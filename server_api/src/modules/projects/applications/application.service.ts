@@ -464,7 +464,7 @@ export class ApplicationService {
         TransitionHelper.validateTransition(
             from,
             to,
-            PROJECT_STAGE_TRANSITIONS
+            APPLICATION_TRANSITIONS
         );
         if (
             to === ApplicationStatus.accepted ||
@@ -676,7 +676,7 @@ export class ApplicationService {
 
 }
 
-export const PROJECT_STAGE_TRANSITIONS: Record<ApplicationStatus, ApplicationStatus[]> = {
+export const APPLICATION_TRANSITIONS: Record<ApplicationStatus, ApplicationStatus[]> = {
     [ApplicationStatus.pending]: [ApplicationStatus.accepted, ApplicationStatus.rejected],
     [ApplicationStatus.accepted]: [ApplicationStatus.pending],
     [ApplicationStatus.rejected]: [ApplicationStatus.pending]

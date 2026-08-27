@@ -1,14 +1,19 @@
 import { DeleteDto } from "../../../common/dtos/delete.dto";
+import { FindOptions } from "../../../common/dtos/filter.dto";
+import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { NotificationService } from "../../notifications/notification.service";
 import { ProjectStatus } from "../../projects/project.model";
 import { IProjectRepository } from "../../projects/project.repository";
+import { IReviewerRepository } from "../../reviewers/reviewer.repository";
+import { ReviewerStatus } from "../../reviewers/reviewer.state-machine";
 import { VerificationConfigurationStatus } from "../verification-conf/verification-conf.model";
 import { IVerificationConfigurationRepository } from "../verification-conf/verification-conf.repository";
 import { CreateVerificationDTO } from "./verification.dto";
 import { IVerification, VerificationStatus } from "./verification.model";
-import { IVerificationRepository } from "./verification.repository";
+import { FilterVerification, IVerificationRepository } from "./verification.repository";
 
 
 export class VerificationService {
@@ -17,6 +22,7 @@ export class VerificationService {
         private readonly repository: IVerificationRepository,
         private readonly verificationConfRepo: IVerificationConfigurationRepository,
         private readonly projectRepo: IProjectRepository,
+        private readonly reviewerRepo: IReviewerRepository,
         private readonly notificationService?: NotificationService,
     ) { }
     // --------------------------------------------------
@@ -115,7 +121,6 @@ export class VerificationService {
                     ERROR_CODES.VERIFICATION_ALREADY_EXISTS
                 );
             }
-
             // ------------------------------------------
             // Already successfully verified
             // ------------------------------------------
@@ -132,7 +137,7 @@ export class VerificationService {
             // ------------------------------------------
             if (
                 currentVerification.status ===
-                VerificationStatus.failed
+                VerificationStatus.rejected
             ) {
                 attempt =
                     currentVerification.attempt + 1;
@@ -159,9 +164,7 @@ export class VerificationService {
                 configuration: configuration._id,
                 attempt,
                 status: VerificationStatus.submitted,
-                //submittedBy,
                 documentPath
-                //submittedAt: now
             });
         // ----------------------------------------------
         // 9. Set as current verification
@@ -170,11 +173,9 @@ export class VerificationService {
             String(project._id),
             String(verification._id)
         );
-
         // ----------------------------------------------
         // 10. Send notification
         // ----------------------------------------------
-
         if (this.notificationService) {
             await this.notificationService
                 .notifyVerificationSubmitted(
@@ -208,6 +209,7 @@ export class VerificationService {
     }
 
 
+    /*
     // --------------------------------------------------
     // GET BY CONF
     // --------------------------------------------------
@@ -224,7 +226,7 @@ export class VerificationService {
                 ERROR_CODES.VERIFICATION_CONFIGURATION_NOT_FOUND
             );
         }
-        return await this.repository.find({ configuration: confId });
+        return await this.repository.find({ configuration: confId }, { populate: true });
     }
 
     // --------------------------------------------------
@@ -244,6 +246,164 @@ export class VerificationService {
             );
         }
         return await this.repository.find({ project: projectId });
+    }
+    */
+
+    async find(
+        filters: FilterVerification = {},
+        options?: FindOptions
+    ): Promise<IVerification[]> {
+
+        return await this.repository.find(
+            filters, options
+        );
+    }
+
+    private async calculateTotalScore(id: string): Promise<number> {
+        const approvedReviews =
+            await this.reviewerRepo.find({
+                verification: id,
+                status: ReviewerStatus.approved
+            });
+
+        const totalWeight = approvedReviews.reduce(
+            (sum, review) =>
+                sum + (review.weight ?? 1),
+            0
+        );
+
+        if (totalWeight === 0) {
+            await this.repository.update(id, {
+                totalScore: 0
+            });
+
+            return 0;
+        }
+
+        const score =
+            approvedReviews.reduce(
+                (sum, review) =>
+                    sum +
+                    (review.score ?? 0) *
+                    (review.weight ?? 1),
+                0
+            ) / totalWeight;
+
+        await this.repository.update(id, {
+            totalScore: score
+        });
+
+        return score;
+    }
+
+
+
+    /**
+ * Transition verification status (state machine)
+ */
+    async transitionState(dto: TransitionRequestDto) {
+        const { id, current, next, userId } = dto;
+        if (!userId) {
+            throw new AppError(ERROR_CODES.UNAUTHORIZED);
+        }
+
+        const verificationDoc = await this.repository.findById(id);
+
+        if (!verificationDoc) {
+            throw new AppError(ERROR_CODES.VERIFICATION_NOT_FOUND);
+        }
+
+        const projectId = String(verificationDoc.project);
+
+        const projectDoc = await this.projectRepo.findById(projectId);
+
+        if (!projectDoc) {
+            throw new AppError(
+                ERROR_CODES.PROJECT_NOT_FOUND
+            );
+        }
+
+        if (!projectDoc.currentVerification) {
+            throw new AppError(
+                ERROR_CODES.CURRENT_VERIFICATION_NOT_FOUND
+            );
+        }
+
+        if (String(projectDoc.currentVerification) !== id) {
+            throw new AppError(
+                ERROR_CODES.INVALID_VERIFICATION_STATUS
+            );
+        }
+
+        if (projectDoc.status !== ProjectStatus.completed) {
+            throw new AppError(
+                ERROR_CODES.INVALID_PROJECT_STATUS
+            );
+        }
+
+        const from = verificationDoc.status as VerificationStatus;
+        const to = next as VerificationStatus;
+
+        // Prevent race condition
+        if (current && current !== from) {
+            throw new AppError(
+                ERROR_CODES.STATE_OUT_OF_SYNC
+            );
+        }
+
+        // Validate state transition
+        TransitionHelper.validateTransition(
+            from,
+            to,
+            VERIFICATION_TRANSITIONS
+        );
+
+        // Verification can only be completed after enough approved reviews
+        if (
+            to === VerificationStatus.verified ||
+            to === VerificationStatus.rejected
+        ) {
+            const configuration =
+                await this.verificationConfRepo.findById(
+                    String(verificationDoc.configuration)
+                );
+
+            if (!configuration) {
+                throw new AppError(
+                    ERROR_CODES.VERIFICATION_CONFIGURATION_NOT_FOUND
+                );
+            }
+
+            const approvedCount =
+                await this.reviewerRepo.count({
+                    verification: id,
+                    status: ReviewerStatus.approved
+                });
+
+            if (approvedCount < configuration.minReviewers) {
+                throw new AppError(
+                    ERROR_CODES.INSUFFICIENT_REVIEWS,
+                    `At least ${configuration.minReviewers} approved reviews are required.`
+                );
+            }
+
+            const totalScore =
+                await this.calculateTotalScore(id);
+
+            if (to === VerificationStatus.verified) {
+                const minAcceptanceScore =
+                    configuration.minAcceptanceScore ?? 0;
+
+                if ((totalScore ?? 0) < minAcceptanceScore) {
+                    throw new AppError(
+                        ERROR_CODES.SCORE_BELOW_THRESHOLD,
+                        `Cannot verify. Minimum required score is ${minAcceptanceScore}, but got ${totalScore}.`
+                    );
+                }
+            }
+        }
+
+        return this.repository.updateStatus(id, to, userId);
     }
 
     /**
@@ -300,6 +460,17 @@ export class VerificationService {
             );
         }
 
+
+        if (
+            await this.reviewerRepo.exists({
+                verification: id
+            })
+        ) {
+            throw new AppError(
+                ERROR_CODES.REVIEWER_ALREADY_EXISTS
+            );
+        }
+
         // ----------------------------------------------
         // Determine the new current verification
         // ----------------------------------------------
@@ -325,8 +496,22 @@ export class VerificationService {
         return this.repository.delete(id);
     }
 
-
-
-
-
 }
+
+export const VERIFICATION_TRANSITIONS: Record<
+    VerificationStatus,
+    VerificationStatus[]
+> = {
+    [VerificationStatus.submitted]: [
+        VerificationStatus.verified,
+        VerificationStatus.rejected
+    ],
+
+    [VerificationStatus.verified]: [
+        VerificationStatus.submitted
+    ],
+
+    [VerificationStatus.rejected]: [
+        VerificationStatus.submitted
+    ]
+};

@@ -1,10 +1,12 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
+import { IStatusHistory } from "../../../common/types/status-history";
+import { createStatusHistorySchema } from "../../../common/schemas/status-history.schema";
 
 export enum VerificationStatus {
     submitted = "submitted",
     verified = "verified",
-    failed = "failed"
+    rejected = "rejected"
 }
 
 export interface IVerification extends Document {
@@ -12,17 +14,19 @@ export interface IVerification extends Document {
     project: mongoose.Types.ObjectId;
     configuration: mongoose.Types.ObjectId;
     attempt: number;
-    status: VerificationStatus;
     documentPath: string;
     totalScore: number | null;
-
-    //submittedAt?: Date;
     reviewedAt?: Date;
-    //submittedBy?: mongoose.Types.ObjectId;
-    //remarks?: string;
+    status: VerificationStatus;
+    statusHistory: IStatusHistory<VerificationStatus>[];
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+const VerificationStatusHistorySchema =
+    createStatusHistorySchema(
+        Object.values(VerificationStatus)
+    );
 
 const VerificationSchema =
     new Schema<IVerification>(
@@ -45,45 +49,30 @@ const VerificationSchema =
                 min: 1,
             },
 
+
+            documentPath: {
+                type: String,
+                required: true,
+            },
+            totalScore: {
+                type: Number,
+                min: 0,
+                default: null
+            },
+            reviewedAt: {
+                type: Date,
+            },
             status: {
                 type: String,
                 enum: Object.values(VerificationStatus),
                 default: VerificationStatus.submitted,
                 required: true,
             },
-/*
-            submittedBy: {
-                type: Schema.Types.ObjectId,
-                ref: COLLECTIONS.USER,
-                required: true,
-            },
-            
-            submittedAt: {
-                type: Date,
-            },
-             remarks: {
-                type: String,
-            },
-            */
+            statusHistory: {
+                type: [VerificationStatusHistorySchema],
+                default: []
+            }
 
-            documentPath: {
-                type: String,
-                required: true,
-            },
-
-            totalScore: {
-                type: Number,
-                min: 0,
-                default: null
-            },
-
-            
-
-            reviewedAt: {
-                type: Date,
-            },
-
-           
         },
         {
             timestamps: true,

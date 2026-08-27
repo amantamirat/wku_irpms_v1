@@ -9,6 +9,7 @@ export interface CreateVerificationConfigurationDTO {
     minReviewers: number;
     maxReviewers: number;
     maxAttempts: number;
+    minAcceptanceScore: number;
     status?: VerificationConfigurationStatus;
 }
 
@@ -19,5 +20,6 @@ export interface UpdateVerificationConfigurationDTO {
     minReviewers?: number;
     maxReviewers?: number;
     maxAttempts?: number;
+    minAcceptanceScore?: number;
     status?: VerificationConfigurationStatus;
 }

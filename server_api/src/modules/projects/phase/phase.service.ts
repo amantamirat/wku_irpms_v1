@@ -186,6 +186,9 @@ export class PhaseService {
         if (!projectDoc)
             throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
+        if (projectDoc.currentVerification)
+            throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS, "A verification already exists for this project.");
+
         const projectStatus = projectDoc.status;
 
         const prevPhase = await this.phaseRepo.findPreviousPhase(

@@ -45,6 +45,7 @@ export class VerificationConfigurationRepository
             minReviewers: data.minReviewers,
             maxReviewers: data.maxReviewers,
             maxAttempts: data.maxAttempts,
+            minAcceptanceScore: data.minAcceptanceScore,
             status: data.status
         });
     }
@@ -55,7 +56,7 @@ export class VerificationConfigurationRepository
 
         return VerificationConfiguration
             .findById(id)
-        .populate("grant")
+            .populate("grant")
         //.populate("template");
     }
 

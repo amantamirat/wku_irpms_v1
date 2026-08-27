@@ -16,6 +16,7 @@ export interface IVerificationConfiguration extends Document {
     maxAttempts: number;
     deadline: Date;
     template?: mongoose.Types.ObjectId;
+    minAcceptanceScore: number;
     status: VerificationConfigurationStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -64,6 +65,14 @@ const VerificationConfigurationSchema =
                 required: true,
                 min: 1,
                 default: 1
+            },
+
+            minAcceptanceScore: {
+                type: Number,
+                min: 0,
+                max: 100,
+                default: 50,
+                required: true
             },
 
             status: {

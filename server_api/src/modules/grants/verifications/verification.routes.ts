@@ -1,12 +1,13 @@
 import { Router } from "express";
 import {
     checkPermission,
+    checkTransitionPermission,
     verifyActiveAccount
 } from "../../auth/auth.middleware";
 
 import { VerificationController } from "./verification.controller";
-import { VerificationService } from "./verification.serive";
-import { notificationService, projectRepo, verificationConfRepo, verificationRepo } from "../../../core/container";
+import { VerificationService } from "./verification.service";
+import { notificationService, projectRepo, reviewerRepo, verificationConfRepo, verificationRepo } from "../../../core/container";
 import { upload } from "../../../util/multer";
 
 const verificationService =
@@ -14,6 +15,7 @@ const verificationService =
         verificationRepo,
         verificationConfRepo,
         projectRepo,
+        reviewerRepo,
         notificationService,
     );
 
@@ -41,7 +43,7 @@ router.post(
     controller.create
 );
 
-
+/*
 // Get verifications by configuration
 router.get(
     "/configuration/:configurationId",
@@ -58,7 +60,14 @@ router.get(
     //checkPermission("verification:read"),
     controller.getByProject
 );
+*/
 
+router.get(
+    "/",
+    verifyActiveAccount,
+    //checkPermission("verification:read"),
+    controller.find
+);
 
 // Get verification by ID
 router.get(
@@ -66,6 +75,13 @@ router.get(
     verifyActiveAccount,
     //checkPermission("verification:read"),
     controller.getById
+);
+
+router.patch(
+    "/:id/transition",
+    verifyActiveAccount,
+    checkTransitionPermission("verification"),
+    controller.transitionState
 );
 
 router.delete(

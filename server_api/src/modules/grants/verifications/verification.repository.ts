@@ -10,7 +10,6 @@ import { FindOptions } from "../../../common/dtos/filter.dto";
 export interface CreateVerificationData {
     project: string;
     documentPath: string;
-    //submittedBy: string;
     configuration: string;
     attempt: number;
     status: VerificationStatus;
@@ -18,11 +17,12 @@ export interface CreateVerificationData {
 
 
 export interface FilterVerification {
-    project: string;
-    configuration: string;
-    attempt: number;
-    status: VerificationStatus;
+    project?: string;
+    configuration?: string;
+    attempt?: number;
+    status?: VerificationStatus;
 }
+
 
 export interface IVerificationRepository {
 
@@ -31,7 +31,8 @@ export interface IVerificationRepository {
     ): Promise<IVerification>;
 
     findById(
-        id: string, options?: FindOptions
+        id: string,
+        options?: FindOptions
     ): Promise<IVerification | null>;
 
     findOneByAttempt(
@@ -40,18 +41,30 @@ export interface IVerificationRepository {
     ): Promise<IVerification | null>;
 
     find(
-        filters?: FilterQuery<IVerification>
+        filters?: FilterVerification,
+        options?: FindOptions
     ): Promise<IVerification[]>;
+
+    count(
+        filters?: FilterVerification
+    ): Promise<number>;
 
     update(
         id: string,
         data: Partial<IVerification>
     ): Promise<IVerification | null>;
 
+    updateStatus(
+        id: string,
+        status: VerificationStatus,
+        changedBy: string
+    ): Promise<IVerification | null>;
+
     delete(
         id: string
     ): Promise<IVerification | null>;
 }
+
 
 export class VerificationRepository
     implements IVerificationRepository {
@@ -72,8 +85,6 @@ export class VerificationRepository
                     data.configuration
                 ),
 
-
-
             attempt:
                 data.attempt,
 
@@ -81,29 +92,37 @@ export class VerificationRepository
                 data.status,
 
             documentPath:
-                data.documentPath,
-
-            submittedAt:
-                new Date()
+                data.documentPath
         });
     }
+
+
+    // --------------------------------------------------
+    // FIND BY ID
+    // --------------------------------------------------
 
     async findById(
         id: string,
         options?: FindOptions
     ): Promise<IVerification | null> {
 
-        const query = Verification.findById(id);
+        const query =
+            Verification.findById(id);
 
         if (options?.populate) {
+
             query
                 .populate("project")
-                .populate("configuration")
-                //.populate("submittedBy");
+                .populate("configuration");
         }
 
         return query;
     }
+
+
+    // --------------------------------------------------
+    // FIND BY ATTEMPT
+    // --------------------------------------------------
 
     async findOneByAttempt(
         projectId: string,
@@ -112,27 +131,117 @@ export class VerificationRepository
 
         return Verification
             .findOne({
-                project: new mongoose.Types.ObjectId(projectId),
+                project:
+                    new mongoose.Types.ObjectId(
+                        projectId
+                    ),
                 attempt
             })
-        //.populate("project")
-        //.populate("configuration")
-        //.populate("submittedBy");
-    };
+            .populate("project")
+            .populate("configuration");
+    }
+
+
+    // --------------------------------------------------
+    // FIND
+    // --------------------------------------------------
 
     async find(
-        filters: FilterQuery<IVerification> = {}
+        filters: FilterVerification = {},
+        options?: FindOptions
     ): Promise<IVerification[]> {
 
-        return Verification
-            .find(filters)
-            .populate("project")
-            .populate("configuration")
-            //.populate("submittedBy")
-            .sort({
-                attempt: 1
-            });
+        const filter: FilterQuery<IVerification> = {};
+
+        if (filters.project) {
+            filter.project =
+                new mongoose.Types.ObjectId(
+                    filters.project
+                );
+        }
+
+        if (filters.configuration) {
+            filter.configuration =
+                new mongoose.Types.ObjectId(
+                    filters.configuration
+                );
+        }
+
+        if (filters.attempt !== undefined) {
+            filter.attempt =
+                filters.attempt;
+        }
+
+        if (filters.status) {
+            filter.status =
+                Array.isArray(filters.status)
+                    ? { $in: filters.status }
+                    : filters.status;
+        }
+
+        const query =
+            Verification
+                .find(filter)
+                .sort({
+                    createdAt: -1
+                });
+
+        if (options?.populate) {
+
+            query
+                .populate("project")
+                .populate("configuration");
+        }
+
+        return query;
     }
+
+
+    // --------------------------------------------------
+    // COUNT
+    // --------------------------------------------------
+
+    async count(
+        filters: FilterVerification = {}
+    ): Promise<number> {
+
+        const filter: FilterQuery<IVerification> = {};
+
+        if (filters.project) {
+            filter.project =
+                new mongoose.Types.ObjectId(
+                    filters.project
+                );
+        }
+
+        if (filters.configuration) {
+            filter.configuration =
+                new mongoose.Types.ObjectId(
+                    filters.configuration
+                );
+        }
+
+        if (filters.attempt !== undefined) {
+            filter.attempt =
+                filters.attempt;
+        }
+
+        if (filters.status) {
+            filter.status =
+                Array.isArray(filters.status)
+                    ? { $in: filters.status }
+                    : filters.status;
+        }
+
+        return Verification.countDocuments(
+            filter
+        );
+    }
+
+
+    // --------------------------------------------------
+    // UPDATE
+    // --------------------------------------------------
 
     async update(
         id: string,
@@ -151,9 +260,52 @@ export class VerificationRepository
         );
     }
 
+
+    // --------------------------------------------------
+    // UPDATE STATUS
+    // --------------------------------------------------
+
+    async updateStatus(
+        id: string,
+        status: VerificationStatus,
+        changedBy: string
+    ): Promise<IVerification | null> {
+
+        return Verification.findByIdAndUpdate(
+            id,
+            {
+                $set: {
+                    status
+                },
+                $push: {
+                    statusHistory: {
+                        status,
+                        changedBy:
+                            new mongoose.Types.ObjectId(
+                                changedBy
+                            ),
+                        changedAt: new Date()
+                    }
+                }
+            },
+            {
+                new: true,
+                runValidators: true
+            }
+        );
+    }
+
+
+    // --------------------------------------------------
+    // DELETE
+    // --------------------------------------------------
+
     async delete(
         id: string
     ): Promise<IVerification | null> {
-        return Verification.findByIdAndDelete(id);
+
+        return Verification.findByIdAndDelete(
+            id
+        );
     }
 }

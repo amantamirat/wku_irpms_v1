@@ -103,7 +103,7 @@ export class ApplicationController {
             };
 
             const updated = await this.service.transitionState(dto);
-            successResponse(res, 200, "Project Stage status updated successfully", updated);
+            successResponse(res, 200, "Application status updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }

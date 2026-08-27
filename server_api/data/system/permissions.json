@@ -1085,5 +1085,25 @@
     "category": "Verification Management",
     "name": "verification:delete",
     "description": "Delete verification submissions"
+  },
+  {
+    "category": "Verification Management",
+    "name": "verification:transition.submitted.verified",
+    "description": "Verify a submitted verification"
+  },
+  {
+    "category": "Verification Management",
+    "name": "verification:transition.submitted.rejected",
+    "description": "Reject a submitted verification"
+  },
+  {
+    "category": "Verification Management",
+    "name": "verification:transition.verified.submitted",
+    "description": "Revert a verified verification back to submitted"
+  },
+  {
+    "category": "Verification Management",
+    "name": "verification:transition.rejected.submitted",
+    "description": "Reopen a rejected verification and move it back to submitted"
   }
 ]

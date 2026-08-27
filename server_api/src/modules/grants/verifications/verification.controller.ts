@@ -6,11 +6,14 @@ import {
     successResponse,
     errorResponse
 } from "../../../common/helpers/response";
-import { VerificationService } from "./verification.serive";
+import { VerificationService } from "./verification.service";
 import { AuthenticatedRequest } from "../../auth/auth.middleware";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
+import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
+import { VerificationStatus } from "./verification.model";
+import { FilterVerification } from "./verification.repository";
 
 export class VerificationController {
 
@@ -102,6 +105,7 @@ export class VerificationController {
     };
 
 
+    /*
     getByConfiguration = async (
         req: Request,
         res: Response
@@ -157,6 +161,89 @@ export class VerificationController {
                 err.message,
                 err
             );
+        }
+    };
+    */
+
+
+    find = async (
+        req: Request,
+        res: Response
+    ) => {
+        try {
+
+            const {
+                project,
+                configuration,
+                attempt,
+                status
+            } = req.query;
+
+            const filters: FilterVerification = {
+                project: project
+                    ? String(project)
+                    : undefined,
+
+                configuration: configuration
+                    ? String(configuration)
+                    : undefined,
+
+                attempt: attempt !== undefined
+                    ? Number(attempt)
+                    : undefined,
+
+                status:
+                    typeof status === "string"
+                        ? status as VerificationStatus
+                        : undefined
+            };
+
+            const verifications =
+                await this.service.find(
+                    filters,
+                    {
+                        populate: true
+                    }
+                );
+
+            successResponse(
+                res,
+                200,
+                "Verifications fetched successfully",
+                verifications
+            );
+
+        } catch (err: any) {
+
+            errorResponse(
+                res,
+                400,
+                err.message,
+                err
+            );
+        }
+    };
+
+    // -----------------------
+    // Transition State
+    // -----------------------
+    transitionState = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            const { id } = req.params;
+            const { current, next } = req.body;
+
+            const dto: TransitionRequestDto = {
+                id: String(id),
+                current: current,
+                next: next,
+                userId: req.auth.userId,
+            };
+
+            const updated = await this.service.transitionState(dto);
+            successResponse(res, 200, "Verification status updated successfully", updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
         }
     };
 
