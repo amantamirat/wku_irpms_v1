@@ -5,6 +5,11 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node src/irpms-api.ts",
+    
+    "seed": "ts-node src/scripts/seed.ts",
+    "seed:system": "ts-node src/scripts/seed.ts system",
+    "seed:sample": "ts-node src/scripts/seed.ts sample",
+    
     "build": "tsc",
     "start": "node dist/irpms-api.js"
   },

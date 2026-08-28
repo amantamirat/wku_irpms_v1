@@ -1,30 +1,26 @@
 import bcrypt from "bcryptjs";
 import fs from 'fs/promises';
 import path from 'path';
-import { AcademicLevel, Unit } from '../common/constants/enums';
-import { Gender } from "../modules/users/user.model";
-import { UserRepository } from "../modules/users/user.repository";
+import { Unit } from '../common/constants/enums';
+import { AccountStatus } from '../modules/accounts/account.model';
+import { AccountRepository } from "../modules/accounts/account.repository";
 import { PermissionRepository } from "../modules/permissions/permission.repository";
 import { RoleRepository } from '../modules/permissions/roles/role.repository';
 import { SettingKey } from '../modules/settings/setting.model';
 import { SettingRepository } from '../modules/settings/setting.repository';
-import { AccountRepository } from "../modules/accounts/account.repository";
-import { AccountStatus } from '../modules/accounts/account.model';
-import { SpecializationRepository } from "../modules/organization/specializations/specialization.repository";
-import { PositionRepository } from "../modules/positions/position.repository";
+import { Gender } from "../modules/users/user.model";
+import { UserRepository } from "../modules/users/user.repository";
 
-export class SeedService {
+export class SystemSeeder {
     constructor(
         private settingRepo = new SettingRepository(),
         private permissionRepo = new PermissionRepository(),
         private roleRepo = new RoleRepository(),
         private accRepo = new AccountRepository(),
         private userRepo = new UserRepository(),
-        private specializationRepo = new SpecializationRepository(),
-        private positionRepo = new PositionRepository(),
     ) { }
 
-    async runAllSeeds() {
+    async run() {
         console.log("🛠️  System Bootstrap Started...");
 
         // 1. First, set up the global rules (Settings)
@@ -208,87 +204,5 @@ export class SeedService {
         });
         console.log("✅ Initial admin created successfully.");
     }
-
-
-
-
-
-
-
-    async seedSpecializations(): Promise<void> {
-        try {
-            const filePath = path.join(
-                process.cwd(),
-                "data/sample",
-                "specializations.json"
-            );
-
-            const rawData = await fs.readFile(filePath, "utf-8");
-            const specializations = JSON.parse(rawData);
-
-            let seeded = false;
-
-            for (const item of specializations) {
-                if (!item.name || !item.academicLevel) continue;
-
-                const exists = await this.specializationRepo.findByNameAndLevel(
-                    item.name,
-                    item.academicLevel
-                );
-
-                if (exists) continue;
-
-                await this.specializationRepo.create({
-                    name: item.name,
-                    academicLevel: item.academicLevel as AcademicLevel
-                });
-
-                seeded = true;
-            }
-
-            if (seeded) {
-                console.log("✅ Specializations seeded");
-            }
-        } catch (error) {
-            console.error("❌ Error seeding specializations:", error);
-        }
-    }
-
-
-    async seedPositions(): Promise<void> {
-        try {
-            const filePath = path.join(
-                process.cwd(),
-                "data/sample",
-                "positions.json"
-            );
-
-            const rawData = await fs.readFile(filePath, "utf-8");
-            const positions = JSON.parse(rawData);
-
-            let seeded = false;
-
-            for (const item of positions) {
-                if (!item.name) continue;
-
-                const exists = await this.positionRepo.findByName(item.name);
-
-                if (exists) continue;
-
-                await this.positionRepo.create({
-                    name: item.name
-                });
-
-                seeded = true;
-            }
-
-            if (seeded) {
-                console.log("✅ Positions seeded");
-            }
-        } catch (error) {
-            console.error("❌ Error seeding positions:", error);
-        }
-    }
-
 
 }

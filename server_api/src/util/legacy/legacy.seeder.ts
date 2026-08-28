@@ -1,20 +1,18 @@
 import fs from 'fs/promises';
 import path from 'path';
+import { Unit } from '../../common/constants/enums';
+import { AppError } from '../../common/errors/app.error';
+import { ERROR_CODES } from '../../common/errors/error.codes';
+import { ICalendarRepository } from '../../modules/calendar/calendar.repository';
 import { IGrantRepository } from "../../modules/grants/grant.repository";
 import { IOrganizationRepository } from "../../modules/organization/organization.repository";
 import { CollaboratorDto } from "../../modules/projects/collaborators/collaborator.dto";
 import { PhaseDto } from "../../modules/projects/phase/phase.dto";
 import { CreateProjectDTO } from "../../modules/projects/project.dto";
-import { IThemeRepository } from "../../modules/thematics/themes/theme.repository";
-import { IUserRepository } from "../../modules/users/user.repository";
-import { ExtractedMember, LegacyProjectDTO } from "./legacy.dto";
-import { AppError } from '../../common/errors/app.error';
-import { ERROR_CODES } from '../../common/errors/error.codes';
-import { Unit } from '../../common/constants/enums';
-import { ICalendarRepository } from '../../modules/calendar/calendar.repository';
-import { IProjectRepository } from '../../modules/projects/project.repository';
 import { ProjectService } from '../../modules/projects/project.service';
+import { IThemeRepository } from "../../modules/thematics/themes/theme.repository";
 import { UserService } from '../../modules/users/user.service';
+import { ExtractedMember, LegacyProjectDTO } from "./legacy.dto";
 
 export class LegacySeeder {
 
