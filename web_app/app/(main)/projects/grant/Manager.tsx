@@ -97,7 +97,8 @@ const ProjectManager = ({ grant }: ProjectManagerProps) => {
                 template: (project) => (
                     <ProjectDetail project={project} updateProject={handleUpdateProject} />
                 )
-            }
+            },
+            hideDefaultActions:true,
         });
     }, [handleUpdateProject]); // 👈 Removed 'projects' from dependencies!
 

@@ -7,6 +7,7 @@ import { VerificationApi } from "../api/verification.api";
 import { Verification } from "../models/verification.model";
 import { BASE_URL } from "@/api/ApiClient";
 import { Project } from "../../projects/models/project.model";
+import { extractId } from "@/utils/extractId";
 
 interface VerificationManagerProps {
     project: string | Project;
@@ -16,14 +17,14 @@ const VerificationManager = ({ project }: VerificationManagerProps) => {
     const [verifications, setVerifications] = useState<Verification[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
-    const projectId = typeof project === "string" ? project : project?._id;
+    const projectId = extractId(project);
 
     useEffect(() => {
         const fetchVerifications = async () => {
             if (!projectId) return;
             setLoading(true);
             try {
-                const data = await VerificationApi.getByProject(projectId);
+                const data = await VerificationApi.getAll({ project: projectId });
                 setVerifications(Array.isArray(data) ? data : []);
             } catch (error) {
                 console.error("Error fetching verifications", error);

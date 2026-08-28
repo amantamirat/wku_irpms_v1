@@ -64,7 +64,6 @@
             "phase:transition.proposed.approved",
             "phase:transition.approved.active",
             "phase:document:read",
-            "project.stage:calculateTotalscore",
             "user:read",
             "reviewer:*",
             "result:read"
@@ -82,7 +81,6 @@
             "collaborator:*",
             "thematic:read",
             "theme:read",
-            "project_theme:*",
             "phase:*",
             "application:read",
             "application:create",

@@ -1,21 +1,35 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
-import { Verification } from "../models/verification.model";
+import { FilterVerification, sanitizeVerification, Verification } from "../models/verification.model";
+import { TransitionRequestDto } from "@/types/util";
 
 const ENDPOINT = "/verifications";
 
 export const VerificationApi: EntityApi<
     Verification,
-    undefined
+    FilterVerification
 > & {
-    getByConfiguration: (configurationId: string) => Promise<Verification[]>;
-    getByProject: (projectId: string) => Promise<Verification[]>;
+    //getByConfiguration: (configurationId: string) => Promise<Verification[]>;
+    //getByProject: (projectId: string) => Promise<Verification[]>;
 } = {
     // ---------------------------
     // Fetch / Query
     // ---------------------------
-    async getAll() {
-        return ApiClient.get(`${ENDPOINT}`);
+    async getAll(filter?: FilterVerification) {
+        const params = new URLSearchParams();
+
+        if (filter) {
+            Object.entries(filter).forEach(([key, value]) => {
+                if (value !== undefined && value !== null && value !== '') {
+                    params.append(key, String(value));
+                }
+            });
+        }
+
+        const queryString = params.toString();
+        const url = queryString ? `${ENDPOINT}?${queryString}` : `${ENDPOINT}`;
+
+        return ApiClient.get(url);
     },
 
     // ---------------------------
@@ -26,10 +40,12 @@ export const VerificationApi: EntityApi<
         return ApiClient.get(`${ENDPOINT}/${id}`);
     },
 
+    /*
     // ---------------------------
     // Get By Configuration ID
     // GET /verifications/configuration/:configurationId
     // ---------------------------
+
     async getByConfiguration(configurationId: string): Promise<Verification[]> {
         return ApiClient.get(`${ENDPOINT}/configuration/${configurationId}`);
     },
@@ -41,26 +57,34 @@ export const VerificationApi: EntityApi<
     async getByProject(projectId: string): Promise<Verification[]> {
         return ApiClient.get(`${ENDPOINT}/project/${projectId}`);
     },
-
+*/
     // ---------------------------
     // Create / Submit Verification (Multipart Form Data)
     // POST /verifications
     // ---------------------------
     async create(dto: Verification): Promise<Verification> {
+        // Clean and extract all IDs in a single step
+        const sanitized = sanitizeVerification(dto);
         const formData = new FormData();
 
-        if (dto.document) {
-            formData.append("document", dto.document);
+        if (sanitized.document) {
+            formData.append("document", sanitized.document);
         }
 
-        // 2. Append string / text fields
-        formData.append("project", dto.project);
-        formData.append("configuration", dto.configuration);
-
-        if (dto.remarks) {
-            formData.append("remarks", dto.remarks);
+        // Since sanitizeVerification ran extractId, project & configuration are strings
+        if (sanitized.project) {
+            formData.append("project", sanitized.project as string);
         }
 
+        if (sanitized.configuration) {
+            formData.append("configuration", sanitized.configuration as string);
+        }
+
+        /*
+        if (sanitized.remarks) {
+            formData.append("remarks", sanitized.remarks);
+        }
+*/
         const created = await ApiClient.post(`${ENDPOINT}`, formData);
         return created as Verification;
     },
@@ -72,7 +96,15 @@ export const VerificationApi: EntityApi<
         if (!verification._id) {
             throw new Error("_id required");
         }
-        return ApiClient.put(`${ENDPOINT}/${verification._id}`, verification);
+        return ApiClient.put(`${ENDPOINT}/${verification._id}`, sanitizeVerification(verification));
+    },
+
+    // ---------------------------
+    // Transition State
+    // ---------------------------
+    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
+        const url = `${ENDPOINT}/${id}/transition`;
+        return ApiClient.patch(url, dto);
     },
 
     // ---------------------------

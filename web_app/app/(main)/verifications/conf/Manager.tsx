@@ -8,6 +8,9 @@ import { Verification } from "../models/verification.model";
 import { VerificationConfiguration } from "../verification-conf/models/verification-conf.model";
 import { BASE_URL } from "@/api/ApiClient";
 import VrificationDetail from "./VerificationDetail";
+import { extractId } from "@/utils/extractId";
+import { VERIFICATION_STATUS_ORDER, VERIFICATION_TRANSITIONS } from "../models/verification.state-machine";
+import { Application } from "../../applications/models/application.model";
 
 interface VerificationManagerProps {
     configuration: VerificationConfiguration;
@@ -19,10 +22,11 @@ const VerificationManager = ({ configuration }: VerificationManagerProps) => {
 
     useEffect(() => {
         const fetchVerifications = async () => {
-            if (!configuration?._id) return;
+            const confId = extractId(configuration);
+            if (!confId) return;
             setLoading(true);
             try {
-                const data = await VerificationApi.getByConfiguration(configuration._id);
+                const data = await VerificationApi.getAll({ configuration: confId });
                 setVerifications(Array.isArray(data) ? data : []);
             } catch (error) {
                 console.error("Error fetching verifications", error);
@@ -80,6 +84,14 @@ const VerificationManager = ({ configuration }: VerificationManagerProps) => {
                     )
                 },
                 {
+                    header: "Score",
+                    body: (app: Application) => (
+                        <span className="font-bold text-sm">
+                            {typeof app?.totalScore === "number" ? app.totalScore : "—"}
+                        </span>
+                    )
+                },
+                {
                     header: "Document",
                     body: (r: Verification) => r.documentPath ? (
                         <a
@@ -95,28 +107,14 @@ const VerificationManager = ({ configuration }: VerificationManagerProps) => {
                             No document
                         </span>
                     )
-                },
-                /*
-                {
-                    header: "Submitted At",
-                    field: "submittedAt",
-                    sortable: true,
-                    body: (r: Verification) => (
-                        <span className="text-600 text-sm">
-                            {r.submittedAt ? new Date(r.submittedAt).toLocaleDateString() : "-"}
-                        </span>
-                    )
-                },
-                {
-                    header: "Remarks",
-                    field: "remarks",
-                    body: (r: Verification) => (
-                        <div className="text-600 truncate text-sm" style={{ maxWidth: '200px' }} title={r.remarks}>
-                            {r.remarks || "-"}
-                        </div>
-                    )
-                }*/
+                }
             ],
+            workflow: {
+                statusField: "status",
+                updateFields: ["totalScore"],
+                statusOrder: VERIFICATION_STATUS_ORDER,
+                transitions: VERIFICATION_TRANSITIONS
+            },
             permissionPrefix: "verification",
             hideEditAction: true,
             expandable: {
