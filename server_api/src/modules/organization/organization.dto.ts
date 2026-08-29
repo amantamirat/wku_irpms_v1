@@ -25,13 +25,14 @@ export interface UpdateOrganizationDTO {
     userId: string;
 }
 
-export interface GetOrganizationsDTO {
-    type: Unit;
+export interface FilterOrganizationsDTO {
+    type?: Unit;
     parent?: string;
-    populate?: boolean;
+    name?: string;
 }
 
-
+/*
 export interface ExistsOrganizationDTO {
     parent?: string;
 }
+    */

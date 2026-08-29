@@ -117,7 +117,7 @@ export class UserController {
             const dto: UpdateRolesDTO = {
                 id,
                 roles,
-                applicantId: req.auth.userId,
+                userId: req.auth.userId,
             };
 
             const updated = await this.service.updateRoles(dto);
@@ -138,7 +138,7 @@ export class UserController {
             const dto: UpdateOwnershipsDTO = {
                 id,
                 ownerships,
-                applicantId: req.auth.userId,
+                userId: req.auth.userId,
             };
 
             const updated = await this.service.updateOwnerships(dto);

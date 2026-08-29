@@ -15,6 +15,7 @@ export interface CreateGrantDTO {
     amount: number;
     thematic: string;
     description?: string;
+    status?:GrantStatus;
 }
 
 export interface UpdateGrantDTO {

@@ -1,7 +1,8 @@
 import mongoose from "mongoose";
 import dotenv from "dotenv";
-import { SystemSeeder } from "../util/system.seed";
-import { SampleSeeder } from "../util/sample.seed";
+import { createSystemSeeder, SystemSeeder } from "../util/seeder/system.seed";
+import { createSampleSeeder, SampleSeeder } from "../util/seeder/sample.seed";
+import { createLegacySeeder } from "../util/seeder/legacy/legacy.seed";
 
 dotenv.config();
 
@@ -20,22 +21,28 @@ async function main() {
 
     switch (command) {
         case "system":
-            await new SystemSeeder().run();
+            await createSystemSeeder().run();
             break;
 
         case "sample":
-            await new SampleSeeder().run();
+            await createSampleSeeder().run();
+            break;
+
+        case "legacy":
+            await createLegacySeeder().run();
             break;
 
         case "all":
-            await new SystemSeeder().run();
-            await new SampleSeeder().run();
+            await createSystemSeeder().run();
+            await createSampleSeeder().run();
+            await createLegacySeeder().run();
             break;
 
         default:
             console.log(`Available seed commands:
                 npm run seed system
                 npm run seed sample
+                npm run seed legacy
                 npm run seed all
             `);
             break;

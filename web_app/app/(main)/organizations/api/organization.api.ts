@@ -1,12 +1,12 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { GetOrganizationsOptions, Organization, sanitize } from "../models/organization.model";
+import { FilterOrganization, Organization, sanitize } from "../models/organization.model";
 
 const end_point = "/organizations";
 
-export const OrganizationApi: EntityApi<Organization, GetOrganizationsOptions | undefined> = {
+export const OrganizationApi: EntityApi<Organization, FilterOrganization | undefined> = {
 
-    async getAll(options?: GetOrganizationsOptions) {
+    async getAll(options?: FilterOrganization) {
         const query = new URLSearchParams();
 
         if (options) {

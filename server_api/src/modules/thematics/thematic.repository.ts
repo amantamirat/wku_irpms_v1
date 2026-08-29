@@ -2,14 +2,14 @@ import mongoose from "mongoose";
 import { Thematic, IThematic } from "./thematic.model";
 import {
     CreateThematicDTO,
-    GetThematicsDTO,
+    FilterThematicsDTO,
     UpdateThematicDTO
 } from "./thematic.dto";
 
 export interface IThematicRepository {
     findById(id: string): Promise<IThematic | null>;
-    findOne(dto: GetThematicsDTO): Promise<IThematic | null>;
-    find(filters: GetThematicsDTO): Promise<Partial<IThematic>[]>;
+    findOne(dto: FilterThematicsDTO): Promise<IThematic | null>;
+    find(filters: FilterThematicsDTO): Promise<Partial<IThematic>[]>;
     create(dto: CreateThematicDTO): Promise<IThematic>;
     update(id: string, data: UpdateThematicDTO["data"]): Promise<IThematic | null>;
     delete(id: string): Promise<IThematic | null>;
@@ -25,7 +25,7 @@ export class ThematicRepository implements IThematicRepository {
     }
 
 
-    async findOne({ title, status }: GetThematicsDTO) {
+    async findOne({ title, status }: FilterThematicsDTO) {
         const filter: Record<string, any> = {};
 
         if (title) {
@@ -41,7 +41,7 @@ export class ThematicRepository implements IThematicRepository {
             .exec();
     }
 
-    async find(filters: GetThematicsDTO) {
+    async find(filters: FilterThematicsDTO) {
         const query: any = {};
         if (filters.status) {
             query.status = filters.status;

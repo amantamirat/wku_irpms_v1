@@ -1,43 +1,41 @@
 import bcrypt from "bcryptjs";
 import fs from 'fs/promises';
 import path from 'path';
-import { Unit } from '../common/constants/enums';
-import { AccountStatus } from '../modules/accounts/account.model';
-import { AccountRepository } from "../modules/accounts/account.repository";
-import { PermissionRepository } from "../modules/permissions/permission.repository";
-import { RoleRepository } from '../modules/permissions/roles/role.repository';
-import { SettingKey } from '../modules/settings/setting.model';
-import { SettingRepository } from '../modules/settings/setting.repository';
-import { Gender } from "../modules/users/user.model";
-import { UserRepository } from "../modules/users/user.repository";
+import { Unit } from '../../common/constants/enums';
+import { accountRepo, organizationRepo, permissionRepo, roleRepo, settingRepo, userRepo } from "../../core/container";
+import { AccountStatus } from '../../modules/accounts/account.model';
+import { IAccountRepository } from "../../modules/accounts/account.repository";
+import { IOrganizationRepository } from "../../modules/organization/organization.repository";
+import { IPermissionRepository } from "../../modules/permissions/permission.repository";
+import { IRoleRepository } from '../../modules/permissions/roles/role.repository';
+import { SettingKey } from '../../modules/settings/setting.model';
+import { ISettingRepository } from '../../modules/settings/setting.repository';
+import { Gender } from "../../modules/users/user.model";
+import { IUserRepository } from "../../modules/users/user.repository";
+import { SYSTEM } from "../../common/constants/system.constant";
 
 export class SystemSeeder {
     constructor(
-        private settingRepo = new SettingRepository(),
-        private permissionRepo = new PermissionRepository(),
-        private roleRepo = new RoleRepository(),
-        private accRepo = new AccountRepository(),
-        private userRepo = new UserRepository(),
+        private readonly settingRepo: ISettingRepository,
+        private readonly permissionRepo: IPermissionRepository,
+        private readonly roleRepo: IRoleRepository,
+        private readonly accountRepo: IAccountRepository,
+        private readonly userRepo: IUserRepository,
+        private readonly organizationRepo: IOrganizationRepository,
     ) { }
 
     async run() {
         console.log("🛠️  System Bootstrap Started...");
-
         // 1. First, set up the global rules (Settings)
         await this.seedSettings();
-
         // 2. Set up the atomic actions (Permissions)
         await this.seedPermissions();
-
         // 3. Bundle them (Roles)
         await this.seedRoles();
-
         // 4. Create the janitor (Admin User)
         await this.seedAdmin();
-
-        // 4. Create the specializations
-        // await this.seedSpecializations();
-
+        // 5. Create the directorates
+        await this.seedDirectorates();
         console.log("✅ System Bootstrap Finished.");
     }
 
@@ -161,7 +159,7 @@ export class SystemSeeder {
     }
 
     async seedAdmin() {
-        if (await this.accRepo.exists({})) {
+        if (await this.accountRepo.exists({})) {
             return;
         }
         const adminEmail = process.env.EMAIL;
@@ -196,7 +194,7 @@ export class SystemSeeder {
 
         // Create the User record linked to the new applicant
         const hashedPassword = await bcrypt.hash(process.env.PASSWORD || "Admin@123", 10);
-        await this.accRepo.create({
+        await this.accountRepo.create({
             email: adminEmail,
             password: hashedPassword,
             applicant: String(applicant._id),
@@ -205,4 +203,49 @@ export class SystemSeeder {
         console.log("✅ Initial admin created successfully.");
     }
 
+
+    async seedDirectorates() {
+        const directorates = [
+            SYSTEM.RESEARCH_DIRECTORATE,
+            "Community Service",
+            "Technology Transfer",
+            "Indigenous Knowledge"
+        ];
+
+        let seeded = false;
+
+        for (const name of directorates) {
+            const exists = await this.organizationRepo.exists({
+                name,
+                type: Unit.directorate
+            });
+
+            if (exists)
+                continue;
+
+            await this.organizationRepo.create({
+                type: Unit.directorate,
+                name
+            });
+
+            seeded = true;
+        }
+
+        if (seeded) {
+            console.log("✅ Directorates seeded");
+        }
+    }
+}
+
+
+
+export function createSystemSeeder() {
+    return new SystemSeeder(
+        settingRepo,
+        permissionRepo,
+        roleRepo,
+        accountRepo,
+        userRepo,
+        organizationRepo
+    );
 }

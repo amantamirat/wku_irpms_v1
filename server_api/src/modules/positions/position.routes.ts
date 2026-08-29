@@ -3,10 +3,11 @@ import { PositionController } from "./position.controller";
 import { verifyActiveAccount, checkPermission } from "../auth/auth.middleware";
 import { PERMISSIONS } from "../../common/constants/permissions";
 import { PositionService } from "./position.service";
+import { exprienceRepo, positionRepo } from "../../core/container";
 
 const router = Router();
 
-const positionService = new PositionService();
+const positionService = new PositionService(positionRepo, exprienceRepo);
 const controller = new PositionController(positionService);
 
 router.post("/", verifyActiveAccount, checkPermission([PERMISSIONS.POSITION.CREATE]), controller.create);

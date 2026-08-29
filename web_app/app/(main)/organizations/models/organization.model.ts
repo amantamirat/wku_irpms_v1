@@ -1,3 +1,5 @@
+import { extractId } from "@/utils/extractId";
+
 // Enum for Organization Types
 export enum OrgnUnit {
     college = 'college',
@@ -30,14 +32,13 @@ export enum Classification {
 
 // Enum for Ownership
 export enum Ownership {
-    //Internal = 'Internal',
     Private = 'Private',
     Public = 'Public',
     NGO = 'NGO',
 }
 
 
-
+/*
 // Address Type
 export type Address = {
     region?: string;
@@ -46,6 +47,7 @@ export type Address = {
     city?: string;
     kebele?: string;
 };
+*/
 
 export type Organization = {
     _id?: string;
@@ -54,13 +56,13 @@ export type Organization = {
     academicLevel?: AcademicLevel;
     classification?: Classification;
     ownership?: Ownership;
-    address?: Address;
+    //address?: Address;
     parent?: string | Organization;
     createdAt?: string;
     updatedAt?: string;
 };
 
-export interface GetOrganizationsOptions {
+export interface FilterOrganization {
     type: OrgnUnit;
     parent?: Organization;
     populate?: boolean;
@@ -132,10 +134,7 @@ export const validateOrganization = (
 export function sanitize(organization: Partial<Organization>): Partial<Organization> {
     return {
         ...organization,
-        parent:
-            typeof organization.parent === 'object' && organization.parent !== null
-                ? (organization.parent as Organization)._id
-                : organization.parent,
+        parent: extractId(organization.parent),
     };
 }
 

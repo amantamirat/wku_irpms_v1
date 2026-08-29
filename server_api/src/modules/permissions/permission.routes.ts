@@ -1,13 +1,12 @@
 import { Router } from 'express';
 
+import { permissionRepo } from '../../core/container';
 import { checkPermission, verifyActiveAccount } from '../auth/auth.middleware';
 import { PermissionController } from './permission.controller';
 import { PermissionService } from './permission.service';
-import { PermissionRepository } from './permission.repository';
 
 const router: Router = Router();
-const repository = new PermissionRepository();
-const service = new PermissionService(repository);
+const service = new PermissionService(permissionRepo);
 const controller = new PermissionController(service);
 
 router.get(

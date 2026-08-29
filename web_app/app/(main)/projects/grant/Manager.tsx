@@ -8,6 +8,7 @@ import ProjectDetail from "../../projects/components/ProjectDetail";
 import { ProjectApi } from "../api/project.api";
 import { Project } from "../models/project.model";
 import { CALL_PROJECT_TRANSITIONS, PROJECT_STATUS_ORDER, STANDALONE_PROJECT_TRANSITIONS } from "../models/project.state-machine";
+import { etbCurrencyFormatter } from "@/utils/currencyUtil";
 
 interface ProjectManagerProps {
     grant: Grant;
@@ -76,6 +77,17 @@ const ProjectManager = ({ grant }: ProjectManagerProps) => {
                     )
                 },
                 {
+                    header: "Budget",
+                    field: "totalBudget",
+                    sortable: true,
+                    body: (p: Project) => (
+                        <span className="text-500">
+                            {p.totalBudget ?
+                                etbCurrencyFormatter.format(p.totalBudget) : 'N/A'}
+                        </span>
+                    )
+                },
+                {
                     header: "Status",
                     field: "status",
                     sortable: true,
@@ -98,7 +110,7 @@ const ProjectManager = ({ grant }: ProjectManagerProps) => {
                     <ProjectDetail project={project} updateProject={handleUpdateProject} />
                 )
             },
-            hideDefaultActions:true,
+            hideDefaultActions: true,
         });
     }, [handleUpdateProject]); // 👈 Removed 'projects' from dependencies!
 

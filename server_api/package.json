@@ -9,6 +9,7 @@
     "seed": "ts-node src/scripts/seed.ts",
     "seed:system": "ts-node src/scripts/seed.ts system",
     "seed:sample": "ts-node src/scripts/seed.ts sample",
+    "seed:legacy": "ts-node src/scripts/seed.ts legacy",
     
     "build": "tsc",
     "start": "node dist/irpms-api.js"

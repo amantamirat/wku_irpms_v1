@@ -1,4 +1,5 @@
 // container.ts
+import { AccountRepository } from "../modules/accounts/account.repository";
 import { AnonymizerService } from "../modules/anonymizer/anonymizer.service";
 import { CalendarRepository } from "../modules/calendar/calendar.repository";
 import { CallRepository } from "../modules/calls/call.repository";
@@ -17,7 +18,9 @@ import { NotificationRepository } from "../modules/notifications/notification.re
 import { NotificationService } from "../modules/notifications/notification.service";
 import { OrganizationRepository } from "../modules/organization/organization.repository";
 import { SpecializationRepository } from "../modules/organization/specializations/specialization.repository";
+import { PermissionRepository } from "../modules/permissions/permission.repository";
 import { RoleRepository } from "../modules/permissions/roles/role.repository";
+import { PositionRepository } from "../modules/positions/position.repository";
 import { ApplicationRepository } from "../modules/projects/applications/application.repository";
 import { ApplicationService } from "../modules/projects/applications/application.service";
 import { ApplicationSynchronizer } from "../modules/projects/applications/application.synchronizer";
@@ -37,6 +40,7 @@ import { TemplateParserService } from "../modules/templates/services/template.pa
 import { TemplateRepository } from "../modules/templates/template.repository";
 import { ThematicRepository } from "../modules/thematics/thematic.repository";
 import { ThemeRepository } from "../modules/thematics/themes/theme.repository";
+import { EnrollmentRepository } from "../modules/users/enrollments/enrollment.repository";
 import { ExperienceRepository } from "../modules/users/experiences/experience.repository";
 import { UserRepository } from "../modules/users/user.repository";
 import { UserService } from "../modules/users/user.service";
@@ -46,16 +50,21 @@ export const settingRepo = new SettingRepository();
 export const settingService = new SettingService(settingRepo);
 export const notificationService = new NotificationService(notificationRepo, settingService);
 
-// calendar repos
-export const calendarRepo = new CalendarRepository();
+
 // organization repos
 export const organizationRepo = new OrganizationRepository();
 //user repos
 export const userRepo = new UserRepository();
 export const exprienceRepo = new ExperienceRepository();
 export const specializationRepo = new SpecializationRepository();
+export const enrollmentRepo = new EnrollmentRepository();
+export const positionRepo = new PositionRepository();
 //account repos
+export const permissionRepo = new PermissionRepository();
 export const roleRepo = new RoleRepository();
+export const accountRepo = new AccountRepository();
+// calendar repos
+export const calendarRepo = new CalendarRepository();
 //grant repos
 export const grantRepo = new GrantRepository();
 export const thematicRepo = new ThematicRepository();

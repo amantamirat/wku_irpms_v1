@@ -1,14 +1,15 @@
 import fs from "fs/promises";
 import path from "path";
 
-import { AcademicLevel } from "../common/constants/enums";
-import { SpecializationRepository } from "../modules/organization/specializations/specialization.repository";
-import { PositionRepository } from "../modules/positions/position.repository";
+import { AcademicLevel } from "../../common/constants/enums";
+import { ISpecializationRepository } from "../../modules/organization/specializations/specialization.repository";
+import { IPositionRepository } from "../../modules/positions/position.repository";
+import { positionRepo, specializationRepo } from "../../core/container";
 
 export class SampleSeeder {
     constructor(
-        private specializationRepo = new SpecializationRepository(),
-        private positionRepo = new PositionRepository(),
+        private readonly specializationRepo: ISpecializationRepository,
+        private readonly positionRepo: IPositionRepository,
     ) { }
 
     async run(): Promise<void> {
@@ -103,5 +104,12 @@ export class SampleSeeder {
             );
         }
     }
+}
+
+export function createSampleSeeder() {
+    return new SampleSeeder(
+        specializationRepo,
+        positionRepo
+    );
 }
 

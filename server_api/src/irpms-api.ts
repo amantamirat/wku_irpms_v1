@@ -54,9 +54,9 @@ import authRoutes from './modules/auth/auth.routes';
 import notificationRoutes from './modules/notifications/notification.routes';
 
 import path from 'path';
-import { SystemSeeder } from './util/system.seed';
+import { SystemSeeder } from './util/seeder/system.seed';
 import { SocketService } from './modules/notifications/socket.service';
-import { LegacySeeder } from './util/legacy/legacy.seeder';
+import { LegacySeeder } from './util/seeder/legacy/legacy.seed';
 import { calendarRepo, grantRepo, organizationRepo, projectService, themeRepo, userRepo, userService } from './core/container';
 
 dotenv.config();
@@ -135,21 +135,6 @@ const PORT = process.env.SERVER_PORT || 5000;
 
     await mongoose.connect(MONGO_URL);
     console.log('database connection established');
-
-    /*
-    const seeder = new LegacySeeder(
-      organizationRepo,
-      grantRepo,
-      themeRepo,
-      calendarRepo,
-      userService,
-      projectService
-    );
-    //seeder.seedProjects("Thematic Grant");
-    //seeder.seedColleges();
-    //seeder.seedDepartments();
-    //seeder.seedUsers();
-    */
 
     // 2. Create the HTTP server explicitly using your Express app
     const httpServer = http.createServer(app);

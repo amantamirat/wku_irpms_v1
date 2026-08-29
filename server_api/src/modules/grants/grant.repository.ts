@@ -83,6 +83,7 @@ export class GrantRepository implements IGrantRepository {
             amount: dto.amount,
             thematic: new mongoose.Types.ObjectId(dto.thematic),
             description: dto.description,
+            status: dto.status
         };
 
         return Grant.create(data);

@@ -5,6 +5,7 @@ export interface CreateThematicDTO {
     title: string;
     level: ThematicLevel;
     description?: string;
+    status?:ThematicStatus;
 }
 
 export interface UpdateThematicDTO {
@@ -17,7 +18,7 @@ export interface UpdateThematicDTO {
     userId?: string;
 }
 
-export interface GetThematicsDTO {
+export interface FilterThematicsDTO {
     title?: string;
     status?: ThematicStatus;
 }

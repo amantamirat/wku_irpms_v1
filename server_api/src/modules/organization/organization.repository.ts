@@ -1,5 +1,5 @@
 // organization.repository.ts
-import mongoose, { Model } from "mongoose";
+import mongoose from "mongoose";
 
 import {
     Organization,
@@ -14,67 +14,97 @@ import {
 
 import {
     CreateOrganizationDTO,
-    ExistsOrganizationDTO,
-    GetOrganizationsDTO,
+    FilterOrganizationsDTO,
     UpdateOrganizationDTO
 } from "./organization.dto";
+
 import { Unit } from "../../common/constants/enums";
+import { FindOptions } from "../../common/dtos/filter.dto";
 
 
 export interface IOrganizationRepository {
     findById(id: string): Promise<IOrganization | null>;
-    findByIds(ids: string[]): Promise<any[]>;
-    find(options: GetOrganizationsDTO): Promise<any[]>;
+
+    findOne(
+        filter: FilterOrganizationsDTO,
+        options?: FindOptions
+    ): Promise<IOrganization | null>;
+
+    find(
+        filter: FilterOrganizationsDTO,
+        options?: FindOptions
+    ): Promise<IOrganization[]>;
+
     create(data: CreateOrganizationDTO): Promise<any>;
-    update(id: string, data: UpdateOrganizationDTO["data"]): Promise<any>;
-    findByName(orgName: string, populate?: boolean): Promise<IOrganization | null>;
-    exists(filters: ExistsOrganizationDTO): Promise<boolean>;
+
+    update(
+        id: string,
+        data: UpdateOrganizationDTO["data"]
+    ): Promise<any>;
+
+    exists(filters: FilterOrganizationsDTO): Promise<boolean>;
+
     delete(id: string): Promise<void>;
 }
 
+
 export class OrganizationRepository implements IOrganizationRepository {
+
     // ------------------------------------
     // GET BY ID
     // ------------------------------------
-    async findById(id: string) {
-        return Organization.findById(new mongoose.Types.ObjectId(id))
+    async findById(id: string): Promise<IOrganization | null> {
+        return Organization.findById(
+            new mongoose.Types.ObjectId(id)
+        )
             .lean<IOrganization>()
             .exec();
     }
 
+
     // ------------------------------------
-    // FIND BY TYPE (all Colleges, all Programs, etc.)
+    // FIND ONE
     // ------------------------------------
-    async find(filters: GetOrganizationsDTO) {
-        const query: any = {};
-        if (filters.type) {
-            query.type = filters.type;
+    async findOne(
+        filters: FilterOrganizationsDTO,
+        options?: FindOptions
+    ): Promise<IOrganization | null> {
+
+        const query = this.buildFilter(filters);
+
+        let dbQuery = Organization.findOne(query);
+
+        if (options?.populate) {
+            dbQuery = dbQuery.populate("parent");
         }
 
-        if (filters.parent) {
-            query.parent = new mongoose.Types.ObjectId(filters.parent);
-        }
-        let dbQuery = Organization.find(query);
-        if (filters.populate) {
-            dbQuery = dbQuery
-                .populate("parent")
-        }
         return dbQuery
-            .lean()
+            .lean<IOrganization>()
             .exec();
     }
 
+
     // ------------------------------------
-    // FIND BY MANY IDS
+    // FIND MANY
     // ------------------------------------
-    async findByIds(ids: string[]) {
-        return Organization.find({
-            _id: { $in: ids.map(id => new mongoose.Types.ObjectId(id)) }
-        })
-            // .populate("parent")
-            .lean()
+    async find(
+        filters: FilterOrganizationsDTO,
+        options?: FindOptions
+    ): Promise<IOrganization[]> {
+
+        const query = this.buildFilter(filters);
+
+        let dbQuery = Organization.find(query);
+
+        if (options?.populate) {
+            dbQuery = dbQuery.populate("parent");
+        }
+
+        return dbQuery
+            .lean<IOrganization[]>()
             .exec();
     }
+
 
     // ------------------------------------
     // CREATE
@@ -91,7 +121,7 @@ export class OrganizationRepository implements IOrganizationRepository {
             data.parent = new mongoose.Types.ObjectId(dto.parent);
         }
 
-        // Add Special fields
+        // Add special fields
         if (dto.academicLevel) {
             data.academicLevel = dto.academicLevel;
         }
@@ -105,9 +135,11 @@ export class OrganizationRepository implements IOrganizationRepository {
         }
 
         // Pick the right discriminator model
-        const Model = this.getModelByType(dto.type) as mongoose.Model<any>;
+        const Model = this.getModelByType(dto.type);
+
         return Model.create(data);
     }
+
 
     // ------------------------------------
     // UPDATE
@@ -116,22 +148,30 @@ export class OrganizationRepository implements IOrganizationRepository {
         id: string,
         dtoData: UpdateOrganizationDTO["data"]
     ) {
+
         const updateData: any = {};
 
-        if (dtoData.name !== undefined)
+        if (dtoData.name !== undefined) {
             updateData.name = dtoData.name;
+        }
 
-        if (dtoData.parent !== undefined)
-            updateData.parent = new mongoose.Types.ObjectId(dtoData.parent);
+        if (dtoData.parent !== undefined) {
+            updateData.parent = new mongoose.Types.ObjectId(
+                dtoData.parent
+            );
+        }
 
-        if (dtoData.academicLevel !== undefined)
+        if (dtoData.academicLevel !== undefined) {
             updateData.academicLevel = dtoData.academicLevel;
+        }
 
-        if (dtoData.classification !== undefined)
+        if (dtoData.classification !== undefined) {
             updateData.classification = dtoData.classification;
+        }
 
-        if (dtoData.ownership !== undefined)
+        if (dtoData.ownership !== undefined) {
             updateData.ownership = dtoData.ownership;
+        }
 
         return Organization.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
@@ -140,44 +180,92 @@ export class OrganizationRepository implements IOrganizationRepository {
         ).exec();
     }
 
-    async findByName(orgName: string, populate?: boolean): Promise<IOrganization | null> {
-        const query = Organization.findOne({ name: orgName });
-        if (populate) {
-            query.populate("parent");
-        }
-        return query.lean<IOrganization>();
-    }
 
-    async exists(filters: ExistsOrganizationDTO): Promise<boolean> {
-        const query: any = {};
-        if (filters.parent) {
-            query.parent = new mongoose.Types.ObjectId(filters.parent);
-        }
-        const result = await Organization.exists(query).exec();
+    // ------------------------------------
+    // EXISTS
+    // ------------------------------------
+    async exists(
+        filters: FilterOrganizationsDTO
+    ): Promise<boolean> {
+
+        const query = this.buildFilter(filters);
+
+        const result = await Organization
+            .exists(query)
+            .exec();
+
         return result !== null;
     }
+
 
     // ------------------------------------
     // DELETE
     // ------------------------------------
-    async delete(id: string) {
-        await Organization.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();
+    async delete(id: string): Promise<void> {
+
+        await Organization.findByIdAndDelete(
+            new mongoose.Types.ObjectId(id)
+        ).exec();
     }
+
+
+    // ------------------------------------
+    // BUILD FILTER
+    // ------------------------------------
+    private buildFilter(
+        filters: FilterOrganizationsDTO
+    ): Record<string, any> {
+
+        const query: Record<string, any> = {};
+
+        if (filters.type !== undefined) {
+            query.type = filters.type;
+        }
+
+        if (filters.parent !== undefined) {
+            query.parent = new mongoose.Types.ObjectId(
+                filters.parent
+            );
+        }
+
+        if (filters.name !== undefined) {
+            query.name = filters.name;
+        }
+
+        return query;
+    }
+
 
     // ------------------------------------
     // INTERNAL UTILITY
     // Maps type → discriminator model
     // ------------------------------------
-    private getModelByType(type: Unit) {
+    private getModelByType(type: Unit): mongoose.Model<any> {
+
         switch (type) {
-            case Unit.college: return College;
-            case Unit.department: return Department;
-            case Unit.program: return Program;
-            case Unit.directorate: return Directorate;
-            case Unit.center: return Center;
-            case Unit.external: return External;
+            case Unit.college:
+                return College;
+
+            case Unit.department:
+                return Department;
+
+            case Unit.program:
+                return Program;
+
+            case Unit.directorate:
+                return Directorate;
+
+            case Unit.center:
+                return Center;
+
+            case Unit.external:
+                return External;
+
             default:
-                throw new Error(`Unknown organization type: ${type}`);
+                throw new Error(
+                    `Unknown organization type: ${type}`
+                );
         }
     }
 }
+

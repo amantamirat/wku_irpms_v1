@@ -30,19 +30,27 @@ const SaveOrganization = ({ visible, item, onHide, onComplete }: EntitySaveDialo
     const [submitted, setSubmitted] = useState(false);
     const [loadingParents, setLoadingParents] = useState(false);
 
-    const parentType = getParentType(item.type);
+    // Derived properties
+    const parentType = getParentType(localOrg.type);
     const isProgram = localOrg.type === OrgnUnit.program;
     const isExternal = localOrg.type === OrgnUnit.external;
 
-    // Sync local state with prop item
+    // Reset local state when dialog visibility changes or item updates
     useEffect(() => {
-        setLocalOrg({ ...item });
-    }, [item]);
+        if (visible) {
+            setLocalOrg({ ...item });
+            setSubmitted(false);
+        }
+    }, [visible, item]);
 
-    // Fetch Parents when dialog opens and parentType is known
+    // Fetch parent options dynamically when dialog opens
     useEffect(() => {
-        if (!visible || !parentType) return;
+        if (!visible || !parentType) {
+            setParents([]);
+            return;
+        }
 
+        let isMounted = true;
         const fetchParents = async () => {
             setLoadingParents(true);
             try {
@@ -50,35 +58,43 @@ const SaveOrganization = ({ visible, item, onHide, onComplete }: EntitySaveDialo
                 if (scopes === "*") {
                     scopes = await OrganizationApi.getAll({ type: parentType });
                 }
-                setParents(Array.isArray(scopes) ? scopes : []);
+                if (isMounted) {
+                    setParents(Array.isArray(scopes) ? scopes : []);
+                }
             } catch (err) {
                 console.error("Failed to load parents", err);
             } finally {
-                setLoadingParents(false);
+                if (isMounted) setLoadingParents(false);
             }
         };
 
         fetchParents();
+
+        return () => {
+            isMounted = false;
+        };
     }, [visible, parentType, getScopesByUnit]);
 
-    const clearForm = () => {
-        setSubmitted(false);
-        setLocalOrg({ ...item });
-    };
-
     const handleHide = () => {
-        clearForm();
+        setSubmitted(false);
         onHide();
     };
 
     const saveOrganization = async () => {
         setSubmitted(true);
-        try {
-            const validation = validateOrganization(localOrg);
-            if (!validation.valid) {
-                throw new Error(validation.message || "Validation failed");
-            }
 
+        const validation = validateOrganization(localOrg);
+        if (!validation.valid) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Validation Error',
+                detail: validation.message || 'Validation failed',
+                life: 3000,
+            });
+            return;
+        }
+
+        try {
             const saved = localOrg._id
                 ? await OrganizationApi.update(localOrg)
                 : await OrganizationApi.create(localOrg);
@@ -90,7 +106,6 @@ const SaveOrganization = ({ visible, item, onHide, onComplete }: EntitySaveDialo
                 life: 2000,
             });
 
-            // Brief delay to allow toast to be seen before closing/refreshing
             if (onComplete) {
                 setTimeout(() => onComplete({ ...saved, parent: localOrg.parent }), 500);
             }
@@ -156,7 +171,7 @@ const SaveOrganization = ({ visible, item, onHide, onComplete }: EntitySaveDialo
                     {submitted && !localOrg.name && <small className="p-error">Name is required.</small>}
                 </div>
 
-                {/* Academic Fields (Programs) */}
+                {/* Program Specific Fields */}
                 {isProgram && (
                     <>
                         <div className="field">
@@ -169,6 +184,7 @@ const SaveOrganization = ({ visible, item, onHide, onComplete }: EntitySaveDialo
                                 placeholder="Select Level"
                                 className={classNames({ 'p-invalid': submitted && !localOrg.academicLevel })}
                             />
+                            {submitted && !localOrg.academicLevel && <small className="p-error">Academic Level is required.</small>}
                         </div>
                         <div className="field">
                             <label htmlFor="classification">Classification</label>
@@ -180,11 +196,12 @@ const SaveOrganization = ({ visible, item, onHide, onComplete }: EntitySaveDialo
                                 placeholder="Select Classification"
                                 className={classNames({ 'p-invalid': submitted && !localOrg.classification })}
                             />
+                            {submitted && !localOrg.classification && <small className="p-error">Classification is required.</small>}
                         </div>
                     </>
                 )}
 
-                {/* External Fields */}
+                {/* External Specific Fields */}
                 {isExternal && (
                     <div className="field">
                         <label htmlFor="ownership">Ownership</label>
@@ -196,6 +213,7 @@ const SaveOrganization = ({ visible, item, onHide, onComplete }: EntitySaveDialo
                             placeholder="Select Ownership"
                             className={classNames({ 'p-invalid': submitted && !localOrg.ownership })}
                         />
+                        {submitted && !localOrg.ownership && <small className="p-error">Ownership is required.</small>}
                     </div>
                 )}
             </Dialog>

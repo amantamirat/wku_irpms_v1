@@ -34,13 +34,13 @@ export interface UpdateUserDTO {
 export interface UpdateRolesDTO {
     id: string;       // target user
     roles: string[];      // array of role IDs to assign
-    applicantId?: string;    // actor, for auditing
+    userId?: string;    // actor, for auditing
 }
 
 export interface UpdateOwnershipsDTO {
     id: string;                     // target applicant
     ownerships: IOwnership[]; // full ownership definition
-    applicantId: string;             // actor (auditing / permission)
+    userId: string;             // actor (auditing / permission)
 }
 
 export interface GetUsersDTO {

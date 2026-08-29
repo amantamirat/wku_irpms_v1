@@ -11,8 +11,8 @@ import { IPositionRepository, PositionRepository } from "./position.repository";
 export class PositionService {
 
     constructor(
-        private readonly positionRepo: IPositionRepository = new PositionRepository(),
-        private readonly experienceRepo: IExperienceRepository = new ExperienceRepository()
+        private readonly positionRepo: IPositionRepository,
+        private readonly experienceRepo: IExperienceRepository
     ) { }
 
     /* =========================

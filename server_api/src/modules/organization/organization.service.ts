@@ -1,40 +1,42 @@
 // organization.service.ts
-import { IOrganizationRepository } from "./organization.repository";
+import { Unit } from "../../common/constants/enums";
+import { FindOptions } from "../../common/dtos/filter.dto";
+import { AppError } from "../../common/errors/app.error";
+import { ERROR_CODES } from "../../common/errors/error.codes";
+import { IGrantRepository } from "../grants/grant.repository";
+import { IEnrollmentRepository } from "../users/enrollments/enrollment.repository";
+import { IExperienceRepository } from "../users/experiences/experience.repository";
+import { IUserRepository } from "../users/user.repository";
 import {
     CreateOrganizationDTO,
-    GetOrganizationsDTO,
+    FilterOrganizationsDTO,
     UpdateOrganizationDTO
 } from "./organization.dto";
-import { ERROR_CODES } from "../../common/errors/error.codes";
-import { UserRepository, IUserRepository } from "../users/user.repository";
-import { IEnrollmentRepository, EnrollmentRepository } from "../users/enrollments/enrollment.repository";
-import { Unit } from "../../common/constants/enums";
-import { GrantRepository, IGrantRepository } from "../grants/grant.repository";
-import { AppError } from "../../common/errors/app.error";
-import { ExperienceRepository } from "../users/experiences/experience.repository";
+import { IOrganizationRepository } from "./organization.repository";
 
 export class OrganizationService {
 
 
-    constructor(private readonly repo: IOrganizationRepository,
-        private userRepo: IUserRepository = new UserRepository(),
-        private studentRepo: IEnrollmentRepository = new EnrollmentRepository(),
-        private grantRepo: IGrantRepository = new GrantRepository(),
-        private exprienceRepo = new ExperienceRepository(),
+    constructor(
+        private readonly organizationRepo: IOrganizationRepository,
+        private readonly userRepo: IUserRepository,
+        private readonly grantRepo: IGrantRepository,
+        private readonly enrollmentRepo: IEnrollmentRepository,
+        private readonly exprienceRepo: IExperienceRepository,
     ) {
     }
 
     // ----------------------------------------------------
     // FIND LIST (filter by type, parent)
     // ----------------------------------------------------
-    async getAll(filters: GetOrganizationsDTO) {
-        return this.repo.find(filters);
+    async getAll(filters: FilterOrganizationsDTO, options?: FindOptions) {
+        return this.organizationRepo.find(filters, options);
     }
 
 
     async validateParent(type: Unit, parent: string) {
         if (type === Unit.department || type === Unit.program || type === Unit.center) {
-            const organDoc = await this.repo.findById(parent);
+            const organDoc = await this.organizationRepo.findById(parent);
             if (!organDoc) {
                 throw new Error(ERROR_CODES.ORGANIZATION_PARENT_NOT_FOUND);
             }
@@ -57,11 +59,11 @@ export class OrganizationService {
         if (parent) {
             await this.validateParent(type, parent);
         }
-        return this.repo.create(dto);
+        return this.organizationRepo.create(dto);
     }
 
     async getById(id: string) {
-        const organDoc = await this.repo.findById(id);
+        const organDoc = await this.organizationRepo.findById(id);
         if (!organDoc) throw new AppError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
         return organDoc;
     }
@@ -72,7 +74,7 @@ export class OrganizationService {
     // ----------------------------------------------------
     async update(dto: UpdateOrganizationDTO) {
         const { id, data } = dto;
-        const orgDoc = await this.repo.update(id, data);
+        const orgDoc = await this.organizationRepo.update(id, data);
         if (!orgDoc) {
             throw new Error(ERROR_CODES.ORGANIZATION_NOT_FOUND);
         }
@@ -84,7 +86,7 @@ export class OrganizationService {
     // DELETE ORGANIZATION
     // ----------------------------------------------------
     async delete(id: string) {
-        const orgnDoc = await this.repo.findById(id);
+        const orgnDoc = await this.organizationRepo.findById(id);
 
         if (!orgnDoc) {
             throw new Error(ERROR_CODES.ORGANIZATION_NOT_FOUND);
@@ -92,7 +94,7 @@ export class OrganizationService {
 
         const orgType = orgnDoc.type;
 
-        const childExist = await this.repo.exists({ parent: id });
+        const childExist = await this.organizationRepo.exists({ parent: id });
 
         if (childExist) {
             throw new AppError(
@@ -103,7 +105,6 @@ export class OrganizationService {
 
         if (orgType === Unit.external || orgType === Unit.department) {
             const userExists = await this.userRepo.exists({ workspace: id });
-
             if (userExists) {
                 throw new AppError(
                     ERROR_CODES.ORGANIZATION_IN_USE,
@@ -122,7 +123,7 @@ export class OrganizationService {
         }
 
         if (orgType === Unit.program) {
-            const exists = await this.studentRepo.exists({ program: id });
+            const exists = await this.enrollmentRepo.exists({ program: id });
             if (exists) {
                 throw new AppError(
                     ERROR_CODES.ORGANIZATION_IN_USE,
@@ -140,6 +141,6 @@ export class OrganizationService {
                 );
             }
         }
-        return await this.repo.delete(id);
+        return await this.organizationRepo.delete(id);
     }
 }

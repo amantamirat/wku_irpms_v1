@@ -94,6 +94,7 @@ export interface AppMenuItem extends MenuModel {
     visible?: boolean;
     disabled?: boolean;
     replaceUrl?: boolean;
+    permission?: string | string[]; // Added line
     command?: ({ originalEvent, item }: CommandProps) => void;
 }
 

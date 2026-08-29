@@ -4,7 +4,7 @@ import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { IGrantRepository } from "../grants/grant.repository";
-import { CreateThematicDTO, GetThematicsDTO, UpdateThematicDTO } from "./thematic.dto";
+import { CreateThematicDTO, FilterThematicsDTO, UpdateThematicDTO } from "./thematic.dto";
 import { themeLevelIndex } from "./thematic.enum";
 import { IThematicRepository } from "./thematic.repository";
 import { THEMATIC_TRANSITIONS, ThematicStatus } from "./thematic.state-machine";
@@ -31,7 +31,7 @@ export class ThematicService {
         }
     }
 
-    async getAll(options: GetThematicsDTO) {
+    async getAll(options: FilterThematicsDTO) {
         return await this.repository.find(options);
     }
 
