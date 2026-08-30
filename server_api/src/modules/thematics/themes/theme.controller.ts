@@ -69,6 +69,7 @@ export class ThemeController {
         }
     }
 
+    /*
     import = async (req: Request, res: Response) => {
         try {
             const file = req.file;
@@ -80,7 +81,7 @@ export class ThemeController {
             errorResponse(res, 400, err.message, err);
         }
     }
-
+*/
 
 
 }

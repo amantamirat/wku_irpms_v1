@@ -1,14 +1,14 @@
 import mongoose from "mongoose";
 import { Theme, ITheme } from "./theme.model";
-import { CreateThemeDTO, ExistsThemeDTO, GetThemeDTO, UpdateThemeDTO } from "./theme.dto";
+import { CreateThemeDTO, FilterThemeDTO, UpdateThemeDTO } from "./theme.dto";
 
 export interface IThemeRepository {
     findById(id: string): Promise<ITheme | null>;
-    find(filters: GetThemeDTO): Promise<ITheme[]>;
-    findOne(dto: GetThemeDTO): Promise<ITheme | null>;
+    find(filters: FilterThemeDTO): Promise<ITheme[]>;
+    findOne(dto: FilterThemeDTO): Promise<ITheme | null>;
     create(dto: CreateThemeDTO, session?: mongoose.ClientSession): Promise<ITheme>;
     update(id: string, data: UpdateThemeDTO["data"]): Promise<ITheme | null>;
-    exists(filters: ExistsThemeDTO): Promise<boolean>;
+    exists(filters: FilterThemeDTO): Promise<boolean>;
     deleteMany(dto: { thematic?: string, theme?: string }): Promise<any>; // Added this
     delete(id: string): Promise<ITheme | null>;
 }
@@ -22,7 +22,7 @@ export class ThemeRepository implements IThemeRepository {
     }
 
 
-    async findOne(dto: GetThemeDTO) {
+    async findOne(dto: FilterThemeDTO) {
         const filter: Record<string, any> = {};
 
         if (dto.thematicArea) {
@@ -42,7 +42,7 @@ export class ThemeRepository implements IThemeRepository {
             .exec();
     }
 
-    async find(filters: GetThemeDTO) {
+    async find(filters: FilterThemeDTO) {
         const query: any = {};
         if (filters.thematicArea) {
             query.thematicArea = new mongoose.Types.ObjectId(filters.thematicArea);
@@ -95,7 +95,7 @@ export class ThemeRepository implements IThemeRepository {
         ).exec();
     }
 
-    async exists(filters: ExistsThemeDTO): Promise<boolean> {
+    async exists(filters: FilterThemeDTO): Promise<boolean> {
         const query: any = {};
 
         if (filters.thematicArea) {
@@ -104,6 +104,9 @@ export class ThemeRepository implements IThemeRepository {
 
         if (filters.parent) {
             query.parent = new mongoose.Types.ObjectId(filters.parent);
+        }
+        if (filters.level !== undefined) {
+            query.level = filters.level;
         }
         const result = await Theme.exists(query).exec();
         return result !== null;

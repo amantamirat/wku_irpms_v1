@@ -12,8 +12,9 @@ export interface Options {
     };
 }*/
 
-export interface GetProjectsDTO {
+export interface FilterProjectsDTO {
     grant?: string;
+    calendar?: string;
     leadPI?: string;
     call?: string;
     status?: ProjectStatus;
@@ -58,9 +59,4 @@ export interface UpdateProjectDTO {
     userId: string;
 }
 
-export interface ExistsProjectDTO {
-    leadPI?: string;
-    grant?: string;
-    call?: string;
-}
 

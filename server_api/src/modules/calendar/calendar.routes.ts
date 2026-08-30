@@ -1,16 +1,11 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
+import { calendarRepo, callRepo, enrollmentRepo, projectRepo } from '../../core/container';
 import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../auth/auth.middleware';
 import { CalendarController } from './calendar.controller';
-import { CalendarRepository } from './calendar.repository';
 import { CalendarService } from './calendar.service';
-import { EnrollmentRepository } from '../users/enrollments/enrollment.repository';
-import { CallRepository } from '../calls/call.repository';
 
-const repository = new CalendarRepository();
-const callRepo = new CallRepository();
-const enrollmentRepo = new EnrollmentRepository();
-const service = new CalendarService(repository, callRepo, enrollmentRepo);
+const service = new CalendarService(calendarRepo, callRepo, enrollmentRepo, projectRepo);
 const controller = new CalendarController(service);
 
 const router: Router = Router();

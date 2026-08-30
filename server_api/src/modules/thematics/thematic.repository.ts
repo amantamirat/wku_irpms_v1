@@ -25,11 +25,15 @@ export class ThematicRepository implements IThematicRepository {
     }
 
 
-    async findOne({ title, status }: FilterThematicsDTO) {
+    async findOne({ title, level, status }: FilterThematicsDTO) {
         const filter: Record<string, any> = {};
 
         if (title) {
             filter.title = title;
+        }
+
+        if (level) {
+            filter.level = level;
         }
 
         if (status) {

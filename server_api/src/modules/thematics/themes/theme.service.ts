@@ -6,7 +6,7 @@ import { SettingService } from "../../settings/setting.service";
 import { themeLevelIndex } from "../thematic.enum";
 import { IThematicRepository } from "../thematic.repository";
 import { ThematicStatus } from "../thematic.state-machine";
-import { CreateThemeDTO, GetThemeDTO, IThemeImportDTO, UpdateThemeDTO } from "./theme.dto";
+import { CreateThemeDTO, FilterThemeDTO, IThemeImportDTO, UpdateThemeDTO } from "./theme.dto";
 import { IThemeRepository } from "./theme.repository";
 import mongoose from 'mongoose';
 import fs from "fs";
@@ -16,7 +16,7 @@ export class ThemeService {
     constructor(
         private readonly repository: IThemeRepository,
         private readonly thematicRepo: IThematicRepository,
-        private readonly settingService: SettingService
+        //private readonly settingService?: SettingService
     ) { }
 
     async validateThematic(thematicId: string) {
@@ -50,7 +50,7 @@ export class ThemeService {
         }
     }
 
-    async getThemes(filters: GetThemeDTO) {
+    async getThemes(filters: FilterThemeDTO) {
         return await this.repository.find(filters);
     }
 
@@ -86,6 +86,8 @@ export class ThemeService {
         //if (deleted) await this.repository.deleteMany({ theme: id });
         return deleted;
     }
+
+    /*
 
     async importFromFile(file: Express.Multer.File, thematicAreaId: string) {
         // 1. Get Dynamic Settings
@@ -200,5 +202,5 @@ export class ThemeService {
                 session
             );
         }
-    }
+    }*/
 }

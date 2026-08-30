@@ -20,5 +20,6 @@ export interface UpdateThematicDTO {
 
 export interface FilterThematicsDTO {
     title?: string;
+    level?:ThematicLevel;
     status?: ThematicStatus;
 }

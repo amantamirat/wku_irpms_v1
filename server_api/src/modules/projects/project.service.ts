@@ -1,7 +1,7 @@
 // project.service.ts
 import {
     CreateProjectDTO,
-    GetProjectsDTO,
+    FilterProjectsDTO,
     UpdateProjectDTO,
 } from "./project.dto";
 import { IProjectRepository } from "./project.repository";
@@ -93,7 +93,7 @@ export class ProjectService {
     }
 
 
-    async getProjects(options: GetProjectsDTO) {
+    async getProjects(options: FilterProjectsDTO) {
         return this.projectRepo.find(options);
     }
 

@@ -8,10 +8,10 @@ import { ThematicRepository } from '../thematic.repository';
 import { SettingService } from '../../settings/setting.service';
 import { SettingRepository } from '../../settings/setting.repository';
 import { upload } from '../../../util/multer';
+import { thematicRepo, themeRepo } from '../../../core/container';
 
 const controller = new ThemeController(new ThemeService(
-    new ThemeRepository(), new ThematicRepository(),
-    new SettingService(new SettingRepository())));
+    themeRepo, thematicRepo));
 
 const router: Router = Router();
 
@@ -51,7 +51,7 @@ router.delete(
     checkPermission([PERMISSIONS.THEME.DELETE]),
     controller.delete
 );
-
+/*
 router.post(
     "/import/:id",
     verifyActiveAccount,
@@ -59,5 +59,6 @@ router.post(
     upload.single('file'),
     controller.import
 );
+*/
 
 export default router;

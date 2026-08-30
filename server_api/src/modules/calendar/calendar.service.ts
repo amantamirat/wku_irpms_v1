@@ -3,6 +3,7 @@ import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { ICallRepository } from "../calls/call.repository";
+import { IProjectRepository } from "../projects/project.repository";
 import { IEnrollmentRepository } from "../users/enrollments/enrollment.repository";
 import { CreateCalendarDTO, GetCalendarDTO, UpdateCalendarDTO } from "./calendar.dto";
 import { CalendarStatus } from "./calendar.model";
@@ -15,6 +16,7 @@ export class CalendarService {
         private readonly repository: CalendarRepository,
         private readonly callRepo: ICallRepository,
         private readonly enrollmentRepo: IEnrollmentRepository,
+        private readonly projectRepo: IProjectRepository,
     ) {
     }
 
@@ -78,6 +80,12 @@ export class CalendarService {
             if (await this.callRepo.exists({ calendar: id })) {
                 throw new AppError(ERROR_CODES.CALENDAR_IN_USE,
                     'This fiscal calendar is already being used by calls.'
+                );
+            }
+
+            if (await this.projectRepo.exists({ calendar: id })) {
+                throw new AppError(ERROR_CODES.CALENDAR_IN_USE,
+                    'This fiscal calendar is already being used by projects.'
                 );
             }
             if (await this.enrollmentRepo.exists({ calendar: id })) {

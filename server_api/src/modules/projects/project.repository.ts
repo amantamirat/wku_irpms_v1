@@ -2,15 +2,14 @@
 import mongoose, { ClientSession } from "mongoose";
 import {
     CreateProjectDTO,
-    ExistsProjectDTO,
-    GetProjectsDTO,
+    FilterProjectsDTO,
     UpdateProjectDTO
 } from "./project.dto";
 import { IProject, Project, ProjectStatus } from "./project.model";
 
 export interface IProjectRepository {
     findById(id: string, populate?: boolean): Promise<IProject | null>;
-    find(filters: GetProjectsDTO): Promise<Partial<IProject>[]>;
+    find(filters: FilterProjectsDTO): Promise<Partial<IProject>[]>;
     create(dto: CreateProjectDTO): Promise<IProject>;
     update(id: string, data: UpdateProjectDTO["data"]): Promise<IProject | null>;
     updateStatus(id: string, newStatus: ProjectStatus, session?: ClientSession): Promise<IProject | null>;
@@ -36,7 +35,7 @@ export interface IProjectRepository {
     clearCurrentVerification(
         project: string
     ): Promise<IProject | null>;
-    exists(filters: ExistsProjectDTO): Promise<boolean>;
+    exists(filters: FilterProjectsDTO): Promise<boolean>;
     delete(id: string): Promise<IProject | null>;
 }
 
@@ -60,7 +59,7 @@ export class ProjectRepository implements IProjectRepository {
         return dbQuery.lean<IProject>().exec();
     }
 
-    async find(filters: GetProjectsDTO) {
+    async find(filters: FilterProjectsDTO) {
         const query: Record<string, any> = {};
 
         if (filters.status) {
@@ -77,6 +76,10 @@ export class ProjectRepository implements IProjectRepository {
 
         if (filters.call) {
             query.call = new mongoose.Types.ObjectId(filters.call);
+        }
+
+        if (filters.calendar) {
+            query.calendar = new mongoose.Types.ObjectId(filters.calendar);
         }
 
         let dbQuery = Project.find(query);
@@ -254,9 +257,9 @@ export class ProjectRepository implements IProjectRepository {
         return dbQuery.exec();
     }
 
-    async exists(filters: ExistsProjectDTO): Promise<boolean> {
+    async exists(filters: FilterProjectsDTO): Promise<boolean> {
         const query: any = {};
-        const { leadPI, grant, call } = filters;
+        const { leadPI, grant, call, calendar } = filters;
         if (leadPI) {
             query.leadPI = new mongoose.Types.ObjectId(leadPI);
         }
@@ -265,6 +268,10 @@ export class ProjectRepository implements IProjectRepository {
         }
         if (call) {
             query.call = new mongoose.Types.ObjectId(call);
+        }
+
+        if (calendar) {
+            query.calendar = new mongoose.Types.ObjectId(calendar);
         }
         const result = await Project.exists(query).exec();
         return result !== null;

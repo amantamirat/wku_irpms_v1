@@ -15,7 +15,7 @@ export interface UpdateThemeDTO {
     userId?: string;
 }
 
-export interface GetThemeDTO {
+export interface FilterThemeDTO {
     parent?: string;
     thematicArea?: string;
     title?:string;
@@ -23,10 +23,12 @@ export interface GetThemeDTO {
     populate?: boolean;
 }
 
+/*
+
 export interface ExistsThemeDTO {
     parent?: string;
     thematicArea?: string;
-}
+}*/
 
 export interface IThemeImportDTO {
     title: string;
