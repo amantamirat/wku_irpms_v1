@@ -1,0 +1,950 @@
+[
+    {
+        "title": "Research Concept Note Evaluation",
+        "description": "Evaluation format for assessing research concept notes.",
+        "weight": 50,
+        "criteria": [
+            {
+                "title": "Relevance",
+                "weight": 5,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Highly Relevant",
+                        "score": 5
+                    },
+                    {
+                        "title": "Moderately Relevant",
+                        "score": 3
+                    },
+                    {
+                        "title": "Less Relevant",
+                        "score": 2
+                    },
+                    {
+                        "title": "Not Relevant",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Technology / Skill / Knowledge Transferability",
+                "weight": 12,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Highly Transferable",
+                        "score": 12
+                    },
+                    {
+                        "title": "Moderately Transferable",
+                        "score": 6
+                    },
+                    {
+                        "title": "Less Transferable",
+                        "score": 2
+                    },
+                    {
+                        "title": "Not Transferable",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Scope of the Research",
+                "weight": 6,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Three relevant sub-themes addressed",
+                        "score": 6
+                    },
+                    {
+                        "title": "Two relevant sub-themes addressed",
+                        "score": 4
+                    },
+                    {
+                        "title": "One relevant sub-theme addressed",
+                        "score": 2
+                    },
+                    {
+                        "title": "No relevant sub-theme addressed",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Topic - Concise and Clear",
+                "weight": 2,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Yes",
+                        "score": 2
+                    },
+                    {
+                        "title": "No",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Topic - Researchable",
+                "weight": 2,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Yes",
+                        "score": 2
+                    },
+                    {
+                        "title": "No",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Objectives - SMART",
+                "weight": 5,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "SMART Enough",
+                        "score": 5
+                    },
+                    {
+                        "title": "Somewhat SMART",
+                        "score": 3
+                    },
+                    {
+                        "title": "Not SMART Enough",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Significance - Beneficiaries Clearly Identified",
+                "weight": 6,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Clearly Identified",
+                        "score": 6
+                    },
+                    {
+                        "title": "Moderately Identified",
+                        "score": 4
+                    },
+                    {
+                        "title": "Less Identified",
+                        "score": 2
+                    },
+                    {
+                        "title": "Not Identified",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Feasibility - Team Specialization",
+                "weight": 4,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Fully Addressed",
+                        "score": 4
+                    },
+                    {
+                        "title": "Moderately Addressed",
+                        "score": 2
+                    },
+                    {
+                        "title": "Less Addressed",
+                        "score": 1
+                    },
+                    {
+                        "title": "Not Addressed",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Feasibility - Ethical Acceptability",
+                "weight": 4,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "No Ethical Problem",
+                        "score": 4
+                    },
+                    {
+                        "title": "Some Ethical Problem",
+                        "score": 2
+                    },
+                    {
+                        "title": "Not Ethically Acceptable",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Feasibility - Relevance to Researchers' Specialization",
+                "weight": 4,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Highly Relevant",
+                        "score": 4
+                    },
+                    {
+                        "title": "Relevant",
+                        "score": 2
+                    },
+                    {
+                        "title": "Less Relevant",
+                        "score": 1
+                    },
+                    {
+                        "title": "Not Relevant",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Reviewer Comments",
+                "weight": 0,
+                "formType": "Open",
+                "isRequired": false
+            }
+        ]
+    },
+    {
+        "title": "Research Proposal Evaluation",
+        "description": "Evaluation format for assessing research proposals. A plagiarism test should be completed before evaluating the research proposal.",
+        "weight": 50,
+        "criteria": [
+            {
+                "title": "Research Topic - Title Clearly Reflects the Proposed Work",
+                "weight": 3,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Highly Reflected",
+                        "score": 3
+                    },
+                    {
+                        "title": "Moderately Reflected",
+                        "score": 2
+                    },
+                    {
+                        "title": "Not Reflected",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Background and Justification - Historical Development",
+                "weight": 3,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Well Discussed",
+                        "score": 3
+                    },
+                    {
+                        "title": "Moderately Discussed",
+                        "score": 2
+                    },
+                    {
+                        "title": "Less Discussed",
+                        "score": 1
+                    },
+                    {
+                        "title": "Not Discussed",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Background and Justification - Research Gaps",
+                "weight": 3,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Well Described",
+                        "score": 3
+                    },
+                    {
+                        "title": "Moderately Described",
+                        "score": 2
+                    },
+                    {
+                        "title": "Less Described",
+                        "score": 1
+                    },
+                    {
+                        "title": "Not Described",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Objectives - Specific",
+                "weight": 2,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Specific",
+                        "score": 2
+                    },
+                    {
+                        "title": "Not Specific",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Objectives - Measurable",
+                "weight": 2,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Measurable",
+                        "score": 2
+                    },
+                    {
+                        "title": "Not Measurable",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Objectives - Attainable",
+                "weight": 2,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Attainable",
+                        "score": 2
+                    },
+                    {
+                        "title": "Not Attainable",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Objectives - Reliable",
+                "weight": 2,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Reliable",
+                        "score": 2
+                    },
+                    {
+                        "title": "Not Reliable",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Objectives - Time Bounded",
+                "weight": 2,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Time Bounded",
+                        "score": 2
+                    },
+                    {
+                        "title": "Not Time Bounded",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Soundness of Methodology - Research Design and Sampling Technique",
+                "weight": 4,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Highly Appropriate",
+                        "score": 4
+                    },
+                    {
+                        "title": "Partially Appropriate",
+                        "score": 2
+                    },
+                    {
+                        "title": "Not Appropriate",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Soundness of Methodology - Analysis Techniques",
+                "weight": 3,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Highly Appropriate",
+                        "score": 3
+                    },
+                    {
+                        "title": "Partially Appropriate",
+                        "score": 1
+                    },
+                    {
+                        "title": "Not Appropriate",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Expected Output / Outcome - Description",
+                "weight": 4,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Well Described",
+                        "score": 4
+                    },
+                    {
+                        "title": "Moderately Described",
+                        "score": 2
+                    },
+                    {
+                        "title": "Less Described",
+                        "score": 1
+                    },
+                    {
+                        "title": "Not Described",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Expected Output / Outcome - Beneficiaries",
+                "weight": 3,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Clearly Identified",
+                        "score": 3
+                    },
+                    {
+                        "title": "Somewhat Identified",
+                        "score": 1
+                    },
+                    {
+                        "title": "Not Identified",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Expected Output / Outcome - Technology, Skill or Knowledge Transferability",
+                "weight": 7,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Highly Transferable",
+                        "score": 7
+                    },
+                    {
+                        "title": "Moderately Transferable",
+                        "score": 3
+                    },
+                    {
+                        "title": "Less Transferable",
+                        "score": 2
+                    },
+                    {
+                        "title": "Not Transferable",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Operational Feasibility - Timeframe, Budget and Operational Challenges",
+                "weight": 8,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Highly Realistic",
+                        "score": 8
+                    },
+                    {
+                        "title": "Moderately Realistic",
+                        "score": 4
+                    },
+                    {
+                        "title": "Less Realistic",
+                        "score": 2
+                    },
+                    {
+                        "title": "Not Realistic",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Operational Feasibility - Ethical Acceptability",
+                "weight": 2,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "No Ethical Problem",
+                        "score": 2
+                    },
+                    {
+                        "title": "Some Ethical Problem",
+                        "score": 1
+                    },
+                    {
+                        "title": "Not Ethically Acceptable",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Reviewer Comments",
+                "weight": 0,
+                "formType": "Open",
+                "isRequired": false
+            }
+        ]
+    },
+    {
+        "title": "TT Project Proposal Evaluation",
+        "description": "Evaluation criteria for Technology Transfer Project Proposals by Wolkite University Industry Linkage and Technology Transfer Directorate.",
+        "weight": 100,
+        "criteria": [
+            {
+                "title": "Relevance of the Proposed Technology to Transfer - Type of Technology",
+                "weight": 10,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Innovative",
+                        "score": 10
+                    },
+                    {
+                        "title": "Automation / Development",
+                        "score": 7
+                    },
+                    {
+                        "title": "Copy / Customization / Adaptation",
+                        "score": 5
+                    }
+                ]
+            },
+            {
+                "title": "Relevance of the Proposed Technology to Transfer - Relation to WKU Research Output",
+                "weight": 10,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "The proposed technology is a research output at Wolkite University",
+                        "score": 10
+                    },
+                    {
+                        "title": "The proposed technology is significant and problem-solving but is not a research output",
+                        "score": 8
+                    }
+                ]
+            },
+            {
+                "title": "Relevance of the Proposed Technology to Transfer - Community / Industry Problem Solving",
+                "weight": 10,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "The proposed technology can solve a problem of the community / industry",
+                        "score": 10
+                    },
+                    {
+                        "title": "The proposed technology cannot adequately solve a community / industry problem",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Extent and Reality of the Proposed Community Problems to be Solved",
+                "weight": 10,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Highly significant and realistic",
+                        "score": 10
+                    },
+                    {
+                        "title": "Moderately significant and realistic",
+                        "score": 5
+                    },
+                    {
+                        "title": "Less significant and realistic",
+                        "score": 2
+                    },
+                    {
+                        "title": "Not significant or realistic",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Methodology - Clarity of Methods and Tools for Technology Development",
+                "weight": 5,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Highly Appropriate",
+                        "score": 5
+                    },
+                    {
+                        "title": "Partially Appropriate",
+                        "score": 3
+                    },
+                    {
+                        "title": "Not Appropriate",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Methodology - Availability of Materials in Local Market",
+                "weight": 5,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Readily Available",
+                        "score": 5
+                    },
+                    {
+                        "title": "Partially Available",
+                        "score": 3
+                    },
+                    {
+                        "title": "Not Available",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Methodology - Ease of Technology Design and Development at WKU",
+                "weight": 5,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Easy",
+                        "score": 5
+                    },
+                    {
+                        "title": "Moderately Easy",
+                        "score": 3
+                    },
+                    {
+                        "title": "Difficult",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Commercial Value - Ease of Converting Technology into Business",
+                "weight": 5,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Highly Easy to Commercialize",
+                        "score": 5
+                    },
+                    {
+                        "title": "Moderately Easy to Commercialize",
+                        "score": 3
+                    },
+                    {
+                        "title": "Difficult to Commercialize",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Commercial Value - Availability of Adequate Local Demand",
+                "weight": 5,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "High Local Demand",
+                        "score": 5
+                    },
+                    {
+                        "title": "Moderate Local Demand",
+                        "score": 3
+                    },
+                    {
+                        "title": "Low or No Local Demand",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Commercial Value - Ease of Manufacturability / Development and Market",
+                "weight": 5,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Highly Easy",
+                        "score": 5
+                    },
+                    {
+                        "title": "Moderately Easy",
+                        "score": 3
+                    },
+                    {
+                        "title": "Difficult",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Commercial Value - Capacity of Technology to Solve Community Problems",
+                "weight": 5,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Highly Capable",
+                        "score": 5
+                    },
+                    {
+                        "title": "Moderately Capable",
+                        "score": 3
+                    },
+                    {
+                        "title": "Less Capable",
+                        "score": 1
+                    },
+                    {
+                        "title": "Not Capable",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Project Activities and Budget - Appropriateness of Project Activities with Scope",
+                "weight": 5,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Appropriate",
+                        "score": 5
+                    },
+                    {
+                        "title": "Inappropriate",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Project Activities and Budget - Appropriateness of Budget Requirements with Project Activities",
+                "weight": 10,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Appropriate",
+                        "score": 10
+                    },
+                    {
+                        "title": "Inappropriate",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Project Activities and Budget - Attainability of Requested Budget",
+                "weight": 10,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Reasonable and Possible to Obtain",
+                        "score": 10
+                    },
+                    {
+                        "title": "Not Reasonable or Difficult to Obtain",
+                        "score": 0
+                    }
+                ]
+            },
+            {
+                "title": "Reviewer Comments",
+                "weight": 0,
+                "formType": "Open",
+                "isRequired": false
+            }
+        ]
+    },
+    {
+        "title": "Community Service Project Proposal Evaluation",
+        "description": "University-level evaluation checklist for Community Service Project Proposals.",
+        "weight": 100,
+        "criteria": [
+            {
+                "title": "Organization of the Project Proposal, Format and Logical Content",
+                "weight": 5,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Meets the criterion",
+                        "score": 5
+                    }
+                ]
+            },
+            {
+                "title": "Problem Statement and Justification with Evidence / Research",
+                "weight": 15,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Meets the criterion",
+                        "score": 15
+                    }
+                ]
+            },
+            {
+                "title": "Objectives, Outputs and Outcomes / Impacts are Clearly Stated and SMART",
+                "weight": 15,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Meets the criterion",
+                        "score": 15
+                    }
+                ]
+            },
+            {
+                "title": "Relevance to Community Needs and Constraints and Project Feasibility",
+                "weight": 20,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Meets the criterion",
+                        "score": 20
+                    }
+                ]
+            },
+            {
+                "title": "Coherence of the Overall Project, Including Objectives and Activities",
+                "weight": 8,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Meets the criterion",
+                        "score": 8
+                    }
+                ]
+            },
+            {
+                "title": "Responses to Questions Raised by Reviewers and Audiences",
+                "weight": 7,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Meets the criterion",
+                        "score": 7
+                    }
+                ]
+            },
+            {
+                "title": "Sustainability Strategies are Clearly Indicated",
+                "weight": 20,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Meets the criterion",
+                        "score": 20
+                    }
+                ]
+            },
+            {
+                "title": "Assumptions and Risks are Clearly and Explicitly Defined",
+                "weight": 10,
+                "formType": "Single",
+                "options": [
+                    {
+                        "title": "Meets the criterion",
+                        "score": 10
+                    }
+                ]
+            },
+            {
+                "title": "Reviewer Comments",
+                "weight": 0,
+                "formType": "Open",
+                "isRequired": false
+            }
+        ]
+    },
+    {
+        "title": "Community Service Logical Frame Evaluation - College Level",
+        "description": "Logical frame evaluation for Community Service projects at college level by the Wolkite University Community Service & Engagement Directorate.",
+        "weight": 50,
+        "criteria": [
+            {
+                "title": "Relevance of the Project - Relatedness to Call Priorities and Thematic Areas",
+                "weight": 5,
+                "formType": "Number"
+            },
+            {
+                "title": "Relevance of the Project - Relevance to Community Needs, Constraints and Beneficiaries",
+                "weight": 5,
+                "formType": "Number"
+            },
+            {
+                "title": "Research or Publication Output - CS Concept / Problem as WKU Research or Publication Output",
+                "weight": 7,
+                "formType": "Number"
+            },
+            {
+                "title": "Research or Publication Output - Publication Output from Target Area",
+                "weight": 3,
+                "formType": "Number"
+            },
+            {
+                "title": "Effectiveness and Feasibility - Problem Identification and Analysis",
+                "weight": 4,
+                "formType": "Number"
+            },
+            {
+                "title": "Effectiveness and Feasibility - Project Log Frame Coherence",
+                "weight": 4,
+                "formType": "Number"
+            },
+            {
+                "title": "Effectiveness and Feasibility - Activities and Their Effectiveness",
+                "weight": 4,
+                "formType": "Number"
+            },
+            {
+                "title": "Effectiveness and Feasibility - Stakeholder and Partner Roles and Involvement",
+                "weight": 3,
+                "formType": "Number"
+            },
+            {
+                "title": "Sustainability - Assumptions, Risks, Monitoring and Sustainability Strategy",
+                "weight": 5,
+                "formType": "Number"
+            },
+            {
+                "title": "Sustainability - Long-Term Sustainable Impact on Target Group and Final Beneficiaries",
+                "weight": 5,
+                "formType": "Number"
+            },
+            {
+                "title": "Reviewer Comments",
+                "weight": 0,
+                "formType": "Open",
+                "isRequired": false
+            }
+        ]
+    }
+]

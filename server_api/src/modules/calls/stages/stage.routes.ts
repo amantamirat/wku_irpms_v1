@@ -3,12 +3,12 @@ import { checkPermission, verifyActiveAccount } from '../../auth/auth.middleware
 import { StageController } from './stage.controller';
 import { StageService } from './stage.service';
 
-import { callRepo, evalRepo, stageRepo } from '../../../core/container';
+import { callRepo, evaluationRepo, stageRepo } from '../../../core/container';
 
 //const stageRepo = new StageRepository();
 //const callRepo = new CallRepository();
 //const evalRepo = new EvaluationRepository();
-const service = new StageService(stageRepo, callRepo, evalRepo);
+const service = new StageService(stageRepo, callRepo, evaluationRepo);
 const controller = new StageController(service);
 const router = Router();
 

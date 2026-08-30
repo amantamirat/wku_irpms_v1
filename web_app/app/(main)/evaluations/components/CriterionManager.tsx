@@ -71,10 +71,11 @@ const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
             }
         ],
         SaveDialog: SaveCriterion,
+        /*
         importConfig: {
             enable: true,
             importId: evaluation?._id ?? undefined
-        },
+        },*/
     });
 
     return <Manager />;

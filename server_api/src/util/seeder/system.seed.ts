@@ -12,7 +12,6 @@ import { SettingKey } from '../../modules/settings/setting.model';
 import { ISettingRepository } from '../../modules/settings/setting.repository';
 import { Gender } from "../../modules/users/user.model";
 import { IUserRepository } from "../../modules/users/user.repository";
-import { SYSTEM } from "../../common/constants/system.constant";
 
 export class SystemSeeder {
     constructor(
@@ -20,8 +19,7 @@ export class SystemSeeder {
         private readonly permissionRepo: IPermissionRepository,
         private readonly roleRepo: IRoleRepository,
         private readonly accountRepo: IAccountRepository,
-        private readonly userRepo: IUserRepository,
-        private readonly organizationRepo: IOrganizationRepository,
+        private readonly userRepo: IUserRepository
     ) { }
 
     async run() {
@@ -34,8 +32,7 @@ export class SystemSeeder {
         await this.seedRoles();
         // 4. Create the janitor (Admin User)
         await this.seedAdmin();
-        // 5. Create the directorates
-        await this.seedDirectorates();
+        
         console.log("✅ System Bootstrap Finished.");
     }
 
@@ -201,40 +198,7 @@ export class SystemSeeder {
             status: AccountStatus.active
         });
         console.log("✅ Initial admin created successfully.");
-    }
-
-
-    async seedDirectorates() {
-        const directorates = [
-            SYSTEM.RESEARCH_DIRECTORATE,
-            "Community Service",
-            "Technology Transfer",
-            "Indigenous Knowledge"
-        ];
-
-        let seeded = false;
-
-        for (const name of directorates) {
-            const exists = await this.organizationRepo.exists({
-                name,
-                type: Unit.directorate
-            });
-
-            if (exists)
-                continue;
-
-            await this.organizationRepo.create({
-                type: Unit.directorate,
-                name
-            });
-
-            seeded = true;
-        }
-
-        if (seeded) {
-            console.log("✅ Directorates seeded");
-        }
-    }
+    }    
 }
 
 
@@ -245,7 +209,6 @@ export function createSystemSeeder() {
         permissionRepo,
         roleRepo,
         accountRepo,
-        userRepo,
-        organizationRepo
+        userRepo
     );
 }

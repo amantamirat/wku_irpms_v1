@@ -1,7 +1,7 @@
 import { Request, Response } from 'express';
 import { successResponse, errorResponse } from "../../common/helpers/response";
 import { AuthenticatedRequest } from "../auth/auth.middleware";
-import { CreateEvaluationDTO, GetEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
+import { CreateEvaluationDTO, FilterEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
 import { EvaluationService } from "./evaluation.service";
 import { ERROR_CODES } from '../../common/errors/error.codes';
 import { TransitionRequestDto } from '../../common/dtos/transition.dto';
@@ -36,7 +36,7 @@ export class EvaluationController {
     getAll = async (req: Request, res: Response) => {
         try {
             const { status } = req.query;
-            const filter: GetEvaluationsDTO = {
+            const filter: FilterEvaluationsDTO = {
                 status: status as EvalStatus,
             };
             const evaluations = await this.service.get(filter);

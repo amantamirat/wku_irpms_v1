@@ -4,7 +4,7 @@ import { errorResponse, successResponse } from "../../../common/helpers/response
 import { AuthenticatedRequest } from "../../auth/auth.middleware";
 import {
     CreateCriterionDTO,
-    GetCriteriaDTO,
+    FilterCriteriaDTO,
     UpdateCriterionDTO
 } from "./criterion.dto";
 import { CriterionService } from "./criterion.service";
@@ -39,9 +39,8 @@ export class CriterionController {
         try {
             const { evaluation, populate } = req.query;
 
-            const dto: GetCriteriaDTO = {
+            const dto: FilterCriteriaDTO = {
                 evaluation: evaluation as string | undefined,
-                populate: populate === 'true'
             };
 
             const criteria = await this.service.get(dto);
@@ -78,16 +77,16 @@ export class CriterionController {
             errorResponse(res, 400, err.message, err);
         }
     }
-
-    import = async (req: Request, res: Response) => {
-        try {
-            const file = req.file;
-            if (!file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
-            const { id } = req.params;
-            const result = await this.service.importFromFile(file, id);
-            successResponse(res, 201, "Criteria imported", result);
-        } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
-        }
-    }
+    /*
+        import = async (req: Request, res: Response) => {
+            try {
+                const file = req.file;
+                if (!file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
+                const { id } = req.params;
+                const result = await this.service.importFromFile(file, id);
+                successResponse(res, 201, "Criteria imported", result);
+            } catch (err: any) {
+                errorResponse(res, 400, err.message, err);
+            }
+        }*/
 }

@@ -45,10 +45,11 @@ const ThemeManager = ({ thematic, level = 0, parent }: ThemeManagerProps) => {
             parent
         }),
         SaveDialog: SaveTheme,
+        /*
         importConfig: {
             enable: !!thematic,
             importId: thematic?._id ?? undefined
-        },
+        },*/
         permissionPrefix: "theme",
         expandable: {
             template: (row) => {
@@ -77,10 +78,10 @@ const ThemeManager = ({ thematic, level = 0, parent }: ThemeManagerProps) => {
 
                 // Render the next nested tier and pass the thematic context along
                 return (
-                    <ThemeManager 
-                        thematic={thematic} 
-                        parent={row} 
-                        level={currentLevel + 1} 
+                    <ThemeManager
+                        thematic={thematic}
+                        parent={row}
+                        level={currentLevel + 1}
                     />
                 );
             }

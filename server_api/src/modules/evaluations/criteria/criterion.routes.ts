@@ -1,21 +1,16 @@
 import { Router } from "express";
-import { PERMISSIONS } from "../../../common/constants/permissions";
+import { criterionRepo, evaluationRepo } from "../../../core/container";
+import { upload } from "../../../util/multer";
 import { checkPermission, verifyActiveAccount } from "../../auth/auth.middleware";
 import { CriterionController } from "./criterion.controller";
 import { CriterionService } from "./criterion.service";
-import { CriterionRepository } from "./criterion.repository";
-import { ResultRepository } from "../../reviewers/results/result.repository";
-import { EvaluationRepository } from "../evaluation.repository";
-import { SettingService } from "../../settings/setting.service";
-import { SettingRepository } from "../../settings/setting.repository";
-import { upload } from "../../../util/multer";
 
-const repository = new CriterionRepository();
+//const repository = new CriterionRepository();
 //const resultRepo = new ResultRepository();
-const evalRepo = new EvaluationRepository();
-const service = new CriterionService(repository, //resultRepo, 
-    evalRepo,
-    new SettingService(new SettingRepository())
+//const evalRepo = new EvaluationRepository();
+const service = new CriterionService(criterionRepo, //resultRepo, 
+    evaluationRepo,
+   // new SettingService(new SettingRepository())
 );
 const controller = new CriterionController(service);
 const router = Router();
@@ -52,6 +47,7 @@ router.delete(
     controller.delete
 );
 
+/*
 // Batch import criteria with options
 router.post(
     "/import/:id",
@@ -60,5 +56,5 @@ router.post(
     upload.single('file'),
     controller.import
 );
-
+*/
 export default router;

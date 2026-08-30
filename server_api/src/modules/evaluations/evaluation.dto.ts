@@ -5,6 +5,7 @@ export interface CreateEvaluationDTO {
     description: string;
     weight: number;
     userId?: string;
+    status?: EvalStatus;
 }
 
 export interface UpdateEvaluationDTO {
@@ -18,6 +19,8 @@ export interface UpdateEvaluationDTO {
     userId?: string;
 }
 
-export interface GetEvaluationsDTO {
+export interface FilterEvaluationsDTO {
+    title?: string;
+    weight?: number;
     status?: EvalStatus;
 }

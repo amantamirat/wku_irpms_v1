@@ -37,12 +37,11 @@ export interface UpdateCriterionDTO {
 // =========================
 // 3️⃣ Get Criteria (Query Filters)
 // =========================
-export interface GetCriteriaDTO {
+export interface FilterCriteriaDTO {
     evaluation?: string;
-    stage?: string;
-    reviewer?: string;
-    populate?: boolean;
-    sort?: 'order' | 'createdAt'; // Useful for UI lists
+    title?: string;
+    formType?: FormType;
+    weight?: number;
 }
 
 // =========================

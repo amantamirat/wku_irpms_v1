@@ -3,6 +3,7 @@ import { COLLECTIONS } from "../../common/constants/collections.enum";
 import { EvalStatus } from "./evaluation.state-machine";
 
 export interface IEvaluation extends Document {
+    _id?:string;
     title: string;
     description?: string;
     weight: number;

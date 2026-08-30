@@ -4,7 +4,7 @@ import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { CriterionRepository, ICriterionRepository } from "./criteria/criterion.repository";
-import { CreateEvaluationDTO, GetEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
+import { CreateEvaluationDTO, FilterEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
 import { IEvaluationRepository } from "./evaluation.repository";
 import { EVAL_TRANSITIONS, EvalStatus } from "./evaluation.state-machine";
 
@@ -26,7 +26,7 @@ export class EvaluationService {
         }
     }
 
-    async get(options: GetEvaluationsDTO) {
+    async get(options: FilterEvaluationsDTO) {
         return await this.repository.find(options);
     }
 

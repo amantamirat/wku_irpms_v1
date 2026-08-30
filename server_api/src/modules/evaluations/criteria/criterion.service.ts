@@ -1,19 +1,15 @@
-import fs from "fs";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { IResultRepository } from "../../reviewers/results/result.repository";
-import { SettingKey } from "../../settings/setting.model";
 import { SettingService } from "../../settings/setting.service";
 import { IEvaluationRepository } from "../evaluation.repository";
 import { EvalStatus } from "../evaluation.state-machine";
 import {
     CreateCriterionDTO,
-    GetCriteriaDTO,
-    ImportCriteriaBatchDTO,
+    FilterCriteriaDTO,
     UpdateCriterionDTO
 } from "./criterion.dto";
-import { ICriterionRepository } from "./criterion.repository";
 import { FormType } from "./criterion.model";
+import { ICriterionRepository } from "./criterion.repository";
 
 export class CriterionService {
 
@@ -21,7 +17,7 @@ export class CriterionService {
         private readonly repository: ICriterionRepository,
         //private readonly resultRep: IResultRepository,
         private readonly evalRepo: IEvaluationRepository,
-        private readonly settingService: SettingService,
+        //private readonly settingService: SettingService,
     ) { }
 
     /**
@@ -44,8 +40,8 @@ export class CriterionService {
         return await this.repository.create(dto);
     }
 
-    async get(dto: GetCriteriaDTO) {
-        return await this.repository.find(dto);
+    async get(dto: FilterCriteriaDTO) {
+        return await this.repository.find(dto, { populate: true });
     }
 
     /**
@@ -92,6 +88,7 @@ export class CriterionService {
     }
 
 
+    /*
     async importFromFile(file: Express.Multer.File, evaluationId: string) {
         // 1. Get Dynamic Settings
         const maxSizeMB = await this.settingService.getSettingValue<number>(
@@ -117,41 +114,41 @@ export class CriterionService {
 
         return result;
     }
-
+*/
 
     /**
      * Batch import criteria with embedded options.
      */
     // criterion.service.ts
-
-    async import(dto: ImportCriteriaBatchDTO) {
-        const { evaluation, criteriaData } = dto;
-        // 1️⃣ Business Logic: Check if evaluation exists
-        const evalDoc = await this.evalRepo.findById(evaluation);
-        if (!evalDoc) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
-        if (evalDoc.status !== EvalStatus.draft) throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
-
-
-        // 2️⃣ Business Logic: Validate all data before sending to Repo
-        const dtosToCreate: CreateCriterionDTO[] = criteriaData.map((item, index) => {
-            if (item.options) {
-                this.validateOptionScores(item.options, item.weight);
-            }
-
-            return {
-                evaluation: evaluation,
-                title: item.title,
-                weight: item.weight,
-                formType: item.formType,
-                options: item.options,
-                order: item.order ?? index
-            };
-        });
-
-        // 3️⃣ Abstract Call: Let the repo handle the DB heavy lifting
-        return await this.repository.createMany(dtosToCreate);
-    }
-
+    /*
+        async import(dto: ImportCriteriaBatchDTO) {
+            const { evaluation, criteriaData } = dto;
+            // 1️⃣ Business Logic: Check if evaluation exists
+            const evalDoc = await this.evalRepo.findById(evaluation);
+            if (!evalDoc) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+            if (evalDoc.status !== EvalStatus.draft) throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
+    
+    
+            // 2️⃣ Business Logic: Validate all data before sending to Repo
+            const dtosToCreate: CreateCriterionDTO[] = criteriaData.map((item, index) => {
+                if (item.options) {
+                    this.validateOptionScores(item.options, item.weight);
+                }
+    
+                return {
+                    evaluation: evaluation,
+                    title: item.title,
+                    weight: item.weight,
+                    formType: item.formType,
+                    options: item.options,
+                    order: item.order ?? index
+                };
+            });
+    
+            // 3️⃣ Abstract Call: Let the repo handle the DB heavy lifting
+            return await this.repository.createMany(dtosToCreate);
+        }
+    */
     /**
      * Helper to ensure data integrity
      */

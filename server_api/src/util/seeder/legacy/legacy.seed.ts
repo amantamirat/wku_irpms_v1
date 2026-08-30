@@ -1,7 +1,6 @@
 import fs from 'fs/promises';
 import path from 'path';
 import { Unit } from '../../../common/constants/enums';
-import { SYSTEM } from '../../../common/constants/system.constant';
 import { AppError } from '../../../common/errors/app.error';
 import { ERROR_CODES } from '../../../common/errors/error.codes';
 import { calendarRepo, grantRepo, organizationRepo, projectService, thematicRepo, themeRepo, userService } from '../../../core/container';
@@ -25,6 +24,7 @@ export class LegacySeeder {
 
     private readonly LEGACY_GRANT = "Legacy Grant";
     private readonly LEGACY_THEMATICS = "Legacy Thematics";
+    private readonly RESEARCH_DIRECTORATE = "Research"
 
     constructor(
         private readonly organizationRepo: IOrganizationRepository,
@@ -47,6 +47,8 @@ export class LegacySeeder {
         await this.seedLegacyThemes(projects);
 
         await this.seedUsers();
+
+        await this.seedDirectorates();
 
         const grant = await this.seedLegacyGrant(projects);
         await this.seedProjects(String(grant._id), projects);
@@ -434,6 +436,38 @@ Failed         : ${failed}
             console.log("✅ Departments seeded");
     }
 
+    async seedDirectorates() {
+        const directorates = [
+            this.RESEARCH_DIRECTORATE,
+            "Community Service",
+            "Technology Transfer",
+            "Indigenous Knowledge"
+        ];
+
+        let seeded = false;
+
+        for (const name of directorates) {
+            const exists = await this.organizationRepo.exists({
+                name,
+                type: Unit.directorate
+            });
+
+            if (exists)
+                continue;
+
+            await this.organizationRepo.create({
+                type: Unit.directorate,
+                name
+            });
+
+            seeded = true;
+        }
+
+        if (seeded) {
+            console.log("✅ Directorates seeded");
+        }
+    }
+
     async seedUsers() {
         const filePath = path.join(process.cwd(), 'data/legacy', 'researchers.json');
         const rawData = await fs.readFile(filePath, 'utf-8');
@@ -607,7 +641,7 @@ Failed         : ${failed}
         // Find Research Directorate
         const researchDirectorate =
             await this.organizationRepo.findOne({
-                name: SYSTEM.RESEARCH_DIRECTORATE,
+                name: this.RESEARCH_DIRECTORATE,
                 type: Unit.directorate
             });
 

@@ -10,6 +10,7 @@ import { ProfileRepository } from "../modules/compositions/profile/profile.repos
 import { RequirementRepository } from "../modules/compositions/requirements/requirement.repository";
 import { ConstraintRepository } from "../modules/constraints/constraint.repository";
 import { ConstraintValidationService } from "../modules/constraints/services/constraint-validator.service";
+import { CriterionRepository } from "../modules/evaluations/criteria/criterion.repository";
 import { EvaluationRepository } from "../modules/evaluations/evaluation.repository";
 import { GrantRepository } from "../modules/grants/grant.repository";
 import { VerificationConfigurationRepository } from "../modules/grants/verification-conf/verification-conf.repository";
@@ -82,7 +83,8 @@ export const phaseRepo = new PhaseRepository();
 //call repos
 export const callRepo = new CallRepository();
 export const stageRepo = new StageRepository();
-export const evalRepo = new EvaluationRepository();
+export const evaluationRepo = new EvaluationRepository();
+export const criterionRepo = new CriterionRepository();
 export const applicationRepo = new ApplicationRepository();
 export const reviewerRepo = new ReviewerRepository();
 

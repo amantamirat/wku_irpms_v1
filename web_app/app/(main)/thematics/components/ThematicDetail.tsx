@@ -30,13 +30,7 @@ const ThematicDetail = ({ thematic }: ThematicDetailProps) => {
             header: "Hierarchy Preview", // New Preview Tab
             permission: PERMISSIONS.THEME.READ,
             content: <ThemeHierarchyPreview thematic={thematic} />
-        },
-        {
-            header: "Grants",
-            permission: "grant:read",
-            disabled: true,
-            content: <GrantManager thematic={thematic} />
-        },
+        }
     ], [thematic]);
 
     /**
@@ -50,7 +44,7 @@ const ThematicDetail = ({ thematic }: ThematicDetailProps) => {
         <TabView>
             {allowedTabs.map((tab, index) => (
                 <TabPanel key={index} header={tab.header}
-                    disabled={tab.disabled}
+                    //disabled={tab.disabled}
                 >
                     {tab.content}
                 </TabPanel>
