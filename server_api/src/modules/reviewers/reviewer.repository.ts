@@ -5,7 +5,7 @@ import {
     ReviewerTargetType
 } from "./reviewer.model";
 import { ReviewerStatus } from "./reviewer.state-machine";
-import { FindOptions } from "../../common/dtos/filter.dto";
+import { FilterOptions } from "../../common/dtos/filter.dto";
 import { FilterReviewersDto } from "./reviewer.dto";
 
 
@@ -43,12 +43,12 @@ export interface IReviewerRepository {
 
     findById(
         id: string,
-        options?: FindOptions
+        options?: FilterOptions
     ): Promise<IReviewer | null>;
 
     find(
         filter?: FilterReviewersDto,
-        options?: FindOptions
+        options?: FilterOptions
     ): Promise<IReviewer[]>;
 
     count(
@@ -193,7 +193,7 @@ export class ReviewerRepository
 
     async findById(
         id: string,
-        options?: FindOptions
+        options?: FilterOptions
     ): Promise<IReviewer | null> {
 
         const query =
@@ -220,7 +220,7 @@ export class ReviewerRepository
 
     async find(
         reviewerFilter: FilterReviewersDto = {},
-        options?: FindOptions
+        options?: FilterOptions
     ): Promise<IReviewer[]> {
 
         const filter =

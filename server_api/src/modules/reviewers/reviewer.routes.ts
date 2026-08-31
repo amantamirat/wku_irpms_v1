@@ -26,9 +26,16 @@ const router: Router = Router();
 router.post('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.REVIEWER.CREATE]),
     controller.create);
+
 router.get('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.REVIEWER.READ]),
     controller.get);
+
+router.get(
+    '/me',
+    verifyActiveAccount,
+    controller.getMyEvaluations
+);
 
 router.put('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.REVIEWER.UPDATE]),

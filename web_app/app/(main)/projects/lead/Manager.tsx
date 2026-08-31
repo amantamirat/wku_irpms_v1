@@ -4,10 +4,9 @@ import { User } from "@/app/(main)/users/models/user.model";
 import { createEntityManager } from "@/components/createEntityManager";
 import MyBadge from "@/templates/MyBadge";
 import { useEffect, useMemo, useState } from "react";
-import { ProjectApi } from "../api/project.api";
-import { Project, ProjectStatus } from "../models/project.model";
 import ProjectDetail from "../../projects/components/ProjectDetail";
-import ProjectWizard from "../components/wirzard/ProjectWizard";
+import { ProjectApi } from "../api/project.api";
+import { Project } from "../models/project.model";
 
 
 interface ProjectManagerProps {
@@ -15,7 +14,7 @@ interface ProjectManagerProps {
     enableEditing?: boolean;
 }
 
-const ProjectManager = ({ user, enableEditing }: ProjectManagerProps) => {
+const UserProjectManager = ({ user, enableEditing }: ProjectManagerProps) => {
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -25,7 +24,7 @@ const ProjectManager = ({ user, enableEditing }: ProjectManagerProps) => {
             if (!user) return;
             setLoading(true);
             try {
-                const data = await ProjectApi.getAll({ leadPI: user, populate: true });
+                const data = await ProjectApi.getAll({ leadPI: user});
                 setProjects(Array.isArray(data) ? data : []);
             } catch (error) {
                 console.error("Error fetching projects", error);
@@ -70,14 +69,7 @@ const ProjectManager = ({ user, enableEditing }: ProjectManagerProps) => {
             hideSearch: true,
             //disableEditRow: (row) => row.status !== ProjectStatus.accepted,
             //disableDeleteRow: (row) => row.status !== ProjectStatus.draft,
-            hideDefaultActions: true,
-            createNew: enableEditing ? () => ({
-                leadPI: user,
-                title: "",
-                summary: "",
-                themes: []
-            }) : undefined,
-            SaveDialog: enableEditing ? ProjectWizard : undefined,
+            hideDefaultActions: true,         
             expandable: {
                 template: (project) => {
                     return <ProjectDetail project={project} enableEditing={enableEditing} />;
@@ -93,4 +85,4 @@ const ProjectManager = ({ user, enableEditing }: ProjectManagerProps) => {
     return <Manager />;
 };
 
-export default ProjectManager;
+export default UserProjectManager;

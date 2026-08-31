@@ -9,12 +9,13 @@ import { ProjectApi } from "../api/project.api";
 import { Project } from "../models/project.model";
 import { CALL_PROJECT_TRANSITIONS, PROJECT_STATUS_ORDER, STANDALONE_PROJECT_TRANSITIONS } from "../models/project.state-machine";
 import { etbCurrencyFormatter } from "@/utils/currencyUtil";
+import ProjectWizard from "../components/wirzard/ProjectWizard";
 
 interface ProjectManagerProps {
     grant: Grant;
 }
 
-const ProjectManager = ({ grant }: ProjectManagerProps) => {
+const GrantProjectManager = ({ grant }: ProjectManagerProps) => {
     const [projects, setProjects] = useState<Project[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
@@ -23,7 +24,7 @@ const ProjectManager = ({ grant }: ProjectManagerProps) => {
             if (!grant) return;
             setLoading(true);
             try {
-                const data = await ProjectApi.getAll({ grant: grant, populate: true });
+                const data = await ProjectApi.getAll({ grant: grant });
                 setProjects(Array.isArray(data) ? data : []);
             } catch (error) {
                 console.error("Error fetching grant projects", error);
@@ -96,6 +97,14 @@ const ProjectManager = ({ grant }: ProjectManagerProps) => {
                     )
                 }
             ],
+            createNew: () => ({
+                //leadPI: user,
+                title: "",
+                summary: "",
+                themes: [],
+                grant
+            }),
+            SaveDialog: ProjectWizard,
             permissionPrefix: "project",
             workflow: {
                 statusField: "status",
@@ -110,7 +119,7 @@ const ProjectManager = ({ grant }: ProjectManagerProps) => {
                     <ProjectDetail project={project} updateProject={handleUpdateProject} />
                 )
             },
-            hideDefaultActions: true,
+            //hideDefaultActions: true,
         });
     }, [handleUpdateProject]); // 👈 Removed 'projects' from dependencies!
 
@@ -122,4 +131,4 @@ const ProjectManager = ({ grant }: ProjectManagerProps) => {
     return <Manager items={projects} />;
 };
 
-export default ProjectManager;
+export default GrantProjectManager;

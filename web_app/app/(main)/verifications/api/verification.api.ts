@@ -1,7 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
-import { FilterVerification, sanitizeVerification, Verification } from "../models/verification.model";
 import { TransitionRequestDto } from "@/types/util";
+import { FilterVerification, sanitizeVerification, Verification } from "../models/verification.model";
 
 const ENDPOINT = "/verifications";
 
@@ -16,20 +16,7 @@ export const VerificationApi: EntityApi<
     // Fetch / Query
     // ---------------------------
     async getAll(filter?: FilterVerification) {
-        const params = new URLSearchParams();
-
-        if (filter) {
-            Object.entries(filter).forEach(([key, value]) => {
-                if (value !== undefined && value !== null && value !== '') {
-                    params.append(key, String(value));
-                }
-            });
-        }
-
-        const queryString = params.toString();
-        const url = queryString ? `${ENDPOINT}?${queryString}` : `${ENDPOINT}`;
-
-        return ApiClient.get(url);
+        return ApiClient.get(ENDPOINT, filter);
     },
 
     // ---------------------------

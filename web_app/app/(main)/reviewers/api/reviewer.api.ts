@@ -2,52 +2,40 @@ import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
 import { TransitionRequestDto } from "@/types/util";
 import {
-    GetReviewersOptions,
+    FilterReviewersOptions,
     Reviewer,
     sanitizeReviewer
 } from "../models/reviewer.model";
 
 const end_point = '/project/reviewers';
 
-export const ReviewerApi: EntityApi<Reviewer, GetReviewersOptions | undefined> = {
+export const ReviewerApi: EntityApi<Reviewer, FilterReviewersOptions | undefined>
+    & {
 
-    async getAll(options?: GetReviewersOptions): Promise<Reviewer[]> {
-        const query = new URLSearchParams();
+        me: (options?: FilterReviewersOptions) => Promise<Reviewer[]>;
 
-        if (options) {
-            const sanitized = sanitizeReviewer(options);
-            if (sanitized.reviewer) {
-                query.append("reviewer", sanitized.reviewer as string);
-            }
-            if (sanitized.application) {
-                query.append("application", sanitized.application as string);
-            }
-            if (sanitized.verification) {
-                query.append("verification", sanitized.verification as string);
-            }
-            if (sanitized.targetType) {
-                query.append("targetType", sanitized.targetType as string);
-            }
-            // NEW: Handle Status Array or String
-            if (options.status) {
-                if (Array.isArray(options.status)) {
-                    // Append each status individually for standard URL array handling
-                    options.status.forEach(s => query.append("status", s));
-                } else {
-                    query.append("status", options.status);
-                }
-            }
-            /*
-            if (populate !== undefined) {
-                query.append("populate", String(populate));
-            }*/
-        }
+    }
+    = {
 
-        const url = query.toString()
-            ? `${end_point}?${query.toString()}`
-            : end_point;
+    async getAll(filter?: FilterReviewersOptions): Promise<Reviewer[]> {
 
-        const data = await ApiClient.get(url);
+        /*
+                if (options) {            
+                    // NEW: Handle Status Array or String
+                    if (options.status) {
+                        if (Array.isArray(options.status)) {
+                            options.status.forEach(s => query.append("status", s));
+                        } 
+                    }           
+                }*/
+        const data = await ApiClient.get(end_point, filter);
+        return data as Reviewer[];
+    },
+
+    async me(
+        filter?: Omit<FilterReviewersOptions, "reviewer">
+    ): Promise<Reviewer[]> {
+        const data = await ApiClient.get(`${end_point}/me`, filter);
         return data as Reviewer[];
     },
 

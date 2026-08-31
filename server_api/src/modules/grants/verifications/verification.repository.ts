@@ -4,7 +4,7 @@ import {
     Verification,
     VerificationStatus
 } from "./verification.model";
-import { FindOptions } from "../../../common/dtos/filter.dto";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 
 
 export interface CreateVerificationData {
@@ -32,7 +32,7 @@ export interface IVerificationRepository {
 
     findById(
         id: string,
-        options?: FindOptions
+        options?: FilterOptions
     ): Promise<IVerification | null>;
 
     findOneByAttempt(
@@ -42,7 +42,7 @@ export interface IVerificationRepository {
 
     find(
         filters?: FilterVerification,
-        options?: FindOptions
+        options?: FilterOptions
     ): Promise<IVerification[]>;
 
     count(
@@ -103,7 +103,7 @@ export class VerificationRepository
 
     async findById(
         id: string,
-        options?: FindOptions
+        options?: FilterOptions
     ): Promise<IVerification | null> {
 
         const query =
@@ -148,7 +148,7 @@ export class VerificationRepository
 
     async find(
         filters: FilterVerification = {},
-        options?: FindOptions
+        options?: FilterOptions
     ): Promise<IVerification[]> {
 
         const filter: FilterQuery<IVerification> = {};

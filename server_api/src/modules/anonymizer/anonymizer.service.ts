@@ -54,9 +54,8 @@ export class AnonymizerService {
         try {
 
             const collabs = await this.collaboratorRepo.find({
-                project: String(application.project),
-                populate: true
-            });
+                project: String(application.project)
+            }, { populate: true });
 
             const memberNames = collabs
                 .map(collab => collab.member)

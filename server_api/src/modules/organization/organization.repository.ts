@@ -19,7 +19,7 @@ import {
 } from "./organization.dto";
 
 import { Unit } from "../../common/constants/enums";
-import { FindOptions } from "../../common/dtos/filter.dto";
+import { FilterOptions } from "../../common/dtos/filter.dto";
 
 
 export interface IOrganizationRepository {
@@ -27,12 +27,12 @@ export interface IOrganizationRepository {
 
     findOne(
         filter: FilterOrganizationsDTO,
-        options?: FindOptions
+        options?: FilterOptions
     ): Promise<IOrganization | null>;
 
     find(
         filter: FilterOrganizationsDTO,
-        options?: FindOptions
+        options?: FilterOptions
     ): Promise<IOrganization[]>;
 
     create(data: CreateOrganizationDTO): Promise<any>;
@@ -67,7 +67,7 @@ export class OrganizationRepository implements IOrganizationRepository {
     // ------------------------------------
     async findOne(
         filters: FilterOrganizationsDTO,
-        options?: FindOptions
+        options?: FilterOptions
     ): Promise<IOrganization | null> {
 
         const query = this.buildFilter(filters);
@@ -89,7 +89,7 @@ export class OrganizationRepository implements IOrganizationRepository {
     // ------------------------------------
     async find(
         filters: FilterOrganizationsDTO,
-        options?: FindOptions
+        options?: FilterOptions
     ): Promise<IOrganization[]> {
 
         const query = this.buildFilter(filters);

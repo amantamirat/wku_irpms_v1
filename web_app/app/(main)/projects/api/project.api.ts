@@ -1,33 +1,25 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { GetProjectsOptions, Project, sanitize } from "../models/project.model";
+import { FilterProjects, Project } from "../models/project.model";
 import { TransitionRequestDto } from "@/types/util";
+import { sanitize } from "@/utils/sanitizer";
 
 const end_point = "/projects";
 
-interface IProjectApi extends EntityApi<Project, GetProjectsOptions | undefined> {
+interface IProjectApi extends EntityApi<Project, FilterProjects | undefined> {
     transitionState: (id: string, dto: TransitionRequestDto) => Promise<Project>;
+    me: (filter?: FilterProjects) => Promise<Project[]>;
 }
 
 export const ProjectApi: IProjectApi = {
 
-    async getAll(options?: GetProjectsOptions): Promise<Project[]> {
-        const query = new URLSearchParams();
+    async getAll(filter?: FilterProjects): Promise<Project[]> {
+        const data = await ApiClient.get(end_point, filter);
+        return data as Project[];
+    },
 
-        if (options) {
-            const sanitized = sanitize(options);
-            Object.entries(sanitized).forEach(([key, value]) => {
-                if (value !== undefined && value !== null) {
-                    query.append(key, String(value));
-                }
-            });
-        }
-
-        const url = query.toString()
-            ? `${end_point}?${query.toString()}`
-            : end_point;
-
-        const data = await ApiClient.get(url);
+    async me(filter?: FilterProjects): Promise<Project[]> {
+        const data = await ApiClient.get(`${end_point}/me`, filter);
         return data as Project[];
     },
 
@@ -35,11 +27,7 @@ export const ProjectApi: IProjectApi = {
         id: string,
         populate?: boolean
     ): Promise<Project> {
-        const query = populate !== undefined
-            ? `?populate=${populate}`
-            : '';
-        const url = `${end_point}/${id}${query}`;
-        const data = await ApiClient.get(url);
+        const data = await ApiClient.get(end_point);
         return data as Project;
     },
     async create(project: Partial<Project>): Promise<Project> {

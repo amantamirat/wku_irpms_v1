@@ -1,18 +1,12 @@
 'use client';
 
 import React from 'react';
-import { useAuth } from "@/contexts/auth-context";
-import ReviewerManager from "../../reviewers/user/Manager";
+import MyReviewersManager from "../../reviewers/me/MyReviewersManager";
 import { BreadCrumb } from 'primereact/breadcrumb';
 import { Card } from 'primereact/card';
 
 const MyEvaluationsPage = () => {
-    const { getUser } = useAuth();
-    const user = getUser();
-
-    const breadcrumbItems = [
-        { label: 'My Evaluations' }
-    ];
+    const breadcrumbItems = [{ label: 'My Evaluations' }];
     const home = { icon: 'pi pi-home', url: '/' };
 
     return (
@@ -39,14 +33,7 @@ const MyEvaluationsPage = () => {
 
                 {/* Main Content Card */}
                 <Card className="shadow-1 border-none border-round-xl surface-card">
-                    {user ? (
-                        <ReviewerManager user={user} enableEvaluation />
-                    ) : (
-                        <div className="p-5 text-center text-500">
-                            <i className="pi pi-spin pi-spinner text-2xl mb-2 block text-primary"></i>
-                            Loading evaluation details...
-                        </div>
-                    )}
+                    <MyReviewersManager />
                 </Card>
             </div>
         </div>

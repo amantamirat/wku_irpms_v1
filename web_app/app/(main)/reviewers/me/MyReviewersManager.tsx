@@ -3,35 +3,32 @@
 import { createEntityManager } from "@/components/createEntityManager";
 import MyBadge from "@/templates/MyBadge";
 import { useCallback, useEffect, useMemo, useState } from "react";
-import { User } from "../../users/models/user.model";
 import { ReviewerApi } from "../api/reviewer.api";
 import { Reviewer, ReviewerStatus, ReviewerTargetType } from "../models/reviewer.model";
 import { REVIEWER_STATUS_ORDER, REVIEWER_USER_TRANSITIONS } from "../models/reviewer.state-machine";
 import EvaluationDialog from "../components/EvaluationDialog";
 
-interface ReviewerManagerProps {
-    user: User;
-    enableEvaluation?: boolean;
+interface MyReviewersManagerProps {
+   // enableEvaluation?: boolean;
 }
 
-const ReviewerManager = ({ user, enableEvaluation }: ReviewerManagerProps) => {
-
+const MyReviewersManager = () => {
     const [reviewers, setReviewers] = useState<Reviewer[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
     const [selectedReviewer, setSelectedReviewer] = useState<Reviewer | null>(null);
 
     const fetchReviewers = useCallback(async () => {
-        if (!user) return;
         setLoading(true);
         try {
-            const data = await ReviewerApi.getAll({ reviewer: user });
+            // Uses dedicated me endpoint (no user ID param needed)
+            const data = await ReviewerApi.me();
             setReviewers(Array.isArray(data) ? data : []);
         } catch (error) {
-            console.error("Error fetching reviewers", error);
+            console.error("Error fetching my evaluations", error);
         } finally {
             setLoading(false);
         }
-    }, [user]);
+    }, []);
 
     useEffect(() => {
         fetchReviewers();
@@ -67,7 +64,6 @@ const ReviewerManager = ({ user, enableEvaluation }: ReviewerManagerProps) => {
                     field: "targetType",
                     body: (r: Reviewer) => {
                         const targetType = r.targetType || (r.application ? ReviewerTargetType.APPLICATION : ReviewerTargetType.VERIFICATION);
-
                         let tagLabel = String(targetType);
 
                         if (targetType === ReviewerTargetType.APPLICATION) {
@@ -126,11 +122,11 @@ const ReviewerManager = ({ user, enableEvaluation }: ReviewerManagerProps) => {
 
             <EvaluationDialog
                 reviewer={selectedReviewer}
-                enableEvaluation={enableEvaluation}
+                enableEvaluation={true}
                 onClose={handleCloseDialog}
             />
         </>
     );
 };
 
-export default ReviewerManager;
+export default MyReviewersManager;

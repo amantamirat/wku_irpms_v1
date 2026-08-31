@@ -5,7 +5,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { GrantApi } from '@/app/(main)/grants/api/grant.api';
 import { Grant } from '@/app/(main)/grants/models/grant.model';
 //import ProjectManager from './components/ProjectManager';
-import ProjectManager from './grant/Manager';
+import GrantProjectManager from './grant/Manager';
 
 const Page = () => {
     const [grants, setGrants] = useState<Grant[]>([]);
@@ -72,7 +72,7 @@ const Page = () => {
             {/* MAIN CONTENT */}
             <div className="border-round-xl surface-card shadow-1 p-4 md:p-5">
                 {selectedGrant ? (
-                    <ProjectManager grant={selectedGrant} />
+                    <GrantProjectManager grant={selectedGrant} />
                 ) : (
                     <div className="flex flex-column align-items-center justify-content-center py-8 text-center">
                         <i className="pi pi-file-import text-4xl text-300 mb-3" />

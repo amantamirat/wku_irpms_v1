@@ -6,18 +6,19 @@ import {
     UpdateProjectDTO
 } from "./project.dto";
 import { IProject, Project, ProjectStatus } from "./project.model";
+import { FilterOptions } from "../../common/dtos/filter.dto";
+import { options } from "joi";
 
 export interface IProjectRepository {
-    findById(id: string, populate?: boolean): Promise<IProject | null>;
-    find(filters: FilterProjectsDTO): Promise<Partial<IProject>[]>;
+    findById(id: string,  options?: FilterOptions): Promise<IProject | null>;
+    find(filters: FilterProjectsDTO, options?: FilterOptions): Promise<Partial<IProject>[]>;
     create(dto: CreateProjectDTO): Promise<IProject>;
     update(id: string, data: UpdateProjectDTO["data"]): Promise<IProject | null>;
-    updateStatus(id: string, newStatus: ProjectStatus, session?: ClientSession): Promise<IProject | null>;
-    incrementTotals(projectId: string, delta: { duration: number; budget: number }, session?: ClientSession): Promise<IProject | null>;
+    updateStatus(id: string, newStatus: ProjectStatus): Promise<IProject | null>;
+    incrementTotals(projectId: string, delta: { duration: number; budget: number }): Promise<IProject | null>;
     updateTotalCollabs(
         projectId: string,
-        delta: number,
-        session?: ClientSession
+        delta: number
     ): Promise<IProject | null>;
     updateCurrentApplication(
         id: string,
@@ -44,11 +45,11 @@ export class ProjectRepository implements IProjectRepository {
 
     async findById(
         id: string,
-        populate?: boolean
+         options?: FilterOptions
     ): Promise<IProject | null> {
         let dbQuery = Project.findById(new mongoose.Types.ObjectId(id));
 
-        if (populate) {
+        if (options?.populate) {
             dbQuery = dbQuery
                 .populate("leadPI")
                 .populate("calendar")
@@ -59,7 +60,7 @@ export class ProjectRepository implements IProjectRepository {
         return dbQuery.lean<IProject>().exec();
     }
 
-    async find(filters: FilterProjectsDTO) {
+    async find(filters: FilterProjectsDTO, options?: FilterOptions) {
         const query: Record<string, any> = {};
 
         if (filters.status) {
@@ -84,7 +85,7 @@ export class ProjectRepository implements IProjectRepository {
 
         let dbQuery = Project.find(query);
 
-        if (filters.populate) {
+        if (options?.populate) {
             dbQuery = dbQuery
                 .populate("leadPI")
                 .populate("grant")

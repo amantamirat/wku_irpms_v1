@@ -45,15 +45,15 @@ export default function QuickLinks() {
             permission: PERMISSIONS.COLLABORATOR.READ,
             color: 'bg-purple-100 text-purple-700'
         },
-
-        {
-            href: '/reports/financial',
-            label: 'Grant Tracking',
-            description: 'Monitor budget spend and funding',
-            icon: 'pi pi-money-bill',
-            permission: PERMISSIONS.PERMISSION.READ,
-            color: 'bg-green-100 text-green-700'
-        }
+        /*
+                {
+                    href: '/reports/financial',
+                    label: 'Grant Tracking',
+                    description: 'Monitor budget spend and funding',
+                    icon: 'pi pi-money-bill',
+                    permission: PERMISSIONS.PERMISSION.READ,
+                    color: 'bg-green-100 text-green-700'
+                }*/
     ], []);
 
     const allowedLinks = links.filter(link => hasPermission([link.permission]));

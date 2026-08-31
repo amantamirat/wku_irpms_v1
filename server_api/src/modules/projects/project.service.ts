@@ -24,6 +24,7 @@ import { IPhaseRepository } from "./phase/phase.repository";
 import { PhaseService } from "./phase/phase.service";
 import { ProjectStatus } from "./project.model";
 import { CALL_PROJECT_TRANSITIONS, STANDALONE_PROJECT_TRANSITIONS } from "./project.state-machine";
+import { FilterOptions } from "../../common/dtos/filter.dto";
 
 
 export class ProjectService {
@@ -93,12 +94,24 @@ export class ProjectService {
     }
 
 
-    async getProjects(options: FilterProjectsDTO) {
-        return this.projectRepo.find(options);
+    async getProjects(filter: FilterProjectsDTO, options?: FilterOptions) {
+        return this.projectRepo.find(filter, options);
     }
 
-    async getById(id: string, populate?: boolean) {
-        const proj = await this.projectRepo.findById(id, populate);
+    getMyProjects = async (
+        userId: string,
+        options?: FilterOptions
+    ) => {
+        return this.projectRepo.find(
+            {
+                leadPI: userId
+            },
+            { ...options, populate: true }
+        );
+    };
+
+    async getById(id: string, options?: FilterOptions) {
+        const proj = await this.projectRepo.findById(id, options);
         if (!proj) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         return proj;
     }

@@ -21,6 +21,9 @@ router.get('/', verifyActiveAccount,
     checkPermission([PERMISSIONS.COLLABORATOR.READ]),
     controller.get);
 
+router.get('/me', verifyActiveAccount,
+    controller.getMyCollaborations);
+
 router.put('/:id', verifyActiveAccount,
     checkPermission([PERMISSIONS.COLLABORATOR.UPDATE]),
     controller.update);

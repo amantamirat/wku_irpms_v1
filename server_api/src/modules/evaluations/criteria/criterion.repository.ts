@@ -5,12 +5,12 @@ import {
     FilterCriteriaDTO,
     UpdateCriterionDTO
 } from "./criterion.dto";
-import { FindOptions } from "../../../common/dtos/filter.dto";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 
 export interface ICriterionRepository {
     findById(id: string): Promise<ICriterion | null>;
-    findOne(filters: FilterCriteriaDTO, options?: FindOptions): Promise<ICriterion | null>;
-    find(filters: FilterCriteriaDTO,options?: FindOptions): Promise<ICriterion[]>;
+    findOne(filters: FilterCriteriaDTO, options?: FilterOptions): Promise<ICriterion | null>;
+    find(filters: FilterCriteriaDTO,options?: FilterOptions): Promise<ICriterion[]>;
     create(dto: CreateCriterionDTO): Promise<ICriterion>;
     createMany(dtos: CreateCriterionDTO[]): Promise<ICriterion[]>;
     update(
@@ -63,7 +63,7 @@ export class CriterionRepository implements ICriterionRepository {
     // ==================================================
 
     async findOne(
-        filters: FilterCriteriaDTO, options?: FindOptions
+        filters: FilterCriteriaDTO, options?: FilterOptions
     ): Promise<ICriterion | null> {
 
         const query = this.buildFilter(filters);
@@ -84,7 +84,7 @@ export class CriterionRepository implements ICriterionRepository {
     // ==================================================
 
     async find(
-        filters: FilterCriteriaDTO, options?: FindOptions
+        filters: FilterCriteriaDTO, options?: FilterOptions
     ): Promise<ICriterion[]> {
 
         const query = this.buildFilter(filters);

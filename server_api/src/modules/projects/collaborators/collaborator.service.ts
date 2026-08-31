@@ -5,7 +5,7 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { IProjectRepository } from "../project.repository";
 import {
     CreateCollaboratorDto,
-    GetCollaboratorsOptions,
+    FilterCollaborators,
     UpdateCollaboratorDto
 } from "./collaborator.dto";
 import { ICollaboratorRepository } from "./collaborator.repository";
@@ -19,6 +19,7 @@ import { CollaboratorStatus } from "./collaborator.model";
 //import { CompositionValidator } from "../../compositions/composition.validator";
 import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
 import { ICallRepository } from "../../calls/call.repository";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 
 
 export class CollaboratorService {
@@ -87,10 +88,27 @@ export class CollaboratorService {
         }
     }
 
-    async get(options: GetCollaboratorsOptions) {
+    async get(options: FilterCollaborators) {
         const collaborators = await this.collabRepo.find(options);
         return collaborators;
     }
+
+    getMyCollaborations = async (
+        userId: string,
+        filter?: Partial<FilterCollaborators>,
+        options?: FilterOptions
+    ) => {
+        return this.collabRepo.find(
+            {
+                ...filter,
+                member: userId
+            },
+            {
+                ...options,
+                populate: true
+            }
+        );
+    };
 
 
     async update(dto: UpdateCollaboratorDto) {

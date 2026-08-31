@@ -45,7 +45,7 @@ export class CollaboratorController {
     // -----------------------
     get = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            const { project,  member, status, populate } = req.query;
+            const { project, member, status, populate } = req.query;
             const collaborators = await this.service.get({
                 project: project ? (project as string) : undefined,
                 member: member ? (member as string) : undefined,
@@ -53,6 +53,30 @@ export class CollaboratorController {
                 ...(populate !== undefined && { populate: populate === "true" })
             });
             successResponse(res, 200, 'Collaborators fetched successfully', collaborators);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
+    getMyCollaborations = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ) => {
+        try {
+            if (!req.auth) {
+                throw new Error(ERROR_CODES.UNAUTHORIZED);
+            }
+
+            const collaborations = await this.service.getMyCollaborations(
+                req.auth.userId
+            );
+
+            successResponse(
+                res,
+                200,
+                "My collaborations fetched successfully",
+                collaborations
+            );
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }

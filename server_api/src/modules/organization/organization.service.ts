@@ -1,6 +1,6 @@
 // organization.service.ts
 import { Unit } from "../../common/constants/enums";
-import { FindOptions } from "../../common/dtos/filter.dto";
+import { FilterOptions } from "../../common/dtos/filter.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { IGrantRepository } from "../grants/grant.repository";
@@ -29,7 +29,7 @@ export class OrganizationService {
     // ----------------------------------------------------
     // FIND LIST (filter by type, parent)
     // ----------------------------------------------------
-    async getAll(filters: FilterOrganizationsDTO, options?: FindOptions) {
+    async getAll(filters: FilterOrganizationsDTO, options?: FilterOptions) {
         return this.organizationRepo.find(filters, options);
     }
 

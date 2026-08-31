@@ -74,6 +74,30 @@ export class ReviewerController {
         }
     };
 
+    getMyEvaluations = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ) => {
+        try {
+            if (!req.auth) {
+                throw new Error(ERROR_CODES.UNAUTHORIZED);
+            }
+
+            const evaluations = await this.service.getMyEvaluations(
+                req.auth.userId
+            );
+
+            successResponse(
+                res,
+                200,
+                "My evaluations fetched successfully",
+                evaluations
+            );
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
     // -----------------------
     // UPDATE (weight)
     // -----------------------

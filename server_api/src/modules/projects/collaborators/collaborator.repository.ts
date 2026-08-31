@@ -3,20 +3,20 @@ import mongoose, { ClientSession } from "mongoose";
 import { Collaborator, ICollaborator } from "./collaborator.model";
 import {
     CreateCollaboratorDto,
-    ExistsCollabDTO,
-    GetCollaboratorsOptions,
+    FilterCollaborators,
     UpdateCollaboratorDto,
 } from "./collaborator.dto";
 import { CollaboratorStatus } from "./collaborator.model";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 
 export interface ICollaboratorRepository {
     findById(id: string): Promise<ICollaborator | null>;
-    find(filters: GetCollaboratorsOptions): Promise<ICollaborator[]>;
+    find(filters: FilterCollaborators, option?: FilterOptions): Promise<ICollaborator[]>;
     create(dto: CreateCollaboratorDto, session?: ClientSession): Promise<ICollaborator>;
     createMany(dtos: CreateCollaboratorDto[]): Promise<ICollaborator[]>;
     update(id: string, data: UpdateCollaboratorDto["data"]): Promise<ICollaborator | null>;
     updateStatus(id: string, newStatus: CollaboratorStatus): Promise<ICollaborator | null>;
-    exists(filters: ExistsCollabDTO): Promise<boolean>;
+    exists(filters: FilterCollaborators): Promise<boolean>;
     countByProject(projectId: string, session?: ClientSession): Promise<number>;
     delete(id: string): Promise<ICollaborator | null>;
     deleteByProject(projectId: string): Promise<any>;
@@ -31,7 +31,7 @@ export class CollaboratorRepository implements ICollaboratorRepository {
             .exec();
     }
 
-    async find(filters: GetCollaboratorsOptions) {
+    async find(filters: FilterCollaborators, options?: FilterOptions) {
         const query: any = {};
 
         if (filters.project) {
@@ -48,7 +48,7 @@ export class CollaboratorRepository implements ICollaboratorRepository {
 
         let dbQuery = Collaborator.find(query);
 
-        if (filters.populate) {
+        if (options?.populate) {
             dbQuery = dbQuery.populate([
                 { path: 'member', populate: { path: 'workspace' } },
                 { path: 'project', populate: { path: 'leadPI' } }
@@ -102,11 +102,11 @@ export class CollaboratorRepository implements ICollaboratorRepository {
         ).exec();
     }
 
-    async exists(filters: ExistsCollabDTO): Promise<boolean> {
+    async exists(filters: FilterCollaborators): Promise<boolean> {
         const query: any = {};
-        const { project, member } = filters;
+        const { project, member, status } = filters;
 
-        if (!project && !member) {
+        if (!project && !member && !status) {
             return false;
         }
 
@@ -115,6 +115,10 @@ export class CollaboratorRepository implements ICollaboratorRepository {
         }
         if (member) {
             query.member = new mongoose.Types.ObjectId(member);
+        }
+
+        if (status) {
+            query.status = status;
         }
 
         const result = await Collaborator.exists(query).exec();

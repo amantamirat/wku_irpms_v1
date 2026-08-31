@@ -17,7 +17,8 @@
             "calendar:*",
             "experience:*",
             "position:*",
-            "specialization:*"
+            "specialization:*",
+            "result:*"
         ]
     },
     {

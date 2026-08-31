@@ -1,5 +1,5 @@
 import { DeleteDto } from "../../../common/dtos/delete.dto";
-import { FindOptions } from "../../../common/dtos/filter.dto";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
@@ -251,7 +251,7 @@ export class VerificationService {
 
     async find(
         filters: FilterVerification = {},
-        options?: FindOptions
+        options?: FilterOptions
     ): Promise<IVerification[]> {
 
         return await this.repository.find(

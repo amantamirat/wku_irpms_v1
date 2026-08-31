@@ -1,27 +1,20 @@
 'use client';
 
-import React from 'react';
-import { useAuth } from '@/contexts/auth-context';
 import { BreadCrumb } from 'primereact/breadcrumb';
 import { Card } from 'primereact/card';
-import ProjectManager from '../../projects/lead/Manager';
+import MyProjectsManager from '../../projects/me/MyProjectsManager';
+
+const BREADCRUMB_ITEMS = [{ label: 'My Projects' }];
+const BREADCRUMB_HOME = { icon: 'pi pi-home', url: '/' };
 
 const MyProjectsPage = () => {
-    const { getUser } = useAuth();
-    const appUser = getUser();
-
-    const breadcrumbItems = [
-        { label: 'My Projects' }
-    ];
-    const home = { icon: 'pi pi-home', url: '/' };
-
     return (
         <div className="p-3 md:p-5 surface-50 min-h-screen">
             <div className="max-w-7xl mx-auto">
                 {/* Breadcrumbs */}
                 <BreadCrumb
-                    model={breadcrumbItems}
-                    home={home}
+                    model={BREADCRUMB_ITEMS}
+                    home={BREADCRUMB_HOME}
                     className="bg-transparent border-none p-0 mb-3 text-sm"
                 />
 
@@ -39,14 +32,7 @@ const MyProjectsPage = () => {
 
                 {/* Main Content Card */}
                 <Card className="shadow-1 border-none border-round-xl surface-card">
-                    {appUser ? (
-                        <ProjectManager user={appUser} enableEditing = {true}/>
-                    ) : (
-                        <div className="p-5 text-center text-500">
-                            <i className="pi pi-spin pi-spinner text-2xl mb-2 block text-primary"></i>
-                            Loading project details...
-                        </div>
-                    )}
+                    <MyProjectsManager />
                 </Card>
             </div>
         </div>

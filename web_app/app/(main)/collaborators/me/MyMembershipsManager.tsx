@@ -1,57 +1,56 @@
 'use client';
 
-import { User } from "@/app/(main)/users/models/user.model";
 import { createEntityManager } from "@/components/createEntityManager";
 import MyBadge from "@/templates/MyBadge";
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { CollaboratorApi } from "../api/collaborator.api";
 import { Collaborator } from "../models/collaborator.model";
 import { COLLAB_STATUS_ORDER, COLLAB_TRANSITIONS } from "../models/collaborator.state-machine";
 import ProjectDetail from "../../projects/components/ProjectDetail";
+import EmptyState from "@/components/EmptyState";
 
-
-interface CollaboratorManagerProps {
-    user: User;
-}
-
-const CollaboratorManager = ({ user }: CollaboratorManagerProps) => {
+const MyMembershipsManager = () => {
     const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
+    const fetchCollaborators = useCallback(async () => {
+        setLoading(true);
+        try {
+            // Uses dedicated me endpoint (no user ID param needed)
+            const data = await CollaboratorApi.me();
+            setCollaborators(Array.isArray(data) ? data : []);
+        } catch (error) {
+            console.error("Error fetching my collaborations", error);
+        } finally {
+            setLoading(false);
+        }
+    }, []);
 
     useEffect(() => {
-        const fetchCollaborators = async () => {
-            if (!user) return;
-            setLoading(true);
-            try {
-                const data = await CollaboratorApi.getAll({ member: user }, true);
-                setCollaborators(Array.isArray(data) ? data : []);
-            } catch (error) {
-                console.error("Error fetching collaborators", error);
-            } finally {
-                setLoading(false);
-            }
-        };
-
         fetchCollaborators();
-    }, [user]);
+    }, [fetchCollaborators]);
 
-    // useMemo prevents component re-creation on every render cycle
+
+
     const Manager = useMemo(() => {
         return createEntityManager<Collaborator>({
-            //title: "Evaluations",
             itemName: "Collaborator",
             api: CollaboratorApi,
             columns: [
                 {
                     header: "Project Title",
                     field: "project.title",
-                    body: (r: Collaborator, options: any) => {
-                        const title = typeof r.project === "object" ? r.project.title : "Unknown Project";
-                        return <div className="truncate text-sm font-medium" title={title}
-                            style={{ maxWidth: "350px" }}
-                        >{title}</div>;
-
+                    body: (r: Collaborator) => {
+                        const title = typeof r.project === "object" ? r.project?.title : "Unknown Project";
+                        return (
+                            <div
+                                className="truncate text-sm font-medium"
+                                title={title}
+                                style={{ maxWidth: "350px" }}
+                            >
+                                {title}
+                            </div>
+                        );
                     }
                 },
                 {
@@ -70,11 +69,11 @@ const CollaboratorManager = ({ user }: CollaboratorManagerProps) => {
                         const lead = typeof c.project === "object" ? c.project?.leadPI : null;
                         return (
                             <div>
-                                {(lead as any)?.name ?? "Loading..."}
+                                {(lead as any)?.name ?? "N/A"}
                             </div>
                         );
                     }
-                },                
+                },
                 {
                     header: "Status",
                     field: "status",
@@ -84,28 +83,42 @@ const CollaboratorManager = ({ user }: CollaboratorManagerProps) => {
                     )
                 }
             ],
-            items: collaborators,
+            workflow: {
+                statusField: "status",
+                statusOrder: COLLAB_STATUS_ORDER,
+                transitions: COLLAB_TRANSITIONS
+            },
             permissionPrefix: "collaborator",
             hideSearch: true,
             hideDefaultActions: true,
             expandable: {
                 template: (collaborator) => {
-                    // Extracts the string ID whether project is an object or already a string ID
                     const projectId = typeof collaborator?.project === 'object'
                         ? collaborator.project?._id
                         : collaborator?.project;
+
                     if (!projectId) return <div className="p-3 text-500">No project ID found.</div>;
                     return <ProjectDetail project={projectId} />;
                 }
             }
         });
-    }, [collaborators]);
+    }, []);
 
     if (loading) {
-        return <div className="p-4 text-center">Loading projects...</div>;
+        return <div className="p-4 text-center">Loading memberships...</div>;
     }
 
-    return <Manager />;
+    if (collaborators.length === 0) {
+        return (
+            <EmptyState
+                icon="pi pi-users"
+                title="No project memberships"
+                description="You are not listed as a collaborator on any active projects."
+            />
+        );
+    }
+
+    return <Manager items={collaborators} />;
 };
 
-export default CollaboratorManager;
+export default MyMembershipsManager;

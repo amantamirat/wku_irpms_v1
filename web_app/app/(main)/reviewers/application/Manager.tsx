@@ -59,7 +59,6 @@ const ApplicationReviewerManager = ({ application }: ReviewerManagerProps) => {
                 ? (): Reviewer => ({
                     targetType: ReviewerTargetType.APPLICATION,
                     application: application,
-                    //project: application?.project,
                     weight: 1,
                     status: ReviewerStatus.pending
                 })

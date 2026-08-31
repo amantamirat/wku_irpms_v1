@@ -1,4 +1,5 @@
 // reviewer.service.ts
+import { FilterOptions } from "../../common/dtos/filter.dto";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
@@ -72,6 +73,23 @@ export class ReviewerService {
             throw err;
         }
     }
+
+    getMyEvaluations = async (
+        userId: string,
+        filter?: Partial<FilterReviewersDto>,
+        options?: FilterOptions
+    ) => {
+        return this.repository.find(
+            {
+                ...filter,
+                reviewer: userId
+            },
+            {
+                ...options,
+                populate: true
+            }
+        );
+    };
 
     async getReviewers(filter: FilterReviewersDto) {
         return this.repository.find(filter, { populate: true });

@@ -17,7 +17,7 @@ export type Collaborator = {
     updatedAt?: Date;
 }
 
-export interface GetCollaboratorsOptions {
+export interface FilterCollaboratorsOptions {
     project?: string | Project;
     member?: string | User;
     status?: CollaboratorStatus;

@@ -61,8 +61,8 @@ export class ProjectController {
         grant: grant ? String(grant) : undefined,
         call: call ? String(call) : undefined,
         status: status ? (status as ProjectStatus) : undefined,
-        populate: populate === "true"
-      });
+      }, { populate: true }
+      );
 
       successResponse(res, 200, "Projects fetched successfully", projects);
     } catch (err: any) {
@@ -74,8 +74,32 @@ export class ProjectController {
     try {
       const { id } = req.params;
       const { populate } = req.query;
-      const project = await this.service.getById(id, populate === "true");
+      const project = await this.service.getById(id, { populate: true });
       successResponse(res, 200, 'Project fetched successfully', project);
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  };
+
+  getMyProjects = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    try {
+      if (!req.auth) {
+        throw new Error(ERROR_CODES.UNAUTHORIZED);
+      }
+
+      const projects = await this.service.getMyProjects(
+        req.auth.userId
+      );
+
+      successResponse(
+        res,
+        200,
+        "My projects fetched successfully",
+        projects
+      );
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }

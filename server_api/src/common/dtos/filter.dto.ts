@@ -1,3 +1,3 @@
-export interface FindOptions {
+export interface FilterOptions {
     populate?: boolean;
 }

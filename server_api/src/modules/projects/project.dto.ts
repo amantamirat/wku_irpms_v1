@@ -18,7 +18,7 @@ export interface FilterProjectsDTO {
     leadPI?: string;
     call?: string;
     status?: ProjectStatus;
-    populate?: boolean;
+    // populate?: boolean;
     //options?: Options;
     //calendar?: string;
     //workspace?: string;

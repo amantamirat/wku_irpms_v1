@@ -25,15 +25,11 @@ export interface UpdateCollaboratorDto {
 }
 
 // Options for querying collaborators
-export interface GetCollaboratorsOptions {
+export interface FilterCollaborators {
     project?: string;
     member?: string;
     status?: CollaboratorStatus,
-    populate?: boolean;
 }
 
-export interface ExistsCollabDTO {
-    project?: string;
-    member?: string;
-}
+
 

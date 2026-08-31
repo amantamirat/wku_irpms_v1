@@ -47,13 +47,13 @@ export type Project = {
     //workspace?: string | Organization;
 }
 
-export interface GetProjectsOptions {
+export interface FilterProjects {
     grant?: string | Grant;
     leadPI?: string | User;
     call?: string | Call;
     workspace?: string | Organization;
-    calendar?: string;
-    populate?: boolean;
+    calendar?: string|Calendar;
+    //populate?: boolean;
 }
 
 export const validateProject = (project: Project): { valid: boolean; message?: string } => {
@@ -83,7 +83,7 @@ export const validateApplyProject = (project: Project): { valid: boolean; messag
     return { valid: true };
 };
 
-
+/*
 export const sanitize = (project: Partial<Project>): Partial<Project> => {
     return {
         ...project,
@@ -103,12 +103,6 @@ export const sanitize = (project: Partial<Project>): Partial<Project> => {
             typeof project.call === 'object' && project.call !== null
                 ? (project.call as any)._id
                 : project.call,
-        /*
-                workspace:
-            typeof project.workspace === 'object' && project.workspace !== null
-                ? (project.workspace as any)._id
-                : project.workspace,
-                */
         // --- Fix for Themes Array ---
         themes: project.themes?.map(t => {
             // If the theme is an object, take the _id, otherwise return the string/id as is
@@ -121,5 +115,5 @@ export const sanitize = (project: Partial<Project>): Partial<Project> => {
         phases: project.phases?.map(p => sanitizePhase(p)),
     };
 }
-
+*/
 

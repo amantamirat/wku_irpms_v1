@@ -1,5 +1,6 @@
 import { AuthApi } from "@/app/(full-page)/auth/api/auth.service";
 import { ApiError } from "./ApiError";
+import { extractId } from "@/utils/extractId";
 
 
 export const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -55,20 +56,25 @@ export const ApiClient = {
         if (params) {
             const searchParams = new URLSearchParams();
 
-            Object.entries(params).forEach(([key, value]) => {
-                // Automatically ignore undefined, null, or empty string values
+            Object.entries(params).forEach(([key, rawValue]) => {
+                // 1. Handle dates first
+                if (rawValue instanceof Date) {
+                    searchParams.append(key, rawValue.toISOString());
+                    return;
+                }
+
+                // 2. Extract _id if rawValue is a populated object
+                const value = extractId(rawValue);
+
+                // 3. Omit undefined, null, or empty string values
                 if (value !== undefined && value !== null && value !== "") {
-                    if (value instanceof Date) {
-                        searchParams.append(key, value.toISOString());
-                    } else {
-                        searchParams.append(key, String(value));
-                    }
+                    searchParams.append(key, String(value));
                 }
             });
 
             const queryString = searchParams.toString();
             if (queryString) {
-                // Appends safely whether or not endpoint already contains '?'
+                // Safely appends parameters regardless of existing query strings
                 url += (url.includes("?") ? "&" : "?") + queryString;
             }
         }

@@ -1,35 +1,30 @@
-import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
+import { EntityApi } from "@/api/EntityApi";
+import { TransitionRequestDto } from "@/types/util";
 import {
     Collaborator,
-    CollaboratorStatus,
-    GetCollaboratorsOptions,
+    FilterCollaboratorsOptions,
     sanitizeCollaborator
 } from "../models/collaborator.model";
-import { TransitionRequestDto } from "@/types/util";
 
 const end_point = '/project/collaborators';
 
-export const CollaboratorApi: EntityApi<Collaborator, GetCollaboratorsOptions | undefined> = {
+export const CollaboratorApi: EntityApi<Collaborator, FilterCollaboratorsOptions | undefined>
+    & {
+        me: (options?: FilterCollaboratorsOptions) => Promise<Collaborator[]>;
 
-    async getAll(options?: GetCollaboratorsOptions, populate?: boolean): Promise<Collaborator[]> {
-        const query = new URLSearchParams();
+    } = {
 
-        if (options) {
-            const sanitized = sanitizeCollaborator(options);
-            if (sanitized.project) query.append("project", sanitized.project as string);
-            if (sanitized.member) query.append("member", sanitized.member as string);
-            if (sanitized.status) query.append("status", sanitized.status);
-        }
+    async getAll(filter?: FilterCollaboratorsOptions, populate?: boolean): Promise<Collaborator[]> {
 
-        if (populate !== undefined) {
-            query.append("populate", String(populate));
-        }
-        const url = query.toString()
-            ? `${end_point}?${query.toString()}`
-            : end_point;
+        const data = await ApiClient.get(end_point, filter);
+        return data as Collaborator[];
+    },
 
-        const data = await ApiClient.get(url);
+    async me(
+        filter?: Omit<FilterCollaboratorsOptions, "member">
+    ): Promise<Collaborator[]> {
+        const data = await ApiClient.get(`${end_point}/me`, filter);
         return data as Collaborator[];
     },
 

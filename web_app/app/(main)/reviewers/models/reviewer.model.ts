@@ -31,12 +31,12 @@ export type Reviewer = {
     updatedAt?: Date;
 }
 
-export interface GetReviewersOptions {
+export interface FilterReviewersOptions {
     targetType?: ReviewerTargetType;
     reviewer?: string | User;
     application?: string | Application;
     verification?: string | Verification;
-    status?: ReviewerStatus | ReviewerStatus[];
+    status?: ReviewerStatus;
 }
 
 export const validateReviewer = (reviewer: Reviewer): { valid: boolean; message?: string } => {
@@ -55,7 +55,7 @@ export const validateReviewer = (reviewer: Reviewer): { valid: boolean; message?
     return { valid: true };
 };
 
-export const sanitizeReviewer = (reviewer: Partial<Reviewer | GetReviewersOptions>): Reviewer => {
+export const sanitizeReviewer = (reviewer: Partial<Reviewer | FilterReviewersOptions>): Reviewer => {
     return {
         ...reviewer,
         application:

@@ -17,10 +17,8 @@ import { CollaboratorApi } from "./collaborators/api/collaborator.api";
 import { Collaborator, CollaboratorStatus } from "./collaborators/models/collaborator.model";
 import { ReportDashboard } from "./reports/components/Dashboard";
 
-
 const Dashboard = () => {
-    const { hasPermission, getUser } = useAuth();
-    const appUser = getUser();
+    const { hasPermission } = useAuth();
     const isAdmin = hasPermission([PERMISSIONS.REPORT.OVERVIEW]);
     const isReviewer = hasPermission([PERMISSIONS.REVIEWER.READ]);
     const isResearcher = hasPermission([PERMISSIONS.PROJECT.READ]);
@@ -32,17 +30,15 @@ const Dashboard = () => {
     const [pendingCollabs, setPendingCollabs] = useState<Collaborator[] | undefined>(undefined);
 
     useEffect(() => {
-        if (!appUser) return;
-
         // Fetch Pending Evaluations
-        const fetchEvals = async () => {
+        const fetchPendingEvals = async () => {
             if (!isReviewer) {
                 setLoadingEvals(false);
                 return;
             }
             setLoadingEvals(true);
             try {
-                const data = await ReviewerApi.getAll({ reviewer: appUser, status: ReviewerStatus.pending }, true);
+                const data = await ReviewerApi.me({ status: ReviewerStatus.pending });
                 setPendingReviewees(Array.isArray(data) ? data : []);
             } catch (error) {
                 console.error("Error fetching pending reviewers", error);
@@ -59,7 +55,7 @@ const Dashboard = () => {
             }
             setLoadingCollabs(true);
             try {
-                const data = await CollaboratorApi.getAll({ member: appUser, status: CollaboratorStatus.pending }, true);
+                const data = await CollaboratorApi.me({ status: CollaboratorStatus.pending });
                 setPendingCollabs(Array.isArray(data) ? data : []);
             } catch (error) {
                 console.error("Error fetching pending collaborations", error);
@@ -68,9 +64,9 @@ const Dashboard = () => {
             }
         };
 
-        fetchEvals();
+        fetchPendingEvals();
         fetchCollabs();
-    }, [appUser, isReviewer, isResearcher]);
+    }, [isReviewer, isResearcher]);
 
     return (
         <div className="grid">
@@ -85,7 +81,7 @@ const Dashboard = () => {
             <div className="col-12 lg:col-8">
 
                 {/* 1. Collaboration Invitations */}
-                {isResearcher && appUser && (loadingCollabs || (pendingCollabs && pendingCollabs.length > 0)) && (
+                {isResearcher && (loadingCollabs || (pendingCollabs && pendingCollabs.length > 0)) && (
                     <div className="card border-none shadow-1 p-4 mb-4">
                         {loadingCollabs ? (
                             <div className="flex flex-column align-items-center justify-content-center p-4">
@@ -99,7 +95,7 @@ const Dashboard = () => {
                 )}
 
                 {/* 2. Reviewer Tasks */}
-                {isReviewer && appUser && (loadingEvals || (pendingReviewees && pendingReviewees.length > 0)) && (
+                {isReviewer && (loadingEvals || (pendingReviewees && pendingReviewees.length > 0)) && (
                     <div className="card border-none shadow-1 p-4 mb-4">
                         {loadingEvals ? (
                             <div className="flex flex-column align-items-center justify-content-center p-4">
