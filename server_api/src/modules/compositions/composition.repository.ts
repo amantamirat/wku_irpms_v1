@@ -1,3 +1,4 @@
+import { FilterOptions } from "../../common/dtos/filter.dto";
 import { Composition, IComposition } from "./composition.model";
 
 
@@ -7,8 +8,13 @@ export class CompositionRepository {
     return Composition.create(data);
   }
 
-  async findAll() {
-    return Composition.find().sort({ createdAt: -1 });
+  async findAll(options?: FilterOptions) {
+    let dbQuery = Composition.find();
+    if (options?.populate) {
+      dbQuery.populate("leadProfileRule");
+      dbQuery.populate("leadHistoryRule");
+    }
+    return dbQuery.sort({ createdAt: -1 });
   }
 
   async findById(id: string) {

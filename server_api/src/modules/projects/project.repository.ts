@@ -1,16 +1,15 @@
 // project.repository.ts
 import mongoose, { ClientSession } from "mongoose";
+import { FilterOptions } from "../../common/dtos/filter.dto";
 import {
     CreateProjectDTO,
     FilterProjectsDTO,
     UpdateProjectDTO
 } from "./project.dto";
 import { IProject, Project, ProjectStatus } from "./project.model";
-import { FilterOptions } from "../../common/dtos/filter.dto";
-import { options } from "joi";
 
 export interface IProjectRepository {
-    findById(id: string,  options?: FilterOptions): Promise<IProject | null>;
+    findById(id: string, options?: FilterOptions): Promise<IProject | null>;
     find(filters: FilterProjectsDTO, options?: FilterOptions): Promise<Partial<IProject>[]>;
     create(dto: CreateProjectDTO): Promise<IProject>;
     update(id: string, data: UpdateProjectDTO["data"]): Promise<IProject | null>;
@@ -45,7 +44,7 @@ export class ProjectRepository implements IProjectRepository {
 
     async findById(
         id: string,
-         options?: FilterOptions
+        options?: FilterOptions
     ): Promise<IProject | null> {
         let dbQuery = Project.findById(new mongoose.Types.ObjectId(id));
 
@@ -260,7 +259,10 @@ export class ProjectRepository implements IProjectRepository {
 
     async exists(filters: FilterProjectsDTO): Promise<boolean> {
         const query: any = {};
-        const { leadPI, grant, call, calendar } = filters;
+        const { leadPI, grant, call, calendar, title } = filters;
+        if (title) {
+            query.title = title;
+        }
         if (leadPI) {
             query.leadPI = new mongoose.Types.ObjectId(leadPI);
         }
@@ -270,7 +272,6 @@ export class ProjectRepository implements IProjectRepository {
         if (call) {
             query.call = new mongoose.Types.ObjectId(call);
         }
-
         if (calendar) {
             query.calendar = new mongoose.Types.ObjectId(calendar);
         }

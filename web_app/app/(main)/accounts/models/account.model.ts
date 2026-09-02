@@ -8,7 +8,7 @@ export enum AccountStatus {
 
 export type Account = {
     _id?: string;
-    applicant?: string | User;
+    user?: string | User;
     email?: string;
     password?: string;
     currentPassword?: string;
@@ -29,7 +29,7 @@ export const validateAccount = (user: Account, currentPassword: boolean = false,
     if (!emailRegex.test(user.email)) {
         return { valid: false, message: "Email is not valid." };
     }
-    if (!user.applicant) {
+    if (!user.user) {
         return { valid: false, message: "Applicant is required." };
     }
     if (currentPassword) {
@@ -66,10 +66,10 @@ export const validateAccount = (user: Account, currentPassword: boolean = false,
 export function sanitizeAccount(user: Partial<Account>): Partial<Account> {
     return {
         ...user,
-        applicant:
-            typeof user.applicant === 'object' && user.applicant !== null
-                ? (user.applicant as any)._id
-                : user.applicant,
+        user:
+            typeof user.user === 'object' && user.user !== null
+                ? (user.user as any)._id
+                : user.user,
     };
 }
 

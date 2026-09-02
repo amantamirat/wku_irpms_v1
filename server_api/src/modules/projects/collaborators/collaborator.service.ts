@@ -88,8 +88,8 @@ export class CollaboratorService {
         }
     }
 
-    async get(options: FilterCollaborators) {
-        const collaborators = await this.collabRepo.find(options);
+    async get(filter: FilterCollaborators, options?: FilterOptions) {
+        const collaborators = await this.collabRepo.find(filter, options);
         return collaborators;
     }
 

@@ -910,8 +910,13 @@
   },
   {
     "category": "Application Management",
-    "name": "application:calculateTotalScore",
-    "description": "Calculate and store total score for an application based on approved reviewer evaluations"
+    "name": "application:anonymize",
+    "description": "Anonymize an application document by removing identifying information"
+  },
+  {
+    "category": "Application Management",
+    "name": "application:apply",
+    "description": "Submit an application to a project"
   },
   {
     "category": "Application Management",
@@ -1105,5 +1110,25 @@
     "category": "Verification Management",
     "name": "verification:transition.rejected.submitted",
     "description": "Reopen a rejected verification and move it back to submitted"
+  },
+  {
+    "category": "Verification Configuration Management",
+    "name": "verification-conf:create",
+    "description": "Create verification configurations"
+  },
+  {
+    "category": "Verification Configuration Management",
+    "name": "verification-conf:read",
+    "description": "View verification configurations"
+  },
+  {
+    "category": "Verification Configuration Management",
+    "name": "verification-conf:update",
+    "description": "Update verification configurations"
+  },
+  {
+    "category": "Verification Configuration Management",
+    "name": "verification-conf:delete",
+    "description": "Delete verification configurations"
   }
 ]

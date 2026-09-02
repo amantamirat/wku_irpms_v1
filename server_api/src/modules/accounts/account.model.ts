@@ -10,7 +10,7 @@ export enum AccountStatus {
 export interface IAccount extends Document {
   email: string;
   password: string;
-  applicant: mongoose.Types.ObjectId;
+  user: mongoose.Types.ObjectId;
   resetCode?: String;
   resetCodeExpires?: Date;
   lastLogin?: Date;
@@ -37,7 +37,7 @@ const AccountSchema = new Schema<IAccount>(
       required: true,
       select: false,
     },
-    applicant: {
+    user: {
       type: Schema.Types.ObjectId,
       ref: COLLECTIONS.USER,
       immutable: true,

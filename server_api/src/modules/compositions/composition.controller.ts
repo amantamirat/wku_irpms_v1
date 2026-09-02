@@ -38,13 +38,8 @@ export class CompositionController {
     // ✅ Get Compositions
     get = async (req: Request, res: Response) => {
         try {
-            const { populate } = req.query;
 
-            const options: GetCompositionDTO = {
-                populate: populate === "true"
-            };
-
-            const compositions = await this.service.findAll();
+            const compositions = await this.service.findAll({ populate: true });
 
             successResponse(res, 200, "Compositions fetched successfully", compositions);
         } catch (err: any) {

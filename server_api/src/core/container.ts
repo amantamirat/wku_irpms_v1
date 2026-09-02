@@ -1,5 +1,6 @@
 // container.ts
 import { AccountRepository } from "../modules/accounts/account.repository";
+import { AccountService } from "../modules/accounts/account.service";
 import { AnonymizerService } from "../modules/anonymizer/anonymizer.service";
 import { CalendarRepository } from "../modules/calendar/calendar.repository";
 import { CallRepository } from "../modules/calls/call.repository";
@@ -64,6 +65,7 @@ export const positionRepo = new PositionRepository();
 export const permissionRepo = new PermissionRepository();
 export const roleRepo = new RoleRepository();
 export const accountRepo = new AccountRepository();
+export const accountService = new AccountService(accountRepo, userRepo);
 // calendar repos
 export const calendarRepo = new CalendarRepository();
 //grant repos

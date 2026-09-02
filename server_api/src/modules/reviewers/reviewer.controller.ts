@@ -83,8 +83,9 @@ export class ReviewerController {
                 throw new Error(ERROR_CODES.UNAUTHORIZED);
             }
 
+            const { status } = req.query;
             const evaluations = await this.service.getMyEvaluations(
-                req.auth.userId
+                req.auth.userId, { status: status ? status as ReviewerStatus : undefined }
             );
 
             successResponse(

@@ -75,7 +75,7 @@ const SaveAccount = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
 
             // Short delay for the toast to be seen before closing
             setTimeout(() => {
-                onComplete?.({ ...saved, applicant: localUser.applicant });
+                onComplete?.({ ...saved, user: localUser.user });
                 onHide();
             }, 600);
         } catch (err: any) {
@@ -119,7 +119,7 @@ const SaveAccount = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
                 <div className="field">
                     <label className="font-bold small mb-2 block">Link to Applicant</label>
                     <Dropdown
-                        value={localUser.applicant}
+                        value={localUser.user}
                         options={applicants}
                         optionLabel="name"
                         dataKey="_id"
@@ -129,8 +129,8 @@ const SaveAccount = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
                         filterBy="name"
                         placeholder="Select an applicant profile"
                         disabled={isEdit} // Prevent changing the owner of credentials
-                        onChange={(e) => setLocalUser({ ...localUser, applicant: e.value })}
-                        className={classNames({ 'p-invalid': submitted && !localUser.applicant })}
+                        onChange={(e) => setLocalUser({ ...localUser, user: e.value })}
+                        className={classNames({ 'p-invalid': submitted && !localUser.user })}
                     />
                 </div>
 

@@ -131,7 +131,7 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
                     icon: "pi pi-eye-slash",
                     severity: "warning",
                     tooltip: "Anonymize Document",
-                    permissions: ["application:calculateTotalScore"],
+                    permissions: ["application:anonymize"],
 
                     disabled: (row: Application) =>
                         row.anonymizationStatus !==

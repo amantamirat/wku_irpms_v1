@@ -1,3 +1,4 @@
+import { FilterOptions } from "../../common/dtos/filter.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { UpdateCompositionDTO } from "./composition.dto";
@@ -13,8 +14,8 @@ export class CompositionService {
     return this.repository.create(data);
   }
 
-  async findAll() {
-    return this.repository.findAll();
+  async findAll(options?: FilterOptions) {
+    return this.repository.findAll(options);
   }
 
   async getById(id: string) {

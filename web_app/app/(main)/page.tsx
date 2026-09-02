@@ -20,8 +20,9 @@ import { ReportDashboard } from "./reports/components/Dashboard";
 const Dashboard = () => {
     const { hasPermission } = useAuth();
     const isAdmin = hasPermission([PERMISSIONS.REPORT.OVERVIEW]);
-    const isReviewer = hasPermission([PERMISSIONS.REVIEWER.READ]);
-    const isResearcher = hasPermission([PERMISSIONS.PROJECT.READ]);
+    // const isReviewer = hasPermission([PERMISSIONS.REVIEWER.READ]);
+    //const isResearcher = hasPermission([PERMISSIONS.PROJECT.READ]);
+    const isApplicant = hasPermission("application:apply");
 
     const [loadingEvals, setLoadingEvals] = useState(true);
     const [loadingCollabs, setLoadingCollabs] = useState(true);
@@ -32,10 +33,6 @@ const Dashboard = () => {
     useEffect(() => {
         // Fetch Pending Evaluations
         const fetchPendingEvals = async () => {
-            if (!isReviewer) {
-                setLoadingEvals(false);
-                return;
-            }
             setLoadingEvals(true);
             try {
                 const data = await ReviewerApi.me({ status: ReviewerStatus.pending });
@@ -49,10 +46,6 @@ const Dashboard = () => {
 
         // Fetch Pending Collaborations
         const fetchCollabs = async () => {
-            if (!isResearcher) {
-                setLoadingCollabs(false);
-                return;
-            }
             setLoadingCollabs(true);
             try {
                 const data = await CollaboratorApi.me({ status: CollaboratorStatus.pending });
@@ -66,7 +59,7 @@ const Dashboard = () => {
 
         fetchPendingEvals();
         fetchCollabs();
-    }, [isReviewer, isResearcher]);
+    }, []);
 
     return (
         <div className="grid">
@@ -81,7 +74,7 @@ const Dashboard = () => {
             <div className="col-12 lg:col-8">
 
                 {/* 1. Collaboration Invitations */}
-                {isResearcher && (loadingCollabs || (pendingCollabs && pendingCollabs.length > 0)) && (
+                {(loadingCollabs || (pendingCollabs && pendingCollabs.length > 0)) && (
                     <div className="card border-none shadow-1 p-4 mb-4">
                         {loadingCollabs ? (
                             <div className="flex flex-column align-items-center justify-content-center p-4">
@@ -95,7 +88,7 @@ const Dashboard = () => {
                 )}
 
                 {/* 2. Reviewer Tasks */}
-                {isReviewer && (loadingEvals || (pendingReviewees && pendingReviewees.length > 0)) && (
+                {(loadingEvals || (pendingReviewees && pendingReviewees.length > 0)) && (
                     <div className="card border-none shadow-1 p-4 mb-4">
                         {loadingEvals ? (
                             <div className="flex flex-column align-items-center justify-content-center p-4">
@@ -109,7 +102,7 @@ const Dashboard = () => {
                 )}
 
                 {/* 3. Call Opportunities */}
-                {isResearcher && (
+                {isApplicant && (
                     <div className="card border-none shadow-1 p-4 mb-4">
                         <div className="flex align-items-center justify-content-between mb-4">
                             <h5 className="m-0 text-xl font-bold">Call Opportunities</h5>

@@ -1,5 +1,5 @@
 import mongoose, { FilterQuery } from "mongoose";
-import { CreateAccountDTO, UpdateAccountDTO } from './account.dto';
+import { CreateAccountDTO, FilterAccountDTO, UpdateAccountDTO } from './account.dto';
 import { IAccount, Account } from "./account.model";
 
 
@@ -9,7 +9,7 @@ export interface IAccountRepository {
     findByEmail(email: string): Promise<IAccount | null>;
     findAll(): Promise<Partial<IAccount>[]>;
     update(id: string, data: UpdateAccountDTO["data"]): Promise<IAccount | null>;
-    exists(filter: Partial<IAccount>): Promise<boolean>;
+    exists(filter: FilterAccountDTO): Promise<boolean>;
     delete(id: string): Promise<void>;
 }
 
@@ -17,7 +17,7 @@ export class AccountRepository implements IAccountRepository {
 
     async create(dto: CreateAccountDTO) {
         const data: Partial<IAccount> = {
-            applicant: new mongoose.Types.ObjectId(dto.applicant),
+            user: new mongoose.Types.ObjectId(dto.user),
             password: dto.password,
             email: dto.email,
             status: dto.status,
@@ -43,7 +43,7 @@ export class AccountRepository implements IAccountRepository {
 
     async findAll() {
         const filter: any = {};
-        return Account.find(filter).populate("applicant")
+        return Account.find(filter).populate("user")
             //.populate("roles").populate("organizations")
             .lean<IAccount[]>()
             .exec();
@@ -84,7 +84,7 @@ export class AccountRepository implements IAccountRepository {
 
     }
 
-    async exists(filter: FilterQuery<IAccount>): Promise<boolean> {
+    async exists(filter: FilterAccountDTO): Promise<boolean> {
         const result = await Account.exists(filter);
         return result !== null;
     }

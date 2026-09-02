@@ -36,9 +36,9 @@ export default function ProjectDetail({ project, updateProject, enableEditing }:
             setLoading(true);
             setError(null);
 
-            ProjectApi.getById!(project, true)
-                .then((project: Project) => {
-                    setProjectData(project);
+            ProjectApi.getById!(project)
+                .then((p: Project) => {
+                    setProjectData(p);
                 })
                 .catch((err: any) => {
                     console.error("Failed to load project details:", err);

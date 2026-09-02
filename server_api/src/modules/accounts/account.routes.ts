@@ -1,8 +1,9 @@
 import { Router } from 'express';
 import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../auth/auth.middleware';
 import { AccountController } from './account.controller';
+import { accountService } from '../../core/container';
 
-const controller = new AccountController();
+const controller = new AccountController(accountService);
 const router: Router = Router();
 router.post('/', verifyActiveAccount,
     checkPermission("account:create"),

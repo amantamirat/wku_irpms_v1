@@ -3,7 +3,7 @@ import path from 'path';
 import { Unit } from '../../../common/constants/enums';
 import { AppError } from '../../../common/errors/app.error';
 import { ERROR_CODES } from '../../../common/errors/error.codes';
-import { calendarRepo, grantRepo, organizationRepo, projectService, thematicRepo, themeRepo, userService } from '../../../core/container';
+import { accountService, calendarRepo, grantRepo, organizationRepo, projectService, thematicRepo, themeRepo, userService } from '../../../core/container';
 import { CalendarStatus } from '../../../modules/calendar/calendar.model';
 import { ICalendarRepository } from '../../../modules/calendar/calendar.repository';
 import { FundingSource, GrantStatus } from '../../../modules/grants/grant.model';
@@ -19,12 +19,13 @@ import { ThematicStatus } from '../../../modules/thematics/thematic.state-machin
 import { IThemeRepository } from "../../../modules/thematics/themes/theme.repository";
 import { UserService } from '../../../modules/users/user.service';
 import { ExtractedMember, LegacyProjectDTO } from "./legacy.dto";
+import { AccountService } from '../../../modules/accounts/account.service';
 
 export class LegacySeeder {
 
     private readonly LEGACY_GRANT = "Legacy Grant";
     private readonly LEGACY_THEMATICS = "Legacy Thematics";
-    private readonly RESEARCH_DIRECTORATE = "Research"
+    private readonly RESEARCH_DIRECTORATE = "Research";
 
     constructor(
         private readonly organizationRepo: IOrganizationRepository,
@@ -33,6 +34,7 @@ export class LegacySeeder {
         private readonly themeRepo: IThemeRepository,
         private readonly calendarRepo: ICalendarRepository,
         private readonly userService: UserService,
+        private readonly accountService: AccountService,
         private readonly projectService: ProjectService
     ) { }
 
@@ -68,7 +70,8 @@ export class LegacySeeder {
             raw
                 .replace(/\t/g, " ")
                 .replace(/\s+/g, " ")
-                .trim();
+                .trim()
+                .replace(/^dr\.\s*/i, "");
         // Extract position from parentheses
         const positionMatch =
             clean.match(/\((.*?)\)/);
@@ -254,7 +257,7 @@ export class LegacySeeder {
             grant: grantId,
             calendar: String(calendar._id),
             title: item.Project_Title,
-            summary: `Imported project ${item.Academic_Year}`,
+            //summary: `L project ${item.Academic_Year}`,
             leadPI: pi.member,
             themes: [
                 String(theme._id)
@@ -468,39 +471,94 @@ Failed         : ${failed}
         }
     }
 
+    private buildEmail(name: string): string {
+        const parts = name
+            .trim()
+            .toLowerCase()
+            .replace(/[^a-z0-9\s]+/g, ' ')
+            .split(/\s+/)
+            .filter(Boolean);
+
+        if (parts.length < 2) {
+            throw new AppError(
+                ERROR_CODES.INVALID_USER,
+                `Cannot generate email for ${name}`
+            );
+        }
+
+        return `${parts[0]}.${parts[1]}@wku.edu.et`;
+    }
+
     async seedUsers() {
-        const filePath = path.join(process.cwd(), 'data/legacy', 'researchers.json');
+        const defaultPassword = process.env.SEEDER_DEFAULT_PASSWORD;
+
+        if (!defaultPassword) {
+            console.warn(
+                "⚠️ SEEDER_DEFAULT_PASSWORD is not configured. " +
+                "Users will be seeded, but accounts will not be created."
+            );
+        }
+
+        const filePath = path.join(
+            process.cwd(),
+            'data/legacy',
+            'researchers.json'
+        );
+
         const rawData = await fs.readFile(filePath, 'utf-8');
         const users = JSON.parse(rawData);
+
         let seeded = false;
+
         for (const item of users) {
             const departmentName = item.Department;
 
-            const department = await this.organizationRepo.findOne({ name: departmentName });
+            const department = await this.organizationRepo.findOne({
+                name: departmentName
+            });
+
             if (!department) {
                 console.warn(`Department ${departmentName} does not exist`);
                 continue;
             }
+
             const parsed = this.parseName(item.Name);
 
-            const userExists =
-                await this.userService.findOne({
-                    workspace: String(department._id),
-                    name: parsed.name
-                });
-            if (userExists)
-                continue;
-
-            //use service
-            await this.userService.create({
-                name: parsed.name,
+            const existedUser = await this.userService.findOne({
                 workspace: String(department._id),
-                gender: item.Gender
+                name: parsed.name
             });
 
-            seeded = true;
+            let userDoc = existedUser;
+
+            if (!userDoc) {
+                userDoc = await this.userService.create({
+                    name: parsed.name,
+                    workspace: String(department._id),
+                    gender: item.Gender
+                });
+
+                seeded = true;
+            }
+
+            // Only create account if password is configured
+            if (defaultPassword) {
+                const email = this.buildEmail(parsed.name);
+                const emailExist = await this.accountService.exists({ email });
+                const userExist = await this.accountService.exists({ user: String(userDoc._id) });
+                if (!emailExist && !userExist) {
+                    await this.accountService.create({
+                        user: String(userDoc._id),
+                        email,
+                        password: defaultPassword,
+                    });
+                }
+            }
         }
-        if (seeded) console.log("✅ Users seeded");
+
+        if (seeded) {
+            console.log("✅ Users seeded");
+        }
     }
 
     async seedLegacyThemes(projects: LegacyProjectDTO[]) {
@@ -691,6 +749,7 @@ export function createLegacySeeder() {
         themeRepo,
         calendarRepo,
         userService,
+        accountService,
         projectService
     );
 }

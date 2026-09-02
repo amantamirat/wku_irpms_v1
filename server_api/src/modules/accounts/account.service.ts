@@ -5,7 +5,7 @@ import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { IUserRepository, UserRepository } from "../users/user.repository";
-import { CreateAccountDTO, UpdateAccountDTO } from "./account.dto";
+import { CreateAccountDTO, FilterAccountDTO, UpdateAccountDTO } from "./account.dto";
 import { AccountStatus } from "./account.model";
 import { IAccountRepository, AccountRepository } from "./account.repository";
 
@@ -19,8 +19,8 @@ export const Account_TRANSITIONS: Record<AccountStatus, AccountStatus[]> = {
 export class AccountService {
 
     constructor(
-        private readonly repository: IAccountRepository = new AccountRepository(),
-        private readonly appRepository: IUserRepository = new UserRepository()
+        private readonly accountRepo: IAccountRepository,
+        private readonly userRepo: IUserRepository,
     ) { }
 
     static async prepareHash(password: string): Promise<string> {
@@ -29,28 +29,32 @@ export class AccountService {
     };
 
     async create(dto: CreateAccountDTO) {
-        const { applicant, email, password } = dto;
-        const applicantDoc = await this.appRepository.findById(applicant);
-        if (!applicantDoc) {
+        const { user, email, password } = dto;
+        const userDoc = await this.userRepo.findById(user);
+        if (!userDoc) {
             throw new AppError(ERROR_CODES.USER_NOT_FOUND);
         }
         const hashed = await AccountService.prepareHash(password);
         try {
-            const created = await this.repository.create({
+            const created = await this.accountRepo.create({
                 ...dto, email, password: hashed, status: AccountStatus.pending
             });
-            return { ...created, applicant: applicantDoc };
+            return { ...created, user: userDoc };
         } catch (err: any) {
             // 5. Handle unique index violations
             if (err?.code === 11000) {
-                throw new AppError(ERROR_CODES.USER_ALREADY_EXISTS);
+                throw new AppError(ERROR_CODES.ACCOUNT_ALREADY_EXISTS);
             }
             throw err;
         }
     }
 
+    async exists(filter: FilterAccountDTO) {
+        return await this.accountRepo.exists(filter);
+    }
+
     async getAll() {
-        const users = await this.repository.findAll();
+        const users = await this.accountRepo.findAll();
         return users;
     }
 
@@ -60,7 +64,7 @@ export class AccountService {
             const hashed = await AccountService.prepareHash(data.password);
             data.password = hashed;
         }
-        const updated = await this.repository.update(id, data);
+        const updated = await this.accountRepo.update(id, data);
         if (!updated) throw new Error(ERROR_CODES.UNAUTHORIZED);
         return updated;
     }
@@ -68,7 +72,7 @@ export class AccountService {
     async transitionState(dto: TransitionRequestDto) {
         const { id, current, next } = dto;
 
-        const user = await this.repository.findById(id);
+        const user = await this.accountRepo.findById(id);
         if (!user) {
             throw new AppError(ERROR_CODES.UNAUTHORIZED);
         }
@@ -84,18 +88,18 @@ export class AccountService {
             to,
             Account_TRANSITIONS
         );
-        return await this.repository.update(id, {
+        return await this.accountRepo.update(id, {
             status: to
         });
     }
 
     async delete(dto: DeleteDto) {
         const { id } = dto;
-        const userDoc = await this.repository.findById(id);
+        const userDoc = await this.accountRepo.findById(id);
         if (!userDoc) throw new AppError(ERROR_CODES.UNAUTHORIZED);
         if (userDoc.status === AccountStatus.active) {
             throw new Error(ERROR_CODES.ACCOUNT_IN_USE);
         }
-        return await this.repository.delete(id);
+        return await this.accountRepo.delete(id);
     }
 }

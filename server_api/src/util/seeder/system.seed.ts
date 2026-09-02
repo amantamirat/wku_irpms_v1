@@ -2,10 +2,9 @@ import bcrypt from "bcryptjs";
 import fs from 'fs/promises';
 import path from 'path';
 import { Unit } from '../../common/constants/enums';
-import { accountRepo, organizationRepo, permissionRepo, roleRepo, settingRepo, userRepo } from "../../core/container";
+import { accountRepo, permissionRepo, roleRepo, settingRepo, userRepo } from "../../core/container";
 import { AccountStatus } from '../../modules/accounts/account.model';
 import { IAccountRepository } from "../../modules/accounts/account.repository";
-import { IOrganizationRepository } from "../../modules/organization/organization.repository";
 import { IPermissionRepository } from "../../modules/permissions/permission.repository";
 import { IRoleRepository } from '../../modules/permissions/roles/role.repository';
 import { SettingKey } from '../../modules/settings/setting.model';
@@ -32,7 +31,7 @@ export class SystemSeeder {
         await this.seedRoles();
         // 4. Create the janitor (Admin User)
         await this.seedAdmin();
-        
+
         console.log("✅ System Bootstrap Finished.");
     }
 
@@ -124,7 +123,7 @@ export class SystemSeeder {
 
         for (const pattern of permissionPatterns) {
 
-            // 1️⃣ Full wildcard -> *
+            // 1. Full wildcard
             if (pattern === "*") {
                 allPermissions.forEach(p =>
                     resolvedPermissions.set(p.name, p._id)
@@ -132,11 +131,24 @@ export class SystemSeeder {
                 continue;
             }
 
-            // 2️⃣ Prefix wildcard -> project:* // Now modified to include nested permissions (removes the dot restriction)
+            // 2. Wildcard pattern
             if (pattern.includes("*")) {
-                const prefix = pattern.replace("*", "");
+                const patternParts = pattern.split(":");
 
-                const matched = allPermissions.filter(p => p.name.startsWith(prefix));
+                const matched = allPermissions.filter(permission => {
+                    const permissionParts = permission.name.split(":");
+
+                    // Must have the same number of segments
+                    if (permissionParts.length !== patternParts.length) {
+                        return false;
+                    }
+
+                    return patternParts.every(
+                        (part, index) =>
+                            part === "*" ||
+                            part === permissionParts[index]
+                    );
+                });
 
                 matched.forEach(p =>
                     resolvedPermissions.set(p.name, p._id)
@@ -145,8 +157,11 @@ export class SystemSeeder {
                 continue;
             }
 
-            // 3️⃣ Exact permission
-            const exact = allPermissions.find(p => p.name === pattern);
+            // 3. Exact permission
+            const exact = allPermissions.find(
+                p => p.name === pattern
+            );
+
             if (exact) {
                 resolvedPermissions.set(exact.name, exact._id);
             }
@@ -194,11 +209,11 @@ export class SystemSeeder {
         await this.accountRepo.create({
             email: adminEmail,
             password: hashedPassword,
-            applicant: String(applicant._id),
+            user: String(applicant._id),
             status: AccountStatus.active
         });
         console.log("✅ Initial admin created successfully.");
-    }    
+    }
 }
 
 

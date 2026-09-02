@@ -33,7 +33,7 @@ router.post(
 router.post(
     "/apply",
     verifyActiveAccount,
-    // checkPermission("project:apply"),
+    checkPermission("application:apply"),
     (req, res, next) => {
         // Set the dynamic subfolder for this specific endpoint
         req.headers["x-upload-folder"] = "applications";

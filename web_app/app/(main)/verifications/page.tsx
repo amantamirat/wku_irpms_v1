@@ -7,9 +7,11 @@ import { Button } from 'primereact/button';
 import { VerificationConfiguration } from './verification-conf/models/verification-conf.model';
 import { VerificationConfigurationApi } from './verification-conf/api/verification-conf.api';
 import VerificationManager from './conf/Manager';
+import { useAuth } from '@/contexts/auth-context';
 
 const VerificationPage = () => {
     const router = useRouter();
+    const { hasPermission } = useAuth();
     const [configurations, setConfigurations] = useState<VerificationConfiguration[]>([]);
     const [selectedConfig, setSelectedConfig] = useState<VerificationConfiguration | null>(null);
     const [loadingConfigs, setLoadingConfigs] = useState<boolean>(false);
@@ -49,12 +51,14 @@ const VerificationPage = () => {
                     </span>
                 </div>
 
-                <Button
-                    label="Manage Configurations"
-                    icon="pi pi-cog"
-                    className="p-button-outlined p-button-secondary w-full md:w-auto"
-                    onClick={() => router.push('verifications/verification-conf')} // 👈 Update route path if needed
-                />
+                {hasPermission('verification-conf:read') && (
+                    <Button
+                        label="Manage Configurations"
+                        icon="pi pi-cog"
+                        className="p-button-outlined p-button-secondary w-full md:w-auto"
+                        onClick={() => router.push('verifications/verification-conf')}
+                    />
+                )}
             </div>
 
             {/* CONTROL PANEL */}
@@ -100,12 +104,6 @@ const VerificationPage = () => {
                         <p className="text-500 mt-2 text-sm mb-4">
                             Please select a verification configuration above to view associated submissions.
                         </p>
-                        <Button
-                            label="Go to Configurations"
-                            icon="pi pi-cog"
-                            className="p-button-sm p-button-outlined"
-                            onClick={() => router.push('/verification-conf')}
-                        />
                     </div>
                 )}
             </div>

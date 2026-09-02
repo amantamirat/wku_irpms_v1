@@ -9,11 +9,9 @@ import { AccountService } from './account.service';
 
 
 export class AccountController {
-
-  private service: AccountService;
-
-  constructor(service?: AccountService) {
-    this.service = service || new AccountService();
+  constructor(
+    private readonly service: AccountService,
+  ) {
   }
 
   create = async (req: AuthenticatedRequest, res: Response) => {

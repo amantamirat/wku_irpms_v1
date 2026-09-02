@@ -50,6 +50,12 @@ export class ProjectService {
             if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
             if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
         }
+        if (await this.projectRepo.exists({ title })) {
+            throw new AppError(
+                ERROR_CODES.PROJECT_ALREADY_EXISTS,
+                "A project with this title already exists. Please choose a different title."
+            );
+        }
         const created = await this.projectRepo.create({
             ...dto, status: ProjectStatus.draft,
             createdBy: userId

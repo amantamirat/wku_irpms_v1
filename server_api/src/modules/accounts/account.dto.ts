@@ -2,7 +2,7 @@ import { AccountStatus } from './account.model';
 
 
 export interface CreateAccountDTO {
-    applicant: string;
+    user: string;
     email: string;
     password: string;
     status?: AccountStatus;
@@ -20,6 +20,12 @@ export interface UpdateAccountDTO {
         status: AccountStatus;
     }>;
     userId?: string;
+}
+
+export interface FilterAccountDTO {
+    user?: string;
+    email?: string;
+    status?: AccountStatus;
 }
 
 

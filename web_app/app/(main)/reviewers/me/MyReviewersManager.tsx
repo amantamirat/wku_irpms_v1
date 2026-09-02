@@ -20,7 +20,6 @@ const MyReviewersManager = () => {
     const fetchReviewers = useCallback(async () => {
         setLoading(true);
         try {
-            // Uses dedicated me endpoint (no user ID param needed)
             const data = await ReviewerApi.me();
             setReviewers(Array.isArray(data) ? data : []);
         } catch (error) {

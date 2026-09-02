@@ -12,7 +12,7 @@ export default createEntityManager<Account>({
     api: AccountApi,
     columns: [
         { header: "Email", field: "email" },
-        { header: "Name", field: "applicant.name" },
+        { header: "Name", field: "user.name" },
         { header: "Last Seen", field: "lastLogin" },
         {
             header: "Status",

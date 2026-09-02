@@ -2,7 +2,8 @@ import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
 import { TransitionRequestDto } from "@/types/util";
 import { GetProjectApplicationOptions, Application, sanitizeApplication } from "../models/application.model";
-import { Project, sanitize } from "../../projects/models/project.model";
+import { Project } from "../../projects/models/project.model";
+import { sanitize } from "@/utils/sanitizer";
 
 const end_point = "/project/applications";
 
@@ -18,30 +19,7 @@ export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions
     // Fetch / Query
     // ---------------------------
     async getAll(options, populate) {
-        const query = new URLSearchParams();
-
-        if (options) {
-            const sanitized = sanitizeApplication(options);
-
-            if (options.project) {
-                query.append("project", sanitized.project as string);
-            }
-
-            if (options.stage) {
-                query.append("stage", sanitized.stage as string);
-            }
-
-            if (options.status) {
-                query.append("status", sanitized.status as string);
-            }
-
-            if (populate !== undefined) {
-                query.append("populate", String(populate));
-            }
-        }
-
-        const qs = query.toString();
-        return ApiClient.get(`${end_point}${qs ? `?${qs}` : ""}`);
+        return ApiClient.get(end_point, options);
     },
 
     // ---------------------------
@@ -55,7 +33,7 @@ export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions
     // Create
     // ---------------------------
     async create(application) {
-        const sanitized = sanitizeApplication(application);
+        const sanitized = sanitize(application);
         const formData = new FormData();
         formData.append("project", sanitized.project as string);
         formData.append("stage", sanitized.stage as string);
@@ -70,11 +48,11 @@ export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions
         const sanitized = sanitize(project);
 
         // 1. Separate the file from the rest of the data
-        if (sanitized.file) {
+        if (project.file) {
             // Backend usually expects 'document' or 'file' - 
             // Based on your controller, make sure Multer is configured for this key
-            formData.append("file", sanitized.file);
-            delete sanitized.file;
+            formData.append("file", project.file);
+            delete project.file;
         }
 
         // 2. Wrap the REST of the project data into a single stringified JSON object

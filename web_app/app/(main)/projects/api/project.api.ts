@@ -24,10 +24,9 @@ export const ProjectApi: IProjectApi = {
     },
 
     async getById(
-        id: string,
-        populate?: boolean
+        id: string
     ): Promise<Project> {
-        const data = await ApiClient.get(end_point);
+        const data = await ApiClient.get(`${end_point}/${id}`);
         return data as Project;
     },
     async create(project: Partial<Project>): Promise<Project> {

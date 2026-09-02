@@ -50,7 +50,7 @@ export class AuthService {
         const accountId = String(accountDoc._id);
 
         const userDoc = await this.userRepository.findById(
-            String(accountDoc.applicant),
+            String(accountDoc.user),
             true
         );
 

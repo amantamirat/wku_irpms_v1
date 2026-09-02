@@ -4,6 +4,7 @@ import { useMemo } from "react";
 import { Application } from "../models/application.model";
 import ApplicationReviewerManager from "../../reviewers/application/Manager";
 import ProjectDetail from "../../projects/components/ProjectDetail";
+import { extractId } from "@/utils/extractId";
 
 interface ApplicationDetailProps {
     application: Application;
@@ -14,9 +15,7 @@ const ApplicationDetail = ({ application }: ApplicationDetailProps) => {
     const { hasPermission } = useAuth();
 
     // Safely extract project ID whether application.project is an object or string ID
-    const projectId = typeof application?.project === "object" && application.project !== null
-        ? application.project._id
-        : (application?.project as string);
+    const projectId = extractId(application.project);
 
     /**
      * Define tabs in a scalable configuration array
