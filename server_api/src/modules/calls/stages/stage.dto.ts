@@ -27,14 +27,7 @@ export interface UpdateStageDTO {
     }>;
 }
 
-export interface GetStageDTO {
-    call?: string;
-    evaluation?: string;
-    order?: number;
-    populate?: boolean;
-}
-
-export interface ExistsStageDTO {
+export interface FilterStageDto {
     call?: string;
     evaluation?: string;
     order?: number;

@@ -61,7 +61,7 @@ export class VerificationService {
         // 3. Get verification configuration
         // ----------------------------------------------
         const configuration =
-            await this.verificationConfRepo.findByGrant(
+            await this.verificationConfRepo.findOneByGrant(
                 String(project.grant)
             );
 

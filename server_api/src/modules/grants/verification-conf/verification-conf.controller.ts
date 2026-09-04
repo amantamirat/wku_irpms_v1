@@ -2,12 +2,14 @@ import { Request, Response } from "express";
 import { VerificationConfigurationService } from "./verification-conf.service";
 import {
     CreateVerificationConfigurationDTO,
+    FilterConfigurationDTO,
     UpdateVerificationConfigurationDTO
 } from "./verification-conf.dto";
 import {
     successResponse,
     errorResponse
 } from "../../../common/helpers/response";
+import { VerificationConfigurationStatus } from "./verification-conf.model";
 
 export class VerificationConfigurationController {
 
@@ -45,13 +47,35 @@ export class VerificationConfigurationController {
     };
 
 
-    getAll = async (
+    get = async (
         req: Request,
         res: Response
     ) => {
         try {
+
+            const {
+                deadline,
+                status
+            } = req.query;
+
+            const filters: FilterConfigurationDTO = {
+                deadline: deadline
+                    ? new Date(String(deadline))
+                    : undefined,
+
+                status:
+                    typeof status === "string"
+                        ? status as VerificationConfigurationStatus
+                        : undefined
+            };
+
             const configurations =
-                await this.service.getAll();
+                await this.service.get(
+                    filters,
+                    {
+                        populate: true
+                    }
+                );
 
             successResponse(
                 res,
@@ -61,6 +85,7 @@ export class VerificationConfigurationController {
             );
 
         } catch (err: any) {
+
             errorResponse(
                 res,
                 400,
@@ -70,13 +95,15 @@ export class VerificationConfigurationController {
         }
     };
 
+
+
     getUpcoming = async (
         req: Request,
         res: Response
     ) => {
         try {
             const configurations =
-                await this.service.getUpcoming();
+                await this.service.getUpcoming({ populate: true });
 
             successResponse(
                 res,
@@ -130,8 +157,12 @@ export class VerificationConfigurationController {
         try {
             const { id } = req.params;
 
+            console.log("i am call ed update of conf");
+
             const dto =
                 req.body as UpdateVerificationConfigurationDTO;
+
+            console.log(dto);
 
             const configuration =
                 await this.service.update(

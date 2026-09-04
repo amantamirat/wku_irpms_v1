@@ -2,7 +2,8 @@ import { Schema, Document, model } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 import { Accessibility, Gender } from "../../users/user.model";
 import { AcademicLevel } from "../../../common/constants/enums";
-import { IRange, RangeSchema } from "../composition.model";
+import { IRange } from "../../../common/types/range";
+import { RangeSchema } from "../../../common/schemas/range.schema";
 
 
 export interface IEligibilityProfile extends Document {

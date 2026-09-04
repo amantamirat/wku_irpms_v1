@@ -31,8 +31,7 @@ const router = Router();
 router.post(
     "/",
     verifyActiveAccount,
-    //checkPermission("verification:create"),
-
+    checkPermission("verification:create"),
     (req, res, next) => {
         req.headers["x-upload-folder"] = "verifications";
         next();
@@ -65,7 +64,7 @@ router.get(
 router.get(
     "/",
     verifyActiveAccount,
-    //checkPermission("verification:read"),
+    checkPermission("verification:read"),
     controller.find
 );
 
@@ -73,7 +72,7 @@ router.get(
 router.get(
     "/:id",
     verifyActiveAccount,
-    //checkPermission("verification:read"),
+    checkPermission("verification:read"),
     controller.getById
 );
 

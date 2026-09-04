@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 import { VerificationConfigurationStatus } from "./verification-conf.model";
 
 export interface CreateVerificationConfigurationDTO {
@@ -21,5 +20,12 @@ export interface UpdateVerificationConfigurationDTO {
     maxReviewers?: number;
     maxAttempts?: number;
     minAcceptanceScore?: number;
+    status?: VerificationConfigurationStatus;
+}
+
+
+export interface FilterConfigurationDTO {
+    //grant?: string;
+    deadline?: Date;
     status?: VerificationConfigurationStatus;
 }

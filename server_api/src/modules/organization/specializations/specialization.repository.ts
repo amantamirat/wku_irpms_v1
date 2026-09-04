@@ -1,11 +1,11 @@
 import mongoose from "mongoose";
-import { CreateSpecializationDTO, UpdateSpecializationDTO, GetSpecializationsOptions } from "./specialization.dto";
+import { CreateSpecializationDTO, UpdateSpecializationDTO, FilterSpecializationsDto } from "./specialization.dto";
 import { Specialization, ISpecialization } from "./specialization.model";
 import { AcademicLevel } from "../../../common/constants/enums";
 
 export interface ISpecializationRepository {
     findById(id: string): Promise<ISpecialization | null>;
-    find(filters: GetSpecializationsOptions): Promise<Partial<ISpecialization>[]>;
+    find(filters: FilterSpecializationsDto): Promise<Partial<ISpecialization>[]>;
     create(dto: CreateSpecializationDTO): Promise<ISpecialization>;
     update(id: string, data: UpdateSpecializationDTO["data"]): Promise<ISpecialization | null>;
     delete(id: string): Promise<ISpecialization | null>;
@@ -21,7 +21,7 @@ export class SpecializationRepository implements ISpecializationRepository {
             .exec();
     }
 
-    async find(filters: GetSpecializationsOptions) {
+    async find(filters: FilterSpecializationsDto) {
         const query: any = {};
 
         if (filters.ids?.length) {

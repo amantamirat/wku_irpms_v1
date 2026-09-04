@@ -310,26 +310,6 @@
     "description": "Delete grant entries"
   },
   {
-    "category": "Grant Management",
-    "name": "grant.stage:create",
-    "description": "Create grant stage entries"
-  },
-  {
-    "category": "Grant Management",
-    "name": "grant.stage:read",
-    "description": "Read grant stage entries"
-  },
-  {
-    "category": "Grant Management",
-    "name": "grant.stage:update",
-    "description": "Update grant stage entries"
-  },
-  {
-    "category": "Grant Management",
-    "name": "grant.stage:delete",
-    "description": "Delete grant stage entries"
-  },
-  {
     "category": "Constraint Management",
     "name": "constraint:create",
     "description": "Create constraint entries"

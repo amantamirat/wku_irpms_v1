@@ -2,7 +2,7 @@ import fs from "fs";
 import path from "path";
 import { Request, Response } from "express";
 import { errorResponse, successResponse } from "../../../common/helpers/response";
-import { ApplyProjectDTO, CreateApplicationDTO, GetApplicationDTO } from "./application.dto";
+import { ApplyProjectDTO, CreateApplicationDTO, FilterApplicationDTO } from "./application.dto";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
@@ -116,18 +116,17 @@ export class ApplicationController {
         try {
             const { project, stage, status, populate, skip, limit } = req.query;
 
-            const dto: GetApplicationDTO = {
+            const dto: FilterApplicationDTO = {
                 project: project as string,
                 stage: stage as string,
                 //grantAllocation: grantAllocation as string,
                 //callStage: callStage as string,
                 status: status as any,
-                ...(populate !== undefined && { populate: populate === "true" }),
-                skip: skip ? Number(skip) : undefined,
-                limit: limit ? Number(limit) : undefined,
+                //...(populate !== undefined && { populate: populate === "true" }),
+                //skip: skip ? Number(skip) : undefined,
+                //limit: limit ? Number(limit) : undefined,
             };
-
-            const docs = await this.service.get(dto);
+            const docs = await this.service.get(dto, { populate: true });
             successResponse(res, 200, "Project documents fetched successfully", docs);
 
         } catch (err: any) {

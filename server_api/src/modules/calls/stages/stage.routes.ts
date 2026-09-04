@@ -5,13 +5,12 @@ import { StageService } from './stage.service';
 
 import { callRepo, evaluationRepo, stageRepo } from '../../../core/container';
 
-//const stageRepo = new StageRepository();
-//const callRepo = new CallRepository();
-//const evalRepo = new EvaluationRepository();
+
 const service = new StageService(stageRepo, callRepo, evaluationRepo);
 const controller = new StageController(service);
 const router = Router();
 
+// Create
 router.post(
     '/',
     verifyActiveAccount,
@@ -19,19 +18,23 @@ router.post(
     controller.create
 );
 
+// Get upcoming
+router.get(
+    '/upcoming',
+    verifyActiveAccount,
+    // checkPermission(["call.stage:read"]),
+    controller.getUpcoming
+);
 
-router.get('/next/:id', verifyActiveAccount,
+// Get next stage
+router.get(
+    '/next/:id',
+    verifyActiveAccount,
     checkPermission(["call.stage:read"]),
     controller.getNext
 );
 
-
-router.get('/:id', verifyActiveAccount,
-    checkPermission(["call.stage:read"]),
-    controller.getById
-);
-
-// Get 
+// Get all
 router.get(
     '/',
     verifyActiveAccount,
@@ -39,8 +42,15 @@ router.get(
     controller.get
 );
 
+// Get by ID
+router.get(
+    '/:id',
+    verifyActiveAccount,
+    checkPermission(["call.stage:read"]),
+    controller.getById
+);
 
-// Update 
+// Update
 router.put(
     '/:id',
     verifyActiveAccount,

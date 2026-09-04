@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { StageService } from './stage.service';
-import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from './stage.dto';
+import { CreateStageDTO, FilterStageDto, UpdateStageDTO } from './stage.dto';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
 import { AuthenticatedRequest } from '../../auth/auth.middleware';
 //import { StageCategory } from './grant.stage.model';
@@ -52,15 +52,13 @@ export class StageController {
         try {
             const { call, evaluation, category, order, populate } = req.query;
 
-            const dto: GetStageDTO = {
+            const dto: FilterStageDto = {
                 call: call as string,
                 evaluation: evaluation as string,
                 order: order ? Number(order) : undefined,
-                // category: category ? category as StageCategory : undefined,
-                ...(populate !== undefined && { populate: populate === "true" })
             };
 
-            const stages = await this.service.get(dto);
+            const stages = await this.service.get(dto, { populate: true });
             successResponse(res, 200, 'Stages fetched successfully', stages);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -89,15 +87,30 @@ export class StageController {
         }
     };
 
-    /*
-    getUpcomingVerification = async (req: Request, res: Response) => {
+    getUpcoming = async (
+        req: Request,
+        res: Response
+    ) => {
         try {
-            const verifications = await this.service.getUpcomingVerification();
-            successResponse(res, 200, 'stage fetched', verifications);
+            const stages =
+                await this.service.getUpcoming({ populate: true });
+
+            successResponse(
+                res,
+                200,
+                "Upcoming stages fetched successfully",
+                stages
+            );
+
         } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
+            errorResponse(
+                res,
+                400,
+                err.message,
+                err
+            );
         }
-    }*/
+    };
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {

@@ -238,7 +238,9 @@ const SaveTemplate = (props: EntitySaveDialogProps<Template>) => {
                                 </div>
 
                                 {/* Guidelines for LLM Validation */}
-                                <div className="col-12 field mb-2">
+                                {
+                                    /**
+                                     * <div className="col-12 field mb-2">
                                     <label className="text-xs font-bold block mb-1">
                                         <i className="pi pi-sparkles text-primary mr-1"></i>
                                         Validation Guidelines (AI Prompt)
@@ -249,6 +251,9 @@ const SaveTemplate = (props: EntitySaveDialogProps<Template>) => {
                                         onChange={(e) => updateSection(idx, { guidelines: e.target.value })}
                                     />
                                 </div>
+                                     */
+                                }
+
 
                                 {/* Min / Max Words */}
                                 <div className="col-6 field mb-0">

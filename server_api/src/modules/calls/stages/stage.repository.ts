@@ -1,26 +1,28 @@
 import { Types } from "mongoose";
 import {
     CreateStageDTO,
-    ExistsStageDTO,
-    GetStageDTO,
+    FilterStageDto,
     UpdateStageDTO
 } from "./stage.dto";
 import { IStage, Stage } from "./stage.model";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 
 
 export interface IStageRepository {
     findById(id: string): Promise<IStage | null>;
-    find(filters: GetStageDTO): Promise<IStage[]>;
+    find(filters: FilterStageDto, options?: FilterOptions): Promise<IStage[]>;
     findOne(callId: string, order: number): Promise<IStage | null>;
 
     getFirstStage(callId: string): Promise<IStage | null>;
     getLastStage(callId: string): Promise<IStage | null>;
     getNextStage(callId: string, currentOrder: number): Promise<IStage | null>;
 
+    findUpcoming(options?: FilterOptions): Promise<IStage[]>;
+
     create(dto: CreateStageDTO): Promise<IStage>;
     update(id: string, data: UpdateStageDTO["data"]): Promise<IStage | null>;
     updateMany(filter: any, update: any): Promise<any>;
-    exists(filters: ExistsStageDTO): Promise<boolean>;
+    exists(filters: FilterStageDto): Promise<boolean>;
     delete(id: string): Promise<IStage | null>;
 }
 
@@ -34,7 +36,7 @@ export class StageRepository implements IStageRepository {
     }
 
 
-    async find(filters: GetStageDTO): Promise<IStage[]> {
+    async find(filters: FilterStageDto, options?: FilterOptions): Promise<IStage[]> {
         const query: any = {};
 
         if (filters.call) {
@@ -51,7 +53,7 @@ export class StageRepository implements IStageRepository {
 
         let dbQuery = Stage.find(query).sort({ order: 1 });
 
-        if (filters.populate) {
+        if (options?.populate) {
             dbQuery = dbQuery
                 .populate("call")
                 .populate("evaluation")
@@ -108,6 +110,24 @@ export class StageRepository implements IStageRepository {
             .exec();
     }
 
+    async findUpcoming(options?: FilterOptions): Promise<IStage[]> {
+        let query = Stage
+            .find({
+                deadline: {
+                    $gt: new Date()
+                }
+            })
+            .sort({ deadline: 1 });
+
+        if (options?.populate) {
+            query = query
+                .populate("call")
+            //.populate("template");
+        }
+
+        return query;
+    }
+
 
     async create(dto: CreateStageDTO): Promise<IStage> {
         return Stage.create({
@@ -157,7 +177,7 @@ export class StageRepository implements IStageRepository {
     }
 
 
-    async exists(filters: ExistsStageDTO): Promise<boolean> {
+    async exists(filters: FilterStageDto): Promise<boolean> {
         const query: any = {};
 
         if (filters.call) {

@@ -1,4 +1,5 @@
 import { DeleteDto } from "../../../common/dtos/delete.dto";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
@@ -18,7 +19,7 @@ import { ProjectService } from "../project.service";
 import {
     ApplyProjectDTO,
     CreateApplicationDTO,
-    GetApplicationDTO,
+    FilterApplicationDTO,
     UpdateApplicationDTO
 } from "./application.dto";
 import { ApplicationStatus } from "./application.model";
@@ -346,10 +347,10 @@ export class ApplicationService {
     }
 
     /**
-     * Get project stages
+     * Get project applications
      */
-    async get(dto: GetApplicationDTO) {
-        return await this.repository.find(dto);
+    async get(dto: FilterApplicationDTO, options?: FilterOptions) {
+        return await this.repository.find(dto, options);
     }
 
     /**

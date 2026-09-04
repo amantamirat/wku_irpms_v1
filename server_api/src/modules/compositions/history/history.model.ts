@@ -1,6 +1,8 @@
 import { Schema, Document, model } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
-import { IRange, RangeSchema } from "../composition.model";
+import { RangeSchema } from "../../../common/schemas/range.schema";
+import { IRange } from "../../../common/types/range";
+
 
 
 export interface IHistoryRule extends Document {

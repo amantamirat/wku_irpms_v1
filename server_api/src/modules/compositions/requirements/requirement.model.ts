@@ -1,6 +1,8 @@
 import mongoose, { Schema } from "mongoose";
-import { IRange, RangeSchema } from "../composition.model";
+
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
+import { IRange } from "../../../common/types/range";
+import { RangeSchema } from "../../../common/schemas/range.schema";
 
 export enum AggregationMode {
     COUNT = "COUNT",

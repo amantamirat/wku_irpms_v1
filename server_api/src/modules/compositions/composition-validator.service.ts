@@ -1,11 +1,13 @@
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
+import { IRange, matchRange } from "../../common/types/range";
 import { ExperienceRepository } from "../users/experiences/experience.repository";
 import { IUser } from "../users/user.model";
-import { IComposition, IRange } from "./composition.model";
+import { IComposition } from "./composition.model";
 import { CompositionRepository } from "./composition.repository";
 import { IHistoryRule } from "./history/history.model";
 import { HistoryRepository } from "./history/history.repository";
+import { ProfileValidatorService } from "./profile/profile-validator.service";
 import { IEligibilityProfile } from "./profile/profile.model";
 import { ProfileRepository } from "./profile/profile.repository";
 import { AggregationMode } from "./requirements/requirement.model";
@@ -23,7 +25,8 @@ export class CompositionValidationService {
         private readonly profileRepo: ProfileRepository,
         private readonly historyRepo: HistoryRepository,
         private readonly requirementRepo: RequirementRepository,
-        private readonly exprienceRepo: ExperienceRepository,
+        //private readonly exprienceRepo: ExperienceRepository,
+        private readonly profileValidator: ProfileValidatorService
     ) { }
 
     private async getComposition(id: string): Promise<IComposition> {
@@ -40,7 +43,7 @@ export class CompositionValidationService {
 
             const profile = await this.profileRepo.findById(String(composition.leadProfileRule));
 
-            if (profile && !this.matchProfile(profile, lead)) {
+            if (profile && !this.profileValidator.matches(profile, lead)) {
                 errors.push("Lead does not satisfy the required profile.");
             }
         }
@@ -91,7 +94,7 @@ export class CompositionValidationService {
                         ? qualifyingCount / members.length
                         : 0;
 
-            if (!this.matchRange(requirement.threshold, value)) {
+            if (!matchRange(requirement.threshold, value)) {
 
                 const currentValue =
                     requirement.mode === AggregationMode.RATIO
@@ -108,64 +111,13 @@ export class CompositionValidationService {
 
     private async matchesRequirement(member: IUser, profile?: IEligibilityProfile,
         history?: IHistoryRule): Promise<boolean> {
-        return (!profile || await this.matchProfile(profile, member)) &&
+        return (!profile || await this.profileValidator.matches(profile, member)) &&
             (!history || this.matchHistory(history, member));
     }
 
-    private async matchProfile(profile: IEligibilityProfile, user: IUser): Promise<boolean> {
-        if (profile.gender && user.gender !== profile.gender)
-            return false;
 
-        if (profile.age) {
-            if (!user.birthDate) return false;
-            const age = this.calculateAge(user.birthDate);
-            if (!this.matchRange(profile.age, age)) return false;
-        }
 
-        if (profile.experienceYears) {
-            const userExperiences = await this.exprienceRepo.find({ user: String(user._id) });
-            const calculatedExpYears = this.calculateTotalExperienceYears(userExperiences);
-            if (!this.matchRange(profile.experienceYears, calculatedExpYears)) return false;
-        }
 
-        // academic levels
-
-        // accessibility
-
-        return true;
-    }
-
-    private calculateAge(birthDate: Date | string): number {
-        const birth = new Date(birthDate);
-        const today = new Date();
-        let age = today.getFullYear() - birth.getFullYear();
-        const monthDiff = today.getMonth() - birth.getMonth();
-        if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birth.getDate())) {
-            age--;
-        }
-        return age;
-    }
-
-    private calculateTotalExperienceYears(experiences: any[]): number {
-        if (!experiences || experiences.length === 0) return 0;
-
-        let totalMs = 0;
-        const now = new Date();
-
-        for (const exp of experiences) {
-            if (!exp.startDate) continue;
-
-            const start = new Date(exp.startDate);
-            const end = (exp.isCurrent || !exp.endDate) ? now : new Date(exp.endDate);
-
-            if (end > start) {
-                totalMs += (end.getTime() - start.getTime());
-            }
-        }
-
-        const msPerYear = 1000 * 60 * 60 * 24 * 365.25;
-        return totalMs / msPerYear;
-    }
 
 
     private matchHistory(rule: IHistoryRule, user: IUser): boolean {
@@ -192,13 +144,5 @@ export class CompositionValidationService {
         return true;
     }
 
-    private matchRange(range: IRange, value: number): boolean {
-        if (range.min !== undefined && value < range.min)
-            return false;
 
-        if (range.max !== undefined && value > range.max)
-            return false;
-
-        return true;
-    }
 }

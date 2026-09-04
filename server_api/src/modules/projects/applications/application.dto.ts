@@ -2,15 +2,7 @@
 import { CreateProjectDTO } from "../project.dto";
 import { AnonymizationStatus, ApplicationStatus } from "./application.model";
 
-export interface GetApplicationDTO {
-    project?: string;
-    stage?: string;
-    call?: string;
-    status?: ApplicationStatus;
-    populate?: boolean;
-    skip?: number;
-    limit?: number;
-}
+
 
 export interface CreateApplicationDTO {
     project: string;
@@ -32,6 +24,15 @@ export interface UpdateApplicationDTO {
 export interface UpdateApplicationStatusDTO {
     documents: string[];
     status: ApplicationStatus;
+}
+
+export interface FilterApplicationDTO {
+    project?: string;
+    stage?: string;
+    call?: string;
+    status?: ApplicationStatus;
+    //populate?: boolean;
+    
 }
 
 export interface ExistsApplicationDTO {

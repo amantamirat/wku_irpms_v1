@@ -55,39 +55,17 @@ const AppMenu = () => {
 
         {
             label: 'Calls',
-            permission: [
-                'call:create',
-                'project:create'
-            ],
             items: [
                 {
                     label: 'Calls',
                     icon: 'pi pi-fw pi-megaphone',
                     to: '/calls',
                     permission: 'call:create'
-                },
-                {
-                    label: 'Evaluations',
-                    icon: 'pi pi-chart-bar',
-                    to: '/evaluations',
-                    permission: 'evaluation:create'
-                },
-                {
-                    label: 'Templates',
-                    icon: 'pi pi-file-pdf',
-                    to: '/templates',
-                    permission: 'template:create'
                 }
             ]
         },
-
         {
             label: 'Grants',
-            permission: [
-                'calendar:create',
-                'grant:create',
-                'thematic:create'
-            ],
             items: [
                 {
                     label: 'Calendars',
@@ -100,24 +78,53 @@ const AppMenu = () => {
                     icon: 'pi pi-bitcoin',
                     to: '/grants',
                     permission: 'grant:create'
+                }
+            ]
+        },
+        {
+            label: 'Resources',
+            items: [
+                {
+                    label: 'Evaluations',
+                    icon: 'pi pi-chart-bar',
+                    to: '/evaluations',
+                    permission: 'evaluation:create'
                 },
                 {
                     label: 'Thematics',
                     icon: 'pi pi-fw pi-tags',
                     to: '/thematics',
                     permission: 'thematic:create'
+                },
+                {
+                    label: 'Templates',
+                    icon: 'pi pi-file-pdf',
+                    to: '/templates',
+                    permission: 'template:create'
+                }
+            ]
+        },
+
+        {
+            label: 'Rules',
+            items: [
+                {
+                    label: 'Constraints',
+                    icon: 'pi pi-fw pi-sliders-h',
+                    to: '/constraints',
+                    permission: 'constraint:create'
+                },
+                {
+                    label: 'Compositions',
+                    icon: 'pi pi-fw pi-user-edit',
+                    to: '/compositions',
+                    permission: 'composition:create'
                 }
             ]
         },
 
         {
             label: 'User Profiles',
-            permission: [
-                'user:create',
-                'publication:create',
-                'experience:create',
-                'enrollment:create'
-            ],
             items: [
                 {
                     label: 'Users',
@@ -148,10 +155,6 @@ const AppMenu = () => {
 
         {
             label: 'Administration',
-            permission: [
-                'account:create',
-                'role:create'
-            ],
             items: [
                 {
                     label: 'Accounts',
@@ -212,18 +215,6 @@ const AppMenu = () => {
         {
             label: 'Miscellaneous',
             items: [
-                {
-                    label: 'Constraints',
-                    icon: 'pi pi-fw pi-sliders-h',
-                    to: '/constraints',
-                    permission: 'constraint:create'
-                },
-                {
-                    label: 'Compositions',
-                    icon: 'pi pi-fw pi-user-edit',
-                    to: '/compositions',
-                    permission: 'composition:create'
-                },
                 {
                     label: 'Specializations',
                     icon: 'pi pi-fw pi-filter-fill',

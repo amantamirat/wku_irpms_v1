@@ -3,10 +3,12 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { IEvaluationRepository } from "../../evaluations/evaluation.repository";
 import { EvalStatus } from "../../evaluations/evaluation.state-machine";
 import { ICallRepository } from "../call.repository";
-import { CreateStageDTO, GetStageDTO, UpdateStageDTO } from "./stage.dto";
+import { CreateStageDTO, FilterStageDto, UpdateStageDTO } from "./stage.dto";
 //import { StageCategory } from "./grant.stage.model";
 import { CallStatus } from "../call.model";
 import { IStageRepository } from "./stage.repository";
+import { IStage } from "./stage.model";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 
 export class StageService {
 
@@ -109,17 +111,13 @@ export class StageService {
     /**
      * Get all stages or by call
      */
-    async get(dto: GetStageDTO) {
-        return await this.repository.find(dto);
+    async get(dto: FilterStageDto, options?: FilterOptions) {
+        return await this.repository.find(dto, options);
     }
 
-
-    /**
-     * Get all stages or by call
-     * async getUpcomingVerification() {
-        return await this.repository.findUpcomingVerifications();
+    async getUpcoming(options?:FilterOptions): Promise<IStage[]> {
+        return this.repository.findUpcoming(options);
     }
-     */
 
 
     async getById(id: string) {

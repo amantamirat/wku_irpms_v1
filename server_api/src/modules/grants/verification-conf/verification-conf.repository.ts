@@ -1,6 +1,15 @@
+import { FilterOptions } from "../../../common/dtos/filter.dto";
+import {
+    CreateVerificationConfigurationDTO,
+    UpdateVerificationConfigurationDTO,
+    FilterConfigurationDTO
+} from "./verification-conf.dto";
 
-import { CreateVerificationConfigurationDTO, UpdateVerificationConfigurationDTO } from "./verification-conf.dto";
-import { IVerificationConfiguration, VerificationConfiguration } from "./verification-conf.model";
+import {
+    IVerificationConfiguration,
+    VerificationConfiguration
+} from "./verification-conf.model";
+
 
 export interface IVerificationConfigurationRepository {
 
@@ -9,19 +18,30 @@ export interface IVerificationConfigurationRepository {
     ): Promise<IVerificationConfiguration>;
 
     findById(
-        id: string
+        id: string,
+        options?: FilterOptions
     ): Promise<IVerificationConfiguration | null>;
 
+    findOneByGrant(grantId: string): Promise<IVerificationConfiguration | null>;
 
-    findByGrant(
-        grantId: string
-    ): Promise<IVerificationConfiguration | null>;
+    find(
+        filter: FilterConfigurationDTO,
+        options?: FilterOptions
+    ): Promise<IVerificationConfiguration[]>;
 
-    findAll(): Promise<IVerificationConfiguration[]>;
-    findUpcoming(): Promise<IVerificationConfiguration[]>
+    /*
+    findAll(
+        options?: FilterOptions
+    ): Promise<IVerificationConfiguration[]>;*/
+
+    findUpcoming(
+        options?: FilterOptions
+    ): Promise<IVerificationConfiguration[]>;
+
     update(
         id: string,
-        data: UpdateVerificationConfigurationDTO
+        data: UpdateVerificationConfigurationDTO,
+        options?: FilterOptions
     ): Promise<IVerificationConfiguration | null>;
 
     delete(
@@ -33,6 +53,9 @@ export interface IVerificationConfigurationRepository {
 export class VerificationConfigurationRepository
     implements IVerificationConfigurationRepository {
 
+    /**
+     * Create verification configuration
+     */
     async create(
         data: CreateVerificationConfigurationDTO
     ): Promise<IVerificationConfiguration> {
@@ -50,63 +73,119 @@ export class VerificationConfigurationRepository
         });
     }
 
+
+    /**
+     * Find verification configuration by ID
+     */
     async findById(
-        id: string
+        id: string,
+        options?: FilterOptions
     ): Promise<IVerificationConfiguration | null> {
 
-        return VerificationConfiguration
-            .findById(id)
-            .populate("grant")
-        //.populate("template");
+        let query = VerificationConfiguration.findById(id);
+
+        if (options?.populate) {
+            query = query
+                .populate("grant")
+                .populate("template");
+        }
+
+        return query;
     }
 
 
-    async findByGrant(
-        grantId: string
-    ): Promise<IVerificationConfiguration | null> {
+    async findOneByGrant(grantId: string, options?: FilterOptions): Promise<IVerificationConfiguration | null> {
 
-        return VerificationConfiguration
-            .findOne({
-                grant: grantId
-            })
-        //.populate("grant")
-        //.populate("template");
+        let query = VerificationConfiguration.findOne({ grant: grantId });
+
+        if (options?.populate) {
+            query = query
+                //.populate("grant")
+                .populate("template");
+        }
+        return query;
     }
 
 
-    async findAll(): Promise<IVerificationConfiguration[]> {
+    /**
+     * Find verification configurations using filters
+     */
+    async find(
+        filter: FilterConfigurationDTO,
+        options?: FilterOptions
+    ): Promise<IVerificationConfiguration[]> {
 
-        return VerificationConfiguration
-            .find()
-            .populate("grant")
-            .populate("template")
+        const query: Record<string, unknown> = {};
+
+        if (filter.deadline) {
+            query.deadline = filter.deadline;
+        }
+
+        if (filter.status) {
+            query.status = filter.status;
+        }
+
+        let mongooseQuery = VerificationConfiguration
+            .find(query)
             .sort({ createdAt: -1 });
+
+        if (options?.populate) {
+            mongooseQuery = mongooseQuery
+                .populate({
+                    path: "grant",
+                    populate: {
+                        path: "organization"
+                    }
+                })
+                .populate("template");
+        }
+
+        return mongooseQuery;
     }
 
-    async findUpcoming(): Promise<IVerificationConfiguration[]> {
 
-        return VerificationConfiguration
+
+
+
+    /**
+     * Find upcoming verification configurations
+     */
+    async findUpcoming(
+        options?: FilterOptions
+    ): Promise<IVerificationConfiguration[]> {
+
+        let query = VerificationConfiguration
             .find({
                 deadline: {
                     $gt: new Date()
                 }
             })
-            .populate({
-                path: "grant",
-                populate: {
-                    path: "organization"
-                }
-            })
-            //.populate("template")
             .sort({ deadline: 1 });
+
+        if (options?.populate) {
+            query = query
+                .populate({
+                    path: "grant",
+                    populate: {
+                        path: "organization"
+                    }
+                })
+            //.populate("template");
+        }
+        return query;
     }
 
+
+    /**
+     * Update verification configuration
+     */
     async update(
         id: string,
-        data: UpdateVerificationConfigurationDTO
+        data: UpdateVerificationConfigurationDTO,
+        options?: FilterOptions
     ): Promise<IVerificationConfiguration | null> {
 
-        return VerificationConfiguration.findByIdAndUpdate(
+        let query = VerificationConfiguration.findByIdAndUpdate(
             id,
             {
                 $set: data
@@ -115,11 +194,21 @@ export class VerificationConfigurationRepository
                 new: true,
                 runValidators: true
             }
-        )
-            .populate("grant")
-            .populate("template");
+        );
+
+        if (options?.populate) {
+            query = query
+                .populate("grant")
+                .populate("template");
+        }
+
+        return query;
     }
 
+
+    /**
+     * Delete verification configuration
+     */
     async delete(
         id: string
     ): Promise<IVerificationConfiguration | null> {

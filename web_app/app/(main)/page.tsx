@@ -7,7 +7,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
 
 import CallOpportunityGrid from "./dashboard/CallOpportunityGrid";
 import QuickLinks from "./dashboard/QuickLinks";
-import UpcomingVerifications from "./dashboard/UpcomingVerifications";
+import VerificationWindow from "./dashboard/VerificationWindow";
 import PendingEvalsManager from "./dashboard/pending-evals/Manager";
 import PendingCollabManager from "./dashboard/pending-collabs/Manager";
 
@@ -16,13 +16,14 @@ import { Reviewer, ReviewerStatus } from "./reviewers/models/reviewer.model";
 import { CollaboratorApi } from "./collaborators/api/collaborator.api";
 import { Collaborator, CollaboratorStatus } from "./collaborators/models/collaborator.model";
 import { ReportDashboard } from "./reports/components/Dashboard";
+import UpcomingDeadlines from "./dashboard/UpcomingDeadlines";
 
 const Dashboard = () => {
     const { hasPermission } = useAuth();
     const isAdmin = hasPermission([PERMISSIONS.REPORT.OVERVIEW]);
-    // const isReviewer = hasPermission([PERMISSIONS.REVIEWER.READ]);
-    //const isResearcher = hasPermission([PERMISSIONS.PROJECT.READ]);
-    const isApplicant = hasPermission("application:apply");
+
+    const canApply = hasPermission("application:apply");
+    const canCreateVerification = hasPermission("verification:create");
 
     const [loadingEvals, setLoadingEvals] = useState(true);
     const [loadingCollabs, setLoadingCollabs] = useState(true);
@@ -102,7 +103,7 @@ const Dashboard = () => {
                 )}
 
                 {/* 3. Call Opportunities */}
-                {isApplicant && (
+                {canApply && (
                     <div className="card border-none shadow-1 p-4 mb-4">
                         <div className="flex align-items-center justify-content-between mb-4">
                             <h5 className="m-0 text-xl font-bold">Call Opportunities</h5>
@@ -112,12 +113,19 @@ const Dashboard = () => {
                 )}
             </div>
 
-            {/* 🟠 RIGHT COLUMN: Utilities */}
+            {/* 🟠 RIGHT COLUMN: Utilities & Widgets */}
             <div className="col-12 lg:col-4">
                 <div className="card border-none shadow-1 p-4 mb-4">
-                    <h5 className="m-0 text-xl font-bold mb-3">Upcoming Verifications</h5>
-                    <UpcomingVerifications />
+                    <h5 className="m-0 text-xl font-bold mb-3">Upcoming Deadlines</h5>
+                    <UpcomingDeadlines />
                 </div>
+                {/* Verification Window placed here for Applicants */}
+                {canCreateVerification && (
+                    <div className="card border-none shadow-1 p-4 mb-4">
+                        <h5 className="m-0 text-xl font-bold mb-3">Verification Deadlines</h5>
+                        <VerificationWindow />
+                    </div>
+                )}
             </div>
 
             <div className="col-12">

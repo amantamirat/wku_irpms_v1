@@ -22,6 +22,12 @@ export type VerificationConfiguration = {
     updatedAt?: Date;
 };
 
+export interface FilterConfigurationDTO {
+    //grant?: string | Grant;
+    deadline?: Date;
+    status?: VerificationConfigurationStatus;
+}
+
 export const validateVerificationConfiguration = (
     config: Partial<VerificationConfiguration>
 ): { valid: boolean; message?: string } => {
@@ -83,6 +89,7 @@ export const validateVerificationConfiguration = (
     return { valid: true };
 };
 
+/*
 export function sanitizeVerificationConfiguration(
     config: Partial<VerificationConfiguration>
 ): Partial<VerificationConfiguration> {
@@ -105,7 +112,7 @@ export function sanitizeVerificationConfiguration(
         maxAttempts: config.maxAttempts !== undefined ? Number(config.maxAttempts) : undefined,
         deadline: config.deadline ? new Date(config.deadline) : undefined,
     };
-}
+}*/
 
 export const createEmptyVerificationConfiguration = (): VerificationConfiguration => ({
     grant: "",

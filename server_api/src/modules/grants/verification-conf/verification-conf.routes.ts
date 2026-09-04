@@ -27,7 +27,7 @@ router.get(
     '/',
     verifyActiveAccount,
     checkPermission("verification-conf:read"),
-    verificationConfController.getAll
+    verificationConfController.get
 );
 
 router.get(

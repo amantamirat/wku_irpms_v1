@@ -18,7 +18,7 @@ export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions
     // ---------------------------
     // Fetch / Query
     // ---------------------------
-    async getAll(options, populate) {
+    async getAll(options) {
         return ApiClient.get(end_point, options);
     },
 

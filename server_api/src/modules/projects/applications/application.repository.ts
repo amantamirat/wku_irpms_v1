@@ -5,7 +5,7 @@ import {
     CreateApplicationDTO,
     ExistsApplicationDTO,
     FindByIdOptions,
-    GetApplicationDTO,
+    FilterApplicationDTO,
     UpdateApplicationDTO
 } from "./application.dto";
 import {
@@ -13,6 +13,7 @@ import {
     IApplication,
     Application
 } from "./application.model";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 
 export interface IApplicationRepository {
 
@@ -22,7 +23,7 @@ export interface IApplicationRepository {
     ): Promise<IApplication | null>;
 
     find(
-        filters: GetApplicationDTO
+        filters: FilterApplicationDTO, options?: FilterOptions
     ): Promise<IApplication[]>;
 
     /*
@@ -94,30 +95,30 @@ export class ApplicationRepository
 
 
     async find(
-        options: GetApplicationDTO
+        filter: FilterApplicationDTO, options?: FilterOptions
     ): Promise<IApplication[]> {
 
         const query: any = {};
 
         // Direct filters
-        if (options.project) {
+        if (filter.project) {
             query.project =
-                new mongoose.Types.ObjectId(options.project);
+                new mongoose.Types.ObjectId(filter.project);
         }
 
-        if (options.stage) {
+        if (filter.stage) {
             query.stage =
-                new mongoose.Types.ObjectId(options.stage);
+                new mongoose.Types.ObjectId(filter.stage);
         }
 
-        if (options.status) {
-            query.status = options.status;
+        if (filter.status) {
+            query.status = filter.status;
         }
 
         const dbQuery = Application.find(query);
 
         // Populate
-        if (options.populate) {
+        if (options?.populate) {
             dbQuery
                 .populate("project")
                 .populate("stage");

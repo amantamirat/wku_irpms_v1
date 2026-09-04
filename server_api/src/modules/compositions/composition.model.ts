@@ -1,24 +1,12 @@
 import mongoose, { Document, Schema } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
 
-export interface IRange {
-  min: number;
-  max: number;
-}
-export const RangeSchema = new Schema<IRange>(
-  {
-    min: { type: Number, default: 0 },
-    max: { type: Number, default: Infinity },
-  },
-  { _id: false } // prevents extra _id for subdocument
-);
-
 export interface IComposition extends Document {
   name: string;
   description?: string;
   leadProfileRule?: mongoose.Types.ObjectId;//profile
   leadHistoryRule?: mongoose.Types.ObjectId;//history
-  memberRequirements?: mongoose.Types.ObjectId[];
+  memberRequirements?: mongoose.Types.ObjectId[];//requirement
   createdAt?: Date;
   updatedAt?: Date;
 }

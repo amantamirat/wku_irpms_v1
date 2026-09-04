@@ -1,7 +1,9 @@
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import {
     CreateVerificationConfigurationDTO,
+    FilterConfigurationDTO,
     UpdateVerificationConfigurationDTO
 } from "./verification-conf.dto";
 import {
@@ -24,7 +26,7 @@ export class VerificationConfigurationService {
 
         // One configuration per grant
         const existing =
-            await this.repository.findByGrant(dto.grant);
+            await this.repository.findOneByGrant(dto.grant);
 
         if (existing) {
             throw new AppError(
@@ -75,12 +77,12 @@ export class VerificationConfigurationService {
         return configuration;
     }*/
 
-    async getAll(): Promise<IVerificationConfiguration[]> {
-        return this.repository.findAll();
+    async get(filter: FilterConfigurationDTO, options: FilterOptions): Promise<IVerificationConfiguration[]> {
+        return this.repository.find(filter, options);
     }
 
-    async getUpcoming(): Promise<IVerificationConfiguration[]> {
-        return this.repository.findUpcoming();
+    async getUpcoming(options?:FilterOptions): Promise<IVerificationConfiguration[]> {
+        return this.repository.findUpcoming(options);
     }
 
     async update(

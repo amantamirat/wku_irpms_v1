@@ -8,6 +8,7 @@ const end_point = "/call/stages";
 export const StageApi: EntityApi<Stage, GetStagesDTO | undefined>
     & {
         getNext: (stageId: string) => Promise<Stage | null>;
+        getUpcoming: () => Promise<Stage[]>;
     }
     = {
 
@@ -15,34 +16,7 @@ export const StageApi: EntityApi<Stage, GetStagesDTO | undefined>
     // Fetch / Query
     // ---------------------------
     async getAll(options) {
-        const query = new URLSearchParams();
-
-        if (options) {
-            const sanitized = sanitizeCallStage(options);
-
-            if (options.call) {
-                query.append("call", sanitized.call as string);
-            }
-
-            if (options.name) {
-                query.append("grantStage", sanitized.name as string);
-            }
-
-            if (sanitized.order !== undefined) {
-                query.append("order", String(sanitized.order));
-            }
-
-            if (options.status) {
-                query.append("status", sanitized.status as string);
-            }
-
-            if (options.populate !== undefined) {
-                query.append("populate", String(options.populate));
-            }
-        }
-
-        const qs = query.toString();
-        return ApiClient.get(`${end_point}${qs ? `?${qs}` : ""}`);
+        return ApiClient.get(end_point, options);
     },
 
     // ---------------------------
@@ -66,6 +40,10 @@ export const StageApi: EntityApi<Stage, GetStagesDTO | undefined>
             }
             throw err;
         }
+    },
+
+    async getUpcoming(): Promise<Stage[]> {
+        return ApiClient.get(`${end_point}/upcoming`);
     },
 
     /*
