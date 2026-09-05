@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { criterionRepo, evaluationRepo } from "../../../core/container";
 import { upload } from "../../../util/multer";
-import { checkPermission, verifyActiveAccount } from "../../auth/auth.middleware";
+import { verifyActiveAccount } from "../../auth/auth.middleware";
+import { checkPermission } from '../../../core/container';
 import { CriterionController } from "./criterion.controller";
 import { CriterionService } from "./criterion.service";
 

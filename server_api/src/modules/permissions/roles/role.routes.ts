@@ -3,7 +3,8 @@ import { RoleController } from './role.controller';
 
 import { PERMISSIONS } from '../../../common/constants/permissions';
 import { roleRepo } from '../../../core/container';
-import { checkPermission, verifyActiveAccount } from '../../auth/auth.middleware';
+import { verifyActiveAccount } from '../../auth/auth.middleware';
+import { checkPermission } from '../../../core/container';
 import { RoleService } from './role.service';
 
 const service = new RoleService(roleRepo);

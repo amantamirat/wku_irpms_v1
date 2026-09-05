@@ -10,16 +10,14 @@ import {
 } from "./collaborator.dto";
 import { ICollaboratorRepository } from "./collaborator.repository";
 
-import { ClientSession } from "mongoose";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { NotificationService } from "../../notifications/notification.service";
 import { ProjectStatus } from "../project.model";
 import { CollaboratorStatus } from "./collaborator.model";
-//import { CompositionValidator } from "../../compositions/composition.validator";
-import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
-import { ICallRepository } from "../../calls/call.repository";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
+import { ICallRepository } from "../../calls/call.repository";
+import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
 
 
 export class CollaboratorService {
@@ -189,7 +187,11 @@ export class CollaboratorService {
 }
 
 
-export const COLLAB_TRANSITIONS: Record<CollaboratorStatus, CollaboratorStatus[]> = {
-    [CollaboratorStatus.pending]: [CollaboratorStatus.verified],
-    [CollaboratorStatus.verified]: [CollaboratorStatus.pending]
+export const COLLAB_TRANSITIONS: Record<
+    CollaboratorStatus,
+    CollaboratorStatus[]
+> = {
+    [CollaboratorStatus.pending]: [CollaboratorStatus.verified, CollaboratorStatus.declined],
+    [CollaboratorStatus.verified]: [],
+    [CollaboratorStatus.declined]: [CollaboratorStatus.pending]
 };

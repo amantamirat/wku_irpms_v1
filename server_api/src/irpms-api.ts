@@ -1,63 +1,61 @@
-import express, { Application } from 'express';
-import mongoose from 'mongoose';
+import path from 'path';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import express, { Application } from 'express';
 import http from 'http'; // 1. Import the native http module
-import organizationRoutes from './modules/organization/organization.routes';
+import mongoose from 'mongoose';
 
-import userRoutes from './modules/users/user.routes';
+import organizationRoutes from './modules/organization/organization.routes';
+import specializationRoutes from './modules/organization/specializations/specialization.routes';
 import positionRoutes from './modules/positions/position.routes';
 import enrollmentRoutes from './modules/users/enrollments/enrollment.routes';
 import experienceRoutes from './modules/users/experiences/experience.routes';
 import publicationRoutes from './modules/users/publications/publication.routes';
-import specializationRoutes from './modules/organization/specializations/specialization.routes';
+import userRoutes from './modules/users/user.routes';
 
-import thematicRoutes from './modules/thematics/thematic.routes';
-import themeRoutes from './modules/thematics/themes/theme.routes'
-import evaluationRoutes from './modules/evaluations/evaluation.routes';
 import criterionRoutes from './modules/evaluations/criteria/criterion.routes';
+import evaluationRoutes from './modules/evaluations/evaluation.routes';
 import templateRoutes from './modules/templates/template.routes';
+import thematicRoutes from './modules/thematics/thematic.routes';
+import themeRoutes from './modules/thematics/themes/theme.routes';
 
 import grantRoutes from './modules/grants/grant.routes';
 import verificationConfRoutes from './modules/grants/verification-conf/verification-conf.routes';
 import verificationRoutes from './modules/grants/verifications/verification.routes';
 
 
-import constraintRoutes from './modules/constraints/constraint.routes';
 import compositionRoutes from './modules/compositions/composition.routes';
+import constraintRoutes from './modules/constraints/constraint.routes';
 
-import profileRoutes from './modules/compositions/profile/profile.routes';
 import historyRoutes from './modules/compositions/history/history.routes';
+import profileRoutes from './modules/compositions/profile/profile.routes';
 import requirementRoutes from './modules/compositions/requirements/requirement.routes';
 
 import calendarRoutes from './modules/calendar/calendar.routes';
 import callRoutes from './modules/calls/call.routes';
 import callStageRoutes from './modules/calls/stages/stage.routes';
 
-import projectRoutes from './modules/projects/project.routes';
 import collaboratorRoutes from './modules/projects/collaborators/collaborator.routes';
-//import assignmentRoutes from './modules/projects/collaborators/assignment/assignment.routes';
-import phaseRoutes from './modules/projects/phase/phase.routes';
+import projectRoutes from './modules/projects/project.routes';
+
 import phaseDocRoutes from './modules/projects/phase/documents/phase.doc.routes';
+import phaseRoutes from './modules/projects/phase/phase.routes';
 
 import applicationRoutes from './modules/projects/applications/application.routes';
-import reviewerRoutes from './modules/reviewers/reviewer.routes';
 import resultRoutes from './modules/reviewers/results/result.routes';
+import reviewerRoutes from './modules/reviewers/reviewer.routes';
 
 import accountRoutes from './modules/accounts/account.routes';
 import reportRoutes from './modules/reports/report.routes';
 
-import settingRoutes from './modules/settings/setting.routes';
-import permissionRoutes from './modules/permissions/permission.routes';
-import roleRoutes from './modules/permissions/roles/role.routes';
 import authRoutes from './modules/auth/auth.routes';
 import notificationRoutes from './modules/notifications/notification.routes';
+import permissionRoutes from './modules/permissions/permission.routes';
+import roleRoutes from './modules/permissions/roles/role.routes';
+import settingRoutes from './modules/settings/setting.routes';
 
-import path from 'path';
-import { SystemSeeder } from './util/seeder/system.seed';
+
 import { SocketService } from './modules/notifications/socket.service';
-import { LegacySeeder } from './util/seeder/legacy/legacy.seed';
-import { calendarRepo, grantRepo, organizationRepo, projectService, themeRepo, userRepo, userService } from './core/container';
 
 dotenv.config();
 const app: Application = express();

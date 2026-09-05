@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../../common/constants/permissions';
 import { phaseService } from '../../../core/container';
-import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../../auth/auth.middleware';
+import { verifyActiveAccount } from '../../auth/auth.middleware';
+import { checkTransitionPermission } from '../../../core/container';
+import { checkPermission } from '../../../core/container';
 import { PhaseController } from './phase.controller';
 
 const controller = new PhaseController(phaseService);

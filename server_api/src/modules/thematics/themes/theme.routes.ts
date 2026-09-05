@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../../common/constants/permissions';
-import { verifyActiveAccount, checkPermission } from '../../auth/auth.middleware';
+import { verifyActiveAccount } from '../../auth/auth.middleware';
+import { checkPermission } from '../../../core/container';
 import { ThemeController } from './theme.controller';
 import { ThemeService } from './theme.service';
 import { ThemeRepository } from './theme.repository';

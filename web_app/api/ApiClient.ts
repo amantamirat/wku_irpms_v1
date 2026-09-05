@@ -13,37 +13,50 @@ const getAuthToken = (): string | null => {
 };
 
 const handleError = async (response: Response) => {
-    if (!response.ok) {
+    if (response.ok) {
+        return response;
+    }
 
-        let errorMessage = `Request failed with status ${response.status}`;
+    const errorMessage =
+        `Request failed with status ${response.status}`;
 
-        try {
-            const errorData = await response.json();
+    let errorData: any = null;
 
-            throw new ApiError(
-                errorData.message || errorMessage,
-                {
-                    code: errorData.code,
-                    details: errorData.details,
-                    status: response.status
-                }
-            );
+    try {
+        errorData = await response.json();
+    } catch {
+        // Response body is not JSON
+    }
 
-        } catch (error) {
-            // If it is already ApiError, preserve it
-            if (error instanceof ApiError) {
-                throw error;
-            }
-            const text = await response.text();
-            throw new ApiError(
-                text || errorMessage,
-                {
-                    status: response.status
-                }
-            );
+    const apiError = new ApiError(
+        errorData?.message || errorMessage,
+        {
+            code: errorData?.code,
+            details: errorData?.details,
+            status: response.status
+        }
+    );
+
+    // Authentication token is missing, expired, or invalid
+    if (
+        response.status === 401 &&
+        [
+            "TOKEN_MISSING",
+            "TOKEN_EXPIRED",
+            "TOKEN_INVALID"
+        ].includes(errorData?.code)
+    ) {
+        console.log(
+            `[ApiClient] Authentication failed: ${errorData.code}`
+        );
+
+        if (typeof window !== "undefined") {
+            AuthApi.logout();
+            window.location.href = "/auth/login";
         }
     }
-    return response;
+
+    throw apiError;
 };
 
 export const ApiClient = {

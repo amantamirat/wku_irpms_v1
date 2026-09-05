@@ -1,7 +1,8 @@
 import { Router } from 'express';
 import { SpecializationController } from './specialization.controller';
 import { PERMISSIONS } from '../../../common/constants/permissions';
-import { verifyActiveAccount, checkPermission } from '../../auth/auth.middleware';
+import { verifyActiveAccount } from '../../auth/auth.middleware';
+import { checkPermission } from '../../../core/container';
 
 
 const controller = new SpecializationController();

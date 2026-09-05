@@ -1,5 +1,6 @@
 import { Router } from 'express';
-import { checkPermission, verifyActiveAccount } from '../../auth/auth.middleware';
+import { verifyActiveAccount } from '../../auth/auth.middleware';
+import { checkPermission } from '../../../core/container';
 import { StageController } from './stage.controller';
 import { StageService } from './stage.service';
 

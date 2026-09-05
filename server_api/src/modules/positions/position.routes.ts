@@ -1,6 +1,7 @@
 import { Router } from "express";
 import { PositionController } from "./position.controller";
-import { verifyActiveAccount, checkPermission } from "../auth/auth.middleware";
+import { verifyActiveAccount } from "../auth/auth.middleware";
+import { checkPermission } from '../../core/container';
 import { PERMISSIONS } from "../../common/constants/permissions";
 import { PositionService } from "./position.service";
 import { exprienceRepo, positionRepo } from "../../core/container";

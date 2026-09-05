@@ -5,7 +5,6 @@ import {
     UpdateProjectDTO,
 } from "./project.dto";
 import { IProjectRepository } from "./project.repository";
-
 import { DeleteDto } from "../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
@@ -203,15 +202,11 @@ export class ProjectService {
             if (!phases.every(p => p.status === PhaseStatus.approved))
                 throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_APPROVED);
 
+            /*
             const collabs = await this.collabRepo.find({ project: id });
             if (!collabs.every(c => c.status === CollaboratorStatus.verified))
-                throw new AppError(ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED);
+                throw new AppError(ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED);*/
 
-            //  await this.grantRepo.consumeBudget(String(projectDoc.grant), projectDoc.totalBudget ?? 0);
-        }
-
-        if (from === ProjectStatus.granted && to === ProjectStatus.approved) {
-            //   await this.grantRepo.reverseConsumedBudget(String(projectDoc.grant), projectDoc.totalBudget ?? 0);
         }
 
         return await this.projectRepo.updateStatus(id, to);

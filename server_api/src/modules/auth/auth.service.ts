@@ -6,14 +6,12 @@ import { ERROR_CODES } from "../../common/errors/error.codes";
 import { CacheService } from "../../util/cache.service";
 import { MailService } from "../mail/mail.service";
 import { SettingKey } from "../settings/setting.model";
-import { SettingRepository } from "../settings/setting.repository";
 import { SettingService } from "../settings/setting.service";
-import { UserRepository } from "../users/user.repository";
-
+import { IUserRepository } from "../users/user.repository";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { VerfyAccountDto } from '../accounts/account.dto';
 import { AccountStatus, IAccount } from '../accounts/account.model';
-import { AccountRepository, IAccountRepository } from "../accounts/account.repository";
+import { IAccountRepository } from "../accounts/account.repository";
 import { Account_TRANSITIONS } from "../accounts/account.service";
 import { ChangePasswordDTO, LoginDto } from "./auth.dto";
 
@@ -21,10 +19,10 @@ import { ChangePasswordDTO, LoginDto } from "./auth.dto";
 export class AuthService {
 
     constructor(
-        private readonly repository: IAccountRepository = new AccountRepository(),
-        private readonly userRepository = new UserRepository(),
+        private readonly repository: IAccountRepository,
+        private readonly userRepository: IUserRepository,
+        private readonly settingService: SettingService,
         private readonly mailService = new MailService(),
-        private readonly settingService: SettingService = new SettingService(new SettingRepository())
     ) { }
 
     async login(dto: LoginDto) {
@@ -50,8 +48,7 @@ export class AuthService {
         const accountId = String(accountDoc._id);
 
         const userDoc = await this.userRepository.findById(
-            String(accountDoc.user),
-            true
+            String(accountDoc.user), { populate: true }
         );
 
         if (!userDoc)
@@ -87,12 +84,6 @@ export class AuthService {
             status: accountDoc.status
         };
 
-        const safeUser = {
-            _id: userDoc._id,
-            name: userDoc.name,
-            email: accountDoc.email,
-        };
-
         const expiryHours =
             await this.settingService.getSettingValue(
                 SettingKey.TOKEN_EXPIRY_HOURS,
@@ -116,8 +107,6 @@ export class AuthService {
                 _id: userDoc._id,
                 name: userDoc.name,
                 email: accountDoc.email,
-                //birthDate: userDoc.birthDate,
-                //gender: userDoc.gender,
             },
             permissions,
             ownerships,
@@ -154,7 +143,6 @@ export class AuthService {
     }
 
     async sendCode(email: string): Promise<void> {
-
         const userDoc = await this.repository.findByEmail(email);
 
         if (!userDoc || userDoc.status === AccountStatus.suspended) {
@@ -209,12 +197,9 @@ export class AuthService {
     }
 
     async activateUser(data: VerfyAccountDto) {
-
         const { email, resetCode } = data;
-
         const userDoc = await this.repository.findByEmail(email);
-
-        if (!userDoc) throw new Error("User not found");
+        if (!userDoc) throw new AppError(ERROR_CODES.USER_NOT_FOUND);
 
         if (!userDoc.resetCode || userDoc.resetCode !== resetCode) {
             throw new Error("Invalid verification code.");
@@ -235,5 +220,7 @@ export class AuthService {
             resetCodeExpires: new Date()
         });
     }
+
+
 
 }

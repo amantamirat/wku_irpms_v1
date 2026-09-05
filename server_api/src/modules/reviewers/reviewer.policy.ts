@@ -72,6 +72,19 @@ export class ReviewerPolicy {
             throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         }
 
+        // All collaborators must be verified before assigning reviewers
+        const hasUnverified =
+            await this.collaboratorRepo.existsUnverified(
+                String(applicationDoc.project)
+            );
+
+        if (hasUnverified) {
+            throw new AppError(
+                ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED,
+                'All project collaborators must be verified before reviewers can be assigned.'
+            );
+        }
+
         const stageDoc = await this.stageRepo.findById(String(applicationDoc.stage));
         if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 

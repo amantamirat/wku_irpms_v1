@@ -1,7 +1,8 @@
 import { Router } from "express";
 import { PERMISSIONS } from "../../../common/constants/permissions";
 import { historyRepo } from "../../../core/container";
-import { checkPermission, verifyActiveAccount } from "../../auth/auth.middleware";
+import { verifyActiveAccount } from "../../auth/auth.middleware";
+import { checkPermission } from '../../../core/container';
 import { HistoryController } from "./history.controller";
 import { HistoryService } from "./history.service";
 

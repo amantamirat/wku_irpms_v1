@@ -1,48 +1,57 @@
 import { IOwnership } from "../modules/users/user.model";
-
 import NodeCache from "node-cache";
 
 export const cache = new NodeCache({
-    stdTTL: 2 * 3600, // cache for 2 hour
-    checkperiod: 3 * 60, // clear expired items every 3 minutes
+    stdTTL: 2 * 3600,
+    checkperiod: 3 * 60,
 });
-
 
 export class CacheService {
 
-    static getUserOrganizations(userId: string): string[] {
-        const key = `user:${userId}:organizations`;
-        return cache.get<string[]>(key) ?? [];
+    private static userOrganizationsKey(userId: string): string {
+        return `user:${userId}:organizations`;
     }
 
-    static setUserOrganizations(userId: string, orgIds: string[]) {
-        const key = `user:${userId}:organizations`;
-        cache.set(key, orgIds);
+    private static userPermissionsKey(userId: string): string {
+        return `user:${userId}:permissions`;
     }
 
-    static getUserPermissions(userId: string): string[] {
-        const key = `user:${userId}:permissions`;
-        return cache.get<string[]>(key) ?? [];
+    static getUserOrganizations(userId: string): string[] | undefined {
+        return cache.get<string[]>(this.userOrganizationsKey(userId));
     }
 
-    static setUserPermissions(userId: string, permissions: string[]) {
-        const key = `user:${userId}:permissions`;
-        cache.set(key, permissions);
+    static setUserOrganizations(userId: string, orgIds: string[]): void {
+        cache.set(this.userOrganizationsKey(userId), orgIds);
+    }
+
+    static getUserPermissions(userId: string): string[] | undefined {
+        return cache.get<string[]>(this.userPermissionsKey(userId));
+    }
+
+    static setUserPermissions(userId: string, permissions: string[]): void {
+        cache.set(this.userPermissionsKey(userId), permissions);
     }
 
     static hasOrganizationOwnership(userId: string, organizationId: string): boolean {
         const orgs = this.getUserOrganizations(userId);
-        return orgs.includes(organizationId);
+        return orgs ? orgs.includes(organizationId) : false;
     }
+
+    /*
 
     static hasPermissions(userId: string, permissions: string[]): boolean {
         const userPermissions = this.getUserPermissions(userId);
-        const permSet = new Set(userPermissions);
-        return permissions.some(p => permSet.has(p));
-    }
 
-    static invalidateUser(userId: string) {
-        cache.del(`user:${userId}:permissions`);
-        cache.del(`user:${userId}:organizations`);
+        if (!userPermissions) {
+            return false;
+        }
+        const permSet = new Set(userPermissions);
+        return permissions.some(permission => permSet.has(permission));
+    }
+        */
+
+    static invalidateUser(userId: string): void {
+        cache.del(this.userPermissionsKey(userId));
+        cache.del(this.userOrganizationsKey(userId));
     }
 }

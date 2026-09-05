@@ -5,8 +5,8 @@ import { ConstraintService } from "./constraint.service";
 
 import {
     verifyActiveAccount,
-    checkPermission,
 } from "../auth/auth.middleware";
+import { checkPermission } from '../../core/container';
 import { constraintRepo } from "../../core/container";
 
 

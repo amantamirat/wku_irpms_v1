@@ -5,8 +5,8 @@ import { TemplateService } from "./template.service";
 
 import {
   verifyActiveAccount,
-  checkPermission,
 } from "../auth/auth.middleware";
+import { checkPermission } from '../../core/container';
 import { templateRepo } from "../../core/container";
 
 

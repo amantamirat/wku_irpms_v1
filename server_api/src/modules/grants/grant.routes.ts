@@ -1,7 +1,9 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
 import { callRepo, compositionRepo, grantRepo, organizationRepo, projectRepo, thematicRepo } from '../../core/container';
-import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../auth/auth.middleware';
+import { verifyActiveAccount } from '../auth/auth.middleware';
+import { checkTransitionPermission } from '../../core/container';
+import { checkPermission } from '../../core/container';
 import { GrantController } from './grant.controller';
 import { GrantService } from './grant.service';
 

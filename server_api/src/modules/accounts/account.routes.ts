@@ -1,5 +1,7 @@
 import { Router } from 'express';
-import { checkPermission, checkTransitionPermission, verifyActiveAccount } from '../auth/auth.middleware';
+import { verifyActiveAccount } from '../auth/auth.middleware';
+import { checkTransitionPermission } from '../../core/container';
+import { checkPermission } from '../../core/container';
 import { AccountController } from './account.controller';
 import { accountService } from '../../core/container';
 

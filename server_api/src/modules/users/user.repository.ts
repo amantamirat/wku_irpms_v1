@@ -1,11 +1,12 @@
 import User, { IUser, IOwnership } from "./user.model";
-import { CreateUserDTO, UpdateUserDTO, GetUsersDTO, UpdateRolesDTO, ExistsUserDTO } from "./user.dto";
+import { CreateUserDTO, UpdateUserDTO, FilterUsersDTO, UpdateRolesDTO, ExistsUserDTO } from "./user.dto";
 import mongoose from "mongoose";
+import { FilterOptions } from "../../common/dtos/filter.dto";
 
 export interface IUserRepository {
-    findById(id: string): Promise<IUser | null>;
-    findOne({ workspace, name }: GetUsersDTO): Promise<IUser | null>;
-    findAll(filter?: GetUsersDTO): Promise<IUser[]>;
+    findById(id: string, options?: FilterOptions): Promise<IUser | null>;
+    findOne({ workspace, name }: FilterUsersDTO): Promise<IUser | null>;
+    findAll(filter?: FilterUsersDTO, options?: FilterOptions): Promise<IUser[]>;
     create(data: CreateUserDTO): Promise<IUser>;
     update(id: string, data: UpdateUserDTO["data"]): Promise<IUser | null>;
     // Roles management
@@ -21,38 +22,32 @@ export class UserRepository implements IUserRepository {
     // -------------------------
     // FIND BY ID
     // -------------------------
+    async findById(id: string, options?: FilterOptions): Promise<IUser | null> {
+        let query = User.findById(new mongoose.Types.ObjectId(id));
 
-    async findById(id: string, populate?: boolean): Promise<IUser | null> {
-        if (populate === true) {
-            return User.findById(id).
-                populate("workspace").
-                populate({
+        if (options?.populate) {
+            query = query
+                .populate("workspace")
+                .populate({
                     path: "roles",
-                    populate: {
-                        path: "permissions"
-                    }
-                }).
-                populate("ownerships").
-                lean<IUser>().
-                exec();
+                    populate: { path: "permissions" }
+                })
+                .populate("ownerships");
         }
-        return User.findById(new mongoose.Types.ObjectId(id))
+        return query
             .lean<IUser>()
             .exec();
     }
 
 
-    async findOne({ workspace, name }: GetUsersDTO) {
+    async findOne({ workspace, name }: FilterUsersDTO) {
         const filter: Record<string, any> = {};
-
         if (workspace) {
             filter.workspace = new mongoose.Types.ObjectId(workspace);
         }
-
         if (name) {
             filter.name = name;
         }
-
         return User.findOne(filter)
             .lean<IUser>()
             .exec();
@@ -61,14 +56,12 @@ export class UserRepository implements IUserRepository {
     // -------------------------
     // FIND ALL WITH OPTIONAL FILTER
     // -------------------------
-    async findAll(filter: GetUsersDTO): Promise<IUser[]> {
+    async findAll(filter: FilterUsersDTO, options?: FilterOptions): Promise<IUser[]> {
         const query: any = {};
-
         // Handle single workspace filter
         if (filter.workspace) {
             query.workspace = new mongoose.Types.ObjectId(filter.workspace);
         }
-
         // Handle array of user IDs filter
         if (filter.ids && filter.ids.length > 0) {
             query._id = {
@@ -78,9 +71,8 @@ export class UserRepository implements IUserRepository {
 
         let dbQuery = User.find(query);
 
-        if (filter.populate) {
+        if (options?.populate) {
             dbQuery = dbQuery.populate("workspace");
-            // .populate("specializations")
         }
 
         return dbQuery

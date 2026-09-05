@@ -1,7 +1,13 @@
 // container.ts
+import { Response, NextFunction } from "express";
+import { ERROR_CODES } from "../common/errors/error.codes";
+import { errorResponse } from "../common/helpers/response";
+import { createCheckPermission, createCheckTransitionPermission } from "../common/middleware/permission.middleware";
 import { AccountRepository } from "../modules/accounts/account.repository";
 import { AccountService } from "../modules/accounts/account.service";
 import { AnonymizerService } from "../modules/anonymizer/anonymizer.service";
+import { AuthenticatedRequest } from "../modules/auth/auth.middleware";
+import { AuthPermissionService } from "../modules/auth/auth.permission-service";
 import { CalendarRepository } from "../modules/calendar/calendar.repository";
 import { CallRepository } from "../modules/calls/call.repository";
 import { StageRepository } from "../modules/calls/stages/stage.repository";
@@ -46,6 +52,7 @@ import { EnrollmentRepository } from "../modules/users/enrollments/enrollment.re
 import { ExperienceRepository } from "../modules/users/experiences/experience.repository";
 import { UserRepository } from "../modules/users/user.repository";
 import { UserService } from "../modules/users/user.service";
+import { CacheService } from "../util/cache.service";
 
 export const notificationRepo = new NotificationRepository();
 export const settingRepo = new SettingRepository();
@@ -66,6 +73,11 @@ export const permissionRepo = new PermissionRepository();
 export const roleRepo = new RoleRepository();
 export const accountRepo = new AccountRepository();
 export const accountService = new AccountService(accountRepo, userRepo);
+//middleware and auth
+export const authPermissionService = new AuthPermissionService(userRepo);
+export const checkPermission = createCheckPermission(authPermissionService);
+export const checkTransitionPermission = createCheckTransitionPermission(checkPermission);
+
 // calendar repos
 export const calendarRepo = new CalendarRepository();
 //grant repos
@@ -121,4 +133,5 @@ export const applicationService = new ApplicationService(applicationRepo, callRe
     notificationService);
 
 export const userService = new UserService(userRepo, organizationRepo, roleRepo);
+
 

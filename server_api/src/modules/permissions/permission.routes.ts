@@ -1,7 +1,8 @@
 import { Router } from 'express';
 
 import { permissionRepo } from '../../core/container';
-import { checkPermission, verifyActiveAccount } from '../auth/auth.middleware';
+import { verifyActiveAccount } from '../auth/auth.middleware';
+import { checkPermission } from '../../core/container';
 import { PermissionController } from './permission.controller';
 import { PermissionService } from './permission.service';
 
@@ -15,13 +16,13 @@ router.get(
   checkPermission("permission:read"),
   controller.getPermissions
 );
-
+/*
 router.put('/:id',
   verifyActiveAccount,
   checkPermission("permission:update"),
   controller.update
 );
-
+*/
 router.delete('/:id',
   verifyActiveAccount,
   checkPermission("permission:delete"),

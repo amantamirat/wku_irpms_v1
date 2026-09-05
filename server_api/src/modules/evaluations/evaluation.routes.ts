@@ -1,7 +1,9 @@
 import { Router } from "express";
 import { EvaluationController } from "./evaluation.controller";
 import { PERMISSIONS } from "../../common/constants/permissions";
-import { verifyActiveAccount, checkPermission, checkTransitionPermission } from "../auth/auth.middleware";
+import { verifyActiveAccount } from "../auth/auth.middleware";
+import { checkTransitionPermission } from '../../core/container';
+import { checkPermission } from '../../core/container';
 import { EvaluationRepository } from "./evaluation.repository";
 import { EvaluationService } from "./evaluation.service";
 import { CriterionRepository } from "./criteria/criterion.repository";

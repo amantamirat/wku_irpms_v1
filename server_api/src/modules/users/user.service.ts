@@ -5,7 +5,7 @@ import { IOrganizationRepository, OrganizationRepository } from "../organization
 import { CollaboratorRepository, ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
 import { IProjectRepository, ProjectRepository } from "../projects/project.repository";
 import { IRoleRepository, RoleRepository } from "../permissions/roles/role.repository";
-import { CreateUserDTO, UpdateUserDTO, GetUsersDTO, UpdateRolesDTO, UpdateOwnershipsDTO } from "./user.dto";
+import { CreateUserDTO, UpdateUserDTO, FilterUsersDTO, UpdateRolesDTO, UpdateOwnershipsDTO } from "./user.dto";
 import { IUserRepository, UserRepository } from "./user.repository";
 import { Unit } from "../../common/constants/enums";
 import { EnrollmentRepository } from "./enrollments/enrollment.repository";
@@ -50,11 +50,11 @@ export class UserService {
     // -------------------------
     // GET ALL (with optional filter)
     // -------------------------
-    async getAll(filter: GetUsersDTO) {
+    async getAll(filter: FilterUsersDTO) {
         return await this.repo.findAll(filter);
     }
 
-    async findOne({ workspace, name }: GetUsersDTO) {
+    async findOne({ workspace, name }: FilterUsersDTO) {
         return await this.repo.findOne({ workspace, name });
     }
     // -------------------------

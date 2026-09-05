@@ -7,9 +7,9 @@ import { ReportService } from "./report.service";
 import { ReportController } from "./report.controller";
 
 import {
-    checkPermission,
     verifyActiveAccount
 } from "../auth/auth.middleware";
+import { checkPermission } from '../../core/container';
 
 import { PERMISSIONS } from "../../common/constants/permissions";
 

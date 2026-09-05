@@ -43,11 +43,11 @@ export interface UpdateOwnershipsDTO {
     userId: string;             // actor (auditing / permission)
 }
 
-export interface GetUsersDTO {
+export interface FilterUsersDTO {
     ids?: string[];
     workspace?: string;
     name?: string;
-    populate?: boolean;
+   // populate?: boolean;
 }
 
 export interface ExistsUserDTO {

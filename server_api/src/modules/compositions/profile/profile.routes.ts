@@ -3,7 +3,8 @@ import { Router } from "express";
 import { ProfileService } from "./profile.service";
 import { profileRepo } from "../../../core/container";
 import { ProfileController } from "./profile.controller";
-import { checkPermission, verifyActiveAccount } from "../../auth/auth.middleware";
+import { verifyActiveAccount } from "../../auth/auth.middleware";
+import { checkPermission } from '../../../core/container';
 import { PERMISSIONS } from "../../../common/constants/permissions";
 
 const service = new ProfileService(profileRepo);

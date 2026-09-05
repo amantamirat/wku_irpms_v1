@@ -1,5 +1,4 @@
 // collaborator.repository.ts
-import mongoose, { ClientSession } from "mongoose";
 import { Collaborator, ICollaborator } from "./collaborator.model";
 import {
     CreateCollaboratorDto,
@@ -8,16 +7,18 @@ import {
 } from "./collaborator.dto";
 import { CollaboratorStatus } from "./collaborator.model";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
+import mongoose from "mongoose";
 
 export interface ICollaboratorRepository {
     findById(id: string): Promise<ICollaborator | null>;
     find(filters: FilterCollaborators, option?: FilterOptions): Promise<ICollaborator[]>;
-    create(dto: CreateCollaboratorDto, session?: ClientSession): Promise<ICollaborator>;
+    create(dto: CreateCollaboratorDto): Promise<ICollaborator>;
     createMany(dtos: CreateCollaboratorDto[]): Promise<ICollaborator[]>;
     update(id: string, data: UpdateCollaboratorDto["data"]): Promise<ICollaborator | null>;
     updateStatus(id: string, newStatus: CollaboratorStatus): Promise<ICollaborator | null>;
     exists(filters: FilterCollaborators): Promise<boolean>;
-    countByProject(projectId: string, session?: ClientSession): Promise<number>;
+    existsUnverified(project: string): Promise<boolean>;
+    countByProject(project: string): Promise<number>;
     delete(id: string): Promise<ICollaborator | null>;
     deleteByProject(projectId: string): Promise<any>;
 }
@@ -61,13 +62,14 @@ export class CollaboratorRepository implements ICollaboratorRepository {
     }
 
 
-    async create(dto: CreateCollaboratorDto, session?: ClientSession) {
+    async create(dto: CreateCollaboratorDto) {
         const data: Partial<ICollaborator> = {
             ...dto,
             project: new mongoose.Types.ObjectId(dto.project),
             member: new mongoose.Types.ObjectId(dto.member),
         };
-        return Collaborator.create([data], { session }).then(res => res[0]);
+
+        return Collaborator.create(data);
     }
 
     // ✅ NEW: bulk insert
@@ -125,24 +127,28 @@ export class CollaboratorRepository implements ICollaboratorRepository {
         return result !== null;
     }
 
-    async countByProject(projectId: string, session?: ClientSession) {
-        let query = Collaborator.countDocuments({
-            project: new mongoose.Types.ObjectId(projectId)
-        });
+    async existsUnverified(project: string): Promise<boolean> {
+        const result = await Collaborator.exists({
+            project: new mongoose.Types.ObjectId(project),
+            status: { $ne: CollaboratorStatus.verified }
+        }).exec();
 
-        if (session) {
-            query = query.session(session);
-        }
-        return query.exec();
+        return result !== null;
+    }
+
+    async countByProject(project: string): Promise<number> {
+        return Collaborator.countDocuments({
+            project: new mongoose.Types.ObjectId(project)
+        }).exec();
     }
 
     async delete(id: string) {
         return Collaborator.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();
     }
-    async deleteByProject(projectId: string) {
-        if (!mongoose.Types.ObjectId.isValid(projectId)) throw new Error("Invalid Project ID");
+    async deleteByProject(project: string) {
+        if (!mongoose.Types.ObjectId.isValid(project)) throw new Error("Invalid Project ID");
         return Collaborator.deleteMany({
-            project: new mongoose.Types.ObjectId(projectId)
+            project: new mongoose.Types.ObjectId(project)
         }).exec();
     }
 }

@@ -2,17 +2,10 @@ import mongoose, { model, Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 import { IUser } from "../../users/user.model";
 
-export enum CollaboratorRole {
-    CO_I = "CO_I",
-    ASSISTANT = "ASSISTANT",
-    //INVESTIGATOR = "INVESTIGATOR",
-    //ADVISOR = "ADVISOR",
-    //COMMUNITY_PARTNER = "COMMUNITY_PARTNER",
-}
-
 export enum CollaboratorStatus {
     pending = 'pending',
-    verified = 'verified'
+    verified = 'verified',
+    declined = 'declined'
 }
 
 export interface ICollaborator extends Document {

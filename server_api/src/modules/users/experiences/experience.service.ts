@@ -16,7 +16,7 @@ export class ExperienceService {
 
     constructor(
         private readonly repository: IExperienceRepository,
-        private readonly applicantRepository: IUserRepository,
+        private readonly userRepo: IUserRepository,
         private readonly organizationRepository: IOrganizationRepository,
         private readonly posRepository: IPositionRepository
     ) { }
@@ -50,7 +50,7 @@ export class ExperienceService {
     async create(dto: CreateExperienceDTO) {
         const { user: applicant, organization, position } = dto;
 
-        const applicantDoc = await this.applicantRepository.findById(applicant);
+        const applicantDoc = await this.userRepo.findById(applicant);
         if (!applicantDoc)
             throw new AppError(ERROR_CODES.USER_NOT_FOUND);
 

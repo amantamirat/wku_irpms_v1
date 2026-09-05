@@ -3,7 +3,9 @@ import { PublicationController } from './publication.controller';
 import { PERMISSIONS } from '../../../common/constants/permissions';
 import { PublicationService } from './publication.service';
 import { PublicationRepository } from './publication.repository';
-import { verifyActiveAccount, checkPermission, checkTransitionPermission } from '../../auth/auth.middleware';
+import { verifyActiveAccount } from '../../auth/auth.middleware';
+import { checkTransitionPermission } from '../../../core/container';
+import { checkPermission } from '../../../core/container';
 import { UserRepository } from '../user.repository';
 
 const publicationRepository = new PublicationRepository();

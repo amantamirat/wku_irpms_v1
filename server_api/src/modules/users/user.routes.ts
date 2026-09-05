@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { userService } from '../../core/container';
-import { checkPermission, verifyActiveAccount } from '../auth/auth.middleware';
+import { verifyActiveAccount } from '../auth/auth.middleware';
+import { checkPermission } from '../../core/container';
 import { UserController } from './user.controller';
 
 const controller = new UserController(userService);

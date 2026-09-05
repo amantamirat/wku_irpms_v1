@@ -1,9 +1,9 @@
 import { Router } from "express";
 import {
-    checkPermission,
-    checkTransitionPermission,
     verifyActiveAccount
 } from "../../auth/auth.middleware";
+import { checkTransitionPermission } from '../../../core/container';
+import { checkPermission } from '../../../core/container';
 
 import { VerificationController } from "./verification.controller";
 import { VerificationService } from "./verification.service";

@@ -1,7 +1,9 @@
 import express from "express";
 import { applicationService } from "../../../core/container";
 import { upload } from "../../../util/multer";
-import { checkPermission, checkTransitionPermission, verifyActiveAccount } from "../../auth/auth.middleware";
+import { verifyActiveAccount } from "../../auth/auth.middleware";
+import { checkTransitionPermission } from '../../../core/container';
+import { checkPermission } from '../../../core/container';
 import { NotificationRepository } from "../../notifications/notification.repository";
 import { NotificationService } from "../../notifications/notification.service";
 import { SettingRepository } from "../../settings/setting.repository";

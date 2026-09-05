@@ -4,7 +4,8 @@ import { PERMISSIONS } from '../../../common/constants/permissions';
 import { EnrollmentService } from './enrollment.service';
 import { EnrollmentRepository } from './enrollment.repository';
 import { CalendarRepository } from '../../calendar/calendar.repository';
-import { verifyActiveAccount, checkPermission } from '../../auth/auth.middleware';
+import { verifyActiveAccount } from '../../auth/auth.middleware';
+import { checkPermission } from '../../../core/container';
 import { UserRepository } from '../user.repository';
 import { OrganizationRepository } from '../../organization/organization.repository';
 

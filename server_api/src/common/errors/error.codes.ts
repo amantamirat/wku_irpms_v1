@@ -35,6 +35,7 @@ export const ERROR_CODES = {
 
     // ---------- ACCOUNT ----------
     ACCOUNT_NOT_FOUND: "ACCOUNT_DOES_NOT_EXIST",
+    ACCOUNT_NOT_ACTIVE: "ACCOUNT_NOT_ACTIVE",
     ACCOUNT_SUSPENDED: "Account is suspended. Contact support.",
     ACCOUNT_LOCKED: "Account temporarily locked due to too many failed login attempts.",
     INVALID_CREDENTIALS: "Invalid credentials.",

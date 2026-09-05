@@ -4,7 +4,7 @@ import { AuthenticatedRequest } from '../auth/auth.middleware';
 import { UserService } from './user.service';
 import {
     CreateUserDTO,
-    GetUsersDTO,
+    FilterUsersDTO,
     UpdateUserDTO,
     UpdateOwnershipsDTO,
     UpdateRolesDTO,
@@ -54,7 +54,7 @@ export class UserController {
         try {
             const { workspace, populate } = req.query;
 
-            const filter: GetUsersDTO = {
+            const filter: FilterUsersDTO = {
                 workspace: workspace as string,
                 ...(populate !== undefined && { populate: populate === "true" })
             };

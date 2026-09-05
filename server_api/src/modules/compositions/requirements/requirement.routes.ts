@@ -3,7 +3,8 @@ import { Router } from "express";
 import { RequirementService } from "./requirement.service";
 import { requirementRepo } from "../../../core/container";
 import { RequirementController } from "./requirement.controller";
-import { checkPermission, verifyActiveAccount } from "../../auth/auth.middleware";
+import { verifyActiveAccount } from "../../auth/auth.middleware";
+import { checkPermission } from '../../../core/container';
 import { PERMISSIONS } from "../../../common/constants/permissions";
 
 const service = new RequirementService(requirementRepo);
