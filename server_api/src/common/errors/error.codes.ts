@@ -23,6 +23,7 @@ export const ERROR_CODES = {
     // ---------- SETTING ----------
     SETTING_NOT_FOUND: "SETTING_NOT_FOUND",
     SETTING_FILE_SIZE_OUT_OF_RANGE: "File size must be between 1 and 100MB.",
+    INVALID_EMAIL_DOMAIN: "INVALID_EMAIL_DOMAIN",
     // ---------- PERMISSION ----------
     PERMISSION_NOT_FOUND: "PERMISSION_NOT_FOUND",
 

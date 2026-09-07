@@ -1,14 +1,13 @@
 import dotenv from 'dotenv';
 import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
-import { errorResponse } from '../../common/helpers/response';
-import JwtPayload from './auth.dto';
-import { AccountStatus } from '../accounts/account.model';
-import { ERROR_CODES } from '../../common/errors/error.codes';
-import { Action } from '../../common/constants/permissions';
 import { Unit } from '../../common/constants/enums';
-import { AuthPermissionService } from './auth.permission-service';
+import { Action } from '../../common/constants/permissions';
+import { ERROR_CODES } from '../../common/errors/error.codes';
+import { errorResponse } from '../../common/helpers/response';
 import { checkPermission } from '../../core/container';
+import { AccountStatus } from '../accounts/account.model';
+import JwtPayload from './auth.dto';
 
 dotenv.config();
 
@@ -56,15 +55,19 @@ export const verifyActiveAccount = (req: AuthenticatedRequest, res: Response, ne
 
 export function checkUnitPermission(action: Action) {
   return (req: Request, res: Response, next: NextFunction) => {
-    // Extract unit type from body or query
-    const unitInput = req.body.type || req.query.type || req.params.type;
+    const unitInput =
+      req.body?.type ??
+      req.query?.type ??
+      req.params?.type;
+
     const unit = unitInput as Unit;
 
-    // Validate unit type
     if (!Object.values(Unit).includes(unit)) {
       return errorResponse(res, 400, "Invalid or missing unit type");
     }
+
     const permission = `organization:${unit}:${action}`;
+
     return checkPermission(permission)(req, res, next);
   };
 }

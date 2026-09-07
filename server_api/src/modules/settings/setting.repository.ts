@@ -1,6 +1,5 @@
-import mongoose from "mongoose";
-import { Setting, ISetting, SettingKey } from "./setting.model";
 import { UpdateSettingDto } from "./setting.dto"; // Assuming you named it this
+import { ISetting, Setting, SettingKey } from "./setting.model";
 
 export interface ISettingRepository {
     create(

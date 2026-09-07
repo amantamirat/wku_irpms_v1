@@ -1,25 +1,18 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { FilterOrganization, Organization, sanitize } from "../models/organization.model";
+import { FilterOrganization, Organization } from "../models/organization.model";
+import { sanitize } from "@/utils/sanitizer";
 
 const end_point = "/organizations";
 
 export const OrganizationApi: EntityApi<Organization, FilterOrganization | undefined> = {
 
-    async getAll(options?: FilterOrganization) {
-        const query = new URLSearchParams();
+    async getAll(options) {
+        return ApiClient.get(end_point, options);
+    },
 
-        if (options) {
-            const sanitized = sanitize(options);
-            if (sanitized.type) query.append("type", sanitized.type as string);
-            if (sanitized.parent) query.append("parent", sanitized.parent as string);
-            if (options.populate !== undefined) {
-                query.append("populate", String(options.populate));
-            }
-        }
-
-        const url = query.toString() ? `${end_point}?${query.toString()}` : end_point;
-        return ApiClient.get(url);
+    async lookup(options) {
+        return ApiClient.get(`${end_point}/lookup`, options);
     },
 
     async create(organization: Partial<Organization>) {

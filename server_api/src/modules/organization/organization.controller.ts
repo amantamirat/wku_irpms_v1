@@ -60,6 +60,21 @@ export class OrganizationController {
     };
 
 
+    lookup = async (req: Request, res: Response) => {
+        try {
+            const { type, parent } = req.query;
+            const filters: FilterOrganizationsDTO = {
+                type: type as Unit,
+                parent: parent as string
+            };
+            const organizations = await this.service.getAll(filters);
+            successResponse(res, 200, "Organizations fetched successfully", organizations);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
+
     getById = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;

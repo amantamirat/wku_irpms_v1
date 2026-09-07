@@ -45,10 +45,10 @@ const SaveExperienceDialog = ({
         const loadData = async () => {
             try {
                 const [depts, externs, pos, userList] = await Promise.all([
-                    OrganizationApi.getAll({ type: OrgnUnit.department }),
-                    OrganizationApi.getAll({ type: OrgnUnit.external }),
-                    PositionApi.getAll({}),
-                    !isUserPredefined ? UserApi.getAll({}) : Promise.resolve([])
+                    OrganizationApi.lookup!({ type: OrgnUnit.department }),
+                    OrganizationApi.lookup!({ type: OrgnUnit.external }),
+                    PositionApi.lookup!(),
+                    !isUserPredefined ? UserApi.lookup!({}) : Promise.resolve([])
                 ]);
                 setOrganizations([...depts, ...externs]);
                 setPositions(pos);

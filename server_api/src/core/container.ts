@@ -63,11 +63,11 @@ export const exprienceRepo = new ExperienceRepository();
 export const specializationRepo = new SpecializationRepository();
 export const enrollmentRepo = new EnrollmentRepository();
 export const positionRepo = new PositionRepository();
-//account repos
+//roles and permissions repos
 export const permissionRepo = new PermissionRepository();
 export const roleRepo = new RoleRepository();
 export const accountRepo = new AccountRepository();
-export const accountService = new AccountService(accountRepo, userRepo);
+export const accountService = new AccountService(accountRepo, userRepo, settingService);
 //middleware and auth
 export const authPermissionService = new AuthPermissionService(userRepo);
 export const checkPermission = createCheckPermission(authPermissionService);

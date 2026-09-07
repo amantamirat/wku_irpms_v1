@@ -35,7 +35,7 @@ const SaveEnrollmentDialog = ({
     // Dropdown Data
     const [calendars, setCalendars] = useState<Calendar[]>([]);
     const [programs, setPrograms] = useState<Organization[]>([]);
-    const [applicants, setApplicants] = useState<User[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
 
     // Predefined Logic
     const isStudPredefined = !!item.student;
@@ -54,13 +54,13 @@ const SaveEnrollmentDialog = ({
                 const requests: Promise<any>[] = [];
 
                 if (!isCalendarPredefined)
-                    requests.push(CalendarApi.getAll({ status: CalendarStatus.active }).then(setCalendars));
+                    requests.push(CalendarApi.lookup!({ status: CalendarStatus.active }).then(setCalendars));
 
                 if (!isProgramPredefined)
-                    requests.push(OrganizationApi.getAll({ type: OrgnUnit.program }).then(setPrograms));
+                    requests.push(OrganizationApi.lookup!({ type: OrgnUnit.program }).then(setPrograms));
 
                 if (!isStudPredefined)
-                    requests.push(UserApi.getAll({}).then(setApplicants));
+                    requests.push(UserApi.lookup!({}).then(setUsers));
 
                 await Promise.all(requests);
             } catch (err) {
@@ -148,23 +148,23 @@ const SaveEnrollmentDialog = ({
                 footer={footer}
                 onHide={handleHide}
             >
-                {/* Applicant Selection */}
+                {/* Student Selection */}
                 <div className="field">
-                    <label htmlFor="applicant" className="font-bold text-sm">Applicant</label>
+                    <label htmlFor="user" className="font-bold text-sm">Student</label>
                     {isStudPredefined ? (
                         <InputText
-                            value={(localEnrollment.student as User)?.name || 'Linked User'}
+                            value={(localEnrollment.student as User)?.name || 'Linked Student'}
                             disabled
                             className="bg-gray-100"
                         />
                     ) : (
                         <Dropdown
-                            id="applicant"
+                            id="user"
                             value={localEnrollment.student}
-                            options={applicants}
+                            options={users}
                             optionLabel="name"
                             dataKey="_id"
-                            placeholder="Select an Applicant"
+                            placeholder="Select Student"
                             onChange={(e) => setLocalEnrollment({ ...localEnrollment, student: e.value })}
                             className={classNames({ 'p-invalid': submitted && !localEnrollment.student })}
                         />

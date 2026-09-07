@@ -2,18 +2,17 @@ import mongoose from "mongoose";
 import { Position, PositionDocument } from "./position.model";
 import {
     CreatePositionDTO,
-    ExistsPositionDTO,
-    GetPositionsDTO,
+    FilterPositionsDTO,
     UpdatePositionDTO
 } from "./position.dto";
 
 export interface IPositionRepository {
     findById(id: string): Promise<PositionDocument | null>;
     findByName(name: string): Promise<PositionDocument | null>;
-    find(filters: GetPositionsDTO): Promise<PositionDocument[]>;
+    find(filters: FilterPositionsDTO): Promise<PositionDocument[]>;
     create(dto: CreatePositionDTO): Promise<PositionDocument>;
     update(id: string, dtoData: UpdatePositionDTO["data"]): Promise<PositionDocument | null>;
-    exists(filters: ExistsPositionDTO): Promise<boolean>;
+    exists(filters: FilterPositionsDTO): Promise<boolean>;
     delete(id: string): Promise<PositionDocument | null>;
 }
 
@@ -29,7 +28,7 @@ export class PositionRepository implements IPositionRepository {
         return Position.findOne({ name });
     }
 
-    async find(filters: GetPositionsDTO) {
+    async find(filters: FilterPositionsDTO) {
         const query: any = {};
 
         // optional search by name
@@ -66,7 +65,7 @@ export class PositionRepository implements IPositionRepository {
         ).exec();
     }
 
-    async exists(filters: ExistsPositionDTO): Promise<boolean> {
+    async exists(filters: FilterPositionsDTO): Promise<boolean> {
         const query: any = {};
 
         if (filters.name) {

@@ -39,8 +39,8 @@ const SaveReviewerDialog = ({
         const fetchUsers = async () => {
             try {
                 if (visible) {
-                    const data = await UserApi.getAll({});
-                    setUsers(data);
+                    const data = await UserApi.lookup!({});
+                    setUsers(data || []);
                 }
             } catch (err) {
                 console.error("Failed to fetch users:", err);
@@ -65,9 +65,9 @@ const SaveReviewerDialog = ({
         try {
             let saved: Reviewer;
             if (isEditMode) {
-                saved = await ReviewerApi.update({ 
-                    _id: localReviewer._id, 
-                    weight: localReviewer.weight 
+                saved = await ReviewerApi.update({
+                    _id: localReviewer._id,
+                    weight: localReviewer.weight
                 });
             } else {
                 saved = await ReviewerApi.create(localReviewer);
@@ -117,7 +117,7 @@ const SaveReviewerDialog = ({
                 onHide={onHide}
             >
                 <div className="formgrid grid">
-                    
+
                     {/* Applicant selection only shown in Create Mode */}
                     {!isEditMode && (
                         <div className="field col-12">

@@ -37,9 +37,9 @@ const SavePublicationDialog = ({
     useEffect(() => {
         if (!visible || isAuthorPredefined) return;
 
-        UserApi.getAll({})
+        UserApi.lookup!({})
             .then(setUsers)
-            .catch((err) => console.error('Failed to fetch applicant data:', err));
+            .catch((err) => console.error('Failed to fetch user data:', err));
     }, [visible, isAuthorPredefined]);
 
     /**

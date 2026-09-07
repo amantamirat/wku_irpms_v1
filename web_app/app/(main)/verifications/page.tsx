@@ -12,6 +12,7 @@ import { useAuth } from '@/contexts/auth-context';
 const VerificationPage = () => {
     const router = useRouter();
     const { hasPermission } = useAuth();
+    const canReadConfs = hasPermission('verification-conf:read')
     const [configurations, setConfigurations] = useState<VerificationConfiguration[]>([]);
     const [selectedConfig, setSelectedConfig] = useState<VerificationConfiguration | null>(null);
     const [loadingConfigs, setLoadingConfigs] = useState<boolean>(false);
@@ -21,14 +22,14 @@ const VerificationPage = () => {
         const fetchConfigurations = async () => {
             setLoadingConfigs(true);
             try {
-                const data = await VerificationConfigurationApi.getAll();
+                const data = await VerificationConfigurationApi.lookup!();
                 const configList = Array.isArray(data) ? data : [];
                 setConfigurations(configList);
                 if (configList.length > 0) {
                     setSelectedConfig(configList[0]);
                 }
             } catch (error) {
-                console.error('Failed to fetch verification configurations:', error);
+                //console.error('Failed to fetch verification configurations:', error);
             } finally {
                 setLoadingConfigs(false);
             }
@@ -51,7 +52,7 @@ const VerificationPage = () => {
                     </span>
                 </div>
 
-                {hasPermission('verification-conf:read') && (
+                {canReadConfs && (
                     <Button
                         label="Manage Configurations"
                         icon="pi pi-cog"

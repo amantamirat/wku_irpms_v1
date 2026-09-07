@@ -3,7 +3,7 @@ import { ERROR_CODES } from "../../common/errors/error.codes";
 import { ExperienceRepository, IExperienceRepository } from "../users/experiences/experience.repository";
 import {
     CreatePositionDTO,
-    GetPositionsDTO,
+    FilterPositionsDTO,
     UpdatePositionDTO
 } from "./position.dto";
 import { IPositionRepository, PositionRepository } from "./position.repository";
@@ -32,7 +32,7 @@ export class PositionService {
     /* =========================
        Get / Find Positions
     ========================= */
-    async find(options: GetPositionsDTO = {}) {
+    async find(options: FilterPositionsDTO = {}) {
         return await this.positionRepo.find(options);
     }
 

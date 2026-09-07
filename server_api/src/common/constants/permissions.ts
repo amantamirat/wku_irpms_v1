@@ -279,6 +279,7 @@ export const PERMISSIONS = {
   POSITION: {
     CREATE: "position:create",
     READ: "position:read",
+    LOOKUP: "position:lookup",
     UPDATE: "position:update",
     DELETE: "position:delete",
   },

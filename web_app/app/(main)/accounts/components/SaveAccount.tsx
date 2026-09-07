@@ -24,7 +24,7 @@ interface EntitySaveDialogProps<T> {
 const SaveAccount = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<Account>) => {
     const toast = useRef<Toast>(null);
     const [localUser, setLocalUser] = useState<Partial<Account>>({});
-    const [applicants, setApplicants] = useState<User[]>([]);
+    const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
     const [errorMessage, setErrorMessage] = useState<string | null>(null);
@@ -35,19 +35,19 @@ const SaveAccount = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
     useEffect(() => {
         if (visible) {
             setLocalUser({ ...item });
-            fetchApplicants();
+            fetchUsers();
         } else {
             setSubmitted(false);
             setErrorMessage(null);
         }
     }, [visible, item]);
 
-    const fetchApplicants = async () => {
+    const fetchUsers = async () => {
         try {
-            const data = await UserApi.getAll({});
-            setApplicants(data);
+            const data = await UserApi.lookup!({});
+            setUsers(data);
         } catch (err) {
-            console.error('Failed to fetch applicants');
+            console.error('Failed to fetch users');
         }
     };
 
@@ -117,17 +117,17 @@ const SaveAccount = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
                 )}
 
                 <div className="field">
-                    <label className="font-bold small mb-2 block">Link to Applicant</label>
+                    <label className="font-bold small mb-2 block">Link to User</label>
                     <Dropdown
                         value={localUser.user}
-                        options={applicants}
+                        options={users}
                         optionLabel="name"
                         dataKey="_id"
                         filter
                         filterMatchMode="contains"
                         filterLocale="en"
                         filterBy="name"
-                        placeholder="Select an applicant profile"
+                        placeholder="Select user profile"
                         disabled={isEdit} // Prevent changing the owner of credentials
                         onChange={(e) => setLocalUser({ ...localUser, user: e.value })}
                         className={classNames({ 'p-invalid': submitted && !localUser.user })}
@@ -135,7 +135,7 @@ const SaveAccount = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
                 </div>
 
                 <div className="field">
-                    <label className="font-bold small mb-2 block">System Email</label>
+                    <label className="font-bold small mb-2 block">Account Email</label>
                     <div className="p-inputgroup">
                         <span className="p-inputgroup-addon"><i className="pi pi-envelope"></i></span>
                         <InputText

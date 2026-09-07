@@ -27,7 +27,7 @@ interface OwnershipDialogProps {
 const OwnershipDialog = ({ visible, item, onHide, onComplete }: OwnershipDialogProps) => {
     const toast = useRef<Toast>(null);
     const confirm = useConfirmDialog();
-    
+
     const [ownerships, setOwnerships] = useState<IOwnership[]>([]);
     const [orgOptions, setOrgOptions] = useState<Record<string, any[]>>({});
     const [loading, setLoading] = useState(false);
@@ -51,7 +51,7 @@ const OwnershipDialog = ({ visible, item, onHide, onComplete }: OwnershipDialogP
 
     const fetchOrgs = async (unitType: OrgnUnit) => {
         try {
-            const data = await OrganizationApi.getAll({ type: unitType });
+            const data = await OrganizationApi.lookup!({ type: unitType });
             setOrgOptions(prev => ({ ...prev, [unitType]: data }));
         } catch (err) {
             console.error("Failed to load organizations", err);
@@ -93,7 +93,7 @@ const OwnershipDialog = ({ visible, item, onHide, onComplete }: OwnershipDialogP
 
     const scopeTemplate = (rowData: IOwnership, { rowIndex }: any) => {
         const isFullAccess = rowData.scope === '*';
-        
+
         return (
             <div className="flex align-items-center gap-3">
                 <div className="flex-grow-1">
@@ -171,8 +171,8 @@ const OwnershipDialog = ({ visible, item, onHide, onComplete }: OwnershipDialogP
                 onHide={onHide}
             >
                 <div className="card border-none p-0 mt-2">
-                    <DataTable 
-                        value={ownerships} 
+                    <DataTable
+                        value={ownerships}
                         emptyMessage="No ownerships assigned yet. Use the dropdown below to add one."
                         responsiveLayout="scroll"
                         className="p-datatable-sm"

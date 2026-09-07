@@ -21,16 +21,7 @@ export const validatePosition = (
     return { valid: true };
 };
 
-/* =========================
-   Sanitize
-========================= */
 
-export const sanitizePosition = (pos: Partial<Position>): Position => {
-    return {
-        ...pos,
-        name: pos.name?.trim() || ""
-    } as Position;
-};
 
 /* =========================
    Empty Factory
@@ -44,6 +35,6 @@ export const createEmptyPosition = (): Position => ({
    Query Options
 ========================= */
 
-export interface GetPositionOptions {
-    search?: string;
+export interface FilterPositionOptions {
+    name?: string;
 }

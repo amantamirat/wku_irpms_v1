@@ -44,5 +44,11 @@
         "value": false,
         "type": "boolean",
         "description": "If true, the application will block non-admin access."
+    },
+    {
+        "key": "email_domain",
+        "value": "wku.edu.et",
+        "type": "string",
+        "description": "Email domain allowed for user account creation"
     }
 ]

@@ -82,7 +82,7 @@ const OrganizationManager = ({ type }: Props) => {
         createNew: () => createEmptyOrganization({ type }),
         SaveDialog: SaveOrganization,
         permissionPrefix: `organization:${type}`,
-        query: () => ({ type, populate: true })
+        query: () => ({ type })
     });
 
     return <Manager key={type} />;

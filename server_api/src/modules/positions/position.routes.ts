@@ -12,6 +12,7 @@ const positionService = new PositionService(positionRepo, exprienceRepo);
 const controller = new PositionController(positionService);
 
 router.post("/", verifyActiveAccount, checkPermission([PERMISSIONS.POSITION.CREATE]), controller.create);
+router.get("/lookup", verifyActiveAccount, checkPermission([PERMISSIONS.POSITION.LOOKUP]), controller.get);
 router.get("/", verifyActiveAccount, checkPermission([PERMISSIONS.POSITION.READ]), controller.get);
 router.put("/:id", verifyActiveAccount, checkPermission([PERMISSIONS.POSITION.UPDATE]), controller.update);
 router.delete("/:id", verifyActiveAccount, checkPermission([PERMISSIONS.POSITION.DELETE]), controller.delete);

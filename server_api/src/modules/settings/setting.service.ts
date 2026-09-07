@@ -5,10 +5,9 @@ import { AppError } from '../../common/errors/app.error';
 import { ERROR_CODES } from '../../common/errors/error.codes';
 
 export class SettingService {
-    
 
-    constructor(private repository: ISettingRepository) {
-       
+
+    constructor(private readonly repository: ISettingRepository) {
     }
 
     /**

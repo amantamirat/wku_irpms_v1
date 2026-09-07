@@ -65,7 +65,7 @@ export type Organization = {
 export interface FilterOrganization {
     type: OrgnUnit;
     parent?: Organization;
-    populate?: boolean;
+    //populate?: boolean;
 }
 
 
@@ -131,12 +131,7 @@ export const validateOrganization = (
 };
 
 
-export function sanitize(organization: Partial<Organization>): Partial<Organization> {
-    return {
-        ...organization,
-        parent: extractId(organization.parent),
-    };
-}
+
 
 export const createEmptyOrganization = (org: Organization): Organization => ({
     type: org.type,

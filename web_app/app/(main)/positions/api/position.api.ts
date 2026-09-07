@@ -1,20 +1,17 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { Position, sanitizePosition, GetPositionOptions } from "../models/position.model";
+import { Position, FilterPositionOptions } from "../models/position.model";
 
 const end_point = "/positions";
 
-export const PositionApi: EntityApi<Position, GetPositionOptions | undefined> = {
+export const PositionApi: EntityApi<Position, FilterPositionOptions | undefined> = {
 
     async getAll(options) {
-        const query = new URLSearchParams();
+        return ApiClient.get(end_point, options);
+    },
 
-        if (options?.search) {
-            query.append("search", options.search);
-        }
-
-        const qs = query.toString();
-        return ApiClient.get(`${end_point}${qs ? `?${qs}` : ""}`);
+    async lookup(filter) {
+        return ApiClient.get(`${end_point}/lookup`, filter);
     },
 
     async getById(id: string) {
@@ -22,15 +19,14 @@ export const PositionApi: EntityApi<Position, GetPositionOptions | undefined> = 
     },
 
     async create(position) {
-        const sanitized = sanitizePosition(position);
-        return ApiClient.post(end_point, sanitized);
+        return ApiClient.post(end_point, position);
     },
 
     async update(position) {
         if (!position._id) throw new Error("_id required");
         return ApiClient.put(
             `${end_point}/${position._id}`,
-            sanitizePosition(position)
+            position
         );
     },
 

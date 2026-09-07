@@ -8,6 +8,8 @@ import { IUserRepository, UserRepository } from "../users/user.repository";
 import { CreateAccountDTO, FilterAccountDTO, UpdateAccountDTO } from "./account.dto";
 import { AccountStatus } from "./account.model";
 import { IAccountRepository, AccountRepository } from "./account.repository";
+import { SettingService } from "../settings/setting.service";
+import { SettingKey } from "../settings/setting.model";
 
 
 export const Account_TRANSITIONS: Record<AccountStatus, AccountStatus[]> = {
@@ -21,6 +23,7 @@ export class AccountService {
     constructor(
         private readonly accountRepo: IAccountRepository,
         private readonly userRepo: IUserRepository,
+        private readonly settingService: SettingService,
     ) { }
 
     static async prepareHash(password: string): Promise<string> {
@@ -30,21 +33,43 @@ export class AccountService {
 
     async create(dto: CreateAccountDTO) {
         const { user, email, password } = dto;
+
         const userDoc = await this.userRepo.findById(user);
+
         if (!userDoc) {
             throw new AppError(ERROR_CODES.USER_NOT_FOUND);
         }
+
+        // Validate email domain
+        const allowedDomain = await this.settingService.getSettingValue<string>(
+            SettingKey.EMAIL_DOMAIN,
+            "*"
+        );
+
+        if (allowedDomain !== "*") {
+            const emailDomain = email.split("@").pop()?.toLowerCase();
+
+            if (!emailDomain || emailDomain !== allowedDomain.toLowerCase()) {
+                throw new AppError(ERROR_CODES.INVALID_EMAIL_DOMAIN);
+            }
+        }
+
         const hashed = await AccountService.prepareHash(password);
+
         try {
             const created = await this.accountRepo.create({
-                ...dto, email, password: hashed, status: AccountStatus.pending
+                ...dto,
+                email,
+                password: hashed,
+                status: AccountStatus.pending
             });
+
             return { ...created, user: userDoc };
         } catch (err: any) {
-            // 5. Handle unique index violations
             if (err?.code === 11000) {
                 throw new AppError(ERROR_CODES.ACCOUNT_ALREADY_EXISTS);
             }
+
             throw err;
         }
     }

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { checkUnitPermission, verifyActiveAccount } from '../auth/auth.middleware';
 import { OrganizationController } from './organization.controller';
 
-import { enrollmentRepo, exprienceRepo, grantRepo, organizationRepo, userRepo } from '../../core/container';
+import { checkPermission, enrollmentRepo, exprienceRepo, grantRepo, organizationRepo, userRepo } from '../../core/container';
 import { OrganizationService } from './organization.service';
 
 
@@ -23,12 +23,20 @@ router.post(
 );
 
 router.get(
+    '/lookup',
+    verifyActiveAccount,
+    checkPermission('organization:lookup'),
+    controller.lookup
+);
+
+router.get(
     '/',
     verifyActiveAccount,
+    checkUnitPermission('read'),
     controller.getAll
 );
 
-router.get('/:id', verifyActiveAccount,
+router.get('/:id', verifyActiveAccount, checkPermission('organization:lookup'),
     controller.getById);
 
 router.put(

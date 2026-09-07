@@ -23,7 +23,7 @@ const SaveCollaborator = ({
 
     const toast = useRef<Toast>(null);
     const [localCollaborator, setLocalCollaborator] = useState<Collaborator>({ ...item });
-    const [applicants, setApplicants] = useState<User[]>([]);
+    const [members, setMembers] = useState<User[]>([]);
     const [submitted, setSubmitted] = useState(false);
     const [loading, setLoading] = useState(false);
 
@@ -43,8 +43,8 @@ const SaveCollaborator = ({
             if (visible && !isEditMode) {
                 setLoading(true);
                 try {
-                    const data = await UserApi.getAll({});
-                    setApplicants(data);
+                    const data = await UserApi.lookup!({});
+                    setMembers(data);
                 } catch (err) {
                     console.error("Failed to fetch applicants:", err);
                 } finally {
@@ -64,7 +64,7 @@ const SaveCollaborator = ({
     const saveCollaborator = async () => {
         setSubmitted(true);
         const validation = validate();
-        
+
         if (!validation.valid) {
             toast.current?.show({ severity: 'warn', summary: 'Validation', detail: validation.message });
             return;
@@ -117,7 +117,7 @@ const SaveCollaborator = ({
                             id="applicant"
                             value={localCollaborator.member}
                             // In edit mode, we just use the current applicant as the only option
-                            options={isEditMode ? [localCollaborator.member as User] : applicants}
+                            options={isEditMode ? [localCollaborator.member as User] : members}
                             onChange={(e) => setLocalCollaborator({ ...localCollaborator, member: e.value })}
                             dataKey="_id"
                             optionLabel="name"

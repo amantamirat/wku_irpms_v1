@@ -1,5 +1,6 @@
 'use client';
 
+import { EntitySaveDialogProps } from "@/components/createEntityManager";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
@@ -8,10 +9,8 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
 import { useEffect, useRef, useState } from "react";
-import { Thematic, ThemeLevel, validateThematic } from "../models/thematic.model";
-import { useDirectorate } from "@/contexts/DirectorateContext";
-import { EntitySaveDialogProps } from "@/components/createEntityManager";
 import { ThematicApi } from "../api/thematic.api";
+import { Thematic, ThemeLevel, validateThematic } from "../models/thematic.model";
 
 const SaveThematic = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<Thematic>) => {
     const toast = useRef<Toast>(null);

@@ -6,11 +6,6 @@
   },
   {
     "category": "Permission Management",
-    "name": "permission:update",
-    "description": "Edit permissions"
-  },
-  {
-    "category": "Permission Management",
     "name": "permission:delete",
     "description": "Delete permissions"
   },
@@ -233,6 +228,11 @@
     "category": "Organization Management",
     "name": "organization:external:delete",
     "description": "Delete external units"
+  },
+  {
+    "category": "Organization Management",
+    "name": "organization:lookup",
+    "description": "Search and select organizations for contextual workflows"
   },
   {
     "category": "Calendar Management",
@@ -1062,6 +1062,10 @@
   {
     "category": "Position Management",
     "name": "position:read"
+  },
+  {
+    "category": "Position Management",
+    "name": "position:lookup"
   },
   {
     "category": "Position Management",

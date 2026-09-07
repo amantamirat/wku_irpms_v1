@@ -1,16 +1,10 @@
 import { Router } from "express";
-import { SettingController } from "./setting.controller";
-import { SettingService } from "./setting.service";
-import { SettingRepository } from "./setting.repository";
+import { checkPermission, settingService } from '../../core/container';
 import { verifyActiveAccount } from "../auth/auth.middleware";
-import { checkPermission } from '../../core/container';
+import { SettingController } from "./setting.controller";
 
 const router = Router();
-
-// Dependency Injection
-const repo = new SettingRepository();
-const service = new SettingService(repo);
-const controller = new SettingController(service);
+const controller = new SettingController(settingService);
 
 
 router.get("/", verifyActiveAccount,

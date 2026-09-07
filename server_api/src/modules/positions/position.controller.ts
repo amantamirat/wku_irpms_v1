@@ -3,7 +3,7 @@ import mongoose from "mongoose";
 import { PositionService } from "./position.service";
 import {
     CreatePositionDTO,
-    GetPositionsDTO,
+    FilterPositionsDTO,
     UpdatePositionDTO
 } from "./position.dto";
 import { successResponse, errorResponse } from "../../common/helpers/response";
@@ -34,13 +34,9 @@ export class PositionController {
     // 🟡 GET / FIND
     get = async (req: Request, res: Response) => {
         try {
-            const {populate } = req.query;
+           
 
-            const options: GetPositionsDTO = {
-                populate: populate === "true" // query param is string
-            };
-
-            const positions = await this.service.find(options);
+            const positions = await this.service.find();
             successResponse(res, 200, "Positions fetched successfully", positions);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

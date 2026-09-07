@@ -107,7 +107,7 @@ const AppMenu = () => {
             ]
         },
         {
-            label: 'User Profiles',
+            label: 'Administration',
             items: [
                 {
                     label: 'Users',
@@ -115,6 +115,7 @@ const AppMenu = () => {
                     to: '/users',
                     permission: 'user:read'
                 },
+                /*
                 {
                     label: 'Publications',
                     icon: PrimeIcons.BOOK,
@@ -132,13 +133,7 @@ const AppMenu = () => {
                     icon: PrimeIcons.ID_CARD,
                     to: '/users/enrollments',
                     permission: 'enrollment:read'
-                }
-            ]
-        },
-
-        {
-            label: 'Administration',
-            items: [
+                }*/
                 {
                     label: 'Accounts',
                     icon: PrimeIcons.SHIELD,

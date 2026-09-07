@@ -21,11 +21,8 @@ export interface UpdatePositionDTO {
    Get / Filter DTO
 ========================= */
 
-export interface GetPositionsDTO {
+export interface FilterPositionsDTO {
     search?: string;     // optional: for name search
-    populate?: boolean;  // keep if you actually use it
+    name?: string;
 }
 
-export interface ExistsPositionDTO {
-    name: string;
-}

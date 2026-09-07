@@ -56,7 +56,7 @@ const SaveOrganization = ({ visible, item, onHide, onComplete }: EntitySaveDialo
             try {
                 let scopes = getScopesByUnit(parentType);
                 if (scopes === "*") {
-                    scopes = await OrganizationApi.getAll({ type: parentType });
+                    scopes = await OrganizationApi.lookup!({ type: parentType });
                 }
                 if (isMounted) {
                     setParents(Array.isArray(scopes) ? scopes : []);
