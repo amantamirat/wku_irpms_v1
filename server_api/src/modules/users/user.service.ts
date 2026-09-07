@@ -11,6 +11,7 @@ import { Unit } from "../../common/constants/enums";
 import { EnrollmentRepository } from "./enrollments/enrollment.repository";
 import { ExperienceRepository } from "./experiences/experience.repository";
 import { PublicationRepository } from "./publications/publication.repository";
+import { FilterOptions } from "../../common/dtos/filter.dto";
 
 export class UserService {
 
@@ -50,8 +51,17 @@ export class UserService {
     // -------------------------
     // GET ALL (with optional filter)
     // -------------------------
-    async getAll(filter: FilterUsersDTO) {
-        return await this.repo.findAll(filter);
+    async getAll(filter: FilterUsersDTO, options?: FilterOptions) {
+        return await this.repo.findAll(filter, options);
+    }
+
+    async lookup(filter: FilterUsersDTO) {
+        const users = await this.getAll(filter);
+        return users.map(user => ({
+            _id: user._id,
+            name: user.name,
+            orcid: user.orcid,
+        }));
     }
 
     async findOne({ workspace, name }: FilterUsersDTO) {

@@ -1,4 +1,5 @@
 import { DeleteDto } from "../../common/dtos/delete.dto";
+import { FilterOptions } from "../../common/dtos/filter.dto";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
@@ -8,7 +9,7 @@ import { ICalendarRepository } from "../calendar/calendar.repository";
 import { GrantStatus } from "../grants/grant.model";
 import { IGrantRepository } from "../grants/grant.repository";
 import { IProjectRepository } from "../projects/project.repository";
-import { CreateCallDTO, GetCallsOptions, UpdateCallDTO } from "./call.dto";
+import { CreateCallDTO, FilterCallDTO, UpdateCallDTO } from "./call.dto";
 import { CallStatus } from "./call.model";
 import { ICallRepository } from "./call.repository";
 
@@ -44,12 +45,12 @@ export class CallService {
         return created;
     }
 
-    async getCalls(options: GetCallsOptions) {
-        return await this.repository.find(options);
+    async getCalls(filter: FilterCallDTO, options?: FilterOptions) {
+        return await this.repository.find(filter, options);
     }
 
-    async getById(id: string, populate?: boolean) {
-        const call = await this.repository.findById(id, populate);
+    async getById(id: string, options?: FilterOptions) {
+        const call = await this.repository.findById(id, options);
         if (!call) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         return call;
     }

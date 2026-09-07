@@ -23,8 +23,7 @@ interface CollaboratorsStepProps {
 
 export const CollaboratorsStep = ({ data, constraint, onUpdate, onNext, onBack }: CollaboratorsStepProps) => {
     const { hasPermission } = useAuth();
-    const canReadUsers = hasPermission(["user:read"]);
-
+    const canReadUsers = hasPermission(["user:lookup"]);
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
@@ -34,7 +33,7 @@ export const CollaboratorsStep = ({ data, constraint, onUpdate, onNext, onBack }
             const fetchUsers = async () => {
                 setLoading(true);
                 try {
-                    const res = await UserApi.getAll({});
+                    const res = await UserApi.lookup!();
                     setUsers(res);
                 } catch (err) {
                     console.error("Failed to fetch applicants", err);

@@ -39,11 +39,11 @@ export interface UpdateCallDTO {
 }
 
 // Options for querying calls
-export interface GetCallsOptions {
+export interface FilterCallDTO {
     calendar?: string;
     grant?: string;
     status?: CallStatus;
-    populate?: boolean;
+    //populate?: boolean;
 }
 
 export interface ExistsCallDTO {

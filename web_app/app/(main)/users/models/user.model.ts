@@ -38,9 +38,8 @@ export type User = {
     //populate?: boolean;
 }
 
-export interface GetUsersOptions {
-    //workspace?: string | Organization;
-    populate?: boolean;
+export interface FilterUsersOptions {
+    workspace?: string | Organization;
 }
 
 export const userUnits = [OrgnUnit.department, OrgnUnit.external]
@@ -89,31 +88,7 @@ export const validateUser = (user: User): { valid: boolean; message?: string } =
     return { valid: true };
 };
 
-export function sanitizeUser(user: Partial<User>): Partial<User> {
-    return {
-        ...user,
-        workspace:
-            typeof user.workspace === 'object' && user.workspace !== null
-                ? (user.workspace as any)._id
-                : user.workspace,
 
-        specializations: user.specializations
-            ?.map(spec =>
-                typeof spec === 'object' && spec !== null
-                    ? (spec as any)._id
-                    : spec
-            )
-            .filter((id): id is string => typeof id === 'string'),
-
-        roles: user.roles
-            ?.map(role =>
-                typeof role === 'object' && role !== null
-                    ? (role as Role)._id
-                    : role
-            )
-            .filter((id): id is string => typeof id === 'string'),
-    };
-}
 
 
 export const createEmptyUser = (): User => ({

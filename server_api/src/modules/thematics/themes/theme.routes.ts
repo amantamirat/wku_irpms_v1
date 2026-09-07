@@ -1,21 +1,19 @@
 import { Router } from 'express';
+
 import { PERMISSIONS } from '../../../common/constants/permissions';
 import { verifyActiveAccount } from '../../auth/auth.middleware';
 import { checkPermission } from '../../../core/container';
 import { ThemeController } from './theme.controller';
 import { ThemeService } from './theme.service';
-import { ThemeRepository } from './theme.repository';
-import { ThematicRepository } from '../thematic.repository';
-import { SettingService } from '../../settings/setting.service';
-import { SettingRepository } from '../../settings/setting.repository';
-import { upload } from '../../../util/multer';
 import { thematicRepo, themeRepo } from '../../../core/container';
 
-const controller = new ThemeController(new ThemeService(
-    themeRepo, thematicRepo));
+const controller = new ThemeController(
+    new ThemeService(themeRepo, thematicRepo)
+);
 
 const router: Router = Router();
 
+// Create
 router.post(
     '/',
     verifyActiveAccount,
@@ -23,15 +21,15 @@ router.post(
     controller.create
 );
 
-/*
-router.post(
-    '/import',
+// Lookup - currently uses the same get controller
+router.get(
+    '/lookup',
     verifyActiveAccount,
-    checkPermission([PERMISSIONS.THEME.IMPORT]),
-    controller.import
+    checkPermission("theme:lookup"),
+    controller.get
 );
-*/
 
+// Read / management
 router.get(
     '/',
     verifyActiveAccount,
@@ -39,6 +37,7 @@ router.get(
     controller.get
 );
 
+// Update
 router.put(
     '/:id',
     verifyActiveAccount,
@@ -46,20 +45,12 @@ router.put(
     controller.update
 );
 
+// Delete
 router.delete(
     '/:id',
     verifyActiveAccount,
     checkPermission([PERMISSIONS.THEME.DELETE]),
     controller.delete
 );
-/*
-router.post(
-    "/import/:id",
-    verifyActiveAccount,
-    checkPermission("theme:import"),
-    upload.single('file'),
-    controller.import
-);
-*/
 
 export default router;

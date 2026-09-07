@@ -5,7 +5,7 @@ import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { ICallRepository } from "../calls/call.repository";
 import { IProjectRepository } from "../projects/project.repository";
 import { IEnrollmentRepository } from "../users/enrollments/enrollment.repository";
-import { CreateCalendarDTO, GetCalendarDTO, UpdateCalendarDTO } from "./calendar.dto";
+import { CreateCalendarDTO, FilterCalendarDTO, UpdateCalendarDTO } from "./calendar.dto";
 import { CalendarStatus } from "./calendar.model";
 import { CalendarRepository } from "./calendar.repository";
 
@@ -31,7 +31,7 @@ export class CalendarService {
         }
     }
 
-    async get(option: GetCalendarDTO) {
+    async get(option: FilterCalendarDTO) {
         const calendars = await this.repository.find(option);
         return calendars;
     }

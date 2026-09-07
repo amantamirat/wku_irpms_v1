@@ -11,7 +11,7 @@ export type Theme = {
     updatedAt?: Date;
 }
 
-export interface GetThemesOptions {
+export interface FilterThemesOptions {
     parent?: string | Theme;
     thematicArea?: string | Thematic;
     level?: number;
@@ -29,16 +29,3 @@ export const validateTheme = (theme: Theme): { valid: boolean; message?: string 
 };
 
 
-export function sanitizeTheme(theme: Partial<Theme>): Partial<Theme> {
-    return {
-        ...theme,
-        thematicArea:
-            typeof theme.thematicArea === 'object' && theme.thematicArea !== null
-                ? (theme.thematicArea as any)._id
-                : theme.thematicArea,
-        parent:
-            typeof theme.parent === 'object' && theme.parent !== null
-                ? (theme.parent as Theme)._id
-                : theme.parent,
-    };
-}

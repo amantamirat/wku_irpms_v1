@@ -1,47 +1,38 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { GetThemesOptions, sanitizeTheme, Theme } from "../models/theme.model";
+import { FilterThemesOptions, Theme } from "../models/theme.model";
+import { sanitize } from "@/utils/sanitizer";
 
 const end_point = '/thematics/themes';
 
-export const ThemeApi: EntityApi<Theme, GetThemesOptions> = {
+export const ThemeApi: EntityApi<Theme, FilterThemesOptions> = {
 
-    async getAll(options?: GetThemesOptions) {
-        const query = new URLSearchParams();
+    async getAll(options?: FilterThemesOptions) {
+        return ApiClient.get(end_point, options);
+    },
 
-        if (options) {
-            const sanitized = sanitizeTheme(options);
-            if (options.parent) query.append("parent", sanitized.parent as string);
-            if (options.thematicArea) query.append("thematicArea", sanitized.thematicArea as string);
-            if (options.level !== undefined)
-                query.append("level", String(sanitized.level));
-        }
-
-        const url = query.toString()
-            ? `${end_point}?${query.toString()}`
-            : end_point;
-
-        return ApiClient.get(url);
+    async lookup(options?: FilterThemesOptions) {
+        return ApiClient.get(`${end_point}/lookup`, options);
     },
 
     async create(theme) {
-        const sanitized = sanitizeTheme(theme);
+        const sanitized = sanitize(theme);
         return ApiClient.post(end_point, sanitized);
     },
 
     async update(theme) {
         if (!theme._id) throw new Error("_id required");
-
-        const sanitized = sanitizeTheme(theme);
+        const sanitized = sanitize(theme);
         return ApiClient.put(`${end_point}/${theme._id}`, sanitized);
     },
 
     async delete(theme) {
-        //if (!theme._id) throw new Error("_id required");
+        if (!theme._id) throw new Error("_id required");
         return ApiClient.delete(`${end_point}/${theme._id}`);
     },
 
+    /*
     async import(formData: FormData, thematicId?: string) {
         return ApiClient.post(`${end_point}/import/${thematicId}`, formData);
-    }
+    }*/
 };

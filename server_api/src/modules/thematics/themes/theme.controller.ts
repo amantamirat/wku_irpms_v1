@@ -8,8 +8,7 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 
 export class ThemeController {
 
-    constructor(private service: ThemeService) {
-    }
+    constructor(private service: ThemeService) { }
 
     create = async (req: Request, res: Response) => {
         try {
@@ -28,13 +27,12 @@ export class ThemeController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { parent, thematicArea, level, populate } = req.query;
+            const { parent, thematicArea, level } = req.query;
             const themes = await this.service.getThemes({
                 parent: parent as string,
                 thematicArea: thematicArea as string,
                 level: level !== undefined ? Number(level) : undefined,
-                ...(populate !== undefined && { populate: populate === "true" })
-            });
+            }, { populate: true });
             successResponse(res, 200, "Themes fetched successfully", themes);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

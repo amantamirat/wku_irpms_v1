@@ -5,10 +5,11 @@ import MyBadge from "@/templates/MyBadge";
 import { Calendar } from "../../calendars/models/calendar.model";
 import { Grant } from "../../grants/models/grant.model";
 import { CallApi } from "../api/call.api";
-import { Call, createEmptyCall, GetCallsOptions } from "../models/call.model";
+import { Call, createEmptyCall, FilterCallsOptions } from "../models/call.model";
 import { CALL_STATUS_ORDER, CALL_TRANSITIONS } from "../models/call.state-machine";
 import CallDetail from "./CallDetail";
 import SaveCall from "./SaveCall";
+import { Organization } from "../../organizations/models/organization.model";
 //import SaveCall from "./new/SaveCall";
 
 interface CallManagerProps {
@@ -20,7 +21,7 @@ interface CallManagerProps {
 
 const CallManager = ({ calendar, grant }: CallManagerProps) => {
 
-    const Manager = createEntityManager<Call, GetCallsOptions | undefined>({
+    const Manager = createEntityManager<Call, FilterCallsOptions | undefined>({
         title: "Strategic Calls Management",
         itemName: "Call",
         api: CallApi,
@@ -34,6 +35,17 @@ const CallManager = ({ calendar, grant }: CallManagerProps) => {
                     const calendar = c.calendar as Calendar;
                     if (typeof calendar === "object") {
                         return calendar.year;
+                    }
+                    return "-";
+                }
+            },
+
+            {
+                header: "Organization",
+                body: (c: Call) => {
+                    const org = c.organization as Organization;
+                    if (typeof org === "object") {
+                        return org.name;
                     }
                     return "-";
                 }

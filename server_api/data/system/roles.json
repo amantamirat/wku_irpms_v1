@@ -69,15 +69,16 @@
     {
         "name": "applicant",
         "permissions": [
-            "calendar:read",
-            "call:read",
+            "calendar:lookup",
+            "grant:lookup",
+            "user:lookup",
+            "theme:lookup",
+            "call:lookup",
+            "verification-conf:lookup",
             "call.stage:read",
             "constraint:read",
             "project:read",
-            "user:read",
             "collaborator:*",
-            "thematic:read",
-            "theme:read",
             "phase:*",
             "application:apply",
             "application:read",
@@ -92,7 +93,7 @@
     {
         "name": "reviewer",
         "permissions": [
-            "calendar:read",
+            "calendar:lookup",
             "reviewer:read",
             "reviewer:transition.pending.accepted",
             "reviewer:transition.accepted.submitted",

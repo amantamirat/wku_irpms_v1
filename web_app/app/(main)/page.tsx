@@ -21,9 +21,8 @@ import UpcomingDeadlines from "./dashboard/UpcomingDeadlines";
 const Dashboard = () => {
     const { hasPermission } = useAuth();
     const isAdmin = hasPermission([PERMISSIONS.REPORT.OVERVIEW]);
-
-    const canApply = hasPermission("application:apply");
-    const canCreateVerification = hasPermission("verification:create");
+    const canLookCalls = hasPermission("call:lookup");    
+    const canLookVerificationConfs = hasPermission("verification-conf:lookup");
 
     const [loadingEvals, setLoadingEvals] = useState(true);
     const [loadingCollabs, setLoadingCollabs] = useState(true);
@@ -62,6 +61,14 @@ const Dashboard = () => {
         fetchCollabs();
     }, []);
 
+    // Check if the left section has any active content (loading states or data)
+    const hasLeftContent = 
+        loadingEvals || 
+        loadingCollabs || 
+        (pendingCollabs && pendingCollabs.length > 0) || 
+        (pendingReviewees && pendingReviewees.length > 0) || 
+        canLookCalls;
+
     return (
         <div className="grid">
             {/* 📊 REPORT OVERVIEW / STATS ROW */}
@@ -71,63 +78,74 @@ const Dashboard = () => {
                 </div>
             )}
 
-            {/* 🔵 LEFT COLUMN: Core Work */}
-            <div className="col-12 lg:col-8">
+            {/* 🔵 LEFT COLUMN: Core Work (Only rendered if there's content to display) */}
+            {hasLeftContent && (
+                <div className="col-12 lg:col-8">
 
-                {/* 1. Collaboration Invitations */}
-                {(loadingCollabs || (pendingCollabs && pendingCollabs.length > 0)) && (
-                    <div className="card border-none shadow-1 p-4 mb-4">
-                        {loadingCollabs ? (
-                            <div className="flex flex-column align-items-center justify-content-center p-4">
-                                <ProgressSpinner style={{ width: '35px', height: '35px' }} strokeWidth="4" />
-                                <span className="mt-2 text-500 text-sm font-medium">Loading pending collaborations...</span>
-                            </div>
-                        ) : (
-                            <PendingCollabManager items={pendingCollabs!} />
-                        )}
-                    </div>
-                )}
-
-                {/* 2. Reviewer Tasks */}
-                {(loadingEvals || (pendingReviewees && pendingReviewees.length > 0)) && (
-                    <div className="card border-none shadow-1 p-4 mb-4">
-                        {loadingEvals ? (
-                            <div className="flex flex-column align-items-center justify-content-center p-4">
-                                <ProgressSpinner style={{ width: '35px', height: '35px' }} strokeWidth="4" />
-                                <span className="mt-2 text-500 text-sm font-medium">Loading pending evaluations...</span>
-                            </div>
-                        ) : (
-                            <PendingEvalsManager items={pendingReviewees!} />
-                        )}
-                    </div>
-                )}
-
-                {/* 3. Call Opportunities */}
-                {canApply && (
-                    <div className="card border-none shadow-1 p-4 mb-4">
-                        <div className="flex align-items-center justify-content-between mb-4">
-                            <h5 className="m-0 text-xl font-bold">Call Opportunities</h5>
+                    {/* 1. Collaboration Invitations */}
+                    {(loadingCollabs || (pendingCollabs && pendingCollabs.length > 0)) && (
+                        <div className="card border-none shadow-1 p-4 mb-4">
+                            {loadingCollabs ? (
+                                <div className="flex flex-column align-items-center justify-content-center p-4">
+                                    <ProgressSpinner style={{ width: '35px', height: '35px' }} strokeWidth="4" />
+                                    <span className="mt-2 text-500 text-sm font-medium">Loading pending collaborations...</span>
+                                </div>
+                            ) : (
+                                <PendingCollabManager items={pendingCollabs!} />
+                            )}
                         </div>
-                        <CallOpportunityGrid />
-                    </div>
-                )}
-            </div>
+                    )}
 
-            {/* 🟠 RIGHT COLUMN: Utilities & Widgets */}
-            <div className="col-12 lg:col-4">
-                <div className="card border-none shadow-1 p-4 mb-4">
-                    <h5 className="m-0 text-xl font-bold mb-3">Upcoming Deadlines</h5>
-                    <UpcomingDeadlines />
+                    {/* 2. Reviewer Tasks */}
+                    {(loadingEvals || (pendingReviewees && pendingReviewees.length > 0)) && (
+                        <div className="card border-none shadow-1 p-4 mb-4">
+                            {loadingEvals ? (
+                                <div className="flex flex-column align-items-center justify-content-center p-4">
+                                    <ProgressSpinner style={{ width: '35px', height: '35px' }} strokeWidth="4" />
+                                    <span className="mt-2 text-500 text-sm font-medium">Loading pending evaluations...</span>
+                                </div>
+                            ) : (
+                                <PendingEvalsManager items={pendingReviewees!} />
+                            )}
+                        </div>
+                    )}
+
+                    {/* 3. Call Opportunities */}
+                    {canLookCalls && (
+                        <div className="card border-none shadow-1 p-4 mb-4">
+                            <div className="flex align-items-center justify-content-between mb-4">
+                                <h5 className="m-0 text-xl font-bold">Call Opportunities</h5>
+                            </div>
+                            <CallOpportunityGrid />
+                        </div>
+                    )}
                 </div>
-                {/* Verification Window placed here for Applicants */}
-                {canCreateVerification && (
-                    <div className="card border-none shadow-1 p-4 mb-4">
-                        <h5 className="m-0 text-xl font-bold mb-3">Verification Deadlines</h5>
-                        <VerificationWindow />
+            )}
+
+            {/* 🟠 RIGHT COLUMN: Expands to full width (lg:col-12) if left column is absent */}
+            <div className={`col-12 ${hasLeftContent ? 'lg:col-4' : 'lg:col-12'}`}>
+                <div className="grid">
+                    {/* Upcoming Deadlines Widget */}
+                    <div className={`col-12 ${!hasLeftContent && canLookVerificationConfs ? 'md:col-6' : ''}`}>
+                        <div className="card border-none shadow-1 p-4 mb-4">
+                            <h5 className="m-0 text-xl font-bold mb-3">Upcoming Deadlines</h5>
+                            <UpcomingDeadlines />
+                        </div>
                     </div>
-                )}
+
+                    {/* Verification Deadlines Widget */}
+                    {canLookVerificationConfs && (
+                        <div className={`col-12 ${!hasLeftContent ? 'md:col-6' : ''}`}>
+                            <div className="card border-none shadow-1 p-4 mb-4">
+                                <h5 className="m-0 text-xl font-bold mb-3">Verification Deadlines</h5>
+                                <VerificationWindow />
+                            </div>
+                        </div>
+                    )}
+                </div>
             </div>
 
+            {/* 🔗 QUICK LINKS ROW */}
             <div className="col-12">
                 <QuickLinks />
             </div>

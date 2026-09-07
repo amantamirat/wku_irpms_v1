@@ -1,6 +1,6 @@
 import { Request, Response } from 'express';
 import { GrantService } from './grant.service';
-import { CreateGrantDTO, GetGrantsDTO, UpdateGrantDTO } from './grant.dto';
+import { CreateGrantDTO, FilterGrantsDTO, UpdateGrantDTO } from './grant.dto';
 import { AuthenticatedRequest } from '../auth/auth.middleware';
 import { successResponse, errorResponse } from '../../common/helpers/response';
 import { ERROR_CODES } from '../../common/errors/error.codes';
@@ -32,14 +32,13 @@ export class GrantController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { organization, thematic, status, populate } = req.query;
-            const options: GetGrantsDTO = {
+            const { organization, thematic, status } = req.query;
+            const options: FilterGrantsDTO = {
                 organization: organization as string,
                 thematic: thematic as string,
                 status: status as GrantStatus,
-                ...(populate !== undefined && { populate: populate === "true" })
             };
-            const grants = await this.service.get(options);
+            const grants = await this.service.get(options, { populate: true });
             successResponse(res, 200, "Grants fetched successfully", grants);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -47,6 +46,35 @@ export class GrantController {
     }
 
 
+    lookup = async (req: Request, res: Response) => {
+        try {
+            const { organization, thematic, status } = req.query;
+
+            const filter: FilterGrantsDTO = {
+                organization: organization as string,
+                thematic: thematic as string,
+                status: status as GrantStatus,
+            };
+
+            const grants = await this.service.get(filter);
+
+            /*
+            const result = grants.map(grant => ({
+                id: grant._id,
+                title: grant.title,
+                amount: grant.amount,
+            }));*/
+
+            successResponse(
+                res,
+                200,
+                "Grants lookup fetched successfully",
+                grants
+            );
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
 
     getById = async (req: Request, res: Response) => {
         try {

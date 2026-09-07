@@ -1,11 +1,12 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
-import { GetUsersOptions, IOwnership, User, sanitizeUser } from "../models/user.model";
+import { FilterUsersOptions, IOwnership, User } from "../models/user.model";
+import { sanitize } from "@/utils/sanitizer";
 
 const end_point = "/users";
 
 
-export const UserApi: EntityApi<User, GetUsersOptions | undefined> & {
+export const UserApi: EntityApi<User, FilterUsersOptions | undefined> & {
 
     updateRoles: (userId: string, roles: string[]) => Promise<User>;
     updateOwnerships: (userId: string, ownerships: IOwnership[]) => Promise<User>;
@@ -13,30 +14,25 @@ export const UserApi: EntityApi<User, GetUsersOptions | undefined> & {
 } = {
 
     async create(user: Partial<User>): Promise<User> {
-        const sanitized = sanitizeUser(user);
+        const sanitized = sanitize(user);
         const created = await ApiClient.post(end_point, sanitized);
         return created as User;
     },
 
-    async getAll(options?: GetUsersOptions): Promise<User[]> {
-        const query = new URLSearchParams();
-        if (options) {
-            if (options.populate !== undefined) {
-                query.append("populate", String(options.populate));
-            }
-        }
-        const qs = query.toString();
-        const url = `${end_point}${qs ? `?${qs}` : ""}`;
-        const data = await ApiClient.get(url);
+    async getAll(options?: FilterUsersOptions): Promise<User[]> {
+        const data = await ApiClient.get(end_point, options);
         return data as User[];
+    },
+
+
+    async lookup(options?: FilterUsersOptions) {
+        return ApiClient.get(`${end_point}/lookup`, options);
     },
 
     async update(user: Partial<User>): Promise<User> {
         if (!user._id) throw new Error("_id required");
-
-        const sanitized = sanitizeUser(user);
+        const sanitized = sanitize(user);
         const updated = await ApiClient.put(`${end_point}/${user._id}`, sanitized);
-
         return updated as User;
     },
 
@@ -77,7 +73,6 @@ export const UserApi: EntityApi<User, GetUsersOptions | undefined> & {
 
     async delete(user: Partial<User>): Promise<boolean> {
         if (!user._id) throw new Error("_id required");
-
         return ApiClient.delete(`${end_point}/${user._id}`);
     },
 };

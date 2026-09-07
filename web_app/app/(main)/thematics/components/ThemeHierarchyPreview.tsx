@@ -8,7 +8,6 @@ import { Thematic, themeLevelIndex } from '../models/thematic.model';
 import { ThemeApi } from '../themes/api/theme.api';
 import { buildTree, ThemeNode } from '../models/thematic.node';
 
-
 interface Props {
     thematic: Thematic;
 }
@@ -46,7 +45,7 @@ const ThemeHierarchyPreview = ({ thematic }: Props) => {
     const loadHierarchy = async () => {
         try {
             setLoading(true);
-            const themes = await ThemeApi.getAll({ thematicArea: thematic._id });
+            const themes = await ThemeApi.lookup!({ thematicArea: thematic._id });
 
             if (themes.length > 0) {
                 // Create a map for quick lookups

@@ -1,7 +1,7 @@
 'use client';
 
 import { createEntityManager } from "@/components/createEntityManager";
-import { Theme, GetThemesOptions } from "../models/theme.model"; // Ensure ThemeLevel is imported
+import { Theme, FilterThemesOptions } from "../models/theme.model"; // Ensure ThemeLevel is imported
 import { ThemeApi } from "../api/theme.api";
 import SaveTheme from "./SaveTheme";
 import { Thematic, ThemeLevel } from "../../models/thematic.model";
@@ -14,7 +14,7 @@ interface ThemeManagerProps {
 
 const ThemeManager = ({ thematic, level = 0, parent }: ThemeManagerProps) => {
 
-    const Manager = createEntityManager<Theme, GetThemesOptions | undefined>({
+    const Manager = createEntityManager<Theme, FilterThemesOptions | undefined>({
         title: "Manage Themes",
         itemName: "Theme",
         api: ThemeApi,

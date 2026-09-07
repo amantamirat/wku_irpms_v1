@@ -15,6 +15,11 @@ const router: Router = Router();
 router.post('/', verifyActiveAccount, checkPermission([PERMISSIONS.CALENDAR.CREATE]),
   controller.create);
 
+// Lookup - currently uses the same get controller
+router.get('/lookup', verifyActiveAccount,
+  checkPermission("calendar:lookup"),
+  controller.get
+);
 router.get('/', verifyActiveAccount,
   checkPermission([PERMISSIONS.CALENDAR.READ]),
   controller.get

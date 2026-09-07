@@ -17,8 +17,8 @@ const VerificationWindow = () => {
     useEffect(() => {
         const loadUpcomingVerifications = async () => {
             try {
-                const data = await VerificationConfigurationApi.getAll({ 
-                    status: VerificationConfigurationStatus.active 
+                const data = await VerificationConfigurationApi.lookup!({
+                    status: VerificationConfigurationStatus.active
                 });
                 setConfigurations(Array.isArray(data) ? data : []);
             } catch (error) {
@@ -54,7 +54,7 @@ const VerificationWindow = () => {
                 // Safely extract populated grant and nested organization
                 const grantObj = typeof config.grant === 'object' && config.grant ? (config.grant as any) : null;
                 const grantTitle = grantObj?.title || 'Grant';
-                
+
                 const orgObj = grantObj && typeof grantObj.organization === 'object' ? grantObj.organization : null;
                 const orgName = orgObj?.name || '';
 
@@ -63,7 +63,7 @@ const VerificationWindow = () => {
                     config.deadline ||
                     (config as any).dueDate ||
                     (config as any).verificationDeadline;
-                    
+
                 const deadline = deadlineRaw ? new Date(deadlineRaw) : null;
                 const isValidDate = deadline && !isNaN(deadline.getTime());
 
@@ -79,9 +79,8 @@ const VerificationWindow = () => {
                     >
                         {/* DATE BADGE */}
                         <div
-                            className={`flex flex-column align-items-center justify-content-center border-round surface-100 p-2 ${
-                                isUrgent ? 'bg-orange-100 text-orange-700' : ''
-                            }`}
+                            className={`flex flex-column align-items-center justify-content-center border-round surface-100 p-2 ${isUrgent ? 'bg-orange-100 text-orange-700' : ''
+                                }`}
                             style={{ minWidth: '50px' }}
                         >
                             <span className="text-xs font-bold uppercase">

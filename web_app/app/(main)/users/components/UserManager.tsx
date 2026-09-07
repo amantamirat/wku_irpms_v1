@@ -1,7 +1,7 @@
 'use client';
 import { useState } from "react";
 import { createEntityManager } from "@/components/createEntityManager";
-import { User, createEmptyUser, GetUsersOptions } from "../models/user.model";
+import { FilterUsersOptions, User, createEmptyUser } from "../models/user.model";
 import { UserApi } from "../api/user.api";
 import RoleDialog from "./dialogs/RoleDialog"; // The component we refactored
 import MyBadge from "@/templates/MyBadge";
@@ -16,7 +16,7 @@ const ManageUsers = () => {
     const [ownerhipDialogVisible, setOwnershipDialogVisible] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
 
-    const EntityManager = createEntityManager<User, GetUsersOptions>({
+    const EntityManager = createEntityManager<User, FilterUsersOptions>({
         title: "Manage Users",
         itemName: "User",
         api: UserApi,
@@ -60,7 +60,6 @@ const ManageUsers = () => {
                 )
             }
         ],
-        query: () => ({ populate: true }),
         createNew: createEmptyUser,
         SaveDialog: SaveUser,
         permissionPrefix: "user",

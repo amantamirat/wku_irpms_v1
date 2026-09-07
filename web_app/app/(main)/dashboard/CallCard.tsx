@@ -20,9 +20,8 @@ interface CallCardProps {
     onApply?: (callId: string) => void;
 }
 
-export const OpenCallCard = ({ call }: CallCardProps) => {
+export const CallCard = ({ call }: CallCardProps) => {
     const router = useRouter();
-
     // Direct Data Mapping 
     const grant = call.grant as Grant;
     const calendar = call.calendar as Calendar;

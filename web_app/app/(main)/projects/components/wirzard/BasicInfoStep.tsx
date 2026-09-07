@@ -1,5 +1,4 @@
 'use client';
-
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
@@ -18,10 +17,10 @@ import { Grant } from '@/app/(main)/grants/models/grant.model';
 import { GrantStatus } from '@/app/(main)/grants/models/grant.state-machine';
 import { ThemeNode, buildTree } from '@/app/(main)/thematics/models/thematic.node';
 import { Project } from '../../models/project.model';
+import { extractId } from '@/utils/extractId';
 
 interface BasicInfoStepProps {
     data: Partial<Project>;
-    //call?: Call; // Strictly a Call object or undefined
     onUpdate: (data: Partial<Project>) => void;
     onNext: () => void;
     isEditModeOnly?: boolean;
@@ -34,7 +33,7 @@ export const BasicInfoStep = ({ data, onUpdate, onNext, isEditModeOnly }: BasicI
     const [themeNodes, setThemeNodes] = useState<ThemeNode[]>([]);
 
     // --- Applicants State ---
-    const [applicants, setApplicants] = useState<any[]>([]);
+    const [users, setUsers] = useState<any[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
 
     // 1. Resolve active Call object directly from prop or data.call
@@ -66,39 +65,16 @@ export const BasicInfoStep = ({ data, onUpdate, onNext, isEditModeOnly }: BasicI
     const isCalendarLocked = isEditModeOnly || hasCall;
     const isLeadLocked = isEditModeOnly || hasCall;
 
-    // 3. Sync Call, Grant, and Calendar back to project state
-    /*
-    useEffect(() => {
-        if (activeCall) {
-            const updates: Partial<Project> = {};
-
-            if (!data.call) {
-                updates.call = activeCall as any;
-            }
-            if (activeCall.grant && !data.grant) {
-                updates.grant = activeCall.grant as any;
-            }
-            if (activeCall.calendar && !data.calendar) {
-                updates.calendar = activeCall.calendar as any;
-            }
-
-            if (Object.keys(updates).length > 0) {
-                onUpdate(updates);
-            }
-        }
-    }, [activeCall]);
-    */
-
-    // 4. Load Applicants
+    // 4. Load Users    
     useEffect(() => {
         const fetchUsers = async () => {
             if (!isLeadLocked) {
                 setLoadingUsers(true);
                 try {
-                    const res = await UserApi.getAll({});
-                    setApplicants(res || []);
+                    const res = await UserApi.lookup!();
+                    setUsers(res || []);
                 } catch (err) {
-                    console.error("Failed to fetch applicants:", err);
+                    console.error("Failed to fetch users:", err);
                 } finally {
                     setLoadingUsers(false);
                 }
@@ -112,12 +88,12 @@ export const BasicInfoStep = ({ data, onUpdate, onNext, isEditModeOnly }: BasicI
         const loadInitialData = async () => {
             try {
                 if (!isGrantLocked) {
-                    const gData = await GrantApi.getAll({ status: GrantStatus.active, populate: true });
+                    const gData = await GrantApi.lookup!({ status: GrantStatus.active});
                     setGrants(gData || []);
                 }
 
                 if (!isCalendarLocked) {
-                    const cData = await CalendarApi.getAll();
+                    const cData = await CalendarApi.lookup!();
                     setCalendars(cData || []);
                 }
             } catch (err) {
@@ -135,7 +111,7 @@ export const BasicInfoStep = ({ data, onUpdate, onNext, isEditModeOnly }: BasicI
                 return;
             }
 
-            const grantId = typeof activeGrant === 'object' ? (activeGrant as any)._id : activeGrant;
+            const grantId = extractId(activeGrant);
 
             if (grantId) {
                 let fullGrantObject = typeof activeGrant === 'object' ? (activeGrant as Grant) : null;
@@ -148,8 +124,8 @@ export const BasicInfoStep = ({ data, onUpdate, onNext, isEditModeOnly }: BasicI
 
                 if (thematicId) {
                     try {
-                        const tData = await ThemeApi.getAll({ thematicArea: thematicId });
-                        setThemeNodes(buildTree(tData));
+                        const tData = await ThemeApi.lookup!({ thematicArea: thematicId });
+                        setThemeNodes(buildTree(tData || []));
                     } catch (err) {
                         console.error('Failed to fetch themes:', err);
                         setThemeNodes([]);
@@ -276,7 +252,7 @@ export const BasicInfoStep = ({ data, onUpdate, onNext, isEditModeOnly }: BasicI
                     ) : (
                         <Dropdown
                             value={selectedLeadId}
-                            options={applicants}
+                            options={users}
                             onChange={(e) => handleLeadChange(e.value)}
                             optionLabel="name"
                             optionValue="_id"

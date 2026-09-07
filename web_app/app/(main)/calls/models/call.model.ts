@@ -26,11 +26,11 @@ export type Call = {
     updatedAt?: Date;
 };
 
-export interface GetCallsOptions {
+export interface FilterCallsOptions {
     status?: CallStatus;
     calendar?: string;
     grant?: string;
-    populate?: boolean;
+    //populate?: boolean;
 }
 
 export const validateCall = (call: Partial<Call>): { valid: boolean; message?: string } => {

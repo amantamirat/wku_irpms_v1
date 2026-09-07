@@ -9,9 +9,10 @@ import { IProjectRepository } from "../projects/project.repository";
 import { IThematicRepository } from "../thematics/thematic.repository";
 import { ThematicStatus } from "../thematics/thematic.state-machine";
 import { CompositionRepository } from "../compositions/composition.repository";
-import { CreateGrantDTO, GetGrantsDTO, UpdateGrantDTO } from "./grant.dto";
+import { CreateGrantDTO, FilterGrantsDTO, UpdateGrantDTO } from "./grant.dto";
 import { FundingSource, GrantStatus } from "./grant.model";
 import { IGrantRepository } from "./grant.repository";
+import { FilterOptions } from "../../common/dtos/filter.dto";
 
 
 export class GrantService {
@@ -48,8 +49,12 @@ export class GrantService {
         return created;
     }
 
-    async get(options: GetGrantsDTO) {
-        return await this.repository.find(options);
+    async get(filter: FilterGrantsDTO, options?: FilterOptions) {
+        return await this.repository.find(filter, options);
+    }
+
+    async lookup(filter: FilterGrantsDTO) {
+        return await this.repository.find(filter);
     }
 
     async getById(id: string) {

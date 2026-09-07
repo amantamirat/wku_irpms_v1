@@ -25,6 +25,13 @@ router.post(
 );
 
 router.get(
+    '/lookup',
+    verifyActiveAccount,
+    checkPermission("verification-conf:lookup"),
+    verificationConfController.get
+);
+
+router.get(
     '/',
     verifyActiveAccount,
     checkPermission("verification-conf:read"),

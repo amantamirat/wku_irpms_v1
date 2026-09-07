@@ -139,7 +139,7 @@ export class ThematicService {
         if (!thematicDoc) throw new AppError(ERROR_CODES.THEMATIC_NOT_FOUND);
         if (thematicDoc.status !== ThematicStatus.draft) throw new AppError(ERROR_CODES.THEMATIC_NOT_DRAFT);
         // 1. Delete all themes belonging to this area
-        await this.themeRepo.deleteMany({ thematic: id });
+        await this.themeRepo.deleteMany({ thematicArea: id });
         // 2. Delete the thematic area
         return await this.repository.delete(id);
     }

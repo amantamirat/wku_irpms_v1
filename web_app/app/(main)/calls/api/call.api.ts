@@ -1,33 +1,21 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
 import { TransitionRequestDto } from "@/types/util";
-import { Call, GetCallsOptions, sanitizeCall } from "../models/call.model";
+import { Call, FilterCallsOptions, sanitizeCall } from "../models/call.model";
 
 const end_point = "/calls";
 
-export const CallApi: EntityApi<Call, GetCallsOptions | undefined>
-= {
+export const CallApi: EntityApi<Call, FilterCallsOptions | undefined>
+    = {
     // ---------------------------
     // Fetch / Query
     // ---------------------------
-    async getAll(options: GetCallsOptions) {
-        const query = new URLSearchParams();
+    async getAll(filter: FilterCallsOptions) {
+        return ApiClient.get(end_point, filter);
+    },
 
-        if (options) {
-            const sanitized = sanitizeCall(options);
-
-            // Dynamically append all present keys
-            Object.entries(sanitized).forEach(([key, value]) => {
-                if (value !== undefined && value !== null) {
-                    query.append(key, String(value));
-                }
-            });
-        }
-
-        const qs = query.toString();
-        const url = `${end_point}${qs ? `?${qs}` : ""}`;
-
-        return ApiClient.get(url);
+    async lookup(filter) {
+        return ApiClient.get(`${end_point}/lookup`, filter);
     },
 
     // ---------------------------
@@ -37,7 +25,7 @@ export const CallApi: EntityApi<Call, GetCallsOptions | undefined>
         const query = populate !== undefined ? `?populate=${populate}` : '';
         return ApiClient.get(`${end_point}/${id}${query}`);
     },
-   
+
 
     // ---------------------------
     // Create

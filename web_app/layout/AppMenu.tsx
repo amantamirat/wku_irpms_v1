@@ -25,7 +25,6 @@ const AppMenu = () => {
                 }
             ]
         },
-
         {
             label: 'Project',
             items: [
@@ -33,16 +32,13 @@ const AppMenu = () => {
                     label: 'Projects',
                     icon: 'pi pi-folder-open',
                     to: '/projects',
-                    permission: 'project:create'
+                    permission: 'project:read'
                 },
                 {
                     label: 'Applications',
                     icon: 'pi pi-list',
                     to: '/applications/stage',
-                    permission: [
-                        'application:transition.pending.accepted',
-                        'application:transition.pending.rejected'
-                    ]
+                    permission: 'application:read',
                 },
                 {
                     label: 'Verifications',
@@ -52,32 +48,20 @@ const AppMenu = () => {
                 }
             ]
         },
-
         {
-            label: 'Calls',
+            label: 'Opportunities',
             items: [
                 {
                     label: 'Calls',
                     icon: 'pi pi-fw pi-megaphone',
                     to: '/calls',
-                    permission: 'call:create'
-                }
-            ]
-        },
-        {
-            label: 'Grants',
-            items: [
-                {
-                    label: 'Calendars',
-                    icon: PrimeIcons.CALENDAR,
-                    to: '/calendars',
-                    permission: 'calendar:create'
+                    permission: 'call:read'
                 },
                 {
                     label: 'Grants',
                     icon: 'pi pi-bitcoin',
                     to: '/grants',
-                    permission: 'grant:create'
+                    permission: 'grant:read'
                 }
             ]
         },
@@ -88,19 +72,19 @@ const AppMenu = () => {
                     label: 'Evaluations',
                     icon: 'pi pi-chart-bar',
                     to: '/evaluations',
-                    permission: 'evaluation:create'
+                    permission: 'evaluation:read'
                 },
                 {
                     label: 'Thematics',
                     icon: 'pi pi-fw pi-tags',
                     to: '/thematics',
-                    permission: 'thematic:create'
+                    permission: 'thematic:read'
                 },
                 {
                     label: 'Templates',
                     icon: 'pi pi-file-pdf',
                     to: '/templates',
-                    permission: 'template:create'
+                    permission: 'template:read'
                 }
             ]
         },
@@ -112,17 +96,16 @@ const AppMenu = () => {
                     label: 'Constraints',
                     icon: 'pi pi-fw pi-sliders-h',
                     to: '/constraints',
-                    permission: 'constraint:create'
+                    permission: 'constraint:read'
                 },
                 {
                     label: 'Compositions',
                     icon: 'pi pi-fw pi-user-edit',
                     to: '/compositions',
-                    permission: 'composition:create'
+                    permission: 'composition:read'
                 }
             ]
         },
-
         {
             label: 'User Profiles',
             items: [
@@ -130,25 +113,25 @@ const AppMenu = () => {
                     label: 'Users',
                     icon: PrimeIcons.USERS,
                     to: '/users',
-                    permission: 'user:create'
+                    permission: 'user:read'
                 },
                 {
                     label: 'Publications',
                     icon: PrimeIcons.BOOK,
                     to: '/users/publications',
-                    permission: 'publication:create'
+                    permission: 'publication:read'
                 },
                 {
                     label: 'Experiences',
                     icon: PrimeIcons.BRIEFCASE,
                     to: '/users/experiences',
-                    permission: 'experience:create'
+                    permission: 'experience:read'
                 },
                 {
                     label: 'Enrollments',
                     icon: PrimeIcons.ID_CARD,
                     to: '/users/enrollments',
-                    permission: 'enrollment:create'
+                    permission: 'enrollment:read'
                 }
             ]
         },
@@ -160,13 +143,13 @@ const AppMenu = () => {
                     label: 'Accounts',
                     icon: PrimeIcons.SHIELD,
                     to: '/accounts',
-                    permission: 'account:create'
+                    permission: 'account:read'
                 },
                 {
                     label: 'Roles & Permissions',
                     icon: PrimeIcons.LOCK,
                     to: '/roles',
-                    permission: 'role:create'
+                    permission: 'role:read'
                 }
             ]
         },
@@ -178,37 +161,37 @@ const AppMenu = () => {
                     label: 'Colleges',
                     icon: 'pi pi-fw pi-warehouse',
                     to: `/organizations/${OrgnUnit.college}`,
-                    permission: PERMISSIONS.ORGANIAZTION.COLLEGE.CREATE
+                    permission: PERMISSIONS.ORGANIAZTION.COLLEGE.READ
                 },
                 {
                     label: 'Departments',
                     icon: 'pi pi-fw pi-star',
                     to: `/organizations/${OrgnUnit.department}`,
-                    permission: PERMISSIONS.ORGANIAZTION.DEPARTMENT.CREATE
+                    permission: PERMISSIONS.ORGANIAZTION.DEPARTMENT.READ
                 },
                 {
                     label: 'Programs',
                     icon: 'pi pi-fw pi-star-half',
                     to: `/organizations/${OrgnUnit.program}`,
-                    permission: PERMISSIONS.ORGANIAZTION.PROGRAM.CREATE
+                    permission: PERMISSIONS.ORGANIAZTION.PROGRAM.READ
                 },
                 {
                     label: 'Directorates',
                     icon: 'pi pi-fw pi-objects-column',
                     to: `/organizations/${OrgnUnit.directorate}`,
-                    permission: PERMISSIONS.ORGANIAZTION.DIRECTORATE.CREATE
+                    permission: PERMISSIONS.ORGANIAZTION.DIRECTORATE.READ
                 },
                 {
                     label: 'Centers',
                     icon: 'pi pi-fw pi-circle',
                     to: `/organizations/${OrgnUnit.center}`,
-                    permission: PERMISSIONS.ORGANIAZTION.CENTER.CREATE
+                    permission: PERMISSIONS.ORGANIAZTION.CENTER.READ
                 },
                 {
                     label: 'External',
                     icon: 'pi pi-fw pi-mars',
                     to: `/organizations/${OrgnUnit.external}`,
-                    permission: PERMISSIONS.ORGANIAZTION.EXTERNAL.CREATE
+                    permission: PERMISSIONS.ORGANIAZTION.EXTERNAL.READ
                 }
             ]
         },
@@ -216,16 +199,22 @@ const AppMenu = () => {
             label: 'Miscellaneous',
             items: [
                 {
+                    label: 'Calendars',
+                    icon: PrimeIcons.CALENDAR,
+                    to: '/calendars',
+                    permission: 'calendar:read'
+                },
+                {
                     label: 'Specializations',
                     icon: 'pi pi-fw pi-filter-fill',
                     to: '/specializations',
-                    permission: PERMISSIONS.SPECIALIZATION.CREATE
+                    permission: PERMISSIONS.SPECIALIZATION.READ
                 },
                 {
                     label: 'Positions',
                     icon: 'pi pi-fw pi-flag',
                     to: '/positions',
-                    permission: PERMISSIONS.POSITION.CREATE
+                    permission: PERMISSIONS.POSITION.READ
                 },
                 {
                     label: 'Settings',

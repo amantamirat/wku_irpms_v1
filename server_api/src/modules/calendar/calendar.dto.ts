@@ -20,7 +20,7 @@ export interface UpdateCalendarDTO {
     //userId: string;
 }
 
-export interface GetCalendarDTO {
+export interface FilterCalendarDTO {
     year?: number;
     status?: CalendarStatus;
 }

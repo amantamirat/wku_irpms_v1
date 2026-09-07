@@ -22,6 +22,13 @@ router.post(
 );
 
 router.get(
+  '/lookup',
+  verifyActiveAccount,
+  checkPermission("grant:lookup"),
+  controller.lookup
+);
+
+router.get(
   '/',
   verifyActiveAccount,
   checkPermission([

@@ -5,7 +5,7 @@ import MyBadge from "@/templates/MyBadge";
 import { Organization } from "../../organizations/models/organization.model";
 import { Thematic } from "../../thematics/models/thematic.model";
 import { GrantApi } from "../api/grant.api";
-import { createEmptyGrant, GetGrantOptions, Grant } from "../models/grant.model";
+import { createEmptyGrant, FilterGrantOptions, Grant } from "../models/grant.model";
 import { GRANT_STATUS_ORDER, GRANT_TRANSITIONS } from "../models/grant.state-machine";
 import SaveGrant from "./SaveGrant";
 import { etbCurrencyFormatter } from "@/utils/currencyUtil";
@@ -18,7 +18,7 @@ interface GrantManagerProps {
 
 const GrantManager = ({ organization, thematic }: GrantManagerProps) => {
 
-    const Manager = createEntityManager<Grant, GetGrantOptions | undefined>({
+    const Manager = createEntityManager<Grant, FilterGrantOptions | undefined>({
         title: "Manage Grants",
         itemName: "Grant",
         api: GrantApi,

@@ -1,25 +1,36 @@
 import { Router } from 'express';
-import { userService } from '../../core/container';
+
+import { userService, checkPermission } from '../../core/container';
 import { verifyActiveAccount } from '../auth/auth.middleware';
-import { checkPermission } from '../../core/container';
 import { UserController } from './user.controller';
 
 const controller = new UserController(userService);
+
 const router: Router = Router();
 
-router.post('/',
+router.post(
+    '/',
     verifyActiveAccount,
     checkPermission("user:create"),
     controller.create
 );
 
-router.get('/',
+router.get(
+    '/lookup',
+    verifyActiveAccount,
+    checkPermission("user:lookup"),
+    controller.lookup
+);
+
+router.get(
+    '/',
     verifyActiveAccount,
     checkPermission("user:read"),
     controller.get
 );
 
-router.put('/:id',
+router.put(
+    '/:id',
     verifyActiveAccount,
     checkPermission("user:update"),
     controller.update
@@ -39,7 +50,8 @@ router.put(
     controller.updateOwnerships
 );
 
-router.delete('/:id',
+router.delete(
+    '/:id',
     verifyActiveAccount,
     checkPermission("user:delete"),
     controller.delete

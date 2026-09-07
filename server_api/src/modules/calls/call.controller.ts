@@ -24,13 +24,12 @@ export class CallController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { calendar, grant, status, populate } = req.query;
+            const { calendar, grant, status } = req.query;
             const calls = await this.service.getCalls({
                 calendar: calendar as string,
                 grant: grant as string,
-                status: status as CallStatus,
-                ...(populate !== undefined && { populate: populate === "true" })
-            });
+                status: status as CallStatus
+            }, { populate: true });
             successResponse(res, 200, 'Calls fetched successfully', calls);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -40,10 +39,7 @@ export class CallController {
     getById = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
-            const populate =
-                req.query.populate === 'true' ||
-                req.query.populate === '1';
-            const call = await this.service.getById(id, populate);
+            const call = await this.service.getById(id, { populate: true });
             successResponse(res, 200, 'Call fetched successfully', call);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

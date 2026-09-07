@@ -39,8 +39,6 @@
     "name": "role:delete",
     "description": "Delete roles"
   },
-
-  
   {
     "category": "Account Management",
     "name": "account:create",
@@ -90,6 +88,11 @@
     "category": "User Management",
     "name": "user:read",
     "description": "View users"
+  },
+  {
+    "category": "User Management",
+    "name": "user:lookup",
+    "description": "Search and select users for contextual workflows such as adding collaborators or assigning reviewers"
   },
   {
     "category": "User Management",
@@ -243,6 +246,11 @@
   },
   {
     "category": "Calendar Management",
+    "name": "calendar:lookup",
+    "description": "Search and select calendar entries for contextual workflows"
+  },
+  {
+    "category": "Calendar Management",
     "name": "calendar:update",
     "description": "Update calendar entries"
   },
@@ -280,6 +288,11 @@
     "category": "Grant Management",
     "name": "grant:read",
     "description": "Read grant entries"
+  },
+  {
+    "category": "Grant Management",
+    "name": "grant:lookup",
+    "description": "Search and select grants for contextual workflows such as project creation"
   },
   {
     "category": "Grant Management",
@@ -402,6 +415,11 @@
   },
   {
     "category": "Call Management",
+    "name": "call:lookup",
+    "description": "Search and select calls entries for contextual workflows"
+  },
+  {
+    "category": "Call Management",
     "name": "call:update"
   },
   {
@@ -520,8 +538,8 @@
   },
   {
     "category": "Theme Management",
-    "name": "theme:import",
-    "description": "Import theme by batch entries"
+    "name": "theme:lookup",
+    "description": "Search and select themes for contextual workflows such as project creation"
   },
   {
     "category": "Theme Management",
@@ -1102,6 +1120,11 @@
     "category": "Verification Configuration Management",
     "name": "verification-conf:read",
     "description": "View verification configurations"
+  },
+  {
+    "category": "Verification Configuration Management",
+    "name": "verification-conf:lookup",
+    "description": "Look verification configurations"
   },
   {
     "category": "Verification Configuration Management",

@@ -4,7 +4,7 @@ import { TransitionRequestDto } from "@/types/util";
 import { FilterConfigurationDTO, VerificationConfiguration } from "../models/verification-conf.model";
 import { sanitize } from "@/utils/sanitizer";
 
-const ENDPOINT = "/verification-configurations";
+const end_point = "/verification-configurations";
 
 export const VerificationConfigurationApi: EntityApi<
     VerificationConfiguration,
@@ -17,7 +17,11 @@ export const VerificationConfigurationApi: EntityApi<
     // Fetch / Query
     // ---------------------------
     async getAll(filter) {
-        return await ApiClient.get(ENDPOINT, filter);
+        return await ApiClient.get(end_point, filter);
+    },
+
+    async lookup(options) {
+        return ApiClient.get(`${end_point}/lookup`, options);
     },
 
     // ---------------------------
@@ -25,14 +29,14 @@ export const VerificationConfigurationApi: EntityApi<
     // GET /verification-configurations/upcoming
     // ---------------------------
     async getUpcoming(): Promise<VerificationConfiguration[]> {
-        return ApiClient.get(`${ENDPOINT}/upcoming`);
+        return ApiClient.get(`${end_point}/upcoming`);
     },
 
     // ---------------------------
     // Get By Id
     // ---------------------------
     async getById(id: string): Promise<VerificationConfiguration> {
-        return ApiClient.get(`${ENDPOINT}/${id}`);
+        return ApiClient.get(`${end_point}/${id}`);
     },
 
     // ---------------------------
@@ -40,7 +44,7 @@ export const VerificationConfigurationApi: EntityApi<
     // ---------------------------
     async create(verificationConfig) {
         const sanitized = sanitize(verificationConfig);
-        return ApiClient.post(`${ENDPOINT}`, sanitized);
+        return ApiClient.post(`${end_point}`, sanitized);
     },
 
     // ---------------------------
@@ -52,14 +56,14 @@ export const VerificationConfigurationApi: EntityApi<
         }
         const sanitized = sanitize(verificationConfig);
         //console.log("client data", JSON.stringify(sanitized));
-        return ApiClient.put(`${ENDPOINT}/${verificationConfig._id}`, sanitized);
+        return ApiClient.put(`${end_point}/${verificationConfig._id}`, sanitized);
     },
 
     // ---------------------------
     // Transition State
     // ---------------------------
     async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
-        const url = `${ENDPOINT}/${id}`;
+        const url = `${end_point}/${id}`;
         return ApiClient.patch(url, dto);
     },
 
@@ -70,6 +74,6 @@ export const VerificationConfigurationApi: EntityApi<
         if (!verificationConfig._id) {
             throw new Error("_id required");
         }
-        return ApiClient.delete(`${ENDPOINT}/${verificationConfig._id}`);
+        return ApiClient.delete(`${end_point}/${verificationConfig._id}`);
     },
 };

@@ -20,18 +20,11 @@ export interface FilterThemeDTO {
     thematicArea?: string;
     title?:string;
     level?: number;
-    populate?: boolean;
 }
 
 /*
-
-export interface ExistsThemeDTO {
-    parent?: string;
-    thematicArea?: string;
-}*/
-
 export interface IThemeImportDTO {
     title: string;
     priority?: number;
     children?: IThemeImportDTO[]; // Recursive definition
-}
+}*/

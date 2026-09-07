@@ -51,7 +51,7 @@ export const createEmptyCalendar = (): Calendar => ({
     status: CalendarStatus.planned
 });
 
-export interface GetCalendarOptions {
+export interface FilterCalendarOptions {
     status?: CalendarStatus;
 }
 

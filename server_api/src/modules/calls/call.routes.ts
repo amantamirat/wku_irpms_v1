@@ -18,7 +18,14 @@ router.post(
     checkPermission([PERMISSIONS.CALL.CREATE]),
     controller.create
 );
-// Get cycles
+// Lookup - currently uses the same get controller
+router.get(
+    '/lookup',
+    verifyActiveAccount,
+    checkPermission("call:lookup"),
+    controller.get
+);
+// Get
 router.get(
     '/',
     verifyActiveAccount,
@@ -27,7 +34,7 @@ router.get(
 );
 
 router.get('/:id', verifyActiveAccount,
-    checkPermission([PERMISSIONS.CALL.READ]),
+    checkPermission("call:lookup"),
     controller.getById
 );
 // Update call

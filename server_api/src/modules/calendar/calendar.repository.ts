@@ -1,12 +1,12 @@
 import mongoose from "mongoose";
 import { Calendar, ICalendar } from "./calendar.model";
-import { CreateCalendarDTO, GetCalendarDTO, UpdateCalendarDTO } from "./calendar.dto";
+import { CreateCalendarDTO, FilterCalendarDTO, UpdateCalendarDTO } from "./calendar.dto";
 
 
 export interface ICalendarReadRepository {
     findById(id: string): Promise<ICalendar | null>;
-    find(option: GetCalendarDTO): Promise<ICalendar[]>;
-    findOne(dto: GetCalendarDTO): Promise<ICalendar | null>;
+    find(filter: FilterCalendarDTO): Promise<ICalendar[]>;
+    findOne(dto: FilterCalendarDTO): Promise<ICalendar | null>;
 }
 
 export interface ICalendarRepository extends ICalendarReadRepository {
@@ -23,7 +23,7 @@ export class CalendarRepository implements ICalendarRepository {
             .exec();
     }
 
-    async findOne({ year, status }: GetCalendarDTO) {
+    async findOne({ year, status }: FilterCalendarDTO) {
         const filter: Record<string, any> = {};
 
         if (year) {
@@ -39,10 +39,13 @@ export class CalendarRepository implements ICalendarRepository {
             .exec();
     }
 
-    async find(option: GetCalendarDTO) {
+    async find(filter: FilterCalendarDTO) {
         const query: any = {};
-        if (option.status) {
-            query.status = option.status;
+        if (filter.year) {
+            query.year = filter.year;
+        }
+        if (filter.status) {
+            query.status = filter.status;
         }
         return Calendar.find(query)
             .sort({ year: -1 })

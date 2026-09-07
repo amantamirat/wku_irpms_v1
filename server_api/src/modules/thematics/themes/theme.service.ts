@@ -6,10 +6,11 @@ import { SettingService } from "../../settings/setting.service";
 import { themeLevelIndex } from "../thematic.enum";
 import { IThematicRepository } from "../thematic.repository";
 import { ThematicStatus } from "../thematic.state-machine";
-import { CreateThemeDTO, FilterThemeDTO, IThemeImportDTO, UpdateThemeDTO } from "./theme.dto";
+import { CreateThemeDTO, FilterThemeDTO, UpdateThemeDTO } from "./theme.dto";
 import { IThemeRepository } from "./theme.repository";
 import mongoose from 'mongoose';
 import fs from "fs";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 
 export class ThemeService {
 
@@ -50,8 +51,8 @@ export class ThemeService {
         }
     }
 
-    async getThemes(filters: FilterThemeDTO) {
-        return await this.repository.find(filters);
+    async getThemes(filters: FilterThemeDTO, options?: FilterOptions) {
+        return await this.repository.find(filters, options);
     }
 
     async update(dto: UpdateThemeDTO) {

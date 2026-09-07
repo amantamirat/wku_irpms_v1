@@ -1,10 +1,9 @@
 import { useAuth } from "@/contexts/auth-context";
-import { Thematic } from "../models/thematic.model";
-import { useMemo } from "react";
 import { PERMISSIONS } from "@/types/permissions";
 import { TabPanel, TabView } from "primereact/tabview";
+import { useMemo } from "react";
+import { Thematic } from "../models/thematic.model";
 import ThemeManager from "../themes/components/ThemeManager";
-import GrantManager from "../../grants/components/GrantManager";
 import ThemeHierarchyPreview from "./ThemeHierarchyPreview";
 
 
@@ -28,7 +27,7 @@ const ThematicDetail = ({ thematic }: ThematicDetailProps) => {
         },
         {
             header: "Hierarchy Preview", // New Preview Tab
-            permission: PERMISSIONS.THEME.READ,
+            permission: "theme:lookup",
             content: <ThemeHierarchyPreview thematic={thematic} />
         }
     ], [thematic]);
@@ -43,9 +42,7 @@ const ThematicDetail = ({ thematic }: ThematicDetailProps) => {
     return (
         <TabView>
             {allowedTabs.map((tab, index) => (
-                <TabPanel key={index} header={tab.header}
-                    //disabled={tab.disabled}
-                >
+                <TabPanel key={index} header={tab.header}                >
                     {tab.content}
                 </TabPanel>
             ))}

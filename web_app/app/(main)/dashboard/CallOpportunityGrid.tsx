@@ -1,7 +1,7 @@
 'use client';
 import { useEffect, useState } from 'react';
 import { Call, CallStatus } from '../calls/models/call.model';
-import { OpenCallCard } from './OpenCallCard';
+import { CallCard } from './CallCard';
 import { CallApi } from '../calls/api/call.api';
 
 const CallOpportunityGrid = () => {
@@ -12,8 +12,8 @@ const CallOpportunityGrid = () => {
     useEffect(() => {
         const loadCalls = async () => {
             try {
-                const data = await CallApi.getAll({ status: CallStatus.active, populate: true });
-                setCalls(data);
+                const data = await CallApi.lookup!({ status: CallStatus.active });
+                setCalls(data || []);
             } catch (err) {
                 console.error("Error loading calls:", err);
             } finally {
@@ -39,7 +39,7 @@ const CallOpportunityGrid = () => {
             {calls.length > 0 ? (
                 calls.map((call) => (
                     <div key={call._id} className="col-12 md:col-6 xl:col-4 p-2">
-                        <OpenCallCard
+                        <CallCard
                             call={call}
                             onApply={(id) => window.location.href = `/apply/${id}`}
                         />

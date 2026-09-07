@@ -1,26 +1,18 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { Calendar, GetCalendarOptions } from "../models/calendar.model";
+import { Calendar, FilterCalendarOptions } from "../models/calendar.model";
 import { TransitionRequestDto } from "@/types/util";
 
 const end_point = "/calendars";
 
-export const CalendarApi: EntityApi<Calendar, GetCalendarOptions | undefined> = {
+export const CalendarApi: EntityApi<Calendar, FilterCalendarOptions | undefined> = {
 
-    async getAll(options?: GetCalendarOptions) {
-        const query = new URLSearchParams();
+    async getAll(options?: FilterCalendarOptions) {
+        return ApiClient.get(end_point, options);
+    },
 
-        if (options) {
-            if (options.status) {
-                query.append("status", options.status as string);
-            }
-        }
-
-        const url = query.toString()
-            ? `${end_point}?${query.toString()}`
-            : end_point;
-
-        return ApiClient.get(url);
+    async lookup(options) {
+        return ApiClient.get(`${end_point}/lookup`, options);
     },
 
     async getById(id: string): Promise<Calendar> {

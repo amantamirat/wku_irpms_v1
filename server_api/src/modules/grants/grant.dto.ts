@@ -1,11 +1,10 @@
 import { FundingSource, GrantStatus } from "./grant.model";
 
-export interface GetGrantsDTO {
+export interface FilterGrantsDTO {
     organization?: string;
     thematic?: string;
     fundingSource?: FundingSource;
     status?: GrantStatus;
-    populate?: boolean;
 }
 
 export interface CreateGrantDTO {
@@ -34,9 +33,5 @@ export interface TransitionGrantDTO {
     userId: string;
 }
 
-export interface ExistsGrantDTO {
-    organization?: string;
-    thematic?: string;
-}
 
 

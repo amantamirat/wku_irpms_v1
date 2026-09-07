@@ -5,6 +5,7 @@ import { errorResponse, successResponse } from '../../common/helpers/response';
 import { AuthenticatedRequest } from '../auth/auth.middleware';
 import {
   CreateCalendarDTO,
+  FilterCalendarDTO,
   UpdateCalendarDTO,
 } from './calendar.dto';
 import { CalendarService } from './calendar.service';
@@ -41,11 +42,21 @@ export class CalendarController {
 
   get = async (req: Request, res: Response) => {
     try {
-      const { status } = req.query;
-      const calendars = await this.service.get(
-        { status: status ? status as CalendarStatus : undefined }
+      const { year, status } = req.query;
+
+      const filter: FilterCalendarDTO = {
+        year: year ? Number(year) : undefined,
+        status: status ? status as CalendarStatus : undefined,
+      };
+
+      const calendars = await this.service.get(filter);
+
+      successResponse(
+        res,
+        200,
+        'Calendars fetched successfully',
+        calendars
       );
-      successResponse(res, 200, 'Calendars fetched successfully', calendars);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
@@ -90,7 +101,7 @@ export class CalendarController {
     }
   };
 
-  
+
 
   delete = async (req: Request, res: Response) => {
     try {

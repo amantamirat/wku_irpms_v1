@@ -1,24 +1,17 @@
 import { EntityApi } from "@/api/EntityApi"
-import { GetGrantOptions, Grant, sanitize } from "../models/grant.model"
+import { FilterGrantOptions, Grant, sanitize } from "../models/grant.model"
 import { ApiClient } from "@/api/ApiClient"
 import { TransitionRequestDto } from "@/types/util"
 
 const end_point = "/grants";
-export const GrantApi: EntityApi<Grant, GetGrantOptions | undefined> = {
+export const GrantApi: EntityApi<Grant, FilterGrantOptions | undefined> = {
 
     async getAll(options) {
-        const query = new URLSearchParams();
-        if (options) {
-            const sanitized = sanitize(options);
-            if (options.status) {
-                query.append("status", sanitized.status as string);
-            }
-            if (options.populate !== undefined) {
-                query.append("populate", String(options.populate));
-            }
-        }
-        const qs = query.toString();
-        return ApiClient.get(`${end_point}${qs ? `?${qs}` : ""}`);
+        return ApiClient.get(end_point, options);
+    },
+
+    async lookup(options) {
+        return ApiClient.get(`${end_point}/lookup`, options);
     },
 
     async getById(id: string) {

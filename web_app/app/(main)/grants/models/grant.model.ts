@@ -61,9 +61,8 @@ export const createEmptyGrant = (data?: {
     ...(data?.thematic && { thematic: data.thematic }),
 });
 
-export interface GetGrantOptions {
+export interface FilterGrantOptions {
     organization?: Organization | string;
     thematic?: Thematic | string;
     status?: GrantStatus;
-    populate?: boolean;
 }

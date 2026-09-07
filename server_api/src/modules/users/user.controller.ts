@@ -43,7 +43,7 @@ export class UserController {
             };
 
             const created = await this.service.create(dto);
-            successResponse(res, 201, 'Applicant created successfully', created);
+            successResponse(res, 201, 'User created successfully', created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
@@ -52,22 +52,35 @@ export class UserController {
     // GET /applicants
     get = async (req: Request, res: Response) => {
         try {
-            const { workspace, populate } = req.query;
+            const { workspace } = req.query;
 
             const filter: FilterUsersDTO = {
                 workspace: workspace as string,
-                ...(populate !== undefined && { populate: populate === "true" })
             };
 
-            const applicants = await this.service.getAll(filter);
+            const users = await this.service.getAll(filter, { populate: true });
 
-            successResponse(res, 200, "Applicants fetched successfully", applicants);
+            successResponse(res, 200, "Users fetched successfully", users);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     };
 
-    // PUT /applicants?id=xxx
+
+    lookup = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            if (!req.auth) throw new Error('User not authorized');
+            const { search, workspace } = req.query;
+            const filter: FilterUsersDTO = {
+                workspace: workspace as string,
+            };
+            const users = await this.service.lookup(filter);
+            successResponse(res, 200, 'Users lookup fetched successfully', users);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.auth) throw new Error('User not authorized');
@@ -100,7 +113,7 @@ export class UserController {
             };
 
             const updated = await this.service.update(dto);
-            successResponse(res, 200, 'Applicant updated successfully', updated);
+            successResponse(res, 200, 'User updated successfully', updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
@@ -121,7 +134,7 @@ export class UserController {
             };
 
             const updated = await this.service.updateRoles(dto);
-            successResponse(res, 200, 'Applicant roles updated successfully', updated);
+            successResponse(res, 200, 'User roles updated successfully', updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
@@ -142,7 +155,7 @@ export class UserController {
             };
 
             const updated = await this.service.updateOwnerships(dto);
-            successResponse(res, 200, 'Applicant ownerships updated successfully', updated);
+            successResponse(res, 200, 'User ownerships updated successfully', updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
@@ -154,7 +167,7 @@ export class UserController {
             if (!req.auth) throw new Error('User not authorized');
             const { id } = req.params;
             const deleted = await this.service.delete(id);
-            successResponse(res, 200, 'Applicant deleted successfully', deleted);
+            successResponse(res, 200, 'User deleted successfully', deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
