@@ -119,15 +119,13 @@ export class ApplicationController {
             const dto: FilterApplicationDTO = {
                 project: project as string,
                 stage: stage as string,
-                //grantAllocation: grantAllocation as string,
-                //callStage: callStage as string,
                 status: status as any,
                 //...(populate !== undefined && { populate: populate === "true" }),
                 //skip: skip ? Number(skip) : undefined,
                 //limit: limit ? Number(limit) : undefined,
             };
-            const docs = await this.service.get(dto, { populate: true });
-            successResponse(res, 200, "Project documents fetched successfully", docs);
+            const applications = await this.service.get(dto, { populate: true });
+            successResponse(res, 200, "Project documents fetched successfully", applications);
 
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

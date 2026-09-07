@@ -1,20 +1,8 @@
 import express from "express";
-import { applicationService } from "../../../core/container";
+import { applicationService, checkPermission, checkTransitionPermission } from "../../../core/container";
 import { upload } from "../../../util/multer";
 import { verifyActiveAccount } from "../../auth/auth.middleware";
-import { checkTransitionPermission } from '../../../core/container';
-import { checkPermission } from '../../../core/container';
-import { NotificationRepository } from "../../notifications/notification.repository";
-import { NotificationService } from "../../notifications/notification.service";
-import { SettingRepository } from "../../settings/setting.repository";
-import { SettingService } from "../../settings/setting.service";
 import { ApplicationController } from "./application.controller";
-
-
-const notificationService = new NotificationService(
-    new NotificationRepository(),
-    new SettingService(new SettingRepository())
-);
 
 const controller = new ApplicationController(applicationService);
 const router = express.Router();
@@ -49,6 +37,14 @@ router.get(
     "/",
     verifyActiveAccount,
     checkPermission("application:read"),
+    controller.get
+);
+
+//used the same get function
+router.get(
+    "/lookup",
+    verifyActiveAccount,
+    checkPermission("application:lookup"),
     controller.get
 );
 

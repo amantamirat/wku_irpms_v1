@@ -31,7 +31,7 @@ const ApplicationManager = ({ project, enableEditing }: ApplicationManagerProps)
             setLoading(true);
             try {
                 // Fetch all project applications for history table
-                const data = await ApplicationApi.getAll({ project: project }, true);
+                const data = await ApplicationApi.lookup!({ project: project });
                 const appList = Array.isArray(data) ? data : [];
                 setApplications(appList);
 

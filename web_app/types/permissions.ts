@@ -184,6 +184,7 @@ export const PERMISSIONS = {
   PROJECT: {
     CREATE: "project:create",
     READ: "project:read",
+    LOOKUP: "project:lookup",
     UPDATE: "project:update",
     STATUS: {
       ACCEPT: "project:status.accepted",

@@ -2,7 +2,8 @@
 import React from 'react';
 import { Divider } from 'primereact/divider';
 import { HistoryRule } from '../models/history.model';
-import { IRange } from '../models/composition.model';
+import { IRange } from '@/types/range';
+
 
 interface HistoryRuleViewProps {
     historyRule: HistoryRule;

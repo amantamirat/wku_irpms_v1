@@ -1,37 +1,33 @@
 // application.repository.ts
 
-import mongoose, { HydratedDocument } from "mongoose";
+import mongoose from "mongoose";
+
 import {
     CreateApplicationDTO,
-    ExistsApplicationDTO,
-    FindByIdOptions,
     FilterApplicationDTO,
     UpdateApplicationDTO
 } from "./application.dto";
+
 import {
     ApplicationStatus,
     IApplication,
     Application
 } from "./application.model";
+
 import { FilterOptions } from "../../../common/dtos/filter.dto";
+
 
 export interface IApplicationRepository {
 
     findById(
         id: string,
-        options?: FindByIdOptions
+        options?: FilterOptions
     ): Promise<IApplication | null>;
 
     find(
-        filters: FilterApplicationDTO, options?: FilterOptions
+        filters?: FilterApplicationDTO,
+        options?: FilterOptions
     ): Promise<IApplication[]>;
-
-    /*
-    findOneByProjectAndStage(
-        projectId: string,
-        grantStageId?: string,
-        callStageId?: string
-    ): Promise<IApplication | null>;*/
 
     findLatestByProject(
         projectId: string
@@ -56,7 +52,7 @@ export interface IApplicationRepository {
     ): Promise<number>;
 
     exists(
-        filters: ExistsApplicationDTO
+        filters: FilterApplicationDTO
     ): Promise<boolean>;
 
     delete(
@@ -69,23 +65,47 @@ export interface IApplicationRepository {
 export class ApplicationRepository
     implements IApplicationRepository {
 
+    /**
+     * Build MongoDB filter from application filters
+     */
+    private buildFilter(
+        filters: Partial<FilterApplicationDTO> = {}
+    ): Record<string, any> {
+
+        const query: Record<string, any> = {};
+
+        if (filters.project) {
+            query.project =
+                new mongoose.Types.ObjectId(filters.project);
+        }
+
+        if (filters.stage) {
+            query.stage =
+                new mongoose.Types.ObjectId(filters.stage);
+        }
+
+        if (filters.status) {
+            query.status =
+                filters.status;
+        }
+
+        return query;
+    }
+
+
     async findById(
         id: string,
-        options?: FindByIdOptions
+        options?: FilterOptions
     ): Promise<IApplication | null> {
 
         let dbQuery = Application.findById(
             new mongoose.Types.ObjectId(id)
         );
 
-        const populate = options?.populate;
-
-        if (populate?.project) {
-            dbQuery = dbQuery.populate("project");
-        }
-
-        if (populate?.stage) {
-            dbQuery = dbQuery.populate("stage");
+        if (options?.populate) {
+            dbQuery
+                .populate("project")
+                .populate("stage");
         }
 
         return dbQuery
@@ -95,29 +115,14 @@ export class ApplicationRepository
 
 
     async find(
-        filter: FilterApplicationDTO, options?: FilterOptions
+        filters: FilterApplicationDTO = {},
+        options?: FilterOptions
     ): Promise<IApplication[]> {
 
-        const query: any = {};
+        const query = this.buildFilter(filters);
 
-        // Direct filters
-        if (filter.project) {
-            query.project =
-                new mongoose.Types.ObjectId(filter.project);
-        }
+        let dbQuery = Application.find(query);
 
-        if (filter.stage) {
-            query.stage =
-                new mongoose.Types.ObjectId(filter.stage);
-        }
-
-        if (filter.status) {
-            query.status = filter.status;
-        }
-
-        const dbQuery = Application.find(query);
-
-        // Populate
         if (options?.populate) {
             dbQuery
                 .populate("project")
@@ -129,32 +134,7 @@ export class ApplicationRepository
             .exec();
     }
 
-    /*
-    async findOneByProjectAndStage(
-        projectId: string,
-        stageId?: string,
-        callStageId?: string
-    ): Promise<IApplication | null> {
 
-        const query: any = {
-            project:
-                new mongoose.Types.ObjectId(projectId)
-        };
-
-        if (stageId) {
-            query.stage =
-                new mongoose.Types.ObjectId(stageId);
-        }
-
-        if (callStageId) {
-            query.callStage =
-                new mongoose.Types.ObjectId(callStageId);
-        }
-
-        return Application.findOne(query)
-            .lean<IApplication>()
-            .exec();
-    }*/
     async create(
         dto: CreateApplicationDTO
     ): Promise<IApplication> {
@@ -247,22 +227,10 @@ export class ApplicationRepository
 
 
     async exists(
-        filters: ExistsApplicationDTO
+        filters: FilterApplicationDTO
     ): Promise<boolean> {
 
-        const query: any = {};
-
-        const { stage, project } = filters;
-
-        if (stage) {
-            query.grantStage =
-                new mongoose.Types.ObjectId(stage);
-        }
-
-        if (project) {
-            query.project =
-                new mongoose.Types.ObjectId(project);
-        }
+        const query = this.buildFilter(filters);
 
         const result =
             await Application.exists(query).exec();

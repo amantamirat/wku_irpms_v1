@@ -24,7 +24,7 @@ export default function QuickLinks() {
             label: 'My Projects',
             description: 'Manage your research, project and deliverables',
             icon: 'pi pi-briefcase',
-            permission: PERMISSIONS.PROJECT.READ,
+            permission: PERMISSIONS.PROJECT.LOOKUP,
             color: 'bg-blue-100 text-blue-700'
         },
         {

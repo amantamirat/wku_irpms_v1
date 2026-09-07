@@ -724,6 +724,11 @@
   },
   {
     "category": "Project Management",
+    "name": "project:lookup",
+    "description": "Look up project entries"
+  },
+  {
+    "category": "Project Management",
     "name": "project:update",
     "description": "Update project entries"
   },
@@ -902,6 +907,11 @@
     "category": "Application Management",
     "name": "application:read",
     "description": "Read application entries"
+  },
+  {
+    "category": "Application Management",
+    "name": "application:lookup",
+    "description": "Look up application entries"
   },
   {
     "category": "Application Management",

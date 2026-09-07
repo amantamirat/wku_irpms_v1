@@ -80,13 +80,6 @@ export default function ProjectDetail({ project, updateProject, enableEditing }:
     }
 
     // 1. Format Budget
-    /*
-    const displayBudget = new Intl.NumberFormat('en-ET', {
-        style: 'currency',
-        currency: 'ETB',
-        maximumFractionDigits: 0
-    }).format(projectData?.totalBudget || 0);
-    */
 
     // 2. Format Total Duration
     let displayDuration = 'Not Specified';
@@ -135,12 +128,11 @@ export default function ProjectDetail({ project, updateProject, enableEditing }:
     ];
 
     // 2. Conditionally add Application Manager tab if projectData.call exists
-    if (projectData?.call) {
+    if (projectData?.currentApplication) {
         tabs.push({
             header: "Applications",
             icon: "pi pi-folder-open",
-            // Use PERMISSIONS.APPLICATION?.READ or PERMISSIONS.PROJECT?.READ based on your setup
-            permission: (PERMISSIONS as any).APPLICATION?.READ || PERMISSIONS.PROJECT.READ,
+            permission: "application:lookup",
             content: <ApplicationManager project={projectData} enableEditing={enableEditing} />
         });
     }
@@ -174,6 +166,11 @@ export default function ProjectDetail({ project, updateProject, enableEditing }:
                         <span className="flex align-items-center px-2 py-1 border-round surface-100">
                             <i className="pi pi-tag mr-2 text-primary"></i>
                             {getDisplayName((projectData?.grant), 'title')}
+                        </span>
+
+                        <span className="flex align-items-center px-2 py-1 border-round surface-100">
+                            <i className="pi pi-calendar mr-2 text-green-500"></i>
+                            {getDisplayName(projectData?.calendar, 'year')}
                         </span>
 
                         <span className="flex align-items-center px-2 py-1 border-round surface-100">

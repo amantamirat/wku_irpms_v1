@@ -58,10 +58,10 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
             try {
                 const [availableGrants, availableCalendars, availableConstraints, availableCompositions] = await Promise.all([
                     !isGrantPredefined
-                        ? GrantApi.getAll({ status: GrantStatus.active, populate: true })
+                        ? GrantApi.lookup!({ status: GrantStatus.active })
                         : Promise.resolve([]),
                     !isCalendarPredefined
-                        ? CalendarApi.getAll({ status: CalendarStatus.active })
+                        ? CalendarApi.lookup!({ status: CalendarStatus.active })
                         : Promise.resolve([]),
                     ConstraintApi.getAll(),
                     CompositionApi.getAll() // Fetches composition options

@@ -202,6 +202,7 @@ export const PERMISSIONS = {
     CREATE: "project:create",
     READ: "project:read",
     UPDATE: "project:update",
+    LOOKUP: "project:lookup",
     STATUS: {
       ACCEPT: "project:status.accepted",
       NEGOTIATE: "project:status.negotiation",

@@ -110,6 +110,23 @@ export class ProjectController {
     }
   };
 
+
+  lookup = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const filters = buildProjectFilter(req.query);
+      const projects = await this.service.getProjects(
+        filters);
+      successResponse(
+        res,
+        200,
+        "Projects fetched successfully",
+        projects
+      );
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  };
+
   getById = async (
     req: AuthenticatedRequest,
     res: Response
@@ -145,7 +162,7 @@ export class ProjectController {
       const filters = buildProjectFilter(req.query);
 
       const projects = await this.service.getMyProjects(
-        req.auth.userId, filters, {populate:true}
+        req.auth.userId, filters,
       );
 
       successResponse(

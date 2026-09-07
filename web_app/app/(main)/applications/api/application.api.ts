@@ -21,7 +21,9 @@ export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions
     async getAll(options) {
         return ApiClient.get(end_point, options);
     },
-
+    async lookup(options) {
+        return ApiClient.get(`${end_point}/lookup`, options);
+    },
     // ---------------------------
     // Get By Id
     // ---------------------------

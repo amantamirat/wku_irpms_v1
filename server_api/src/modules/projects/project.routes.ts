@@ -32,10 +32,17 @@ router.get(
     controller.getMyProjects
 );
 
-router.get('/:id', verifyActiveAccount,
-    checkPermission([PERMISSIONS.PROJECT.READ]),
-    controller.getById);
+// lookup projects
+router.get(
+    '/lookup',
+    verifyActiveAccount,
+    checkPermission([PERMISSIONS.PROJECT.LOOKUP]),
+    controller.lookup
+);
 
+router.get('/:id', verifyActiveAccount,
+    checkPermission([PERMISSIONS.PROJECT.LOOKUP]),
+    controller.getById);
 
 
 //update    

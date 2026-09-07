@@ -8,10 +8,7 @@ import { CollaboratorController } from './collaborator.controller';
 
 
 
-/*
-const service = new CollaboratorService(
-    repository, projectRepo, projAuth, appRepository, constValidator, notificationService
-)*/
+
 const controller = new CollaboratorController(collabService);
 const router: Router = Router();
 

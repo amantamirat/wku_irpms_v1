@@ -69,7 +69,7 @@ const MyProjectsManager = ({ enableEditing = true }: MyProjectsManagerProps) => 
             hideDefaultActions: true,
             expandable: {
                 template: (project) => (
-                    <ProjectDetail project={project} enableEditing={enableEditing} />
+                    <ProjectDetail project={project._id ?? ""} enableEditing={enableEditing} />
                 )
             }
         });

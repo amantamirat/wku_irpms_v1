@@ -18,6 +18,10 @@ export const ProjectApi: IProjectApi = {
         return data as Project[];
     },
 
+    async lookup(options) {
+        return ApiClient.get(`${end_point}/lookup`, options);
+    },
+
     async me(filter?: FilterProjects): Promise<Project[]> {
         const data = await ApiClient.get(`${end_point}/me`, filter);
         return data as Project[];

@@ -17,7 +17,7 @@ const Page = () => {
 
     useEffect(() => {
         const fetchCalls = async () => {
-            const data = await CallApi.getAll({ status: CallStatus.active, populate: true });
+            const data = await CallApi.lookup!({ status: CallStatus.active });
             setCalls(data);
             if (data?.length) setSelectedCall(data[0]);
         };

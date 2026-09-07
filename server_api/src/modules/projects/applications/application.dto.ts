@@ -30,9 +30,7 @@ export interface FilterApplicationDTO {
     project?: string;
     stage?: string;
     call?: string;
-    status?: ApplicationStatus;
-    //populate?: boolean;
-    
+    status?: ApplicationStatus;   
 }
 
 export interface ExistsApplicationDTO {
