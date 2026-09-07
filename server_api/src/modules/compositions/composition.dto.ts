@@ -1,8 +1,4 @@
-/* ---------------- RANGE ---------------- */
-export interface IRangeDTO {
-  min: number;
-  max: number;
-}
+
 
 export interface CreateCompositionDTO {
   name: string;

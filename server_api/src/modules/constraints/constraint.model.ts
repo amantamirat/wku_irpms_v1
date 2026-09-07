@@ -1,45 +1,30 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
-
+import { IRange } from "../../common/types/range";
+import { RangeSchema } from "../../common/schemas/range.schema";
 
 export interface IConstraint extends Document {
     name: string;
     description?: string;
 
-    minParticipants?: number;
-    maxParticipants?: number;
+    participants?: IRange;
+    phases?: IRange;
 
-    minPhases?: number;
-    maxPhases?: number;
+    budget?: IRange;
+    duration?: IRange;
 
-    minBudget?: number;
-    maxBudget?: number;
+    budgetPerPhase?: IRange;
+    durationPerPhase?: IRange;
 
-    minDuration?: number;
-    maxDuration?: number;
+    themes?: IRange;
+    subThemes?: IRange;
 
-    minBudgetPerPhase?: number;
-    maxBudgetPerPhase?: number;
-
-    minDurationPerPhase?: number;
-    maxDurationPerPhase?: number;
-
-    minThemes?: number;
-    maxThemes?: number;
-
-    minSubThemes?: number;
-    maxSubThemes?: number;
-
-    minFocusAreas?: number;
-    maxFocusAreas?: number;
-
-    minIndicators?: number;
-    maxIndicators?: number;
+    focusAreas?: IRange;
+    indicators?: IRange;
 
     createdAt?: Date;
     updatedAt?: Date;
 }
-
 
 const ConstraintSchema = new Schema<IConstraint>(
     {
@@ -55,94 +40,44 @@ const ConstraintSchema = new Schema<IConstraint>(
             trim: true,
         },
 
-        minParticipants: {
-            type: Number,
-            min: 0,
-        },
-        maxParticipants: {
-            type: Number,
-            min: 0,
+        participants: {
+            type: RangeSchema,
         },
 
-        minPhases: {
-            type: Number,
-            min: 0,
-        },
-        maxPhases: {
-            type: Number,
-            min: 0,
+        phases: {
+            type: RangeSchema,
         },
 
-        minBudget: {
-            type: Number,
-            min: 0,
-        },
-        maxBudget: {
-            type: Number,
-            min: 0,
+        budget: {
+            type: RangeSchema,
         },
 
-        minDuration: {
-            type: Number,
-            min: 0,
-        },
-        maxDuration: {
-            type: Number,
-            min: 0,
+        duration: {
+            type: RangeSchema,
         },
 
-        minBudgetPerPhase: {
-            type: Number,
-            min: 0,
-        },
-        maxBudgetPerPhase: {
-            type: Number,
-            min: 0,
+        budgetPerPhase: {
+            type: RangeSchema,
         },
 
-        minDurationPerPhase: {
-            type: Number,
-            min: 0,
-        },
-        maxDurationPerPhase: {
-            type: Number,
-            min: 0,
+        durationPerPhase: {
+            type: RangeSchema,
         },
 
-        minThemes: {
-            type: Number,
-            min: 0,
-        },
-        maxThemes: {
-            type: Number,
-            min: 0,
+        themes: {
+            type: RangeSchema,
         },
 
-        minSubThemes: {
-            type: Number,
-            min: 0,
-        },
-        maxSubThemes: {
-            type: Number,
-            min: 0,
+        subThemes: {
+            type: RangeSchema,
         },
 
-        minFocusAreas: {
-            type: Number,
-            min: 0,
-        },
-        maxFocusAreas: {
-            type: Number,
-            min: 0,
+        focusAreas: {
+            type: RangeSchema,
         },
 
-        minIndicators: {
-            type: Number,
-            min: 0,
-        },
-        maxIndicators: {
-            type: Number,
-            min: 0,
+        indicators: {
+            type: RangeSchema,
         },
     },
     {
@@ -151,4 +86,6 @@ const ConstraintSchema = new Schema<IConstraint>(
 );
 
 export const Constraint = mongoose.model<IConstraint>(
-    COLLECTIONS.CONSTRAINT, ConstraintSchema);
+    COLLECTIONS.CONSTRAINT,
+    ConstraintSchema
+);

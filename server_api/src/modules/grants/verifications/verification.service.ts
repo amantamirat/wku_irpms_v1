@@ -11,9 +11,9 @@ import { IReviewerRepository } from "../../reviewers/reviewer.repository";
 import { ReviewerStatus } from "../../reviewers/reviewer.state-machine";
 import { VerificationConfigurationStatus } from "../verification-conf/verification-conf.model";
 import { IVerificationConfigurationRepository } from "../verification-conf/verification-conf.repository";
-import { CreateVerificationDTO } from "./verification.dto";
+import { CreateVerificationDTO, FilterVerification } from "./verification.dto";
 import { IVerification, VerificationStatus } from "./verification.model";
-import { FilterVerification, IVerificationRepository } from "./verification.repository";
+import { IVerificationRepository } from "./verification.repository";
 
 
 export class VerificationService {

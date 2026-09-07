@@ -1,8 +1,8 @@
-import mongoose from "mongoose";
 import dotenv from "dotenv";
-import { createSystemSeeder, SystemSeeder } from "../util/seeder/system.seed";
-import { createDemoSeeder, DemoSeeder } from "../util/seeder/demo.seed";
+import mongoose from "mongoose";
+import { createDemoSeeder } from "../util/seeder/demo.seed";
 import { createLegacySeeder } from "../util/seeder/legacy/legacy.seed";
+import { createSystemSeeder } from "../util/seeder/system.seed";
 
 dotenv.config();
 

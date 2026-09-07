@@ -8,6 +8,7 @@ import { Message } from 'primereact/message';
 import { classNames } from 'primereact/utils';
 import { Project } from '../../models/project.model';
 import { Constraint } from '@/app/(main)/constraints/models/constraint.model';
+import { etbCurrencyFormatter } from '@/utils/currencyUtil';
 
 interface PhasesStepProps {
     data: Partial<Project>;
@@ -20,10 +21,6 @@ interface PhasesStepProps {
 export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: PhasesStepProps) => {
     const [submitted, setSubmitted] = useState(false);
 
-    // --- Constraint Helpers ---
-    const formatETB = (val: number) =>
-        new Intl.NumberFormat('en-US', { style: 'currency', currency: 'ETB', maximumFractionDigits: 0 }).format(val);
-
     // --- Validation Logic ---
     const validation = useMemo(() => {
         const phases = data.phases || [];
@@ -32,27 +29,27 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
 
         // Check Phase Count
         const isCountValid =
-            phases.length >= (constraint?.minPhases ?? 0) &&
-            phases.length <= (constraint?.maxPhases ?? Infinity);
+            phases.length >= (constraint?.phases?.min ?? 0) &&
+            phases.length <= (constraint?.phases?.max ?? Infinity);
 
         // Check Aggregates
         const isTotalBudgetValid =
-            totalBudget >= (constraint?.minBudget ?? 0) &&
-            totalBudget <= (constraint?.maxBudget ?? Infinity);
+            totalBudget >= (constraint?.budget?.min ?? 0) &&
+            totalBudget <= (constraint?.budget?.max ?? Infinity);
 
         const isTotalTimeValid =
-            totalDuration >= (constraint?.minDuration ?? 0) &&
-            totalDuration <= (constraint?.maxDuration ?? Infinity);
+            totalDuration >= (constraint?.duration?.min ?? 0) &&
+            totalDuration <= (constraint?.duration?.max ?? Infinity);
 
         // Check Individual Phases
         const phaseErrors = phases.map(p => {
             const budgetErr =
-                p.budget < (constraint?.minBudgetPerPhase ?? 0) ||
-                p.budget > (constraint?.maxBudgetPerPhase ?? Infinity);
+                p.budget < (constraint?.budgetPerPhase?.min ?? 0) ||
+                p.budget > (constraint?.budgetPerPhase?.max ?? Infinity);
 
             const timeErr =
-                p.duration < (constraint?.minDurationPerPhase ?? 0) ||
-                p.duration > (constraint?.maxDurationPerPhase ?? Infinity);
+                p.duration < (constraint?.durationPerPhase?.min ?? 0) ||
+                p.duration > (constraint?.durationPerPhase?.max ?? Infinity);
 
             const basicErr = !p.title?.trim() || !p.description?.trim();
             return !!(budgetErr || timeErr || basicErr);
@@ -72,7 +69,8 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
         };
     }, [data.phases, constraint]);
 
-    const isMaxReached = !!(constraint?.maxPhases && validation.currentCount >= constraint.maxPhases);
+    const maxPhases = constraint?.phases?.max;
+    const isMaxReached = !!(maxPhases && validation.currentCount >= maxPhases);
 
     // --- Actions ---
     const updatePhase = (index: number, field: string, value: any) => {
@@ -118,23 +116,23 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
                 <div>
                     <h4 className="m-0 text-900">Project Budget & Timeline</h4>
                     <p className="text-600 text-sm m-0">
-                        Phases allowed: {constraint?.minPhases ?? 1} - {constraint?.maxPhases ?? '∞'}
+                        Phases allowed: {constraint?.phases?.min ?? 1} - {constraint?.phases?.max ?? '∞'}
                     </p>
                 </div>
                 <div className="flex gap-4 mt-3 md:mt-0">
                     <div className="text-right">
                         <small className="block text-700 uppercase font-bold text-xs">Total Duration</small>
                         <span className={classNames("text-xl font-bold", validation.isTotalTimeValid ? "text-900" : "text-red-600")}>
-                            {validation.totalDuration} / {constraint?.maxDuration ?? '∞'} Days
+                            {validation.totalDuration} / {constraint?.duration?.max ?? '∞'} Days
                         </span>
                     </div>
                     <div className="text-right">
                         <small className="block text-700 uppercase font-bold text-xs">Total Budget</small>
                         <span className={classNames("text-xl font-bold", validation.isTotalBudgetValid ? "text-primary" : "text-red-600")}>
-                            {formatETB(validation.totalBudget)}
+                            {etbCurrencyFormatter.format(validation.totalBudget)}
                         </span>
-                        {constraint?.maxBudget && (
-                            <small className="block text-500">Max: {formatETB(constraint.maxBudget)}</small>
+                        {constraint?.budget?.max !== undefined && (
+                            <small className="block text-500">Max: {etbCurrencyFormatter.format(constraint.budget.max)}</small>
                         )}
                     </div>
                 </div>
@@ -144,7 +142,7 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
             {submitted && !validation.isTotalBudgetValid && (
                 <Message
                     severity="error"
-                    text={`Total budget must be between ${formatETB(constraint?.minBudget ?? 0)} and ${constraint?.maxBudget ? formatETB(constraint.maxBudget) : 'unlimited'
+                    text={`Total budget must be between ${etbCurrencyFormatter.format(constraint?.budget?.min ?? 0)} and ${constraint?.budget?.max !== undefined ? etbCurrencyFormatter.format(constraint.budget.max) : 'unlimited'
                         }`}
                     className="w-full mb-3"
                 />
@@ -152,7 +150,7 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
             {submitted && !validation.isTotalTimeValid && (
                 <Message
                     severity="error"
-                    text={`Total duration must be between ${constraint?.minDuration ?? 0} and ${constraint?.maxDuration ?? '∞'} days.`}
+                    text={`Total duration must be between ${constraint?.duration?.min ?? 0} and ${constraint?.duration?.max ?? '∞'} days.`}
                     className="w-full mb-3"
                 />
             )}
@@ -161,13 +159,13 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
             {data.phases?.map((phase, index) => {
                 const isPhaseBudgetInvalid =
                     submitted &&
-                    ((constraint?.minBudgetPerPhase !== undefined && phase.budget < constraint.minBudgetPerPhase) ||
-                        (constraint?.maxBudgetPerPhase !== undefined && phase.budget > constraint.maxBudgetPerPhase));
+                    ((constraint?.budgetPerPhase?.min !== undefined && phase.budget < constraint.budgetPerPhase.min) ||
+                        (constraint?.budgetPerPhase?.max !== undefined && phase.budget > constraint.budgetPerPhase.max));
 
                 const isPhaseDurationInvalid =
                     submitted &&
-                    ((constraint?.minDurationPerPhase !== undefined && phase.duration < constraint.minDurationPerPhase) ||
-                        (constraint?.maxDurationPerPhase !== undefined && phase.duration > constraint.maxDurationPerPhase));
+                    ((constraint?.durationPerPhase?.min !== undefined && phase.duration < constraint.durationPerPhase.min) ||
+                        (constraint?.durationPerPhase?.max !== undefined && phase.duration > constraint.durationPerPhase.max));
 
                 return (
                     <div key={index} className="card border-1 border-200 surface-50 mb-4 p-3 relative shadow-1 border-round-lg">
@@ -205,15 +203,15 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
                                 <label className="font-bold text-sm">Budget (ETB)</label>
                                 <InputNumber
                                     value={phase.budget}
-                                    onValueChange={(e) => updatePhase(index, 'budget', e.value)}
+                                    onValueChange={(e) => updatePhase(index, 'budget', e.value ?? 0)}
                                     mode="currency"
                                     currency="ETB"
                                     locale="en-US"
                                     className={classNames({ 'p-invalid': isPhaseBudgetInvalid })}
                                 />
-                                {(constraint?.minBudgetPerPhase !== undefined || constraint?.maxBudgetPerPhase !== undefined) && (
+                                {(constraint?.budgetPerPhase?.min !== undefined || constraint?.budgetPerPhase?.max !== undefined) && (
                                     <small className="text-500 block mt-1">
-                                        Limit: {formatETB(constraint.minBudgetPerPhase ?? 0)} - {constraint.maxBudgetPerPhase ? formatETB(constraint.maxBudgetPerPhase) : '∞'}
+                                        Limit: {etbCurrencyFormatter.format(constraint?.budgetPerPhase?.min ?? 0)} - {constraint?.budgetPerPhase?.max !== undefined ? etbCurrencyFormatter.format(constraint.budgetPerPhase.max) : '∞'}
                                     </small>
                                 )}
                             </div>
@@ -222,15 +220,15 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
                                 <label className="font-bold text-sm">Duration (Days)</label>
                                 <InputNumber
                                     value={phase.duration}
-                                    onValueChange={(e) => updatePhase(index, 'duration', e.value)}
+                                    onValueChange={(e) => updatePhase(index, 'duration', e.value ?? 0)}
                                     suffix=" Days"
                                     showButtons
                                     min={0}
                                     className={classNames({ 'p-invalid': isPhaseDurationInvalid })}
                                 />
-                                {(constraint?.minDurationPerPhase !== undefined || constraint?.maxDurationPerPhase !== undefined) && (
+                                {(constraint?.durationPerPhase?.min !== undefined || constraint?.durationPerPhase?.max !== undefined) && (
                                     <small className="text-500 block mt-1">
-                                        Limit: {constraint.minDurationPerPhase ?? 0} - {constraint.maxDurationPerPhase ?? '∞'} days
+                                        Limit: {constraint?.durationPerPhase?.min ?? 0} - {constraint?.durationPerPhase?.max ?? '∞'} days
                                     </small>
                                 )}
                             </div>
@@ -261,7 +259,7 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
                 className="p-button-outlined p-button-sm w-full border-dashed py-3"
                 onClick={addPhase}
                 disabled={isMaxReached}
-                tooltip={isMaxReached ? `Maximum of ${constraint?.maxPhases} phases allowed` : ""}
+                tooltip={isMaxReached ? `Maximum of ${maxPhases} phases allowed` : ""}
                 tooltipOptions={{ showOnDisabled: true }}
             />
 

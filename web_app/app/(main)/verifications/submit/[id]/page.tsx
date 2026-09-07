@@ -33,8 +33,8 @@ export interface TemplateValidationResult {
 export default function VerificationSubmitPage() {
     const params = useParams();
     const router = useRouter();
-    const { getUser } = useAuth();
-    const appUser = getUser();
+    //const { getUser } = useAuth();
+    //const appUser = getUser();
 
     const configId = params?.id as string;
 
@@ -69,23 +69,24 @@ export default function VerificationSubmitPage() {
                     : configData.grant;
 
                 // 2. Fetch User Projects & Filter matching grant & COMPLETED status
-                if (appUser?._id) {
-                    const userProjects: Project[] = await ProjectApi.getAll({
-                        leadPI: appUser, grant: targetGrantId
-                    });
 
-                    const filtered = userProjects.filter((proj: any) => {
-                        //const projGrantId = typeof proj.grant === 'object' ? proj.grant?._id : proj.grant;
-                        //const isSameGrant = projGrantId === targetGrantId;
-                        const isCompleted = proj.status === ProjectStatus.completed;
-                        return isCompleted;
-                    });
+                const userProjects: Project[] = await ProjectApi.me({
+                    grant: targetGrantId, status: ProjectStatus.completed
+                });
 
-                    setEligibleProjects(filtered);
-                    if (filtered.length > 0) {
-                        setSelectedProject(filtered[0]);
-                    }
+                /*
+                const filtered = userProjects.filter((proj: any) => {
+                    //const projGrantId = typeof proj.grant === 'object' ? proj.grant?._id : proj.grant;
+                    //const isSameGrant = projGrantId === targetGrantId;
+                    const isCompleted = proj.status === ProjectStatus.completed;
+                    return isCompleted;
+                });*/
+
+                setEligibleProjects(userProjects);
+                if (userProjects.length > 0) {
+                    setSelectedProject(userProjects[0]);
                 }
+
             } catch (err: any) {
                 console.error('Failed to load initial verification data', err);
                 setError(err?.message || 'Failed to load verification details.');
@@ -95,7 +96,7 @@ export default function VerificationSubmitPage() {
         };
 
         loadInitialData();
-    }, [configId, appUser?._id]);
+    }, [configId]);
 
     const clearErrors = () => {
         setError(null);
@@ -123,7 +124,7 @@ export default function VerificationSubmitPage() {
             await VerificationApi.create({
                 project: selectedProject._id,
                 configuration: configId,
-                document:selectedFile,
+                document: selectedFile,
             });
 
             setLoading(false);

@@ -1,36 +1,31 @@
+import { IRange } from "../../common/types/range";
+/**
+ * Create Constraint
+ */
 export interface CreateConstraintDTO {
     name: string;
     description?: string;
-    
-    minParticipants?: number;
-    maxParticipants?: number;
 
-    minPhases?: number;
-    maxPhases?: number;
+    participants?: IRange;
+    phases?: IRange;
 
-    minBudget?: number;
-    maxBudget?: number;
+    budget?: IRange;
+    duration?: IRange;
 
-    minDuration?: number;
-    maxDuration?: number;
+    budgetPerPhase?: IRange;
+    durationPerPhase?: IRange;
 
-    minBudgetPerPhase?: number;
-    maxBudgetPerPhase?: number;
+    themes?: IRange;
+    subThemes?: IRange;
 
-    minDurationPerPhase?: number;
-    maxDurationPerPhase?: number;
-
-    minThemes?: number;
-    maxThemes?: number;
-
-    minSubThemes?: number;
-    maxSubThemes?: number;
-
-    minFocusAreas?: number;
-    maxFocusAreas?: number;
-
-    minIndicators?: number;
-    maxIndicators?: number;
+    focusAreas?: IRange;
+    indicators?: IRange;
 }
 
-export type UpdateConstraintDTO = Partial<CreateConstraintDTO>;
+/**
+ * Update Constraint
+ */
+export interface UpdateConstraintDTO {
+    id: string;
+    data: Partial<CreateConstraintDTO>;
+}

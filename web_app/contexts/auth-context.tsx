@@ -35,6 +35,20 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
     const [session, setSession] = useState<AuthSession | null>(null);
     const [loading, setLoading] = useState(true);
 
+
+    useEffect(() => {
+        const handleLogout = () => {
+            console.log("🔥 AUTH LOGOUT EVENT RECEIVED");
+            setSession(null);
+        };
+
+        window.addEventListener("auth:logout", handleLogout);
+
+        return () => {
+            window.removeEventListener("auth:logout", handleLogout);
+        };
+    }, []);
+
     useEffect(() => {
         const stored = AuthApi.getLoggedInUser();
         setSession(stored ?? null);

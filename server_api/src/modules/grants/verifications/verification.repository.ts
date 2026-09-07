@@ -5,6 +5,7 @@ import {
     VerificationStatus
 } from "./verification.model";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
+import { FilterVerification } from "./verification.dto";
 
 
 export interface CreateVerificationData {
@@ -16,12 +17,7 @@ export interface CreateVerificationData {
 }
 
 
-export interface FilterVerification {
-    project?: string;
-    configuration?: string;
-    attempt?: number;
-    status?: VerificationStatus;
-}
+
 
 
 export interface IVerificationRepository {

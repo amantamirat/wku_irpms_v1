@@ -46,9 +46,12 @@ export const AuthApi = {
         return localStorage.getItem(tokenStorage);
     },
 
+
     logout() {
+        if (typeof window === "undefined") return;
         localStorage.removeItem(tokenStorage);
         localStorage.removeItem(sessionStorage);
+        window.dispatchEvent(new Event("auth:logout"));
     },
 
     async changePassword(dto: ChangePasswordDTO): Promise<any> {

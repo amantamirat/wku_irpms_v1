@@ -10,32 +10,23 @@ import { useEffect, useRef, useState } from 'react';
 import { ConstraintApi } from '../api/constraint.api';
 import { Constraint, validateConstraint } from '../models/constraint.model';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { IRange } from '@/types/range';
 
-// Helper to initialize missing/optional fields explicitly
+// Helper to initialize constraint state with nested range structures
 const initializeConstraint = (item?: Partial<Constraint>): Constraint => ({
     _id: item?._id,
     name: item?.name ?? '',
     description: item?.description ?? '',
-    minParticipants: item?.minParticipants ?? undefined,
-    maxParticipants: item?.maxParticipants ?? undefined,
-    minPhases: item?.minPhases ?? undefined,
-    maxPhases: item?.maxPhases ?? undefined,
-    minBudget: item?.minBudget ?? undefined,
-    maxBudget: item?.maxBudget ?? undefined,
-    minDuration: item?.minDuration ?? undefined,
-    maxDuration: item?.maxDuration ?? undefined,
-    minBudgetPerPhase: item?.minBudgetPerPhase ?? undefined,
-    maxBudgetPerPhase: item?.maxBudgetPerPhase ?? undefined,
-    minDurationPerPhase: item?.minDurationPerPhase ?? undefined,
-    maxDurationPerPhase: item?.maxDurationPerPhase ?? undefined,
-    minThemes: item?.minThemes ?? undefined,
-    maxThemes: item?.maxThemes ?? undefined,
-    minSubThemes: item?.minSubThemes ?? undefined,
-    maxSubThemes: item?.maxSubThemes ?? undefined,
-    minFocusAreas: item?.minFocusAreas ?? undefined,
-    maxFocusAreas: item?.maxFocusAreas ?? undefined,
-    minIndicators: item?.minIndicators ?? undefined,
-    maxIndicators: item?.maxIndicators ?? undefined,
+    participants: item?.participants ? { ...item.participants } : undefined,
+    phases: item?.phases ? { ...item.phases } : undefined,
+    budget: item?.budget ? { ...item.budget } : undefined,
+    duration: item?.duration ? { ...item.duration } : undefined,
+    budgetPerPhase: item?.budgetPerPhase ? { ...item.budgetPerPhase } : undefined,
+    durationPerPhase: item?.durationPerPhase ? { ...item.durationPerPhase } : undefined,
+    themes: item?.themes ? { ...item.themes } : undefined,
+    subThemes: item?.subThemes ? { ...item.subThemes } : undefined,
+    focusAreas: item?.focusAreas ? { ...item.focusAreas } : undefined,
+    indicators: item?.indicators ? { ...item.indicators } : undefined,
     createdAt: item?.createdAt,
     updatedAt: item?.updatedAt,
 });
@@ -52,8 +43,34 @@ const SaveConstraint = ({ visible, item, onComplete, onHide }: EntitySaveDialogP
     const updateField = (field: keyof Constraint, value: any) => {
         setLocalConstraint((prev) => ({
             ...prev,
-            [field]: value ?? undefined
+            [field]: value
         }));
+    };
+
+    const updateRangeField = (
+        rangeKey: keyof Constraint,
+        bound: 'min' | 'max',
+        value: number | null | undefined
+    ) => {
+        setLocalConstraint((prev) => {
+            const currentRange = (prev[rangeKey] as IRange | undefined) || { min: 0, max: 0 };
+            const updatedRange: Partial<IRange> = {
+                ...currentRange,
+                [bound]: value ?? undefined
+            };
+
+            // Remove range property if both bounds are cleared/empty
+            if (updatedRange.min === undefined && updatedRange.max === undefined) {
+                const copy = { ...prev };
+                delete copy[rangeKey];
+                return copy;
+            }
+
+            return {
+                ...prev,
+                [rangeKey]: updatedRange as IRange
+            };
+        });
     };
 
     const saveConstraint = async () => {
@@ -93,35 +110,38 @@ const SaveConstraint = ({ visible, item, onComplete, onHide }: EntitySaveDialogP
 
     const renderRangeInputs = (
         label: string,
-        minKey: keyof Constraint,
-        maxKey: keyof Constraint,
+        rangeKey: keyof Constraint,
         isCurrency: boolean = false
-    ) => (
-        <div className="col-12 md:col-6 mb-3">
-            <label className="font-bold block mb-2">{label}</label>
-            <div className="flex gap-2 align-items-center">
-                <InputNumber
-                    value={(localConstraint[minKey] as number) ?? null}
-                    onValueChange={(e) => updateField(minKey, e.value)}
-                    placeholder="Min"
-                    mode={isCurrency ? 'currency' : 'decimal'}
-                    currency={isCurrency ? 'ETB' : undefined}
-                    locale="en-ET"
-                    className="w-full"
-                />
-                <span className="text-500">-</span>
-                <InputNumber
-                    value={(localConstraint[maxKey] as number) ?? null}
-                    onValueChange={(e) => updateField(maxKey, e.value)}
-                    placeholder="Max"
-                    mode={isCurrency ? 'currency' : 'decimal'}
-                    currency={isCurrency ? 'ETB' : undefined}
-                    locale="en-ET"
-                    className="w-full"
-                />
+    ) => {
+        const range = localConstraint[rangeKey] as IRange | undefined;
+
+        return (
+            <div className="col-12 md:col-6 mb-3">
+                <label className="font-bold block mb-2">{label}</label>
+                <div className="flex gap-2 align-items-center">
+                    <InputNumber
+                        value={range?.min ?? null}
+                        onValueChange={(e) => updateRangeField(rangeKey, 'min', e.value)}
+                        placeholder="Min"
+                        mode={isCurrency ? 'currency' : 'decimal'}
+                        currency={isCurrency ? 'ETB' : undefined}
+                        locale="en-ET"
+                        className="w-full"
+                    />
+                    <span className="text-500">-</span>
+                    <InputNumber
+                        value={range?.max ?? null}
+                        onValueChange={(e) => updateRangeField(rangeKey, 'max', e.value)}
+                        placeholder="Max"
+                        mode={isCurrency ? 'currency' : 'decimal'}
+                        currency={isCurrency ? 'ETB' : undefined}
+                        locale="en-ET"
+                        className="w-full"
+                    />
+                </div>
             </div>
-        </div>
-    );
+        );
+    };
 
     const footer = (
         <div className="flex justify-content-end gap-2">
@@ -172,16 +192,16 @@ const SaveConstraint = ({ visible, item, onComplete, onHide }: EntitySaveDialogP
                 <h5 className="mb-3 text-700 border-bottom-1 surface-border pb-2">Constraint Ranges</h5>
 
                 <div className="grid">
-                    {renderRangeInputs('Participants', 'minParticipants', 'maxParticipants')}
-                    {renderRangeInputs('Phases Count', 'minPhases', 'maxPhases')}
-                    {renderRangeInputs('Project Budget', 'minBudget', 'maxBudget', true)}
-                    {renderRangeInputs('Project Duration (Days)', 'minDuration', 'maxDuration')}
-                    {renderRangeInputs('Budget per Phase', 'minBudgetPerPhase', 'maxBudgetPerPhase', true)}
-                    {renderRangeInputs('Duration per Phase (Days)', 'minDurationPerPhase', 'maxDurationPerPhase')}
-                    {renderRangeInputs('Themes', 'minThemes', 'maxThemes')}
-                    {renderRangeInputs('Sub Themes', 'minSubThemes', 'maxSubThemes')}
-                    {renderRangeInputs('Focus Areas', 'minFocusAreas', 'maxFocusAreas')}
-                    {renderRangeInputs('Indicators', 'minIndicators', 'maxIndicators')}
+                    {renderRangeInputs('Participants', 'participants')}
+                    {renderRangeInputs('Phases Count', 'phases')}
+                    {renderRangeInputs('Project Budget', 'budget', true)}
+                    {renderRangeInputs('Project Duration (Days)', 'duration')}
+                    {renderRangeInputs('Budget per Phase', 'budgetPerPhase', true)}
+                    {renderRangeInputs('Duration per Phase (Days)', 'durationPerPhase')}
+                    {renderRangeInputs('Themes', 'themes')}
+                    {renderRangeInputs('Sub Themes', 'subThemes')}
+                    {renderRangeInputs('Focus Areas', 'focusAreas')}
+                    {renderRangeInputs('Indicators', 'indicators')}
                 </div>
             </Dialog>
         </>

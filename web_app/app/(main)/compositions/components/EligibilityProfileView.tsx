@@ -5,9 +5,9 @@ import { Tag } from 'primereact/tag';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { AcademicLevel } from '../../organizations/models/organization.model';
 import { Accessibility } from '../../users/models/user.model';
-import { IRange } from '../models/composition.model';
 import { EligibilityProfile } from '../models/profile.model';
 import { ProfileApi } from '../api/profile.api';
+import { IRange } from '@/types/range';
 
 
 interface EligibilityProfileViewProps {

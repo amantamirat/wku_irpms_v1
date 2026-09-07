@@ -5,8 +5,7 @@ import { successResponse, errorResponse } from "../../../common/helpers/response
 import { AuthenticatedRequest } from "../../auth/auth.middleware";
 import {
     CreateProfileDTO,
-    UpdateProfileDTO,
-    GetProfileDTO
+    UpdateProfileDTO
 } from "./profile.dto";
 import { ProfileService } from "./profile.service";
 
@@ -169,7 +168,7 @@ export class ProfileController {
 
                 data: req.body,
 
-                userId
+                //userId
 
             };
 

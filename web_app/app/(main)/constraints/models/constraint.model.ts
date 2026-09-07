@@ -1,83 +1,76 @@
-export type Constraint = {
-    _id?: string;
+import { IRange, isValidRange } from "@/types/range";
 
-    name: string;
-    description?: string;
 
-    minParticipants?: number;
-    maxParticipants?: number;
+export interface Constraint {
+  _id?: string;
 
-    minPhases?: number;
-    maxPhases?: number;
+  name: string;
+  description?: string;
 
-    minBudget?: number;
-    maxBudget?: number;
+  participants?: IRange;
+  phases?: IRange;
 
-    minDuration?: number;
-    maxDuration?: number;
+  budget?: IRange;
+  duration?: IRange;
 
-    minBudgetPerPhase?: number;
-    maxBudgetPerPhase?: number;
+  budgetPerPhase?: IRange;
+  durationPerPhase?: IRange;
 
-    minDurationPerPhase?: number;
-    maxDurationPerPhase?: number;
+  themes?: IRange;
+  subThemes?: IRange;
 
-    minThemes?: number;
-    maxThemes?: number;
+  focusAreas?: IRange;
+  indicators?: IRange;
 
-    minSubThemes?: number;
-    maxSubThemes?: number;
-
-    minFocusAreas?: number;
-    maxFocusAreas?: number;
-
-    minIndicators?: number;
-    maxIndicators?: number;
-
-    createdAt?: string;
-    updatedAt?: string;
-};
-
+  createdAt?: string | Date;
+  updatedAt?: string | Date;
+}
 
 export const validateConstraint = (
-    constraint: Constraint
+  constraint: Constraint
 ): { valid: boolean; message?: string } => {
+  if (!constraint.name || constraint.name.trim() === "") {
+    return {
+      valid: false,
+      message: "Constraint name is required.",
+    };
+  }
 
-    if (!constraint.name || constraint.name.trim() === "") {
-        return {
+  const ranges: [string, IRange | undefined][] = [
+    ["Participants", constraint.participants],
+    ["Phases", constraint.phases],
+    ["Budget", constraint.budget],
+    ["Duration", constraint.duration],
+    ["Budget per phase", constraint.budgetPerPhase],
+    ["Duration per phase", constraint.durationPerPhase],
+    ["Themes", constraint.themes],
+    ["Sub themes", constraint.subThemes],
+    ["Focus areas", constraint.focusAreas],
+    ["Indicators", constraint.indicators],
+  ];
+
+  for (const [name, range] of ranges) {
+    if (range) {
+      if (!isValidRange(range)) {
+        if (range.min < 0 || range.max < 0) {
+          return {
             valid: false,
-            message: "Constraint name is required."
-        };
-    }
-
-
-    const ranges = [
-        ["Participants", constraint.minParticipants, constraint.maxParticipants],
-        ["Phases", constraint.minPhases, constraint.maxPhases],
-        ["Budget", constraint.minBudget, constraint.maxBudget],
-        ["Duration", constraint.minDuration, constraint.maxDuration],
-        ["Budget per phase", constraint.minBudgetPerPhase, constraint.maxBudgetPerPhase],
-        ["Duration per phase", constraint.minDurationPerPhase, constraint.maxDurationPerPhase],
-        ["Themes", constraint.minThemes, constraint.maxThemes],
-        ["Sub themes", constraint.minSubThemes, constraint.maxSubThemes],
-        ["Focus areas", constraint.minFocusAreas, constraint.maxFocusAreas],
-        ["Indicators", constraint.minIndicators, constraint.maxIndicators],
-    ];
-
-
-    for (const [name, min, max] of ranges) {
-
-        if (
-            min !== undefined &&
-            max !== undefined &&
-            min > max
-        ) {
-            return {
-                valid: false,
-                message: `Invalid range for ${name}. Minimum cannot exceed maximum.`
-            };
+            message: `${name} values cannot be negative.`,
+          };
         }
+        if (range.min > range.max) {
+          return {
+            valid: false,
+            message: `Invalid range for ${name}. Minimum cannot exceed maximum.`,
+          };
+        }
+        return {
+          valid: false,
+          message: `${name} contains invalid range numbers.`,
+        };
+      }
     }
+  }
 
-    return { valid: true };
+  return { valid: true };
 };

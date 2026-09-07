@@ -39,6 +39,8 @@
     "name": "role:delete",
     "description": "Delete roles"
   },
+
+  
   {
     "category": "Account Management",
     "name": "account:create",

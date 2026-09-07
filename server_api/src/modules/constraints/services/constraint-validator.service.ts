@@ -5,6 +5,10 @@ import { CreateProjectDTO } from "../../projects/project.dto";
 import { ThemeRepository } from "../../thematics/themes/theme.repository";
 import { IConstraint } from "../constraint.model";
 import { ConstraintRepository } from "../constraint.repository";
+import {
+    IRange,
+    matchRange
+} from "../../../common/types/range";
 
 export interface ConstraintValidationResult {
     valid: boolean;
@@ -24,25 +28,50 @@ export class ConstraintValidationService {
     ) { }
 
 
-    private async getConstraint(constraintId: string): Promise<IConstraint> {
-        const constraint = await this.constraintRepo.findById(constraintId);
+    private async getConstraint(
+        constraintId: string
+    ): Promise<IConstraint> {
+
+        const constraint =
+            await this.constraintRepo.findById(constraintId);
+
         if (!constraint) {
-            throw new AppError(ERROR_CODES.CONSTRAINT_NOT_FOUND);
+            throw new AppError(
+                ERROR_CODES.CONSTRAINT_NOT_FOUND
+            );
         }
+
         return constraint;
     }
 
-    async validateProject(constraintId: string, dto: CreateProjectDTO): Promise<ConstraintValidationResult> {
-        const constraint = await this.getConstraint(constraintId);
+
+    async validateProject(
+        constraintId: string,
+        dto: CreateProjectDTO
+    ): Promise<ConstraintValidationResult> {
+
+        const constraint =
+            await this.getConstraint(constraintId);
 
         const errors: string[] = [];
 
-        // Participants count
-        this.validateParticipants(constraint, dto.collaborators.length, errors);
-        //Project Phases & budget and duration
-        this.validatePhasesInternal(constraint, dto.phases, errors);
-        //Project themes
-        this.validateThemeInternal(constraint, dto.themes, errors);
+        this.validateParticipants(
+            constraint.participants,
+            dto.collaborators.length,
+            errors
+        );
+
+        this.validatePhasesInternal(
+            constraint,
+            dto.phases,
+            errors
+        );
+
+        await this.validateThemeInternal(
+            constraint,
+            dto.themes,
+            errors
+        );
 
         return {
             valid: errors.length === 0,
@@ -50,23 +79,45 @@ export class ConstraintValidationService {
         };
     }
 
-    async validateParticipantCount(constraintId: string, count: number): Promise<ConstraintValidationResult> {
-        const constraint = await this.getConstraint(constraintId);
+
+    async validateParticipantCount(
+        constraintId: string,
+        count: number
+    ): Promise<ConstraintValidationResult> {
+
+        const constraint =
+            await this.getConstraint(constraintId);
 
         const errors: string[] = [];
-        this.validateParticipants(constraint, count, errors);
+
+        this.validateParticipants(
+            constraint.participants,
+            count,
+            errors
+        );
+
         return {
             valid: errors.length === 0,
             errors
         };
     }
 
-    async validatePhases(constraintId: string, phases: PhaseValidationInput[]): Promise<ConstraintValidationResult> {
-        const constraint = await this.getConstraint(constraintId);
+
+    async validatePhases(
+        constraintId: string,
+        phases: PhaseValidationInput[]
+    ): Promise<ConstraintValidationResult> {
+
+        const constraint =
+            await this.getConstraint(constraintId);
 
         const errors: string[] = [];
 
-        this.validatePhasesInternal(constraint, phases, errors);
+        this.validatePhasesInternal(
+            constraint,
+            phases,
+            errors
+        );
 
         return {
             valid: errors.length === 0,
@@ -74,196 +125,218 @@ export class ConstraintValidationService {
         };
     }
 
-    async validateThemes(constraintId: string, selectedThemes: string[]): Promise<ConstraintValidationResult> {
-        const constraint = await this.getConstraint(constraintId);
+
+    async validateThemes(
+        constraintId: string,
+        selectedThemes: string[]
+    ): Promise<ConstraintValidationResult> {
+
+        const constraint =
+            await this.getConstraint(constraintId);
+
         const errors: string[] = [];
-        await this.validateThemeInternal(constraint, selectedThemes, errors);
+
+        await this.validateThemeInternal(
+            constraint,
+            selectedThemes,
+            errors
+        );
+
         return {
             valid: errors.length === 0,
             errors
         };
     }
 
-    private validateParticipants(constraint: IConstraint, count: number, errors: string[]) {
-        if (
-            constraint.minParticipants !== undefined &&
-            count < constraint.minParticipants
-        ) {
-            errors.push(`Minimum participants is ${constraint.minParticipants}.`);
-        }
 
-        if (
-            constraint.maxParticipants !== undefined &&
-            count > constraint.maxParticipants
-        ) {
-            errors.push(`Maximum participants is ${constraint.maxParticipants}.`);
+    private validateParticipants(
+        range: IRange | undefined,
+        count: number,
+        errors: string[]
+    ): void {
+
+        if (range && !matchRange(range, count)) {
+            errors.push(
+                `Participants must be between ${range.min} and ${range.max}. Current count: ${count}.`
+            );
         }
     }
 
 
-    private validatePhaseCount(constraint: IConstraint, count: number, errors: string[]) {
-        if (
-            constraint.minPhases !== undefined &&
-            count < constraint.minPhases
-        ) {
-            errors.push(`Minimum phases is ${constraint.minPhases}.`);
-        }
+    private validatePhaseCount(
+        range: IRange | undefined,
+        count: number,
+        errors: string[]
+    ): void {
 
-        if (
-            constraint.maxPhases !== undefined &&
-            count > constraint.maxPhases
-        ) {
-            errors.push(`Maximum phases is ${constraint.maxPhases}.`);
+        if (range && !matchRange(range, count)) {
+            errors.push(
+                `Phases must be between ${range.min} and ${range.max}. Current count: ${count}.`
+            );
         }
     }
 
-    private validateProjectBudget(constraint: IConstraint, budget: number, errors: string[]) {
-        if (
-            constraint.minBudget !== undefined &&
-            budget < constraint.minBudget
-        ) {
-            errors.push(`Minimum project budget is ${constraint.minBudget}.`);
-        }
 
-        if (constraint.maxBudget !== undefined
-            && budget > constraint.maxBudget) {
-            errors.push(`Maximum project budget is ${constraint.maxBudget}.`);
-        }
-    }
+    private validateProjectBudget(
+        range: IRange | undefined,
+        budget: number,
+        errors: string[]
+    ): void {
 
-    private validateProjectDuration(constraint: IConstraint, duration: number, errors: string[]) {
-        if (
-            constraint.minDuration !== undefined &&
-            duration < constraint.minDuration
-        ) {
-            errors.push(`Minimum project duration is ${constraint.minDuration}.`);
-        }
-
-        if (constraint.maxDuration !== undefined && duration > constraint.maxDuration) {
-            errors.push(`Maximum project duration is ${constraint.maxDuration}.`);
+        if (range && !matchRange(range, budget)) {
+            errors.push(
+                `Project budget must be between ${range.min} and ${range.max}. Current budget: ${budget}.`
+            );
         }
     }
 
-    private validatePhasesInternal(constraint: IConstraint, phases: PhaseValidationInput[], errors: string[]) {
-        // Phases count
-        this.validatePhaseCount(constraint, phases.length, errors);
 
-        // Project budget
+    private validateProjectDuration(
+        range: IRange | undefined,
+        duration: number,
+        errors: string[]
+    ): void {
+
+        if (range && !matchRange(range, duration)) {
+            errors.push(
+                `Project duration must be between ${range.min} and ${range.max}. Current duration: ${duration}.`
+            );
+        }
+    }
+
+
+    private validatePhasesInternal(
+        constraint: IConstraint,
+        phases: PhaseValidationInput[],
+        errors: string[]
+    ): void {
+
+        this.validatePhaseCount(
+            constraint.phases,
+            phases.length,
+            errors
+        );
+
         const projectBudget = phases.reduce(
-            (sum, phase) => sum + phase.budget, 0);
+            (sum, phase) => sum + phase.budget,
+            0
+        );
 
-        this.validateProjectBudget(constraint, projectBudget, errors);
+        this.validateProjectBudget(
+            constraint.budget,
+            projectBudget,
+            errors
+        );
 
-        // Project duration
         const projectDuration = phases.reduce(
-            (sum, phase) => sum + phase.duration, 0);
+            (sum, phase) => sum + phase.duration,
+            0
+        );
 
-        this.validateProjectDuration(constraint, projectDuration, errors);
+        this.validateProjectDuration(
+            constraint.duration,
+            projectDuration,
+            errors
+        );
 
         for (const phase of phases) {
 
             if (
-                constraint.minBudgetPerPhase !== undefined &&
-                phase.budget < constraint.minBudgetPerPhase
+                constraint.budgetPerPhase &&
+                !matchRange(
+                    constraint.budgetPerPhase,
+                    phase.budget
+                )
             ) {
                 errors.push(
-                    `Phase "${phase.title}" budget must be at least ${constraint.minBudgetPerPhase}.`
+                    `Phase "${phase.title}" budget must be between ${constraint.budgetPerPhase.min} and ${constraint.budgetPerPhase.max}. Current budget: ${phase.budget}.`
                 );
             }
 
             if (
-                constraint.maxBudgetPerPhase !== undefined &&
-                phase.budget > constraint.maxBudgetPerPhase
+                constraint.durationPerPhase &&
+                !matchRange(
+                    constraint.durationPerPhase,
+                    phase.duration
+                )
             ) {
                 errors.push(
-                    `Phase "${phase.title}" budget cannot exceed ${constraint.maxBudgetPerPhase}.`
-                );
-            }
-
-            if (
-                constraint.minDurationPerPhase !== undefined &&
-                phase.duration < constraint.minDurationPerPhase
-            ) {
-                errors.push(
-                    `Phase "${phase.title}" duration must be at least ${constraint.minDurationPerPhase}.`
-                );
-            }
-
-            if (
-                constraint.maxDurationPerPhase !== undefined &&
-                phase.duration > constraint.maxDurationPerPhase
-            ) {
-                errors.push(
-                    `Phase "${phase.title}" duration cannot exceed ${constraint.maxDurationPerPhase}.`
+                    `Phase "${phase.title}" duration must be between ${constraint.durationPerPhase.min} and ${constraint.durationPerPhase.max}. Current duration: ${phase.duration}.`
                 );
             }
         }
     }
 
-    private async validateThemeInternal(constraint: IConstraint, selectedThemes: string[], errors: string[]) {
-        const counts = await this.countThemeLevels(selectedThemes);
+
+    private async validateThemeInternal(
+        constraint: IConstraint,
+        selectedThemes: string[],
+        errors: string[]
+    ): Promise<void> {
+
+        const counts =
+            await this.countThemeLevels(selectedThemes);
 
         this.validateThemeLevel(
             "Theme",
             counts[0]?.size ?? 0,
-            constraint.minThemes,
-            constraint.maxThemes,
+            constraint.themes,
             errors
         );
 
         this.validateThemeLevel(
             "Sub-theme",
             counts[1]?.size ?? 0,
-            constraint.minSubThemes,
-            constraint.maxSubThemes,
+            constraint.subThemes,
             errors
         );
 
         this.validateThemeLevel(
             "Focus Area",
             counts[2]?.size ?? 0,
-            constraint.minFocusAreas,
-            constraint.maxFocusAreas,
+            constraint.focusAreas,
             errors
         );
 
         this.validateThemeLevel(
             "Indicator",
             counts[3]?.size ?? 0,
-            constraint.minIndicators,
-            constraint.maxIndicators,
+            constraint.indicators,
             errors
         );
-
     }
 
-    private validateThemeLevel(label: string, count: number, min: number | undefined, max: number | undefined, errors: string[])
-        : void {
-        if (
-            min !== undefined &&
-            count < min
-        ) {
-            errors.push(`${label} count must be at least ${min}. Current count: ${count}.`);
-        }
 
-        if (
-            max !== undefined &&
-            count > max
-        ) {
-            errors.push(`${label} count cannot exceed ${max}. Current count: ${count}.`);
+    private validateThemeLevel(
+        label: string,
+        count: number,
+        range: IRange | undefined,
+        errors: string[]
+    ): void {
+
+        if (range && !matchRange(range, count)) {
+            errors.push(
+                `${label} count must be between ${range.min} and ${range.max}. Current count: ${count}.`
+            );
         }
     }
 
-    private async countThemeLevels(selectedThemes: string[]) {
+
+    private async countThemeLevels(
+        selectedThemes: string[]
+    ) {
 
         const levels: Record<number, Set<string>> = {};
 
         for (const id of selectedThemes) {
 
-            let current = await this.themeRepo.findById(id);
+            let current =
+                await this.themeRepo.findById(id);
 
             if (!current) {
-                throw new AppError(ERROR_CODES.THEME_NOT_FOUND);
+                throw new AppError(
+                    ERROR_CODES.THEME_NOT_FOUND
+                );
             }
 
             while (current) {
@@ -272,8 +345,9 @@ export class ConstraintValidationService {
                     levels[current.level] = new Set();
                 }
 
-                levels[current.level]
-                    .add(current._id.toString());
+                levels[current.level].add(
+                    current._id.toString()
+                );
 
                 if (!current.parent) {
                     break;
@@ -288,5 +362,4 @@ export class ConstraintValidationService {
 
         return levels;
     }
-
 }

@@ -1,7 +1,7 @@
 import fs from "fs";
 import path from "path";
 import { Request, Response } from "express";
-import { CreateVerificationDTO } from "./verification.dto";
+import { CreateVerificationDTO, FilterVerification } from "./verification.dto";
 import {
     successResponse,
     errorResponse
@@ -13,7 +13,7 @@ import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { VerificationStatus } from "./verification.model";
-import { FilterVerification } from "./verification.repository";
+
 
 export class VerificationController {
 

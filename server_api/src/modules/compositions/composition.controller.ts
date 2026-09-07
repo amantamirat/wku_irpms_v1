@@ -8,10 +8,9 @@ import { CreateCompositionDTO, GetCompositionDTO, UpdateCompositionDTO } from '.
 
 export class CompositionController {
 
-    private service: CompositionService;
 
-    constructor(service: CompositionService) {
-        this.service = service;
+
+    constructor(private readonly service: CompositionService) {
     }
 
     // ✅ Create Composition

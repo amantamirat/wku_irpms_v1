@@ -1,25 +1,23 @@
 import { ApiClient } from "@/api/ApiClient";
-import { Composition, sanitizeComposition } from "../models/composition.model";
+import { Composition } from "../models/composition.model";
 import { EntityApi } from "@/api/EntityApi";
+import { sanitize } from "@/utils/sanitizer";
 
 const end_point = '/compositions';
 export const CompositionApi: EntityApi<Composition> = {
-    
+
     async create(composition: Partial<Composition>): Promise<Composition> {
-        const sanitized = sanitizeComposition(composition);
+        const sanitized = sanitize(composition);
         const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Composition;
     },
 
-    async getById(id: string, populate?: boolean): Promise<Composition> {
-        const query = populate !== undefined ? `?populate=${populate}` : '';
-        return ApiClient.get(`${end_point}/${id}${query}`);
+    async getById(id: string): Promise<Composition> {
+        return ApiClient.get(`${end_point}/${id}`);
     },
 
-    async getAll(populate): Promise<Composition[]> {
-        const query = new URLSearchParams();
-        if (populate) query.append("populate", String(populate));
-        const data = await ApiClient.get(`${end_point}?${query.toString()}`);
+    async getAll(): Promise<Composition[]> {
+        const data = await ApiClient.get(end_point);
         return data as Composition[];
     },
 
@@ -28,7 +26,7 @@ export const CompositionApi: EntityApi<Composition> = {
             throw new Error("_id required.");
         }
         const url = `${end_point}/${composition._id}`;
-        const sanitized = sanitizeComposition(composition);
+        const sanitized = sanitize(composition);
         const updatedComposition = await ApiClient.put(url, sanitized);
         return updatedComposition as Composition;
     },

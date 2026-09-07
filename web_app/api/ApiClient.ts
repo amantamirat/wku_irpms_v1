@@ -13,50 +13,40 @@ const getAuthToken = (): string | null => {
 };
 
 const handleError = async (response: Response) => {
-    if (response.ok) {
-        return response;
-    }
-
-    const errorMessage =
-        `Request failed with status ${response.status}`;
+    if (response.ok) return response;
 
     let errorData: any = null;
 
     try {
         errorData = await response.json();
-    } catch {
-        // Response body is not JSON
+    } catch (e) {
+        console.log("JSON PARSE FAILED", e);
     }
 
-    const apiError = new ApiError(
-        errorData?.message || errorMessage,
-        {
-            code: errorData?.code,
-            details: errorData?.details,
-            status: response.status
-        }
-    );
+    const errorCode =
+        errorData?.code ??
+        errorData?.error?.code;
 
-    // Authentication token is missing, expired, or invalid
     if (
         response.status === 401 &&
         [
             "TOKEN_MISSING",
             "TOKEN_EXPIRED",
             "TOKEN_INVALID"
-        ].includes(errorData?.code)
+        ].includes(errorCode)
     ) {
-        console.log(
-            `[ApiClient] Authentication failed: ${errorData.code}`
-        );
-
-        if (typeof window !== "undefined") {
-            AuthApi.logout();
-            window.location.href = "/auth/login";
-        }
+        //console.log("🔥 ENTERED AUTH BLOCK");
+        AuthApi.logout();
     }
 
-    throw apiError;
+    throw new ApiError(
+        errorData?.message || "Request failed",
+        {
+            code: errorCode,
+            details: errorData?.details,
+            status: response.status
+        }
+    );
 };
 
 export const ApiClient = {

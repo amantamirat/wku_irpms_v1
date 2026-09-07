@@ -1,13 +1,12 @@
-import { IRangeDTO } from "../composition.dto";
-
+import { IRange } from "../../../common/types/range";
 
 export interface CreateHistoryDTO {
     name: string;
     description: string;
-    submitted?: IRangeDTO;
-    rejected?: IRangeDTO;
-    completed?: IRangeDTO;
-    granted?: IRangeDTO;
+    submitted?: IRange;
+    rejected?: IRange;
+    completed?: IRange;
+    granted?: IRange;
     userId?: string;
 }
 

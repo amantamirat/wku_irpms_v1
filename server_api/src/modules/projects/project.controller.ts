@@ -1,5 +1,3 @@
-import fs from "fs";
-import path from "path";
 import { Response } from "express";
 import { errorResponse, successResponse } from "../../common/helpers/response";
 import { AuthenticatedRequest } from "../auth/auth.middleware";
@@ -8,10 +6,38 @@ import { DeleteDto } from "../../common/dtos/delete.dto";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { ProjectStatus } from "./project.model";
-import { CreateProjectDTO, UpdateProjectDTO } from "./project.dto";
+import {
+  CreateProjectDTO,
+  FilterProjectsDTO,
+  UpdateProjectDTO
+} from "./project.dto";
+
+
+const buildProjectFilter = (
+  query: AuthenticatedRequest["query"]
+): FilterProjectsDTO => {
+  const {
+    grant,
+    calendar,
+    leadPI,
+    call,
+    title,
+    status
+  } = query;
+
+  return {
+    grant: grant ? String(grant) : undefined,
+    calendar: calendar ? String(calendar) : undefined,
+    leadPI: leadPI ? String(leadPI) : undefined,
+    call: call ? String(call) : undefined,
+    title: title ? String(title) : undefined,
+    status: status
+      ? String(status) as ProjectStatus
+      : undefined,
+  };
+};
 
 export class ProjectController {
-
 
   constructor(private readonly service: ProjectService) { }
 
@@ -21,12 +47,21 @@ export class ProjectController {
 
   create = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      // 1. Authentication Guard
-      if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
+      if (!req.auth) {
+        throw new Error(ERROR_CODES.UNAUTHORIZED);
+      }
 
-      const { calendar, grant, leadPI, title, summary, themes, collaborators, phases } = req.body;
+      const {
+        calendar,
+        grant,
+        leadPI,
+        title,
+        summary,
+        themes,
+        collaborators,
+        phases
+      } = req.body;
 
-      // 2. Construct the DTO using the authenticated user's ID as the applicant
       const dto: CreateProjectDTO = {
         calendar,
         grant,
@@ -39,12 +74,15 @@ export class ProjectController {
         userId: req.auth.userId
       };
 
-      // 3. Delegate execution to the new service method
       const created = await this.service.create(dto);
-      // 4. Send clean success framework response
-      successResponse(res, 201, "Project created successfully", created);
+
+      successResponse(
+        res,
+        201,
+        "Project created successfully",
+        created
+      );
     } catch (err: any) {
-      // 5. Catch validations or database transaction rollbacks safely
       errorResponse(res, 400, err.message, err);
     }
   };
@@ -52,30 +90,44 @@ export class ProjectController {
   // -----------------------
   // Fetch / Query
   // -----------------------
+
   get = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      const { leadPI, grant, call, status, populate } = req.query;
-
-      const projects = await this.service.getProjects({
-        leadPI: leadPI ? String(leadPI) : undefined,
-        grant: grant ? String(grant) : undefined,
-        call: call ? String(call) : undefined,
-        status: status ? (status as ProjectStatus) : undefined,
-      }, { populate: true }
+      const filters = buildProjectFilter(req.query);
+      const projects = await this.service.getProjects(
+        filters,
+        { populate: true }
       );
 
-      successResponse(res, 200, "Projects fetched successfully", projects);
+      successResponse(
+        res,
+        200,
+        "Projects fetched successfully",
+        projects
+      );
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
   };
 
-  getById = async (req: AuthenticatedRequest, res: Response) => {
+  getById = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
     try {
       const { id } = req.params;
-      const { populate } = req.query;
-      const project = await this.service.getById(id, { populate: true });
-      successResponse(res, 200, 'Project fetched successfully', project);
+
+      const project = await this.service.getById(
+        id,
+        { populate: true }
+      );
+
+      successResponse(
+        res,
+        200,
+        "Project fetched successfully",
+        project
+      );
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
@@ -90,8 +142,10 @@ export class ProjectController {
         throw new Error(ERROR_CODES.UNAUTHORIZED);
       }
 
+      const filters = buildProjectFilter(req.query);
+
       const projects = await this.service.getMyProjects(
-        req.auth.userId
+        req.auth.userId, filters, {populate:true}
       );
 
       successResponse(
@@ -108,39 +162,73 @@ export class ProjectController {
   // -----------------------
   // Update
   // -----------------------
-  update = async (req: AuthenticatedRequest, res: Response) => {
+
+  update = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
     try {
-      if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
+      if (!req.auth) {
+        throw new Error(ERROR_CODES.UNAUTHORIZED);
+      }
 
       const { id } = req.params;
       const { title, summary, themes } = req.body;
 
       const dto: UpdateProjectDTO = {
-        id: id as string,
-        data: { title, summary, themes },
+        id,
+        data: {
+          title,
+          summary,
+          themes
+        },
         userId: req.auth.userId,
       };
 
       const updated = await this.service.update(dto);
-      successResponse(res, 200, "Project updated successfully", updated);
+
+      successResponse(
+        res,
+        200,
+        "Project updated successfully",
+        updated
+      );
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
   };
 
-  transitionState = async (req: AuthenticatedRequest, res: Response) => {
+  // -----------------------
+  // Transition
+  // -----------------------
+
+  transitionState = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
     try {
-      if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
+      if (!req.auth) {
+        throw new Error(ERROR_CODES.UNAUTHORIZED);
+      }
+
       const { id } = req.params;
       const { current, next } = req.body;
+
       const dto: TransitionRequestDto = {
-        id: String(id),
-        current: current,
-        next: next,
+        id,
+        current,
+        next,
         userId: req.auth.userId,
       };
+
       const updated = await this.service.transitionState(dto);
-      successResponse(res, 200, "Project status updated successfully", updated);
+
+      successResponse(
+        res,
+        200,
+        "Project status updated successfully",
+        updated
+      );
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
@@ -149,9 +237,15 @@ export class ProjectController {
   // -----------------------
   // Delete
   // -----------------------
-  delete = async (req: AuthenticatedRequest, res: Response) => {
+
+  delete = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
     try {
-      if (!req.auth) throw new Error("User not found!");
+      if (!req.auth) {
+        throw new Error(ERROR_CODES.UNAUTHORIZED);
+      }
 
       const { id } = req.params;
 
@@ -159,8 +253,15 @@ export class ProjectController {
         id,
         userId: req.auth.userId,
       };
+
       const deleted = await this.service.delete(dto);
-      successResponse(res, 200, "Project deleted successfully", deleted);
+
+      successResponse(
+        res,
+        200,
+        "Project deleted successfully",
+        deleted
+      );
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }

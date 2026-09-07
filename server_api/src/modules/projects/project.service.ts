@@ -105,14 +105,12 @@ export class ProjectService {
 
     getMyProjects = async (
         userId: string,
+        filter?: FilterProjectsDTO,
         options?: FilterOptions
     ) => {
-        return this.projectRepo.find(
-            {
-                leadPI: userId
-            },
-            { ...options, populate: true }
-        );
+        return this.projectRepo.find({
+            ...filter, leadPI: userId
+        }, options);
     };
 
     async getById(id: string, options?: FilterOptions) {

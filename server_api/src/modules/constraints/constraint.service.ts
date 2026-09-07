@@ -3,6 +3,7 @@ import { CreateConstraintDTO, UpdateConstraintDTO } from "./constraint.dto";
 import { IConstraint } from "./constraint.model";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
+import { isValidRange } from "../../common/types/range";
 
 
 export class ConstraintService {
@@ -48,9 +49,9 @@ export class ConstraintService {
         dto: UpdateConstraintDTO
     ): Promise<IConstraint | null> {
 
-        if (dto.name) {
+        if (dto.data.name) {
             const exists = await this.repository.exists(
-                dto.name,
+                dto.data.name,
                 id
             );
 
@@ -62,7 +63,7 @@ export class ConstraintService {
             }
         }
 
-        this.validateRange(dto);
+        this.validateRange(dto.data);
 
         return await this.repository.update(id, dto);
     }
@@ -81,29 +82,29 @@ export class ConstraintService {
     ): void {
 
         const ranges = [
-            ["Participants", dto.minParticipants, dto.maxParticipants],
-            ["Phases", dto.minPhases, dto.maxPhases],
-            ["Budget", dto.minBudget, dto.maxBudget],
-            ["Duration", dto.minDuration, dto.maxDuration],
-            ["Budget per phase", dto.minBudgetPerPhase, dto.maxBudgetPerPhase],
-            ["Duration per phase", dto.minDurationPerPhase, dto.maxDurationPerPhase],
-            ["Themes", dto.minThemes, dto.maxThemes],
-            ["Sub themes", dto.minSubThemes, dto.maxSubThemes],
-            ["Focus areas", dto.minFocusAreas, dto.maxFocusAreas],
-            ["Indicators", dto.minIndicators, dto.maxIndicators],
-        ];
+            ["Participants", dto.participants],
+            ["Phases", dto.phases],
+            ["Budget", dto.budget],
+            ["Duration", dto.duration],
+            ["Budget per phase", dto.budgetPerPhase],
+            ["Duration per phase", dto.durationPerPhase],
+            ["Themes", dto.themes],
+            ["Sub themes", dto.subThemes],
+            ["Focus areas", dto.focusAreas],
+            ["Indicators", dto.indicators],
+        ] as const;
 
 
-        for (const [name, min, max] of ranges) {
+        for (const [name, range] of ranges) {
 
-            if (
-                min !== undefined &&
-                max !== undefined &&
-                min > max
-            ) {
+            if (!range) {
+                continue;
+            }
+
+            if (!isValidRange(range)) {
                 throw new AppError(
                     ERROR_CODES.INVALID_INPUT,
-                    `${name} minimum cannot be greater than maximum.`
+                    `${name} range is invalid.`
                 );
             }
         }

@@ -49,11 +49,8 @@ export class ProfileService {
 
 
     async delete(id: string) {
-
         const profile =
             await this.profileRepository.delete(id);
-
-
         if (!profile) {
             throw new AppError(
                 ERROR_CODES.PROFILE_NOT_FOUND

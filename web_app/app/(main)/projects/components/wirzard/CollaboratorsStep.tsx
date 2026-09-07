@@ -1,18 +1,17 @@
 'use client';
-import React, { useEffect, useState, useMemo } from 'react';
+import { Constraint } from '@/app/(main)/constraints/models/constraint.model';
+import { UserApi } from '@/app/(main)/users/api/user.api';
+import { User } from '@/app/(main)/users/models/user.model';
+import { useAuth } from '@/contexts/auth-context';
 import { Button } from 'primereact/button';
-import { Dropdown } from 'primereact/dropdown';
-import { DataTable } from 'primereact/datatable';
 import { Column } from 'primereact/column';
-import { Checkbox } from 'primereact/checkbox';
+import { DataTable } from 'primereact/datatable';
+import { Dropdown } from 'primereact/dropdown';
 import { Message } from 'primereact/message';
 import { classNames } from 'primereact/utils';
-import { Project } from '../../models/project.model';
-import { User } from '@/app/(main)/users/models/user.model';
-import { UserApi } from '@/app/(main)/users/api/user.api';
+import { useEffect, useMemo, useState } from 'react';
 import { roleOptions } from '../../../collaborators/models/collaborator.model';
-import { Constraint } from '@/app/(main)/constraints/models/constraint.model';
-import { useAuth } from '@/contexts/auth-context';
+import { Project } from '../../models/project.model';
 
 interface CollaboratorsStepProps {
     data: Partial<Project>;
@@ -51,9 +50,12 @@ export const CollaboratorsStep = ({ data, constraint, onUpdate, onNext, onBack }
     const validation = useMemo(() => {
         const collabs = data.collaborators || [];
 
+        const minParticipants = constraint?.participants?.min ?? 0;
+        const maxParticipants = constraint?.participants?.max ?? Infinity;
+
         const isCountValid =
-            collabs.length >= (constraint?.minParticipants ?? 0) &&
-            collabs.length <= (constraint?.maxParticipants ?? Infinity);
+            collabs.length >= minParticipants &&
+            collabs.length <= maxParticipants;
 
         const hasEmptyRows = collabs.some(c => !c.member || !c.role);
 
@@ -65,7 +67,8 @@ export const CollaboratorsStep = ({ data, constraint, onUpdate, onNext, onBack }
         };
     }, [data.collaborators, constraint]);
 
-    const isMaxReached = !!(constraint?.maxParticipants && validation.currentCount >= constraint.maxParticipants);
+    const maxParticipants = constraint?.participants?.max;
+    const isMaxReached = !!(maxParticipants && validation.currentCount >= maxParticipants);
 
     // --- Actions ---
     const addCollaborator = () => {
@@ -98,13 +101,16 @@ export const CollaboratorsStep = ({ data, constraint, onUpdate, onNext, onBack }
         }
     };
 
+    const minCountDisplay = constraint?.participants?.min ?? 1;
+    const maxCountDisplay = constraint?.participants?.max ?? 'No limit';
+
     return (
         <div className="mt-4">
             <div className="flex justify-content-between align-items-center mb-4 p-3 bg-gray-50 border-round-lg border-1 border-200">
                 <div>
                     <h4 className="m-0 text-900">Project Team</h4>
                     <p className="text-600 text-sm m-0">
-                        Required team size: {constraint?.minParticipants ?? 1} - {constraint?.maxParticipants ?? 'No limit'} members.
+                        Required team size: {minCountDisplay} - {maxCountDisplay} members.
                     </p>
                 </div>
                 <Button
@@ -113,7 +119,7 @@ export const CollaboratorsStep = ({ data, constraint, onUpdate, onNext, onBack }
                     className="p-button-sm p-button-outlined"
                     onClick={addCollaborator}
                     disabled={isMaxReached}
-                    tooltip={isMaxReached ? `Maximum of ${constraint?.maxParticipants} members reached` : ""}
+                    tooltip={isMaxReached ? `Maximum of ${maxParticipants} members reached` : ""}
                     tooltipOptions={{ showOnDisabled: true }}
                 />
             </div>
@@ -121,7 +127,7 @@ export const CollaboratorsStep = ({ data, constraint, onUpdate, onNext, onBack }
             {submitted && !validation.isCountValid && (
                 <Message
                     severity="error"
-                    text={`Team size must be between ${constraint?.minParticipants ?? 0} and ${constraint?.maxParticipants ?? 'unlimited'} members.`}
+                    text={`Team size must be between ${constraint?.participants?.min ?? 0} and ${maxCountDisplay} members.`}
                     className="w-full mb-3"
                 />
             )}

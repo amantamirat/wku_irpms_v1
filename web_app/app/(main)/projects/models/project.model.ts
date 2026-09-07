@@ -52,7 +52,8 @@ export interface FilterProjects {
     leadPI?: string | User;
     call?: string | Call;
     workspace?: string | Organization;
-    calendar?: string|Calendar;
+    calendar?: string | Calendar;
+    status?: ProjectStatus;
     //populate?: boolean;
 }
 
