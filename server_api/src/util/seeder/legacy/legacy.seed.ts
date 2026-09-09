@@ -295,8 +295,7 @@ export class LegacySeeder {
                 );
 
                 await this.projectService.create(
-                    dto,
-                    { skipValidation: true }
+                    dto, dto.leadPI, { skipValidation: true }
                 );
 
                 created++;

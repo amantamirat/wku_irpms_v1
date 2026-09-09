@@ -130,7 +130,7 @@ export class VerificationConfigurationController {
             const { id } = req.params;
 
             const configuration =
-                await this.service.getById(id);
+                await this.service.getById(id, { populate: true });
 
             successResponse(
                 res,

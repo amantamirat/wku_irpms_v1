@@ -7,6 +7,7 @@ import ProjectDetail from "../../projects/components/ProjectDetail";
 import { ProjectApi } from "../api/project.api";
 import { Project } from "../models/project.model";
 import EmptyState from "@/components/EmptyState";
+import ProjectWizard from "../components/wirzard/ProjectWizard";
 
 interface MyProjectsManagerProps {
     enableEditing?: boolean;
@@ -65,8 +66,15 @@ const MyProjectsManager = ({ enableEditing = true }: MyProjectsManagerProps) => 
                 }
             ],
             permissionPrefix: "project",
+            createNew: () => ({
+                title: "",
+                summary: "",
+                themes: [],
+                lockLead: true
+            }),
+            SaveDialog: ProjectWizard,
             hideSearch: true,
-            hideDefaultActions: true,
+            //hideDefaultActions: true,
             expandable: {
                 template: (project) => (
                     <ProjectDetail project={project._id ?? ""} enableEditing={enableEditing} />

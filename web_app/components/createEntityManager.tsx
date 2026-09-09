@@ -2,11 +2,10 @@ import { EntityApi } from "@/api/EntityApi";
 import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 import { useCrudList } from "@/hooks/useCrudList";
-import { useState, useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
+import ImportDialog from "./ImportDialog";
 import { ItemManager, RowAction } from "./ItemManager";
 import { StateTransitionButtons } from "./StateTransitionButtons";
-import { Button } from "primereact/button";
-import ImportDialog from "./ImportDialog";
 
 export interface EntitySaveDialogProps<T> {
     visible: boolean;
@@ -89,9 +88,12 @@ export function createEntityManager<
         const [item, setItem] = useState<T | null>(null);
         const [showDialog, setShowDialog] = useState(false);
         const [showImportDialog, setShowImportDialog] = useState(false);
-        const canCreate = config.createNew && hasPermission([`${config.permissionPrefix}:create`]);
+        const canCreate = config.createNew && hasPermission([`${config.permissionPrefix}:create`,
+        `${config.permissionPrefix}:create:own`
+        ]);
+        /*
         const canImport = config.importConfig?.enable &&
-            hasPermission([`${config.permissionPrefix}:import`]);
+            hasPermission([`${config.permissionPrefix}:import`]);*/
 
         // Prioritize incoming prop items over config items
         const externalItems = props.items ?? config.items;
@@ -189,7 +191,7 @@ export function createEntityManager<
             ...(!config.hideEditAction && !config.hideDefaultActions ? [{
                 icon: "pi pi-pencil",
                 severity: "success" as const,
-                permissions: [`${config.permissionPrefix}:update`],
+                permissions: [`${config.permissionPrefix}:update`, `${config.permissionPrefix}:update:own`],
                 disabled: config.disableEditRow,
                 onClick: (row: T) => {
                     setItem({ ...row });
@@ -252,11 +254,13 @@ export function createEntityManager<
             });
         }
 
-        const hasToolbarContent = !!config.toolbarEnd || canImport;
+        const hasToolbarContent = !!config.toolbarEnd // || canImport;
         const toolbarEnd = hasToolbarContent ? (
             <>
                 {config.toolbarEnd}
-                {canImport && (
+
+                {/*
+                canImport && (
                     <Button
                         label="Import"
                         icon="pi pi-upload"
@@ -265,7 +269,8 @@ export function createEntityManager<
                         className="ml-2"
                         onClick={() => setShowImportDialog(true)}
                     />
-                )}
+                )*/
+                }
             </>
         ) : undefined;
 

@@ -30,6 +30,7 @@ export interface IProject extends Document {
     currentVerification?: mongoose.Types.ObjectId | null;
     status: ProjectStatus;
     createdBy?: mongoose.Types.ObjectId; // User who created the record
+    updatedBy?: mongoose.Types.ObjectId; // User who last updated the record
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -113,6 +114,10 @@ const ProjectSchema = new Schema<IProject>({
     },
 
     createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.USER,
+    },
+    updatedBy: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.USER,
     },

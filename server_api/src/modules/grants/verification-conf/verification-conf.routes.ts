@@ -48,7 +48,7 @@ router.get(
 router.get(
     '/:id',
     verifyActiveAccount,
-    checkPermission("verification-conf:read"),
+    checkPermission("verification-conf:lookup"),
     verificationConfController.getById
 );
 

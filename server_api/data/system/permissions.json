@@ -336,6 +336,11 @@
   },
   {
     "category": "Constraint Management",
+    "name": "constraint:lookup",
+    "description": "View constraint entries"
+  },
+  {
+    "category": "Constraint Management",
     "name": "constraint:update",
     "description": "Update constraint entries"
   },
@@ -719,6 +724,11 @@
   },
   {
     "category": "Project Management",
+    "name": "project:create:own",
+    "description": "Create projects as the Lead PI"
+  },
+  {
+    "category": "Project Management",
     "name": "project:read",
     "description": "Read project entries"
   },
@@ -731,6 +741,11 @@
     "category": "Project Management",
     "name": "project:update",
     "description": "Update project entries"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:update:own",
+    "description": "Update projects where the user is the Lead PI"
   },
   {
     "category": "Project Management",

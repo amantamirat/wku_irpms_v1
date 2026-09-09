@@ -6,16 +6,12 @@ import { checkTransitionPermission } from '../../core/container';
 import { checkPermission } from '../../core/container';
 import { ProjectController } from './project.controller';
 
-
-
 const controller = new ProjectController(projectService);
 const router: Router = Router();
 
 //create
-
-
 router.post('/', verifyActiveAccount,
-    checkPermission([PERMISSIONS.PROJECT.CREATE]),
+    checkPermission([PERMISSIONS.PROJECT.CREATE, PERMISSIONS.PROJECT.CREATE_OWN]),
     controller.create);
 
 
@@ -25,7 +21,6 @@ router.get('/', verifyActiveAccount,
 
 
 //Put the /me route before /:id:
-
 router.get(
     '/me',
     verifyActiveAccount,
@@ -47,7 +42,7 @@ router.get('/:id', verifyActiveAccount,
 
 //update    
 router.put('/:id', verifyActiveAccount,
-    checkPermission([PERMISSIONS.PROJECT.UPDATE]),
+    checkPermission([PERMISSIONS.PROJECT.UPDATE, PERMISSIONS.PROJECT.UPDATE_OWN]),
     controller.update);
 
 //update status

@@ -7,12 +7,13 @@ import Link from 'next/link';
 import { PrimeIcons } from 'primereact/api';
 import AppMenuitem from './AppMenuitem';
 import { MenuProvider } from './context/menucontext';
-import { useMemo } from 'react';
+import { useContext, useMemo } from 'react';
 import { filterMenuByPermission } from '@/utils/menu';
+import { LayoutContext } from './context/layoutcontext';
 
 const AppMenu = () => {
+    const { layoutConfig } = useContext(LayoutContext);
     const { hasPermission } = useAuth();
-
 
     const menuModel: AppMenuItem[] = [
         {
@@ -277,8 +278,8 @@ const AppMenu = () => {
 
                 <Link href="https://www.wku.edu.et" target="_blank" style={{ cursor: 'pointer' }}>
                     {
-                        // <img alt="Wolkite University" className="w-full mt-3" src={`/images/wku-plan-${layoutConfig.colorScheme === 'light' ? '2' : '1'}.jpg`} />
-                        <img alt="Wolkite University" className="w-full mt-3" src={`/images/wku-irpms-banner.png`} />
+                        <img alt="Wolkite University" className="w-full mt-3" src={`/images/wku-irpms-banner-${layoutConfig.colorScheme === 'light' ? 'light' : 'dark'}.jpg`} />
+                        //<img alt="Wolkite University" className="w-full mt-3" src={`/images/wku-irpms-banner.png`} />
 
                     }
                 </Link>

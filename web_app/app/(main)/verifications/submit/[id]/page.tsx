@@ -1,6 +1,6 @@
 'use client';
-
-import { useAuth } from '@/contexts/auth-context';
+import { ProjectApi } from '@/app/(main)/projects/api/project.api';
+import { Project, ProjectStatus } from '@/app/(main)/projects/models/project.model';
 import { useParams, useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
@@ -11,8 +11,6 @@ import { useEffect, useState } from 'react';
 import { VerificationApi } from '../../api/verification.api';
 import { VerificationConfigurationApi } from '../../verification-conf/api/verification-conf.api';
 import { VerificationConfiguration } from '../../verification-conf/models/verification-conf.model';
-import { Project, ProjectStatus } from '@/app/(main)/projects/models/project.model';
-import { ProjectApi } from '@/app/(main)/projects/api/project.api';
 
 export interface SectionValidationResult {
     name: string;
@@ -33,15 +31,11 @@ export interface TemplateValidationResult {
 export default function VerificationSubmitPage() {
     const params = useParams();
     const router = useRouter();
-    //const { getUser } = useAuth();
-    //const appUser = getUser();
-
     const configId = params?.id as string;
 
     // Data States
     const [config, setConfig] = useState<VerificationConfiguration | null>(null);
     const [eligibleProjects, setEligibleProjects] = useState<Project[]>([]);
-
     const [selectedProject, setSelectedProject] = useState<Project | null>(null);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 

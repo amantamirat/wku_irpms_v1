@@ -45,11 +45,11 @@ export class VerificationConfigurationService {
     }
 
     async getById(
-        id: string
+        id: string, options?:FilterOptions
     ): Promise<IVerificationConfiguration> {
 
         const configuration =
-            await this.repository.findById(id);
+            await this.repository.findById(id, options);
 
         if (!configuration) {
             throw new AppError(

@@ -1,4 +1,3 @@
-import { IOwnership } from "../modules/users/user.model";
 import NodeCache from "node-cache";
 
 export const cache = new NodeCache({
@@ -36,19 +35,6 @@ export class CacheService {
         const orgs = this.getUserOrganizations(userId);
         return orgs ? orgs.includes(organizationId) : false;
     }
-
-    /*
-
-    static hasPermissions(userId: string, permissions: string[]): boolean {
-        const userPermissions = this.getUserPermissions(userId);
-
-        if (!userPermissions) {
-            return false;
-        }
-        const permSet = new Set(userPermissions);
-        return permissions.some(permission => permSet.has(permission));
-    }
-        */
 
     static invalidateUser(userId: string): void {
         cache.del(this.userPermissionsKey(userId));

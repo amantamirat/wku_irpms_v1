@@ -44,7 +44,8 @@ export type Project = {
     file?: File;
     currentApplication?: string | Application;
     currentVerification?: string | Verification;
-    //workspace?: string | Organization;
+    //just for UI
+    lockLead?: boolean;
 }
 
 export interface FilterProjects {

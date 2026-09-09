@@ -11,8 +11,8 @@ import { IProject, Project, ProjectStatus } from "./project.model";
 export interface IProjectRepository {
     findById(id: string, options?: FilterOptions): Promise<IProject | null>;
     find(filters: FilterProjectsDTO, options?: FilterOptions): Promise<Partial<IProject>[]>;
-    create(dto: CreateProjectDTO): Promise<IProject>;
-    update(id: string, data: UpdateProjectDTO["data"]): Promise<IProject | null>;
+    create(dto: CreateProjectDTO, userId: string): Promise<IProject>;
+    update(id: string, data: UpdateProjectDTO["data"], userId: string): Promise<IProject | null>;
     updateStatus(id: string, newStatus: ProjectStatus): Promise<IProject | null>;
     incrementTotals(projectId: string, delta: { duration: number; budget: number }): Promise<IProject | null>;
     updateTotalCollabs(
@@ -93,7 +93,7 @@ export class ProjectRepository implements IProjectRepository {
         }
         return dbQuery.lean<IProject[]>().exec();
     }
-    async create(dto: CreateProjectDTO) {
+    async create(dto: CreateProjectDTO, userId: string) {
         const data = {
             ...dto,
             calendar: dto.calendar ? new mongoose.Types.ObjectId(dto.calendar) : undefined,
@@ -101,27 +101,29 @@ export class ProjectRepository implements IProjectRepository {
             grant: new mongoose.Types.ObjectId(dto.grant),
             leadPI: new mongoose.Types.ObjectId(dto.leadPI),
             themes: dto.themes?.map(thm => new mongoose.Types.ObjectId(thm)),
+            createdBy: new mongoose.Types.ObjectId(userId)
         };
 
-        const created = await Project.create(data);
-
-        return created;
+        return await Project.create(data);
     }
 
-    async update(id: string, dtoData: UpdateProjectDTO["data"]): Promise<IProject | null> {
+    async update(id: string, dtoData: UpdateProjectDTO["data"], userId: string): Promise<IProject | null> {
         const updateData: Partial<IProject> = {};
 
         if (dtoData.title) updateData.title = dtoData.title;
         if (dtoData.summary) updateData.summary = dtoData.summary;
-        //if (dtoData.totalBudget) updateData.totalBudget = dtoData.totalBudget;
-        //if (dtoData.totalDuration) updateData.totalDuration = dtoData.totalDuration;
         if (dtoData.themes) {
             updateData.themes = dtoData.themes.map(id => new mongoose.Types.ObjectId(id))
         }
 
         return Project.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
-            { $set: updateData },
+            {
+                $set: {
+                    ...updateData,
+                    updatedBy: new mongoose.Types.ObjectId(userId)
+                }
+            },
             { new: true }
         ).exec();
     }

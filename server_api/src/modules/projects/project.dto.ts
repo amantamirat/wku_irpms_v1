@@ -2,15 +2,6 @@ import { CollaboratorDto } from "./collaborators/collaborator.dto";
 import { PhaseDto } from "./phase/phase.dto";
 import { ProjectStatus } from "./project.model";
 
-/*
-export interface Options {
-    populate?: {
-        leadPI?: boolean;
-        grant?: boolean;
-        calendar?: boolean;
-        currentApplication?: boolean;
-    };
-}*/
 
 export interface FilterProjectsDTO {
     grant?: string;
@@ -19,15 +10,6 @@ export interface FilterProjectsDTO {
     call?: string;
     title?: string;
     status?: ProjectStatus;
-    // populate?: boolean;
-    //options?: Options;
-    //calendar?: string;
-    //workspace?: string;
-
-    //populate?: boolean;
-    //directorate?: string;
-    //skip?: number;
-    //limit?: number;
 }
 
 
@@ -42,8 +24,6 @@ export interface CreateProjectDTO {
     collaborators: CollaboratorDto[];
     phases: PhaseDto[];
     status?: ProjectStatus;
-    createdBy?: string;
-    userId?: string;
 }
 
 // UPDATE Project

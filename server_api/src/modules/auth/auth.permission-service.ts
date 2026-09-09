@@ -10,12 +10,15 @@ export class AuthPermissionService {
 
     async getUserPermissions(userId: string): Promise<string[]> {
         const cachedPermissions = CacheService.getUserPermissions(userId);
-        // Cache hit
+
         if (cachedPermissions !== undefined) {
             return cachedPermissions;
         }
-        // Cache miss → load from MongoDB
-        const userDoc = await this.userRepository.findById(userId, { populate: true });
+
+        const userDoc = await this.userRepository.findById(userId, {
+            populate: true
+        });
+
         if (!userDoc) {
             throw new AppError(ERROR_CODES.USER_NOT_FOUND);
         }
@@ -29,8 +32,24 @@ export class AuthPermissionService {
                 ) ?? []
             )
         ];
-        // Rebuild cache
+
         CacheService.setUserPermissions(userId, permissions);
+
         return permissions;
+    }
+
+    async hasPermission(
+        userId: string,
+        permissions: string | string[]
+    ): Promise<boolean> {
+        const userPermissions = await this.getUserPermissions(userId);
+
+        const requiredPermissions = Array.isArray(permissions)
+            ? permissions
+            : [permissions];
+
+        return requiredPermissions.some(
+            permission => userPermissions.includes(permission)
+        );
     }
 }

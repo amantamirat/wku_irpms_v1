@@ -24,7 +24,7 @@ router.post(
 router.get(
   '/lookup',
   verifyActiveAccount,
-  checkPermission("grant:lookup"),
+  checkPermission(PERMISSIONS.GRANT.LOOKUP),
   controller.lookup
 );
 
@@ -39,7 +39,7 @@ router.get(
 
 
 router.get('/:id', verifyActiveAccount,
-  checkPermission([PERMISSIONS.GRANT.READ]),
+  checkPermission(PERMISSIONS.GRANT.LOOKUP),
   controller.getById);
 
 

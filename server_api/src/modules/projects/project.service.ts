@@ -1,4 +1,3 @@
-// project.service.ts
 import {
     CreateProjectDTO,
     FilterProjectsDTO,
@@ -24,6 +23,8 @@ import { PhaseService } from "./phase/phase.service";
 import { ProjectStatus } from "./project.model";
 import { CALL_PROJECT_TRANSITIONS, STANDALONE_PROJECT_TRANSITIONS } from "./project.state-machine";
 import { FilterOptions } from "../../common/dtos/filter.dto";
+import { AuthPermissionService } from "../auth/auth.permission-service";
+import { PERMISSIONS } from "../../common/constants/permissions";
 
 
 export class ProjectService {
@@ -37,52 +38,95 @@ export class ProjectService {
         private readonly phaseService: PhaseService,
         private readonly callRepo: ICallRepository,
         private readonly constValidator: ConstraintValidationService,
-        private readonly notificationService: NotificationService
+        private readonly notificationService: NotificationService,
+        private readonly authPermissionService: AuthPermissionService,
     ) { }
 
-
-    async create(dto: CreateProjectDTO, options?: { skipValidation?: boolean }) {
-        const { call, grant, title, summary, leadPI, collaborators, phases, themes, userId } = dto;
+    async create(dto: CreateProjectDTO, userId: string, options?: { skipValidation?: boolean }) {
+        const {
+            grant,
+            title,
+            leadPI,
+            collaborators,
+            phases
+        } = dto;
 
         if (!options?.skipValidation) {
+            const isLeadPI = leadPI === userId;
+            const isAdmin = await this.authPermissionService.hasPermission(userId, PERMISSIONS.PROJECT.CREATE);
+            if (!isAdmin && !isLeadPI) {
+                throw new AppError(ERROR_CODES.UNAUTHORIZED);
+            }
+
             const grantDoc = await this.grantRepo.findById(grant);
-            if (!grantDoc) throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
-            if (grantDoc.status !== GrantStatus.active) throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
+            if (!grantDoc) {
+                throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
+            }
+            if (grantDoc.status !== GrantStatus.active) {
+                throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
+            }
         }
+
         if (await this.projectRepo.exists({ title })) {
             throw new AppError(
                 ERROR_CODES.PROJECT_ALREADY_EXISTS,
                 "A project with this title already exists. Please choose a different title."
             );
         }
+
         const created = await this.projectRepo.create({
             ...dto, status: ProjectStatus.draft,
-            createdBy: userId
-        });
+        }, userId);
+
         if (!created) {
             throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         }
+
         const projectId = String(created._id);
-        if (collaborators?.length) {
-            for (const collab of collaborators) {
-                await this.collabService.create(
-                    {
-                        project: projectId,
-                        projectTitle: title,
-                        member: collab.member,
-                        isLeadPI: leadPI === collab.member,
-                        status: userId === collab.member ? CollaboratorStatus.verified : CollaboratorStatus.pending,
-                        role: collab.isLeadPI
-                            ? "Principal Investigator"
-                            : collab.role
-                    }, options);
+        // Prepare collaborators
+        const projectCollaborators = [...(collaborators || [])];
+        // Make sure the Lead PI is also a collaborator
+        if (leadPI) {
+            const leadExists = projectCollaborators.some(
+                collab => collab.member === leadPI
+            );
+            if (!leadExists) {
+                projectCollaborators.unshift({
+                    member: leadPI,
+                    isLeadPI: true,
+                    role: "Principal Investigator"
+                });
             }
         }
+
+        // Create collaborators
+        for (const collab of projectCollaborators) {
+            const isLeadPI = leadPI === collab.member;
+
+            await this.collabService.create(
+                {
+                    project: projectId,
+                    projectTitle: title,
+                    member: collab.member,
+                    isLeadPI,
+                    status:
+                        userId === collab.member
+                            ? CollaboratorStatus.verified
+                            : CollaboratorStatus.pending,
+                    role: isLeadPI
+                        ? "Principal Investigator"
+                        : collab.role
+                },
+                options
+            );
+        }
+
         // Create phases
         if (phases?.length) {
             const orderedPhases = [...phases].sort(
                 (a, b) => a.order - b.order
             );
+
             for (const phase of orderedPhases) {
                 await this.phaseService.create(
                     {
@@ -92,9 +136,12 @@ export class ProjectService {
                         budget: phase.budget,
                         duration: phase.duration,
                         description: phase.description
-                    }, options);
+                    },
+                    options
+                );
             }
         }
+
         return created;
     }
 
@@ -124,9 +171,23 @@ export class ProjectService {
     // ---------------------------------------------------
     async update(dto: UpdateProjectDTO) {
         const { id, data, userId } = dto;
+
         const projectDoc = await this.getById(id);
-        if (projectDoc.status !== ProjectStatus.draft)
-            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+        const isLeadPI = projectDoc.leadPI?.toString() === userId;
+
+        const isAdmin =
+            await this.authPermissionService.hasPermission(
+                userId,
+                PERMISSIONS.PROJECT.UPDATE
+            );
+        if (!isAdmin) {
+            if (!isLeadPI) {
+                throw new AppError(ERROR_CODES.UNAUTHORIZED);
+            }
+            if (projectDoc.status !== ProjectStatus.draft) {
+                throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+            }
+        }
 
         const nextThemes = data.themes ?? projectDoc.themes.map(String);
         const themesChanged =
@@ -152,7 +213,7 @@ export class ProjectService {
                 }
             }
         }
-        return this.projectRepo.update(id, data);
+        return this.projectRepo.update(id, data, userId);
     }
 
 

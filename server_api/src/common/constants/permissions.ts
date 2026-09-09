@@ -118,6 +118,7 @@ export const PERMISSIONS = {
   GRANT: {
     CREATE: "grant:create",
     READ: "grant:read",
+    LOOKUP: "grant:lookup",
     UPDATE: "grant:update",
     DELETE: "grant:delete",
   },
@@ -200,8 +201,10 @@ export const PERMISSIONS = {
 
   PROJECT: {
     CREATE: "project:create",
+    CREATE_OWN: "project:create:own",
     READ: "project:read",
     UPDATE: "project:update",
+    UPDATE_OWN: "project:update:own",
     LOOKUP: "project:lookup",
     STATUS: {
       ACCEPT: "project:status.accepted",

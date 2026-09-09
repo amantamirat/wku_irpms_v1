@@ -70,9 +70,8 @@ export class ApplicationController {
                 themes: project.themes || [],
                 phases: project.phases || [],
                 docPath: relativeDocPath, // Saved cleanly to your DB
-                userId: req.auth.userId,
             };
-            const submitted = await this.service.apply(dto);
+            const submitted = await this.service.apply(dto, req.auth.userId);
             successResponse(res, 201, "Project submitted successfully", submitted);
 
         } catch (err: any) {

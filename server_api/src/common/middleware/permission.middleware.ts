@@ -12,10 +12,9 @@ export const createCheckPermission = (authPermissionService: AuthPermissionServi
                 if (!req.auth) {
                     return errorResponse(res, 401, ERROR_CODES.UNAUTHORIZED);
                 }
-                const permissions = Array.isArray(requiredPermission) ? requiredPermission : [requiredPermission];
-                const userPermissions = await authPermissionService.getUserPermissions(req.auth.userId);
-                const hasPermission = permissions.some(permission => userPermissions.includes(permission));
+                const hasPermission = await authPermissionService.hasPermission(req.auth.userId, requiredPermission);
                 if (!hasPermission) {
+                    const permissions = Array.isArray(requiredPermission) ? requiredPermission : [requiredPermission];
                     return errorResponse(res, 403, `Forbidden. Missing permission: ${permissions.join(", ")}`);
                 }
                 next();

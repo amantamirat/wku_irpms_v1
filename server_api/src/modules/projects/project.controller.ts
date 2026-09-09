@@ -31,9 +31,7 @@ const buildProjectFilter = (
     leadPI: leadPI ? String(leadPI) : undefined,
     call: call ? String(call) : undefined,
     title: title ? String(title) : undefined,
-    status: status
-      ? String(status) as ProjectStatus
-      : undefined,
+    status: status ? String(status) as ProjectStatus : undefined,
   };
 };
 
@@ -70,11 +68,10 @@ export class ProjectController {
         leadPI,
         themes: themes || [],
         collaborators: collaborators || [],
-        phases: phases || [],
-        userId: req.auth.userId
+        phases: phases || []
       };
 
-      const created = await this.service.create(dto);
+      const created = await this.service.create(dto, req.auth.userId);
 
       successResponse(
         res,
@@ -94,11 +91,7 @@ export class ProjectController {
   get = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const filters = buildProjectFilter(req.query);
-      const projects = await this.service.getProjects(
-        filters,
-        { populate: true }
-      );
-
+      const projects = await this.service.getProjects(filters, { populate: true });
       successResponse(
         res,
         200,
@@ -114,8 +107,7 @@ export class ProjectController {
   lookup = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const filters = buildProjectFilter(req.query);
-      const projects = await this.service.getProjects(
-        filters);
+      const projects = await this.service.getProjects(filters);
       successResponse(
         res,
         200,
@@ -133,12 +125,7 @@ export class ProjectController {
   ) => {
     try {
       const { id } = req.params;
-
-      const project = await this.service.getById(
-        id,
-        { populate: true }
-      );
-
+      const project = await this.service.getById(id, { populate: true });
       successResponse(
         res,
         200,

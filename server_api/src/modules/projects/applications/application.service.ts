@@ -155,11 +155,10 @@ export class ApplicationService {
     /**
  * Apply to a call and create the project's first application
  */
-    async apply(dto: ApplyProjectDTO) {
+    async apply(dto: ApplyProjectDTO, userId: string) {
 
         const {
             call,
-            userId,
             collaborators,
             docPath
         } = dto;
@@ -236,8 +235,7 @@ export class ApplicationService {
                     ...dto,
                     grant: String(callDoc.grant),
                     calendar: String(callDoc.calendar)
-                },
-                    { skipValidation: true });
+                }, userId, { skipValidation: true });
 
             return await this.internalCreate(
                 {

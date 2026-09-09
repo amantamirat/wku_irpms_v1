@@ -75,72 +75,30 @@ export const CallCard = ({ call }: CallCardProps) => {
             </p>
 
             {/* HIGHLIGHT SECTION: Financials & Primary Stage Timeline */}
-            <div className={`p-3 border-round mb-3 ${isUrgent ? 'bg-orange-50' : 'bg-blue-50'}`}>
+            <div className="p-3 border-round mb-3 bg-highlight">
                 <div className="flex flex-column gap-2">
-                    {/* Budget */}
-                    {
-                        /**
-                         * <div className="flex align-items-center gap-2">
-                        <i className={`pi pi-wallet text-sm ${isUrgent ? 'text-orange-600' : 'text-blue-600'}`}></i>
-                        <span className={`text-xs font-bold ${isUrgent ? 'text-orange-800' : 'text-blue-800'}`}>
-                            Budget: {new Intl.NumberFormat('en-ET', {
-                                style: 'currency',
-                                currency: 'ETB',
-                                maximumFractionDigits: 0
-                            }).format(call.budget || 0)}
-                        </span>
-                    </div>
-                         * 
-                         */
-                    }
-
 
                     {/* Call Deadline Date & Time */}
                     <div className="flex align-items-center gap-2">
-                        <i className={`pi pi-clock text-sm ${isUrgent ? 'text-orange-600' : 'text-blue-600'}`}></i>
-                        <span className="text-xs font-semibold text-800">
+                        <i className={`pi pi-clock text-sm ${isUrgent ? 'text-orange-500' : 'text-primary'
+                            }`}></i>
+                        <span className="text-xs font-semibold text-color-secondary">
                             Deadline: {deadline ? format(new Date(deadline), 'MMM dd, yyyy - hh:mm a') : 'N/A'}
                         </span>
                     </div>
                 </div>
 
                 {/* Status/Countdown */}
-                <div className={`flex align-items-center gap-2 border-top-1 pt-2 mt-2 ${isUrgent ? 'border-orange-100' : 'border-blue-100'}`}>
-                    <i className={`pi pi-clock ${isUrgent ? 'text-orange-500' : 'text-blue-500'}`}></i>
-                    <span className={`text-xs font-bold ${isUrgent ? 'text-orange-700' : 'text-blue-700'}`}>
+                <div className={`flex align-items-center gap-2 border-top-1 pt-2 mt-2 ${isUrgent ? 'border-orange-200' : 'border-300'
+                    }`}>
+                    <i className={`pi pi-clock ${isUrgent ? 'text-orange-500' : 'text-primary'
+                        }`}></i>
+                    <span className={`text-xs font-bold ${isUrgent ? 'text-orange-500' : 'text-primary'
+                        }`}>
                         {isClosed ? 'Application Closed' : `${daysLeft} days remaining to apply`}
                     </span>
                 </div>
             </div>
-
-            {/* ADDITIONAL SUBSEQUENT DEADLINES (If available) */}
-            {
-                /**
-                 * {sortedDeadlines.length > 1 && (
-                <div className="surface-100 p-2 border-round border-1 surface-border mb-4">
-                    <span className="block text-xs font-bold uppercase text-500 tracking-wider mb-2 px-1">
-                        Subsequent Stage Timelines
-                    </span>
-                    <div className="flex flex-column gap-2 px-1">
-                        {sortedDeadlines.slice(1).map((item: CallDeadline, idx: number) => {
-                            const stageName = typeof item.grantStage === 'object'
-                                ? (item.grantStage as GrantStage).name
-                                : `Stage ${idx + 2}`;
-
-                            return (
-                                <div key={idx} className="flex justify-content-between text-xs text-600 border-bottom-1 surface-border pb-1 last:border-none">
-                                    <span className="font-medium">{stageName}:</span>
-                                    <span className="text-800 font-semibold">
-                                        {item.submission ? format(new Date(item.submission), 'MMM dd, yyyy') : 'N/A'}
-                                    </span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                </div>
-            )}
-                 */
-            }
 
             <Divider className="my-3 mt-auto" />
 

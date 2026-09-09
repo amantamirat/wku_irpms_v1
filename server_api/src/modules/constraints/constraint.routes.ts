@@ -29,6 +29,17 @@ router.post(
     controller.create
 );
 
+/**
+ * @route GET /constraints/:id
+ * @desc Get constraint by ID
+ * @access Protected
+ */
+router.get(
+    "/lookup",
+    verifyActiveAccount,
+    checkPermission("constraint:lookup"),
+    controller.get
+);
 
 /**
  * @route GET /constraints/:id
@@ -38,7 +49,7 @@ router.post(
 router.get(
     "/:id",
     verifyActiveAccount,
-    checkPermission("constraint:read"),
+    checkPermission("constraint:lookup"),
     controller.getById
 );
 

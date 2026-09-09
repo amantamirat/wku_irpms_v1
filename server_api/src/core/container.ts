@@ -119,7 +119,7 @@ export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, 
     new PhaseSynchronizer(projectRepo, phaseRepo)
 );
 export const projectService = new ProjectService(projectRepo, collaboratorRepo, phaseRepo,
-    grantRepo, collabService, phaseService, callRepo, constraintValidator, notificationService);
+    grantRepo, collabService, phaseService, callRepo, constraintValidator, notificationService, authPermissionService);
 
 export const applicationService = new ApplicationService(applicationRepo, callRepo, stageRepo, reviewerRepo,
     projectService, constraintValidator, templateValidtor,
