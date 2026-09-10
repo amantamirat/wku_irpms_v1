@@ -63,7 +63,6 @@ const ManageUsers = () => {
         createNew: createEmptyUser,
         SaveDialog: SaveUser,
         permissionPrefix: "user",
-
         expandable: {
             template: (user) => (
                 <UserDetail user={user} />

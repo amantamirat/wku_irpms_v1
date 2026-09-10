@@ -2,15 +2,15 @@ import mongoose from "mongoose";
 import {
     CreatePublicationDTO,
     UpdatePublicationDTO,
-    GetPublicationsOptions,
-    ExistsPublicationDTO
+    FilterPublicationsOptions,
 } from "./publication.dto";
 import { IPublication, Publication, PublicationStatus } from "./publication.model";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 
 
 export interface IPublicationRepository {
     findById(id: string): Promise<IPublication | null>;
-    find(filters: GetPublicationsOptions): Promise<Partial<IPublication>[]>;
+    find(filters: FilterPublicationsOptions): Promise<Partial<IPublication>[]>;
     create(data: CreatePublicationDTO): Promise<IPublication>;
     update(id: string, data: UpdatePublicationDTO["data"]): Promise<IPublication | null>;
     updateStatus(id: string, newStatus: PublicationStatus): Promise<IPublication | null>;
@@ -25,7 +25,7 @@ export class PublicationRepository implements IPublicationRepository {
             .exec();
     }
 
-    async find(filters: GetPublicationsOptions = {}): Promise<Partial<IPublication>[]> {
+    async find(filters: FilterPublicationsOptions, options?:FilterOptions): Promise<Partial<IPublication>[]> {
         const query: any = {};
 
         // Filter by applicant if provided
@@ -40,8 +40,7 @@ export class PublicationRepository implements IPublicationRepository {
 
         let dbQuery = Publication.find(query);
 
-        // Populate applicant only if requested
-        if (filters.populate) {
+        if (options?.populate) {
             dbQuery = dbQuery.populate("author");
         }
 
@@ -95,7 +94,7 @@ export class PublicationRepository implements IPublicationRepository {
         ).exec();
     }
 
-    async exists(filters: ExistsPublicationDTO): Promise<boolean> {
+    async exists(filters: FilterPublicationsOptions): Promise<boolean> {
         const query: any = {};
 
         if (filters.author) {

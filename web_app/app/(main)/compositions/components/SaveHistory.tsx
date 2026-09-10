@@ -11,8 +11,8 @@ import { classNames } from 'primereact/utils';
 
 import { HistoryRule } from '../models/history.model';
 import { HistoryApi } from '../api/history.api';
-import { IRange, isValidRange } from '../models/composition.model';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { IRange, isValidRange } from '@/types/range';
 
 const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
   visible,
@@ -46,9 +46,11 @@ const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
     ];
 
     for (const metric of metrics) {
-      if (metric.range) {
-        const check = isValidRange(metric.range, metric.label);
-        if (!check.valid) return check;
+      if (metric.range && !isValidRange(metric.range)) {
+        return {
+          valid: false,
+          message: `${metric.label} range is invalid. Ensure values are non-negative and Min is less than or equal to Max.`
+        };
       }
     }
 

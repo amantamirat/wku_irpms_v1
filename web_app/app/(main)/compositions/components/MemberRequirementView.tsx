@@ -2,10 +2,10 @@
 import React from 'react';
 import { Divider } from 'primereact/divider';
 import { Tag } from 'primereact/tag';
-import { IRange } from '../models/composition.model';
 import { EligibilityProfileView } from './EligibilityProfileView';
 import { HistoryRule } from '../models/history.model';
 import { MemberRequirement, AggregationMode } from '../models/requirement.model';
+import { IRange } from '@/types/range';
 
 interface MemberRequirementViewProps {
     requirement: MemberRequirement;
@@ -46,9 +46,9 @@ export const MemberRequirementView: React.FC<MemberRequirementViewProps> = ({
                     <i className="pi pi-users mr-2 text-xl"></i>
                     {requirement.name || title}
                 </h4>
-                <Tag 
-                    value={requirement.mode || AggregationMode.COUNT} 
-                    severity={isRatioMode ? 'purple' as any : 'info'} 
+                <Tag
+                    value={requirement.mode || AggregationMode.COUNT}
+                    severity={isRatioMode ? 'purple' as any : 'info'}
                     icon={isRatioMode ? 'pi pi-percentage' : 'pi pi-hashtag'}
                     className="text-xs uppercase"
                 />

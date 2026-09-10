@@ -116,25 +116,7 @@ const AppMenu = () => {
                     to: '/users',
                     permission: 'user:read'
                 },
-                /*
-                {
-                    label: 'Publications',
-                    icon: PrimeIcons.BOOK,
-                    to: '/users/publications',
-                    permission: 'publication:read'
-                },
-                {
-                    label: 'Experiences',
-                    icon: PrimeIcons.BRIEFCASE,
-                    to: '/users/experiences',
-                    permission: 'experience:read'
-                },
-                {
-                    label: 'Enrollments',
-                    icon: PrimeIcons.ID_CARD,
-                    to: '/users/enrollments',
-                    permission: 'enrollment:read'
-                }*/
+                
                 {
                     label: 'Accounts',
                     icon: PrimeIcons.SHIELD,

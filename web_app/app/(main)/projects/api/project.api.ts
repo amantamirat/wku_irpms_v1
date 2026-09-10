@@ -1,13 +1,13 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
 import { FilterProjects, Project } from "../models/project.model";
-import { TransitionRequestDto } from "@/types/util";
+import { StateTransition } from "@/api/EntityApi";
 import { sanitize } from "@/utils/sanitizer";
 
 const end_point = "/projects";
 
 interface IProjectApi extends EntityApi<Project, FilterProjects | undefined> {
-    transitionState: (id: string, dto: TransitionRequestDto) => Promise<Project>;
+    transitionState: (id: string, dto: StateTransition) => Promise<Project>;
     me: (filter?: FilterProjects) => Promise<Project[]>;
 }
 
@@ -52,7 +52,7 @@ export const ProjectApi: IProjectApi = {
         return await ApiClient.delete(url);
     },
 
-    async transitionState(id: string, dto: TransitionRequestDto): Promise<Project> {
+    async transitionState(id: string, dto: StateTransition): Promise<Project> {
         // Matches the pattern: PATCH /projects/:id
         const url = `${end_point}/${id}`;
         const updated = await ApiClient.patch(url, dto);

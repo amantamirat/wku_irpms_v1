@@ -1,7 +1,7 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
 import { GetPhaseOptions, Phase, sanitizePhase } from "../models/phase.model";
-import { TransitionRequestDto } from "@/types/util";
+import { StateTransition } from "@/api/EntityApi";
 
 const end_point = "/project/phases";
 
@@ -59,7 +59,7 @@ export const PhaseApi: EntityApi<Phase, GetPhaseOptions | undefined> = {
         return await ApiClient.delete(url);
     },
 
-    async transitionState(id: string, dto: TransitionRequestDto): Promise<Phase> {
+    async transitionState(id: string, dto: StateTransition): Promise<Phase> {
         // Matches the pattern: PATCH /project/phases/:id
         const url = `${end_point}/${id}`;
         const updated = await ApiClient.patch(url, dto);

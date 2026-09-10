@@ -1,10 +1,10 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
-import { TransitionRequestDto } from "@/types/util";
+import { StateTransition } from "@/api/EntityApi";
 import {
     Collaborator,
     FilterCollaboratorsOptions,
-    sanitizeCollaborator
+    sanitize
 } from "../models/collaborator.model";
 
 const end_point = '/project/collaborators';
@@ -35,14 +35,14 @@ export const CollaboratorApi: EntityApi<Collaborator, FilterCollaboratorsOptions
     },
 
     async create(collaborator: Partial<Collaborator>): Promise<Collaborator> {
-        const sanitized = sanitizeCollaborator(collaborator);
+        const sanitized = sanitize(collaborator);
         const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as Collaborator;
     },
 
     async update(collaborator: Partial<Collaborator>): Promise<Collaborator> {
         if (!collaborator._id) throw new Error("_id required");
-        const sanitized = sanitizeCollaborator(collaborator);
+        const sanitized = sanitize(collaborator);
         // Using URL parameter pattern: PUT /project/collaborators/:id
         const url = `${end_point}/${collaborator._id}`;
         const updated = await ApiClient.put(url, sanitized);
@@ -55,7 +55,7 @@ export const CollaboratorApi: EntityApi<Collaborator, FilterCollaboratorsOptions
         return await ApiClient.delete(url);
     },
 
-    async transitionState(id: string, dto: TransitionRequestDto): Promise<Collaborator> {
+    async transitionState(id: string, dto: StateTransition): Promise<Collaborator> {
         // Matches the pattern: PATCH /project/collaborators/:id
         const url = `${end_point}/${id}`;
         const updated = await ApiClient.patch(url, dto);

@@ -1,6 +1,7 @@
 import { AuthApi } from "@/app/(full-page)/auth/api/auth.service";
 import { ApiError } from "./ApiError";
 import { extractId } from "@/utils/extractId";
+import { ERROR_CODES } from "./error.codes";
 
 
 export const BASE_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -23,19 +24,16 @@ const handleError = async (response: Response) => {
         console.log("JSON PARSE FAILED", e);
     }
 
-    const errorCode =
-        errorData?.code ??
-        errorData?.error?.code;
+    const errorCode = errorData?.code;
 
     if (
         response.status === 401 &&
         [
-            "TOKEN_MISSING",
-            "TOKEN_EXPIRED",
-            "TOKEN_INVALID"
+            ERROR_CODES.TOKEN_MISSING,
+            ERROR_CODES.TOKEN_EXPIRED,
+            ERROR_CODES.TOKEN_INVALID
         ].includes(errorCode)
     ) {
-        //console.log("🔥 ENTERED AUTH BLOCK");
         AuthApi.logout();
     }
 
@@ -44,7 +42,7 @@ const handleError = async (response: Response) => {
         {
             code: errorCode,
             details: errorData?.details,
-            status: response.status
+            status: response.status,
         }
     );
 };
@@ -83,22 +81,20 @@ export const ApiClient = {
         }
 
         const token = getAuthToken();
-        try {
-            const response = await fetch(url, {
-                headers: {
-                    "Content-Type": "application/json",
-                    ...(token && { Authorization: `Bearer ${token}` }),
-                },
-                cache: "no-store",
-            });
 
-            await handleError(response);
-            const result = await response.json().catch(() => ({}));
-            return (result.data ?? result) as T;
-        } catch (error) {
-            console.log("[ApiClient.get] Error:", error);
-            throw error;
-        }
+        const response = await fetch(url, {
+            headers: {
+                "Content-Type": "application/json",
+                ...(token && { Authorization: `Bearer ${token}` }),
+            },
+            cache: "no-store",
+        });
+
+        await handleError(response);
+
+        const result = await response.json().catch(() => ({}));
+
+        return (result.data ?? result) as T;
     },
 
     async post(endpoint: string, payload: any): Promise<any> {

@@ -1,6 +1,6 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
-import { TransitionRequestDto } from "@/types/util";
+import { StateTransition } from "@/api/EntityApi";
 import { Call, FilterCallsOptions, sanitizeCall } from "../models/call.model";
 
 const end_point = "/calls";
@@ -48,7 +48,7 @@ export const CallApi: EntityApi<Call, FilterCallsOptions | undefined>
     // ---------------------------
     // Transition State
     // ---------------------------
-    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
+    async transitionState(id: string, dto: StateTransition): Promise<any> {
         const url = `${end_point}/${id}/transition`; // Often better to have a specific sub-route for transitions
         return ApiClient.patch(url, dto);
     },

@@ -11,24 +11,16 @@ export const errorResponse = (
     message: string,
     error?: any
 ): void => {
-
-    console.log("Error:", message, error || '');
-    const response: any = { success: false, message, };
+    //console.log("Error:", message, error || '');
+    const response: any = { success: false, message};
 
     if (error instanceof AppError) {
-
         response.code = error.code;
-
         if (error.details) {
             response.details = error.details;
         }
-
     } else if (error) {
-
         response.error = error.message || error;
-
     }
-
-
     res.status(statusCode).json(response);
 };

@@ -1,24 +1,22 @@
 import { ApiClient } from "@/api/ApiClient";
-import { HistoryRule, sanitizeHistoryRule } from "../models/history.model";
+import { HistoryRule } from "../models/history.model";
 import { EntityApi } from "@/api/EntityApi";
+import { sanitize } from "@/utils/sanitizer";
 
 const end_point = '/team/histories';
 export const HistoryApi: EntityApi<HistoryRule> = {
     async create(HistoryRule: Partial<HistoryRule>): Promise<HistoryRule> {
-        const sanitized = sanitizeHistoryRule(HistoryRule);
+        const sanitized = sanitize(HistoryRule);
         const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as HistoryRule;
     },
 
-    async getById(id: string, populate?: boolean): Promise<HistoryRule> {
-        const query = populate !== undefined ? `?populate=${populate}` : '';
-        return ApiClient.get(`${end_point}/${id}${query}`);
+    async getById(id: string): Promise<HistoryRule> {
+        return ApiClient.get(`${end_point}/${id}`);
     },
 
     async getAll(populate): Promise<HistoryRule[]> {
-        const query = new URLSearchParams();
-        if (populate) query.append("populate", String(populate));
-        const data = await ApiClient.get(`${end_point}?${query.toString()}`);
+        const data = await ApiClient.get(end_point);
         return data as HistoryRule[];
     },
 
@@ -27,7 +25,7 @@ export const HistoryApi: EntityApi<HistoryRule> = {
             throw new Error("_id required.");
         }
         const url = `${end_point}/${HistoryRule._id}`;
-        const sanitized = sanitizeHistoryRule(HistoryRule);
+        const sanitized = sanitize(HistoryRule);
         const updatedHistoryRule = await ApiClient.put(url, sanitized);
         return updatedHistoryRule as HistoryRule;
     },

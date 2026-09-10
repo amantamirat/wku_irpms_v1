@@ -1,5 +1,7 @@
-import { TransitionRequestDto } from "@/types/util"
-
+export interface StateTransition {
+    current: string;
+    next: string;
+}
 
 
 export interface EntityApi<T, Q = undefined> {
@@ -8,8 +10,9 @@ export interface EntityApi<T, Q = undefined> {
     lookup?(filter?: Q): Promise<T[]>
     create(data: Partial<T>): Promise<T>
     update(data: Partial<T>): Promise<T>
-    transitionState?(id: string, dto: TransitionRequestDto): Promise<T>
+    transitionState?(id: string, dto: StateTransition): Promise<T>
     delete(item: Partial<T>): Promise<boolean>
     //for bulk imports
     import?: (formData: FormData, id?: string) => Promise<any>;
 }
+

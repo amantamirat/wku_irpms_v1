@@ -81,8 +81,8 @@ export function createEntityManager<
             removeItem,
             loading,
             setLoading,
-            error,
-            setError
+            //error,
+            //setError
         } = useCrudList<T>();
 
         const [item, setItem] = useState<T | null>(null);
@@ -117,7 +117,7 @@ export function createEntityManager<
                     setLoading(true);
                     await refresh();
                 } catch (err: any) {
-                    setError(err.message);
+                  //  setError(err.message);
                 } finally {
                     setLoading(false);
                 }
@@ -282,8 +282,8 @@ export function createEntityManager<
                     items={items}
                     columns={columns}
                     dataKey="_id"
-                    loading={loading}
-                    error={error}
+                    //loading={loading}
+                    //error={error}
                     enableSearch={!config.hideSearch}
                     hasPermission={hasPermission}
                     actions={actions}

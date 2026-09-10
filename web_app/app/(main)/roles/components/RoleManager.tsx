@@ -1,7 +1,7 @@
-import { createEntityManager } from "@/components/createEntityManager";
 import { createEmptyRole, Role } from "../models/role.model";
 import SaveRole from "./SaveRole";
 import { RoleApi } from "../api/role.api";
+import { createEntityManager } from "@/components/data-table/createEntityManager";
 
 
 export default createEntityManager<Role>({

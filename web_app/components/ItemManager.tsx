@@ -5,7 +5,7 @@ import { DataTable, DataTableFilterMeta, DataTableExpandedRows } from "primereac
 import { InputText } from "primereact/inputtext";
 import { Toolbar } from "primereact/toolbar";
 import ErrorCard from "./ErrorCard";
-import ListSkeleton from "./ListSkeleton";
+import {ListSkeleton} from "./Skeletons";
 
 export interface RowAction<T> {
     icon: string;
@@ -22,7 +22,7 @@ interface ItemManagerProps<T> {
     headerTitle?: string;
     items: T[];
     dataKey: string;
-    columns: ColumnProps[]; // Replaced 'any' with PrimeReact's own type
+    columns: ColumnProps[];
     loading?: boolean;
     error?: string | null;
     enableSearch?: boolean;

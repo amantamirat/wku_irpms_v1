@@ -1,7 +1,7 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
 import { GetThematicsOptions, Thematic, sanitize } from "../models/thematic.model";
-import { TransitionRequestDto } from "@/types/util";
+import { StateTransition } from "@/api/EntityApi";
 
 const end_point = "/thematics";
 
@@ -34,7 +34,7 @@ export const ThematicApi: EntityApi<Thematic, GetThematicsOptions | undefined> =
         return ApiClient.delete(`${end_point}/${thematic._id}`);
     },
 
-    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
+    async transitionState(id: string, dto: StateTransition): Promise<any> {
         const query = new URLSearchParams();
         query.append("id", id);
         const url = `${end_point}/${id}`;

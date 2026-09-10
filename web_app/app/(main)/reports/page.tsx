@@ -36,7 +36,7 @@ export default function ReportsPage() {
 
   // 2. FILTER FORM STATE (Staging changes before apply)
   const [filterForm, setFilterForm] = useState<IReportFilter>({});
-  
+
   // 3. APPLIED FILTER STATE (Triggers API fetch)
   const [appliedFilter, setAppliedFilter] = useState<IReportFilter>({});
 
@@ -49,7 +49,7 @@ export default function ReportsPage() {
   useEffect(() => {
     const fetchGrants = async () => {
       try {
-        const data = await GrantApi.getAll({ populate: true });
+        const data = await GrantApi.lookup!();
         setGrants(data || []);
       } catch (err) {
         console.error('Failed to load grants:', err);

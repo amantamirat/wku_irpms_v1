@@ -1,7 +1,7 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
 import { Evaluation, GetEvaluationsOptions, sanitize } from "../models/evaluation.model";
-import { TransitionRequestDto } from "@/types/util";
+import { StateTransition } from "@/api/EntityApi";
 
 const end_point = "/evaluations";
 
@@ -34,7 +34,7 @@ export const EvaluationApi: EntityApi<Evaluation, GetEvaluationsOptions | undefi
         return ApiClient.delete(`${end_point}/${evaluation._id}`);
     },
 
-    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
+    async transitionState(id: string, dto: StateTransition): Promise<any> {
         const query = new URLSearchParams();
         query.append("id", id);
         const url = `${end_point}/${id}`;

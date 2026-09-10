@@ -8,7 +8,7 @@ export interface UseCrudListOptions<T> {
 export function useCrudList<T extends { _id?: string }>({ initialItems = [], getId }: UseCrudListOptions<T> = {}) {
     const [items, setItems] = useState<T[]>(initialItems);
     const [loading, setLoading] = useState(false);
-    const [error, setError] = useState<string | null>(null);
+    //const [error, setError] = useState<string | null>(null);
 
     const getItemId = (item: T) => {
         if (getId) return getId(item);
@@ -46,7 +46,7 @@ export function useCrudList<T extends { _id?: string }>({ initialItems = [], get
         removeItem,
         loading,
         setLoading,
-        error,
-        setError,
+        //error,
+        //setError,
     };
 }

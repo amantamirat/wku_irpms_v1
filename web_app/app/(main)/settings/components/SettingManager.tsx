@@ -37,6 +37,7 @@ export default createEntityManager<Setting>({
             sortable: true
         }
     ],
+    disableEditRow: (row) => row.key === SettingKey.MAINTENANCE_MODE,
     // createNew is omitted because settings are pre-seeded
     SaveDialog: SaveSetting,
     permissionPrefix: "setting"

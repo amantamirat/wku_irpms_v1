@@ -18,6 +18,7 @@ export interface IProject extends Document {
     _id: mongoose.Types.ObjectId;
     grant: mongoose.Types.ObjectId;
     calendar?: mongoose.Types.ObjectId;
+    organization?: mongoose.Types.ObjectId;
     call?: mongoose.Types.ObjectId;
     title: string;
     summary?: string;
@@ -46,6 +47,11 @@ const ProjectSchema = new Schema<IProject>({
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.CALENDAR,
         required: true,
+        //immutable: true,
+    },
+    organization: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.ORGANIZATION,
         //immutable: true,
     },
     call: {

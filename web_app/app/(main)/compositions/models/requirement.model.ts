@@ -1,6 +1,6 @@
 import { EligibilityProfile } from "./profile.model";
-import { isValidRange, IRange } from "./composition.model";
 import { HistoryRule } from "./history.model";
+import { IRange, isValidRange } from "@/types/range";
 
 export enum AggregationMode {
     COUNT = "COUNT",
@@ -22,7 +22,6 @@ export type MemberRequirement = {
 export const validateMemberRequirement = (
     requirement: MemberRequirement
 ): { valid: boolean; message?: string } => {
-
     if (!requirement.name || requirement.name.trim().length === 0) {
         return {
             valid: false,
@@ -44,13 +43,11 @@ export const validateMemberRequirement = (
         };
     }
 
-    const thresholdCheck = isValidRange(
-        requirement.threshold,
-        "Threshold"
-    );
-
-    if (!thresholdCheck.valid) {
-        return thresholdCheck;
+    if (!isValidRange(requirement.threshold)) {
+        return {
+            valid: false,
+            message: "Threshold range is invalid. Ensure values are non-negative and Min is less than or equal to Max.",
+        };
     }
 
     return {
@@ -59,26 +56,3 @@ export const validateMemberRequirement = (
 };
 
 
-// ---------- Sanitizer ----------
-
-export function sanitizeMemberRequirement(
-    requirement: Partial<MemberRequirement>
-): Partial<MemberRequirement> {
-
-    return {
-        ...requirement,
-
-        profile:
-            typeof requirement.profile === "object" &&
-                requirement.profile !== null
-                ? requirement.profile._id
-                : requirement.profile,
-
-
-        historyRule:
-            typeof requirement.historyRule === "object" &&
-                requirement.historyRule !== null
-                ? requirement.historyRule._id
-                : requirement.historyRule,
-    };
-}

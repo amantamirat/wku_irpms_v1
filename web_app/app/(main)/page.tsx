@@ -9,14 +9,13 @@ import CallOpportunityGrid from "./dashboard/CallOpportunityGrid";
 import QuickLinks from "./dashboard/QuickLinks";
 import VerificationWindow from "./dashboard/VerificationWindow";
 import PendingEvalsManager from "./dashboard/pending-evals/Manager";
-import PendingCollabManager from "./dashboard/pending-collabs/Manager";
-
 import { ReviewerApi } from "./reviewers/api/reviewer.api";
 import { Reviewer, ReviewerStatus } from "./reviewers/models/reviewer.model";
 import { CollaboratorApi } from "./collaborators/api/collaborator.api";
 import { Collaborator, CollaboratorStatus } from "./collaborators/models/collaborator.model";
 import { ReportDashboard } from "./reports/components/Dashboard";
 import UpcomingDeadlines from "./dashboard/UpcomingDeadlines";
+import MyPendingInvitation from "./dashboard/pending-collabs/MyPendingInvitation";
 
 const Dashboard = () => {
     const { hasPermission } = useAuth();
@@ -45,7 +44,7 @@ const Dashboard = () => {
         };
 
         // Fetch Pending Collaborations
-        const fetchCollabs = async () => {
+        const fetchCollabInvitation = async () => {
             setLoadingCollabs(true);
             try {
                 const data = await CollaboratorApi.me({ status: CollaboratorStatus.pending });
@@ -58,7 +57,7 @@ const Dashboard = () => {
         };
 
         fetchPendingEvals();
-        fetchCollabs();
+        fetchCollabInvitation();
     }, []);
 
     // Check if the left section has any active content (loading states or data)
@@ -91,7 +90,7 @@ const Dashboard = () => {
                                     <span className="mt-2 text-500 text-sm font-medium">Loading pending collaborations...</span>
                                 </div>
                             ) : (
-                                <PendingCollabManager items={pendingCollabs!} />
+                                <MyPendingInvitation items={pendingCollabs!} />
                             )}
                         </div>
                     )}

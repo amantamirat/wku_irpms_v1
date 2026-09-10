@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { Call, CallStatus } from '../calls/models/call.model';
 import { CallCard } from './CallCard';
 import { CallApi } from '../calls/api/call.api';
+import { GridSkeleton } from '@/components/Skeletons';
 
 const CallOpportunityGrid = () => {
 
@@ -24,15 +25,7 @@ const CallOpportunityGrid = () => {
     }, []);
 
     if (loading) {
-        return (
-            <div className="grid mt-2">
-                {[1, 2, 3].map((i) => (
-                    <div key={i} className="col-12 md:col-6 p-2">
-                        <div className="card h-10rem surface-100 animate-pulse"></div>
-                    </div>
-                ))}
-            </div>
-        );
+        return <GridSkeleton count={4} />;
     }
     return (
         <div className="grid mt-2">

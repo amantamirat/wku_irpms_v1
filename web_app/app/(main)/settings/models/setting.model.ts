@@ -5,7 +5,8 @@ export enum SettingKey {
     MAX_FILE_UPLOAD_SIZE_MB = "max_file_upload_size_mb",
     ALLOWED_FILE_TYPES = "allowed_file_types", // e.g., ["image/png", "application/pdf"]
     NOTIFICATION_EXPIRY_HOURS = "notification_expiry_hours",
-    MAINTENANCE_MODE = "maintenance_mode"
+    MAINTENANCE_MODE = "maintenance_mode",
+    EMAIL_DOMAIN = "email_domain"
 }
 
 export type Setting = {

@@ -60,7 +60,7 @@ const ImportDialog = <T, Q = undefined>({
 
             formData.append("file", file);
 
-            await api.import(formData, parentId);
+           // await api.import(formData, parentId);
 
             toast.current?.show({
                 severity: "success",

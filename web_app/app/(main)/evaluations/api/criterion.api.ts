@@ -1,21 +1,14 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { Criterion, GetCriteriaOptions, sanitize } from "../models/criterion.model";
+import { Criterion, FilterCriteriaOptions } from "../models/criterion.model";
+import { sanitize } from "../models/evaluation.model";
 
 const end_point = '/criteria';
 
-export const CriterionApi: EntityApi<Criterion, GetCriteriaOptions> = {
+export const CriterionApi: EntityApi<Criterion, FilterCriteriaOptions> = {
 
-    async getAll(options?: GetCriteriaOptions) {
-        const query = new URLSearchParams();
-
-        if (options) {
-            const sanitized = sanitize(options);
-            if (options.evaluation) query.append("evaluation", sanitized.evaluation as string);
-        }
-
-        const url = query.toString() ? `${end_point}?${query.toString()}` : end_point;
-        return ApiClient.get(url);
+    async getAll(options?: FilterCriteriaOptions) {        
+        return ApiClient.get(end_point, options);
     },
 
     async create(criterion) {
@@ -34,7 +27,8 @@ export const CriterionApi: EntityApi<Criterion, GetCriteriaOptions> = {
         return ApiClient.delete(`${end_point}/${criterion._id}`);
     },
 
+    /*
     async import(formData: FormData, evalId?: string) {
         return ApiClient.post(`${end_point}/import/${evalId}`, formData);
-    }
+    }*/
 };

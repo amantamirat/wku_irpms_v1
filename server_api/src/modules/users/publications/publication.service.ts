@@ -4,7 +4,7 @@ import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { UserRepository } from "../user.repository";
 import {
     CreatePublicationDTO,
-    GetPublicationsOptions,
+    FilterPublicationsOptions,
     UpdatePublicationDTO
 } from "./publication.dto";
 import { PublicationRepository } from "./publication.repository";
@@ -39,7 +39,7 @@ export class PublicationService {
         }
     }
 
-    async get(options: GetPublicationsOptions) {
+    async get(options: FilterPublicationsOptions) {
         return await this.repository.find(options);
     }
 

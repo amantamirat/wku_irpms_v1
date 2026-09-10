@@ -1,25 +1,24 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
-import { MemberRequirement, sanitizeMemberRequirement } from "../models/requirement.model";
+import { MemberRequirement } from "../models/requirement.model";
+import { sanitize } from "@/utils/sanitizer";
 
 const end_point = '/team/requirements';
 export const MemberRequirementApi: EntityApi<MemberRequirement> = {
     async create(data: Partial<MemberRequirement>): Promise<MemberRequirement> {
-        const sanitized = sanitizeMemberRequirement(data);
+        const sanitized = sanitize(data);
         const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as MemberRequirement;
     },
 
     async getAll(populate): Promise<MemberRequirement[]> {
-        const query = new URLSearchParams();
-        if (populate) query.append("populate", String(populate));
-        const data = await ApiClient.get(`${end_point}?${query.toString()}`);
+        const data = await ApiClient.get(end_point);
         return data as MemberRequirement[];
     },
 
     async getById(id: string, populate?: boolean): Promise<MemberRequirement> {
-        const query = populate !== undefined ? `?populate=${populate}` : '';
-        return ApiClient.get(`${end_point}/${id}${query}`);
+        //const query = populate !== undefined ? `?populate=${populate}` : '';
+        return ApiClient.get(end_point);
     },
 
     async update(data: Partial<MemberRequirement>): Promise<MemberRequirement> {
@@ -27,7 +26,7 @@ export const MemberRequirementApi: EntityApi<MemberRequirement> = {
             throw new Error("_id required.");
         }
         const url = `${end_point}/${data._id}`;
-        const sanitized = sanitizeMemberRequirement(data);
+        const sanitized = sanitize(data);
         const updatedMemberRequirement = await ApiClient.put(url, sanitized);
         return updatedMemberRequirement as MemberRequirement;
     },

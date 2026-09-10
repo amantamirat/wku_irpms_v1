@@ -1,6 +1,6 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
-import { TransitionRequestDto } from "@/types/util";
+import { StateTransition } from "@/api/EntityApi";
 import { GetProjectApplicationOptions, Application, sanitizeApplication } from "../models/application.model";
 import { Project } from "../../projects/models/project.model";
 import { sanitize } from "@/utils/sanitizer";
@@ -76,7 +76,7 @@ export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions
     // ---------------------------
     // Transition State
     // ---------------------------
-    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
+    async transitionState(id: string, dto: StateTransition): Promise<any> {
         const url = `${end_point}/${id}/transition`;
         return ApiClient.patch(url, dto);
     },

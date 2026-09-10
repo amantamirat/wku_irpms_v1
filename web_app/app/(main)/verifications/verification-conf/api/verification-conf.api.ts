@@ -1,6 +1,6 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
-import { TransitionRequestDto } from "@/types/util";
+import { StateTransition } from "@/api/EntityApi";
 import { FilterConfigurationDTO, VerificationConfiguration } from "../models/verification-conf.model";
 import { sanitize } from "@/utils/sanitizer";
 
@@ -10,7 +10,7 @@ export const VerificationConfigurationApi: EntityApi<
     VerificationConfiguration,
     FilterConfigurationDTO
 > & {
-    transitionState: (id: string, dto: TransitionRequestDto) => Promise<any>;
+   // transitionState: (id: string, dto: TransitionRequestDto) => Promise<any>;
     getUpcoming: () => Promise<VerificationConfiguration[]>;
 } = {
     // ---------------------------
@@ -62,7 +62,7 @@ export const VerificationConfigurationApi: EntityApi<
     // ---------------------------
     // Transition State
     // ---------------------------
-    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
+    async transitionState(id: string, dto: StateTransition): Promise<any> {
         const url = `${end_point}/${id}`;
         return ApiClient.patch(url, dto);
     },

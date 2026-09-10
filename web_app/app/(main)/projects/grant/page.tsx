@@ -16,7 +16,7 @@ const Page = () => {
     useEffect(() => {
         const fetchGrants = async () => {
             try {
-                const data = await GrantApi.getAll({ populate: true });
+                const data = await GrantApi.lookup!();
                 setGrants(data || []);
                 if (data?.length) {
                     setSelectedGrant(data[0]);

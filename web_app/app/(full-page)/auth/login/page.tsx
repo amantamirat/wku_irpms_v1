@@ -16,7 +16,6 @@ import { LoginDto } from "../dto/auth.dto";
 
 const LoginPage = () => {
 
-
     let emptyLogin: LoginDto = {
         email: '',
         password: '',

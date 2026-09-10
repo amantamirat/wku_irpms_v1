@@ -1,7 +1,7 @@
 import { EntityApi } from "@/api/EntityApi"
 import { FilterGrantOptions, Grant, sanitize } from "../models/grant.model"
 import { ApiClient } from "@/api/ApiClient"
-import { TransitionRequestDto } from "@/types/util"
+import { StateTransition } from "@/api/EntityApi";
 
 const end_point = "/grants";
 export const GrantApi: EntityApi<Grant, FilterGrantOptions | undefined> = {
@@ -29,7 +29,7 @@ export const GrantApi: EntityApi<Grant, FilterGrantOptions | undefined> = {
         return ApiClient.put(`/grants/${grant._id}`, sanitize(grant))
     },
 
-    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
+    async transitionState(id: string, dto: StateTransition): Promise<any> {
         const query = new URLSearchParams();
         query.append("id", id);
         const url = `/grants/${id}`;

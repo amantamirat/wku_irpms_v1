@@ -899,19 +899,19 @@
   },
   {
     "category": "Phase Document Management",
-    "name": "phase:document:create"
+    "name": "phase-document:create"
   },
   {
     "category": "Phase Document Management",
-    "name": "phase:document:read"
+    "name": "phase-document:read"
   },
   {
     "category": "Phase Document Management",
-    "name": "phase:document:update"
+    "name": "phase-document:update"
   },
   {
     "category": "Phase Document Management",
-    "name": "phase:document:delete"
+    "name": "phase-document:delete"
   },
   {
     "category": "Application Management",

@@ -27,15 +27,10 @@ export interface UpdatePublicationDTO {
     };
 }
 
-export interface GetPublicationsOptions {
+export interface FilterPublicationsOptions {
     author?: string;
     type?: PublicationType;
     publisher?: string;
     fromDate?: string; // filter by publishedDate
     toDate?: string;
-    populate?: boolean;
-}
-
-export interface ExistsPublicationDTO {
-    author?: string;
 }

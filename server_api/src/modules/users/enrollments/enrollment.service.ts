@@ -31,7 +31,7 @@ export class EnrollmentService {
 
         const programDoc = await this.programRepository.findById(program);
         if (!programDoc) throw new AppError(ERROR_CODES.PROGRAM_NOT_FOUND);
-        if (programDoc.type !== Unit.program) throw new AppError(ERROR_CODES.INVALID_ORGANIZATION_TYPE);
+        if (programDoc.type !== Unit.program) throw new AppError(ERROR_CODES.INVALID_UNIT);
 
         try {
             return await this.repository.create(dto);

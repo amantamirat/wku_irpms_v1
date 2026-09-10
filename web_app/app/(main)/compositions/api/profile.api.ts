@@ -1,11 +1,12 @@
 import { ApiClient } from "@/api/ApiClient";
-import { EligibilityProfile, sanitizeEligibilityProfile } from "../models/profile.model";
+import { EligibilityProfile } from "../models/profile.model";
 import { EntityApi } from "@/api/EntityApi";
+import { sanitize } from "@/utils/sanitizer";
 
 const end_point = '/team/profiles';
 export const ProfileApi: EntityApi<EligibilityProfile> = {
     async create(EligibilityProfile: Partial<EligibilityProfile>): Promise<EligibilityProfile> {
-        const sanitized = sanitizeEligibilityProfile(EligibilityProfile);
+        const sanitized = sanitize(EligibilityProfile);
         const createdData = await ApiClient.post(end_point, sanitized);
         return createdData as EligibilityProfile;
     },
@@ -27,7 +28,7 @@ export const ProfileApi: EntityApi<EligibilityProfile> = {
             throw new Error("_id required.");
         }
         const url = `${end_point}/${EligibilityProfile._id}`;
-        const sanitized = sanitizeEligibilityProfile(EligibilityProfile);
+        const sanitized = sanitize(EligibilityProfile);
         const updatedEligibilityProfile = await ApiClient.put(url, sanitized);
         return updatedEligibilityProfile as EligibilityProfile;
     },

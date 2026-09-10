@@ -1,7 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
 import { Stage, GetStagesDTO, sanitizeCallStage } from "../models/stage.model";
-import { TransitionRequestDto } from "@/types/util";
+import { StateTransition } from "@/api/EntityApi";
 
 const end_point = "/call/stages";
 
@@ -70,7 +70,7 @@ export const StageApi: EntityApi<Stage, GetStagesDTO | undefined>
     // ---------------------------
     // Transition State
     // ---------------------------
-    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
+    async transitionState(id: string, dto: StateTransition): Promise<any> {
         const url = `${end_point}/${id}`;
         return ApiClient.patch(url, dto);
     },

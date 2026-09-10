@@ -126,7 +126,7 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
                 template: (app) => <ApplicationDetail application={app} />
             },
             extraActions: [
-                // Anonymize Action
+                // Anonymize Action//chek the permission and push it to extraaction column and pass it to the manager
                 {
                     icon: "pi pi-eye-slash",
                     severity: "warning",

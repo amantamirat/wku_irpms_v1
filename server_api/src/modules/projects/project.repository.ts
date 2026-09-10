@@ -53,7 +53,8 @@ export class ProjectRepository implements IProjectRepository {
                 .populate("leadPI")
                 .populate("calendar")
                 .populate("grant")
-                .populate("themes");
+                .populate("themes")
+                .populate("createdBy")
         }
 
         return dbQuery.lean<IProject>().exec();
@@ -89,7 +90,8 @@ export class ProjectRepository implements IProjectRepository {
                 .populate("leadPI")
                 .populate("grant")
                 .populate("calendar")
-                .populate("themes");
+                .populate("themes")
+                .populate("createdBy");
         }
         return dbQuery.lean<IProject[]>().exec();
     }

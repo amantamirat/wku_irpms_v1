@@ -38,12 +38,11 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
     useEffect(() => {
         const handleLogout = () => {
-            console.log("🔥 AUTH LOGOUT EVENT RECEIVED");
+            //console.log("🔥 AUTH LOGOUT EVENT RECEIVED");
             setSession(null);
         };
 
         window.addEventListener("auth:logout", handleLogout);
-
         return () => {
             window.removeEventListener("auth:logout", handleLogout);
         };

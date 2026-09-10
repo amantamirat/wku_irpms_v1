@@ -7,10 +7,8 @@ import { ReviewerApi } from "../api/reviewer.api";
 import { Reviewer, ReviewerStatus, ReviewerTargetType } from "../models/reviewer.model";
 import { REVIEWER_STATUS_ORDER, REVIEWER_USER_TRANSITIONS } from "../models/reviewer.state-machine";
 import EvaluationDialog from "../components/EvaluationDialog";
+import EmptyState from "@/components/EmptyState";
 
-interface MyReviewersManagerProps {
-   // enableEvaluation?: boolean;
-}
 
 const MyReviewersManager = () => {
     const [reviewers, setReviewers] = useState<Reviewer[]>([]);
@@ -113,6 +111,16 @@ const MyReviewersManager = () => {
 
     if (loading) {
         return <div className="p-4 text-center">Loading reviewers...</div>;
+    }
+
+    if (reviewers.length === 0) {
+        return (
+            <EmptyState
+                icon="pi pi-users"
+                title="No evaluation"
+                description="You are not listed as a reviwer on any active projects."
+            />
+        );
     }
 
     return (

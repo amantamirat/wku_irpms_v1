@@ -130,10 +130,10 @@ const ApplyPage = () => {
                         <div className="flex flex-column align-items-center justify-content-center py-8 text-center">
                             <i className="pi pi-exclamation-circle text-4xl text-orange-500 mb-3"></i>
                             <p className="text-lg font-semibold text-color m-0">
-                                No rules defined
+                                No rules found
                             </p>
                             <p className="text-sm text-color-secondary mt-1">
-                                There are no constraint profiles configured for this grant yet.
+                                There are no constraint profiles configured yet.
                             </p>
                         </div>
                     )}

@@ -1,4 +1,5 @@
 import { Schema, model, Document } from "mongoose";
+import { COLLECTIONS } from "../../common/constants/collections.enum";
 
 export enum SettingKey {
     TOKEN_EXPIRY_HOURS = "token_expiry_hours",
@@ -34,4 +35,4 @@ const SettingSchema = new Schema<ISetting>({
     description: { type: String },
 }, { timestamps: true });
 
-export const Setting = model<ISetting>("Setting", SettingSchema);
+export const Setting = model<ISetting>(COLLECTIONS.SETTING, SettingSchema);

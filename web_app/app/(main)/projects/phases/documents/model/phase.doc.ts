@@ -9,7 +9,7 @@ export type PhaseDocument = {
     file?: File;
 }
 
-export interface GetPhaseDocOptions {
+export interface FilterPhaseDocOptions {
     phase: string | Phase;
 }
 

@@ -1,4 +1,4 @@
-import { isValidRange, IRange } from "./composition.model";
+import { IRange, isValidRange } from "@/types/range";
 
 export type HistoryRule = {
     _id?: string;
@@ -19,27 +19,21 @@ export const validateHistoryRule = (
         return { valid: false, message: "Name is required." };
     }
 
-    const submitted = isValidRange(rule.submitted, "Submitted");
-    if (!submitted.valid) return submitted;
+    const metrics: { range?: IRange; label: string }[] = [
+        { range: rule.submitted, label: "Submitted" },
+        { range: rule.rejected, label: "Rejected" },
+        { range: rule.completed, label: "Completed" },
+        { range: rule.granted, label: "Granted" }
+    ];
 
-    const rejected = isValidRange(rule.rejected, "Rejected");
-    if (!rejected.valid) return rejected;
-
-    const completed = isValidRange(rule.completed, "Completed");
-    if (!completed.valid) return completed;
-
-    const granted = isValidRange(rule.granted, "Granted");
-    if (!granted.valid) return granted;
+    for (const metric of metrics) {
+        if (metric.range && !isValidRange(metric.range)) {
+            return {
+                valid: false,
+                message: `${metric.label} range is invalid. Ensure values are non-negative and Min is less than or equal to Max.`
+            };
+        }
+    }
 
     return { valid: true };
 };
-
-// ---------- Sanitizer ----------
-
-export function sanitizeHistoryRule(
-    rule: Partial<HistoryRule>
-): Partial<HistoryRule> {
-    return {
-        ...rule,
-    };
-}

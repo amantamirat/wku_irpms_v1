@@ -3,7 +3,7 @@ import { createEntityManager } from "@/components/createEntityManager";
 import { Tag } from 'primereact/tag';
 import { Evaluation } from "../../evaluations/models/evaluation.model";
 import { CriterionApi } from "../api/criterion.api";
-import { createEmptyCriterion, Criterion, FormType, GetCriteriaOptions } from "../models/criterion.model";
+import { createEmptyCriterion, Criterion, FormType, FilterCriteriaOptions } from "../models/criterion.model";
 import SaveCriterion from "./SaveCriterion";
 
 interface CriterionManagerProps {
@@ -12,7 +12,7 @@ interface CriterionManagerProps {
 
 const CriterionManager = ({ evaluation }: CriterionManagerProps) => {
 
-    const Manager = createEntityManager<Criterion, GetCriteriaOptions | undefined>({
+    const Manager = createEntityManager<Criterion, FilterCriteriaOptions | undefined>({
         title: "Manage Evaluation Criteria",
         itemName: "Criterion",
         api: CriterionApi,

@@ -5,7 +5,7 @@ import {
     sanitizePublication
 } from "../models/publication.model";
 import { EntityApi } from "@/api/EntityApi";
-import { TransitionRequestDto } from "@/types/util";
+import { StateTransition } from "@/api/EntityApi";
 
 const endPoint = '/publications';
 
@@ -41,7 +41,7 @@ export const PublicationApi: EntityApi<Publication, GetPublicationsOptions | und
         return updatedPublication as Publication;
     },
 
-    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
+    async transitionState(id: string, dto: StateTransition): Promise<any> {
         const query = new URLSearchParams();
         query.append("id", id);
         const url = `${endPoint}/${id}`;

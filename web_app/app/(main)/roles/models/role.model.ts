@@ -1,4 +1,3 @@
-import { Permission } from "../permissions/models/permission.model";
 
 export type Role = {
     _id?: string;
@@ -17,19 +16,6 @@ export const validateRole = (role: Role): { valid: boolean; message?: string } =
     return { valid: true };
 }
 
-
-export function sanitizeRole(role: Partial<Role>): Partial<Role> {
-    return {
-        ...role,
-        permissions: role.permissions
-            ?.map(p =>
-                typeof p === "object" && p !== null
-                    ? (p as Permission)._id
-                    : p
-            )
-            .filter((id): id is string => typeof id === "string"),
-    };
-}
 
 
 export const createEmptyRole = (): Role => ({

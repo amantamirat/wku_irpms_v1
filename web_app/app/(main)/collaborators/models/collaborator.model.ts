@@ -23,21 +23,6 @@ export interface FilterCollaboratorsOptions {
     status?: CollaboratorStatus;
 }
 
-export const sanitizeCollaborator = (collaborator: Partial<Collaborator>): Collaborator => {
-    return {
-        ...collaborator,
-        project:
-            typeof collaborator.project === "object" && collaborator.project !== null
-                ? (collaborator.project as Project)._id
-                : collaborator.project,
-        member:
-            typeof collaborator.member === "object" && collaborator.member !== null
-                ? (collaborator.member as User)._id
-                : collaborator.member,
-    } as Collaborator;
-}
-
-
 export const roleOptions = [
     //{ label: 'Principal Investigator', value: 'Principal Investigator' },
     { label: 'Co-Investigator', value: 'Co-Investigator' },

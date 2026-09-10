@@ -1,7 +1,7 @@
 import { Application } from "../../applications/models/application.model";
 import { Calendar } from "../../calendars/models/calendar.model";
 import { Call } from "../../calls/models/call.model";
-import { Collaborator, sanitizeCollaborator } from "../../collaborators/models/collaborator.model";
+import { Collaborator, sanitize } from "../../collaborators/models/collaborator.model";
 import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
 import { Theme } from "../../thematics/themes/models/theme.model";

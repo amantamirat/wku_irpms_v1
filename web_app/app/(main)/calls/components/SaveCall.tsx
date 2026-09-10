@@ -175,7 +175,7 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
 
                     {/* Grant Dropdown */}
                     <div className="field col-12 md:col-6">
-                        <label htmlFor="grant" className="font-bold">Grant Source</label>
+                        <label htmlFor="grant" className="font-bold">Grant</label>
                         {isGrantPredefined ? (
                             <InputText
                                 value={(localCall.grant as Grant).title}

@@ -1,6 +1,7 @@
 import { Gender, Accessibility } from "@/app/(main)/users/models/user.model";
 import { AcademicLevel } from "@/app/(main)/organizations/models/organization.model";
-import { isValidRange, IRange } from "./composition.model";
+import { IRange, isValidRange } from "@/types/range";
+
 
 export type EligibilityProfile = {
     _id?: string;
@@ -16,39 +17,30 @@ export type EligibilityProfile = {
 };
 
 export const validateEligibilityProfile = (
-    profile: EligibilityProfile
+  profile: EligibilityProfile
 ): { valid: boolean; message?: string } => {
-
-    if (!profile.name || profile.name.trim().length === 0) {
-        return {
-            valid: false,
-            message: "Name is required.",
-        };
-    }
-    if (profile.age) {
-        const ageCheck = isValidRange(profile.age, "Age");
-        if (!ageCheck.valid) return ageCheck;
-    }
-    if (profile.experienceYears) {
-        const experienceCheck = isValidRange(
-            profile.experienceYears,
-            "Experience years"
-        );
-
-        if (!experienceCheck.valid) return experienceCheck;
-    }
+  if (!profile.name || profile.name.trim().length === 0) {
     return {
-        valid: true,
+      valid: false,
+      message: "Name is required.",
     };
+  }
+
+  if (profile.age && !isValidRange(profile.age)) {
+    return {
+      valid: false,
+      message: "Age range is invalid. Ensure values are non-negative and Min is less than or equal to Max.",
+    };
+  }
+
+  if (profile.experienceYears && !isValidRange(profile.experienceYears)) {
+    return {
+      valid: false,
+      message: "Experience years range is invalid. Ensure values are non-negative and Min is less than or equal to Max.",
+    };
+  }
+
+  return {
+    valid: true,
+  };
 };
-
-
-// ---------- Sanitizer ----------
-
-export function sanitizeEligibilityProfile(
-    profile: Partial<EligibilityProfile>
-): Partial<EligibilityProfile> {
-    return {
-        ...profile,
-    };
-}

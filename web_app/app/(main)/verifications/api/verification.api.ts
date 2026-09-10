@@ -1,6 +1,6 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
-import { TransitionRequestDto } from "@/types/util";
+import { StateTransition } from "@/api/EntityApi";
 import { FilterVerification, sanitizeVerification, Verification } from "../models/verification.model";
 
 const ENDPOINT = "/verifications";
@@ -89,7 +89,7 @@ export const VerificationApi: EntityApi<
     // ---------------------------
     // Transition State
     // ---------------------------
-    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
+    async transitionState(id: string, dto: StateTransition): Promise<any> {
         const url = `${ENDPOINT}/${id}/transition`;
         return ApiClient.patch(url, dto);
     },

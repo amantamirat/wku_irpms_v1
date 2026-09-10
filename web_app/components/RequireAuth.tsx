@@ -13,14 +13,11 @@ export default function RequireAuth({
     const { session, loading } = useAuth();
     const router = useRouter();
     const pathname = usePathname();
-
     const isLoginPage = pathname === '/auth/login';
-    const isRequestActivationPage =
-        pathname === '/auth/request-activation';
+    const isRequestActivationPage = pathname === '/auth/request-activation';
 
     useEffect(() => {
         if (loading) return;
-
         if (!session) {
             if (!isLoginPage) {
                 router.replace('/auth/login');
@@ -29,8 +26,7 @@ export default function RequireAuth({
         }
 
         if (
-            session.status !== AccountStatus.active &&
-            !isRequestActivationPage
+            session.status !== AccountStatus.active && !isRequestActivationPage
         ) {
             router.replace('/auth/request-activation');
         }

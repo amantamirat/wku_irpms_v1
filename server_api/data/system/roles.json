@@ -35,6 +35,7 @@
             "template:*",
             "project:*",
             "phase:read",
+            "phase-document:*",
             "collaborator:read",
             "application:*",
             "verification:*",

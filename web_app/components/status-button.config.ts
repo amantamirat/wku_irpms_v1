@@ -1,3 +1,4 @@
+/*
 export type Status =
     | "draft"
     | "published"
@@ -14,7 +15,7 @@ export type Status =
     | "closed"
     | "pending"
     | "verified";
-
+*/
 export interface StatusButtonConfig {
     icon: string;
     severity: "success" | "warning" | "danger" | "info" | "secondary";
@@ -50,19 +51,19 @@ export const STATUS_BUTTON_CONFIG: Record<string, StatusButtonConfig> = {
         severity: "secondary",
         action: "Archive Catalog"
     },
-
     // ===== Project & Grant flow =====
     submitted: {
         icon: "pi pi-send",
         severity: "info",
         action: "Submit"
     },
+    /*
     shortlisted: {
         icon: "pi pi-list-check", // Represents being picked from a list for review
         severity: "info",        // Distinct from success (published) or secondary (draft)
         action: "Shortlist Project",
         color: 'bg-blue-100 text-blue-700' // Blue is standard for intermediate 'info' states
-    },
+    },*/
     refused: {
         icon: "pi pi-times-circle",
         severity: "danger",

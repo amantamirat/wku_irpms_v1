@@ -1,7 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
 import { sanitizeAccount, Account, AccountStatus } from "../models/account.model";
 import { EntityApi } from "@/api/EntityApi";
-import { TransitionRequestDto } from "@/types/util";
+import { StateTransition } from "@/api/EntityApi";
 
 const end_point = '/accounts';
 
@@ -25,7 +25,7 @@ export const AccountApi: EntityApi<Account> = {
         return ApiClient.put(`${end_point}/${account._id}`, sanitized)
     },
 
-    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
+    async transitionState(id: string, dto: StateTransition): Promise<any> {
         const query = new URLSearchParams();
         query.append("id", id);
         const url = `${end_point}/${id}`;

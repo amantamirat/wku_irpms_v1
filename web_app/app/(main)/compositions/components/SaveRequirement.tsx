@@ -20,8 +20,8 @@ import { HistoryRule } from '../models/history.model';
 import { MemberRequirementApi } from '../api/requirement.api';
 import { ProfileApi } from '../api/profile.api';
 import { HistoryApi } from '../api/history.api';
-import { isValidRange } from '../models/composition.model';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { isValidRange } from '@/types/range';
 
 const modeOptions = Object.values(AggregationMode).map((m) => ({
   label: m,
@@ -104,8 +104,12 @@ const SaveRequirement: React.FC<EntitySaveDialogProps<MemberRequirement>> = ({
       return { valid: false, message: 'Threshold range is required.' };
     }
 
-    const rangeCheck = isValidRange(localRequirement.threshold, 'Threshold');
-    if (!rangeCheck.valid) return rangeCheck;
+    if (!isValidRange(localRequirement.threshold)) {
+      return {
+        valid: false,
+        message: 'Threshold range is invalid. Ensure values are non-negative and Min is less than or equal to Max.'
+      };
+    }
 
     if (localRequirement.mode === AggregationMode.RATIO) {
       const { min, max } = localRequirement.threshold;

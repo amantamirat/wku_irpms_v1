@@ -2,6 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ApiClient, BASE_URL } from "@/api/ApiClient";
 import { io } from 'socket.io-client';
 import { useAuth } from '@/contexts/auth-context';
+import { extractId } from '@/utils/extractId';
 
 export enum NotificationType {
     INFO = 'info',
@@ -70,20 +71,18 @@ export const useNotifications = () => {
     }, [fetchNotifications]);
 
 
-    const { getUser: getApplicant } = useAuth();
+    const { getUser } = useAuth();
     const SOCKET_URL = BASE_URL?.replace('/api', '');
     useEffect(() => {
-        const applicantData = getApplicant();
-        // 1. Determine the ID: if getApplicant is an object, use _id, otherwise use it as a string
-        const applicantId = typeof applicantData === 'object' && applicantData !== null
-            ? (applicantData as any)._id
-            : applicantData;
+        const userData = getUser();
+        // 1. Determine the ID: if getUser is an object, use _id, otherwise use it as a string
+        const userId = extractId(userData);
 
         // 2. Only connect if we actually have an ID
-        if (!applicantId) return;
+        if (!userId) return;
 
         const socket = io(SOCKET_URL, {
-            query: { applicantId }
+            query: { applicantId: userId }
         });
 
         const notificationSound = new Audio('/sounds/beep.mp3');
@@ -101,7 +100,7 @@ export const useNotifications = () => {
             socket.disconnect();
         };
         // Ensure the dependency matches the variable used to trigger the connection
-    }, [getApplicant]);
+    }, [getUser]);
 
     return {
         notifications,

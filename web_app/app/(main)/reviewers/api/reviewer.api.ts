@@ -1,6 +1,6 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
-import { TransitionRequestDto } from "@/types/util";
+import { StateTransition } from "@/api/EntityApi";
 import {
     FilterReviewersOptions,
     Reviewer,
@@ -66,7 +66,7 @@ export const ReviewerApi: EntityApi<Reviewer, FilterReviewersOptions | undefined
         return await ApiClient.delete(url);
     },
 
-    async transitionState(id: string, dto: TransitionRequestDto): Promise<Reviewer> {
+    async transitionState(id: string, dto: StateTransition): Promise<Reviewer> {
         const url = `${end_point}/${id}`;
         const updated = await ApiClient.patch(url, dto);
         return updated as Reviewer;

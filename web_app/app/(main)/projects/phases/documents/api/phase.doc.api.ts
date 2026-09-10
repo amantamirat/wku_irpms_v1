@@ -1,20 +1,17 @@
+import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { GetPhaseDocOptions, PhaseDocument, sanitize } from "../model/phase.doc";
+import { sanitize } from "@/utils/sanitizer";
+import { FilterPhaseDocOptions, PhaseDocument } from "../model/phase.doc";
 
-const end_point = '/project/phase/documents';
+const end_point = "/project/phase/documents";
 
-export const PhaseDocApi = {
+export const PhaseDocApi: EntityApi<PhaseDocument, FilterPhaseDocOptions> = {
 
-    async getPhaseDocs(options: GetPhaseDocOptions): Promise<PhaseDocument[]> {
-        const query = new URLSearchParams();
-        const santized = sanitize(options);
-        if (options.phase) query.append("phase", santized.phase as string);
-        const data = await ApiClient.get(`${end_point}?${query.toString()}`);
-        return data;
+    async getAll(options) {
+        return ApiClient.get(end_point, options);
     },
 
-    async create(phaseDoc: Partial<PhaseDocument>): Promise<PhaseDocument> {
-
+    async create(phaseDoc) {
         const sanitized = sanitize(phaseDoc);
 
         const formData = new FormData();
@@ -29,15 +26,26 @@ export const PhaseDocApi = {
             formData.append("document", phaseDoc.file);
         }
 
-        const created = await ApiClient.post(end_point, formData);
-
-        return created;
+        return ApiClient.post(end_point, formData);
     },
 
-    async delete(phaseDoc: Partial<PhaseDocument>): Promise<boolean> {
-        if (!phaseDoc._id) throw new Error("_id required.");
-        const url = `${end_point}/${phaseDoc._id}`;
-        const deleted = await ApiClient.delete(url);
-        return deleted;
+    async update(phaseDoc) {
+        if (!phaseDoc._id) {
+            throw new Error("_id required");
+        }
+
+        // If update also supports file upload, use FormData here.
+        return ApiClient.put(
+            `${end_point}/${phaseDoc._id}`,
+            sanitize(phaseDoc)
+        );
     },
+
+    async delete(phaseDoc) {
+        if (!phaseDoc._id) {
+            throw new Error("_id required");
+        }
+
+        return ApiClient.delete(`${end_point}/${phaseDoc._id}`);
+    }
 };

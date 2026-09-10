@@ -1,7 +1,7 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
 import { Calendar, FilterCalendarOptions } from "../models/calendar.model";
-import { TransitionRequestDto } from "@/types/util";
+import { StateTransition } from "@/api/EntityApi";
 
 const end_point = "/calendars";
 
@@ -37,7 +37,7 @@ export const CalendarApi: EntityApi<Calendar, FilterCalendarOptions | undefined>
         return ApiClient.delete(`${end_point}/${calendar._id}`);
     },
 
-    async transitionState(id: string, dto: TransitionRequestDto): Promise<any> {
+    async transitionState(id: string, dto: StateTransition): Promise<any> {
         const query = new URLSearchParams();
         query.append("id", id);
         const url = `${end_point}/${id}`;

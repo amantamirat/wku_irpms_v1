@@ -1,7 +1,6 @@
 'use client';
 
 import React from 'react';
-import { createEntityManager } from "@/components/createEntityManager";
 import { OrganizationApi } from "../api/organization.api";
 import {
     Organization,
@@ -11,6 +10,7 @@ import {
     getParentType
 } from "../models/organization.model";
 import SaveOrganization from "./SaveOrganization";
+import { createEntityManager } from '@/components/data-table/createEntityManager';
 
 interface Props {
     type: OrgnUnit;

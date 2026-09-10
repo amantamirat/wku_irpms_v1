@@ -14,8 +14,7 @@ import { classNames } from 'primereact/utils';
 
 import {
   Composition,
-  validateComposition,
-  sanitizeComposition
+  validateComposition
 } from '../models/composition.model';
 import { CompositionApi } from '../api/composition.api';
 import { ProfileApi } from '../api/profile.api';
@@ -97,11 +96,11 @@ const SaveComposition: React.FC<EntitySaveDialogProps<Composition>> = ({
       const validation = validateComposition(localComposition as Composition);
       if (!validation.valid) throw new Error(validation.message);
 
-      const payload = sanitizeComposition(localComposition);
+      //const payload = sanitizeComposition(localComposition);
 
       const saved = localComposition._id
-        ? await CompositionApi.update(payload)
-        : await CompositionApi.create(payload);
+        ? await CompositionApi.update(localComposition)
+        : await CompositionApi.create(localComposition);
 
       toast.current?.show({
         severity: 'success',

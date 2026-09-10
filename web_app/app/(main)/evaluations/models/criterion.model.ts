@@ -34,9 +34,8 @@ export type Criterion = {
     updatedAt?: Date;
 };
 
-export interface GetCriteriaOptions {
+export interface FilterCriteriaOptions {
     evaluation?: string | Evaluation;
-    populate?: boolean;
 }
 
 /**
@@ -71,20 +70,7 @@ export const validateCriterion = (
     return { valid: true };
 };
 
-/**
- * Sanitizes the object for API consumption
- */
-export function sanitize(criterion: Partial<Criterion>): Partial<Criterion> {
-    return {
-        ...criterion,
-        evaluation:
-            typeof criterion.evaluation === 'object' && criterion.evaluation !== null
-                ? (criterion.evaluation as Evaluation)._id
-                : criterion.evaluation,
-        // Ensure options is always an array even if undefined
-        options: criterion.options || []
-    };
-}
+
 
 export const createEmptyCriterion = (criterion?: Partial<Criterion>): Criterion => ({
     evaluation: criterion?.evaluation ?? "",
