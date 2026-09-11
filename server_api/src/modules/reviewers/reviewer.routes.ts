@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { verifyActiveAccount } from '../auth/auth.middleware';
+import { verifyAuthToken } from '../auth/auth.middleware';
 import { checkTransitionPermission } from '../../core/container';
 import { checkPermission } from '../../core/container';
 import { CriterionRepository } from '../evaluations/criteria/criterion.repository';
@@ -25,29 +25,29 @@ const service = new ReviewerService(
 const controller = new ReviewerController(service);
 const router: Router = Router();
 
-router.post('/', verifyActiveAccount,
+router.post('/', verifyAuthToken,
     checkPermission([PERMISSIONS.REVIEWER.CREATE]),
     controller.create);
 
-router.get('/', verifyActiveAccount,
+router.get('/', verifyAuthToken,
     checkPermission([PERMISSIONS.REVIEWER.READ]),
     controller.get);
 
 router.get(
     '/me',
-    verifyActiveAccount,
+    verifyAuthToken,
     controller.getMyEvaluations
 );
 
-router.put('/:id', verifyActiveAccount,
+router.put('/:id', verifyAuthToken,
     checkPermission([PERMISSIONS.REVIEWER.UPDATE]),
     controller.update);
 
-router.patch('/:id', verifyActiveAccount,
+router.patch('/:id', verifyAuthToken,
     checkTransitionPermission("reviewer"),
     controller.transitionState);
 
-router.delete('/:id', verifyActiveAccount,
+router.delete('/:id', verifyAuthToken,
     checkPermission([PERMISSIONS.REVIEWER.DELETE]),
     controller.delete);
 

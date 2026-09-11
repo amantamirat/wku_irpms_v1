@@ -1,8 +1,9 @@
-import { createEntityManager } from "@/components/createEntityManager";
+
 import { Setting, SettingKey } from "../models/setting.model";
 import SaveSetting from "./SaveSetting";
 import { SettingApi } from "../api/setting.api";
 import { Tag } from "primereact/tag";
+import { createEntityManager } from "@/components/data-table/createEntityManager";
 
 // Helper to format the value column based on the setting type
 const valueTemplate = (s: Setting) => {

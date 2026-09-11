@@ -2,7 +2,6 @@
 import { createCheckPermission, createCheckTransitionPermission } from "../common/middleware/permission.middleware";
 import { AccountRepository } from "../modules/accounts/account.repository";
 import { AccountService } from "../modules/accounts/account.service";
-import { AnonymizerService } from "../modules/anonymizer/anonymizer.service";
 import { AuthPermissionService } from "../modules/auth/auth.permission-service";
 import { CalendarRepository } from "../modules/calendar/calendar.repository";
 import { CallRepository } from "../modules/calls/call.repository";
@@ -48,6 +47,7 @@ import { EnrollmentRepository } from "../modules/users/enrollments/enrollment.re
 import { ExperienceRepository } from "../modules/users/experiences/experience.repository";
 import { UserRepository } from "../modules/users/user.repository";
 import { UserService } from "../modules/users/user.service";
+import { AnonymizerService } from "../util/anonymizer/anonymizer.service";
 
 export const notificationRepo = new NotificationRepository();
 export const settingRepo = new SettingRepository();

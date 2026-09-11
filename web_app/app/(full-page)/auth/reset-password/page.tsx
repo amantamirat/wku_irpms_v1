@@ -1,138 +1,248 @@
+/* eslint-disable @next/next/no-img-element */
 'use client';
-import NoAuthGuard from '@/components/NoAuthGuard';
+
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
-import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { Password } from 'primereact/password';
+import { Button } from 'primereact/button';
+import { Messages } from 'primereact/messages';
 import { classNames } from 'primereact/utils';
-import { useContext, useState } from 'react';
+import NoAuthGuard from '@/components/NoAuthGuard';
 import { LayoutContext } from '../../../../layout/context/layoutcontext';
-import { Account, validateAccount } from '@/app/(main)/accounts/models/account.model';
-import { AccountApi } from '@/app/(main)/accounts/api/account.api';
-import { AuthApi } from '../api/auth.service';
+import { AuthApi } from '../api/auth.api';
+import { ResetPasswordDto } from '../dto/auth.dto';
 
 export default function ResetPassword() {
-
   const searchParams = useSearchParams();
   const email = searchParams.get('email') || '';
 
-  let emptyVerification: Account = {
-    email: email,
-    password: "",
-    confirmedPassword:"",
-    resetCode: ''
-  };
-
   const router = useRouter();
+  const { layoutConfig } = useContext(LayoutContext);
+
+  const [resetCode, setResetCode] = useState('');
+  const [password, setPassword] = useState('');
+  const [confirmPassword, setConfirmPassword] = useState('');
   const [progressing, setProgressing] = useState(false);
-  const [credential, setCredential] = useState<Account>(emptyVerification);
+  const [touched, setTouched] = useState(false);
 
+  const codeRef = useRef<HTMLInputElement>(null);
+  const msgs = useRef<Messages>(null);
 
+  useEffect(() => {
+    codeRef.current?.focus();
+  }, []);
 
-  const resetPassword = async () => {
+  // Form Validation Rules
+  const trimmedCode = resetCode.trim();
+  const isCodeInvalid = touched && !trimmedCode;
+  const isPasswordInvalid = touched && (!password || password.length < 6);
+  const isConfirmInvalid = touched && (confirmPassword !== password || !confirmPassword);
+
+  const handleResetPassword = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
+    setTouched(true);
+
+    msgs.current?.clear();
+
+    if (!email) {
+      msgs.current?.show({
+        severity: 'error',
+        summary: 'Missing Email',
+        detail: 'No email provided. Please restart the reset process from the forgot password page.'
+      });
+      return;
+    }
+
+    if (!trimmedCode || !password || password.length < 6 || password !== confirmPassword) {
+      return;
+    }
+
+    const dto: ResetPasswordDto = {
+      email,
+      resetCode: trimmedCode,
+      password
+    };
+
     try {
       setProgressing(true);
-      const result = validateAccount(credential, false, true);
-      if (!result.valid) {
-        throw new Error(result.message);
-      }
 
-      const data = await AuthApi.resetPassword(credential);
-      if (data.success) {
-        alert('Your password has been reset successfully.');
-        setTimeout(() => router.push('/auth/login'), 3000);
+      const data = await AuthApi.resetPassword(dto);
+
+      if (data?.success) {
+        msgs.current?.show({
+          severity: 'success',
+          summary: 'Password Reset Successful',
+          detail: 'Your password has been reset. Redirecting to sign in...'
+        });
+
+        setTimeout(() => {
+          router.push('/auth/login');
+        }, 2000);
       }
     } catch (err: any) {
-      alert(err.message || 'Resetting password failed. Try again later.');
+      msgs.current?.show({
+        severity: 'error',
+        summary: 'Reset Failed',
+        detail: err?.message || 'Failed to reset password. Please verify your code and try again.'
+      });
     } finally {
-      //setCredential(emptyUser);
       setProgressing(false);
     }
   };
 
-
-  const { layoutConfig } = useContext(LayoutContext);
-  const containerClassName = classNames('surface-ground flex align-items-center justify-content-center min-h-screen min-w-screen overflow-hidden', { 'p-input-filled': layoutConfig.inputStyle === 'filled' });
-
-
   return (
     <NoAuthGuard>
-      <div className={containerClassName}>
-        <div className="flex flex-column align-items-center justify-content-center">
+      <div
+        className={classNames('surface-ground flex align-items-center justify-content-center min-h-screen w-full', {
+          'p-input-filled': layoutConfig.inputStyle === 'filled'
+        })}
+        style={{ padding: '2rem 1rem' }}
+      >
+        <div className="w-full" style={{ maxWidth: '480px' }}>
           <div
-            style={{
-              borderRadius: '56px',
-              padding: '0.3rem',
-              background: 'linear-gradient(180deg, var(--primary-color) 10%, rgba(33, 150, 243, 0) 30%)'
-            }}
+            className="surface-card border-1 surface-border shadow-3"
+            style={{ borderRadius: '16px', overflow: 'hidden' }}
           >
-            <div className="w-full surface-card py-8 px-5 sm:px-8" style={{ borderRadius: '53px' }}>
-              <div className="text-center mb-5">
-                <img src={`/images/wku_logo.png`} alt="wku logo" className="mb-5 w-6rem flex-shrink-0" />
-                <div className="text-900 text-3xl font-medium mb-3">Reset Password</div>
-                <span className="text-600 font-medium">Enter the verification code and your new password</span>
-              </div>
+            <div style={{ height: '4px', background: 'var(--primary-color)' }} />
 
-              <div className="mb-5">
-                <label htmlFor="verificationCode" className="block text-900 text-xl font-medium mb-2">
-                  Reset Code
-                </label>
-                <InputText
-                  id="verificationCode"
-                  value={credential.resetCode}
-                  onChange={(e) => setCredential({ ...credential, resetCode: e.target.value })}
-                  placeholder="Enter the 9-digit code you received"
-                  className="w-full p-3 md:w-30rem"
+            <div className="p-4 sm:p-5 md:p-6" style={{ paddingTop: '2.5rem', paddingBottom: '2.25rem' }}>
+              <div className="text-center mb-4">
+                <img
+                  src="/images/wku_logo.png"
+                  alt="WKU Logo"
+                  style={{ width: '76px', height: '76px', objectFit: 'contain', marginBottom: '1rem' }}
                 />
+                <h1 className="text-900 font-bold m-0" style={{ fontSize: '1.75rem', lineHeight: '1.2', letterSpacing: '-0.02em' }}>
+                  Reset Password
+                </h1>
+                <p className="text-600 m-0 mt-2 text-sm" style={{ lineHeight: '1.5' }}>
+                  Enter your verification code and choose a new password.
+                </p>
               </div>
 
-              <div className="mb-5">
-                <label htmlFor="password" className="block text-900 text-xl font-medium mb-2">
-                  New Password
-                </label>
-                <Password
-                  id="password"
-                  value={credential.password}
-                  onChange={(e) => setCredential({ ...credential, password: e.target.value })}
-                  placeholder="New password"
-                  toggleMask
-                  className="w-full"
-                  inputClassName="w-full p-3 md:w-30rem"
+              {/* Target Email Indicator */}
+              {email && (
+                <div className="surface-100 border-round p-3 mb-4 flex align-items-center justify-content-center gap-2">
+                  <i className="pi pi-envelope text-500 text-sm" />
+                  <span className="text-700 font-medium text-sm word-break-all">{email}</span>
+                </div>
+              )}
+
+              {/* API Messages */}
+              <div className="mb-4">
+                <Messages ref={msgs} style={{ width: '100%', wordBreak: 'break-word' }} />
+              </div>
+
+              <form onSubmit={handleResetPassword} className="flex flex-column" noValidate>
+                {/* Reset Code Input */}
+                <div className="mb-4">
+                  <label htmlFor="resetCode" className="block text-900 font-semibold mb-2 text-sm">
+                    Reset Code
+                  </label>
+                  <InputText
+                    id="resetCode"
+                    ref={codeRef}
+                    value={resetCode}
+                    onChange={(e) => setResetCode(e.target.value)}
+                    onBlur={() => setTouched(true)}
+                    placeholder="Enter the code sent to your email"
+                    className={classNames('w-full text-sm', {
+                      'p-invalid': isCodeInvalid
+                    })}
+                    style={{ height: '48px', padding: '0.75rem 1rem' }}
+                    disabled={progressing}
+                    autoComplete="one-time-code"
+                  />
+                  {isCodeInvalid && (
+                    <small className="block text-red-500 mt-1 text-xs">Reset code is required.</small>
+                  )}
+                </div>
+
+                {/* New Password Input */}
+                <div className="mb-4">
+                  <label htmlFor="password" className="block text-900 font-semibold mb-2 text-sm">
+                    New Password
+                  </label>
+                  <Password
+                    id="password"
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    onBlur={() => setTouched(true)}
+                    placeholder="Minimum 6 characters"
+                    toggleMask
+                    feedback
+                    className={classNames('w-full', {
+                      'p-invalid': isPasswordInvalid
+                    })}
+                    inputClassName="w-full text-sm"
+                    inputStyle={{ height: '48px', padding: '0.75rem 1rem' }}
+                    disabled={progressing}
+                    autoComplete="new-password"
+                  />
+                  {isPasswordInvalid && (
+                    <small className="block text-red-500 mt-1 text-xs">
+                      Password must be at least 6 characters long.
+                    </small>
+                  )}
+                </div>
+
+                {/* Confirm Password Input */}
+                <div className="mb-4">
+                  <label htmlFor="confirmPassword" className="block text-900 font-semibold mb-2 text-sm">
+                    Confirm New Password
+                  </label>
+                  <Password
+                    id="confirmPassword"
+                    value={confirmPassword}
+                    onChange={(e) => setConfirmPassword(e.target.value)}
+                    onBlur={() => setTouched(true)}
+                    placeholder="Re-enter new password"
+                    toggleMask
+                    feedback={false}
+                    className={classNames('w-full', {
+                      'p-invalid': isConfirmInvalid
+                    })}
+                    inputClassName="w-full text-sm"
+                    inputStyle={{ height: '48px', padding: '0.75rem 1rem' }}
+                    disabled={progressing}
+                    autoComplete="new-password"
+                  />
+                  {isConfirmInvalid && (
+                    <small className="block text-red-500 mt-1 text-xs">
+                      {!confirmPassword ? 'Please confirm your password.' : 'Passwords do not match.'}
+                    </small>
+                  )}
+                </div>
+
+                <Button
+                  type="submit"
+                  label={progressing ? 'Resetting Password...' : 'Reset Password'}
+                  loading={progressing}
+                  className="w-full mt-2"
+                  style={{ height: '48px', fontSize: '0.95rem', fontWeight: 600, borderRadius: '8px' }}
                 />
-              </div>
+              </form>
 
-              <div className="mb-5">
-                <label htmlFor="confirmPassword" className="block text-900 text-xl font-medium mb-2">
-                  Confirm New Password
-                </label>
-                <Password
-                  id="confirmPassword"
-                  value={credential.confirmedPassword}
-                  onChange={(e) => setCredential({ ...credential, confirmedPassword: e.target.value })}
-                  placeholder="Confirm new password"
-                  toggleMask
-                  className="w-full"
-                  inputClassName="w-full p-3 md:w-30rem"
+              <div className="flex align-items-center justify-content-center mt-4">
+                <Button
+                  type="button"
+                  icon="pi pi-arrow-left"
+                  label="Back to Sign In"
+                  text
+                  className="p-button-secondary text-xs"
+                  onClick={() => router.push('/auth/login')}
+                  disabled={progressing}
                 />
-              </div>
-
-              <Button
-                loading={progressing}
-                label={"Reset Password"}
-                className="w-full p-3 text-xl"
-                type="submit"
-                onClick={resetPassword}
-              />
-              <div className="flex flex-column align-items-center justify-content-center">
-                <Button icon="pi pi-arrow-left" label="Back to Login" text className="mt-4" onClick={() => router.push('/auth/login')} />
               </div>
             </div>
-
           </div>
 
+          <div className="text-center text-500 mt-4 text-xs">
+            Wolkite University Institutional Research & Project Management System
+          </div>
         </div>
       </div>
-
     </NoAuthGuard>
   );
 }

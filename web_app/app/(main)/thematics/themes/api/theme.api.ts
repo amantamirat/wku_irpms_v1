@@ -1,7 +1,7 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
 import { FilterThemesOptions, Theme } from "../models/theme.model";
-import { sanitize } from "@/utils/sanitizer";
+import { sanitize } from "@/utils/utils";
 
 const end_point = '/thematics/themes';
 

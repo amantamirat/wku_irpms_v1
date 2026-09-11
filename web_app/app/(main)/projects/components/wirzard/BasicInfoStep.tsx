@@ -23,7 +23,7 @@ import {
 
 import { UserApi } from '@/app/(main)/users/api/user.api';
 
-import { extractId } from '@/utils/extractId';
+import { extractId } from "@/utils/utils";
 
 import { Project } from '../../models/project.model';
 

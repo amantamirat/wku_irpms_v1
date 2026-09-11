@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { verifyActiveAccount } from '../auth/auth.middleware';
+import { verifyAuthToken } from '../auth/auth.middleware';
 import { checkTransitionPermission } from '../../core/container';
 import { checkPermission } from '../../core/container';
 import { AccountController } from './account.controller';
@@ -7,20 +7,20 @@ import { accountService } from '../../core/container';
 
 const controller = new AccountController(accountService);
 const router: Router = Router();
-router.post('/', verifyActiveAccount,
+router.post('/', verifyAuthToken,
     checkPermission("account:create"),
     controller.create);
-router.get('/', verifyActiveAccount,
+router.get('/', verifyAuthToken,
     checkPermission("account:read"),
     controller.get);
-router.put('/:id', verifyActiveAccount,
+router.put('/:id', verifyAuthToken,
     checkPermission("account:update"),
     controller.update);
 router.patch(
-    '/:id', verifyActiveAccount,
+    '/:id', verifyAuthToken,
     checkTransitionPermission("account"),
     controller.transitionState);
-router.delete('/:id', verifyActiveAccount,
+router.delete('/:id', verifyAuthToken,
     checkPermission("account:delete"),
     controller.delete);
 export default router;

@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { checkUnitPermission, verifyActiveAccount } from '../auth/auth.middleware';
+import { checkUnitPermission, verifyAuthToken } from '../auth/auth.middleware';
 import { OrganizationController } from './organization.controller';
 
 import { checkPermission, enrollmentRepo, exprienceRepo, grantRepo, organizationRepo, userRepo } from '../../core/container';
@@ -17,38 +17,38 @@ const controller = new OrganizationController(service);
  */
 router.post(
     '/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkUnitPermission('create'),
     controller.create
 );
 
 router.get(
     '/lookup',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission('organization:lookup'),
     controller.lookup
 );
 
 router.get(
     '/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkUnitPermission('read'),
     controller.getAll
 );
 
-router.get('/:id', verifyActiveAccount, checkPermission('organization:lookup'),
+router.get('/:id', verifyAuthToken, checkPermission('organization:lookup'),
     controller.getById);
 
 router.put(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkUnitPermission('update'),
     controller.update
 );
 
 router.delete(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkUnitPermission('delete'),
 
     controller.delete

@@ -81,7 +81,7 @@ export function MyPendingInvitation({ items }: MyPendingInvitationProps) {
             <ItemDataTable
                 items={items}
                 columns={columns}
-                actions={actions}
+                rowActions={actions}
                 enableSearch={false}
             />
         </div>

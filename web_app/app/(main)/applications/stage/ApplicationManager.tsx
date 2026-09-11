@@ -140,7 +140,7 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
                     onClick: (row: Application) => {
                         confirm.ask({
                             operation: "anonymize document",
-                            onConfirmAsync: async () => {
+                            onConfirm: async () => {
                                 const updated =
                                     await ApplicationApi.anonymize(
                                         row._id!

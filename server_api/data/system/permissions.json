@@ -11,6 +11,10 @@
   },
   {
     "category": "Setting Management",
+    "name": "setting:read"
+  },
+  {
+    "category": "Setting Management",
     "name": "setting:update",
     "description": "Edit settings"
   },

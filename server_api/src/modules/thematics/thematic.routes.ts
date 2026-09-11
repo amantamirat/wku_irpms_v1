@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ThematicController } from './thematic.controller';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { verifyActiveAccount } from '../auth/auth.middleware';
+import { verifyAuthToken } from '../auth/auth.middleware';
 import { checkTransitionPermission } from '../../core/container';
 import { checkPermission } from '../../core/container';
 import { ThematicService } from './thematic.service';
@@ -19,32 +19,32 @@ const router: Router = Router();
 
 router.post(
     '/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.THEMATIC.CREATE]),
     controller.create
 );
 
 router.get(
     '/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.THEMATIC.READ]),
     controller.get
 );
 
 router.put(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.THEMATIC.UPDATE]),
     controller.update
 );
 
-router.patch('/:id', verifyActiveAccount,
+router.patch('/:id', verifyAuthToken,
     checkTransitionPermission("thematic"),
     controller.transitionState);
 
 router.delete(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.THEMATIC.DELETE]),
     controller.delete
 );

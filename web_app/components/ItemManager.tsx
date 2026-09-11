@@ -4,7 +4,7 @@ import { Column, ColumnProps } from "primereact/column";
 import { DataTable, DataTableFilterMeta, DataTableExpandedRows } from "primereact/datatable";
 import { InputText } from "primereact/inputtext";
 import { Toolbar } from "primereact/toolbar";
-import ErrorCard from "./ErrorCard";
+import ErrorState from "./ErrorState";
 import {ListSkeleton} from "./Skeletons";
 
 export interface RowAction<T> {
@@ -118,7 +118,7 @@ export function ItemManager<T extends Record<string, any>>({
         );
     }, [actions, hasPermission]);
 
-    if (error) return <ErrorCard errorMessage={error} />;
+   // if (error) return <ErrorState errorMessage={error} />;
 
     const startToolbarTemplate = () => (
         <div className="flex flex-wrap gap-2">

@@ -1,7 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
 import { HistoryRule } from "../models/history.model";
 import { EntityApi } from "@/api/EntityApi";
-import { sanitize } from "@/utils/sanitizer";
+import { sanitize } from "@/utils/utils";
 
 const end_point = '/team/histories';
 export const HistoryApi: EntityApi<HistoryRule> = {

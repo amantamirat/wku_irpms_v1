@@ -1,6 +1,6 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { sanitize } from "@/utils/sanitizer";
+import { sanitize } from "@/utils/utils";
 import { FilterPhaseDocOptions, PhaseDocument } from "../model/phase.doc";
 
 const end_point = "/project/phase/documents";

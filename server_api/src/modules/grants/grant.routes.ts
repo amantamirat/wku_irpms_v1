@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
 import { callRepo, compositionRepo, grantRepo, organizationRepo, projectRepo, thematicRepo } from '../../core/container';
-import { verifyActiveAccount } from '../auth/auth.middleware';
+import { verifyAuthToken } from '../auth/auth.middleware';
 import { checkTransitionPermission } from '../../core/container';
 import { checkPermission } from '../../core/container';
 import { GrantController } from './grant.controller';
@@ -16,21 +16,21 @@ const router = Router();
 
 router.post(
   '/',
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission([PERMISSIONS.GRANT.CREATE]),
   controller.create
 );
 
 router.get(
   '/lookup',
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission(PERMISSIONS.GRANT.LOOKUP),
   controller.lookup
 );
 
 router.get(
   '/',
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission([
     PERMISSIONS.GRANT.READ
   ]),
@@ -38,27 +38,27 @@ router.get(
 );
 
 
-router.get('/:id', verifyActiveAccount,
+router.get('/:id', verifyAuthToken,
   checkPermission(PERMISSIONS.GRANT.LOOKUP),
   controller.getById);
 
 
 router.put(
   '/:id',
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission([PERMISSIONS.GRANT.UPDATE]),
   controller.update
 );
 
 router.patch(
-  '/:id', verifyActiveAccount,
+  '/:id', verifyAuthToken,
   checkTransitionPermission("grant"),
   controller.transitionState
 );
 
 router.delete(
   '/:id',
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission([PERMISSIONS.GRANT.DELETE]),
   controller.delete
 );

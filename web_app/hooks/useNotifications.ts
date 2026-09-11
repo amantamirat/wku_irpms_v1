@@ -2,7 +2,7 @@ import { useState, useEffect, useCallback } from 'react';
 import { ApiClient, BASE_URL } from "@/api/ApiClient";
 import { io } from 'socket.io-client';
 import { useAuth } from '@/contexts/auth-context';
-import { extractId } from '@/utils/extractId';
+import { extractId } from "@/utils/utils";
 
 export enum NotificationType {
     INFO = 'info',

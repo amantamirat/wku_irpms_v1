@@ -7,7 +7,7 @@ import { VerificationApi } from "../api/verification.api";
 import { Verification } from "../models/verification.model";
 import { BASE_URL } from "@/api/ApiClient";
 import { Project } from "../../projects/models/project.model";
-import { extractId } from "@/utils/extractId";
+import { extractId } from "@/utils/utils";
 
 interface VerificationManagerProps {
     project: string | Project;

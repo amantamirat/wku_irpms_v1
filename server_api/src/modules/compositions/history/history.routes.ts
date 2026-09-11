@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { PERMISSIONS } from "../../../common/constants/permissions";
 import { historyRepo } from "../../../core/container";
-import { verifyActiveAccount } from "../../auth/auth.middleware";
+import { verifyAuthToken } from "../../auth/auth.middleware";
 import { checkPermission } from '../../../core/container';
 import { HistoryController } from "./history.controller";
 import { HistoryService } from "./history.service";
@@ -16,14 +16,14 @@ const router: Router = Router();
 //----------------------------------------
 router.post(
     "/",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.COMPOSITION.CREATE]),
     controller.create
 );
 
 router.get(
     "/:id",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.COMPOSITION.READ]),
     controller.getById
 )
@@ -33,7 +33,7 @@ router.get(
 //----------------------------------------
 router.get(
     "/",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.COMPOSITION.READ]),
     controller.get
 );
@@ -43,7 +43,7 @@ router.get(
 //----------------------------------------
 router.put(
     "/:id",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.COMPOSITION.UPDATE]),
     controller.update
 );
@@ -53,7 +53,7 @@ router.put(
 //----------------------------------------
 router.delete(
     "/:id",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.COMPOSITION.DELETE]),
     controller.delete
 );

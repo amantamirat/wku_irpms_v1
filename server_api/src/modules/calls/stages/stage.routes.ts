@@ -1,5 +1,5 @@
 import { Router } from 'express';
-import { verifyActiveAccount } from '../../auth/auth.middleware';
+import { verifyAuthToken } from '../../auth/auth.middleware';
 import { checkPermission } from '../../../core/container';
 import { StageController } from './stage.controller';
 import { StageService } from './stage.service';
@@ -14,7 +14,7 @@ const router = Router();
 // Create
 router.post(
     '/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission(["call.stage:create"]),
     controller.create
 );
@@ -22,7 +22,7 @@ router.post(
 // Get upcoming
 router.get(
     '/upcoming',
-    verifyActiveAccount,
+    verifyAuthToken,
     // checkPermission(["call.stage:read"]),
     controller.getUpcoming
 );
@@ -30,7 +30,7 @@ router.get(
 // Get next stage
 router.get(
     '/next/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission(["call.stage:read"]),
     controller.getNext
 );
@@ -38,7 +38,7 @@ router.get(
 // Get all
 router.get(
     '/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission(["call.stage:read"]),
     controller.get
 );
@@ -46,7 +46,7 @@ router.get(
 // Get by ID
 router.get(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission(["call.stage:read"]),
     controller.getById
 );
@@ -54,7 +54,7 @@ router.get(
 // Update
 router.put(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission(["call.stage:update"]),
     controller.update
 );
@@ -62,7 +62,7 @@ router.put(
 // Delete
 router.delete(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission(["call.stage:delete"]),
     controller.delete
 );

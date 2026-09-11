@@ -3,7 +3,7 @@ import { EntityApi } from "@/api/EntityApi";
 import { StateTransition } from "@/api/EntityApi";
 import { GetProjectApplicationOptions, Application, sanitizeApplication } from "../models/application.model";
 import { Project } from "../../projects/models/project.model";
-import { sanitize } from "@/utils/sanitizer";
+import { sanitize } from "@/utils/utils";
 
 const end_point = "/project/applications";
 

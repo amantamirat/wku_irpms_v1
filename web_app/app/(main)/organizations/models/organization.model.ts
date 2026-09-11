@@ -1,4 +1,4 @@
-import { extractId } from "@/utils/extractId";
+import { extractId } from "@/utils/utils";
 
 // Enum for Organization Types
 export enum OrgnUnit {

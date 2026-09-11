@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { SpecializationController } from './specialization.controller';
 import { PERMISSIONS } from '../../../common/constants/permissions';
-import { verifyActiveAccount } from '../../auth/auth.middleware';
+import { verifyAuthToken } from '../../auth/auth.middleware';
 import { checkPermission } from '../../../core/container';
 
 
@@ -11,28 +11,28 @@ const router: Router = Router();
 
 router.post(
   '/',
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission([PERMISSIONS.SPECIALIZATION.CREATE]),
   controller.create
 );
 
 router.get(
   '/',
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission([PERMISSIONS.SPECIALIZATION.READ]),
   controller.get
 );
 
 router.put(
   '/:id',
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission([PERMISSIONS.SPECIALIZATION.UPDATE]),
   controller.update
 );
 
 router.delete(
   '/:id',
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission([PERMISSIONS.SPECIALIZATION.DELETE]),
   controller.delete
 );

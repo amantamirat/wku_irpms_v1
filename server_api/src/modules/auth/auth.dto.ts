@@ -5,8 +5,18 @@ export interface LoginDto {
     password: string;
 }
 
+export interface ActivateAccountDTO {
+    email: string;
+    resetCode: string;
+}
+
+export interface ResetPasswordDto extends ActivateAccountDTO {
+    email: string;
+    password: string;
+}
+
 export default interface JwtPayload {
-    accountId?: string;
+    accountId: string;
     userId: string;
     email: string;
     status: AccountStatus;

@@ -1,15 +1,15 @@
 import path from "path";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { AnonymizationStatus, IApplication } from "../projects/applications/application.model";
-import { ApplicationRepository } from "../projects/applications/application.repository";
-import { CollaboratorRepository } from "../projects/collaborators/collaborator.repository";
-import { PdfExtractorService } from "../templates/services/pdf-extractor.service";
-import { IUser } from "../users/user.model";
 import { AnonymizationEntity, AnonymizationEntityType, AnonymizationResult } from "./anonymizer.types";
 import { PdfLayoutExtractorService } from "./pdf-layout-extractor.service";
 import { PdfEntityLocationMatcher } from "./pdf-location-matcher";
 import { SecurePdfRedactorService } from "./secure-pdf-redactor-service";
+import { IApplication, AnonymizationStatus } from "../../modules/projects/applications/application.model";
+import { ApplicationRepository } from "../../modules/projects/applications/application.repository";
+import { CollaboratorRepository } from "../../modules/projects/collaborators/collaborator.repository";
+import { PdfExtractorService } from "../../modules/templates/services/pdf-extractor.service";
+import { IUser } from "../../modules/users/user.model";
 
 export class AnonymizerService {
 

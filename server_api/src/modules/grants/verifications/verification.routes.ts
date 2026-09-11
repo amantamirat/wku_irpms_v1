@@ -1,6 +1,6 @@
 import { Router } from "express";
 import {
-    verifyActiveAccount
+    verifyAuthToken
 } from "../../auth/auth.middleware";
 import { checkTransitionPermission } from '../../../core/container';
 import { checkPermission } from '../../../core/container';
@@ -30,7 +30,7 @@ const router = Router();
 // Create / submit verification
 router.post(
     "/",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("verification:create"),
     (req, res, next) => {
         req.headers["x-upload-folder"] = "verifications";
@@ -63,7 +63,7 @@ router.get(
 
 router.get(
     "/",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("verification:read"),
     controller.find
 );
@@ -71,21 +71,21 @@ router.get(
 // Get verification by ID
 router.get(
     "/:id",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("verification:read"),
     controller.getById
 );
 
 router.patch(
     "/:id/transition",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkTransitionPermission("verification"),
     controller.transitionState
 );
 
 router.delete(
     "/:id",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("verification:delete"),
     controller.delete
 );

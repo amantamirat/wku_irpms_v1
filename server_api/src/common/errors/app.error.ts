@@ -1,20 +1,14 @@
 import { ErrorCode } from "./error.codes";
 
 export class AppError extends Error {
-    code: ErrorCode;
-    statusCode: number;
-    details?: unknown;
     constructor(
-        code: ErrorCode,
+        public code: ErrorCode,
         message?: string,
-        statusCode = 400,
-        details?: unknown
+        public statusCode = 400,
+        public details?: unknown
     ) {
         super(message || code);
-        
-        this.code = code;
-        this.statusCode = statusCode;
-        this.details = details;
+        this.name = "AppError";
 
         Object.setPrototypeOf(this, AppError.prototype);
     }

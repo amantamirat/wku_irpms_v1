@@ -3,9 +3,9 @@ import { EntityApi } from "@/api/EntityApi";
 import { StateTransition } from "@/api/EntityApi";
 import {
     Collaborator,
-    FilterCollaboratorsOptions,
-    sanitize
+    FilterCollaboratorsOptions
 } from "../models/collaborator.model";
+import { sanitize } from "@/utils/utils";
 
 const end_point = '/project/collaborators';
 

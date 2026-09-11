@@ -147,7 +147,7 @@ const ApplicationManager = ({ project, enableEditing }: ApplicationManagerProps)
                     onClick: (row: Application) => {
                         confirm.ask({
                             operation: "withdraw application",
-                            onConfirmAsync: async () => {
+                            onConfirm: async () => {
                                 if (!row._id) { return; }
                                 await ApplicationApi.withdraw(row._id);
                                 // refresh data here if needed

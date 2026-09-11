@@ -198,7 +198,7 @@ const AppMenu = () => {
                     label: 'Settings',
                     icon: PrimeIcons.COG,
                     to: '/settings',
-                    permission: 'setting:update'
+                    permission: 'setting:read'
                 }
             ]
         },

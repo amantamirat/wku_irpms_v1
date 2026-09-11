@@ -1,4 +1,4 @@
-import { extractId } from "@/utils/extractId";
+import { extractId } from "@/utils/utils";
 import { Project } from "../../projects/models/project.model";
 import { VerificationConfiguration } from "../verification-conf/models/verification-conf.model";
 

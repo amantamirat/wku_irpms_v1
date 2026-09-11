@@ -3,10 +3,12 @@ import { SettingService } from './setting.service';
 import { SettingKey } from './setting.model';
 import { UpdateSettingDto } from './setting.dto';
 import { errorResponse, successResponse } from '../../common/helpers/response';
+import { AppError } from '../../common/errors/app.error';
+import { ERROR_CODES } from '../../common/errors/error.codes';
 
 
 export class SettingController {
-    
+
     constructor(private readonly service: SettingService) { }
 
     getAllSettings = async (req: Request, res: Response) => {
@@ -26,7 +28,8 @@ export class SettingController {
 
             // Validate Key
             if (!Object.values(SettingKey).includes(key as SettingKey)) {
-                return errorResponse(res, 400, `Invalid setting key: ${key}`);
+                throw new AppError(ERROR_CODES.INVALID_CONSTRAINT, `Invalid setting key: ${key}`);
+                //return errorResponse(res, 400, `Invalid setting key: ${key}`, );
             }
 
             const updated = await this.service.update(key as SettingKey, dto);

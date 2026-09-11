@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { verificationConfRepo } from "../../../core/container";
-import { verifyActiveAccount } from "../../auth/auth.middleware";
+import { verifyAuthToken } from "../../auth/auth.middleware";
 import { checkPermission } from '../../../core/container';
 import { VerificationConfigurationController } from "./verification-conf.controller";
 import { VerificationConfigurationService } from "./verification-conf.service";
@@ -19,49 +19,49 @@ const router = Router();
 
 router.post(
     '/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("verification-conf:create"),
     verificationConfController.create
 );
 
 router.get(
     '/lookup',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("verification-conf:lookup"),
     verificationConfController.get
 );
 
 router.get(
     '/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("verification-conf:read"),
     verificationConfController.get
 );
 
 router.get(
     "/upcoming",
-    verifyActiveAccount,
+    verifyAuthToken,
     //checkPermission("verification-conf:read"),
     verificationConfController.getUpcoming
 );
 
 router.get(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("verification-conf:lookup"),
     verificationConfController.getById
 );
 
 router.put(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("verification-conf:update"),
     verificationConfController.update
 );
 
 router.delete(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("verification-conf:delete"),
     verificationConfController.delete
 );

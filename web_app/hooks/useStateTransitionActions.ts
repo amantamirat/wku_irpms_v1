@@ -1,8 +1,8 @@
 import { useMemo } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { ActionButton } from "./useDefaultActions";
 import { StateTransition } from "@/api/EntityApi";
+import { RowActionButton } from "@/components/data-table/ItemDataTable";
 
 
 export interface TransitionAction {
@@ -30,7 +30,7 @@ export function useStateTransitionActions<T extends Record<string, any>>({
     statusField,
     transitions,
     onTransition
-}: UseStateTransitionActionsProps<T>): ActionButton<T>[] {
+}: UseStateTransitionActionsProps<T>): RowActionButton<T>[] {
 
     const { hasPermission } = useAuth();
     const confirm = useConfirmDialog();
@@ -41,7 +41,7 @@ export function useStateTransitionActions<T extends Record<string, any>>({
             return [];
         }
 
-        const actions: ActionButton<T>[] = [];
+        const actions: RowActionButton<T>[] = [];
 
         const possibleTransitions = Object.entries(transitions);
 
@@ -66,7 +66,7 @@ export function useStateTransitionActions<T extends Record<string, any>>({
                     onClick: (row: T) =>
                         confirm.ask({
                             operation: transition.action,
-                            onConfirmAsync: () =>
+                            onConfirm: () =>
                                 onTransition(row._id, { current, next: transition.next })
                         })
                 });

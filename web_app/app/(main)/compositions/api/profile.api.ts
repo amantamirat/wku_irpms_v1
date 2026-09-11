@@ -1,7 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EligibilityProfile } from "../models/profile.model";
 import { EntityApi } from "@/api/EntityApi";
-import { sanitize } from "@/utils/sanitizer";
+import { sanitize } from "@/utils/utils";
 
 const end_point = '/team/profiles';
 export const ProfileApi: EntityApi<EligibilityProfile> = {

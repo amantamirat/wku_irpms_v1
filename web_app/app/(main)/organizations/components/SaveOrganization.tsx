@@ -20,10 +20,11 @@ import {
 import { OrganizationApi } from '../api/organization.api';
 import { useAuth } from '@/contexts/auth-context';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { capitalize } from '@/utils/utils';
 
 const SaveOrganization = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<Organization>) => {
     const toast = useRef<Toast>(null);
-    const { getScopesByUnit } = useAuth();
+    //const { getScopesByUnit } = useAuth();
 
     const [localOrg, setLocalOrg] = useState<Organization>({ ...item });
     const [parents, setParents] = useState<Organization[]>([]);
@@ -54,13 +55,13 @@ const SaveOrganization = ({ visible, item, onHide, onComplete }: EntitySaveDialo
         const fetchParents = async () => {
             setLoadingParents(true);
             try {
-                let scopes = getScopesByUnit(parentType);
-                if (scopes === "*") {
-                    scopes = await OrganizationApi.lookup!({ type: parentType });
-                }
-                if (isMounted) {
-                    setParents(Array.isArray(scopes) ? scopes : []);
-                }
+                // let scopes = getScopesByUnit(parentType);
+                // if (scopes === "*") {
+                const scopes = await OrganizationApi.lookup!({ type: parentType });
+                //  }
+                // if (isMounted) {
+                setParents(Array.isArray(scopes) ? scopes : []);
+                // }
             } catch (err) {
                 console.error("Failed to load parents", err);
             } finally {
@@ -73,7 +74,7 @@ const SaveOrganization = ({ visible, item, onHide, onComplete }: EntitySaveDialo
         return () => {
             isMounted = false;
         };
-    }, [visible, parentType, getScopesByUnit]);
+    }, [visible, parentType]);
 
     const handleHide = () => {
         setSubmitted(false);
@@ -141,7 +142,7 @@ const SaveOrganization = ({ visible, item, onHide, onComplete }: EntitySaveDialo
                 {/* Parent Selection */}
                 {parentType && (
                     <div className="field">
-                        <label htmlFor="parent">{parentType}</label>
+                        <label htmlFor="parent">{capitalize(parentType)}</label>
                         <Dropdown
                             id="parent"
                             dataKey="_id"

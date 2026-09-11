@@ -1,7 +1,7 @@
 import express from "express";
 import { applicationService, checkPermission, checkTransitionPermission } from "../../../core/container";
 import { upload } from "../../../util/multer";
-import { verifyActiveAccount } from "../../auth/auth.middleware";
+import { verifyAuthToken } from "../../auth/auth.middleware";
 import { ApplicationController } from "./application.controller";
 
 const controller = new ApplicationController(applicationService);
@@ -9,7 +9,7 @@ const router = express.Router();
 
 router.post(
     "/",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("application:create"),
     (req, res, next) => {
         // Set the dynamic subfolder for this specific endpoint
@@ -22,7 +22,7 @@ router.post(
 
 router.post(
     "/apply",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("application:apply"),
     (req, res, next) => {
         // Set the dynamic subfolder for this specific endpoint
@@ -35,7 +35,7 @@ router.post(
 
 router.get(
     "/",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("application:read"),
     controller.get
 );
@@ -43,14 +43,14 @@ router.get(
 //used the same get function
 router.get(
     "/lookup",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("application:lookup"),
     controller.get
 );
 
 router.get(
     "/:id",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("application:read"),
     controller.getById
 );
@@ -66,7 +66,7 @@ router.post(
 
 router.post(
     "/:id/anonymize",
-    verifyActiveAccount,
+    verifyAuthToken,
     //checkPermission("application:anonymize"),
     checkPermission("application:calculateTotalScore"),
     controller.anonymize
@@ -83,21 +83,21 @@ router.patch(
 
 router.patch(
     "/:id/transition",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkTransitionPermission("application"),
     controller.transitionState
 );
 
 router.delete(
     "/:id",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("application:delete"),
     controller.delete
 );
 
 router.post(
     "/:id/withdraw",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("application:withdraw"),
     controller.withdraw
 );

@@ -1,7 +1,7 @@
 'use client';
 
 import { useMemo } from 'react';
-import { ActionButton, useDefaultActions } from './useDefaultActions';
+import { ActionButton, useDefaultRowActions } from './useDefaultActions';
 import { TransitionMap, useStateTransitionActions } from './useStateTransitionActions';
 import { StateTransition } from '@/api/EntityApi';
 
@@ -53,7 +53,7 @@ export function useTableActions<T extends Record<string, any>>({
     extraActions = []
 }: UseTableActionsProps<T>): ActionButton<T>[] {
 
-    const defaultActions = useDefaultActions({
+    const defaultActions = useDefaultRowActions({
         resource,
         itemName,
 

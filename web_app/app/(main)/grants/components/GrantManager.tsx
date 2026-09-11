@@ -8,7 +8,7 @@ import { GrantApi } from "../api/grant.api";
 import { createEmptyGrant, FilterGrantOptions, Grant } from "../models/grant.model";
 import { GRANT_STATUS_ORDER, GRANT_TRANSITIONS } from "../models/grant.state-machine";
 import SaveGrant from "./SaveGrant";
-import { etbCurrencyFormatter } from "@/utils/currencyUtil";
+import { etbCurrencyFormatter } from "@/utils/utils";
 
 
 interface GrantManagerProps {

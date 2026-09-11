@@ -1,11 +1,12 @@
-type Unpopulate<T> =
+export type Unpopulate<T> =
     T extends { _id: infer ID }
-        ? ID
-        : T extends Array<infer U>
-        ? Array<Unpopulate<U>>
-        : T extends object
-        ? { [K in keyof T]: Unpopulate<T[K]> }
-        : T;
+    ? ID
+    : T extends Array<infer U>
+    ? Array<Unpopulate<U>>
+    : T extends object
+    ? { [K in keyof T]: Unpopulate<T[K]> }
+    : T;
+
 
 export const sanitize = <T>(
     obj: T,
@@ -33,7 +34,7 @@ export const sanitize = <T>(
 
     // Only convert nested populated objects to their _id
     if (!isRoot && '_id' in obj) {
-        return (obj as { _id: unknown })._id as Unpopulate<T>;
+        return (obj as { _id: unknown; })._id as Unpopulate<T>;
     }
 
     // Root / plain object
@@ -45,3 +46,24 @@ export const sanitize = <T>(
 
     return sanitizedObj as Unpopulate<T>;
 };
+
+
+export const extractId = <T extends { _id?: string; }>(
+    value: string | T | undefined | null
+): string | undefined => {
+    if (!value) return undefined;
+    return typeof value === "object" ? value._id : value;
+};
+
+
+export const etbCurrencyFormatter = new Intl.NumberFormat(
+    'en-US',
+    {
+        style: 'currency',
+        currency: 'ETB'
+    }
+);
+
+
+export const capitalize = (value: string) =>
+    value.charAt(0).toUpperCase() + value.slice(1);

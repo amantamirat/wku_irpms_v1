@@ -30,7 +30,7 @@ export const validateAccount = (user: Account, currentPassword: boolean = false,
         return { valid: false, message: "Email is not valid." };
     }
     if (!user.user) {
-        return { valid: false, message: "Applicant is required." };
+        return { valid: false, message: "User is required." };
     }
     if (currentPassword) {
         if (!user.currentPassword || user.currentPassword.trim() === "") {

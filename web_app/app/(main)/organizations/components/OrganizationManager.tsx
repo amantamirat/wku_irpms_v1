@@ -11,6 +11,7 @@ import {
 } from "../models/organization.model";
 import SaveOrganization from "./SaveOrganization";
 import { createEntityManager } from '@/components/data-table/createEntityManager';
+import { capitalize } from '@/utils/utils';
 
 interface Props {
     type: OrgnUnit;
@@ -26,57 +27,65 @@ const renderBadge = (value: string | undefined, prefix: string) => {
     );
 };
 
-// Pure function to generate dynamic column schemas based on OrgnUnit type
-const getOrganizationColumns = (type: OrgnUnit) => [
-    { header: "Name", field: "name", sortable: true },
+const getOrganizationColumns = (type: OrgnUnit) => {
+    const parentType = getParentType(type);
 
-    ...(getParentType(type) !== undefined
-        ? [
-            {
-                header: "Parent",
-                field: "parent",
-                sortable: true,
-                body: (r: Organization) =>
-                    typeof r.parent === "object" ? r.parent?.name : r.parent
-            }
-        ]
-        : []),
+    return [
+        { header: "Name", field: "name", sortable: true },
 
-    ...(type === OrgnUnit.program
-        ? [
-            {
-                header: "Ac. Level",
-                field: "academicLevel",
-                sortable: true,
-                body: (r: Organization) => renderBadge(r.academicLevel, "academic")
-            },
-            {
-                header: "Classification",
-                field: "classification",
-                sortable: true,
-                body: (r: Organization) => renderBadge(r.classification, "classification")
-            }
-        ]
-        : []),
+        ...(parentType !== undefined
+            ? [
+                {
+                    header: capitalize(parentType),
+                    field: "parent",
+                    sortable: true,
+                    body: (r: Organization) =>
+                        typeof r.parent === "object"
+                            ? r.parent?.name
+                            : r.parent
+                }
+            ]
+            : []),
 
-    ...(type === OrgnUnit.external
-        ? [
-            {
-                header: "Ownership",
-                field: "ownership",
-                sortable: true,
-                body: (r: Organization) => renderBadge(r.ownership, "ownership")
-            }
-        ]
-        : [])
-];
+        ...(type === OrgnUnit.program
+            ? [
+                {
+                    header: "Ac. Level",
+                    field: "academicLevel",
+                    sortable: true,
+                    body: (r: Organization) =>
+                        renderBadge(r.academicLevel, "academic")
+                },
+                {
+                    header: "Classification",
+                    field: "classification",
+                    sortable: true,
+                    body: (r: Organization) =>
+                        renderBadge(r.classification, "classification")
+                }
+            ]
+            : []),
+
+        ...(type === OrgnUnit.external
+            ? [
+                {
+                    header: "Ownership",
+                    field: "ownership",
+                    sortable: true,
+                    body: (r: Organization) =>
+                        renderBadge(r.ownership, "ownership")
+                }
+            ]
+            : [])
+    ];
+};
 
 const OrganizationManager = ({ type }: Props) => {
     // Pass configured dynamic props directly into the EntityManager instance
     // ensuring the component reference stays stable across renders.
     const Manager = createEntityManager<Organization, FilterOrganization | undefined>({
-        title: `Manage ${type}s`,
-        itemName: type,
+        title: `Manage ${capitalize(type)}s`,
+        itemName: capitalize(type),
         api: OrganizationApi,
         columns: getOrganizationColumns(type),
         createNew: () => createEmptyOrganization({ type }),

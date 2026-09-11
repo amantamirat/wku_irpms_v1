@@ -18,6 +18,12 @@
         "description": "Minutes to lock account after max failed login attempts"
     },
     {
+        "key": "verification_code_expiry_min",
+        "value": 10,
+        "type": "number",
+        "description": "Minutes before a verification code expires"
+    },
+    {
         "key": "max_file_upload_size_mb",
         "value": 10,
         "type": "number",

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { ResultController } from './result.controller';
 import { PERMISSIONS } from '../../../common/constants/permissions';
-import { verifyActiveAccount } from '../../auth/auth.middleware';
+import { verifyAuthToken } from '../../auth/auth.middleware';
 import { checkPermission } from '../../../core/container';
 
 import { ResultService } from './result.service';
@@ -38,28 +38,28 @@ const controller = new ResultController(service);
 // -----------------------
 router.post(
     '/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.RESULT.CREATE]),
     controller.create
 );
 
 router.get(
     '/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.RESULT.READ]),
     controller.get
 );
 
 router.put(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.RESULT.UPDATE]),
     controller.update
 );
 
 router.delete(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.RESULT.DELETE]),
     controller.delete
 );

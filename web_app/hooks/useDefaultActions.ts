@@ -3,69 +3,10 @@
 import { useMemo } from 'react';
 import { useAuth } from '@/contexts/auth-context';
 import { useConfirmDialog } from '@/contexts/ConfirmDialogContext';
+import { RowActionButton } from '@/components/data-table/ItemDataTable';
 
 
-export interface ActionButton<T> {
-    /**
-     * PrimeReact icon class.
-     * Example: "pi pi-pencil"
-     */
-    icon: string;
 
-    /**
-     * Optional text displayed beside the icon.
-     */
-    label?: string;
-
-    /**
-     * PrimeReact button severity.
-     */
-    severity?:
-    | "success"
-    | "danger"
-    | "warning"
-    | "info"
-    | "secondary"
-    | "help";
-
-    /**
-     * PrimeReact button size.
-     * Defaults to "small".
-     */
-    size?: "small" | "large";
-
-    /**
-     * Render the button as a text-style button.
-     * Defaults to true.
-     */
-    text?: boolean;
-
-    /**
-     * Render the button as a rounded-style button.
-     * Defaults to true.
-     */
-    rounded?: boolean;
-
-    /**
-     * Tooltip displayed when hovering over the button.
-     */
-    tooltip?: string;
-
-    /**
-     * Additional row-specific visibility condition.
-     */
-    visible?: (row: T) => boolean;
-
-    /**
-     * Disable the action for a specific row.
-     */
-    disabled?: (row: T) => boolean;
-
-    /**
-     * Action executed when the button is clicked.
-     */
-    onClick: (row: T) => void | Promise<void>;
-}
 
 
 interface UseDefaultActionsProps<T> {
@@ -111,10 +52,10 @@ interface UseDefaultActionsProps<T> {
     /**
      * Additional custom actions.
      */
-    extraActions?: ActionButton<T>[];
+    extraActions?: RowActionButton<T>[];
 }
 
-export function useDefaultActions<T extends { _id?: string }>({
+export function useDefaultRowActions<T extends { _id?: string }>({
     resource,
     itemName = 'Item',
     hideDefaultActions = false,
@@ -125,7 +66,7 @@ export function useDefaultActions<T extends { _id?: string }>({
     onEdit,
     onDelete,
     extraActions = [],
-}: UseDefaultActionsProps<T>): ActionButton<T>[] {
+}: UseDefaultActionsProps<T>): RowActionButton<T>[] {
 
     const { hasPermission } = useAuth();
     const confirm = useConfirmDialog();
@@ -135,7 +76,7 @@ export function useDefaultActions<T extends { _id?: string }>({
         /**
          * Start with custom actions.
          */
-        const actions: ActionButton<T>[] = [
+        const actions: RowActionButton<T>[] = [
             ...extraActions,
         ];
 
@@ -195,7 +136,7 @@ export function useDefaultActions<T extends { _id?: string }>({
                 onClick: (row) => {
                     confirm.ask({
                         item: itemName,
-                        onConfirmAsync: () => onDelete(row),
+                        onConfirm: () => onDelete(row),
                     });
                 },
             });

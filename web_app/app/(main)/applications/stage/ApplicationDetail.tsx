@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { Application } from "../models/application.model";
 import ApplicationReviewerManager from "../../reviewers/application/Manager";
 import ProjectDetail from "../../projects/components/ProjectDetail";
-import { extractId } from "@/utils/extractId";
+import { extractId } from "@/utils/utils";
 
 interface ApplicationDetailProps {
     application: Application;

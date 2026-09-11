@@ -3,7 +3,7 @@ import { RoleController } from './role.controller';
 
 import { PERMISSIONS } from '../../../common/constants/permissions';
 import { roleRepo } from '../../../core/container';
-import { verifyActiveAccount } from '../../auth/auth.middleware';
+import { verifyAuthToken } from '../../auth/auth.middleware';
 import { checkPermission } from '../../../core/container';
 import { RoleService } from './role.service';
 
@@ -12,25 +12,25 @@ const controller = new RoleController(service);
 const router: Router = Router();
 
 router.post('/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.ROLE.CREATE]),
     controller.create
 );
 
 router.get('/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.ROLE.READ]),
     controller.get
 );
 
 router.put('/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.ROLE.UPDATE]),
     controller.update
 );
 
 router.delete('/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.ROLE.DELETE]),
     controller.delete
 );

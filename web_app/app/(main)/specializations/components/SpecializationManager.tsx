@@ -1,6 +1,5 @@
 'use client';
-
-import { createEntityManager } from "@/components/createEntityManager";
+import { createEntityManager } from "@/components/data-table/createEntityManager";
 import { SpecializationApi } from "../api/specialization.api";
 import { Specialization } from "../models/specialization.model";
 import SaveSpecialization from "./SaveSpecialization";

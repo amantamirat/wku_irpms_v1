@@ -1,7 +1,7 @@
 import { Router } from "express";
 import { EvaluationController } from "./evaluation.controller";
 import { PERMISSIONS } from "../../common/constants/permissions";
-import { verifyActiveAccount } from "../auth/auth.middleware";
+import { verifyAuthToken } from "../auth/auth.middleware";
 import { checkTransitionPermission } from '../../core/container';
 import { checkPermission } from '../../core/container';
 import { EvaluationRepository } from "./evaluation.repository";
@@ -21,7 +21,7 @@ const router = Router();
  */
 router.post(
   "/",
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission("evaluation:create"),
   controller.create
 );
@@ -33,7 +33,7 @@ router.post(
  */
 router.get(
   "/",
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission("evaluation:read"),
   controller.getAll
 );
@@ -45,12 +45,12 @@ router.get(
  */
 router.put(
   "/:id",
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission("evaluation:update"),
   controller.update
 );
 
-router.patch('/:id', verifyActiveAccount,
+router.patch('/:id', verifyAuthToken,
   checkTransitionPermission("evaluation"),
   controller.transitionState);
 
@@ -61,7 +61,7 @@ router.patch('/:id', verifyActiveAccount,
  */
 router.delete(
   "/:id",
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission("evaluation:delete"),
   controller.delete
 );

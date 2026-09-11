@@ -2,7 +2,7 @@ import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
 import { FilterProjects, Project } from "../models/project.model";
 import { StateTransition } from "@/api/EntityApi";
-import { sanitize } from "@/utils/sanitizer";
+import { sanitize } from "@/utils/utils";
 
 const end_point = "/projects";
 

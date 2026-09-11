@@ -3,7 +3,7 @@ import { Router } from "express";
 import { ProfileService } from "./profile.service";
 import { profileRepo } from "../../../core/container";
 import { ProfileController } from "./profile.controller";
-import { verifyActiveAccount } from "../../auth/auth.middleware";
+import { verifyAuthToken } from "../../auth/auth.middleware";
 import { checkPermission } from '../../../core/container';
 import { PERMISSIONS } from "../../../common/constants/permissions";
 
@@ -17,7 +17,7 @@ const router: Router = Router();
 //----------------------------------------
 router.post(
     "/",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.COMPOSITION.CREATE]),
     controller.create
 );
@@ -25,7 +25,7 @@ router.post(
 
 router.get(
     "/:id",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.COMPOSITION.READ]),
     controller.getById
 );
@@ -35,7 +35,7 @@ router.get(
 //----------------------------------------
 router.get(
     "/",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.COMPOSITION.READ]),
     controller.get
 );
@@ -45,7 +45,7 @@ router.get(
 //----------------------------------------
 router.put(
     "/:id",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.COMPOSITION.UPDATE]),
     controller.update
 );
@@ -55,7 +55,7 @@ router.put(
 //----------------------------------------
 router.delete(
     "/:id",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.COMPOSITION.DELETE]),
     controller.delete
 );

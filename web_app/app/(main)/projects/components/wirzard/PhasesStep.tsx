@@ -8,7 +8,7 @@ import { Message } from 'primereact/message';
 import { classNames } from 'primereact/utils';
 import { Project } from '../../models/project.model';
 import { Constraint } from '@/app/(main)/constraints/models/constraint.model';
-import { etbCurrencyFormatter } from '@/utils/currencyUtil';
+import { etbCurrencyFormatter } from "@/utils/utils";
 
 interface PhasesStepProps {
     data: Partial<Project>;

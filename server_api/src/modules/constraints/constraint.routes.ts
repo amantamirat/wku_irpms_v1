@@ -4,7 +4,7 @@ import { ConstraintService } from "./constraint.service";
 
 
 import {
-    verifyActiveAccount,
+    verifyAuthToken,
 } from "../auth/auth.middleware";
 import { checkPermission } from '../../core/container';
 import { constraintRepo } from "../../core/container";
@@ -24,7 +24,7 @@ const router = Router();
  */
 router.post(
     "/",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("constraint:create"),
     controller.create
 );
@@ -36,7 +36,7 @@ router.post(
  */
 router.get(
     "/lookup",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("constraint:lookup"),
     controller.get
 );
@@ -48,7 +48,7 @@ router.get(
  */
 router.get(
     "/:id",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("constraint:lookup"),
     controller.getById
 );
@@ -62,7 +62,7 @@ router.get(
  */
 router.get(
     "/",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("constraint:read"),
     controller.get
 );
@@ -77,7 +77,7 @@ router.get(
  */
 router.put(
     "/:id",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("constraint:update"),
     controller.update
 );
@@ -90,7 +90,7 @@ router.put(
  */
 router.delete(
     "/:id",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("constraint:delete"),
     controller.delete
 );

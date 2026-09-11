@@ -1,7 +1,7 @@
 // reports/components/FinancialWidget.tsx
 'use client';
 
-import { etbCurrencyFormatter } from '@/utils/currencyUtil';
+import { etbCurrencyFormatter } from "@/utils/utils";
 import { IFinancialReport } from '../models/report.types';
 import { ProgressBar } from 'primereact/progressbar';
 

@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { checkPermission, criterionRepo, evaluationRepo } from "../../../core/container";
-import { verifyActiveAccount } from "../../auth/auth.middleware";
+import { verifyAuthToken } from "../../auth/auth.middleware";
 import { CriterionController } from "./criterion.controller";
 import { CriterionService } from "./criterion.service";
 
@@ -17,7 +17,7 @@ const router = Router();
 // Create a single criterion
 router.post(
     "/",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("criterion:create"),
     controller.create
 );
@@ -25,7 +25,7 @@ router.post(
 // Get all criteria for an evaluation
 router.get(
     "/",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("criterion:read"),
     controller.getAll
 );
@@ -33,7 +33,7 @@ router.get(
 // Update a criterion
 router.put(
     "/:id",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("criterion:update"),
     controller.update
 );
@@ -41,7 +41,7 @@ router.put(
 // Delete a criterion
 router.delete(
     "/:id",
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("criterion:delete"),
     controller.delete
 );

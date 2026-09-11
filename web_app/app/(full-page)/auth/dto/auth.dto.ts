@@ -9,6 +9,16 @@ export interface ChangePasswordDTO {
     password: string;
 }
 
+export interface ActivateAccountDTO {
+    email: string;
+    resetCode: string;
+}
+
+export interface ResetPasswordDto extends ActivateAccountDTO {
+    email: string;
+    password: string;
+}
+
 export const validateLogin = (dto: LoginDto): { valid: boolean; message?: string; } => {
 
     if (!dto.email || dto.email.trim() === "") {

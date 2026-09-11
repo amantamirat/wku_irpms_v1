@@ -4,7 +4,7 @@ import { NotificationRepository } from './notification.repository';
 import { NotificationService } from './notification.service';
 import { SettingService } from '../settings/setting.service';
 import { SettingRepository } from '../settings/setting.repository';
-import { verifyActiveAccount } from '../auth/auth.middleware';
+import { verifyAuthToken } from '../auth/auth.middleware';
 
 
 const repository = new NotificationRepository();
@@ -15,21 +15,21 @@ const router: Router = Router();
 
 // Get the user's notification inbox
 router.get('/',
-    verifyActiveAccount,
+    verifyAuthToken,
     // checkPermission([PERMISSIONS.NOTIFICATION.READ]), 
     controller.getInbox
 );
 
 // Mark a specific notification as read
 router.patch('/:id/read',
-    verifyActiveAccount,
+    verifyAuthToken,
     // checkPermission([PERMISSIONS.NOTIFICATION.UPDATE]), 
     controller.markAsRead
 );
 
 // Bulk mark all as read
 router.post('/read-all',
-    verifyActiveAccount,
+    verifyAuthToken,
     // checkPermission([PERMISSIONS.NOTIFICATION.UPDATE]), 
     controller.markAllRead
 );

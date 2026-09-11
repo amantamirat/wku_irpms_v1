@@ -1,13 +1,18 @@
 'use client';
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { EntityApi, StateTransition } from "@/api/EntityApi";
-import { ItemDataTable } from "@/components/data-table/ItemDataTable";
+import {
+  ItemDataTable,
+  RowActionButton,
+  TopActionButton,
+} from "@/components/data-table/ItemDataTable";
 import { useAuth } from "@/contexts/auth-context";
 import { useCrudList } from "@/hooks/useCrudList";
 import { useTableActions } from "@/hooks/useTableActions";
-import { ActionButton } from "@/hooks/useDefaultActions";
 import { TransitionMap } from "@/hooks/useStateTransitionActions";
+import { ApiError } from "@/api/ApiError";
+import ErrorState from "../ErrorState";
 
 export interface EntitySaveDialogProps<T> {
   visible: boolean;
@@ -22,7 +27,7 @@ export interface CreateEntityManagerConfig<
 > {
   title?: string;
   itemName?: string;
-  permissionPrefix: string;//will be renamed to rescource
+  permissionPrefix: string; // will be renamed to resource
   api: EntityApi<T, TQuery>;
   columns: any[];
   createNew?: () => T;
@@ -42,7 +47,8 @@ export interface CreateEntityManagerConfig<
     allow?: (row: T) => boolean;
   };
 
-  extraActions?: ActionButton<T>[];
+  extraActions?: RowActionButton<T>[];
+  topActions?: TopActionButton[];
   disableEditRow?: (row: T) => boolean;
   disableDeleteRow?: (row: T) => boolean;
   hideDefaultActions?: boolean;
@@ -62,13 +68,34 @@ export function createEntityManager<
 
     const [item, setItem] = useState<T | null>(null);
     const [showDialog, setShowDialog] = useState(false);
+    const [error, setError] = useState<ApiError | string | null>(null);
+
+    const canRead = hasPermission([
+      `${config.permissionPrefix}:read`,
+      `${config.permissionPrefix}:read:own`,
+    ]);
 
     const refresh = async () => {
+      setError(null);
+
+      if (!canRead) {
+        setError(
+          new ApiError("You do not have permission to view this resource.", {
+            status: 403,
+            code: "FORBIDDEN",
+          })
+        );
+        return;
+      }
+
       try {
         setLoading(true);
         const query = config.query ? config.query() : undefined;
         const data = await config.api.getAll(query);
         setAll(data ?? []);
+      } catch (err) {
+        console.error("[EntityManager] Fetch failed:", err);
+        setError(err instanceof ApiError ? err : String(err));
       } finally {
         setLoading(false);
       }
@@ -91,17 +118,25 @@ export function createEntityManager<
     };
 
     const handleDelete = async (row: T) => {
-      const ok = await config.api.delete(row);
-      if (ok) {
-        removeItem(row);
+      try {
+        const ok = await config.api.delete(row);
+        if (ok) {
+          removeItem(row);
+        }
+      } catch (err) {
+        console.error("[EntityManager] Delete failed:", err);
       }
     };
 
     const handleTransition = async (id: string, transition: StateTransition) => {
       if (!config.api.transitionState) return;
-      const updated = await config.api.transitionState(id, transition);
-      if (updated) {
-        updateItem(updated);
+      try {
+        const updated = await config.api.transitionState(id, transition);
+        if (updated) {
+          updateItem(updated);
+        }
+      } catch (err) {
+        console.error("[EntityManager] Transition failed:", err);
       }
     };
 
@@ -132,17 +167,46 @@ export function createEntityManager<
         `${config.permissionPrefix}:create:own`,
       ]);
 
+    // Build top action buttons with typed TopActionButton[]
+    const combinedTopActions = useMemo(() => {
+      const actions: TopActionButton[] = [];
+
+      if (canCreate) {
+        actions.push({
+          label: `Create ${config.itemName || ""}`,
+          icon: "pi pi-plus",
+          severity: "success",
+          onClick: handleCreate,
+        });
+      }
+
+      if (config.topActions) {
+        actions.push(...config.topActions);
+      }
+
+      return actions;
+    }, [canCreate, config.itemName, config.topActions]);
+
+    if (error && !loading) {
+      return (
+        <ErrorState
+          title={config.title ? `${config.title} Unavailable` : undefined}
+          error={error}
+          onRetry={canRead ? refresh : undefined}
+        />
+      );
+    }
+
     return (
       <>
         <ItemDataTable
           headerTitle={config.title}
-          itemName={config.itemName}
           items={items}
           columns={config.columns}
-          actions={actions}
+          rowActions={actions as RowActionButton<T>[]}
+          topActions={combinedTopActions}
           loading={loading}
           enableSearch={!config.hideSearch}
-          onCreate={canCreate ? handleCreate : undefined}
           expandable={
             config.expandable
               ? {

@@ -4,7 +4,7 @@ import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
-import { AnonymizerService } from "../../anonymizer/anonymizer.service";
+import { AnonymizerService } from "../../../util/anonymizer/anonymizer.service";
 import { CallStatus } from "../../calls/call.model";
 import { ICallRepository } from "../../calls/call.repository";
 import { IStage } from "../../calls/stages/stage.model";

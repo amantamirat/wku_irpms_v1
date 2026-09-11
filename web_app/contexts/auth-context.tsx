@@ -1,5 +1,5 @@
 'use client';
-import { AuthApi } from '@/app/(full-page)/auth/api/auth.service';
+import { AuthApi } from '@/app/(full-page)/auth/api/auth.api';
 import { LoginDto } from '@/app/(full-page)/auth/dto/auth.dto';
 import { AccountStatus } from '@/app/(main)/accounts/models/account.model';
 import { OrgnUnit } from '@/app/(main)/organizations/models/organization.model';

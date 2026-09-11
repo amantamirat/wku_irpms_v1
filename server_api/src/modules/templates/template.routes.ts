@@ -4,7 +4,7 @@ import { TemplateRepository } from "./template.repository";
 import { TemplateService } from "./template.service";
 
 import {
-  verifyActiveAccount,
+  verifyAuthToken,
 } from "../auth/auth.middleware";
 import { checkPermission } from '../../core/container';
 import { templateRepo } from "../../core/container";
@@ -24,7 +24,7 @@ const router = Router();
  */
 router.post(
   "/",
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission("template:create"),
   controller.create
 );
@@ -37,7 +37,7 @@ router.post(
  */
 router.get(
   "/",
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission("template:read"),
   controller.get
 );
@@ -50,7 +50,7 @@ router.get(
  */
 router.get(
   "/:id",
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission("template:read"),
   controller.getById
 );
@@ -63,7 +63,7 @@ router.get(
  */
 router.put(
   "/:id",
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission("template:update"),
   controller.update
 );
@@ -76,7 +76,7 @@ router.put(
  */
 router.delete(
   "/:id",
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission("template:delete"),
   controller.delete
 );

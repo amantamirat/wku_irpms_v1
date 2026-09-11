@@ -3,8 +3,8 @@ import { Constraint } from "../models/constraint.model";
 import { ConstraintApi } from "../api/constraint.api";
 import SaveConstraint from "./SaveConstraint";
 import { ConstraintView } from "./ConstraintView";
-import { etbCurrencyFormatter } from "@/utils/currencyUtil";
-import { formatRange } from "@/utils/rangeUtil";
+import { etbCurrencyFormatter } from "@/utils/utils";
+import { formatRange } from "@/types/range";
 
 const ConstraintManager = () => {
     const Manager = createEntityManager<Constraint, undefined>({

@@ -1,12 +1,12 @@
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { ExperienceRepository, IExperienceRepository } from "../users/experiences/experience.repository";
+import { IExperienceRepository } from "../users/experiences/experience.repository";
 import {
     CreatePositionDTO,
     FilterPositionsDTO,
     UpdatePositionDTO
 } from "./position.dto";
-import { IPositionRepository, PositionRepository } from "./position.repository";
+import { IPositionRepository } from "./position.repository";
 
 export class PositionService {
 
@@ -60,7 +60,7 @@ export class PositionService {
         }
 
         const deleted = await this.positionRepo.delete(id);
-        if (!deleted) throw new AppError(ERROR_CODES.POSITION_NOT_FOUND);
+        //if (!deleted) throw new AppError(ERROR_CODES.POSITION_NOT_FOUND);
 
         return deleted;
     }

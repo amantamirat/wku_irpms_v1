@@ -4,16 +4,15 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { CacheService } from "../../util/cache.service";
-import { MailService } from "../mail/mail.service";
+import { MailService, VerificationCodePurpose } from "../mail/mail.service";
 import { SettingKey } from "../settings/setting.model";
 import { SettingService } from "../settings/setting.service";
 import { IUserRepository } from "../users/user.repository";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
-import { VerfyAccountDto } from '../accounts/account.dto';
 import { AccountStatus, IAccount } from '../accounts/account.model';
 import { IAccountRepository } from "../accounts/account.repository";
 import { Account_TRANSITIONS } from "../accounts/account.service";
-import { ChangePasswordDTO, LoginDto } from "./auth.dto";
+import { ActivateAccountDTO, ChangePasswordDTO, LoginDto, ResetPasswordDto } from "./auth.dto";
 
 
 export class AuthService {
@@ -34,15 +33,26 @@ export class AuthService {
             throw new AppError(ERROR_CODES.ACCOUNT_NOT_FOUND);
 
         if (accountDoc.status === AccountStatus.suspended)
-            throw new AppError(ERROR_CODES.ACCOUNT_SUSPENDED);
+            throw new AppError(ERROR_CODES.ACCOUNT_SUSPENDED,
+                "Account is suspended. Contact support.");
 
         if (accountDoc.lockUntil && accountDoc.lockUntil > new Date())
-            throw new AppError(ERROR_CODES.ACCOUNT_LOCKED);
+            throw new AppError(ERROR_CODES.ACCOUNT_LOCKED,
+                "Account temporarily locked due to too many failed login attempts");
 
         const isMatch = await bcrypt.compare(password, accountDoc.password);
         if (!isMatch) {
             await this.handleFailedLogin(accountDoc);
             throw new AppError(ERROR_CODES.INVALID_CREDENTIALS);
+        }
+
+        // Password is correct from here
+        if (accountDoc.status === AccountStatus.pending) {
+            await this.sendCode(email, "activation");
+            throw new AppError(
+                ERROR_CODES.ACCOUNT_PENDING,
+                "Account is not activated. A verification code has been sent to your email."
+            );
         }
 
         const accountId = String(accountDoc._id);
@@ -52,7 +62,7 @@ export class AuthService {
         );
 
         if (!userDoc)
-            throw new Error(ERROR_CODES.USER_NOT_FOUND);
+            throw new AppError(ERROR_CODES.USER_NOT_FOUND);
 
         const permissions = [
             ...new Set(
@@ -98,7 +108,9 @@ export class AuthService {
         await this.repository.update(accountId, {
             lastLogin: new Date(),
             failedLoginAttempts: 0,
-            lockUntil: null
+            lockUntil: null,
+            resetCode: null,
+            resetCodeExpires: null
         });
 
         return {
@@ -136,88 +148,110 @@ export class AuthService {
         if (!accountDoc) throw new AppError(ERROR_CODES.ACCOUNT_NOT_FOUND);
 
         const isMatch = await bcrypt.compare(currentPassword, accountDoc.password);
-        if (!isMatch) throw new Error("Current password is incorrect");
+        if (!isMatch) throw new AppError(ERROR_CODES.INVALID_CREDENTIALS, "Current password is incorrect");
 
         const hashed = await bcrypt.hash(newPassword, 10);
         await this.repository.update(id, { password: hashed });
     }
 
-    async sendCode(email: string): Promise<void> {
-        const userDoc = await this.repository.findByEmail(email);
+    async sendCode(email: string, purpose: VerificationCodePurpose): Promise<void> {
+        const accountDoc = await this.repository.findByEmail(email);
+        if (!accountDoc) {
+            throw new AppError(
+                ERROR_CODES.EMAIL_NOT_FOUND,
+                "No account is associated with this email address."
+            );
+        }
+        if (accountDoc.status === AccountStatus.suspended) {
+            throw new AppError(ERROR_CODES.ACCOUNT_SUSPENDED, "Account is suspended. Contact support.");
+        }
+        if (accountDoc.lockUntil && accountDoc.lockUntil > new Date()) {
+            const remainingMinutes = Math.ceil(
+                (accountDoc.lockUntil.getTime() - Date.now()) / 60000
+            );
 
-        if (!userDoc || userDoc.status === AccountStatus.suspended) {
-            throw new Error("User does not exist.");
+            throw new AppError(
+                ERROR_CODES.ACCOUNT_LOCKED,
+                `Account temporarily locked. Try again in ${remainingMinutes} minute${remainingMinutes !== 1 ? 's' : ''}.`
+            );
         }
 
         const now = new Date();
         const bufferTime = 90 * 60 * 1000;
 
         if (
-            userDoc.resetCode &&
-            userDoc.resetCodeExpires &&
-            userDoc.resetCodeExpires.getTime() - now.getTime() > bufferTime
+            accountDoc.resetCode &&
+            accountDoc.resetCodeExpires &&
+            accountDoc.resetCodeExpires.getTime() - now.getTime() > bufferTime
         ) {
             return;
         }
 
         const code = crypto.randomInt(100000000, 999999999).toString();
-        const expiry = new Date(Date.now() + 120 * 60 * 1000);
 
-        await this.mailService.sendVerificationCode(userDoc.email, code);
+        const expiryMinutes = await this.settingService.getSettingValue(
+            SettingKey.VERIFICATION_CODE_EXPIRY_MIN,
+            10
+        );
+        const expiry = new Date(Date.now() + expiryMinutes * 60 * 1000);
 
-        await this.repository.update(String(userDoc._id), {
+        await this.mailService.sendCode(accountDoc.email, code, expiry, purpose);
+
+        await this.repository.update(String(accountDoc._id), {
             resetCode: code,
             resetCodeExpires: expiry
         });
     }
 
-    async resetPassword(data: VerfyAccountDto) {
-
+    async resetPassword(data: ResetPasswordDto) {
         const { email, resetCode, password } = data;
-
-        const userDoc = await this.repository.findByEmail(email);
-
-        if (!userDoc) throw new Error("User not found");
-
-        if (!userDoc.resetCode || userDoc.resetCode !== resetCode) {
-            throw new Error("Invalid verification code.");
+        const accountDoc = await this.repository.findByEmail(email);
+        if (!accountDoc) throw new AppError(ERROR_CODES.ACCOUNT_NOT_FOUND);
+        if (!accountDoc.resetCode || accountDoc.resetCode !== resetCode) {
+            throw new AppError(ERROR_CODES.INVALID_VERIFICATION_CODE, "Invalid verification code.");
         }
 
-        if (!userDoc.resetCodeExpires || userDoc.resetCodeExpires < new Date()) {
-            throw new Error("Verification code expired.");
+        if (!accountDoc.resetCodeExpires || accountDoc.resetCodeExpires < new Date()) {
+            throw new AppError(ERROR_CODES.VERIFICATION_CODE_EXPIRED, "Verification code expired.");
         }
 
         const hashed = await bcrypt.hash(password ?? "", 10);
 
-        await this.repository.update(String(userDoc._id), {
+        await this.repository.update(String(accountDoc._id), {
             password: hashed,
-            resetCode: "",
-            resetCodeExpires: new Date()
+            resetCode: null,
+            resetCodeExpires: null
         });
     }
 
-    async activateUser(data: VerfyAccountDto) {
+    async activateAccount(data: ActivateAccountDTO) {
         const { email, resetCode } = data;
-        const userDoc = await this.repository.findByEmail(email);
-        if (!userDoc) throw new AppError(ERROR_CODES.USER_NOT_FOUND);
-
-        if (!userDoc.resetCode || userDoc.resetCode !== resetCode) {
-            throw new Error("Invalid verification code.");
+        const accountDoc = await this.repository.findByEmail(email);
+        if (!accountDoc) {
+            throw new AppError(
+                ERROR_CODES.EMAIL_NOT_FOUND,
+                "No account is associated with this email address."
+            );
         }
-
-        const current = userDoc.status;
+        if (!accountDoc.resetCode || accountDoc.resetCode !== resetCode) {
+            throw new AppError(ERROR_CODES.INVALID_VERIFICATION_CODE, "Invalid verification code.");
+        }
+        if (!accountDoc.resetCodeExpires || accountDoc.resetCodeExpires < new Date()) {
+            throw new AppError(ERROR_CODES.VERIFICATION_CODE_EXPIRED, "Verification code expired.");
+        }
+        /*
+        const current = accountDoc.status;
         const nextState = AccountStatus.active;
-
         TransitionHelper.validateTransition(
             current,
             nextState,
             Account_TRANSITIONS
-        );
+        );*/
 
-        await this.repository.update(String(userDoc._id), {
-            status: nextState,
-            resetCode: "",
-            resetCodeExpires: new Date()
+        await this.repository.update(String(accountDoc._id), {
+            status: AccountStatus.active,
+            resetCode: null,
+            resetCodeExpires: null
         });
     }
 

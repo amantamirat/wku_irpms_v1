@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { userService, checkPermission } from '../../core/container';
-import { verifyActiveAccount } from '../auth/auth.middleware';
+import { verifyAuthToken } from '../auth/auth.middleware';
 import { UserController } from './user.controller';
 
 const controller = new UserController(userService);
@@ -10,49 +10,49 @@ const router: Router = Router();
 
 router.post(
     '/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("user:create"),
     controller.create
 );
 
 router.get(
     '/lookup',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("user:lookup"),
     controller.lookup
 );
 
 router.get(
     '/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("user:read"),
     controller.get
 );
 
 router.put(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("user:update"),
     controller.update
 );
 
 router.put(
     '/:id/roles',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("user:role:update"),
     controller.updateRoles
 );
 
 router.put(
     '/:id/ownerships',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("user:ownership:update"),
     controller.updateOwnerships
 );
 
 router.delete(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("user:delete"),
     controller.delete
 );

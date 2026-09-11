@@ -2,12 +2,13 @@ import { createContext, useContext, useState, useRef, ReactNode } from "react";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
+import { ApiError } from "@/api/ApiError";
+import { capitalize } from "@/utils/utils";
 
 interface ConfirmOptions {
     operation?: string;
     item?: string;
-    onConfirm?: () => void;
-    onConfirmAsync?: () => Promise<void>;
+    onConfirm: () => void | Promise<void>;
     onComplete?: () => void;
 }
 
@@ -23,19 +24,23 @@ export const useConfirmDialog = () => {
     return ctx;
 };
 
+
+
 export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => {
     const [visible, setVisible] = useState(false);
-    const [options, setOptions] = useState<ConfirmOptions>({});
+    const [options, setOptions] = useState<ConfirmOptions | null>(null);
     const [loading, setLoading] = useState(false);
     const toast = useRef<Toast>(null);
+
+
 
     const ask = (opts: ConfirmOptions) => {
         setOptions(opts);
         setVisible(true);
     };
 
-    const op = options.operation || "delete";
-    const item = options.item ?? "";
+    const op = options?.operation || "delete";
+    const item = options?.item ?? "";
     const actionText = item ? `${op} ${item}` : op;
     const successDetail = item ? `${op} successfully performed on ${item}` : `${op} successfully performed`;
 
@@ -45,33 +50,35 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
     };
 
     const onOK = async () => {
+        if (!options?.onConfirm) return;
         try {
             setLoading(true);
 
-            options.onConfirm?.();
-
-            await options.onConfirmAsync?.();
+            await options.onConfirm();
 
             toast.current?.show({
                 severity: "success",
-                summary: `${op[0].toUpperCase() + op.slice(1)} Successful`,
+                summary: `${capitalize(op)} Successful`,
                 detail: successDetail,
                 life: 2000
             });
 
-            
             options.onComplete?.();
+        } catch (err) {
+            const message =
+                err instanceof ApiError
+                    ? err.message
+                    : err instanceof Error
+                        ? err.message
+                        : String(err);
 
-        } catch (err: any) {
             toast.current?.show({
                 severity: "error",
-                summary: `${op[0].toUpperCase() + op.slice(1)} Failed`,
-                detail: err?.message ?? String(err),
-                life: 2000
+                summary: `${capitalize(op)} Failed`,
+                detail: message,
+                life: 3000
             });
-
         } finally {
-            await new Promise(resolve => setTimeout(resolve, 1000));
             setLoading(false);
             close();
         }

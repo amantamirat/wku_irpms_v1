@@ -3,8 +3,8 @@ import React from 'react';
 import { Divider } from 'primereact/divider';
 import { Constraint } from '../models/constraint.model';
 import { IRange } from '@/types/range';
-import { formatRange } from '@/utils/rangeUtil';
-import { etbCurrencyFormatter } from '@/utils/currencyUtil';
+import { formatRange } from "@/types/range";
+import { etbCurrencyFormatter } from "@/utils/utils";
 
 interface ConstraintViewProps {
     constraint: Constraint;

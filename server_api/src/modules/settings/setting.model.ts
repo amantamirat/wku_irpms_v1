@@ -5,8 +5,9 @@ export enum SettingKey {
     TOKEN_EXPIRY_HOURS = "token_expiry_hours",
     MAX_LOGIN_ATTEMPTS = "max_login_attempts",
     ACCOUNT_LOCK_MIN = "account_lock_min",
+    VERIFICATION_CODE_EXPIRY_MIN = "verification_code_expiry_min",
     MAX_FILE_UPLOAD_SIZE_MB = "max_file_upload_size_mb",
-    ALLOWED_FILE_TYPES = "allowed_file_types", // e.g., ["image/png", "application/pdf"]
+    ALLOWED_FILE_TYPES = "allowed_file_types",
     NOTIFICATION_EXPIRY_HOURS = "notification_expiry_hours",
     MAINTENANCE_MODE = "maintenance_mode",
     EMAIL_DOMAIN = "email_domain"

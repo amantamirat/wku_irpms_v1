@@ -1,7 +1,7 @@
 import { EntityApi } from "@/api/EntityApi"
 import { Role } from "../models/role.model"
 import { ApiClient } from "@/api/ApiClient"
-import { sanitize } from "@/utils/sanitizer"
+import { sanitize } from "@/utils/utils";
 
 const end_point = "/roles";
 export const RoleApi: EntityApi<Role> = {

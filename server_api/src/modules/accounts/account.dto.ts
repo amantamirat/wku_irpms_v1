@@ -15,8 +15,8 @@ export interface UpdateAccountDTO {
         lastLogin: Date;
         failedLoginAttempts: number;
         lockUntil: Date | null;
-        resetCode: string;
-        resetCodeExpires: Date;
+        resetCode: string | null;
+        resetCodeExpires: Date | null;
         status: AccountStatus;
     }>;
     userId?: string;
@@ -29,8 +29,4 @@ export interface FilterAccountDTO {
 }
 
 
-export interface VerfyAccountDto {
-    email: string;
-    password?: string;
-    resetCode: string;
-}
+

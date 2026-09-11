@@ -4,7 +4,7 @@ import { PERMISSIONS } from '../../../common/constants/permissions';
 import { EnrollmentService } from './enrollment.service';
 import { EnrollmentRepository } from './enrollment.repository';
 import { CalendarRepository } from '../../calendar/calendar.repository';
-import { verifyActiveAccount } from '../../auth/auth.middleware';
+import { verifyAuthToken } from '../../auth/auth.middleware';
 import { checkPermission } from '../../../core/container';
 import { UserRepository } from '../user.repository';
 import { OrganizationRepository } from '../../organization/organization.repository';
@@ -26,25 +26,25 @@ const controller = new EnrollmentController(service);
 const router: Router = Router();
 
 router.post('/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("enrollment:create"),
     controller.create
 );
 
 router.get('/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("enrollment:read"),
     controller.get
 );
 
 router.put('/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("enrollment:update"),
     controller.update
 );
 
 router.delete('/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("enrollment:delete"),
     controller.delete
 );

@@ -2,7 +2,7 @@ import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
 import { StateTransition } from "@/api/EntityApi";
 import { FilterConfigurationDTO, VerificationConfiguration } from "../models/verification-conf.model";
-import { sanitize } from "@/utils/sanitizer";
+import { sanitize } from "@/utils/utils";
 
 const end_point = "/verification-configurations";
 

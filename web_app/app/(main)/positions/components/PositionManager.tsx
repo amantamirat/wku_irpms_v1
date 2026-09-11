@@ -1,6 +1,5 @@
 'use client';
-
-import { createEntityManager } from "@/components/createEntityManager";
+import { createEntityManager } from "@/components/data-table/createEntityManager";
 import { PositionApi } from "../api/position.api";
 import { createEmptyPosition, FilterPositionOptions, Position } from "../models/position.model";
 import SavePositionDialog from "./SavePosition";

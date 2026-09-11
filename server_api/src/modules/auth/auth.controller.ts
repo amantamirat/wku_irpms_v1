@@ -1,11 +1,10 @@
 import { Request, Response } from "express";
-import { successResponse, errorResponse } from "../../common/helpers/response";
-import { VerfyAccountDto } from '../accounts/account.dto';
-import { AuthenticatedRequest } from "./auth.middleware";
-import { AuthService } from "./auth.service";
-import { ChangePasswordDTO, LoginDto } from "./auth.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
+import { errorResponse, successResponse } from "../../common/helpers/response";
+import { ActivateAccountDTO, ChangePasswordDTO, LoginDto, ResetPasswordDto } from "./auth.dto";
+import { AuthenticatedRequest } from "./auth.middleware";
+import { AuthService } from "./auth.service";
 
 export class AuthController {
 
@@ -26,7 +25,7 @@ export class AuthController {
       if (!req.auth) throw new AppError(ERROR_CODES.UNAUTHORIZED);
       const { currentPassword, password } = req.body;
       const dto: ChangePasswordDTO = {
-        id: req.auth.accountId ?? "",
+        id: req.auth.accountId,
         data: { currentPassword, password }
       };
       await this.service.changePassword(dto);
@@ -36,14 +35,14 @@ export class AuthController {
     }
   };
 
-  
+
 
   sendVerificationCode = async (req: Request, res: Response) => {
     try {
 
       const { email } = req.body;
 
-      await this.service.sendCode(email);
+      await this.service.sendCode(email, "password-reset");
 
       successResponse(res, 200, "Verification code sent to email.", { success: true });
 
@@ -55,7 +54,7 @@ export class AuthController {
   resetPassword = async (req: Request, res: Response) => {
     try {
 
-      const data: VerfyAccountDto = req.body;
+      const data: ResetPasswordDto = req.body;
 
       await this.service.resetPassword(data);
 
@@ -66,14 +65,14 @@ export class AuthController {
     }
   };
 
-  activateUser = async (req: Request, res: Response) => {
+  activate = async (req: Request, res: Response) => {
     try {
 
-      const data: VerfyAccountDto = req.body;
+      const data: ActivateAccountDTO = req.body;
 
-      await this.service.activateUser(data);
+      await this.service.activateAccount(data);
 
-      successResponse(res, 200, "User activated successfully", { success: true });
+      successResponse(res, 200, "Account activated successfully", { success: true });
 
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);

@@ -2,7 +2,7 @@ import { Router } from 'express';
 import { ExperienceController } from './experience.controller';
 import { ExperienceService } from './experience.service';
 import { PERMISSIONS } from '../../../common/constants/permissions';
-import { verifyActiveAccount } from '../../auth/auth.middleware';
+import { verifyAuthToken } from '../../auth/auth.middleware';
 import { checkPermission } from '../../../core/container';
 import { ExperienceRepository } from './experience.repository';
 import { UserRepository } from '../user.repository';
@@ -25,28 +25,28 @@ const controller = new ExperienceController(experienceService);
 
 router.post(
     '/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.EXPERIENCE.CREATE]),
     controller.create
 );
 
 router.get(
     '/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.EXPERIENCE.READ]),
     controller.get
 );
 
 router.put(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.EXPERIENCE.UPDATE]),
     controller.update
 );
 
 router.delete(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.EXPERIENCE.DELETE]),
     controller.delete
 );

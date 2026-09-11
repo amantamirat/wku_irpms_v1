@@ -3,7 +3,7 @@ import { PublicationController } from './publication.controller';
 import { PERMISSIONS } from '../../../common/constants/permissions';
 import { PublicationService } from './publication.service';
 import { PublicationRepository } from './publication.repository';
-import { verifyActiveAccount } from '../../auth/auth.middleware';
+import { verifyAuthToken } from '../../auth/auth.middleware';
 import { checkTransitionPermission } from '../../../core/container';
 import { checkPermission } from '../../../core/container';
 import { UserRepository } from '../user.repository';
@@ -20,29 +20,29 @@ const controller = new PublicationController(service);
 const router: Router = Router();
 
 router.post('/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.PUBLICATION.CREATE]),
     controller.create
 );
 
 router.get('/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.PUBLICATION.READ]),
     controller.get
 );
 
 router.put('/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.PUBLICATION.UPDATE]),
     controller.update
 );
 
-router.patch('/:id', verifyActiveAccount,
+router.patch('/:id', verifyAuthToken,
     checkTransitionPermission("publication"),
     controller.transitionState);
 
 router.delete('/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.PUBLICATION.DELETE]),
     controller.delete
 );

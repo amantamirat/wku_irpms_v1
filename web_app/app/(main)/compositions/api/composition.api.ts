@@ -1,7 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
 import { Composition } from "../models/composition.model";
 import { EntityApi } from "@/api/EntityApi";
-import { sanitize } from "@/utils/sanitizer";
+import { sanitize } from "@/utils/utils";
 
 const end_point = '/compositions';
 export const CompositionApi: EntityApi<Composition> = {

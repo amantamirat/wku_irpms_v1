@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
 import { projectService } from '../../core/container';
-import { verifyActiveAccount } from '../auth/auth.middleware';
+import { verifyAuthToken } from '../auth/auth.middleware';
 import { checkTransitionPermission } from '../../core/container';
 import { checkPermission } from '../../core/container';
 import { ProjectController } from './project.controller';
@@ -10,12 +10,12 @@ const controller = new ProjectController(projectService);
 const router: Router = Router();
 
 //create
-router.post('/', verifyActiveAccount,
+router.post('/', verifyAuthToken,
     checkPermission([PERMISSIONS.PROJECT.CREATE, PERMISSIONS.PROJECT.CREATE_OWN]),
     controller.create);
 
 
-router.get('/', verifyActiveAccount,
+router.get('/', verifyAuthToken,
     checkPermission([PERMISSIONS.PROJECT.READ]),
     controller.get);
 
@@ -23,35 +23,35 @@ router.get('/', verifyActiveAccount,
 //Put the /me route before /:id:
 router.get(
     '/me',
-    verifyActiveAccount,
+    verifyAuthToken,
     controller.getMyProjects
 );
 
 // lookup projects
 router.get(
     '/lookup',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.PROJECT.LOOKUP]),
     controller.lookup
 );
 
-router.get('/:id', verifyActiveAccount,
+router.get('/:id', verifyAuthToken,
     checkPermission([PERMISSIONS.PROJECT.LOOKUP]),
     controller.getById);
 
 
 //update    
-router.put('/:id', verifyActiveAccount,
+router.put('/:id', verifyAuthToken,
     checkPermission([PERMISSIONS.PROJECT.UPDATE, PERMISSIONS.PROJECT.UPDATE_OWN]),
     controller.update);
 
 //update status
-router.patch('/:id', verifyActiveAccount,
+router.patch('/:id', verifyAuthToken,
     checkTransitionPermission("project"),
     controller.transitionState);
 
 //delete
-router.delete('/:id', verifyActiveAccount,
+router.delete('/:id', verifyAuthToken,
     checkPermission([PERMISSIONS.PROJECT.DELETE]),
     controller.delete);
 

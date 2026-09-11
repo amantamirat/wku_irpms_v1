@@ -7,7 +7,7 @@ import { ReportService } from "./report.service";
 import { ReportController } from "./report.controller";
 
 import {
-    verifyActiveAccount
+    verifyAuthToken
 } from "../auth/auth.middleware";
 import { checkPermission } from '../../core/container';
 
@@ -29,7 +29,7 @@ const controller =
 // All report endpoints require authentication
 // and report overview permission.
 router.use(
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([
         PERMISSIONS.REPORT.OVERVIEW
     ])

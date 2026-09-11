@@ -6,7 +6,7 @@ import { useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { Messages } from 'primereact/messages';
 import { useRef, useState } from 'react';
-import { AuthApi } from '../api/auth.service';
+import { AuthApi } from '../api/auth.api';
 
 
 export default function RequestActivationPage() {

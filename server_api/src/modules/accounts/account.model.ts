@@ -11,8 +11,8 @@ export interface IAccount extends Document {
   email: string;
   password: string;
   user: mongoose.Types.ObjectId;
-  resetCode?: String;
-  resetCodeExpires?: Date;
+  resetCode?: string | null;
+  resetCodeExpires?: Date | null;
   lastLogin?: Date;
   failedLoginAttempts: number; // Moved from optional to required for schema consistency
   lockUntil?: Date;

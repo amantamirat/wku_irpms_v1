@@ -2,6 +2,7 @@ import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 import { IStatusHistory } from "../../../common/types/status-history";
 import { createStatusHistorySchema } from "../../../common/schemas/status-history.schema";
+import { AnonymizationStatus } from "../../projects/applications/application.model";
 
 export enum VerificationStatus {
     submitted = "submitted",
@@ -17,6 +18,10 @@ export interface IVerification extends Document {
     documentPath: string;
     totalScore: number | null;
     reviewedAt?: Date;
+
+    anonymizedDocumentPath?: string;
+    anonymizationStatus: AnonymizationStatus;
+
     status: VerificationStatus;
     statusHistory: IStatusHistory<VerificationStatus>[];
     createdAt?: Date;
@@ -61,6 +66,16 @@ const VerificationSchema =
             },
             reviewedAt: {
                 type: Date,
+            },
+            anonymizedDocumentPath: {
+                type: String,
+                required: false
+            },
+            anonymizationStatus: {
+                type: String,
+                enum: Object.values(AnonymizationStatus),
+                default: AnonymizationStatus.pending,
+                required: true
             },
             status: {
                 type: String,

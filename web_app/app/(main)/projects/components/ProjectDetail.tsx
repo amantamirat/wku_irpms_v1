@@ -12,7 +12,7 @@ import { ProjectApi } from "../api/project.api";
 import CollaboratorManager from "../../collaborators/project/Manager";
 import ApplicationManager from "../../applications/project/Manager";
 import PhaseManager from "../phases/project/Manager";
-import { etbCurrencyFormatter } from "@/utils/currencyUtil";
+import { etbCurrencyFormatter } from "@/utils/utils";
 import VerificationManager from "../../verifications/project/Manager";
 
 

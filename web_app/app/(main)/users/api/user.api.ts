@@ -1,7 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
 import { FilterUsersOptions, IOwnership, User } from "../models/user.model";
-import { sanitize } from "@/utils/sanitizer";
+import { sanitize } from "@/utils/utils";
 
 const end_point = "/users";
 

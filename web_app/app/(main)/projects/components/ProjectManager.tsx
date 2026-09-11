@@ -6,7 +6,7 @@ import ProjectDetail from "../../projects/components/ProjectDetail";
 import { ProjectApi } from "../api/project.api";
 import { Project } from "../models/project.model";
 import { CALL_PROJECT_TRANSITIONS, PROJECT_STATUS_ORDER, STANDALONE_PROJECT_TRANSITIONS } from "../models/project.state-machine";
-import { etbCurrencyFormatter } from "@/utils/currencyUtil";
+import { etbCurrencyFormatter } from "@/utils/utils";
 import ProjectWizard from "../components/wirzard/ProjectWizard";
 
 const ProjectManager = () => {

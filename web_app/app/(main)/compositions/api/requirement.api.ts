@@ -1,7 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
 import { MemberRequirement } from "../models/requirement.model";
-import { sanitize } from "@/utils/sanitizer";
+import { sanitize } from "@/utils/utils";
 
 const end_point = '/team/requirements';
 export const MemberRequirementApi: EntityApi<MemberRequirement> = {

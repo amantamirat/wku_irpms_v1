@@ -3,12 +3,11 @@ import { NextFunction, Request, Response } from 'express';
 import jwt from 'jsonwebtoken';
 import { Unit } from '../../common/constants/enums';
 import { Action } from '../../common/constants/permissions';
-import { ERROR_CODES } from '../../common/errors/error.codes';
 import { AppError } from '../../common/errors/app.error';
+import { ERROR_CODES } from '../../common/errors/error.codes';
 import { errorResponse } from '../../common/helpers/response';
 import { checkPermission } from '../../core/container';
 
-import { AccountStatus } from '../accounts/account.model';
 import JwtPayload from './auth.dto';
 
 dotenv.config();
@@ -17,37 +16,58 @@ export interface AuthenticatedRequest extends Request {
   auth?: JwtPayload;
 }
 
-export const verifyActiveAccount = (req: AuthenticatedRequest, res: Response, next: NextFunction): void => {
+export const verifyAuthToken = (
+  req: AuthenticatedRequest,
+  res: Response,
+  next: NextFunction
+): void => {
   try {
     const authHeader = req.header('Authorization');
 
     if (!authHeader || !authHeader.startsWith('Bearer ')) {
-      return errorResponse(res, 401, 'Access denied. Authentication token is required.',
-        new AppError(ERROR_CODES.TOKEN_MISSING));
+      return errorResponse(
+        res,
+        401,
+        'Access denied. Authentication token is required.',
+        new AppError(ERROR_CODES.TOKEN_MISSING)
+      );
     }
 
     const token = authHeader.substring(7).trim();
 
     if (!token) {
-      return errorResponse(res, 401, 'Access denied. Authentication token is required.',
-        new AppError(ERROR_CODES.TOKEN_MISSING));
+      return errorResponse(
+        res,
+        401,
+        'Access denied. Authentication token is required.',
+        new AppError(ERROR_CODES.TOKEN_MISSING)
+      );
     }
 
-    const decoded = jwt.verify(token, process.env.KEY as string) as JwtPayload;
-
-    if (decoded.status !== AccountStatus.active) {
-      return errorResponse(res, 403, 'Account is not active. Please activate or contact admin.',
-        new AppError(ERROR_CODES.ACCOUNT_NOT_ACTIVE));
-    }
+    const decoded = jwt.verify(
+      token,
+      process.env.KEY as string
+    ) as JwtPayload;
 
     req.auth = decoded;
     next();
 
   } catch (error: any) {
     if (error.name === 'TokenExpiredError') {
-      return errorResponse(res, 401, 'Token expired. Please log in again.', new AppError(ERROR_CODES.TOKEN_EXPIRED));
+      return errorResponse(
+        res,
+        401,
+        'Token expired. Please log in again.',
+        new AppError(ERROR_CODES.TOKEN_EXPIRED)
+      );
     }
-    return errorResponse(res, 401, 'Invalid token. Please log in again.', new AppError(ERROR_CODES.TOKEN_INVALID));
+
+    return errorResponse(
+      res,
+      401,
+      'Invalid token. Please log in again.',
+      new AppError(ERROR_CODES.TOKEN_INVALID)
+    );
   }
 };
 

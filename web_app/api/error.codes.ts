@@ -7,4 +7,6 @@ export const ERROR_CODES = {
     TOKEN_INVALID: "TOKEN_INVALID",
     // Authorization
     FORBIDDEN: "FORBIDDEN",
+    //Account
+    ACCOUNT_PENDING: "ACCOUNT_PENDING",
 }

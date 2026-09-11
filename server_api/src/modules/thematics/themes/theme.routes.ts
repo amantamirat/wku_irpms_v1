@@ -1,7 +1,7 @@
 import { Router } from 'express';
 
 import { PERMISSIONS } from '../../../common/constants/permissions';
-import { verifyActiveAccount } from '../../auth/auth.middleware';
+import { verifyAuthToken } from '../../auth/auth.middleware';
 import { checkPermission } from '../../../core/container';
 import { ThemeController } from './theme.controller';
 import { ThemeService } from './theme.service';
@@ -16,7 +16,7 @@ const router: Router = Router();
 // Create
 router.post(
     '/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.THEME.CREATE]),
     controller.create
 );
@@ -24,7 +24,7 @@ router.post(
 // Lookup - currently uses the same get controller
 router.get(
     '/lookup',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission("theme:lookup"),
     controller.get
 );
@@ -32,7 +32,7 @@ router.get(
 // Read / management
 router.get(
     '/',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.THEME.READ]),
     controller.get
 );
@@ -40,7 +40,7 @@ router.get(
 // Update
 router.put(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.THEME.UPDATE]),
     controller.update
 );
@@ -48,7 +48,7 @@ router.put(
 // Delete
 router.delete(
     '/:id',
-    verifyActiveAccount,
+    verifyAuthToken,
     checkPermission([PERMISSIONS.THEME.DELETE]),
     controller.delete
 );

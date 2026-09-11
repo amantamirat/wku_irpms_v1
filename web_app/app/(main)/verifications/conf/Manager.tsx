@@ -8,7 +8,7 @@ import { Verification } from "../models/verification.model";
 import { VerificationConfiguration } from "../verification-conf/models/verification-conf.model";
 import { BASE_URL } from "@/api/ApiClient";
 import VrificationDetail from "./VerificationDetail";
-import { extractId } from "@/utils/extractId";
+import { extractId } from "@/utils/utils";
 import { VERIFICATION_STATUS_ORDER, VERIFICATION_TRANSITIONS } from "../models/verification.state-machine";
 import { Application } from "../../applications/models/application.model";
 

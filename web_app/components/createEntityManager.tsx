@@ -208,7 +208,7 @@ export function createEntityManager<
                 onClick: (row: T) =>
                     confirm.ask({
                         item: config.itemName,
-                        onConfirmAsync: () => deleteItem(row),
+                        onConfirm: () => deleteItem(row),
                     })
             }] : [])
         ];
@@ -241,7 +241,7 @@ export function createEntityManager<
                             onTransition={async (next, action) =>
                                 confirm.ask({
                                     operation: action,
-                                    onConfirmAsync: () =>
+                                    onConfirm: () =>
                                         transitionState(row, {
                                             current,
                                             next

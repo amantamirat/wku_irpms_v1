@@ -8,19 +8,34 @@ export const successResponse = (res: Response, statusCode: number = 200, message
 export const errorResponse = (
     res: Response,
     statusCode: number = 400,
-    message: string,
-    error?: any
+    responseMessage: string,
+    error: unknown
 ): void => {
-    //console.log("Error:", message, error || '');
-    const response: any = { success: false, message};
+
+    const response: {
+        success: false;
+        message: string;
+        errorName: string;
+        errorMessage?: string;
+        errorCode?: string;
+        errorDetail?: unknown;
+    } = {
+        success: false,
+        message: responseMessage,
+        errorName: "Unknown"
+    };
 
     if (error instanceof AppError) {
-        response.code = error.code;
-        if (error.details) {
-            response.details = error.details;
-        }
-    } else if (error) {
-        response.error = error.message || error;
+        response.errorName = "AppError";
+        response.errorCode = error.code;
+        response.errorMessage = error.message ?? responseMessage;
+        response.errorDetail = error.details;
+    } else if (error instanceof Error) {
+        response.errorMessage = error.message;
+        console.log("Unknown Error", error.message);
+    } else if (typeof error === "string") {
+        response.errorMessage = error;
     }
+
     res.status(statusCode).json(response);
 };

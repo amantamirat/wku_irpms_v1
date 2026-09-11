@@ -5,7 +5,7 @@ import { Password } from 'primereact/password';
 import { Message } from 'primereact/message';
 import { classNames } from 'primereact/utils';
 import { ChangePasswordDTO } from '@/app/(full-page)/auth/dto/auth.dto';
-import { AuthApi } from '@/app/(full-page)/auth/api/auth.service';
+import { AuthApi } from '@/app/(full-page)/auth/api/auth.api';
 import { Divider } from 'primereact/divider';
 
 
