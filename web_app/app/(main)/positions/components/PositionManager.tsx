@@ -4,8 +4,7 @@ import { PositionApi } from "../api/position.api";
 import { createEmptyPosition, FilterPositionOptions, Position } from "../models/position.model";
 import SavePositionDialog from "./SavePosition";
 
-const PositionManager = () => {
-   
+const PositionManager = () => {   
 
     const Manager = createEntityManager<Position, FilterPositionOptions>({
         title: "Manage Positions",

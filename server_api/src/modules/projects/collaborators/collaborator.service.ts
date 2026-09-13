@@ -43,7 +43,7 @@ export class CollaboratorService {
     }
 
     async create(dto: CreateCollaboratorDto, options?: { skipValidation?: boolean }) {
-        const { member: applicant, project, projectTitle, userId } = dto;
+        const { member, project, projectTitle, userId } = dto;
         if (!options?.skipValidation) {
             const projectDoc = await this.validateProject(project, userId ?? "");
             const callId = String(projectDoc.call);
@@ -74,7 +74,7 @@ export class CollaboratorService {
             await this.projectRepo.updateTotalCollabs(project, 1);
             if (this.notificationService && dto.status !== CollaboratorStatus.verified) {
                 await this.notificationService.notifyProjectInvitation(
-                    applicant, projectTitle ?? project, dto.role, userId
+                    member, projectTitle ?? project, dto.role, userId
                 );
             }
             return created;

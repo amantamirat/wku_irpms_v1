@@ -1,21 +1,18 @@
 import { Router } from 'express';
+import { checkPermission, stageService } from '../../../core/container';
 import { verifyAuthToken } from '../../auth/auth.middleware';
-import { checkPermission } from '../../../core/container';
 import { StageController } from './stage.controller';
-import { StageService } from './stage.service';
-
-import { callRepo, evaluationRepo, stageRepo } from '../../../core/container';
 
 
-const service = new StageService(stageRepo, callRepo, evaluationRepo);
-const controller = new StageController(service);
+
+const controller = new StageController(stageService);
 const router = Router();
 
 // Create
 router.post(
     '/',
     verifyAuthToken,
-    checkPermission(["call.stage:create"]),
+    checkPermission(["stage:create"]),
     controller.create
 );
 
@@ -31,7 +28,7 @@ router.get(
 router.get(
     '/next/:id',
     verifyAuthToken,
-    checkPermission(["call.stage:read"]),
+    checkPermission(["stage:read"]),
     controller.getNext
 );
 
@@ -39,7 +36,7 @@ router.get(
 router.get(
     '/',
     verifyAuthToken,
-    checkPermission(["call.stage:read"]),
+    checkPermission(["stage:read"]),
     controller.get
 );
 
@@ -47,7 +44,7 @@ router.get(
 router.get(
     '/:id',
     verifyAuthToken,
-    checkPermission(["call.stage:read"]),
+    checkPermission(["stage:read"]),
     controller.getById
 );
 
@@ -55,7 +52,7 @@ router.get(
 router.put(
     '/:id',
     verifyAuthToken,
-    checkPermission(["call.stage:update"]),
+    checkPermission(["stage:update"]),
     controller.update
 );
 
@@ -63,7 +60,7 @@ router.put(
 router.delete(
     '/:id',
     verifyAuthToken,
-    checkPermission(["call.stage:delete"]),
+    checkPermission(["stage:delete"]),
     controller.delete
 );
 

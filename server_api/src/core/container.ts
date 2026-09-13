@@ -6,6 +6,7 @@ import { AuthPermissionService } from "../modules/auth/auth.permission-service";
 import { CalendarRepository } from "../modules/calendar/calendar.repository";
 import { CallRepository } from "../modules/calls/call.repository";
 import { StageRepository } from "../modules/calls/stages/stage.repository";
+import { StageService } from "../modules/calls/stages/stage.service";
 import { CompositionRepository } from "../modules/compositions/composition.repository";
 import { HistoryRepository } from "../modules/compositions/history/history.repository";
 import { ProfileRepository } from "../modules/compositions/profile/profile.repository";
@@ -112,7 +113,7 @@ export const constraintValidator = new ConstraintValidationService(
 
 
 // Services
-//export const stageService = new StageService(stageRepo, callRepo, evalRepo);
+export const stageService = new StageService(stageRepo, callRepo, evaluationRepo);
 export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, callRepo, constraintValidator);
 
 export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, callRepo, constraintValidator,

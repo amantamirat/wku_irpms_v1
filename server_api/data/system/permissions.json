@@ -374,46 +374,6 @@
     "description": "Delete composition entries"
   },
   {
-    "category": "Grant Allocation Management",
-    "name": "grant.allocation:create",
-    "description": "Create grant allocation entries"
-  },
-  {
-    "category": "Grant Allocation Management",
-    "name": "grant.allocation:read",
-    "description": "Read grant allocation entries"
-  },
-  {
-    "category": "Grant Allocation Management",
-    "name": "grant.allocation:update",
-    "description": "Update grant allocation entries"
-  },
-  {
-    "category": "Grant Allocation Management",
-    "name": "grant.allocation:transition.planned.active",
-    "description": "Move allocation from planned to active"
-  },
-  {
-    "category": "Grant Allocation Management",
-    "name": "grant.allocation:transition.active.closed",
-    "description": "Move allocation from active to closed"
-  },
-  {
-    "category": "Grant Allocation Management",
-    "name": "grant.allocation:transition.active.planned",
-    "description": "Revert allocation from active to planned"
-  },
-  {
-    "category": "Grant Allocation Management",
-    "name": "grant.allocation:transition.closed.active",
-    "description": "Reopen allocation from closed to active"
-  },
-  {
-    "category": "Grant Allocation Management",
-    "name": "grant.allocation:delete",
-    "description": "Delete grant allocation entries"
-  },
-  {
     "category": "Call Management",
     "name": "call:create",
     "description": "Create call entries"
@@ -472,27 +432,27 @@
   },
   {
     "category": "Call Management",
-    "name": "call.stage:transition.planned.active",
-    "description": "Activate a planned call stage by changing its status from planned to active"
-  },
-  {
-    "category": "Call Management",
-    "name": "call.stage:transition.active.closed",
-    "description": "Close an active call stage to mark it as completed"
-  },
-  {
-    "category": "Call Management",
-    "name": "call.stage:transition.active.planned",
-    "description": "Revert an active call stage back to planned status for adjustments"
-  },
-  {
-    "category": "Call Management",
-    "name": "call.stage:transition.closed.active",
-    "description": "Re-open a closed call stage and set it back to active"
-  },
-  {
-    "category": "Call Management",
     "name": "call.stage:delete",
+    "description": "Delete stage entries"
+  },
+  {
+    "category": "Stage Management",
+    "name": "stage:create",
+    "description": "Create stage entries"
+  },
+  {
+    "category": "Stage Management",
+    "name": "stage:read",
+    "description": "Read stage entries"
+  },
+  {
+    "category": "Stage Management",
+    "name": "stage:update",
+    "description": "Update stage entries"
+  },
+  {
+    "category": "Stage Management",
+    "name": "stage:delete",
     "description": "Delete stage entries"
   },
   {

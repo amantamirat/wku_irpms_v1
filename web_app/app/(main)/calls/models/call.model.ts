@@ -3,6 +3,7 @@ import { Composition } from "../../compositions/models/composition.model";
 import { Constraint } from "../../constraints/models/constraint.model";
 import { Grant } from "../../grants/models/grant.model";
 import { Organization } from "../../organizations/models/organization.model";
+import { Stage } from "../stages/models/stage.model";
 
 export enum CallStatus {
     planned = "planned",
@@ -21,6 +22,7 @@ export type Call = {
     composition?: string | Composition;
     description?: string | null;
     deadline?: Date;
+    stages?: Stage[];//used for creation
     status?: CallStatus;
     createdAt?: Date;
     updatedAt?: Date;

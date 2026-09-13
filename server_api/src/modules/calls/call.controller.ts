@@ -13,8 +13,8 @@ export class CallController {
 
     create = async (req: Request, res: Response) => {
         try {
-            const { grant, calendar, title, description, constraint, composition } = req.body;
-            const dto: CreateCallDTO = { grant, calendar, title, constraint, composition, description };
+            //const { grant, calendar, title, description, constraint, composition } = ;
+            const dto: CreateCallDTO = req.body;
             const call = await this.service.create(dto);
             successResponse(res, 201, "Call created successfully", call);
         } catch (err: any) {

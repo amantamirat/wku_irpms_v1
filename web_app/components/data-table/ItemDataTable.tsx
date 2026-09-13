@@ -6,6 +6,7 @@ import { Column, ColumnProps, ColumnBodyOptions } from "primereact/column";
 import { DataTable, DataTableExpandedRows, DataTableRowToggleEvent } from "primereact/datatable";
 import { InputText } from "primereact/inputtext";
 import { MultiSelect, MultiSelectChangeEvent } from "primereact/multiselect";
+import { Toolbar } from "primereact/toolbar";
 import EmptyState from "@/components/EmptyState";
 import { ListSkeleton } from "../Skeletons";
 
@@ -29,14 +30,14 @@ export interface RowActionButton<T> extends ActionButton {
     onClick: (row: T) => void | Promise<void>;
 }
 
-export interface TopActionButton extends ActionButton {
+export interface ToolBarActionButton extends ActionButton {
     visible?: () => boolean;
     disabled?: () => boolean;
     onClick: () => void | Promise<void>;
 }
 
 /* -------------------------------------------------------------------------- */
-/*                              Selection Types                               */
+/*                               Selection Types                              */
 /* -------------------------------------------------------------------------- */
 
 type TableSelection<T> = T | T[] | null;
@@ -46,7 +47,7 @@ type SelectionChangeEvent<T> = {
 };
 
 /* -------------------------------------------------------------------------- */
-/*                              Component Props                               */
+/*                               Component Props                              */
 /* -------------------------------------------------------------------------- */
 
 export interface ItemDataTableProps<T> {
@@ -58,7 +59,7 @@ export interface ItemDataTableProps<T> {
     enableSearch?: boolean;
     showIndexColumn?: boolean;
     rowActions?: RowActionButton<T>[];
-    topActions?: TopActionButton[];
+    toolBarActions?: ToolBarActionButton[];
     expandable?: {
         template: (row: T) => React.ReactNode;
         allow?: (row: T) => boolean;
@@ -75,7 +76,7 @@ export interface ItemDataTableProps<T> {
 }
 
 /* -------------------------------------------------------------------------- */
-/*                               ItemDataTable                                */
+/*                                ItemDataTable                               */
 /* -------------------------------------------------------------------------- */
 
 export function ItemDataTable<T extends Record<string, any>>({
@@ -87,7 +88,7 @@ export function ItemDataTable<T extends Record<string, any>>({
     enableSearch = true,
     showIndexColumn = true,
     rowActions = [],
-    topActions = [],
+    toolBarActions = [],
     expandable,
     paginator = true,
     rowsPerPage = 10,
@@ -103,20 +104,17 @@ export function ItemDataTable<T extends Record<string, any>>({
     const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | any[]>([]);
 
     /* ------------------------- Column Visibility -------------------------- */
-
-    // Track manually unselected field names when toggling
     const [unselectedFields, setUnselectedFields] = useState<string[]>([]);
 
-    // Compute visible columns on the fly (prevents infinite re-render loops)
     const visibleColumns = useMemo(() => {
         return columns.filter((col) => {
             const field = col.field as string;
             if (!field) return true;
-            
+
             if (enableColumnToggle && unselectedFields.length > 0) {
                 return !unselectedFields.includes(field);
             }
-            
+
             return !defaultHiddenFields.includes(field);
         });
     }, [columns, defaultHiddenFields, unselectedFields, enableColumnToggle]);
@@ -134,10 +132,10 @@ export function ItemDataTable<T extends Record<string, any>>({
 
     /* -------------------------- Top Actions --------------------------- */
 
-    const renderTopActions = () => {
-        if (!topActions || topActions.length === 0) return null;
+    const renderBarActions = () => {
+        if (!toolBarActions || toolBarActions.length === 0) return null;
 
-        const visibleActions = topActions.filter(
+        const visibleActions = toolBarActions.filter(
             (action) => !action.visible || action.visible()
         );
 
@@ -164,13 +162,14 @@ export function ItemDataTable<T extends Record<string, any>>({
         );
     };
 
+    const hasToolBarActions = toolBarActions && toolBarActions.length > 0;
+
     /* ----------------------------- Header ----------------------------- */
 
     const header = useMemo(() => {
-        const hasTopActions = topActions && topActions.length > 0;
         const hasControls = enableSearch || (enableColumnToggle && columns.length > 0);
 
-        if (!headerTitle && !hasTopActions && !hasControls) {
+        if (!headerTitle && !hasControls) {
             return null;
         }
 
@@ -186,7 +185,7 @@ export function ItemDataTable<T extends Record<string, any>>({
                         <div />
                     )}
 
-                    {/* Right: Controls & Top Actions neatly in one line */}
+                    {/* Right: Search and Column Toggle */}
                     <div className="flex flex-wrap align-items-center gap-2">
                         {enableSearch && (
                             <span className="p-input-icon-left">
@@ -215,8 +214,6 @@ export function ItemDataTable<T extends Record<string, any>>({
                                 selectedItemsLabel="{0} selected"
                             />
                         )}
-
-                        {renderTopActions()}
                     </div>
                 </div>
             </div>
@@ -226,7 +223,6 @@ export function ItemDataTable<T extends Record<string, any>>({
         enableColumnToggle,
         headerTitle,
         globalFilter,
-        topActions,
         visibleColumns,
         columns
     ]);
@@ -266,10 +262,14 @@ export function ItemDataTable<T extends Record<string, any>>({
 
     const dtSelectionMode = selectionMode === "checkbox" ? undefined : selectionMode;
 
-    /* ------------------------------ Table ----------------------------- */
+    /* ------------------------------ Render ---------------------------- */
 
     return (
-        <div className="card border-none shadow-1 p-0">
+        <div className="card border-none">
+            {hasToolBarActions && (
+                <Toolbar className="mb-2" end={renderBarActions()} />
+            )}
+
             {loading ? (
                 <ListSkeleton rows={rowsPerPage} />
             ) : (
@@ -345,7 +345,8 @@ export function ItemDataTable<T extends Record<string, any>>({
                             body={actionBody}
                             header="Actions"
                             exportable={false}
-                            style={{ minWidth: "6rem", textAlign: "right" }}
+                            style={{ minWidth: "6rem" }}
+                            alignHeader="center"
                         />
                     )}
                 </DataTable>

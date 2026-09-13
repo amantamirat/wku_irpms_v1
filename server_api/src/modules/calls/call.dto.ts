@@ -1,16 +1,6 @@
 import { CallStatus } from "./call.model";
+import { CreateStageDTO } from "./stages/stage.dto";
 
-export interface FindByIdOptions {
-    populate?: {
-        grant?: boolean;
-    };
-}
-
-export interface CallDeadlineDTO {
-    grantStage: string;
-    submission: string; // ISO date string (e.g., "2026-12-31T23:59:59.000Z")
-    evaluation: string; // ISO date string
-}
 
 export interface CreateCallDTO {
     grant: string;
@@ -20,6 +10,7 @@ export interface CreateCallDTO {
     constraint?: string;
     composition?: string;
     description?: string;
+    stages?: CreateStageDTO[];
     status?: CallStatus;
     userId?: string;
 }
@@ -46,7 +37,3 @@ export interface FilterCallDTO {
     //populate?: boolean;
 }
 
-export interface ExistsCallDTO {
-    grant?: string;
-    calendar?: string;
-}

@@ -19,9 +19,7 @@ export interface ICallRepository {
         options?: FilterOptions
     ): Promise<ICall[]>;
 
-    create(
-        dto: CreateCallDTO
-    ): Promise<ICall>;
+    create(dto: Omit<CreateCallDTO, "stages">): Promise<ICall>;
 
     update(
         id: string,

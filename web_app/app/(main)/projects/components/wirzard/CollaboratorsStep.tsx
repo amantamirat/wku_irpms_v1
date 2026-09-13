@@ -23,13 +23,13 @@ interface CollaboratorsStepProps {
 
 export const CollaboratorsStep = ({ data, constraint, onUpdate, onNext, onBack }: CollaboratorsStepProps) => {
     const { hasPermission } = useAuth();
-    const canReadUsers = hasPermission(["user:lookup"]);
+    const canLookUsers = hasPermission(["user:lookup"]);
     const [users, setUsers] = useState<User[]>([]);
     const [loading, setLoading] = useState(false);
     const [submitted, setSubmitted] = useState(false);
 
     useEffect(() => {
-        if (canReadUsers) {
+        if (canLookUsers) {
             const fetchUsers = async () => {
                 setLoading(true);
                 try {
@@ -43,7 +43,7 @@ export const CollaboratorsStep = ({ data, constraint, onUpdate, onNext, onBack }
             };
             fetchUsers();
         }
-    }, [canReadUsers]);
+    }, [canLookUsers]);
 
     // --- Validation Logic ---
     const validation = useMemo(() => {
@@ -160,7 +160,7 @@ export const CollaboratorsStep = ({ data, constraint, onUpdate, onNext, onBack }
                                 className={classNames("w-full", { 'p-invalid': submitted && !rowData.member })}
                                 disabled={rowData.isLeadPI}
                             />
-                            {!canReadUsers && (
+                            {!canLookUsers && (
                                 <small className="p-error block mt-1">
                                     <i className="pi pi-exclamation-triangle mr-1 text-xs"></i>
                                     Insufficient permissions to modify collaborators.

@@ -1,15 +1,16 @@
 'use client';
 
-import { createEntityManager } from "@/components/createEntityManager";
 import MyBadge from "@/templates/MyBadge";
 import { Calendar } from "../../calendars/models/calendar.model";
 import { Grant } from "../../grants/models/grant.model";
 import { CallApi } from "../api/call.api";
 import { Call, createEmptyCall, FilterCallsOptions } from "../models/call.model";
-import { CALL_STATUS_ORDER, CALL_TRANSITIONS } from "../models/call.state-machine";
 import CallDetail from "./CallDetail";
 import SaveCall from "./SaveCall";
 import { Organization } from "../../organizations/models/organization.model";
+import SaveCallWizard from "./wizard/SaveCallWizard";
+import { createEntityManager } from "@/components/data-table/createEntityManager";
+import { CALL_TRANSITIONS } from "../models/call.state-machine";
 //import SaveCall from "./new/SaveCall";
 
 interface CallManagerProps {
@@ -97,23 +98,12 @@ const CallManager = ({ calendar, grant }: CallManagerProps) => {
             calendar: calendar
         } as any),
 
-        SaveDialog: SaveCall,
+        SaveDialog: SaveCallWizard,
         permissionPrefix: "call",
-
-        query: () => ({
-            calendar: typeof calendar === 'object'
-                ? (calendar as any)?._id
-                : calendar,
-            grant: typeof grant === 'object'
-                ? (grant as any)?._id
-                : grant,
-            populate: true
-        }),
 
         workflow: {
             statusField: "status",
             transitions: CALL_TRANSITIONS,
-            statusOrder: CALL_STATUS_ORDER
         },
 
         expandable: {

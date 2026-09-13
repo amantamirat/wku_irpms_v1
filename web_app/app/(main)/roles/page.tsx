@@ -36,9 +36,15 @@ const RolePage = () => {
             </div>
 
             {/* MAIN CONTENT */}
-            <div className="border-round-xl surface-card shadow-1 p-4 md:p-5">
-                <RoleManager />
+            <RoleManager />
+            {
+                /**
+                 *  <div className="border-round-xl surface-card shadow-1">
+                
             </div>
+                 */
+            }
+           
 
         </div>
     );

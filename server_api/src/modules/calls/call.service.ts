@@ -12,6 +12,7 @@ import { IProjectRepository } from "../projects/project.repository";
 import { CreateCallDTO, FilterCallDTO, UpdateCallDTO } from "./call.dto";
 import { CallStatus } from "./call.model";
 import { ICallRepository } from "./call.repository";
+import { StageService } from "./stages/stage.service";
 
 export class CallService {
 
@@ -20,27 +21,52 @@ export class CallService {
         private readonly grantRepo: IGrantRepository,
         private readonly calendarRepo: ICalendarRepository,
         private readonly projectRepo: IProjectRepository,
+        private readonly stageService: StageService
     ) {
     }
 
     async create(dto: CreateCallDTO) {
-        const { grant } = dto;
+        const { stages, ...callData } = dto;
+        const { grant } = callData;
 
-        // 1. Fetch parent grant & validate
+        if (!stages || stages.length === 0) {
+            throw new AppError(ERROR_CODES.STAGE_REQUIRED);
+        }
+
         const grantDoc = await this.grantRepo.findById(grant);
-        if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
-        if (grantDoc.status !== GrantStatus.active) throw new AppError(ERROR_CODES.GRANT_NOT_ACTIVE);
+
+        if (!grantDoc) {
+            throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+        }
+
+        if (grantDoc.status !== GrantStatus.active) {
+            throw new AppError(ERROR_CODES.GRANT_NOT_ACTIVE);
+        }
 
         const calendarDoc = await this.calendarRepo.findById(dto.calendar);
-        if (!calendarDoc) throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
-        if (calendarDoc.status !== CalendarStatus.active) throw new AppError(ERROR_CODES.CALENDAR_NOT_ACTIVE);
 
-        // 6. Create the Call
+        if (!calendarDoc) {
+            throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
+        }
+
+        if (calendarDoc.status !== CalendarStatus.active) {
+            throw new AppError(ERROR_CODES.CALENDAR_NOT_ACTIVE);
+        }
+
         const created = await this.repository.create({
-            ...dto,
+            ...callData,
             organization: String(grantDoc.organization),
             status: CallStatus.planned
         });
+
+        await Promise.all(
+            stages.map(stage =>
+                this.stageService.create({
+                    ...stage,
+                    call: String(created._id)
+                })
+            )
+        );
 
         return created;
     }

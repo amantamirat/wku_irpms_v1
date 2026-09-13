@@ -1,6 +1,5 @@
 'use client';
 import { ItemDataTable } from "@/components/data-table/ItemDataTable";
-import { useTableActions } from "@/hooks/useTableActions";
 import MyBadge from "@/templates/MyBadge";
 import Link from "next/link";
 import { Button } from "primereact/button";
@@ -11,18 +10,7 @@ interface MyPendingInvitationProps {
 }
 
 export function MyPendingInvitation({ items }: MyPendingInvitationProps) {
-    const actions = useTableActions<Collaborator>({
-        resource: "collaborator",
-        hideDefaultActions: true,
-        /*
-        workflow: {
-            statusField: "status",
-            transitions: COLLABORATION_TRANSITIONS,
-            onTransition: async (id, transition) => {
-                await CollaboratorApi.transitionState!(id, transition);
-            }
-        }*/
-    });
+    
 
     const columns = [
         {
@@ -81,7 +69,6 @@ export function MyPendingInvitation({ items }: MyPendingInvitationProps) {
             <ItemDataTable
                 items={items}
                 columns={columns}
-                rowActions={actions}
                 enableSearch={false}
             />
         </div>

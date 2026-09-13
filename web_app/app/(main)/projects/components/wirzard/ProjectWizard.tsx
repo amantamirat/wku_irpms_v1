@@ -18,7 +18,6 @@ const ProjectWizard = ({ item, onComplete, onHide, visible }: EntitySaveDialogPr
     const toast = useRef<Toast>(null);
     const { getUser } = useAuth();
     const appUser = getUser();
-
     const isEditMode = !!item?._id;
 
     // --- Core Wizard States ---

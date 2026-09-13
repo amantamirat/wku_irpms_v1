@@ -1,14 +1,13 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { calendarRepo, callRepo, grantRepo, projectRepo } from '../../core/container';
+import { calendarRepo, callRepo, grantRepo, projectRepo, stageService } from '../../core/container';
 import { verifyAuthToken } from '../auth/auth.middleware';
 import { checkTransitionPermission } from '../../core/container';
 import { checkPermission } from '../../core/container';
 import { CallController } from './call.controller';
 import { CallService } from './call.service';
 
-
-const service = new CallService(callRepo, grantRepo, calendarRepo, projectRepo);
+const service = new CallService(callRepo, grantRepo, calendarRepo, projectRepo, stageService);
 const controller = new CallController(service);
 const router = Router();
 

@@ -45,8 +45,6 @@ export function useCrudList<T extends { _id?: string }>({ initialItems = [], get
         updateItem,
         removeItem,
         loading,
-        setLoading,
-        //error,
-        //setError,
+        setLoading
     };
 }
