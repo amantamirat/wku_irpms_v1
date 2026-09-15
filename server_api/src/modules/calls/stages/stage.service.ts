@@ -8,13 +8,15 @@ import { CallStatus } from "../call.model";
 import { IStageRepository } from "./stage.repository";
 import { IStage } from "./stage.model";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
+import { IApplicationRepository } from "../../projects/applications/application.repository";
 
 export class StageService {
 
     constructor(
         private readonly repository: IStageRepository,
         private readonly callRepository: ICallRepository,
-        private readonly evalRepository: IEvaluationRepository
+        private readonly evalRepository: IEvaluationRepository,
+        private readonly applicationRepo: IApplicationRepository,
     ) {
     }
 
@@ -34,10 +36,8 @@ export class StageService {
         });
     }
 
-    /**
-     * Create a new stage
-     */
-    async create(dto: CreateStageDTO) {
+
+    async validateCreate(dto: CreateStageDTO): Promise<void> {
         const {
             call,
             evaluation,
@@ -46,15 +46,15 @@ export class StageService {
             minAcceptanceScore
         } = dto;
 
-        // 1. Reviewer validation
+        // Reviewer validation
         if (minReviewers > maxReviewers) {
             throw new AppError(ERROR_CODES.INVALID_REVIEWER_RANGE);
         }
 
-        // 2. Call validation
-        await this.validateCall(call);
+        if (call !== "validation")
+            await this.validateCall(call);
 
-        // 3. Evaluation validation
+        // Evaluation validation
         const evalDoc = await this.evalRepository.findById(evaluation);
 
         if (!evalDoc) {
@@ -62,43 +62,59 @@ export class StageService {
         }
 
         if (evalDoc.status !== EvalStatus.published) {
-            throw new AppError(
-                ERROR_CODES.EVALUATION_NOT_PUBLISHED
-            );
+            throw new AppError(ERROR_CODES.EVALUATION_NOT_PUBLISHED);
         }
 
-        // 4. Minimum acceptance score validation
-        const totalWeight = evalDoc.weight;
-
-        if (minAcceptanceScore > totalWeight) {
+        // Acceptance score validation
+        if (minAcceptanceScore > evalDoc.weight) {
             throw new AppError(
                 ERROR_CODES.MIN_SCORE_EXCEEDS_EVALUATION_WEIGHT
             );
         }
+    }
 
+    /**
+     * Create a new stage
+     */
+    async create(dto: CreateStageDTO) {
+        /*
+        console.trace("STAGE SERVICE CREATE CALLED:", {
+            call: dto.call,
+            name: dto.name,
+            order: dto.order
+        });*/
+        await this.validateCreate(dto);
         try {
-            // 5. Determine next stage order
-            const lastStage = await this.repository.getLastStage(call);
+            const lastStage = await this.repository.getLastStage(dto.call);
 
-            const nextOrder = lastStage
+            const order = lastStage
                 ? lastStage.order + 1
                 : 1;
 
-            // 6. Create stage
+
+
             const stage = await this.repository.create({
                 ...dto,
-                order: nextOrder
+                order
             });
 
-            // 7. Sync deadline when first stage is created
+
+
             if (!lastStage) {
-                await this.syncCallDeadline(call);
+                await this.syncCallDeadline(dto.call);
             }
 
             return stage;
 
         } catch (err: any) {
             if (err?.code === 11000) {
+                /*
+                console.error("Duplicate key error:");
+                console.error("Message:", err.message);
+                console.error("Key pattern:", err.keyPattern);
+                console.error("Key value:", err.keyValue);
+                console.error("Index:", err.index);
+                console.error("Full error:", err);*/
                 throw new AppError(
                     ERROR_CODES.STAGE_ALREADY_EXISTS
                 );
@@ -114,7 +130,7 @@ export class StageService {
         return await this.repository.find(dto, options);
     }
 
-    async getUpcoming(options?:FilterOptions): Promise<IStage[]> {
+    async getUpcoming(options?: FilterOptions): Promise<IStage[]> {
         return this.repository.findUpcoming(options);
     }
 
@@ -139,6 +155,10 @@ export class StageService {
         return nextStage;
     }
 
+
+    async exists(filter: FilterStageDto) {
+        return await this.repository.exists(filter);
+    }
 
     /**
  * Update a stage
@@ -201,12 +221,26 @@ export class StageService {
     */
     async delete(id: string) {
         const stageDoc = await this.repository.findById(id);
-        if (!stageDoc) throw new Error(ERROR_CODES.STAGE_NOT_FOUND);
+
+        if (!stageDoc) {
+            throw new Error(ERROR_CODES.STAGE_NOT_FOUND);
+        }
+
         const { call, order } = stageDoc;
-        await this.validateCall(String(call));
+
+        const hasApplication = await this.applicationRepo.exists({
+            stage: id
+        });
+
+        if (hasApplication) {
+            throw new AppError(
+                ERROR_CODES.APPLICATION_ALREADY_EXISTS,
+                "Cannot delete stage because an application already exists for it"
+            );
+        }
 
         const deleted = await this.repository.delete(id);
-        // Re-arrange orders of remaining selection stages
+
         if (deleted) {
             await this.repository.updateMany(
                 {
@@ -222,6 +256,7 @@ export class StageService {
         if (order === 1) {
             await this.syncCallDeadline(String(stageDoc.call));
         }
-        return deleted
+
+        return deleted;
     }
 }

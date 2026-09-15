@@ -1,23 +1,21 @@
 'use client';
 
-import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
-import { createEntityManager } from "@/components/createEntityManager";
+import { createEntityManager } from "@/components/data-table/createEntityManager";
 import { Call } from "../../models/call.model";
 import { StageApi } from "../api/stage.api";
 import {
     createEmptyCallStage,
-    GetStagesDTO,
+    FilterStagesDTO,
     Stage
 } from "../models/stage.model";
 import SaveStage from "./SaveStage";
 
 interface StageManagerProps {
-    call?: Call;
-    evaluation?: Evaluation;
+    call?: Call
 }
 
-const StageManager = ({ call, evaluation }: StageManagerProps) => {
-    const Manager = createEntityManager<Stage, GetStagesDTO | undefined>({
+const StageManager = ({ call }: StageManagerProps) => {
+    const Manager = createEntityManager<Stage, FilterStagesDTO | undefined>({
         title: "Manage Stages",
         itemName: "Stage",
         api: StageApi,
@@ -69,40 +67,24 @@ const StageManager = ({ call, evaluation }: StageManagerProps) => {
                             timeStyle: "short",
                         })
                         : "-"
-            },
-            {
-                /**
-                 * 
-                 * {
-                header: "Status",
-                field: "status",
-                sortable: true,
-                style: { width: "10rem" },
-                body: (s: Stage) => <MyBadge type="status" value={s.status ?? "Unknown"} />
-            }
-                 */
-            }
+            }           
 
         ],
+
+        defaultHiddenFields:["order"],
 
         createNew: () =>
             createEmptyCallStage({
                 call,
-                evaluation,
-
             }),
 
         SaveDialog: SaveStage,
 
-        permissionPrefix: "call.stage",
+        permissionPrefix: "stage",
 
         query: () => ({
             call: call ?? undefined,
-            evaluation: evaluation ?? undefined,
-            populate: true
         }),
-
-
     });
 
     return <Manager />;

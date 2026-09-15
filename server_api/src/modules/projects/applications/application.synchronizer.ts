@@ -1,18 +1,12 @@
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { TransitionHelper } from "../../../common/helpers/transition.helper";
-import { IStageRepository } from "../../calls/stages/stage.repository";
-import { ProjectStatus } from "../project.model";
 import { IProjectRepository } from "../project.repository";
-import { PROJECT_TRANSITIONS } from "../project.state-machine";
-import { ApplicationStatus } from "./application.model";
 import { IApplicationRepository } from "./application.repository";
 
 export class ApplicationSynchronizer {
     constructor(
         private readonly projectRepo: IProjectRepository,
         private readonly applicationRepo: IApplicationRepository,
-        private readonly stageRepo: IStageRepository
     ) { }
 
     async sync(project: string) {
@@ -32,68 +26,20 @@ export class ApplicationSynchronizer {
 
         if (!latestApplication) {
             if (currentId) {
-                await this.projectRepo.clearCurrentApplication(project);
+                await this.projectRepo.update(project, { currentApplication: null });
             }
         } else {
             const latestId = String(latestApplication._id);
 
             if (currentId !== latestId) {
-                await this.projectRepo.updateCurrentApplication(
+                await this.projectRepo.update(
                     project,
-                    latestId
+                    {
+                        currentApplication: latestId
+                    }
                 );
             }
         }
-        /**
-         * Compute project status
-         */
-        const currentStatus = projectDoc.status;
-        let newStatus = ProjectStatus.draft;
-
-        if (latestApplication) {
-            newStatus = ProjectStatus.submitted;
-
-            switch (latestApplication.status) {
-                case ApplicationStatus.rejected:
-                    newStatus = ProjectStatus.rejected;
-                    break;
-
-                case ApplicationStatus.accepted: {
-                    const lastStage = await this.stageRepo.getLastStage(
-                        String(projectDoc.call)
-                    );
-
-                    if (!lastStage) {
-                        throw new AppError(ERROR_CODES.LAST_STAGE_NOT_FOUND);
-                    }
-
-                    if (
-                        String(latestApplication.stage) ===
-                        String(lastStage._id)
-                    ) {
-                        newStatus = ProjectStatus.accepted;
-                    }
-
-                    break;
-                }
-            }
-        }
-        /**
-         * Synchronize project status
-         */
-        if (newStatus !== currentStatus) {
-            TransitionHelper.validateTransition(
-                currentStatus,
-                newStatus,
-                PROJECT_TRANSITIONS
-            );
-
-            return await this.projectRepo.updateStatus(
-                project,
-                newStatus
-            );
-        }
-
         return projectDoc;
     }
 }

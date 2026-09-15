@@ -4,7 +4,6 @@ import { Card } from 'primereact/card';
 import { Divider } from 'primereact/divider';
 import { Tag } from 'primereact/tag';
 import { useRouter } from 'next/navigation';
-
 // Date Utilities
 import { format, differenceInCalendarDays, isPast } from 'date-fns';
 
@@ -13,7 +12,7 @@ import { Call } from '../calls/models/call.model';
 import { Grant } from '../grants/models/grant.model';
 import { Calendar } from '../calendars/models/calendar.model';
 import { Organization } from '../organizations/models/organization.model';
-
+import { useAuth } from '@/contexts/auth-context';
 
 interface CallCardProps {
     call: Call;
@@ -22,6 +21,11 @@ interface CallCardProps {
 
 export const CallCard = ({ call }: CallCardProps) => {
     const router = useRouter();
+    const { hasPermission } = useAuth();
+
+    // Check if user has the project:apply permission
+    const canApply = hasPermission ? hasPermission('project:apply') : false;
+
     // Direct Data Mapping 
     const grant = call.grant as Grant;
     const calendar = call.calendar as Calendar;
@@ -35,7 +39,7 @@ export const CallCard = ({ call }: CallCardProps) => {
     const isUrgent = daysLeft >= 0 && daysLeft < 5;
 
     const proceedToApply = () => {
-        router.push(`/applications/apply/${call._id}`);
+        router.push(`/projects/apply/${call._id}`);
     };
 
     return (
@@ -108,14 +112,17 @@ export const CallCard = ({ call }: CallCardProps) => {
                     <small className="text-500 text-xs">Funding Source</small>
                     <span className="text-xs font-medium">{(grant?.fundingSource) || 'Internal Fund'}</span>
                 </div>
-                <Button
-                    label={isClosed ? "Closed" : "Apply"}
-                    icon={isClosed ? "pi pi-lock" : "pi pi-pencil"}
-                    size="small"
-                    className={`p-button-raised ${isUrgent ? 'p-button-warning' : ''}`}
-                    disabled={isClosed}
-                    onClick={proceedToApply}
-                />
+
+                {canApply && (
+                    <Button
+                        label={isClosed ? "Closed" : "Apply"}
+                        icon={isClosed ? "pi pi-lock" : "pi pi-pencil"}
+                        size="small"
+                        className={`p-button-raised ${isUrgent ? 'p-button-warning' : ''}`}
+                        disabled={isClosed}
+                        onClick={proceedToApply}
+                    />
+                )}
             </div>
         </Card>
     );

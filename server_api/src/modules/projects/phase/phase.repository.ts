@@ -2,13 +2,14 @@ import mongoose from "mongoose";
 import { Phase, IPhase, PhaseStatus } from "./phase.model";
 import {
     CreatePhaseDto,
-    GetPhasesOptions,
+    FilterPhases,
     UpdatePhaseDto,
 } from "./phase.dto";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 
 export interface IPhaseRepository {
     findById(id: string): Promise<IPhase | null>;
-    find(filters: GetPhasesOptions): Promise<IPhase[]>;
+    find(filters: FilterPhases, options?: FilterOptions): Promise<IPhase[]>;
 
     findOne(projectId: string, order: number): Promise<IPhase | null>;
     findFirstPhase(projectId: string): Promise<IPhase | null>;
@@ -45,7 +46,7 @@ export class PhaseRepository implements IPhaseRepository {
             .exec();
     }
 
-    async find(filters: GetPhasesOptions): Promise<IPhase[]> {
+    async find(filters: FilterPhases, options?: FilterOptions): Promise<IPhase[]> {
         const query: Record<string, unknown> = {};
 
         if (filters.project) {
@@ -55,7 +56,7 @@ export class PhaseRepository implements IPhaseRepository {
         let phaseQuery = Phase.find(query)
             .sort({ order: 1 });
 
-        if (filters.populate) {
+        if (options?.populate) {
             phaseQuery = phaseQuery.populate({
                 path: "project",
             });

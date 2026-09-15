@@ -3,6 +3,7 @@ import { applicationService, checkPermission, checkTransitionPermission } from "
 import { upload } from "../../../util/multer";
 import { verifyAuthToken } from "../../auth/auth.middleware";
 import { ApplicationController } from "./application.controller";
+import { PERMISSIONS } from "../../../common/constants/permissions";
 
 const controller = new ApplicationController(applicationService);
 const router = express.Router();
@@ -10,7 +11,7 @@ const router = express.Router();
 router.post(
     "/",
     verifyAuthToken,
-    checkPermission("application:create"),
+    checkPermission([PERMISSIONS.APPLICATION.CREATE, PERMISSIONS.APPLICATION.CREATE_OWN]),
     (req, res, next) => {
         // Set the dynamic subfolder for this specific endpoint
         req.headers["x-upload-folder"] = "applications";
@@ -20,6 +21,7 @@ router.post(
     controller.create
 );
 
+/*
 router.post(
     "/apply",
     verifyAuthToken,
@@ -32,7 +34,7 @@ router.post(
     upload.single("file"),
     controller.apply
 );
-
+*/
 router.get(
     "/",
     verifyAuthToken,
@@ -51,7 +53,7 @@ router.get(
 router.get(
     "/:id",
     verifyAuthToken,
-    checkPermission("application:read"),
+    checkPermission("application:lookup"),
     controller.getById
 );
 
@@ -67,8 +69,8 @@ router.post(
 router.post(
     "/:id/anonymize",
     verifyAuthToken,
-    //checkPermission("application:anonymize"),
-    checkPermission("application:calculateTotalScore"),
+    checkPermission("application:anonymize"),
+    //checkPermission("application:calculateTotalScore"),
     controller.anonymize
 );
 
@@ -91,15 +93,16 @@ router.patch(
 router.delete(
     "/:id",
     verifyAuthToken,
-    checkPermission("application:delete"),
+    checkPermission(["application:delete, application:delete:own"]),
     controller.delete
 );
 
+/*
 router.post(
     "/:id/withdraw",
     verifyAuthToken,
     checkPermission("application:withdraw"),
     controller.withdraw
 );
-
+*/
 export default router;

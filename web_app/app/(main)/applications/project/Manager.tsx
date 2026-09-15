@@ -1,16 +1,17 @@
 'use client';
 
 import { BASE_URL } from "@/api/ApiClient";
-import { createEntityManager } from "@/components/createEntityManager";
-import MyBadge from "@/templates/MyBadge";
-import { useEffect, useMemo, useState } from "react";
-import { Project, ProjectStatus } from "../../projects/models/project.model";
-import { ApplicationApi } from "../api/application.api";
-import { AnonymizationStatus, Application, ApplicationStatus } from "../models/application.model";
-import { Stage } from "../../calls/stages/models/stage.model";
-import { StageApi } from "../../calls/stages/api/stage.api";
-import SaveApplication from "../components/SaveApplication";
+import { createEntityManager } from "@/components/data-table/createEntityManager";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
+import MyBadge from "@/templates/MyBadge";
+import { extractId } from "@/utils/utils";
+import { useEffect, useMemo, useState } from "react";
+import { StageApi } from "../../calls/stages/api/stage.api";
+import { Stage } from "../../calls/stages/models/stage.model";
+import { Project } from "../../projects/models/project.model";
+import { ApplicationApi } from "../api/application.api";
+import SaveApplication from "../components/SaveApplication";
+import { AnonymizationStatus, Application, ApplicationStatus } from "../models/application.model";
 
 interface ApplicationManagerProps {
     project: Project;
@@ -38,9 +39,8 @@ const ApplicationManager = ({ project, enableEditing }: ApplicationManagerProps)
                 if (!enableEditing) return;
 
                 // Determine current application ID from project
-                const currentAppId = typeof project.currentApplication === "object"
-                    ? (project.currentApplication as any)?._id
-                    : project.currentApplication;
+                const currentAppId =
+                    extractId(project.currentApplication);
 
                 if (currentAppId) {
                     const appDetail = await ApplicationApi.getById!(currentAppId);
@@ -48,7 +48,7 @@ const ApplicationManager = ({ project, enableEditing }: ApplicationManagerProps)
 
                     // If current application is ACCEPTED, query for the next stage
                     const isAccepted = appDetail?.status === ApplicationStatus.accepted;
-                    const stageId = typeof appDetail?.stage === "object" ? appDetail.stage?._id : appDetail?.stage;
+                    const stageId = extractId(appDetail.stage);
 
                     if (isAccepted && stageId) {
                         const nextStage = await StageApi.getNext(stageId);
@@ -136,30 +136,8 @@ const ApplicationManager = ({ project, enableEditing }: ApplicationManagerProps)
             SaveDialog: nextStage ? SaveApplication : undefined,
             items: applications,
             permissionPrefix: "application",
-            extraActions: (project.currentApplication && project.status === ProjectStatus.submitted) ? [
-                {
-                    icon: "pi pi-times",
-                    severity: "warning",
-                    tooltip: "Withdraw Application",
-                    permissions: ["application:withdraw"],
-                    disabled: (row: Application) =>
-                        row.status !== ApplicationStatus.pending,
-                    onClick: (row: Application) => {
-                        confirm.ask({
-                            operation: "withdraw application",
-                            onConfirm: async () => {
-                                if (!row._id) { return; }
-                                await ApplicationApi.withdraw(row._id);
-                                // refresh data here if needed
-                            }
-                        });
-                    }
-                }
-            ] : undefined,
-
             hideSearch: true,
-            // Re-enabled action bar so create button renders when createNew is present
-            hideDefaultActions: true,
+            hideEditAction: true,
         });
     }, [applications, nextStage, project]); // Added nextStage and project to dependencies!
 

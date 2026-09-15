@@ -12,8 +12,6 @@ import { ApplicationService } from "./application.service";
 
 export class ApplicationController {
 
-
-
     constructor(private readonly service: ApplicationService) {
     }
     // ---------------------------------------------------
@@ -29,10 +27,9 @@ export class ApplicationController {
             const dto: CreateApplicationDTO = {
                 project,
                 stage,
-                documentPath: relativeDocPath,
-                userId: req.auth.userId
+                documentPath: relativeDocPath
             };
-            const created = await this.service.createNextApplication(dto);
+            const created = await this.service.create(dto, req.auth.userId);
             successResponse(res, 201, "Project application created successfully", created);
 
         } catch (err: any) {
@@ -46,6 +43,7 @@ export class ApplicationController {
     };
 
 
+    /*
     apply = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
@@ -84,7 +82,7 @@ export class ApplicationController {
             errorResponse(res, 400, err.message, err);
         }
     };
-
+*/
     // -----------------------
     // Transition State
     // -----------------------
@@ -167,6 +165,7 @@ export class ApplicationController {
     };
 
 
+    /*
     withdraw = async (
         req: AuthenticatedRequest,
         res: Response
@@ -222,22 +221,21 @@ export class ApplicationController {
             );
         }
     };
-
+*/
     // ---------------------------------------------------
     // DELETE
     // ---------------------------------------------------
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.auth) throw new AppError(ERROR_CODES.UNAUTHORIZED);
-
             const { id } = req.params;
+            const userId = req.auth.userId;
             const dto: DeleteDto = {
                 id,
-                userId: req.auth.userId,
             };
 
             // Your service deletes the record and returns the deleted document metadata
-            const deletedDoc = await this.service.delete(dto);
+            const deletedDoc = await this.service.delete(dto, userId);
 
             if (deletedDoc?.documentPath) {
                 // ✅ CRITICAL FIX: Joins project root with the stored "uploads/projects/filename.pdf"

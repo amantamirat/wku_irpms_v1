@@ -5,6 +5,7 @@ import { EntityApi, StateTransition } from "@/api/EntityApi";
 import {
   ItemDataTable,
   RowActionButton,
+  ToolBarActionButton,
 } from "@/components/data-table/ItemDataTable";
 import { useAuth } from "@/contexts/auth-context";
 import { useCrudList } from "@/hooks/useCrudList";
@@ -46,6 +47,7 @@ export interface CreateEntityManagerConfig<
 
   SaveDialog?: React.ComponentType<EntitySaveDialogProps<T>>;
 
+  items?: T[];
   query?: () => TQuery;
 
   workflow?: {
@@ -70,7 +72,12 @@ export interface CreateEntityManagerConfig<
   hideEditAction?: boolean;
   hideDeleteAction?: boolean;
 
+  extraToolBarActions?: ToolBarActionButton[];
+  extraRowActions?: RowActionButton<T>[];
+
   hideSearch?: boolean;
+  enableColumnToggle?: boolean,
+  defaultHiddenFields?: string[],
 }
 
 export function createEntityManager<
@@ -82,6 +89,7 @@ export function createEntityManager<
 
     const { items,
       setAll,
+      getById,
       updateItem,
       removeItem,
       loading,
@@ -91,16 +99,14 @@ export function createEntityManager<
     const [item, setItem] = useState<T | null>(null);
     const [showDialog, setShowDialog] = useState(false);
     const [error, setError] = useState<ApiError | string | null>(null);
-
     /*
      * -----------------------------------------
      * READ PERMISSION
      * -----------------------------------------
      */
-
     const canRead = hasPermission([
-      `${config.permissionPrefix}:read`,
-      `${config.permissionPrefix}:read:own`,
+      `${config.permissionPrefix}:read`
+      //,`${config.permissionPrefix}:read:own`,
     ]);
 
     /*
@@ -110,6 +116,11 @@ export function createEntityManager<
      */
 
     const refresh = async () => {
+      if (config.items) {
+        setAll(config.items);
+        return;
+      }
+
       setError(null);
 
       if (!canRead) {
@@ -193,6 +204,7 @@ export function createEntityManager<
           "[EntityManager] Delete failed:",
           err
         );
+        throw err
       }
     };
 
@@ -209,20 +221,33 @@ export function createEntityManager<
       if (!config.api.transitionState) return;
 
       try {
-        const updated =
-          await config.api.transitionState(
-            id,
-            transition
-          );
+        const updated = await config.api.transitionState(
+          id,
+          transition
+        );
 
         if (updated) {
-          updateItem(updated);
+          const prev = getById(id);
+
+          if (!prev) return;
+
+          const statusField = config.workflow?.statusField;
+
+          if (statusField) {
+            updateItem({
+              ...prev,
+              [statusField]: updated[statusField],
+            });
+          } else {
+            updateItem(updated);
+          }
         }
       } catch (err) {
         console.error(
           "[EntityManager] Transition failed:",
           err
         );
+        throw err;
       }
     };
 
@@ -295,6 +320,7 @@ export function createEntityManager<
 
     const rowActions: RowActionButton<T>[] = [
       ...transitionActions,
+      ...config.extraRowActions ?? [],
       ...crudRowActions,
     ];
 
@@ -336,7 +362,7 @@ export function createEntityManager<
           columns={config.columns}
 
           rowActions={rowActions}
-          toolBarActions={toolbarActions}
+          toolBarActions={[...toolbarActions, ...config.extraToolBarActions ?? []]}
 
           loading={loading}
 
@@ -356,6 +382,8 @@ export function createEntityManager<
               }
               : undefined
           }
+          defaultHiddenFields={config.defaultHiddenFields}
+          enableColumnToggle={config.enableColumnToggle}
         />
 
         {item &&

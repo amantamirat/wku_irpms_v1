@@ -21,25 +21,43 @@ import { PhaseStatus } from "./phase/phase.model";
 import { IPhaseRepository } from "./phase/phase.repository";
 import { PhaseService } from "./phase/phase.service";
 import { ProjectStatus } from "./project.model";
-import { CALL_PROJECT_TRANSITIONS, STANDALONE_PROJECT_TRANSITIONS } from "./project.state-machine";
+import { PROJECT_TRANSITIONS } from "./project.state-machine";
 import { FilterOptions } from "../../common/dtos/filter.dto";
 import { AuthPermissionService } from "../auth/auth.permission-service";
 import { PERMISSIONS } from "../../common/constants/permissions";
+import { IApplicationRepository } from "./applications/application.repository";
+import { IStageRepository } from "../calls/stages/stage.repository";
+import { ApplicationStatus } from "./applications/application.model";
+import { CallStatus } from "../calls/call.model";
+import { TemplateValidationService } from "../templates/services/template-validation.service";
+import { ApplicationService } from "./applications/application.service";
+import { ProjectAuth } from "./project.auth";
 
 
 export class ProjectService {
 
     constructor(
         private readonly projectRepo: IProjectRepository,
+
         private readonly collabRepo: ICollaboratorRepository,
         private readonly phaseRepo: IPhaseRepository,
+        private readonly applicationRepo: IApplicationRepository,
+
         private readonly grantRepo: IGrantRepository,
+        private readonly callRepo: ICallRepository,
+        private readonly stageRepo: IStageRepository,
+
         private readonly collabService: CollaboratorService,
         private readonly phaseService: PhaseService,
-        private readonly callRepo: ICallRepository,
-        private readonly constValidator: ConstraintValidationService,
-        private readonly notificationService: NotificationService,
+        private readonly applicationService: ApplicationService,
+
+        private readonly constraintValidator: ConstraintValidationService,
+        private readonly templateValidator: TemplateValidationService,
+
+        private readonly projectAuth: ProjectAuth,
         private readonly authPermissionService: AuthPermissionService,
+        private readonly notificationService: NotificationService,
+
     ) { }
 
     async create(dto: CreateProjectDTO, userId: string, options?: { skipValidation?: boolean }) {
@@ -57,7 +75,6 @@ export class ProjectService {
             if (!isAdmin && !isLeadPI) {
                 throw new AppError(ERROR_CODES.UNAUTHORIZED);
             }
-
             const grantDoc = await this.grantRepo.findById(grant);
             if (!grantDoc) {
                 throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
@@ -67,12 +84,14 @@ export class ProjectService {
             }
         }
 
+        /*
         if (await this.projectRepo.exists({ title })) {
             throw new AppError(
                 ERROR_CODES.PROJECT_ALREADY_EXISTS,
                 "A project with this title already exists. Please choose a different title."
             );
         }
+        */
 
         const created = await this.projectRepo.create({
             ...dto, status: ProjectStatus.draft,
@@ -145,6 +164,94 @@ export class ProjectService {
         return created;
     }
 
+    async apply(dto: CreateProjectDTO, userId: string) {
+        const {
+            call,
+            leadPI,
+            docPath
+        } = dto;
+
+        if (!call)
+            throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+
+        if (!docPath)
+            throw new AppError(ERROR_CODES.FILE_NOT_FOUND);
+
+        const isLeadPI = leadPI === userId;
+
+        if (!isLeadPI) {
+            throw new AppError(ERROR_CODES.UNAUTHORIZED);
+        }
+
+        const callDoc = await this.callRepo.findById(call);
+
+        if (!callDoc)
+            throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+
+        if (callDoc.status !== CallStatus.active)
+            throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
+
+        // Get first stage
+        const firstStage = await this.stageRepo.getFirstStage(call);
+
+        if (!firstStage) {
+            throw new AppError(
+                ERROR_CODES.FIRST_STAGE_NOT_FOUND
+            );
+        }
+
+        if (new Date(firstStage.deadline) < new Date()) {
+            throw new AppError(
+                ERROR_CODES.STAGE_DEADLINE_PASSED
+            );
+        }
+
+        if (callDoc.constraint) {
+            const constraintId = String(callDoc.constraint);
+            const result = await this.constraintValidator.validateProject(constraintId, dto);
+            if (!result.valid) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_CONSTRAINT,
+                    "Constraint validation failed",
+                    400,
+                    result
+                );
+            }
+        }
+
+        if (firstStage.template) {
+            const result =
+                await this.templateValidator.validate(
+                    String(firstStage.template),
+                    docPath
+                );
+
+            if (!result.valid) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_DOCUMENT,
+                    "Document validation failed",
+                    400,
+                    result
+                );
+            }
+        }
+        const projectDoc =
+            await this.create({
+                ...dto,
+                grant: String(callDoc.grant),
+                calendar: String(callDoc.calendar)
+            }, userId, { skipValidation: true });
+
+        await this.applicationService.
+            create({
+                project: String(projectDoc._id),
+                stage: String(firstStage._id),
+                documentPath: docPath,
+            }, userId, { skipValidation: true });
+
+        return projectDoc;
+    }
+
 
     async getProjects(filter: FilterProjectsDTO, options?: FilterOptions) {
         return this.projectRepo.find(filter, options);
@@ -172,18 +279,9 @@ export class ProjectService {
     async update(dto: UpdateProjectDTO) {
         const { id, data, userId } = dto;
 
-        const projectDoc = await this.getById(id);
-        const isLeadPI = projectDoc.leadPI?.toString() === userId;
+        const { projectDoc, isLeadPI } = await this.projectAuth.auth(id, userId, PERMISSIONS.PROJECT.UPDATE);
 
-        const isAdmin =
-            await this.authPermissionService.hasPermission(
-                userId,
-                PERMISSIONS.PROJECT.UPDATE
-            );
-        if (!isAdmin) {
-            if (!isLeadPI) {
-                throw new AppError(ERROR_CODES.UNAUTHORIZED);
-            }
+        if (isLeadPI) {
             if (projectDoc.status !== ProjectStatus.draft) {
                 throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
             }
@@ -200,8 +298,8 @@ export class ProjectService {
 
             if (callDoc.constraint) {
                 const constraintId = String(callDoc.constraint);
-                if (constraintId && this.constValidator) {
-                    const result = await this.constValidator.validateThemes(constraintId, nextThemes);
+                if (constraintId && this.constraintValidator) {
+                    const result = await this.constraintValidator.validateThemes(constraintId, nextThemes);
                     if (!result.valid) {
                         throw new AppError(
                             ERROR_CODES.INVALID_CONSTRAINT,
@@ -217,7 +315,7 @@ export class ProjectService {
     }
 
 
-    async transitionState(dto: TransitionRequestDto) {
+    async transitionState(dto: TransitionRequestDto, userId: string) {
         const { id, current, next } = dto;
 
         const projectDoc = await this.getById(id);
@@ -229,19 +327,65 @@ export class ProjectService {
             throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
         }
 
-        const transitionsMap = projectDoc.call
-            ? CALL_PROJECT_TRANSITIONS
-            : STANDALONE_PROJECT_TRANSITIONS;
+        TransitionHelper.validateTransition(from, to, PROJECT_TRANSITIONS);
 
-        TransitionHelper.validateTransition(from, to, transitionsMap);
+        if (to === ProjectStatus.approved) {
+            if (projectDoc.currentApplication) {
+                if (!projectDoc.call) {
+                    throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+                }
 
-        /*
-        TransitionHelper.validateTransition(
-            from,
-            to,
-            PROJECT_TRANSITIONS
-        );
-        */
+                const callDoc = await this.callRepo.findById(
+                    String(projectDoc.call)
+                );
+
+                if (!callDoc) {
+                    throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+                }
+
+                const currentAppDoc = await this.applicationRepo.findById(
+                    String(projectDoc.currentApplication)
+                );
+
+                if (!currentAppDoc) {
+                    throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
+                }
+
+                const lastStage = await this.stageRepo.getLastStage(
+                    String(callDoc._id)
+                );
+
+                if (!lastStage) {
+                    throw new AppError(ERROR_CODES.LAST_STAGE_NOT_FOUND);
+                }
+                /**
+                 * Project can only be approved from an accepted
+                 * application that reached the final stage.
+                 */
+                if (currentAppDoc.status !== ApplicationStatus.accepted) {
+                    throw new AppError(
+                        ERROR_CODES.APPLICATION_NOT_ACCEPTED,
+                        "The current application must be accepted before the project can be approved"
+                    );
+                }
+
+                if (
+                    String(currentAppDoc.stage) !==
+                    String(lastStage._id)
+                ) {
+                    throw new AppError(
+                        ERROR_CODES.APPLICATION_NOT_AT_FINAL_STAGE,
+                        "The current application has not reached the final stage"
+                    );
+                }
+
+                /**
+                 * The project is now approved.
+                 *
+                 * Do any additional application/stage business logic here.
+                 */
+            }
+        }
 
         if (from !== ProjectStatus.granted && to === ProjectStatus.approved) {
             await this.notificationService.notifyProjectFinalization(
@@ -257,33 +401,31 @@ export class ProjectService {
         //rollback notification remain
 
         if (to === ProjectStatus.granted) {
+            const collabs = await this.collabRepo.find({ project: id });
+            if (!collabs.every(c => c.status === CollaboratorStatus.verified))
+                throw new AppError(ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED);
+
             const phases = await this.phaseRepo.find({ project: id });
             if (!phases.every(p => p.status === PhaseStatus.approved))
                 throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_APPROVED);
 
-            /*
-            const collabs = await this.collabRepo.find({ project: id });
-            if (!collabs.every(c => c.status === CollaboratorStatus.verified))
-                throw new AppError(ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED);*/
-
         }
 
-        return await this.projectRepo.updateStatus(id, to);
+        return await this.projectRepo.updateStatus(id, to, userId);
     }
 
 
     // ---------------------------------------------------
     // DELETE
     // ---------------------------------------------------
-    async delete(dto: DeleteDto) {
-        const { id, userId } = dto;
-        const projectDoc = await this.getById(id);
+    async delete(dto: DeleteDto, userId: string) {
+        const { id } = dto;
+        const { projectDoc } = await this.projectAuth.auth(id, userId, PERMISSIONS.PROJECT.DELETE);
         if (
-            projectDoc.status !== ProjectStatus.draft &&
-            projectDoc.status !== ProjectStatus.submitted
+            projectDoc.status !== ProjectStatus.draft
         ) {
             throw new AppError(
-                ERROR_CODES.INVALID_PROJECT_STATUS,
+                ERROR_CODES.PROJECT_NOT_DRAFT,
                 "The project must be in draft or submitted status to perform this operation."
             );
         }

@@ -22,6 +22,7 @@ export const PERMISSIONS = {
     DELETE: "user:delete"
   },
 
+  /*
   APPLICANT: {
     CREATE: "applicant:create",
     READ: "applicant:read",
@@ -29,7 +30,7 @@ export const PERMISSIONS = {
     ROLE_UPDATE: "applicant:role:update",
     OWNERSHIP_UPDATE: "applicant:ownership:update",
     DELETE: "applicant:delete"
-  },
+  },*/
 
   ORGANIAZTION: {
     COLLEGE: {
@@ -214,9 +215,11 @@ export const PERMISSIONS = {
       COMPLETE: "project:status.completed"
     },
     DELETE: "project:delete",
+    DELETE_OWN: "project:delete:own",
   },
   COLLABORATOR: {
     CREATE: "collaborator:create",
+    CREATE_OWN: "collaborator:create:own",
     READ: "collaborator:read",
     UPDATE: "collaborator:update",
     STATUS: {
@@ -224,19 +227,20 @@ export const PERMISSIONS = {
       PEND: "collaborator:status.pending"
     },
     DELETE: "collaborator:delete",
+    DELETE_OWN: "collaborator:delete:own",
   },
   PHASE: {
     CREATE: "phase:create",
+    CREATE_OWN: "phase:create:own",
+
     READ: "phase:read",
+    LOOKUP: "phase:lookup",
+
     UPDATE: "phase:update",
-    STATUS: {
-      PROPOSE: "phase:status.proposed",
-      REVIEW: "phase:status.reviewed",
-      APPROVE: "phase:status.approved",
-      ACTIVATE: "phase:status.active",
-      COMPLETE: "phase:status.completed"
-    },
+    UPDATE_OWN: "phase:update:own",
+
     DELETE: "phase:delete",
+    DELETE_OWN: "phase:delete:own",
   },
   PHASE_DOCUMENT: {
     CREATE: "phase:document:create",
@@ -250,20 +254,13 @@ export const PERMISSIONS = {
     UPDATE: "project_theme:update",
     DELETE: "project_theme:delete",
   },
-  DOCUMENT: {
-    CREATE: "document:create",
-    READ: "document:read",
-    UPDATE: "document:update",
-    STATUS: {
-      SUBMIT: "document:status.submitted",
-      SELECT: "document:status.selected",
-      ACCEPT: "document:status.accepted",
-      REJECT: "document:status.rejected",
-      REVIEW: "document:status.reviewed",
-    },
-    SUBMIT: "document:submit",
-    DELETE: "document:delete",
-    //UPDATE_STATUS: "document:update_status",
+  APPLICATION: {
+    CREATE: "application:create",
+    CREATE_OWN: "application:create:own",
+    READ: "application:read",
+    UPDATE: "application:update",
+    DELETE: "application:delete",
+    DELETE_OWN: "application:delete:own",
   },
   REVIEWER: {
     CREATE: "reviewer:create",

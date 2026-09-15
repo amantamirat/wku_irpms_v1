@@ -1,10 +1,9 @@
-import { createEntityManager } from "@/components/createEntityManager";
-
 import { createEmptyAccount, Account } from "../models/account.model";
 import { AccountApi } from "../api/account.api";
 import MyBadge from "@/templates/MyBadge";
-import { ACCOUNT_STATUS_ORDER, ACCOUNT_TRANSITIONS } from "../models/account.state-machine";
+import { ACCOUNT_TRANSITIONS } from "../models/account.state-machine";
 import SaveAccount from "./SaveAccount";
+import { createEntityManager } from "@/components/data-table/createEntityManager";
 
 export default createEntityManager<Account>({
     title: "Manage Accounts",
@@ -25,7 +24,6 @@ export default createEntityManager<Account>({
     workflow: {
         statusField: "status",
         transitions: ACCOUNT_TRANSITIONS,
-        statusOrder: ACCOUNT_STATUS_ORDER
     },
     permissionPrefix: "account"
 })

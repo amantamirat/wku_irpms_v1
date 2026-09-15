@@ -1,14 +1,13 @@
 'use client';
 
-import { createEntityManager } from "@/components/createEntityManager";
+import { createEntityManager } from "@/components/data-table/createEntityManager";
 import MyBadge from "@/templates/MyBadge";
 import { useEffect, useMemo, useState } from "react";
 import { Project, ProjectStatus } from "../../models/project.model";
 import { PhaseApi } from "../api/phase.api";
 import SavePhase from "../components/SavePhase";
 import { Phase } from "../models/phase.model";
-import { PHASE_STATUS_ORDER, PHASE_TRANSITIONS } from "../models/phase.state-machine";
-import { ProjectApi } from "../../api/project.api";
+import { PHASE_TRANSITIONS } from "../models/phase.state-machine";
 
 interface PhaseManagerProps {
     project: Project;
@@ -20,10 +19,11 @@ const PhaseManager = ({ project, updateProject, enableEditing }: PhaseManagerPro
     const [phases, setPhases] = useState<Phase[]>([]);
     const [loading, setLoading] = useState<boolean>(false);
 
+
     const canManage = useMemo(() => (
         enableEditing &&
-        (project.status === ProjectStatus.draft ||
-            project.status === ProjectStatus.approved)
+        (project.status === ProjectStatus.draft
+        )
     ), [project.status, enableEditing]);
 
     useEffect(() => {
@@ -31,7 +31,7 @@ const PhaseManager = ({ project, updateProject, enableEditing }: PhaseManagerPro
             if (!project) return;
             setLoading(true);
             try {
-                const data = await PhaseApi.getAll({ project: project }, true);
+                const data = await PhaseApi.lookup!({ project: project });
                 setPhases(Array.isArray(data) ? data : []);
             } catch (error) {
                 console.error("Error fetching phases", error);
@@ -105,26 +105,7 @@ const PhaseManager = ({ project, updateProject, enableEditing }: PhaseManagerPro
             SaveDialog: canManage ? SavePhase : undefined,
             workflow: {
                 statusField: "status",
-                transitions: PHASE_TRANSITIONS,
-                statusOrder: PHASE_STATUS_ORDER
-            },
-            // Handle phase transition completion
-            onTransitComplete: async (updatedPhase: Phase) => {
-                //console.log("Phase transition complete triggered:", updatedPhase)
-                // Refetch updated project from API (due to backend sync) & update parent Project state
-                if (updateProject && project) {
-                    try {
-                        const projectId = project._id;
-                        if (projectId) {
-                            const updatedProject = await ProjectApi.getById!(projectId, true);
-                            if (updatedProject) {
-                                updateProject(updatedProject);
-                            }
-                        }
-                    } catch (error) {
-                        console.error("Error updating project state after phase transition", error);
-                    }
-                }
+                transitions: PHASE_TRANSITIONS
             },
             hideSearch: true,
             hideDefaultActions: !canManage,

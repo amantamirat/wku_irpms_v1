@@ -59,8 +59,7 @@ export function useStateTransitionActions<T extends Record<string, any>>({
                     icon: transition.icon,
                     severity: transition.severity,
                     tooltip: transition.action,
-                    //rounded:false,
-                    //text: false,
+                    text: false,
                     visible: (row: T) =>
                         row[statusField] === current,
 

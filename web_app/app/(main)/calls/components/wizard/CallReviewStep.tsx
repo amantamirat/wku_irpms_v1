@@ -1,9 +1,8 @@
 'use client';
 
-import React from 'react';
 import { Button } from 'primereact/button';
-import { Stage } from '../../stages/models/stage.model';
 import { Call } from '../../models/call.model';
+import { Stage } from '../../stages/models/stage.model';
 
 interface CallReviewStepProps {
     callData: Partial<Call>;

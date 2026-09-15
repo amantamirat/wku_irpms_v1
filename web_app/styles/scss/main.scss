@@ -2,8 +2,8 @@
 @import 'components/buttons';
 @import 'components/project-detail';
 @import 'components/ownership-tag';
-@import 'components/theme-level-tag';
-@import 'components/form_type-tag';
+@import 'components/_themelevel-tag';
+@import './components/_formtype-tag.scss';
 @import 'components/academic-badge';
 @import 'components/classification-badge';
 @import 'components/gender-badge';

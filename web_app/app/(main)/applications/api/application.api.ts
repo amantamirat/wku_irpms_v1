@@ -9,9 +9,7 @@ const end_point = "/project/applications";
 
 export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions | undefined>
     & {
-        //calculateTotalScore: (id: string) => Promise<number>;
         anonymize: (id: string) => Promise<Application>;
-        apply: (project: Partial<Project>) => Promise<Application>;
         withdraw: (id: string) => Promise<boolean>;
     } = {
 
@@ -45,25 +43,7 @@ export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions
     },
 
 
-    async apply(project: Partial<Project>): Promise<Application> {
-        const formData = new FormData();
-        const sanitized = sanitize(project);
-
-        // 1. Separate the file from the rest of the data
-        if (project.file) {
-            // Backend usually expects 'document' or 'file' - 
-            // Based on your controller, make sure Multer is configured for this key
-            formData.append("file", project.file);
-            delete project.file;
-        }
-
-        // 2. Wrap the REST of the project data into a single stringified JSON object
-        // This satisfies: project = JSON.parse(req.body.project);
-        formData.append("project", JSON.stringify(sanitized));
-
-        const created = await ApiClient.post(`${end_point}/apply`, formData);
-        return created as Application;
-    },
+    
 
     // ---------------------------
     // Update

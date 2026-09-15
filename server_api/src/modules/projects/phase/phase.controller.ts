@@ -2,7 +2,7 @@ import { Request, Response } from "express";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { errorResponse, successResponse } from "../../../common/helpers/response";
 import { AuthenticatedRequest } from "../../auth/auth.middleware";
-import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto } from "./phase.dto";
+import { CreatePhaseDto, FilterPhases, UpdatePhaseDto } from "./phase.dto";
 import { PhaseService } from "./phase.service";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
@@ -24,7 +24,7 @@ export class PhaseController {
                 budget,
                 description,
                 project,
-               // breakdown    // Fixed: removed illegal [] syntax
+                // breakdown    // Fixed: removed illegal [] syntax
             } = req.body;
 
             const data: CreatePhaseDto = {
@@ -50,14 +50,13 @@ export class PhaseController {
     // -----------------------
     get = async (req: Request, res: Response) => {
         try {
-            const { project, populate } = req.query;
+            const { project } = req.query;
 
-            const filter: GetPhasesOptions = {
+            const filter: FilterPhases = {
                 project: project as string,
-                populate: populate === 'true'
             };
 
-            const phases = await this.service.getPhases(filter);
+            const phases = await this.service.getPhases(filter, { populate: true });
             successResponse(res, 200, "Phases fetched successfully", phases);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -126,10 +125,10 @@ export class PhaseController {
 
             const dto: DeleteDto = {
                 id,
-                userId: req.auth.userId,
+                //userId: ,
             };
 
-            const deleted = await this.service.delete(dto);
+            const deleted = await this.service.delete(dto, req.auth.userId);
             successResponse(res, 200, "Phase deleted successfully", deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

@@ -29,6 +29,9 @@ export interface IApplication extends Document {
     anonymizationStatus: AnonymizationStatus;
     status: ApplicationStatus;
 
+    createdBy?: mongoose.Types.ObjectId; // User who created the record
+    updatedBy?: mongoose.Types.ObjectId; // User who last updated the record
+
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -77,8 +80,16 @@ const ApplicationSchema = new Schema<IApplication>(
             enum: Object.values(ApplicationStatus),
             default: ApplicationStatus.pending,
             required: true
-        }
+        },
 
+        createdBy: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.USER,
+        },
+        updatedBy: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.USER,
+        },
     },
     {
         timestamps: true

@@ -1,19 +1,18 @@
 'use client';
 
-import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import MyBadge from "@/templates/MyBadge";
-import { PERMISSIONS } from "@/types/permissions";
+import { etbCurrencyFormatter } from "@/utils/utils";
 import { format } from "date-fns";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { TabPanel, TabView } from "primereact/tabview";
-import { Project } from "../models/project.model";
-import { ProjectApi } from "../api/project.api";
-import CollaboratorManager from "../../collaborators/project/Manager";
+import { useEffect, useState } from "react";
 import ApplicationManager from "../../applications/project/Manager";
-import PhaseManager from "../phases/project/Manager";
-import { etbCurrencyFormatter } from "@/utils/utils";
+import CollaboratorManager from "../../collaborators/project/Manager";
 import VerificationManager from "../../verifications/project/Manager";
+import { ProjectApi } from "../api/project.api";
+import { Project } from "../models/project.model";
+import PhaseManager from "../phases/project/Manager";
 
 
 interface ProjectDetailProps {
@@ -116,13 +115,13 @@ export default function ProjectDetail({ project, updateProject, enableEditing }:
         {
             header: "Phases",
             icon: "pi pi-list",
-            permission: "phase:read",
+            permission: "phase:lookup",
             content: <PhaseManager project={projectData} updateProject={updateProject} enableEditing={enableEditing} />
         },
         {
             header: "Collaborators",
             icon: "pi pi-users",
-            permission: PERMISSIONS.COLLABORATOR.READ,
+            permission: "collaborator:lookup",
             content: <CollaboratorManager project={projectData} enableEditing={enableEditing} />
         }
     ];

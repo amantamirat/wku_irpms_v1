@@ -136,7 +136,6 @@ export function useCrudActions<T extends { _id?: string }>({
                 severity: 'success',
                 tooltip: `Edit ${itemName}`,
                 text: true,
-                rounded: true,
                 disabled: disableEditRow,
 
                 onClick: (row) => {
@@ -164,7 +163,7 @@ export function useCrudActions<T extends { _id?: string }>({
                 severity: 'danger',
                 tooltip: `Delete ${itemName}`,
                 text: true,
-                rounded: true,
+               // rounded: true,
                 disabled: disableDeleteRow,
 
                 onClick: (row) => {

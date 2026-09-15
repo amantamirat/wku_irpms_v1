@@ -33,6 +33,7 @@ import { CollaboratorService } from "../modules/projects/collaborators/collabora
 import { PhaseRepository } from "../modules/projects/phase/phase.repository";
 import { PhaseService } from "../modules/projects/phase/phase.service";
 import { PhaseSynchronizer } from "../modules/projects/phase/phase.synchronizer";
+import { ProjectAuth } from "../modules/projects/project.auth";
 import { ProjectRepository } from "../modules/projects/project.repository";
 import { ProjectService } from "../modules/projects/project.service";
 import { ReviewerRepository } from "../modules/reviewers/reviewer.repository";
@@ -113,20 +114,28 @@ export const constraintValidator = new ConstraintValidationService(
 
 
 // Services
-export const stageService = new StageService(stageRepo, callRepo, evaluationRepo);
-export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, callRepo, constraintValidator);
+export const stageService = new StageService(stageRepo, callRepo, evaluationRepo, applicationRepo);
 
-export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, callRepo, constraintValidator,
-    new PhaseSynchronizer(projectRepo, phaseRepo)
-);
-export const projectService = new ProjectService(projectRepo, collaboratorRepo, phaseRepo,
-    grantRepo, collabService, phaseService, callRepo, constraintValidator, notificationService, authPermissionService);
+export const projectAuth = new ProjectAuth(projectRepo, authPermissionService);
 
-export const applicationService = new ApplicationService(applicationRepo, callRepo, stageRepo, reviewerRepo,
-    projectService, constraintValidator, templateValidtor,
-    new ApplicationSynchronizer(projectRepo, applicationRepo, stageRepo),
-    new AnonymizerService(applicationRepo, collaboratorRepo),
+export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, callRepo, constraintValidator,
+    projectAuth,
     notificationService);
+export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, callRepo, constraintValidator,
+    projectAuth, new PhaseSynchronizer(projectRepo, phaseRepo)
+);
+
+export const applicationService = new ApplicationService(
+    applicationRepo, projectRepo, callRepo, stageRepo, reviewerRepo,
+    templateValidtor, new ApplicationSynchronizer(projectRepo, applicationRepo),
+    new AnonymizerService(applicationRepo, collaboratorRepo), projectAuth,
+    notificationService);
+
+export const projectService = new ProjectService(projectRepo, collaboratorRepo, phaseRepo, applicationRepo,
+    grantRepo, callRepo, stageRepo,
+    collabService, phaseService, applicationService,
+    constraintValidator, templateValidtor, projectAuth,
+    authPermissionService, notificationService);
 
 export const userService = new UserService(userRepo, organizationRepo, roleRepo);
 

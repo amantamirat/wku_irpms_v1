@@ -13,12 +13,20 @@ const controller = new CollaboratorController(collabService);
 const router: Router = Router();
 
 router.post('/', verifyAuthToken,
-    checkPermission([PERMISSIONS.COLLABORATOR.CREATE]),
+    checkPermission([PERMISSIONS.COLLABORATOR.CREATE, PERMISSIONS.COLLABORATOR.CREATE_OWN]),
     controller.create);
 
 router.get('/', verifyAuthToken,
     checkPermission([PERMISSIONS.COLLABORATOR.READ]),
     controller.get);
+
+// Lookup - currently uses the same get controller
+router.get(
+    '/lookup',
+    verifyAuthToken,
+    checkPermission("collaborator:lookup"),
+    controller.get
+);
 
 router.get('/me', verifyAuthToken,
     controller.getMyCollaborations);
@@ -32,7 +40,7 @@ router.patch('/:id', verifyAuthToken,
     controller.transitionState);
 
 router.delete('/:id', verifyAuthToken,
-    checkPermission([PERMISSIONS.COLLABORATOR.DELETE]),
+    checkPermission([PERMISSIONS.COLLABORATOR.DELETE, PERMISSIONS.COLLABORATOR.DELETE_OWN]),
     controller.delete);
 
 export default router;

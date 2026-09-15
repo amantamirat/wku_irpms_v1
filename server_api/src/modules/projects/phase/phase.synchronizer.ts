@@ -79,7 +79,7 @@ export class PhaseSynchronizer {
 
         return this.projectRepo.updateStatus(
             projectId,
-            newStatus
+            newStatus, ""
         );
     }
 }

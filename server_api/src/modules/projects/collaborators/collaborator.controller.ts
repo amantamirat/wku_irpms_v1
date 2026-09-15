@@ -8,9 +8,8 @@ import {
     CreateCollaboratorDto,
     UpdateCollaboratorDto
 } from './collaborator.dto';
-import { CollaboratorService } from './collaborator.service';
 import { CollaboratorStatus } from './collaborator.model';
-import { populate } from 'dotenv';
+import { CollaboratorService } from './collaborator.service';
 
 export class CollaboratorController {
 
@@ -140,10 +139,9 @@ export class CollaboratorController {
 
             const dto: DeleteDto = {
                 id,
-                userId: req.auth.userId,
+                // userId: req.auth.userId,
             };
-
-            const deleted = await this.service.delete(dto);
+            const deleted = await this.service.delete(dto, req.auth.userId);
             successResponse(res, 200, 'Collaborator deleted successfully', deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

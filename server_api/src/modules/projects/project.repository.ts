@@ -1,5 +1,5 @@
 // project.repository.ts
-import mongoose, { ClientSession } from "mongoose";
+import mongoose from "mongoose";
 import { FilterOptions } from "../../common/dtos/filter.dto";
 import {
     CreateProjectDTO,
@@ -9,44 +9,62 @@ import {
 import { IProject, Project, ProjectStatus } from "./project.model";
 
 export interface IProjectRepository {
-    findById(id: string, options?: FilterOptions): Promise<IProject | null>;
-    find(filters: FilterProjectsDTO, options?: FilterOptions): Promise<Partial<IProject>[]>;
-    create(dto: CreateProjectDTO, userId: string): Promise<IProject>;
-    update(id: string, data: UpdateProjectDTO["data"], userId: string): Promise<IProject | null>;
-    updateStatus(id: string, newStatus: ProjectStatus): Promise<IProject | null>;
-    incrementTotals(projectId: string, delta: { duration: number; budget: number }): Promise<IProject | null>;
-    updateTotalCollabs(
-        projectId: string,
-        delta: number
-    ): Promise<IProject | null>;
-    updateCurrentApplication(
+    findById(
         id: string,
-        application: string
-    ): Promise<IProject | null>;
-    clearCurrentApplication(
-        project: string,
-        session?: ClientSession
+        options?: FilterOptions
     ): Promise<IProject | null>;
 
-    updateCurrentVerification(
+    find(
+        filters: FilterProjectsDTO,
+        options?: FilterOptions
+    ): Promise<Partial<IProject>[]>;
+
+    create(
+        dto: CreateProjectDTO,
+        userId: string
+    ): Promise<IProject>;
+
+    update(
         id: string,
-        verification: string | null
+        data: UpdateProjectDTO["data"],
+        userId?: string
     ): Promise<IProject | null>;
-    clearCurrentVerification(
-        project: string
+
+    incrementTotals(
+        projectId: string,
+        delta: {
+            duration?: number;
+            budget?: number;
+            collabs?: number;
+        }
     ): Promise<IProject | null>;
-    exists(filters: FilterProjectsDTO): Promise<boolean>;
-    delete(id: string): Promise<IProject | null>;
+
+    updateStatus(
+        id: string,
+        newStatus: ProjectStatus,
+        userId: string
+    ): Promise<IProject | null>;
+
+    exists(
+        filters: FilterProjectsDTO
+    ): Promise<boolean>;
+
+    delete(
+        id: string
+    ): Promise<IProject | null>;
 }
 
-// MongoDB implementation
+
 export class ProjectRepository implements IProjectRepository {
 
     async findById(
         id: string,
         options?: FilterOptions
     ): Promise<IProject | null> {
-        let dbQuery = Project.findById(new mongoose.Types.ObjectId(id));
+
+        let dbQuery = Project.findById(
+            new mongoose.Types.ObjectId(id)
+        );
 
         if (options?.populate) {
             dbQuery = dbQuery
@@ -54,13 +72,18 @@ export class ProjectRepository implements IProjectRepository {
                 .populate("calendar")
                 .populate("grant")
                 .populate("themes")
-                .populate("createdBy")
+                .populate("createdBy");
         }
 
         return dbQuery.lean<IProject>().exec();
     }
 
-    async find(filters: FilterProjectsDTO, options?: FilterOptions) {
+
+    async find(
+        filters: FilterProjectsDTO,
+        options?: FilterOptions
+    ): Promise<Partial<IProject>[]> {
+
         const query: Record<string, any> = {};
 
         if (filters.status) {
@@ -68,19 +91,27 @@ export class ProjectRepository implements IProjectRepository {
         }
 
         if (filters.leadPI) {
-            query.leadPI = new mongoose.Types.ObjectId(filters.leadPI);
+            query.leadPI = new mongoose.Types.ObjectId(
+                filters.leadPI
+            );
         }
 
         if (filters.grant) {
-            query.grant = new mongoose.Types.ObjectId(filters.grant);
+            query.grant = new mongoose.Types.ObjectId(
+                filters.grant
+            );
         }
 
         if (filters.call) {
-            query.call = new mongoose.Types.ObjectId(filters.call);
+            query.call = new mongoose.Types.ObjectId(
+                filters.call
+            );
         }
 
         if (filters.calendar) {
-            query.calendar = new mongoose.Types.ObjectId(filters.calendar);
+            query.calendar = new mongoose.Types.ObjectId(
+                filters.calendar
+            );
         }
 
         let dbQuery = Project.find(query);
@@ -93,199 +124,231 @@ export class ProjectRepository implements IProjectRepository {
                 .populate("themes")
                 .populate("createdBy");
         }
+
         return dbQuery.lean<IProject[]>().exec();
     }
-    async create(dto: CreateProjectDTO, userId: string) {
+
+
+    async create(
+        dto: CreateProjectDTO,
+        userId: string
+    ): Promise<IProject> {
+
         const data = {
             ...dto,
-            calendar: dto.calendar ? new mongoose.Types.ObjectId(dto.calendar) : undefined,
-            call: dto.call ? new mongoose.Types.ObjectId(dto.call) : undefined,
+
+            calendar: dto.calendar
+                ? new mongoose.Types.ObjectId(dto.calendar)
+                : undefined,
+
+            call: dto.call
+                ? new mongoose.Types.ObjectId(dto.call)
+                : undefined,
+
             grant: new mongoose.Types.ObjectId(dto.grant),
+
             leadPI: new mongoose.Types.ObjectId(dto.leadPI),
-            themes: dto.themes?.map(thm => new mongoose.Types.ObjectId(thm)),
+
+            themes: dto.themes?.map(
+                themeId => new mongoose.Types.ObjectId(themeId)
+            ),
+
             createdBy: new mongoose.Types.ObjectId(userId)
         };
 
-        return await Project.create(data);
+        return Project.create(data);
     }
 
-    async update(id: string, dtoData: UpdateProjectDTO["data"], userId: string): Promise<IProject | null> {
+    async update(
+        id: string,
+        dtoData: UpdateProjectDTO["data"],
+        userId?: string
+    ): Promise<IProject | null> {
+
         const updateData: Partial<IProject> = {};
 
-        if (dtoData.title) updateData.title = dtoData.title;
-        if (dtoData.summary) updateData.summary = dtoData.summary;
-        if (dtoData.themes) {
-            updateData.themes = dtoData.themes.map(id => new mongoose.Types.ObjectId(id))
+        if (dtoData.title !== undefined) {
+            updateData.title = dtoData.title;
         }
+
+        if (dtoData.summary !== undefined) {
+            updateData.summary = dtoData.summary;
+        }
+
+        if (dtoData.totalBudget !== undefined) {
+            updateData.totalBudget = dtoData.totalBudget;
+        }
+
+        if (dtoData.totalDuration !== undefined) {
+            updateData.totalDuration = dtoData.totalDuration;
+        }
+
+        if (dtoData.totalCollabs !== undefined) {
+            updateData.totalCollabs = dtoData.totalCollabs;
+        }
+
+        if (dtoData.themes !== undefined) {
+            updateData.themes = dtoData.themes.map(
+                themeId => new mongoose.Types.ObjectId(themeId)
+            );
+        }
+
+        if (dtoData.call !== undefined) {
+            updateData.call = dtoData.call
+                ? new mongoose.Types.ObjectId(dtoData.call)
+                : null;
+        }
+
+        if (dtoData.calendar !== undefined) {
+            updateData.calendar = dtoData.calendar
+                ? new mongoose.Types.ObjectId(dtoData.calendar)
+                : null;
+        }
+
+        if (dtoData.currentApplication !== undefined) {
+            updateData.currentApplication =
+                dtoData.currentApplication
+                    ? new mongoose.Types.ObjectId(dtoData.currentApplication)
+                    : null;
+        }
+
+        if (dtoData.currentVerification !== undefined) {
+            updateData.currentVerification =
+                dtoData.currentVerification
+                    ? new mongoose.Types.ObjectId(dtoData.currentVerification)
+                    : null;
+        }
+
+        if (userId) {
+            updateData.updatedBy = new mongoose.Types.ObjectId(userId);
+        }
+
+        return Project.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            {
+                $set: updateData
+            },
+            {
+                new: true
+            }
+        ).exec();
+    }
+
+
+    async incrementTotals(
+        projectId: string,
+        delta: {
+            duration?: number;
+            budget?: number;
+            collabs?: number;
+        }
+    ): Promise<IProject | null> {
+        const increment: Record<string, number> = {};
+
+        if (delta.duration !== undefined) {
+            increment.totalDuration = delta.duration;
+        }
+
+        if (delta.budget !== undefined) {
+            increment.totalBudget = delta.budget;
+        }
+
+        if (delta.collabs !== undefined) {
+            increment.totalCollabs = delta.collabs;
+        }
+
+        if (Object.keys(increment).length === 0) {
+            return Project.findById(projectId).exec();
+        }
+
+        return Project.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(projectId),
+            {
+                $inc: increment
+            },
+            {
+                new: true
+            }
+        ).exec();
+    }
+
+
+    async updateStatus(
+        id: string,
+        status: ProjectStatus,
+        userId: string
+    ): Promise<IProject | null> {
 
         return Project.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             {
                 $set: {
-                    ...updateData,
-                    updatedBy: new mongoose.Types.ObjectId(userId)
+                    status
+                },
+                $push: {
+                    statusHistory: {
+                        status,
+                        changedBy:
+                            new mongoose.Types.ObjectId(
+                                userId
+                            ),
+                        changedAt: new Date()
+                    }
                 }
             },
-            { new: true }
-        ).exec();
-    }
-
-    async incrementTotals(
-        projectId: string,
-        delta: { duration: number; budget: number },
-        session?: ClientSession
-    ) {
-        return Project.findByIdAndUpdate(
-            projectId,
-            {
-                $inc: {
-                    totalDuration: delta.duration,
-                    totalBudget: delta.budget
-                }
-            },
-            {
-                session,          // <-- attach session here
-                new: true         // optional: return updated document
-            }
-        );
-    }
-
-    async updateTotalCollabs(
-        projectId: string,
-        delta: number,
-        session?: ClientSession
-    ) {
-        return Project.findByIdAndUpdate(
-            projectId,
-            {
-                $inc: {
-                    totalCollabs: delta
-                }
-            },
-            {
-                session,
-                new: true
-            }
-        );
-    }
-
-
-
-    async updateStatus(
-        id: string,
-        newStatus: ProjectStatus,
-        session?: ClientSession
-    ) {
-        return Project.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
-            { $set: { status: newStatus } },
             {
                 new: true,
-                session // attach session here
+                runValidators: true
             }
         ).exec();
     }
 
-    // ✅ add inside ProjectRepository
-    async updateCurrentApplication(
-        id: string,
-        application: string
-    ) {
-        const update =
 
-        {
-            $set: {
-                currentApplication: new mongoose.Types.ObjectId(application)
-            }
+    async exists(
+        filters: FilterProjectsDTO
+    ): Promise<boolean> {
+
+        const query: Record<string, any> = {};
+
+        if (filters.title) {
+            query.title = filters.title;
         }
 
-
-        return Project.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
-            update,
-            {
-                new: true
-            }
-        ).exec();
-    }
-
-    // ✅ add inside ProjectRepository
-    async updateCurrentVerification(
-        id: string,
-        verification: string | null
-    ) {
-        const update =
-
-        {
-            $set: {
-                currentVerification: verification ? new mongoose.Types.ObjectId(verification) : null
-            }
+        if (filters.leadPI) {
+            query.leadPI = new mongoose.Types.ObjectId(
+                filters.leadPI
+            );
         }
-        return Project.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
-            update,
-            {
-                new: true
-            }
-        ).exec();
-    }
 
-    async clearCurrentApplication(
-        project: string
-    ) {
-        let dbQuery = Project.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(project),
-            {
-                $unset: {
-                    currentApplication: 1
-                }
-            },
-            { new: true }
-        );
-        return dbQuery.exec();
-    }
+        if (filters.grant) {
+            query.grant = new mongoose.Types.ObjectId(
+                filters.grant
+            );
+        }
 
+        if (filters.call) {
+            query.call = new mongoose.Types.ObjectId(
+                filters.call
+            );
+        }
 
-    async clearCurrentVerification(
-        project: string
-    ) {
-        let dbQuery = Project.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(project),
-            {
-                $unset: {
-                    currentVerification: 1
-                }
-            },
-            { new: true }
-        );
-        return dbQuery.exec();
-    }
+        if (filters.calendar) {
+            query.calendar = new mongoose.Types.ObjectId(
+                filters.calendar
+            );
+        }
 
-    async exists(filters: FilterProjectsDTO): Promise<boolean> {
-        const query: any = {};
-        const { leadPI, grant, call, calendar, title } = filters;
-        if (title) {
-            query.title = title;
-        }
-        if (leadPI) {
-            query.leadPI = new mongoose.Types.ObjectId(leadPI);
-        }
-        if (grant) {
-            query.grant = new mongoose.Types.ObjectId(grant);
-        }
-        if (call) {
-            query.call = new mongoose.Types.ObjectId(call);
-        }
-        if (calendar) {
-            query.calendar = new mongoose.Types.ObjectId(calendar);
-        }
         const result = await Project.exists(query).exec();
+
         return result !== null;
     }
 
 
+    async delete(
+        id: string
+    ): Promise<IProject | null> {
 
-    async delete(id: string) {
         return Project.findByIdAndDelete(id).exec();
     }
 }
+

@@ -40,7 +40,6 @@ export interface UpdatePhaseDto {
 }
 
 // ---------- GET_OPTIONS ----------
-export interface GetPhasesOptions {
+export interface FilterPhases {
     project: string;
-    populate?: boolean;
 }

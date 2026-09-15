@@ -1,4 +1,5 @@
-import { createEntityManager } from "@/components/createEntityManager";
+'use client'
+import { createEntityManager } from "@/components/data-table/createEntityManager";
 import { PermissionApi } from "../api/permission.api";
 import { Permission } from "../models/permission.model";
 import SavePermission from "./SavePermission";

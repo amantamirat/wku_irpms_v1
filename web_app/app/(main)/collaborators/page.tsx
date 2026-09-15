@@ -2,19 +2,14 @@
 
 import MyBadge from "@/templates/MyBadge";
 import { useEffect, useState } from "react";
-import { CollaboratorApi } from "../api/collaborator.api";
-import { Collaborator } from "../models/collaborator.model";
-import ProjectDetail from "../../projects/components/ProjectDetail";
 import EmptyState from "@/components/EmptyState";
-import {
-    ItemDataTable,
-    RowActionButton
-} from "@/components/data-table/ItemDataTable";
-import { useStateTransitionActions } from "@/hooks/useStateTransitionActions";
-import { StateTransition } from "@/api/EntityApi";
-import { COLLABORATION_TRANSITIONS } from "../models/collaborator.state-machine";
+import { ItemDataTable } from "@/components/data-table/ItemDataTable";
+import { Collaborator } from "./models/collaborator.model";
+import { CollaboratorApi } from "./api/collaborator.api";
+import ProjectDetail from "../projects/components/ProjectDetail";
+import { extractId } from "@/utils/utils";
 
-const MyMembershipsManager = () => {
+const CollaboratorsManager = () => {
     const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
     const [loading, setLoading] = useState(false);
 
@@ -23,10 +18,10 @@ const MyMembershipsManager = () => {
             setLoading(true);
 
             try {
-                const data = await CollaboratorApi.me();
+                const data = await CollaboratorApi.getAll();
                 setCollaborators(Array.isArray(data) ? data : []);
             } catch (error) {
-                console.error("Error fetching my collaborations", error);
+                console.error("Error fetching collaborators", error);
             } finally {
                 setLoading(false);
             }
@@ -34,39 +29,6 @@ const MyMembershipsManager = () => {
 
         fetchCollaborators();
     }, []);
-
-    const handleTransition = async (
-        id: string,
-        transition: StateTransition
-    ) => {
-        if (!CollaboratorApi.transitionState) return;
-
-        const updated = await CollaboratorApi.transitionState(
-            id,
-            transition
-        );
-
-        if (!updated) return;
-
-        setCollaborators(prev =>
-            prev.map(collaborator =>
-                collaborator._id === id
-                    ? {
-                        ...collaborator,
-                        status: updated.status
-                    }
-                    : collaborator
-            )
-        );
-    };
-
-    const rowActions: RowActionButton<Collaborator>[] =
-        useStateTransitionActions<Collaborator>({
-            resource: "collaborator",
-            statusField: "status",
-            transitions: COLLABORATION_TRANSITIONS,
-            onTransition: handleTransition,
-        });
 
     const columns = [
         {
@@ -87,6 +49,23 @@ const MyMembershipsManager = () => {
                         style={{ maxWidth: "350px" }}
                     >
                         {title}
+                    </div>
+                );
+            }
+        },
+        {
+            header: "Member",
+            field: "user.name",
+            sortable: true,
+            body: (collaborator: Collaborator) => {
+                const user =
+                    typeof collaborator.member === "object"
+                        ? collaborator.member
+                        : null;
+
+                return (
+                    <div>
+                        {(user as any)?.name ?? "N/A"}
                     </div>
                 );
             }
@@ -113,7 +92,7 @@ const MyMembershipsManager = () => {
 
                 return (
                     <div>
-                        {(project?.leadPI as any).name ?? "N/A"}
+                        {(project?.leadPI as any)?.name ?? "N/A"}
                     </div>
                 );
             }
@@ -134,7 +113,7 @@ const MyMembershipsManager = () => {
     if (loading) {
         return (
             <div className="p-4 text-center">
-                Loading memberships...
+                Loading collaborators...
             </div>
         );
     }
@@ -143,40 +122,32 @@ const MyMembershipsManager = () => {
         return (
             <EmptyState
                 icon="pi pi-users"
-                title="No project memberships"
-                description="You are not listed as a collaborator on any active projects."
+                title="No collaborators found"
+                description="There are no collaborators currently listed."
             />
         );
     }
 
     return (
-        <>
-            {
-                /**
-                 * <div className="mb-4">
+        <div className="card border-none shadow-1 p-4 mb-4">
+            <div className="mb-4">
                 <h5 className="m-0 text-xl font-bold">
-                    My Memberships
+                    Collaborators Management
                 </h5>
 
                 <p className="text-500 text-sm m-0">
-                    Manage your active project teams and roles
+                    View and manage all project teams and roles
                 </p>
             </div>
-                 */
-            }
-
 
             <ItemDataTable
                 items={collaborators}
                 columns={columns}
-                rowActions={rowActions}
-                enableSearch={false}
+                enableSearch={true}
                 expandable={{
                     template: (collaborator) => {
                         const projectId =
-                            typeof collaborator.project === "object"
-                                ? collaborator.project?._id
-                                : collaborator.project;
+                            extractId(collaborator.project);
 
                         if (!projectId) {
                             return (
@@ -192,8 +163,8 @@ const MyMembershipsManager = () => {
                     }
                 }}
             />
-        </>
+        </div>
     );
 };
 
-export default MyMembershipsManager;
+export default CollaboratorsManager;

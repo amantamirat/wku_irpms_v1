@@ -51,37 +51,7 @@ export const validateCall = (call: Partial<Call>): { valid: boolean; message?: s
     return { valid: true };
 };
 
-export function sanitizeCall(call: Partial<Call>): Partial<Call> {
-    return {
-        ...call,
 
-        grant:
-            typeof call.grant === "object" && call.grant !== null
-                ? call.grant._id
-                : call.grant,
-
-        calendar:
-            typeof call.calendar === "object" && call.calendar !== null
-                ? call.calendar._id
-                : call.calendar,
-
-        organization:
-            typeof call.organization === "object" && call.organization !== null
-                ? call.organization._id
-                : call.organization,
-
-        constraint:
-            typeof call.constraint === "object" && call.constraint !== null
-                ? call.constraint._id
-                : call.constraint,
-
-        composition:
-            typeof call.composition === "object" && call.composition !== null
-                ? call.composition._id
-                : call.composition,
-        description: call.description === "" ? null : call.description,
-    };
-}
 
 
 export const createEmptyCall = (call?: Partial<Call>): Call => ({

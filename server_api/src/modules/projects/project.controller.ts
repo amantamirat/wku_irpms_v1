@@ -1,3 +1,5 @@
+import fs from "fs";
+import path from "path";
 import { Response } from "express";
 import { errorResponse, successResponse } from "../../common/helpers/response";
 import { AuthenticatedRequest } from "../auth/auth.middleware";
@@ -80,6 +82,55 @@ export class ProjectController {
         created
       );
     } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  };
+
+
+  apply = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
+      if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
+
+      const project = JSON.parse(req.body.project) as CreateProjectDTO;
+
+      const relativeDocPath = path
+        .relative(process.cwd(), req.file.path)
+        .replace(/\\/g, "/");
+
+      const dto: CreateProjectDTO = {
+        ...project,
+        grant: "",
+        docPath: relativeDocPath,
+        collaborators: project.collaborators ?? [],
+        themes: project.themes ?? [],
+        phases: project.phases ?? []
+      };
+
+      const submitted = await this.service.apply(
+        dto,
+        req.auth.userId
+      );
+
+      successResponse(
+        res,
+        201,
+        "Project submitted successfully",
+        submitted
+      );
+
+    } catch (err: any) {
+      if (req.file?.path) {
+        fs.unlink(req.file.path, (unlinkErr) => {
+          if (unlinkErr) {
+            console.error(
+              `Failed to delete orphaned file at ${req.file?.path}:`,
+              unlinkErr
+            );
+          }
+        });
+      }
+
       errorResponse(res, 400, err.message, err);
     }
   };
@@ -221,11 +272,10 @@ export class ProjectController {
       const dto: TransitionRequestDto = {
         id,
         current,
-        next,
-        userId: req.auth.userId,
+        next
       };
 
-      const updated = await this.service.transitionState(dto);
+      const updated = await this.service.transitionState(dto, req.auth.userId);
 
       successResponse(
         res,
@@ -255,10 +305,9 @@ export class ProjectController {
 
       const dto: DeleteDto = {
         id,
-        userId: req.auth.userId,
       };
 
-      const deleted = await this.service.delete(dto);
+      const deleted = await this.service.delete(dto, req.auth.userId);
 
       successResponse(
         res,

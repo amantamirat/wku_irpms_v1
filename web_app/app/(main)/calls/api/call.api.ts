@@ -1,7 +1,8 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
 import { StateTransition } from "@/api/EntityApi";
-import { Call, FilterCallsOptions, sanitizeCall } from "../models/call.model";
+import { Call, FilterCallsOptions } from "../models/call.model";
+import { sanitize } from "@/utils/utils";
 
 const end_point = "/calls";
 
@@ -31,7 +32,7 @@ export const CallApi: EntityApi<Call, FilterCallsOptions | undefined>
     // Create
     // ---------------------------
     async create(call) {
-        const sanitized = sanitizeCall(call);
+        const sanitized = sanitize(call);
         return ApiClient.post(`${end_point}`, sanitized);
     },
 
@@ -42,7 +43,7 @@ export const CallApi: EntityApi<Call, FilterCallsOptions | undefined>
         if (!call._id) throw new Error("_id required");
         // We pass the ID and the sanitized body separately 
         // to match common REST patterns
-        return ApiClient.put(`${end_point}/${call._id}`, sanitizeCall(call));
+        return ApiClient.put(`${end_point}/${call._id}`, sanitize(call));
     },
 
     // ---------------------------

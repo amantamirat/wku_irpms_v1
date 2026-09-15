@@ -3,23 +3,22 @@
 import React, { useState, useEffect } from 'react';
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
-import { InputText } from 'primereact/inputtext';
 import { InputNumber } from 'primereact/inputnumber';
 import { Calendar } from 'primereact/calendar';
 import { classNames } from 'primereact/utils';
 
 // Models & APIs
 import { Stage } from '../../stages/models/stage.model';
+import { Call } from '../../models/call.model';
 import { Evaluation } from '@/app/(main)/evaluations/models/evaluation.model';
 import { Template } from '@/app/(main)/templates/models/template.model';
 import { EvaluationApi } from '@/app/(main)/evaluations/api/evaluation.api';
 import { EvaluationStatus } from '@/app/(main)/evaluations/models/evaluation.state-machine';
 import { TemplateApi } from '@/app/(main)/templates/api/template.api';
 
-
 interface CallStagesStepProps {
-    stages: Partial<Stage>[];
-    onUpdateStages: (stages: Partial<Stage>[]) => void;
+    data: Partial<Call>;
+    onUpdate: (data: Partial<Call>) => void;
     onNext: () => void;
     onBack: () => void;
 }
@@ -34,37 +33,44 @@ const STAGE_PRESETS = [
     { label: 'Final Selection', value: 'Final Selection' }
 ];
 
-export const CallStagesStep = ({ stages, onUpdateStages, onNext, onBack }: CallStagesStepProps) => {
+export const CallStagesStep = ({ data, onUpdate, onNext, onBack }: CallStagesStepProps) => {
     const [submitted, setSubmitted] = useState(false);
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
     const [templates, setTemplates] = useState<Template[]>([]);
+
+    const stages: Partial<Stage>[] = data.stages || [];
 
     useEffect(() => {
         EvaluationApi.getAll({ status: EvaluationStatus.published }).then(setEvaluations).catch(console.error);
         TemplateApi.getAll().then(setTemplates).catch(console.error);
     }, []);
 
+    const updateStagesList = (newStages: Partial<Stage>[]) => {
+        onUpdate({ ...data, stages: newStages as Stage[] });
+    };
+
     const addStage = () => {
         const nextOrder = stages.length + 1;
-        onUpdateStages([
+        updateStagesList([
             ...stages,
-            { name: '', order: nextOrder, minAcceptanceScore: 50, deadline: undefined }
+            { name: '', order: nextOrder, minAcceptanceScore: 50, deadline: undefined, evaluation: undefined }
         ]);
     };
 
     const removeStage = (index: number) => {
         const updated = stages.filter((_, i) => i !== index).map((s, idx) => ({ ...s, order: idx + 1 }));
-        onUpdateStages(updated);
+        updateStagesList(updated);
     };
 
     const updateStageField = (index: number, field: keyof Stage, value: any) => {
         const updated = [...stages];
         updated[index] = { ...updated[index], [field]: value };
-        onUpdateStages(updated);
+        updateStagesList(updated);
     };
 
+    // Updated validation: Requires name, deadline, and evaluation form
     const isStageValid = (stage: Partial<Stage>) => {
-        return !!stage.name?.trim() && !!stage.deadline;
+        return !!stage.name?.trim() && !!stage.deadline && !!stage.evaluation;
     };
 
     const validateAndNext = () => {
@@ -136,18 +142,20 @@ export const CallStagesStep = ({ stages, onUpdateStages, onNext, onBack }: CallS
                                 {submitted && !stage.deadline && <small className="p-error">Deadline required.</small>}
                             </div>
 
-                            {/* Evaluation Form */}
+                            {/* Evaluation Form (Required) */}
                             <div className="field col-12 md:col-4">
-                                <label className="font-semibold text-sm">Evaluation Form</label>
+                                <label className="font-bold text-sm">Evaluation Form *</label>
                                 <Dropdown
                                     value={stage.evaluation}
                                     options={evaluations}
                                     optionLabel="title"
                                     dataKey="_id"
                                     onChange={(e) => updateStageField(index, 'evaluation', e.value)}
-                                    placeholder="Select Form (Optional)"
+                                    placeholder="Select Form"
                                     showClear
+                                    className={classNames({ 'p-invalid': submitted && !stage.evaluation })}
                                 />
+                                {submitted && !stage.evaluation && <small className="p-error">Evaluation Form required.</small>}
                             </div>
 
                             {/* Min Acceptance Score */}
@@ -168,7 +176,7 @@ export const CallStagesStep = ({ stages, onUpdateStages, onNext, onBack }: CallS
                                 <Dropdown
                                     value={stage.template}
                                     options={templates}
-                                    optionLabel="title"
+                                    optionLabel="name"
                                     dataKey="_id"
                                     onChange={(e) => updateStageField(index, 'template', e.value)}
                                     placeholder="Select Template (Optional)"

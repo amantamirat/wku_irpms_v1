@@ -3,8 +3,6 @@ import { checkPermission, stageService } from '../../../core/container';
 import { verifyAuthToken } from '../../auth/auth.middleware';
 import { StageController } from './stage.controller';
 
-
-
 const controller = new StageController(stageService);
 const router = Router();
 
@@ -20,7 +18,7 @@ router.post(
 router.get(
     '/upcoming',
     verifyAuthToken,
-    // checkPermission(["call.stage:read"]),
+    //checkPermission(["stage:read"]),
     controller.getUpcoming
 );
 
@@ -28,7 +26,7 @@ router.get(
 router.get(
     '/next/:id',
     verifyAuthToken,
-    checkPermission(["stage:read"]),
+    //checkPermission(["stage:lookup"]),
     controller.getNext
 );
 

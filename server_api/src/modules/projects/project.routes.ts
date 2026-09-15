@@ -5,6 +5,7 @@ import { verifyAuthToken } from '../auth/auth.middleware';
 import { checkTransitionPermission } from '../../core/container';
 import { checkPermission } from '../../core/container';
 import { ProjectController } from './project.controller';
+import { upload } from '../../util/multer';
 
 const controller = new ProjectController(projectService);
 const router: Router = Router();
@@ -13,6 +14,20 @@ const router: Router = Router();
 router.post('/', verifyAuthToken,
     checkPermission([PERMISSIONS.PROJECT.CREATE, PERMISSIONS.PROJECT.CREATE_OWN]),
     controller.create);
+
+
+router.post(
+    "/apply",
+    verifyAuthToken,
+    checkPermission("project:apply"),
+    (req, res, next) => {
+        // Set the dynamic subfolder for this specific endpoint
+        req.headers["x-upload-folder"] = "applications";
+        next();
+    },
+    upload.single("file"),
+    controller.apply
+);
 
 
 router.get('/', verifyAuthToken,
@@ -52,7 +67,7 @@ router.patch('/:id', verifyAuthToken,
 
 //delete
 router.delete('/:id', verifyAuthToken,
-    checkPermission([PERMISSIONS.PROJECT.DELETE]),
+    checkPermission([PERMISSIONS.PROJECT.DELETE, PERMISSIONS.PROJECT.DELETE_OWN]),
     controller.delete);
 
 export default router;

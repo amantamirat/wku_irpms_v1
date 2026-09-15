@@ -264,7 +264,7 @@ export class VerificationRepository
     async updateStatus(
         id: string,
         status: VerificationStatus,
-        changedBy: string
+        userId: string
     ): Promise<IVerification | null> {
 
         return Verification.findByIdAndUpdate(
@@ -278,7 +278,7 @@ export class VerificationRepository
                         status,
                         changedBy:
                             new mongoose.Types.ObjectId(
-                                changedBy
+                                userId
                             ),
                         changedAt: new Date()
                     }

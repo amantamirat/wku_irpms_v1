@@ -169,9 +169,8 @@ export class VerificationService {
         // ----------------------------------------------
         // 9. Set as current verification
         // ----------------------------------------------
-        await this.projectRepo.updateCurrentVerification(
-            String(project._id),
-            String(verification._id)
+        await this.projectRepo.update(
+            String(project._id), { currentVerification: String(verification._id) }
         );
         // ----------------------------------------------
         // 10. Send notification
@@ -476,7 +475,7 @@ export class VerificationService {
         // ----------------------------------------------
 
         if (verificationDoc.attempt === 1) {
-            await this.projectRepo.clearCurrentVerification(projectId);
+            await this.projectRepo.update(projectId, { currentVerification: null });
         } else {
             // ----------------------------------------------
             // Update project current verification
@@ -486,8 +485,9 @@ export class VerificationService {
                     projectId,
                     verificationDoc.attempt - 1
                 );
-            await this.projectRepo.updateCurrentVerification(projectId,
-                previousVerification ? String(previousVerification._id) : null
+            await this.projectRepo.update(projectId, {
+                currentVerification: previousVerification ? String(previousVerification._id) : null
+            }
             );
         }
         // ----------------------------------------------

@@ -7,7 +7,7 @@ import { Organization } from "../../organizations/models/organization.model";
 import { Theme } from "../../thematics/themes/models/theme.model";
 import { User } from "../../users/models/user.model";
 import { Verification } from "../../verifications/models/verification.model";
-import { Phase, sanitizePhase } from "../phases/models/phase.model";
+import { Phase } from "../phases/models/phase.model";
 
 export enum ProjectStatus {
     draft = 'draft',

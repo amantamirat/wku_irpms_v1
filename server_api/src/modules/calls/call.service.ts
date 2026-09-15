@@ -27,13 +27,13 @@ export class CallService {
 
     async create(dto: CreateCallDTO) {
         const { stages, ...callData } = dto;
-        const { grant } = callData;
 
-        if (!stages || stages.length === 0) {
+        if (!stages?.length) {
             throw new AppError(ERROR_CODES.STAGE_REQUIRED);
         }
 
-        const grantDoc = await this.grantRepo.findById(grant);
+        // Validate Grant
+        const grantDoc = await this.grantRepo.findById(callData.grant);
 
         if (!grantDoc) {
             throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
@@ -43,7 +43,8 @@ export class CallService {
             throw new AppError(ERROR_CODES.GRANT_NOT_ACTIVE);
         }
 
-        const calendarDoc = await this.calendarRepo.findById(dto.calendar);
+        // Validate Calendar
+        const calendarDoc = await this.calendarRepo.findById(callData.calendar);
 
         if (!calendarDoc) {
             throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
@@ -53,22 +54,39 @@ export class CallService {
             throw new AppError(ERROR_CODES.CALENDAR_NOT_ACTIVE);
         }
 
-        const created = await this.repository.create({
+        // -----------------------------------------
+        // Validate ALL stages BEFORE creating call
+        // -----------------------------------------
+
+        for (const stage of stages) {
+            await this.stageService.validateCreate({
+                ...stage,
+                call: "validation"
+            });
+        }
+
+        // -----------------------------------------
+        // Create Call
+        // -----------------------------------------
+
+        const call = await this.repository.create({
             ...callData,
             organization: String(grantDoc.organization),
             status: CallStatus.planned
         });
 
-        await Promise.all(
-            stages.map(stage =>
-                this.stageService.create({
-                    ...stage,
-                    call: String(created._id)
-                })
-            )
-        );
+        // -----------------------------------------
+        // Create stages
+        // -----------------------------------------
 
-        return created;
+        for (const stage of stages) {
+
+            await this.stageService.create({
+                ...stage, call: String(call._id)
+            });
+        }
+
+        return this.repository.findById(String(call._id), { populate: true });
     }
 
     async getCalls(filter: FilterCallDTO, options?: FilterOptions) {
@@ -136,9 +154,14 @@ export class CallService {
         const callDoc = await this.repository.findById(id);
         if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         if (callDoc.status !== CallStatus.planned) throw new AppError(ERROR_CODES.CALL_NOT_PLANNED);
-        const deleted = await this.repository.delete(id);
-        //await this.callStageRepo.deleteByCall(id);
-        return deleted;
+        const hasStages = await this.stageService.exists({ call: id });
+        if (hasStages) {
+            throw new AppError(
+                ERROR_CODES.STAGE_ALREADY_EXISTS,
+                "Cannot delete call because it has stages"
+            );
+        }
+        return await this.repository.delete(id);
     }
 }
 export const CALL_TRANSITIONS: Record<CallStatus, CallStatus[]> = {

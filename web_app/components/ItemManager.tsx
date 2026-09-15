@@ -5,7 +5,7 @@ import { DataTable, DataTableFilterMeta, DataTableExpandedRows } from "primereac
 import { InputText } from "primereact/inputtext";
 import { Toolbar } from "primereact/toolbar";
 import ErrorState from "./ErrorState";
-import {ListSkeleton} from "./Skeletons";
+import { ListSkeleton } from "./Skeletons";
 
 export interface RowAction<T> {
     icon: string;
@@ -70,7 +70,7 @@ export function ItemManager<T extends Record<string, any>>({
     // Professional Header: Search on the right, Title on the left
     const header = useMemo(() => {
         if (!enableSearch && !headerTitle) return null;
-        return (            
+        return (
             <div className="flex flex-wrap gap-2 align-items-center justify-content-between">
                 <h5 className="m-0 text-900">{headerTitle}</h5>
                 {enableSearch && (
@@ -118,7 +118,7 @@ export function ItemManager<T extends Record<string, any>>({
         );
     }, [actions, hasPermission]);
 
-   // if (error) return <ErrorState errorMessage={error} />;
+    // if (error) return <ErrorState errorMessage={error} />;
 
     const startToolbarTemplate = () => (
         <div className="flex flex-wrap gap-2">

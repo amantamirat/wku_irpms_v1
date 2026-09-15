@@ -129,9 +129,7 @@ export class CallRepository implements ICallRepository {
             ...dto,
             grant: new mongoose.Types.ObjectId(dto.grant),
             calendar: new mongoose.Types.ObjectId(dto.calendar),
-            organization: new mongoose.Types.ObjectId(
-                dto.organization
-            ),
+            organization: new mongoose.Types.ObjectId(dto.organization),
             constraint: dto.constraint
                 ? new mongoose.Types.ObjectId(dto.constraint)
                 : undefined,

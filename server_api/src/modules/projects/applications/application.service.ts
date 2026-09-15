@@ -1,3 +1,4 @@
+import { PERMISSIONS } from "../../../common/constants/permissions";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
@@ -5,19 +6,18 @@ import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { AnonymizerService } from "../../../util/anonymizer/anonymizer.service";
-import { CallStatus } from "../../calls/call.model";
+import { AuthPermissionService } from "../../auth/auth.permission-service";
 import { ICallRepository } from "../../calls/call.repository";
 import { IStage } from "../../calls/stages/stage.model";
 import { IStageRepository } from "../../calls/stages/stage.repository";
-import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
 import { NotificationService } from "../../notifications/notification.service";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
 import { ReviewerStatus } from "../../reviewers/reviewer.state-machine";
 import { TemplateValidationService } from "../../templates/services/template-validation.service";
-import { IProject, ProjectStatus } from "../project.model";
-import { ProjectService } from "../project.service";
+import { ProjectAuth } from "../project.auth";
+import { ProjectStatus } from "../project.model";
+import { IProjectRepository } from "../project.repository";
 import {
-    ApplyProjectDTO,
     CreateApplicationDTO,
     FilterApplicationDTO,
     UpdateApplicationDTO
@@ -30,23 +30,143 @@ export class ApplicationService {
 
     constructor(
         private readonly repository: IApplicationRepository,
+        private readonly projectRepo: IProjectRepository,
         private readonly callRepo: ICallRepository,
         private readonly stageRepo: IStageRepository,
         private readonly reviewerRepo: IReviewerRepository,
-        private readonly projectService: ProjectService,
-        private readonly constraintValidator: ConstraintValidationService,
         private readonly templateValidator: TemplateValidationService,
         private readonly synchronizer: ApplicationSynchronizer,
         private readonly anonymizerService: AnonymizerService,
-        private readonly notificationService?: NotificationService,
+        private readonly projectAuth: ProjectAuth,
+        private readonly notificationService: NotificationService,
     ) {
     }
 
     /**
- * Create application for the next project stage
+ * Create an application
+ *
+ * Creates the first application when the project has no current
+ * application, otherwise creates the next-stage application.
  */
-    async createNextApplication(
-        dto: CreateApplicationDTO
+    async create(
+        dto: CreateApplicationDTO,
+        userId: string,
+        options?: {
+            skipValidation?: boolean;
+        }
+    ) {
+
+        const projectDoc =
+            await this.projectRepo.findById(dto.project);
+
+        if (!projectDoc) {
+            throw new AppError(
+                ERROR_CODES.PROJECT_NOT_FOUND
+            );
+        }
+
+        // --------------------------------------------------
+        // Authorization
+        // --------------------------------------------------
+        if (!options?.skipValidation) {
+
+            await this.projectAuth.auth(dto.project, userId, PERMISSIONS.APPLICATION.CREATE);
+
+        }
+
+        // --------------------------------------------------
+        // Decide first or next application
+        // --------------------------------------------------
+
+        if (!projectDoc.currentApplication) {
+            return this.createFirstApplication(
+                dto,
+                userId,
+                options
+            );
+        }
+
+        return this.createNextApplication(
+            dto,
+            userId
+        );
+    }
+
+    /**
+ * Create the first application for a project.
+ */
+    private async createFirstApplication(
+        dto: CreateApplicationDTO,
+        userId: string,
+        options?: {
+            skipValidation?: boolean;
+        }
+    ) {
+        if (!options?.skipValidation) {
+
+            const projectDoc =
+                await this.projectRepo.findById(dto.project);
+
+            if (!projectDoc) {
+                throw new AppError(
+                    ERROR_CODES.PROJECT_NOT_FOUND
+                );
+            }
+
+            if (projectDoc.currentApplication) {
+                throw new AppError(
+                    ERROR_CODES.APPLICATION_ALREADY_EXISTS,
+                    "The project already has an application."
+                );
+            }
+
+            const stageDoc =
+                await this.stageRepo.findById(dto.stage);
+
+            if (!stageDoc) {
+                throw new AppError(
+                    ERROR_CODES.STAGE_NOT_FOUND
+                );
+            }
+
+            if (projectDoc.call) {
+                if (
+                    !stageDoc.call ||
+                    String(projectDoc.call) !==
+                    String(stageDoc.call)
+                ) {
+                    throw new AppError(
+                        ERROR_CODES.INVALID_STAGE,
+                        "The application stage does not belong to the project's call."
+                    );
+                }
+            }
+
+            if (stageDoc.order !== 1) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_STAGE,
+                    "The first application must use the first stage."
+                );
+            }
+
+            await this.validateStage(
+                stageDoc,
+                dto.documentPath
+            );
+        }
+
+        return this.internalCreate(
+            dto,
+            userId
+        );
+    }
+
+    /**
+     * * Create an application for the next project stage.
+     * */
+    private async createNextApplication(
+        dto: CreateApplicationDTO,
+        userId: string
     ) {
         const {
             project,
@@ -54,9 +174,14 @@ export class ApplicationService {
             documentPath
         } = dto;
 
-        // Get project
         const projectDoc =
-            await this.projectService.getById(project);
+            await this.projectRepo.findById(project);
+
+        if (!projectDoc) {
+            throw new AppError(
+                ERROR_CODES.PROJECT_NOT_FOUND
+            );
+        }
 
         if (!projectDoc.call) {
             throw new AppError(
@@ -66,7 +191,10 @@ export class ApplicationService {
 
         const callId = String(projectDoc.call);
 
+        // --------------------------------------------------
         // Get requested stage
+        // --------------------------------------------------
+
         const stageDoc =
             await this.stageRepo.findById(stage);
 
@@ -76,8 +204,10 @@ export class ApplicationService {
             );
         }
 
-        // A next-stage application requires
-        // an existing current application
+        // --------------------------------------------------
+        // Current application
+        // --------------------------------------------------
+
         if (!projectDoc.currentApplication) {
             throw new AppError(
                 ERROR_CODES.APPLICATION_NOT_FOUND,
@@ -85,20 +215,23 @@ export class ApplicationService {
             );
         }
 
-        const currentApp =
+        const currentAppDoc =
             await this.repository.findById(
                 String(projectDoc.currentApplication)
             );
 
-        if (!currentApp) {
+        if (!currentAppDoc) {
             throw new AppError(
                 ERROR_CODES.APPLICATION_NOT_FOUND
             );
         }
 
+        // --------------------------------------------------
         // Current application must be accepted
+        // --------------------------------------------------
+
         if (
-            currentApp.status !==
+            currentAppDoc.status !==
             ApplicationStatus.accepted
         ) {
             throw new AppError(
@@ -107,10 +240,13 @@ export class ApplicationService {
             );
         }
 
-        // Get current application's stage
+        // --------------------------------------------------
+        // Get current stage
+        // --------------------------------------------------
+
         const currentStage =
             await this.stageRepo.findById(
-                String(currentApp.stage)
+                String(currentAppDoc.stage)
             );
 
         if (!currentStage) {
@@ -119,7 +255,10 @@ export class ApplicationService {
             );
         }
 
-        // Requested stage must be the next stage
+        // --------------------------------------------------
+        // Requested stage must be next stage
+        // --------------------------------------------------
+
         const expectedNextStage =
             await this.stageRepo.getNextStage(
                 callId,
@@ -137,152 +276,57 @@ export class ApplicationService {
             );
         }
 
-        // Common stage validation
+        // --------------------------------------------------
+        // Validate stage requirements
+        // --------------------------------------------------
+
         await this.validateStage(
             stageDoc,
             documentPath
         );
 
-        // Actual creation
         return this.internalCreate(
             dto,
-            projectDoc,
-            stageDoc
+            userId
         );
     }
-
-
-    /**
- * Apply to a call and create the project's first application
- */
-    async apply(dto: ApplyProjectDTO, userId: string) {
-
-        const {
-            call,
-            collaborators,
-            docPath
-        } = dto;
-
-        // Validate lead PI
-        const lead = collaborators.find(
-            c => c.isLeadPI
-        );
-
-        if (!lead) {
-            throw new AppError(
-                ERROR_CODES.LEAD_PI_NOT_FOUND
-            );
-        }
-
-        if (lead.member !== userId) {
-            throw new AppError(
-                ERROR_CODES.UNAUTHORIZED
-            );
-        }
-
-        // Validate call
-        const callDoc =
-            await this.callRepo.findById(call);
-
-        if (!callDoc) {
-            throw new AppError(
-                ERROR_CODES.CALL_NOT_FOUND
-            );
-        }
-
-        if (callDoc.status !== CallStatus.active) {
-            throw new AppError(
-                ERROR_CODES.CALL_NOT_ACTIVE
-            );
-        }
-
-        // Get first stage
-        const firstStage =
-            await this.stageRepo.getFirstStage(call);
-
-        if (!firstStage) {
-            throw new AppError(
-                ERROR_CODES.FIRST_STAGE_NOT_FOUND
-            );
-        }
-
-        // Validate project constraints
-        if (callDoc.constraint) {
-            const constraintId = String(callDoc.constraint);
-            const result = await this.constraintValidator.validateProject(constraintId, dto);
-            if (!result.valid) {
-                throw new AppError(
-                    ERROR_CODES.INVALID_CONSTRAINT,
-                    "Constraint validation failed",
-                    400,
-                    result
-                );
-            }
-        }
-        // Validate first-stage requirements
-        await this.validateStage(
-            firstStage,
-            docPath
-        );
-
-        // Create project + first application
-        let projectDoc: IProject | undefined;
-
-        try {
-
-            projectDoc =
-                await this.projectService.create({
-                    ...dto,
-                    grant: String(callDoc.grant),
-                    calendar: String(callDoc.calendar)
-                }, userId, { skipValidation: true });
-
-            return await this.internalCreate(
-                {
-                    project: String(projectDoc._id),
-                    stage: String(firstStage._id),
-                    documentPath: docPath,
-                    userId
-                },
-                projectDoc,
-                firstStage
-            );
-
-        } catch (error) {
-
-            if (projectDoc?._id) {
-
-                try {
-                    await this.projectService.delete({
-                        id: String(projectDoc._id)
-                    });
-                } catch (rollbackError) {
-                    console.error(
-                        `Failed to rollback project ${projectDoc._id}`,
-                        rollbackError
-                    );
-                }
-            }
-
-            throw error;
-        }
-    }
-
-
 
     private async internalCreate(
         dto: CreateApplicationDTO,
-        projectDoc: IProject,
-        stageDoc: IStage
+        userId: string
     ) {
         try {
-            const created = await this.repository.create(dto);
+            const created =
+                await this.repository.create(dto, userId);
 
-            await this.synchronizer.sync(
-                String(projectDoc._id)
-            );
+            const projectDoc =
+                await this.projectRepo.findById(dto.project);
 
-            if (this.notificationService) {
+            const stageDoc =
+                await this.stageRepo.findById(dto.stage);
+
+            // First application may establish the project's call
+            if (
+                projectDoc &&
+                stageDoc &&
+                !projectDoc.call &&
+                stageDoc.call
+            ) {
+                await this.projectRepo.update(
+                    dto.project,
+                    {
+                        call: String(stageDoc.call)
+                    }
+                );
+            }
+
+            // currentApplication synchronized
+            await this.synchronizer.sync(dto.project);
+
+            if (
+                projectDoc &&
+                stageDoc
+            ) {
                 await this.notificationService
                     .notifyApplicationSubmitted(
                         String(projectDoc.leadPI),
@@ -291,8 +335,10 @@ export class ApplicationService {
                     );
             }
 
-            // no await here
-            this.anonymizerService.anonymizeApplication(String(created._id));
+            // Fire and forget
+            this.anonymizerService.anonymizeApplication(
+                String(created._id)
+            );
 
             return created;
 
@@ -300,7 +346,7 @@ export class ApplicationService {
 
             if (err?.code === 11000) {
                 throw new AppError(
-                    ERROR_CODES.STAGE_ALREADY_EXISTS
+                    ERROR_CODES.APPLICATION_ALREADY_EXISTS
                 );
             }
 
@@ -316,7 +362,6 @@ export class ApplicationService {
 
         // Deadline
         if (
-            stageDoc.deadline &&
             new Date(stageDoc.deadline) < new Date()
         ) {
             throw new AppError(
@@ -377,14 +422,6 @@ export class ApplicationService {
 
 
     private async calculateTotalScore(id: string): Promise<number> {
-        //const applicationDoc = await this.repository.findById(id);
-        /*
-                if (!applicationDoc) {
-                    throw new AppError(
-                        ERROR_CODES.APPLICATION_NOT_FOUND
-                    );
-                }
-        */
         const approvedReviews =
             await this.reviewerRepo.find({
                 application: id,
@@ -431,7 +468,13 @@ export class ApplicationService {
         if (!applicationDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
 
         const projectId = String(applicationDoc.project);
-        const projectDoc = await this.projectService.getById(projectId);
+        const projectDoc = await this.projectRepo.findById(projectId);
+
+        if (!projectDoc) {
+            throw new AppError(
+                ERROR_CODES.PROJECT_NOT_FOUND
+            );
+        }
         if (!projectDoc.currentApplication) {
             throw new AppError(ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND);
         }
@@ -446,10 +489,8 @@ export class ApplicationService {
 
         const projStatus = projectDoc.status;
 
-        if (projStatus !== ProjectStatus.draft && projStatus !== ProjectStatus.submitted
-            && projStatus !== ProjectStatus.rejected && projStatus !== ProjectStatus.accepted
-        ) {
-            throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
+        if (projStatus !== ProjectStatus.draft) {
+            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
         }
 
         const from = applicationDoc.status as ApplicationStatus;
@@ -481,15 +522,7 @@ export class ApplicationService {
                 );
             }
             const totalScore = await this.calculateTotalScore(id);
-            // const totalScore = applicationDoc.totalScore;
 
-            /*
-            if ((totalScore === undefined || totalScore === null) ) {
-                throw new AppError(
-                    ERROR_CODES.SCORE_NOT_COMPUTED,
-                    "Total score not computed. Please calculate score first."
-                );
-            }*/
             if (to === ApplicationStatus.accepted) {
                 const minAcceptanceScore = stageDoc.minAcceptanceScore ?? 0;
                 if ((totalScore ?? 0) < minAcceptanceScore) {
@@ -500,12 +533,10 @@ export class ApplicationService {
                 }
             }
         }
-        /*
-        if (to === ApplicationStatus.pending) {
-        }*/
+
         const updated = await this.repository.updateStatus(id, to);
 
-        const synced = await this.synchronizer.sync(projectId);
+        //const synced = await this.synchronizer.sync(projectId);
 
         if (this.notificationService) {
             const leadUser = String(projectDoc.leadPI);
@@ -554,68 +585,11 @@ export class ApplicationService {
         return updated;
     }
 
-    async withdraw(dto: { id: string; userId: string }) {
-        const { id, userId } = dto;
-
-        const applicationDoc = await this.repository.findById(id);
-
-        if (!applicationDoc) {
-            throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
-        }
-
-        if (applicationDoc.status !== ApplicationStatus.pending) {
-            throw new AppError(ERROR_CODES.APPLICATION_NOT_PENDING);
-        }
-
-        const projectDoc = await this.projectService.getById(String(applicationDoc.project));
-
-        // Only project lead can withdraw
-        if (String(projectDoc.leadPI) !== String(userId)) {
-            throw new AppError(ERROR_CODES.UNAUTHORIZED);
-        }
-
-        // Only the current application can be withdrawn
-        if (!projectDoc.currentApplication) {
-            throw new AppError(
-                ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND
-            );
-        }
-
-        if (String(projectDoc.currentApplication) !== String(id)) {
-            throw new AppError(ERROR_CODES.INVALID_APPLICATION_STATUS);
-        }
-
-        // Cannot withdraw once reviewers exist
-        if (await this.reviewerRepo.exists({ application: id })) {
-            throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
-        }
-
-        // All business validation is already done above
-        const deleted = await this.delete(
-            { id, userId },
-            { skipValidation: true }
-        );
-
-        if (deleted) {
-            const stageDoc = await this.stageRepo.findById(String(applicationDoc.stage));
-            stageDoc && await this.notificationService?.notifyApplicationWithdrawn(
-                userId,
-                projectDoc.title,
-                stageDoc?.name
-            );
-        }
-
-        return deleted;
-    }
-
     /**
      * Delete 
      */
-    async delete(
-        dto: DeleteDto,
-        options?: { skipValidation?: boolean }
-    ) {
-        const { id, userId } = dto;
+    async delete(dto: DeleteDto, userId: string) {
+        const { id } = dto;
 
         const applicationDoc = await this.repository.findById(id);
 
@@ -625,50 +599,51 @@ export class ApplicationService {
 
         const projectId = String(applicationDoc.project);
 
-        if (!options?.skipValidation) {
-            if (applicationDoc.status !== ApplicationStatus.pending) {
-                throw new AppError(
-                    ERROR_CODES.APPLICATION_NOT_PENDING
-                );
-            }
 
-            const projectDoc =
-                await this.projectService.getById(projectId);
 
-            if (!projectDoc.currentApplication) {
-                throw new AppError(
-                    ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND
-                );
-            }
-
-            if (
-                String(projectDoc.currentApplication) !== String(id)
-            ) {
-                throw new AppError(
-                    ERROR_CODES.INVALID_APPLICATION_STATUS, "This application is not the current application for the project."
-                );
-            }
-
-            if (
-                await this.reviewerRepo.exists({
-                    application: id
-                })
-            ) {
-                throw new AppError(
-                    ERROR_CODES.REVIEWER_ALREADY_EXISTS
-                );
-            }
+        if (applicationDoc.status !== ApplicationStatus.pending) {
+            throw new AppError(
+                ERROR_CODES.APPLICATION_NOT_PENDING
+            );
         }
+
+        const { projectDoc } = await this.projectAuth.auth(projectId, userId, PERMISSIONS.PROJECT.DELETE);
+
+        if (!projectDoc.currentApplication) {
+            throw new AppError(
+                ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND
+            );
+        }
+
+        if (
+            String(projectDoc.currentApplication) !== String(id)
+        ) {
+            throw new AppError(
+                ERROR_CODES.INVALID_APPLICATION_STATUS, "This application is not the current application for the project."
+            );
+        }
+
+        if (
+            await this.reviewerRepo.exists({
+                application: id
+            })
+        ) {
+            throw new AppError(
+                ERROR_CODES.REVIEWER_ALREADY_EXISTS
+            );
+        }
+
 
         const deleted = await this.repository.delete(id);
 
         if (deleted) {
             const synced = await this.synchronizer.sync(projectId);
+            /*
             if (synced && !synced.currentApplication) {
                 await this.projectService.delete({
                     id: projectId
                 });
-            }
+            }*/
         }
         return deleted;
     }

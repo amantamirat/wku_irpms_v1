@@ -3,7 +3,7 @@
 import React, { useCallback, useMemo, useState } from "react";
 import { Button } from "primereact/button";
 import { Column, ColumnProps, ColumnBodyOptions } from "primereact/column";
-import { DataTable, DataTableExpandedRows, DataTableRowToggleEvent } from "primereact/datatable";
+import { DataTable, DataTableExpandedRows, DataTableFilterMeta, DataTableRowToggleEvent } from "primereact/datatable";
 import { InputText } from "primereact/inputtext";
 import { MultiSelect, MultiSelectChangeEvent } from "primereact/multiselect";
 import { Toolbar } from "primereact/toolbar";
@@ -20,7 +20,7 @@ export interface ActionButton {
     severity?: "success" | "danger" | "warning" | "info" | "secondary" | "help";
     size?: "small" | "large";
     text?: boolean;
-    rounded?: boolean;
+    //rounded?: boolean;
     tooltip?: string;
 }
 
@@ -100,7 +100,21 @@ export function ItemDataTable<T extends Record<string, any>>({
     enableColumnToggle = false,
     defaultHiddenFields = [],
 }: ItemDataTableProps<T>) {
+
     const [globalFilter, setGlobalFilter] = useState("");
+    const [filters, setFilters] = useState<DataTableFilterMeta>({
+        global: { value: null, matchMode: "contains" },
+    });
+    // Memoized filter handler to prevent re-renders
+    const onGlobalFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+        const value = e.target.value;
+        setFilters((prev) => ({
+            ...prev,
+            global: { ...prev.global, value },
+        }));
+        setGlobalFilter(value);
+    }, []);
+
     const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | any[]>([]);
 
     /* ------------------------- Column Visibility -------------------------- */
@@ -151,7 +165,7 @@ export function ItemDataTable<T extends Record<string, any>>({
                         severity={action.severity}
                         tooltip={action.tooltip}
                         tooltipOptions={{ position: "bottom" }}
-                        rounded={action.rounded}
+                        //rounded={action.rounded}
                         text={action.text}
                         size={action.size ?? "small"}
                         disabled={action.disabled?.()}
@@ -193,9 +207,7 @@ export function ItemDataTable<T extends Record<string, any>>({
                                 <InputText
                                     type="search"
                                     value={globalFilter}
-                                    onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-                                        setGlobalFilter(e.target.value)
-                                    }
+                                    onChange={onGlobalFilterChange}
                                     placeholder="Search..."
                                     className="p-inputtext-sm w-12rem md:w-16rem"
                                 />
@@ -222,7 +234,7 @@ export function ItemDataTable<T extends Record<string, any>>({
         enableSearch,
         enableColumnToggle,
         headerTitle,
-        globalFilter,
+        filters,
         visibleColumns,
         columns
     ]);
@@ -247,7 +259,7 @@ export function ItemDataTable<T extends Record<string, any>>({
                             severity={action.severity}
                             tooltip={action.tooltip}
                             tooltipOptions={{ position: "bottom" }}
-                            rounded={action.rounded ?? true}
+                            //rounded={action.rounded ?? true}
                             text={action.text ?? true}
                             size={action.size ?? "small"}
                             disabled={action.disabled?.(row)}
@@ -280,6 +292,7 @@ export function ItemDataTable<T extends Record<string, any>>({
                     rows={rowsPerPage}
                     rowsPerPageOptions={[5, 10, 25, 50]}
                     header={header}
+                    filters={filters}
                     globalFilter={globalFilter}
                     globalFilterFields={
                         columns.map((col) => col.field).filter(Boolean) as string[]

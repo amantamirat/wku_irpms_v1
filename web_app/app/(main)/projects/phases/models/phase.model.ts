@@ -31,7 +31,7 @@ export type Phase = {
     updatedAt?: Date;
 };
 
-export interface GetPhaseOptions {
+export interface FilterPhaseOptions {
     project?: string | Project;
 }
 
@@ -86,17 +86,4 @@ export const validatePhase = (phase: Phase): { valid: boolean; message?: string 
     return { valid: true };
 };
 
-// --- Sanitization Logic ---
 
-export const sanitizePhase = (phase: Partial<Phase>): Phase => {
-    return {
-        ...phase,
-        // Ensure project is just an ID string
-        project:
-            typeof phase.project === "object" && phase.project !== null
-                ? (phase.project as Project)._id
-                : phase.project,
-        // Ensure breakdown is at least an empty array to avoid undefined errors in UI
-        //breakdown: phase.breakdown || []
-    } as Phase;
-};

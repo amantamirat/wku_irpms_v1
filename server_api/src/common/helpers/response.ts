@@ -30,9 +30,10 @@ export const errorResponse = (
         response.errorCode = error.code;
         response.errorMessage = error.message ?? responseMessage;
         response.errorDetail = error.details;
+        //console.error("App Error Stack trace:", error.stack);
     } else if (error instanceof Error) {
         response.errorMessage = error.message;
-        console.log("Unknown Error", error.message);
+        console.error("Unknown Error Stack trace:", error.stack);
     } else if (typeof error === "string") {
         response.errorMessage = error;
     }

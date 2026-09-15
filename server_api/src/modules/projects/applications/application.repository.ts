@@ -34,7 +34,7 @@ export interface IApplicationRepository {
     ): Promise<IApplication | null>;
 
     create(
-        dto: CreateApplicationDTO
+        dto: CreateApplicationDTO, userId: string
     ): Promise<IApplication>;
 
     update(
@@ -136,7 +136,7 @@ export class ApplicationRepository
 
 
     async create(
-        dto: CreateApplicationDTO
+        dto: CreateApplicationDTO, userId: string
     ): Promise<IApplication> {
 
         const data: Partial<IApplication> = {
@@ -147,7 +147,8 @@ export class ApplicationRepository
                 new mongoose.Types.ObjectId(dto.stage),
 
             documentPath:
-                dto.documentPath
+                dto.documentPath,
+            createdBy: new mongoose.Types.ObjectId(userId)
         };
 
         return Application.create(data);

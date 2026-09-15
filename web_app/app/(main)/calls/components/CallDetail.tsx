@@ -20,17 +20,9 @@ const CallDetail = ({ call }: CallDetailProps) => {
 
         {
             header: "Stages",
-            permission: "call.stage:read",
+            permission: "stage:read",
             content: <StageManager call={call} />
         },
-
-        /*
-                {
-                    header: "Projects",
-                    permission: PERMISSIONS.PROJECT.READ,
-                    disabled: true,
-                    content: <ProjectManager call={call} />
-                }*/
     ], [call]);
 
     /**

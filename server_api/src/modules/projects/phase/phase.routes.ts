@@ -15,6 +15,14 @@ router.post('/', verifyAuthToken,
 router.get('/', verifyAuthToken,
     checkPermission([PERMISSIONS.PHASE.READ]),
     controller.get);
+
+// Lookup - currently uses the same get controller
+router.get(
+    '/lookup',
+    verifyAuthToken,
+    checkPermission(PERMISSIONS.PHASE.LOOKUP),
+    controller.get
+);
 router.put('/:id', verifyAuthToken,
     checkPermission([PERMISSIONS.PHASE.UPDATE]),
     controller.update);

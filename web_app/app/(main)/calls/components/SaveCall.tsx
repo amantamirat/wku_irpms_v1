@@ -17,13 +17,14 @@ import { GrantApi } from '../../grants/api/grant.api';
 import { Grant } from '../../grants/models/grant.model';
 import { GrantStatus } from '../../grants/models/grant.state-machine';
 import { CallApi } from '../api/call.api';
-import { Call, sanitizeCall, validateCall } from '../models/call.model';
+import { Call, validateCall } from '../models/call.model';
 
 // Constraint & Composition imports (adjust paths to match your project structure)
 import { ConstraintApi } from '../../constraints/api/constraint.api';
 import { Constraint } from '../../constraints/models/constraint.model';
 import { CompositionApi } from '../../compositions/api/composition.api';
 import { Composition } from '../../compositions/models/composition.model';
+import { extractId, sanitize } from '@/utils/utils';
 
 const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<Call>) => {
     const toast = useRef<Toast>(null);
@@ -39,11 +40,6 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
     const isGrantPredefined = !!item.grant;
     const isCalendarPredefined = !!item.calendar;
 
-    // Helper to extract string ID from potentially populated objects
-    const getTargetId = (target: any): string | undefined => {
-        if (!target) return undefined;
-        return typeof target === 'object' ? target._id : target;
-    };
 
     // Keep state in sync with initial item prop
     useEffect(() => {
@@ -97,10 +93,10 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
             const validation = validateCall(localCall);
             if (!validation.valid) throw new Error(validation.message);
 
-            const payload = sanitizeCall(localCall);
+            const payload = sanitize(localCall);
             let saved: Call;
 
-            if (localCall._id) saved = await CallApi.update(payload);
+            if (localCall._id) saved = await CallApi.update(payload as Call);
             else saved = await CallApi.create(payload as Call);
 
             toast.current?.show({
@@ -215,7 +211,7 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
                         <label htmlFor="constraint" className="font-semibold block mb-2">Constraint</label>
                         <Dropdown
                             id="constraint"
-                            value={getTargetId(localCall.constraint)}
+                            value={extractId(localCall.constraint)}
                             options={constraints}
                             optionLabel="name"
                             optionValue="_id"
@@ -230,7 +226,7 @@ const SaveCall = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<C
                         <label htmlFor="composition" className="font-semibold block mb-2">Composition</label>
                         <Dropdown
                             id="composition"
-                            value={getTargetId(localCall.composition)}
+                            value={extractId(localCall.composition)}
                             options={compositions}
                             optionLabel="name"
                             optionValue="_id"

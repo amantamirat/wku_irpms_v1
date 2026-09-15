@@ -46,7 +46,13 @@ const AppMenu = () => {
                     icon: 'pi pi-fw pi-check-square',
                     to: '/verifications',
                     permission: 'verification:read'
-                }
+                },
+                {
+                    label: 'Collaborators',
+                    icon: 'pi pi-users',
+                    to: '/collaborators',
+                    permission: 'application:read',
+                },
             ]
         },
         {
@@ -116,7 +122,7 @@ const AppMenu = () => {
                     to: '/users',
                     permission: 'user:read'
                 },
-                
+
                 {
                     label: 'Accounts',
                     icon: PrimeIcons.SHIELD,

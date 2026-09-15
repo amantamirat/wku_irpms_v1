@@ -1,4 +1,6 @@
+import { PERMISSIONS } from "../../../common/constants/permissions";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
@@ -6,9 +8,10 @@ import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { ICallRepository } from "../../calls/call.repository";
 import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
 import { IGrantRepository } from "../../grants/grant.repository";
+import { ProjectAuth } from "../project.auth";
 import { ProjectStatus } from "../project.model";
 import { IProjectRepository } from "../project.repository";
-import { CreatePhaseDto, GetPhasesOptions, UpdatePhaseDto } from "./phase.dto";
+import { CreatePhaseDto, FilterPhases, UpdatePhaseDto } from "./phase.dto";
 import { PhaseStatus } from "./phase.model";
 import { IPhaseRepository } from "./phase.repository";
 import { PhaseSynchronizer } from "./phase.synchronizer";
@@ -21,9 +24,11 @@ export class PhaseService {
         private readonly grantRepo: IGrantRepository,
         private readonly callRepo: ICallRepository,
         private readonly constraintValidator: ConstraintValidationService,
+        private readonly projectAuth: ProjectAuth,
         private readonly synchronizer: PhaseSynchronizer,
     ) { }
 
+    /*
     async validateProject(project: string) {
         const projectDoc = await this.projRepo.findById(project);
         if (!projectDoc) {
@@ -37,11 +42,20 @@ export class PhaseService {
         }
         return projectDoc;
     }
-
+*/
     async create(dto: CreatePhaseDto, options?: { skipValidation?: boolean }) {
         const { project, userId } = dto;
         if (!options?.skipValidation) {
-            const projectDoc = await this.validateProject(project);
+            if (!userId) { return }
+            const { projectDoc, isLeadPI } = await this.projectAuth.auth(project, userId, PERMISSIONS.PHASE.CREATE);
+
+            if (isLeadPI) {
+                if (
+                    projectDoc.status !== ProjectStatus.draft
+                ) {
+                    throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+                }
+            }
 
             if (projectDoc.call) {
                 const callDoc = await this.callRepo.findById(String(projectDoc.call));
@@ -98,8 +112,8 @@ export class PhaseService {
     // ---------------------------------------------------
     // GET
     // ---------------------------------------------------
-    async getPhases(options: GetPhasesOptions) {
-        return await this.phaseRepo.find(options);
+    async getPhases(filter: FilterPhases, options?: FilterOptions) {
+        return await this.phaseRepo.find(filter, options);
     }
 
     // ---------------------------------------------------
@@ -118,7 +132,14 @@ export class PhaseService {
 
         const projectId = String(phaseDoc.project);
 
-        const projectDoc = await this.validateProject(projectId);
+        const { projectDoc, isLeadPI } = await this.projectAuth.auth(projectId, userId, PERMISSIONS.PHASE.CREATE);
+        if (isLeadPI) {
+            if (
+                projectDoc.status !== ProjectStatus.draft
+            ) {
+                throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+            }
+        }
 
         if (projectDoc.call) {
             const callDoc = await this.callRepo.findById(String(projectDoc.call));
@@ -288,15 +309,22 @@ export class PhaseService {
     // ---------------------------------------------------
     // DELETE
     // ---------------------------------------------------
-    async delete(dto: DeleteDto) {
-        const { id, userId } = dto;
+    async delete(dto: DeleteDto, userId: string) {
+        const { id } = dto;
         const phaseDoc = await this.phaseRepo.findById(id);
         if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
         if (phaseDoc.status !== PhaseStatus.proposed)
             throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
 
         const projectId = String(phaseDoc.project);
-        const projectDoc = await this.validateProject(projectId);
+        const { projectDoc, isLeadPI } = await this.projectAuth.auth(projectId, userId, PERMISSIONS.PHASE.CREATE);
+        if (isLeadPI) {
+            if (
+                projectDoc.status !== ProjectStatus.draft
+            ) {
+                throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+            }
+        }
         if (projectDoc.call) {
             const callDoc = await this.callRepo.findById(String(projectDoc.call));
             if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);

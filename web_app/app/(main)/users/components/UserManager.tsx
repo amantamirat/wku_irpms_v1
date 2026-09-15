@@ -1,6 +1,5 @@
 'use client';
 import { useState } from "react";
-import { createEntityManager } from "@/components/createEntityManager";
 import { FilterUsersOptions, User, createEmptyUser } from "../models/user.model";
 import { UserApi } from "../api/user.api";
 import RoleDialog from "./dialogs/RoleDialog"; // The component we refactored
@@ -9,13 +8,15 @@ import SaveUser from "./SaveUser";
 import { Badge } from "primereact/badge";
 import OwnershipDialog from "./dialogs/OwnershipDialog";
 import UserDetail from "./UserDetail";
+import { createEntityManager } from "@/components/data-table/createEntityManager";
+import { useAuth } from "@/contexts/auth-context";
 
 // We need a small wrapper to handle the local state of the Role Dialog
 const ManageUsers = () => {
     const [roleDialogVisible, setRoleDialogVisible] = useState(false);
     const [ownerhipDialogVisible, setOwnershipDialogVisible] = useState(false);
     const [selectedUser, setSelectedUser] = useState<User | null>(null);
-
+    const { hasPermission } = useAuth();
     const EntityManager = createEntityManager<User, FilterUsersOptions>({
         title: "Manage Users",
         itemName: "User",
@@ -70,12 +71,12 @@ const ManageUsers = () => {
         },
 
         // ADD THE EXTRA ACTION HERE
-        extraActions: [
+        extraRowActions: [
             {
                 icon: "pi pi-shield",
                 severity: "info", // Purple color
                 tooltip: "Manage Roles",
-                permissions: ["user:role:update"],
+                visible: () => { return hasPermission("user:role:update") },
                 onClick: (row: User) => {
                     setSelectedUser(row);
                     setRoleDialogVisible(true);
@@ -85,7 +86,7 @@ const ManageUsers = () => {
                 icon: "pi pi-sitemap",
                 severity: "warning", // orange-ish tone for ownership/structure
                 tooltip: "Manage Ownerships",
-                permissions: ["user:ownership:update"],
+                visible: () => { return hasPermission("user:ownership:update") },
                 onClick: (row: User) => {
                     setSelectedUser(row);
                     setOwnershipDialogVisible(true);

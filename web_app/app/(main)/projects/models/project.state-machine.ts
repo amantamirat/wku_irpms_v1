@@ -131,3 +131,101 @@ export const CALL_PROJECT_TRANSITIONS: Partial<Record<ProjectStatus, ProjectStat
     ],
     ...COMMON_TRANSITIONS
 };
+
+
+import { TransitionMap } from "@/hooks/useStateTransitionActions";
+
+export const PROJECT_TRANSITIONS: TransitionMap = {
+    [ProjectStatus.draft]: [
+        {
+            next: ProjectStatus.approved,
+            action: "Approve",
+            icon: "pi pi-check",
+            severity: "success"
+        },
+        {
+            next: ProjectStatus.refused,
+            action: "Refuse",
+            icon: "pi pi-times",
+            severity: "danger"
+        }
+    ],
+
+    [ProjectStatus.approved]: [
+        {
+            next: ProjectStatus.granted,
+            action: "Grant",
+            icon: "pi pi-check-circle",
+            severity: "success"
+        },
+        {
+            next: ProjectStatus.draft,
+            action: "Set Draft",
+            icon: "pi pi-undo",
+            severity: "warning"
+        }
+    ],
+
+    [ProjectStatus.refused]: [
+        {
+            next: ProjectStatus.draft,
+            action: "Set Draft",
+            icon: "pi pi-undo",
+            severity: "warning"
+        }
+    ],
+
+    [ProjectStatus.granted]: [
+        {
+            next: ProjectStatus.active,
+            action: "Activate",
+            icon: "pi pi-play",
+            severity: "success"
+        },
+        {
+            next: ProjectStatus.approved,
+            action: "Set Approved",
+            icon: "pi pi-undo",
+            severity: "warning"
+        }
+    ],
+
+    [ProjectStatus.active]: [
+        {
+            next: ProjectStatus.completed,
+            action: "Complete",
+            icon: "pi pi-check-circle",
+            severity: "success"
+        },
+        {
+            next: ProjectStatus.terminated,
+            action: "Terminate",
+            icon: "pi pi-times",
+            severity: "danger"
+        },
+        {
+            next: ProjectStatus.granted,
+            action: "Set Granted",
+            icon: "pi pi-undo",
+            severity: "warning"
+        }
+    ],
+
+    [ProjectStatus.completed]: [
+        {
+            next: ProjectStatus.active,
+            action: "Reopen",
+            icon: "pi pi-refresh",
+            severity: "warning"
+        }
+    ],
+
+    [ProjectStatus.terminated]: [
+        {
+            next: ProjectStatus.active,
+            action: "Reactivate",
+            icon: "pi pi-refresh",
+            severity: "success"
+        }
+    ]
+};

@@ -50,7 +50,7 @@ export class StageController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { call, evaluation, category, order, populate } = req.query;
+            const { call, evaluation, order } = req.query;
 
             const dto: FilterStageDto = {
                 call: call as string,

@@ -4,8 +4,9 @@ import { Button } from 'primereact/button';
 import { FileUpload, FileUploadSelectEvent } from 'primereact/fileupload';
 import { Message } from 'primereact/message';
 import { useState } from 'react';
-import { ApplicationApi } from '../../api/application.api';
-import { Project } from '../../../projects/models/project.model';
+import { ApplicationApi } from '../../../applications/api/application.api';
+import { Project } from '../../models/project.model';
+import { ProjectApi } from '@/app/(main)/projects/api/project.api';
 
 // Document/Template Validation Interfaces
 export interface SectionValidationResult {
@@ -40,12 +41,12 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
-    
+
     // Error States
     const [error, setError] = useState<string | null>(null);
     const [validationDetails, setValidationDetails] = useState<TemplateValidationResult | null>(null);
     const [constraintDetails, setConstraintDetails] = useState<ConstraintValidationResult | null>(null);
-    
+
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
     const clearErrors = () => {
@@ -72,7 +73,7 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
         clearErrors();
 
         try {
-            const result = await ApplicationApi.apply({
+            const result = await ProjectApi.apply({
                 ...data,
                 file: selectedFile,
             });
@@ -93,12 +94,12 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
             if (err?.details?.sections) {
                 setValidationDetails(err.details as TemplateValidationResult);
                 setError("Document validation failed. Please address the issues listed below.");
-            } 
+            }
             // 2. Capture Grant Constraint Validation Errors
             else if (err?.details?.errors && Array.isArray(err.details.errors)) {
                 setConstraintDetails(err.details as ConstraintValidationResult);
                 setError(err?.message || "Grant constraint validation failed.");
-            } 
+            }
             // 3. Generic Error Handling
             else {
                 setError(err?.message || "Submission failed. Please try again later.");
@@ -290,11 +291,10 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                     label={success ? 'Finalizing...' : loading ? 'Uploading Proposal...' : 'Submit Final Application'}
                     icon={(loading || success) ? 'pi pi-spin pi-spinner' : 'pi pi-check-circle'}
                     onClick={submitFinalApplication}
-                    className={`px-6 shadow-3 transition-all duration-500 ${
-                        success
+                    className={`px-6 shadow-3 transition-all duration-500 ${success
                             ? 'p-button-info opacity-100'
                             : 'p-button-success'
-                    }`}
+                        }`}
                     disabled={!selectedFile || loading || success}
                 />
             </div>

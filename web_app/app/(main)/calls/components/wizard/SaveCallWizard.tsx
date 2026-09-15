@@ -4,6 +4,13 @@ import React, { useState, useRef, useEffect } from 'react';
 import { Dialog } from 'primereact/dialog';
 import { Steps } from 'primereact/steps';
 import { Toast } from 'primereact/toast';
+import { Button } from 'primereact/button';
+import { InputText } from 'primereact/inputtext';
+import { InputTextarea } from 'primereact/inputtextarea';
+import { DataTable } from 'primereact/datatable';
+import { Column } from 'primereact/column';
+import { Calendar } from 'primereact/calendar';
+import { InputNumber } from 'primereact/inputnumber';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
 
 // APIs & Models
@@ -16,23 +23,29 @@ import { CallStagesStep } from './CallStagesStep';
 import { CallReviewStep } from './CallReviewStep';
 import { CallInfoStep } from './CallInfoStep';
 
-
 export const SaveCallWizard = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<Call>) => {
     const toast = useRef<Toast>(null);
     const [activeIndex, setActiveIndex] = useState(0);
     const [saving, setSaving] = useState(false);
+    const isEditMode = !!item?._id;
 
-    const [callData, setCallData] = useState<Partial<Call>>({ ...item });
-    const [stages, setStages] = useState<Partial<Stage>[]>([]);
+    const [callData, setCallData] = useState<Partial<Call>>({
+        title: '',
+        description: '',
+        stages: [{ name: 'Concept Note', order: 1, minAcceptanceScore: 50, deadline: new Date() }]
+    });
 
     useEffect(() => {
         if (visible) {
-            setCallData({ ...item });
+            setCallData({
+                ...item,
+                title: item?.title || '',
+                description: item?.description || '',
+                stages: item?.stages && item.stages.length > 0
+                    ? item.stages
+                    : [{ name: 'Concept Note', order: 1, minAcceptanceScore: 50, deadline: new Date() }]
+            });
             setActiveIndex(0);
-            if (!item._id) {
-                // Default starter stage for new Call
-                setStages([{ name: 'Concept Note', order: 1, minAcceptanceScore: 50 }]);
-            }
         }
     }, [visible, item]);
 
@@ -41,6 +54,18 @@ export const SaveCallWizard = ({ visible, item, onHide, onComplete }: EntitySave
         { label: 'Stages & Deadlines' },
         { label: 'Review & Finish' }
     ];
+
+    const updateCallData = (data: Partial<Call>) => {
+        setCallData(prev => ({ ...prev, ...data }));
+    };
+
+    const handleNext = () => {
+        setActiveIndex(prev => prev + 1);
+    };
+
+    const handleBack = () => {
+        setActiveIndex(prev => prev - 1);
+    };
 
     const handleSaveWizard = async () => {
         try {
@@ -51,29 +76,41 @@ export const SaveCallWizard = ({ visible, item, onHide, onComplete }: EntitySave
             const payload = sanitize(callData as Call);
             let savedCall: Call;
 
-            if (callData._id) {
+            if (isEditMode && callData._id) {
                 savedCall = await CallApi.update(payload as Call);
             } else {
                 savedCall = await CallApi.create(payload as Call);
             }
 
-            // Persist Stages linked to newly created Call ID
-            if (stages.length > 0) {
-                const stagePromises = stages.map(stg => {
+            /*
+            const currentStages = callData.stages || [];
+            if (currentStages.length > 0) {
+                const stagePromises = currentStages.map(stg => {
                     const stagePayload = { ...stg, call: savedCall._id };
                     return stg._id ? StageApi.update(stagePayload as Stage) : StageApi.create(stagePayload as Stage);
                 });
                 await Promise.all(stagePromises);
             }
+                */
 
             toast.current?.show({
                 severity: 'success',
                 summary: 'Success',
-                detail: 'Call and Stages created successfully',
-                life: 2000
+                detail: isEditMode ? 'Call updated successfully' : 'Call and Stages created successfully',
+                life: 1000
             });
 
-            onComplete?.(savedCall);
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Success',
+                detail: isEditMode ? 'Call updated successfully' : 'Call and Stages created successfully',
+                life: 1000
+            });
+            // Wait for the toast duration (1000ms) before triggering completion and closing
+            setTimeout(() => {
+                onComplete?.(savedCall);
+                onHide();
+            }, 1000);
         } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
@@ -86,46 +123,105 @@ export const SaveCallWizard = ({ visible, item, onHide, onComplete }: EntitySave
         }
     };
 
+    const renderStep = () => {
+        switch (activeIndex) {
+            case 0:
+                return (
+                    <CallInfoStep
+                        data={callData}
+                        onUpdate={updateCallData}
+                        onNext={handleNext}
+                    />
+                );
+            case 1:
+                return (
+                    <CallStagesStep
+                        data={callData}
+                        onUpdate={updateCallData}
+                        onNext={handleNext}
+                        onBack={handleBack}
+                    />
+                );
+            case 2:
+                return (
+                    <CallReviewStep
+                        callData={callData}
+                        stages={callData.stages || []}
+                        onSave={handleSaveWizard}
+                        onBack={handleBack}
+                        saving={saving}
+                    />
+                );
+            default:
+                return null;
+        }
+    };
+
+    // Footer used ONLY in edit mode: strictly Cancel and Save Changes, zero wizard steps or next buttons
+    const editModeFooter = isEditMode ? (
+        <div className="flex justify-content-end gap-2">
+            <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
+            <Button label="Save Changes" icon="pi pi-check" onClick={handleSaveWizard} loading={saving} className="w-auto px-4" />
+        </div>
+    ) : undefined;
+
     return (
         <>
             <Toast ref={toast} />
             <Dialog
                 visible={visible}
                 style={{ width: '750px' }}
-                header={callData._id ? 'Edit Call Setup' : 'New Strategic Call Wizard'}
+                header={isEditMode ? 'Edit Strategic Call' : 'New Strategic Call Wizard'}
                 modal
+                className="p-fluid"
                 onHide={onHide}
+                footer={editModeFooter}
                 maximizable
                 maximized
             >
-                <Steps model={wizardItems} activeIndex={activeIndex} onSelect={(e) => setActiveIndex(e.index)} readOnly={false} className="mb-4" />
-
-                {activeIndex === 0 && (
-                    <CallInfoStep
-                        data={callData}
-                        onUpdate={setCallData}
-                        onNext={() => setActiveIndex(1)}
-                    />
-                )}
-
-                {activeIndex === 1 && (
-                    <CallStagesStep
-                        stages={stages}
-                        onUpdateStages={setStages}
-                        onNext={() => setActiveIndex(2)}
-                        onBack={() => setActiveIndex(0)}
-                    />
-                )}
-
-                {activeIndex === 2 && (
-                    <CallReviewStep
-                        callData={callData}
-                        stages={stages}
-                        onSave={handleSaveWizard}
-                        onBack={() => setActiveIndex(1)}
-                        saving={saving}
-                    />
-                )}
+                <div className="call-wizard pt-2">
+                    {isEditMode ? (
+                        /* Flat form view for Edit Mode — completely bypassing wizard steps and next buttons */
+                        <div className="flex flex-column gap-4 mt-2">
+                            <div className="field">
+                                <label htmlFor="title" className="font-bold">Call Title</label>
+                                <InputText
+                                    id="title"
+                                    value={callData.title || ''}
+                                    onChange={(e) => updateCallData({ title: e.target.value })}
+                                    placeholder="Enter call title..."
+                                />
+                            </div>
+                            <div className="field">
+                                <label htmlFor="description" className="font-bold">Description</label>
+                                <InputTextarea
+                                    id="description"
+                                    rows={4}
+                                    value={callData.description || ''}
+                                    onChange={(e) => updateCallData({ description: e.target.value })}
+                                    placeholder="Enter description..."
+                                />
+                            </div>
+                        </div>
+                    ) : (
+                        /* Multi-step wizard view strictly for Creation Mode */
+                        <>
+                            <Steps
+                                model={wizardItems}
+                                activeIndex={activeIndex}
+                                onSelect={(e) => {
+                                    if (e.index < activeIndex) {
+                                        setActiveIndex(e.index);
+                                    }
+                                }}
+                                className="mb-4"
+                            />
+                            <div className="min-h-20rem">
+                                {renderStep()}
+                            </div>
+                        </>
+                    )}
+                </div>
             </Dialog>
         </>
     );

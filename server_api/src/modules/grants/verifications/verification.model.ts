@@ -87,7 +87,6 @@ const VerificationSchema =
                 type: [VerificationStatusHistorySchema],
                 default: []
             }
-
         },
         {
             timestamps: true,

@@ -21,6 +21,10 @@ export const CollaboratorApi: EntityApi<Collaborator, FilterCollaboratorsOptions
         return data as Collaborator[];
     },
 
+    async lookup(filter) {
+        return ApiClient.get(`${end_point}/lookup`, filter);
+    },
+
     async me(
         filter?: Omit<FilterCollaboratorsOptions, "member">
     ): Promise<Collaborator[]> {

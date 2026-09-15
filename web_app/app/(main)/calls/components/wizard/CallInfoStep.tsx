@@ -16,6 +16,7 @@ import { Constraint } from '@/app/(main)/constraints/models/constraint.model';
 import { GrantApi } from '@/app/(main)/grants/api/grant.api';
 import { Grant } from '@/app/(main)/grants/models/grant.model';
 import { GrantStatus } from '@/app/(main)/grants/models/grant.state-machine';
+import { extractId } from '@/utils/utils';
 
 
 
@@ -23,6 +24,7 @@ interface CallInfoStepProps {
     data: Partial<Call>;
     onUpdate: (data: Partial<Call>) => void;
     onNext: () => void;
+    isEditModeOnly?: boolean;
 }
 
 export const CallInfoStep = ({ data, onUpdate, onNext }: CallInfoStepProps) => {
@@ -31,11 +33,6 @@ export const CallInfoStep = ({ data, onUpdate, onNext }: CallInfoStepProps) => {
     const [calendars, setCalendars] = useState<Calendar[]>([]);
     const [constraints, setConstraints] = useState<Constraint[]>([]);
     const [compositions, setCompositions] = useState<Composition[]>([]);
-
-    const getTargetId = (target: any): string | undefined => {
-        if (!target) return undefined;
-        return typeof target === 'object' ? target._id : target;
-    };
 
     useEffect(() => {
         const loadDependencies = async () => {
@@ -121,7 +118,7 @@ export const CallInfoStep = ({ data, onUpdate, onNext }: CallInfoStepProps) => {
                     <label htmlFor="constraint" className="font-semibold block mb-2">Constraint Profile</label>
                     <Dropdown
                         id="constraint"
-                        value={getTargetId(data.constraint)}
+                        value={extractId(data.constraint)}
                         options={constraints}
                         optionLabel="name"
                         optionValue="_id"
@@ -135,7 +132,7 @@ export const CallInfoStep = ({ data, onUpdate, onNext }: CallInfoStepProps) => {
                     <label htmlFor="composition" className="font-semibold block mb-2">Composition Template</label>
                     <Dropdown
                         id="composition"
-                        value={getTargetId(data.composition)}
+                        value={extractId(data.composition)}
                         options={compositions}
                         optionLabel="name"
                         optionValue="_id"

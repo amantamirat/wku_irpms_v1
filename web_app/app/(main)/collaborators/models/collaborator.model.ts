@@ -3,7 +3,8 @@ import { Project } from "../../projects/models/project.model";
 
 export enum CollaboratorStatus {
     pending = 'pending',
-    verified = 'verified'
+    verified = 'verified',
+    declined = 'declined'
 }
 
 export type Collaborator = {

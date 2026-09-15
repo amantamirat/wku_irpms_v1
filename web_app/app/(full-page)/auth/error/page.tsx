@@ -13,7 +13,7 @@ const ErrorPage = () => {
                     {
                         //<img src={`/images/wku_logo.png`} alt="WKU logo" className="mb-5 w-6rem flex-shrink-0" />
                     }
-                    <ErrorState errorMessage='something went wrong' />
+                    <ErrorState error='something went wrong' />
                     <Button icon="pi pi-arrow-left" label="Go to Dashboard" text onClick={() => router.push('/')} />
                 </div>
             </div>

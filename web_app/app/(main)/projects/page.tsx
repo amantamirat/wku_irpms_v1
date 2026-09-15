@@ -1,6 +1,5 @@
 'use client';
-
-import ProjectManager from './components/ProjectManager';
+import ProjectManager from "./components/ProjectManager";
 
 const Page = () => {
     return (
@@ -17,9 +16,6 @@ const Page = () => {
 
             {/* MAIN CONTENT */}
             <ProjectManager />
-            <div className="border-round-xl surface-card shadow-1 p-4 md:p-5">
-
-            </div>
         </div>
     );
 };

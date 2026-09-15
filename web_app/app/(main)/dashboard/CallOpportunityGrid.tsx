@@ -14,7 +14,18 @@ const CallOpportunityGrid = () => {
         const loadCalls = async () => {
             try {
                 const data = await CallApi.lookup!({ status: CallStatus.active });
-                setCalls(data || []);
+                
+                // Sort calls by deadline, handling undefined deadlines safely
+                const sortedData = (data || []).sort((a, b) => {
+                    // If deadline is missing, fallback to a far future timestamp (puts them at the end)
+                    // Alternatively, use a specific date like: new Date('2099-12-31').getTime()
+                    const timeA = a.deadline ? new Date(a.deadline).getTime() : Number.MAX_SAFE_INTEGER;
+                    const timeB = b.deadline ? new Date(b.deadline).getTime() : Number.MAX_SAFE_INTEGER;
+                    
+                    return timeB- timeA; // Ascending: soonest deadline first
+                });
+
+                setCalls(sortedData);
             } catch (err) {
                 console.error("Error loading calls:", err);
             } finally {

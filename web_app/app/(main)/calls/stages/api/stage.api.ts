@@ -1,11 +1,12 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
-import { Stage, GetStagesDTO, sanitizeCallStage } from "../models/stage.model";
+import { Stage, FilterStagesDTO } from "../models/stage.model";
 import { StateTransition } from "@/api/EntityApi";
+import { sanitize } from "@/utils/utils";
 
 const end_point = "/call/stages";
 
-export const StageApi: EntityApi<Stage, GetStagesDTO | undefined>
+export const StageApi: EntityApi<Stage, FilterStagesDTO | undefined>
     & {
         getNext: (stageId: string) => Promise<Stage | null>;
         getUpcoming: () => Promise<Stage[]>;
@@ -55,7 +56,7 @@ export const StageApi: EntityApi<Stage, GetStagesDTO | undefined>
     // Create
     // ---------------------------
     async create(stage) {
-        const sanitized = sanitizeCallStage(stage);
+        const sanitized = sanitize(stage);
         return ApiClient.post(`${end_point}`, sanitized);
     },
 
@@ -64,7 +65,7 @@ export const StageApi: EntityApi<Stage, GetStagesDTO | undefined>
     // ---------------------------
     async update(stage) {
         // if (!stage._id) throw new Error("_id required");
-        return ApiClient.put(`${end_point}/${stage._id}`, sanitizeCallStage(stage));
+        return ApiClient.put(`${end_point}/${stage._id}`, sanitize(stage));
     },
 
     // ---------------------------

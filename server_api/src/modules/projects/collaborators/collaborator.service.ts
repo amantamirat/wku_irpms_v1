@@ -18,6 +18,9 @@ import { CollaboratorStatus } from "./collaborator.model";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { ICallRepository } from "../../calls/call.repository";
 import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
+import { AuthPermissionService } from "../../auth/auth.permission-service";
+import { ProjectAuth } from "../project.auth";
+import { PERMISSIONS } from "../../../common/constants/permissions";
 
 
 export class CollaboratorService {
@@ -27,25 +30,35 @@ export class CollaboratorService {
         private readonly projectRepo: IProjectRepository,
         private readonly callRepo: ICallRepository,
         private readonly constraintValidator: ConstraintValidationService,
-        private readonly notificationService?: NotificationService,
+        private readonly projectAuth: ProjectAuth,
+        private readonly notificationService: NotificationService,
     ) {
     }
 
-    async validateProject(project: string, user: string) {
+    /*
+    async validateProject(project: string) {
         const projectDoc = await this.projectRepo.findById(project);
-        if (
-            projectDoc?.status !== ProjectStatus.draft &&
-            projectDoc?.status !== ProjectStatus.accepted
-        ) {
-            throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
+        if (!projectDoc) {
+            throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         }
+        
         return projectDoc;
-    }
+    }*/
 
     async create(dto: CreateCollaboratorDto, options?: { skipValidation?: boolean }) {
         const { member, project, projectTitle, userId } = dto;
         if (!options?.skipValidation) {
-            const projectDoc = await this.validateProject(project, userId ?? "");
+            if (!userId) return;
+            const { projectDoc, isLeadPI } = await this.projectAuth.auth(project, userId, PERMISSIONS.COLLABORATOR.CREATE);
+
+            if (isLeadPI) {
+                if (
+                    projectDoc.status !== ProjectStatus.draft
+                ) {
+                    throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+                }
+            }
+
             const callId = String(projectDoc.call);
             if (callId) {
                 const callDoc = await this.callRepo.findById(callId);
@@ -61,18 +74,18 @@ export class CollaboratorService {
                         throw new AppError(ERROR_CODES.INVALID_CONSTRAINT, "participant count", 400, result);
                     }
                 }
-
+                /*
                 if (dto.isLeadPI) {
                     // await this.compositionValidator.validatePI(grantId, applicant);
                 } else {
                     //  await this.compositionValidator.validateCoPI(grantId, applicant);
-                }
+                }*/
             }
         }
         try {
             const created = await this.collabRepo.create(dto);
-            await this.projectRepo.updateTotalCollabs(project, 1);
-            if (this.notificationService && dto.status !== CollaboratorStatus.verified) {
+            await this.projectRepo.incrementTotals(project, { collabs: 1 });
+            if (dto.status !== CollaboratorStatus.verified) {
                 await this.notificationService.notifyProjectInvitation(
                     member, projectTitle ?? project, dto.role, userId
                 );
@@ -110,12 +123,14 @@ export class CollaboratorService {
 
 
     async update(dto: UpdateCollaboratorDto) {
+        throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
+        /*
         const { id, data } = dto;
         const collabDoc = await this.collabRepo.findById(id);
         if (!collabDoc) throw new Error(ERROR_CODES.COLLABORATOR_NOT_FOUND);
         if (collabDoc.status !== CollaboratorStatus.pending)
             throw new AppError(ERROR_CODES.COLLABORATOR_NOT_PENDING);
-        return await this.collabRepo.update(id, data);
+        return await this.collabRepo.update(id, data);*/
     }
 
 
@@ -144,8 +159,8 @@ export class CollaboratorService {
             const projectDoc = await this.projectRepo.findById(String(collabDoc.project));
             if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
             const projectStatus = projectDoc.status;
-            if (projectStatus !== ProjectStatus.draft &&
-                projectStatus !== ProjectStatus.submitted // &&
+            if (projectStatus !== ProjectStatus.draft //&&
+                // projectStatus !== ProjectStatus.submitted // &&
                 // projectStatus !== ProjectStatus.accepted
             ) {
                 throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
@@ -158,15 +173,23 @@ export class CollaboratorService {
     }
 
 
-    async delete(dto: DeleteDto) {
-        const { id, userId: applicantId } = dto;
+    async delete(dto: DeleteDto, userId: string) {
+        const { id } = dto;
 
         const collabDoc = await this.collabRepo.findById(id);
         if (!collabDoc) throw new Error(ERROR_CODES.COLLABORATOR_NOT_FOUND);
         if (collabDoc.status !== CollaboratorStatus.pending) throw new AppError(ERROR_CODES.COLLABORATOR_NOT_PENDING);
 
         const project = String(collabDoc.project);
-        const projectDoc = await this.validateProject(project, applicantId ?? "");
+        const { projectDoc, isLeadPI } = await this.projectAuth.auth(project, userId, PERMISSIONS.COLLABORATOR.DELETE);
+
+        if (isLeadPI) {
+            if (
+                projectDoc.status !== ProjectStatus.draft
+            ) {
+                throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+            }
+        }
 
         const grantId = String(projectDoc.grant);
         const countCollabs = projectDoc.totalCollabs ?? 0;
@@ -176,7 +199,7 @@ export class CollaboratorService {
         }
 
         const deleted = this.collabRepo.delete(id);
-        await this.projectRepo.updateTotalCollabs(project, -1);
+        await this.projectRepo.incrementTotals(project, { collabs: -1 });
         if (!collabDoc.isLeadPI && this.notificationService) {
             await this.notificationService.notifyProjectRemoval(
                 String(collabDoc.member), projectDoc.title, collabDoc.role
@@ -188,10 +211,8 @@ export class CollaboratorService {
 
 
 export const COLLAB_TRANSITIONS: Record<
-    CollaboratorStatus,
-    CollaboratorStatus[]
-> = {
+    CollaboratorStatus, CollaboratorStatus[]> = {
     [CollaboratorStatus.pending]: [CollaboratorStatus.verified, CollaboratorStatus.declined],
-    [CollaboratorStatus.verified]: [],
+    [CollaboratorStatus.verified]: [CollaboratorStatus.pending],
     [CollaboratorStatus.declined]: [CollaboratorStatus.pending]
 };
