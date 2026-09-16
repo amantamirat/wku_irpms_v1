@@ -46,7 +46,40 @@ export class ReviewerController {
     // -----------------------
     get = async (req: Request, res: Response) => {
         try {
-            const { application, verification, reviewer, populate, status } = req.query;
+            const { application, verification, reviewer, status } = req.query;
+
+            const filter: FilterReviewersDto = {
+                application: application
+                    ? String(application)
+                    : undefined,
+
+                reviewer: reviewer
+                    ? String(reviewer)
+                    : undefined,
+
+                verification: verification
+                    ? String(verification)
+                    : undefined,
+
+                status: status
+                    ? Array.isArray(status)
+                        ? status as ReviewerStatus[]
+                        : status as ReviewerStatus
+                    : undefined
+            };
+            const reviewers = await this.service.getReviewers(filter, { populate: true });
+            successResponse(res, 200, "Reviewers fetched successfully", reviewers);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
+    // -----------------------
+    // LOOKUP NO POPULATE
+    // -----------------------
+    lookup = async (req: Request, res: Response) => {
+        try {
+            const { application, verification, reviewer, status } = req.query;
 
             const filter: FilterReviewersDto = {
                 application: application

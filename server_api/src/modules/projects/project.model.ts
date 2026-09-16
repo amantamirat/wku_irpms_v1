@@ -84,7 +84,7 @@ const ProjectSchema = new Schema<IProject>({
         type: String,
         required: true,
         trim: true,
-        //unique: true
+        unique: true
     },
 
     summary: {

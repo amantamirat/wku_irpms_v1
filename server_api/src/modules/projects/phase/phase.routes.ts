@@ -10,7 +10,7 @@ const controller = new PhaseController(phaseService);
 const router: Router = Router();
 
 router.post('/', verifyAuthToken,
-    checkPermission([PERMISSIONS.PHASE.CREATE]),
+    checkPermission([PERMISSIONS.PHASE.CREATE, PERMISSIONS.PHASE.CREATE_OWN]),
     controller.create);
 router.get('/', verifyAuthToken,
     checkPermission([PERMISSIONS.PHASE.READ]),
@@ -24,7 +24,7 @@ router.get(
     controller.get
 );
 router.put('/:id', verifyAuthToken,
-    checkPermission([PERMISSIONS.PHASE.UPDATE]),
+    checkPermission([PERMISSIONS.PHASE.UPDATE, PERMISSIONS.PHASE.UPDATE_OWN]),
     controller.update);
 router.patch(
     '/:id', verifyAuthToken,
@@ -32,7 +32,7 @@ router.patch(
     controller.transitionState
 );
 router.delete('/:id', verifyAuthToken,
-    checkPermission([PERMISSIONS.PHASE.DELETE]),
+    checkPermission([PERMISSIONS.PHASE.DELETE, PERMISSIONS.PHASE.DELETE_OWN]),
     controller.delete);
 
 export default router;

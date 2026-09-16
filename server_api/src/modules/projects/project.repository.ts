@@ -242,29 +242,21 @@ export class ProjectRepository implements IProjectRepository {
             budget?: number;
             collabs?: number;
         }
-    ): Promise<IProject | null> {
-        const increment: Record<string, number> = {};
-
-        if (delta.duration !== undefined) {
-            increment.totalDuration = delta.duration;
-        }
-
-        if (delta.budget !== undefined) {
-            increment.totalBudget = delta.budget;
-        }
-
-        if (delta.collabs !== undefined) {
-            increment.totalCollabs = delta.collabs;
-        }
-
-        if (Object.keys(increment).length === 0) {
-            return Project.findById(projectId).exec();
-        }
-
+    ) {
         return Project.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(projectId),
+            projectId,
             {
-                $inc: increment
+                $inc: {
+                    ...(delta.duration !== undefined && {
+                        totalDuration: delta.duration
+                    }),
+                    ...(delta.budget !== undefined && {
+                        totalBudget: delta.budget
+                    }),
+                    ...(delta.collabs !== undefined && {
+                        totalCollabs: delta.collabs
+                    })
+                }
             },
             {
                 new: true

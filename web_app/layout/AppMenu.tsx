@@ -53,6 +53,13 @@ const AppMenu = () => {
                     to: '/collaborators',
                     permission: 'application:read',
                 },
+
+                {
+                    label: 'Evaluators',
+                    icon: 'pi pi-users-pencil',
+                    to: '/reviewers',
+                    permission: 'reviewer:read',
+                },
             ]
         },
         {

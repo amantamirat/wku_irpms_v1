@@ -93,7 +93,7 @@ router.patch(
 router.delete(
     "/:id",
     verifyAuthToken,
-    checkPermission(["application:delete, application:delete:own"]),
+    checkPermission([PERMISSIONS.APPLICATION.DELETE, PERMISSIONS.APPLICATION.DELETE_OWN]),
     controller.delete
 );
 

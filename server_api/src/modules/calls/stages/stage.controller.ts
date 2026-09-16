@@ -66,6 +66,24 @@ export class StageController {
     };
 
 
+    lookup = async (req: Request, res: Response) => {
+        try {
+            const { call, evaluation, order } = req.query;
+
+            const dto: FilterStageDto = {
+                call: call as string,
+                evaluation: evaluation as string,
+                order: order ? Number(order) : undefined,
+            };
+
+            const stages = await this.service.get(dto);
+            successResponse(res, 200, 'Stages fetched successfully', stages);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
+
     getById = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;

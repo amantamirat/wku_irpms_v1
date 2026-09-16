@@ -6,7 +6,6 @@ import { ReviewerApi } from "../api/reviewer.api";
 import { Reviewer, ReviewerStatus, ReviewerTargetType } from "../models/reviewer.model";
 import MyBadge from "@/templates/MyBadge";
 import SaveReviewerDialog from "../components/SaveReviewerDialog";
-import { REVIEWER_ADMIN_TRANSITIONS, REVIEWER_STATUS_ORDER } from "../models/reviewer.state-machine";
 import EvaluationDialog from "../components/EvaluationDialog";
 
 interface VerificationReviewerManagerProps {
@@ -80,11 +79,7 @@ const VerificationReviewerManager = ({ verification }: VerificationReviewerManag
                 }
             ],
             items: reviewers,
-            workflow: {
-                statusField: "status",
-                statusOrder: REVIEWER_STATUS_ORDER,
-                transitions: REVIEWER_ADMIN_TRANSITIONS
-            },
+           
             permissionPrefix: "reviewer",
             extraActions: [
                 {

@@ -38,11 +38,15 @@ router.get(
     controller.get
 );
 
+router.get('/lookup', verifyAuthToken,
+    checkPermission(["stage:lookup"]),
+    controller.lookup);
+
 // Get by ID
 router.get(
     '/:id',
     verifyAuthToken,
-    checkPermission(["stage:read"]),
+    checkPermission(["stage:lookup"]),
     controller.getById
 );
 

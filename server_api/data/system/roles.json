@@ -16,7 +16,7 @@
             "position:*",
             "publication:*",
             "enrollment:*",
-            "calendar:read"
+            "calendar:lookup"
         ]
     },
     {
@@ -54,7 +54,7 @@
             "composition:*",
             "template:*",
             "call:*",
-            "call.stage:*",
+            "stage:*",
             "thematic:*",
             "theme:*",
             "evaluation:*",

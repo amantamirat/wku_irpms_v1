@@ -2,30 +2,49 @@ import { Server } from 'socket.io';
 
 export class SocketService {
     private static io: Server;
-    private static userSockets = new Map<string, string>(); // Maps userId -> socketId
 
     static init(server: any) {
         this.io = new Server(server, {
-            cors: { origin: "*" } // Adjust for production
+            cors: {
+                origin: '*', // adjust for production
+            },
         });
 
         this.io.on('connection', (socket) => {
             const userId = socket.handshake.query.userId as string;
-            //unsafe the client can request other userid
-            if (userId) {
-                this.userSockets.set(userId, socket.id);
+
+            if (!userId) {
+                socket.disconnect();
+                return;
             }
 
+            socket.join(`user:${userId}`);
+
+            /*
+            console.log(
+                `User ${userId} connected with socket ${socket.id}`
+            );*/
+
             socket.on('disconnect', () => {
-                this.userSockets.delete(userId);
+                /*
+                console.log(
+                    `User ${userId} disconnected`
+                );*/
             });
         });
     }
 
-    static sendNotification(userId: string, notification: any) {
-        const socketId = this.userSockets.get(userId);
-        if (socketId) {
-            this.io.to(socketId).emit('new_notification', notification);
+    static sendNotification(
+        userId: string,
+        notification: any
+    ) {
+        if (!this.io) {
+            console.warn('SocketService is not initialized');
+            return;
         }
+
+        this.io
+            .to(`user:${userId}`)
+            .emit('new_notification', notification);
     }
 }

@@ -46,7 +46,7 @@ const MyProjectsManager = ({
         itemName: "Project",
         api: ProjectApi,
         permissionPrefix: "project",
-        items: projects,
+        initialItems: projects,
         hideSearch: true,
 
         columns: [

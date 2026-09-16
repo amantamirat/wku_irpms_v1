@@ -3,9 +3,9 @@ import { EntityApi } from "@/api/EntityApi";
 import { StateTransition } from "@/api/EntityApi";
 import {
     FilterReviewersOptions,
-    Reviewer,
-    sanitizeReviewer
+    Reviewer
 } from "../models/reviewer.model";
+import { sanitize } from "@/utils/utils";
 
 const end_point = '/project/reviewers';
 
@@ -18,18 +18,12 @@ export const ReviewerApi: EntityApi<Reviewer, FilterReviewersOptions | undefined
     = {
 
     async getAll(filter?: FilterReviewersOptions): Promise<Reviewer[]> {
-
-        /*
-                if (options) {            
-                    // NEW: Handle Status Array or String
-                    if (options.status) {
-                        if (Array.isArray(options.status)) {
-                            options.status.forEach(s => query.append("status", s));
-                        } 
-                    }           
-                }*/
         const data = await ApiClient.get(end_point, filter);
         return data as Reviewer[];
+    },
+
+    async lookup(filter?: FilterReviewersOptions): Promise<Reviewer[]> {
+        return ApiClient.get(`${end_point}/lookup`, filter);
     },
 
     async me(
@@ -46,14 +40,14 @@ export const ReviewerApi: EntityApi<Reviewer, FilterReviewersOptions | undefined
     },
 
     async create(reviewer: Partial<Reviewer>): Promise<Reviewer> {
-        const sanitized = sanitizeReviewer(reviewer);
+        const sanitized = sanitize(reviewer);
         const created = await ApiClient.post(end_point, sanitized);
         return created as Reviewer;
     },
 
     async update(reviewer: Partial<Reviewer>): Promise<Reviewer> {
         //if (!reviewer._id) throw new Error("_id required");
-        const sanitized = sanitizeReviewer(reviewer);
+        const sanitized = sanitize(reviewer);
         const url = `${end_point}/${reviewer._id}`;
         const updated = await ApiClient.put(url, sanitized);
 
@@ -61,7 +55,7 @@ export const ReviewerApi: EntityApi<Reviewer, FilterReviewersOptions | undefined
     },
 
     async delete(reviewer: Partial<Reviewer>): Promise<boolean> {
-        //if (!reviewer._id) throw new Error("_id required");
+        if (!reviewer._id) throw new Error("_id required");
         const url = `${end_point}/${reviewer._id}`;
         return await ApiClient.delete(url);
     },

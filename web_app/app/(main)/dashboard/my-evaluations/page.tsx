@@ -1,6 +1,5 @@
 'use client';
 
-import React from 'react';
 import MyReviewersManager from "../../reviewers/me/MyReviewersManager";
 import { BreadCrumb } from 'primereact/breadcrumb';
 import { Card } from 'primereact/card';

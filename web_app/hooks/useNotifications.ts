@@ -26,18 +26,23 @@ export const useNotifications = () => {
     const [loading, setLoading] = useState(false);
     const [unreadCount, setUnreadCount] = useState(0);
 
+    const { getUser } = useAuth();
+
     const fetchNotifications = useCallback(async () => {
         setLoading(true);
-        try {
-            const notifications = await ApiClient.get('/notifications');
-            setNotifications(notifications);
 
-            // Calculate unread count locally
-            const unread = notifications.filter((n: any) => !n.isRead).length;
-            //console.log("unread", unread);
-            setUnreadCount(unread);
+        try {
+            const data = await ApiClient.get('/notifications');
+
+            setNotifications(data);
+            setUnreadCount(
+                data.filter((n: any) => !n.isRead).length
+            );
         } catch (error) {
-            console.error("Error fetching notifications", error);
+            console.error(
+                "Error fetching notifications",
+                error
+            );
         } finally {
             setLoading(false);
         }
@@ -45,61 +50,121 @@ export const useNotifications = () => {
 
     const markAsRead = async (id: string) => {
         try {
-            await ApiClient.patch(`/notifications/${id}/read`);
-            // Update local state to avoid a full re-fetch
-            setNotifications(prev =>
-                prev.map(n => n._id === id ? { ...n, isRead: true } : n)
+            await ApiClient.patch(
+                `/notifications/${id}/read`
             );
-            setUnreadCount(prev => Math.max(0, prev - 1));
+
+            setNotifications(prev =>
+                prev.map(n =>
+                    n._id === id
+                        ? { ...n, isRead: true }
+                        : n
+                )
+            );
+
+            setUnreadCount(prev =>
+                Math.max(0, prev - 1)
+            );
         } catch (error) {
-            console.error("Error marking as read", error);
+            console.error(
+                "Error marking as read",
+                error
+            );
         }
     };
 
     const markAllRead = async () => {
         try {
-            await ApiClient.post('/notifications/read-all', {});
-            setNotifications(prev => prev.map(n => ({ ...n, isRead: true })));
+            await ApiClient.post(
+                '/notifications/read-all',
+                {}
+            );
+
+            setNotifications(prev =>
+                prev.map(n => ({
+                    ...n,
+                    isRead: true
+                }))
+            );
+
             setUnreadCount(0);
         } catch (error) {
-            console.error("Error marking all read", error);
+            console.error(
+                "Error marking all read",
+                error
+            );
         }
     };
 
+    // Initial notification load
     useEffect(() => {
         fetchNotifications();
     }, [fetchNotifications]);
 
-
-    const { getUser } = useAuth();
-    const SOCKET_URL = BASE_URL?.replace('/api', '');
+    // Real-time notifications
     useEffect(() => {
         const userData = getUser();
-        // 1. Determine the ID: if getUser is an object, use _id, otherwise use it as a string
         const userId = extractId(userData);
 
-        // 2. Only connect if we actually have an ID
-        if (!userId) return;
+        if (!userId) {
+            return;
+        }
+
+        const SOCKET_URL = BASE_URL?.replace('/api', '');
 
         const socket = io(SOCKET_URL, {
-            query: { applicantId: userId }
+            query: {
+                userId
+            }
         });
 
-        const notificationSound = new Audio('/sounds/beep.mp3');
-        socket.on('new_notification', (newNotif) => {
-            setNotifications(prev => [newNotif, ...prev]);
+        socket.on('connect', () => {
+            console.log(
+                'Notification socket connected:',
+                socket.id
+            );
+        });
+
+        socket.on('connect_error', (error) => {
+            console.error(
+                'Notification socket error:',
+                error
+            );
+        });
+
+        socket.on('new_notification', (notification) => {
+            console.log(
+                'New notification received:',
+                notification
+            );
+
+            setNotifications(prev => [
+                notification,
+                ...prev
+            ]);
+
             setUnreadCount(prev => prev + 1);
 
-            notificationSound.play().catch(err => {
-                // Browsers often block audio until the user clicks something on the page
-                console.error("Audio playback failed:", err);
-            });
+            const notificationSound =
+                new Audio('/sounds/beep.mp3');
+
+            notificationSound
+                .play()
+                .catch(() => {
+                    // Browser may block autoplay
+                });
+        });
+
+        socket.on('disconnect', (reason) => {
+            console.log(
+                'Notification socket disconnected:',
+                reason
+            );
         });
 
         return () => {
             socket.disconnect();
         };
-        // Ensure the dependency matches the variable used to trigger the connection
     }, [getUser]);
 
     return {

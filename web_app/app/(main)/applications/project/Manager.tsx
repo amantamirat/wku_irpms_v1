@@ -134,7 +134,7 @@ const ApplicationManager = ({ project, enableEditing }: ApplicationManagerProps)
                 })
                 : undefined,
             SaveDialog: nextStage ? SaveApplication : undefined,
-            items: applications,
+            initialItems: applications,
             permissionPrefix: "application",
             hideSearch: true,
             hideEditAction: true,

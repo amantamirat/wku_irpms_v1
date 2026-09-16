@@ -13,9 +13,12 @@ export enum ReviewerTargetType {
 export enum ReviewerStatus {
     pending = 'pending',
     accepted = 'accepted',
+    decliend = 'declined',
     submitted = 'submitted',
-    approved = 'approved'
+    approved = 'approved',
+    rejected = 'rejected'
 }
+
 
 export type Reviewer = {
     _id?: string;
@@ -53,22 +56,4 @@ export const validateReviewer = (reviewer: Reviewer): { valid: boolean; message?
         return { valid: false, message: 'Verification is required when target type is VERIFICATION.' };
     }
     return { valid: true };
-};
-
-export const sanitizeReviewer = (reviewer: Partial<Reviewer | FilterReviewersOptions>): Reviewer => {
-    return {
-        ...reviewer,
-        application:
-            typeof reviewer.application === "object" && reviewer.application !== null
-                ? (reviewer.application as any)._id
-                : reviewer.application,
-        verification:
-            typeof reviewer.verification === "object" && reviewer.verification !== null
-                ? (reviewer.verification as any)._id
-                : reviewer.verification,
-        reviewer:
-            typeof reviewer.reviewer === "object" && reviewer.reviewer !== null
-                ? (reviewer.reviewer as User)._id
-                : reviewer.reviewer
-    } as Reviewer;
 };

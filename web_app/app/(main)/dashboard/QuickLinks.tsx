@@ -42,7 +42,7 @@ export default function QuickLinks() {
             label: 'My Memberships',
             description: 'View teams and joint project efforts',
             icon: 'pi pi-users',
-            permission: PERMISSIONS.COLLABORATOR.READ,
+            permission: PERMISSIONS.COLLABORATOR.LOOKUP,
             color: 'bg-purple-100 text-purple-700'
         },
         /*

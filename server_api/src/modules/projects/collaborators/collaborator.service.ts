@@ -10,17 +10,16 @@ import {
 } from "./collaborator.dto";
 import { ICollaboratorRepository } from "./collaborator.repository";
 
+import { PERMISSIONS } from "../../../common/constants/permissions";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
-import { NotificationService } from "../../notifications/notification.service";
-import { ProjectStatus } from "../project.model";
-import { CollaboratorStatus } from "./collaborator.model";
-import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { ICallRepository } from "../../calls/call.repository";
 import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
-import { AuthPermissionService } from "../../auth/auth.permission-service";
+import { NotificationService } from "../../notifications/notification.service";
 import { ProjectAuth } from "../project.auth";
-import { PERMISSIONS } from "../../../common/constants/permissions";
+import { ProjectStatus } from "../project.model";
+import { CollaboratorStatus } from "./collaborator.model";
 
 
 export class CollaboratorService {
@@ -35,22 +34,13 @@ export class CollaboratorService {
     ) {
     }
 
-    /*
-    async validateProject(project: string) {
-        const projectDoc = await this.projectRepo.findById(project);
-        if (!projectDoc) {
-            throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
-        }
-        
-        return projectDoc;
-    }*/
-
     async create(dto: CreateCollaboratorDto, options?: { skipValidation?: boolean }) {
-        const { member, project, projectTitle, userId } = dto;
+        const { member, project, userId } = dto;
+        let projectTitle = dto.projectTitle;
         if (!options?.skipValidation) {
             if (!userId) return;
             const { projectDoc, isLeadPI } = await this.projectAuth.auth(project, userId, PERMISSIONS.COLLABORATOR.CREATE);
-
+            projectTitle = projectDoc.title;
             if (isLeadPI) {
                 if (
                     projectDoc.status !== ProjectStatus.draft
@@ -178,6 +168,9 @@ export class CollaboratorService {
 
         const collabDoc = await this.collabRepo.findById(id);
         if (!collabDoc) throw new Error(ERROR_CODES.COLLABORATOR_NOT_FOUND);
+        if (collabDoc.isLeadPI) {
+            throw new AppError(ERROR_CODES.COLLABORATOR_LEAD_PI_CANNOT_DELETE);
+        }
         if (collabDoc.status !== CollaboratorStatus.pending) throw new AppError(ERROR_CODES.COLLABORATOR_NOT_PENDING);
 
         const project = String(collabDoc.project);
@@ -191,16 +184,26 @@ export class CollaboratorService {
             }
         }
 
-        const grantId = String(projectDoc.grant);
-        const countCollabs = projectDoc.totalCollabs ?? 0;
-        const validationResult = await this.constraintValidator.validateParticipantCount(grantId, countCollabs - 1);
-        if (!validationResult.valid) {
-            throw new AppError(ERROR_CODES.INVALID_CONSTRAINT, "participant count", 400, validationResult);
+
+        if (projectDoc.call) {
+            const callDoc = await this.callRepo.findById(String(projectDoc.call));
+            if (!callDoc) {
+                throw new AppError(
+                    ERROR_CODES.CALL_NOT_FOUND
+                );
+            }
+            if (callDoc.constraint) {
+                const countCollabs = projectDoc.totalCollabs ?? 0;
+                const validationResult = await this.constraintValidator.validateParticipantCount(String(callDoc.constraint), countCollabs - 1);
+                if (!validationResult.valid) {
+                    throw new AppError(ERROR_CODES.INVALID_CONSTRAINT, "participant count", 400, validationResult);
+                }
+            }
         }
 
         const deleted = this.collabRepo.delete(id);
         await this.projectRepo.incrementTotals(project, { collabs: -1 });
-        if (!collabDoc.isLeadPI && this.notificationService) {
+        if (!collabDoc.isLeadPI) {
             await this.notificationService.notifyProjectRemoval(
                 String(collabDoc.member), projectDoc.title, collabDoc.role
             );

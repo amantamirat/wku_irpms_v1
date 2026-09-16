@@ -33,6 +33,10 @@ router.get('/', verifyAuthToken,
     checkPermission([PERMISSIONS.REVIEWER.READ]),
     controller.get);
 
+router.get('/lookup', verifyAuthToken,
+    checkPermission([PERMISSIONS.REVIEWER.LOOKUP]),
+    controller.lookup);
+
 router.get(
     '/me',
     verifyAuthToken,

@@ -109,7 +109,7 @@ export class NotificationService {
         stageName: string,
         senderId?: string
     ) {
-        return this.notify({
+        return await this.notify({
             recipient: recipientId,
             sender: senderId,
             title: "Application Submitted",

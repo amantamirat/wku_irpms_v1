@@ -16,19 +16,18 @@ const ApplicationDetail = ({ application }: ApplicationDetailProps) => {
 
     // Safely extract project ID whether application.project is an object or string ID
     const projectId = extractId(application.project);
-
     /**
      * Define tabs in a scalable configuration array
      */
     const tabs = useMemo(() => [
         {
             header: "Reviewers",
-            permission: "reviewer:read",
+            permission: "reviewer:lookup",
             content: <ApplicationReviewerManager application={application} />
         },
         {
             header: "Project",
-            permission: "project:read",
+            permission: "project:lookup",
             content: projectId ? <ProjectDetail project={projectId} /> : null
         },
     ], [application, projectId]);

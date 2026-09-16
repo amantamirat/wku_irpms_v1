@@ -84,14 +84,13 @@ export class ProjectService {
             }
         }
 
-        /*
+
         if (await this.projectRepo.exists({ title })) {
             throw new AppError(
                 ERROR_CODES.PROJECT_ALREADY_EXISTS,
                 "A project with this title already exists. Please choose a different title."
             );
         }
-        */
 
         const created = await this.projectRepo.create({
             ...dto, status: ProjectStatus.draft,
@@ -243,7 +242,7 @@ export class ProjectService {
             }, userId, { skipValidation: true });
 
         await this.applicationService.
-            create({
+            createFirstApplication({
                 project: String(projectDoc._id),
                 stage: String(firstStage._id),
                 documentPath: docPath,
@@ -330,6 +329,7 @@ export class ProjectService {
         TransitionHelper.validateTransition(from, to, PROJECT_TRANSITIONS);
 
         if (to === ProjectStatus.approved) {
+
             if (projectDoc.currentApplication) {
                 if (!projectDoc.call) {
                     throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
@@ -378,13 +378,15 @@ export class ProjectService {
                         "The current application has not reached the final stage"
                     );
                 }
-
-                /**
-                 * The project is now approved.
-                 *
-                 * Do any additional application/stage business logic here.
-                 */
             }
+
+            const collabs = await this.collabRepo.find({ project: id });
+            if (!collabs.every(c => c.status === CollaboratorStatus.verified))
+                throw new AppError(ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED);
+
+            const phases = await this.phaseRepo.find({ project: id });
+            if (!phases.every(p => p.status === PhaseStatus.approved))
+                throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_APPROVED);
         }
 
         if (from !== ProjectStatus.granted && to === ProjectStatus.approved) {
@@ -401,13 +403,14 @@ export class ProjectService {
         //rollback notification remain
 
         if (to === ProjectStatus.granted) {
+            /*
             const collabs = await this.collabRepo.find({ project: id });
             if (!collabs.every(c => c.status === CollaboratorStatus.verified))
                 throw new AppError(ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED);
 
             const phases = await this.phaseRepo.find({ project: id });
             if (!phases.every(p => p.status === PhaseStatus.approved))
-                throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_APPROVED);
+                throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_APPROVED);*/
 
         }
 
@@ -428,6 +431,9 @@ export class ProjectService {
                 ERROR_CODES.PROJECT_NOT_DRAFT,
                 "The project must be in draft or submitted status to perform this operation."
             );
+        }
+        if (projectDoc.currentApplication) {
+            throw new AppError(ERROR_CODES.APPLICATION_ALREADY_EXISTS);
         }
         await this.collabRepo.deleteByProject(id);
         await this.phaseRepo.deleteByProject(id);

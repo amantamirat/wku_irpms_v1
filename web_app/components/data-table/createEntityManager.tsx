@@ -8,11 +8,11 @@ import {
   ToolBarActionButton,
 } from "@/components/data-table/ItemDataTable";
 import { useAuth } from "@/contexts/auth-context";
-import { useCrudList } from "@/hooks/useCrudList";
 import {
   TransitionMap,
   useStateTransitionActions,
 } from "@/hooks/useStateTransitionActions";
+import { useCrudList } from "@/hooks/useCrudList";
 import { useCrudActions } from "@/hooks/useCrudActions";
 import { ApiError } from "@/api/ApiError";
 import ErrorState from "../ErrorState";
@@ -31,24 +31,22 @@ export interface CreateEntityManagerConfig<
   title?: string;
   itemName?: string;
 
-  /**
-   * Resource used for permission checks.
-   */
   permissionPrefix: string;
 
   api: EntityApi<T, TQuery>;
 
   columns: any[];
 
-  /**
-   * Creates a new entity when the Create action is clicked.
-   */
   createNew?: () => T;
 
   SaveDialog?: React.ComponentType<EntitySaveDialogProps<T>>;
 
-  items?: T[];
+  initialItems?: T[];
+
   query?: () => TQuery;
+
+  // Explicitly choose to use lookup instead of getAll
+  useLookup?: boolean;
 
   workflow?: {
     statusField: keyof T;
@@ -58,7 +56,9 @@ export interface CreateEntityManagerConfig<
   expandable?: {
     template: (
       row: T,
-      actions: { updateItem: (item: T) => void }
+      actions: {
+        updateItem: (item: T) => void;
+      }
     ) => React.ReactNode;
 
     allow?: (row: T) => boolean;
@@ -76,8 +76,8 @@ export interface CreateEntityManagerConfig<
   extraRowActions?: RowActionButton<T>[];
 
   hideSearch?: boolean;
-  enableColumnToggle?: boolean,
-  defaultHiddenFields?: string[],
+  enableColumnToggle?: boolean;
+  defaultHiddenFields?: string[];
 }
 
 export function createEntityManager<
@@ -87,26 +87,40 @@ export function createEntityManager<
   return function EntityManager() {
     const { hasPermission } = useAuth();
 
-    const { items,
+    const {
+      items,
       setAll,
       getById,
       updateItem,
       removeItem,
       loading,
       setLoading,
-    } = useCrudList<T>();
+    } = useCrudList<T>({
+      initialItems: config.initialItems ?? [],
+    });
 
     const [item, setItem] = useState<T | null>(null);
     const [showDialog, setShowDialog] = useState(false);
-    const [error, setError] = useState<ApiError | string | null>(null);
+
+    /**
+     * true  = editing
+     * false = creating
+     */
+    const [editing, setEditing] = useState(false);
+
+    const [error, setError] = useState<
+      ApiError | string | null
+    >(null);
+
     /*
      * -----------------------------------------
      * READ PERMISSION
      * -----------------------------------------
      */
+
     const canRead = hasPermission([
-      `${config.permissionPrefix}:read`
-      //,`${config.permissionPrefix}:read:own`,
+      `${config.permissionPrefix}:read`,
+      `${config.permissionPrefix}:lookup`,
     ]);
 
     /*
@@ -116,12 +130,17 @@ export function createEntityManager<
      */
 
     const refresh = async () => {
-      if (config.items) {
-        setAll(config.items);
+      setError(null);
+
+      /*
+       * External data source.
+       *
+       * The manager does not fetch or overwrite
+       * the local CRUD state.
+       */
+      if (config.initialItems !== undefined) {
         return;
       }
-
-      setError(null);
 
       if (!canRead) {
         setError(
@@ -133,6 +152,7 @@ export function createEntityManager<
             }
           )
         );
+
         return;
       }
 
@@ -143,11 +163,22 @@ export function createEntityManager<
           ? config.query()
           : undefined;
 
-        const data = await config.api.getAll(query);
+        let data: T[];
+        // Use lookup if explicitly requested in config, otherwise fall back to getAll
+        if (config.useLookup && typeof config.api.lookup === "function") {
+          data = await config.api.lookup(query);
+        } else if (typeof config.api.getAll === "function") {
+          data = await config.api.getAll(query);
+        } else {
+          data = [];
+        }
 
-        setAll(data ?? []);
+        setAll(Array.isArray(data) ? data : []);
       } catch (err) {
-        console.error("[EntityManager] Fetch failed:", err);
+        console.error(
+          "[EntityManager] Fetch failed:",
+          err
+        );
 
         setError(
           err instanceof ApiError
@@ -170,8 +201,14 @@ export function createEntityManager<
      */
 
     const handleCreate = () => {
-      if (!config.createNew) return;
+      if (!config.createNew) {
+        return;
+      }
+
       setItem(config.createNew());
+
+      setEditing(false);
+
       setShowDialog(true);
     };
 
@@ -183,6 +220,9 @@ export function createEntityManager<
 
     const handleEdit = (row: T) => {
       setItem({ ...row });
+
+      setEditing(true);
+
       setShowDialog(true);
     };
 
@@ -194,7 +234,8 @@ export function createEntityManager<
 
     const handleDelete = async (row: T) => {
       try {
-        const ok = await config.api.delete(row);
+        const ok =
+          await config.api.delete(row);
 
         if (ok) {
           removeItem(row);
@@ -204,7 +245,8 @@ export function createEntityManager<
           "[EntityManager] Delete failed:",
           err
         );
-        throw err
+
+        throw err;
       }
     };
 
@@ -218,61 +260,112 @@ export function createEntityManager<
       id: string,
       transition: StateTransition
     ) => {
-      if (!config.api.transitionState) return;
+      if (!config.api.transitionState) {
+        return;
+      }
 
       try {
-        const updated = await config.api.transitionState(
-          id,
-          transition
-        );
+        const updated =
+          await config.api.transitionState(
+            id,
+            transition
+          );
 
-        if (updated) {
-          const prev = getById(id);
+        if (!updated) {
+          return;
+        }
 
-          if (!prev) return;
+        const prev = getById(id);
 
-          const statusField = config.workflow?.statusField;
+        if (!prev) {
+          return;
+        }
 
-          if (statusField) {
-            updateItem({
-              ...prev,
-              [statusField]: updated[statusField],
-            });
-          } else {
-            updateItem(updated);
-          }
+        const statusField =
+          config.workflow?.statusField;
+
+        if (statusField) {
+          updateItem({
+            ...prev,
+            [statusField]:
+              updated[statusField],
+          });
+        } else {
+          updateItem(updated);
         }
       } catch (err) {
         console.error(
           "[EntityManager] Transition failed:",
           err
         );
+
         throw err;
       }
     };
 
     /*
      * -----------------------------------------
+     * SAVE COMPLETE
+     * -----------------------------------------
+     */
+
+    const handleSaveComplete = (
+      saved: T
+    ) => {
+      /*
+       * Your useCrudList.updateItem is already
+       * an upsert:
+       *
+       * - existing item -> update
+       * - new item      -> add
+       *
+       * Therefore we can simply use updateItem.
+       */
+      updateItem(saved);
+
+      setShowDialog(false);
+      setItem(null);
+      setEditing(false);
+    };
+
+    /*
+     * -----------------------------------------
+     * DIALOG HIDE
+     * -----------------------------------------
+     */
+
+    const handleDialogHide = () => {
+      setShowDialog(false);
+      setItem(null);
+      setEditing(false);
+    };
+
+    /*
+     * -----------------------------------------
      * CRUD ACTIONS
      * -----------------------------------------
-     *
-     * Create -> toolbarActions
-     * Edit/Delete -> rowActions
      */
 
     const {
       toolbarActions,
       rowActions: crudRowActions,
     } = useCrudActions<T>({
-      resource: config.permissionPrefix,
-      itemName: config.itemName,
+      resource:
+        config.permissionPrefix,
 
-      onCreate: config.createNew
-        ? handleCreate
-        : undefined,
+      itemName:
+        config.itemName,
 
-      onEdit: handleEdit,
-      onDelete: handleDelete,
+      onCreate:
+        config.createNew
+          ? handleCreate
+          : undefined,
+
+      onEdit:
+        handleEdit,
+
+      onDelete:
+        handleDelete,
 
       hideDefaultActions:
         config.hideDefaultActions,
@@ -297,32 +390,35 @@ export function createEntityManager<
      * -----------------------------------------
      * STATE TRANSITION ACTIONS
      * -----------------------------------------
-     *
-     * These are row actions only.
      */
 
     const transitionActions =
       useStateTransitionActions<T>({
-        resource: config.permissionPrefix,
+        resource:
+          config.permissionPrefix,
+
         statusField:
           config.workflow?.statusField,
+
         transitions:
           config.workflow?.transitions,
+
         onTransition:
           handleTransition,
       });
 
     /*
      * -----------------------------------------
-     * COMBINE ROW ACTIONS
+     * ROW ACTIONS
      * -----------------------------------------
      */
 
-    const rowActions: RowActionButton<T>[] = [
-      ...transitionActions,
-      ...config.extraRowActions ?? [],
-      ...crudRowActions,
-    ];
+    const rowActions:
+      RowActionButton<T>[] = [
+        ...transitionActions,
+        ...(config.extraRowActions ?? []),
+        ...crudRowActions,
+      ];
 
     /*
      * -----------------------------------------
@@ -358,15 +454,23 @@ export function createEntityManager<
       <>
         <ItemDataTable
           headerTitle={config.title}
+
           items={items}
+
           columns={config.columns}
 
           rowActions={rowActions}
-          toolBarActions={[...toolbarActions, ...config.extraToolBarActions ?? []]}
+
+          toolBarActions={[
+            ...toolbarActions,
+            ...(config.extraToolBarActions ?? []),
+          ]}
 
           loading={loading}
 
-          enableSearch={!config.hideSearch}
+          enableSearch={
+            !config.hideSearch
+          }
 
           expandable={
             config.expandable
@@ -374,16 +478,26 @@ export function createEntityManager<
                 allow:
                   config.expandable.allow,
 
-                template: (row: T) =>
+                template: (
+                  row: T
+                ) =>
                   config.expandable!.template(
                     row,
-                    { updateItem }
+                    {
+                      updateItem,
+                    }
                   ),
               }
               : undefined
           }
-          defaultHiddenFields={config.defaultHiddenFields}
-          enableColumnToggle={config.enableColumnToggle}
+
+          defaultHiddenFields={
+            config.defaultHiddenFields
+          }
+
+          enableColumnToggle={
+            config.enableColumnToggle
+          }
         />
 
         {item &&
@@ -391,13 +505,15 @@ export function createEntityManager<
           config.SaveDialog && (
             <config.SaveDialog
               visible={showDialog}
+
               item={item}
-              onComplete={(saved: T) => {
-                updateItem(saved);
-                setShowDialog(false);
-              }}
-              onHide={() =>
-                setShowDialog(false)
+
+              onComplete={
+                handleSaveComplete
+              }
+
+              onHide={
+                handleDialogHide
               }
             />
           )}

@@ -20,6 +20,14 @@ export const StageApi: EntityApi<Stage, FilterStagesDTO | undefined>
         return ApiClient.get(end_point, options);
     },
 
+
+    // ---------------------------
+    // Fetch / Query
+    // ---------------------------
+    async lookup(filter) {
+        return ApiClient.get(`${end_point}/lookup`, filter);
+    },
+
     // ---------------------------
     // Get By Id
     // ---------------------------

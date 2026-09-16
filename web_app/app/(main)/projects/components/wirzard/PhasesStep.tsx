@@ -41,7 +41,7 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
             totalDuration >= (constraint?.duration?.min ?? 0) &&
             totalDuration <= (constraint?.duration?.max ?? Infinity);
 
-        // Check Individual Phases
+        // Check Individual Phases (Removed description requirement)
         const phaseErrors = phases.map(p => {
             const budgetErr =
                 p.budget < (constraint?.budgetPerPhase?.min ?? 0) ||
@@ -51,7 +51,7 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
                 p.duration < (constraint?.durationPerPhase?.min ?? 0) ||
                 p.duration > (constraint?.durationPerPhase?.max ?? Infinity);
 
-            const basicErr = !p.title?.trim() || !p.description?.trim();
+            const basicErr = !p.title?.trim(); // Only checking title now
             return !!(budgetErr || timeErr || basicErr);
         });
 
@@ -240,13 +240,7 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
                                     onChange={(e) => updatePhase(index, 'description', e.target.value)}
                                     rows={2}
                                     autoResize
-                                    className={classNames({
-                                        'p-invalid': submitted && !phase.description?.trim()
-                                    })}
                                 />
-                                {submitted && !phase.description?.trim() && (
-                                    <small className="p-error block">Description is required.</small>
-                                )}
                             </div>
                         </div>
                     </div>

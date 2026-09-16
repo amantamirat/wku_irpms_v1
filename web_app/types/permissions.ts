@@ -198,6 +198,7 @@ export const PERMISSIONS = {
   COLLABORATOR: {
     CREATE: "collaborator:create",
     READ: "collaborator:read",
+    LOOKUP: "collaborator:lookup",
     UPDATE: "collaborator:update",
     STATUS: {
       VERIFY: "collaborator:status.verified",

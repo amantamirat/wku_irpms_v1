@@ -1,3 +1,4 @@
+import { console } from "inspector";
 import { PERMISSIONS } from "../../../common/constants/permissions";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
@@ -50,10 +51,11 @@ export class ApplicationService {
  */
     async create(
         dto: CreateApplicationDTO,
-        userId: string,
+        userId: string
+        /*
         options?: {
             skipValidation?: boolean;
-        }
+        }*/
     ) {
 
         const projectDoc =
@@ -68,11 +70,11 @@ export class ApplicationService {
         // --------------------------------------------------
         // Authorization
         // --------------------------------------------------
-        if (!options?.skipValidation) {
+        //if (!options?.skipValidation) {
 
-            await this.projectAuth.auth(dto.project, userId, PERMISSIONS.APPLICATION.CREATE);
+        await this.projectAuth.auth(dto.project, userId, PERMISSIONS.APPLICATION.CREATE);
 
-        }
+        //}
 
         // --------------------------------------------------
         // Decide first or next application
@@ -81,8 +83,8 @@ export class ApplicationService {
         if (!projectDoc.currentApplication) {
             return this.createFirstApplication(
                 dto,
-                userId,
-                options
+                userId
+                //,options
             );
         }
 
@@ -95,7 +97,7 @@ export class ApplicationService {
     /**
  * Create the first application for a project.
  */
-    private async createFirstApplication(
+    async createFirstApplication(
         dto: CreateApplicationDTO,
         userId: string,
         options?: {
@@ -296,6 +298,7 @@ export class ApplicationService {
         userId: string
     ) {
         try {
+            //console.log("BEFORE CREATION APPLICATION");
             const created =
                 await this.repository.create(dto, userId);
 
@@ -308,25 +311,31 @@ export class ApplicationService {
             // First application may establish the project's call
             if (
                 projectDoc &&
-                stageDoc &&
-                !projectDoc.call &&
-                stageDoc.call
+                stageDoc
+
             ) {
-                await this.projectRepo.update(
-                    dto.project,
-                    {
-                        call: String(stageDoc.call)
-                    }
-                );
+
+                if (!projectDoc.call &&
+                    stageDoc.call) {
+                    await this.projectRepo.update(
+                        dto.project,
+                        {
+                            call: String(stageDoc.call)
+                        }
+                    );
+                }
+
             }
 
             // currentApplication synchronized
             await this.synchronizer.sync(dto.project);
 
+            //console.log("BEFORE NOTIFICATION AFTER CREATION APPLICATION");
             if (
                 projectDoc &&
                 stageDoc
             ) {
+
                 await this.notificationService
                     .notifyApplicationSubmitted(
                         String(projectDoc.leadPI),
@@ -638,12 +647,6 @@ export class ApplicationService {
 
         if (deleted) {
             const synced = await this.synchronizer.sync(projectId);
-            /*
-            if (synced && !synced.currentApplication) {
-                await this.projectService.delete({
-                    id: projectId
-                });
-            }*/
         }
         return deleted;
     }

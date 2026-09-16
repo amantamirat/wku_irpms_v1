@@ -91,8 +91,8 @@ export class ReviewerService {
         );
     };
 
-    async getReviewers(filter: FilterReviewersDto) {
-        return this.repository.find(filter, { populate: true });
+    async getReviewers(filter: FilterReviewersDto, options?: FilterOptions) {
+        return this.repository.find(filter, options);
     }
 
     // --- Update reviewer data (weight) ---

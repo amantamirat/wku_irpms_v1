@@ -8,7 +8,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import CallOpportunityGrid from "./dashboard/CallOpportunityGrid";
 import QuickLinks from "./dashboard/QuickLinks";
 import VerificationWindow from "./dashboard/VerificationWindow";
-import PendingEvalsManager from "./dashboard/pending-evals/Manager";
+import PendingEvalsManager from "./dashboard/pending-evals/MyPendingEvaluations";
 import { ReviewerApi } from "./reviewers/api/reviewer.api";
 import { Reviewer, ReviewerStatus } from "./reviewers/models/reviewer.model";
 import { CollaboratorApi } from "./collaborators/api/collaborator.api";

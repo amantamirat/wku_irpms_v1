@@ -87,7 +87,7 @@ const ProjectManager = createEntityManager<Project>({
 
     expandable: {
         template: (project) => (
-            <ProjectDetail project={project} />
+            <ProjectDetail project={project} enableEditing={true} />
         )
     }
 });

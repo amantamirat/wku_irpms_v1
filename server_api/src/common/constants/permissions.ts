@@ -265,6 +265,7 @@ export const PERMISSIONS = {
   REVIEWER: {
     CREATE: "reviewer:create",
     READ: "reviewer:read",
+    LOOKUP: "reviewer:lookup",
     UPDATE: "reviewer:update",
     // CHANGE_STATUS: "reviewer:change_status", // New permission for status transitions
     // APPROVE: "reviewer:approve",      // Keep as special approval permission

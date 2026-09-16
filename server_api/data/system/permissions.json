@@ -517,6 +517,11 @@
   },
   {
     "category": "Reviewer Management",
+    "name": "reviewer:lookup",
+    "description": "View reviewers"
+  },
+  {
+    "category": "Reviewer Management",
     "name": "reviewer:update",
     "description": "Edit reviewer details like weight"
   },
@@ -549,6 +554,26 @@
     "category": "Reviewer Management",
     "name": "reviewer:transition.approved.submitted",
     "description": "Revert reviewer status from approved to submitted"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:transition.pending.declined",
+    "description": "Move reviewer status from pending to declined"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:transition.declined.pending",
+    "description": "Revert reviewer status from declined to pending"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:transition.submitted.rejected",
+    "description": "Move reviewer status from submitted to rejected"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:transition.rejected.submitted",
+    "description": "Revert reviewer status from rejected to submitted"
   },
   {
     "category": "Reviewer Management",

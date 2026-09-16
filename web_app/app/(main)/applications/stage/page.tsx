@@ -27,7 +27,7 @@ const Page = () => {
     useEffect(() => {
         if (selectedCall) {
             const fetchStages = async () => {
-                const data = await StageApi.getAll({ call: selectedCall });
+                const data = await StageApi.lookup!({ call: selectedCall });
                 setStages(data);
                 setActiveIndex(0);
             };
@@ -114,11 +114,11 @@ const Page = () => {
                                             </div>
                                         }
                                     >
-                                        <div className="mt-3">
-                                            <ApplicationManager
-                                                stage={stage}
-                                            />
-                                        </div>
+
+                                        <ApplicationManager
+                                            stage={stage}
+                                        />
+
                                     </TabPanel>
                                 ))}
                             </TabView>

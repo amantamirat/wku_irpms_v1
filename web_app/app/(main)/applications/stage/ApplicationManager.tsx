@@ -1,15 +1,29 @@
 'use client';
 
-import { BASE_URL } from "@/api/ApiClient";
-import { createEntityManager } from "@/components/createEntityManager";
-import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import MyBadge from "@/templates/MyBadge";
-import { useEffect, useMemo, useState } from "react";
-import { Stage } from "../../calls/stages/models/stage.model";
-import { ApplicationApi } from "../api/application.api";
-import { AnonymizationStatus, Application, ApplicationStatus } from "../models/application.model";
-import { APPLICATION_STATUS_ORDER, APPLICATION_TRANSITIONS } from "../models/application.state-machine";
-import ApplicationDetail from "./ApplicationDetail";
+import { useEffect, useState } from 'react';
+import { BASE_URL } from '@/api/ApiClient';
+import MyBadge from '@/templates/MyBadge';
+import EmptyState from '@/components/EmptyState';
+import {
+    ItemDataTable,
+    RowActionButton
+} from '@/components/data-table/ItemDataTable';
+import {
+    StateTransition
+} from '@/api/EntityApi';
+import { useStateTransitionActions } from '@/hooks/useStateTransitionActions';
+import { useConfirmDialog } from '@/contexts/ConfirmDialogContext';
+import { Stage } from '../../calls/stages/models/stage.model';
+import { ApplicationApi } from '../api/application.api';
+import {
+    AnonymizationStatus,
+    Application
+} from '../models/application.model';
+import {
+    APPLICATION_TRANSITIONS
+} from '../models/application.state-machine';
+import ApplicationDetail from './ApplicationDetail';
+import { useAuth } from '@/contexts/auth-context';
 
 interface ApplicationManagerProps {
     stage: Stage;
@@ -17,18 +31,26 @@ interface ApplicationManagerProps {
 
 const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
     const confirm = useConfirmDialog();
+
     const [applications, setApplications] = useState<Application[]>([]);
-    const [loading, setLoading] = useState<boolean>(false);
+    const [loading, setLoading] = useState(true);
+
+    const { hasPermission } = useAuth();
 
     useEffect(() => {
         const fetchApplications = async () => {
             if (!stage) return;
+
             setLoading(true);
+
             try {
                 const data = await ApplicationApi.getAll({ stage }, true);
                 setApplications(Array.isArray(data) ? data : []);
             } catch (error) {
-                console.error("Error fetching applications for stage:", error);
+                console.error(
+                    'Error fetching applications for stage:',
+                    error
+                );
             } finally {
                 setLoading(false);
             }
@@ -37,141 +59,194 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
         fetchApplications();
     }, [stage]);
 
-    // useMemo prevents component re-creation on every render cycle
-    const Manager = useMemo(() => {
-        return createEntityManager<Application>({
-            title: "Applications",
-            itemName: "Application",
-            api: ApplicationApi,
-            columns: [
-                {
-                    header: "Project",
-                    field: "project.title",
-                    body: (ps: Application) => {
-                        const title = typeof ps.project === "object" ? ps.project.title : "Unknown Project";
-                        return (
-                            <div className="truncate max-w-xs text-sm font-medium" title={title}>
-                                {title}
-                            </div>
-                        );
-                    },
-                    sortable: true
-                },
-                {
-                    header: "Orig Doc",
-                    body: (ps: Application) => ps.documentPath ? (
-                        <a
-                            href={`${BASE_URL}/${ps.documentPath.replace(/^\\/, "")}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline"
-                        >
-                            <i className="pi pi-file-pdf text-red-500 text-sm"></i>
-                            <span>View PDF</span>
-                        </a>
-                    ) : (
-                        <span className="text-gray-400 text-xs italic">No document</span>
-                    )
-                },
-                {
-                    header: "Anon Doc",
-                    body: (app: Application) => app.anonymizedDocumentPath ? (
-                        <a
-                            href={`${BASE_URL}/${app.anonymizedDocumentPath.replace(/^\\/, "")}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 hover:text-emerald-800 hover:underline"
-                        >
-                            <i className="pi pi-file-pdf text-emerald-500 text-sm"></i>
-                            <span>View PDF</span>
-                        </a>
-                    ) : (
-                        <span className="text-gray-400 text-xs italic">N/A</span>
-                    )
-                },
-                {
-                    header: "Score",
-                    body: (app: Application) => (
-                        <span className="font-bold text-sm">
-                            {typeof app?.totalScore === "number" ? app.totalScore : "—"}
-                        </span>
-                    )
-                },
-                {
-                    header: "Status",
-                    body: (app: Application) => <MyBadge type="status" value={app.status} />
-                },
-            ],
-            items: applications,
-            permissionPrefix: "application",
-            workflow: {
-                statusField: "status",
-                updateFields: ["totalScore"],
-                statusOrder: APPLICATION_STATUS_ORDER,
-                transitions: APPLICATION_TRANSITIONS
-            },
-            /*
-            onTransitComplete: (item) => {
-                setApplications((prev) =>
-                    prev.map((app) => (app._id === item._id ? {
-                        ...app, totalScore:
-                            (item.status === ApplicationStatus.pending && item.totalScore === null) ?
-                                null : item.totalScore, status: item.status
-                    } : app))
-                );
-            },*/
-            hideEditAction: true,
-            disableDeleteRow: (row: Application) => row.status !== ApplicationStatus.pending,
-            expandable: {
-                template: (app) => <ApplicationDetail application={app} />
-            },
-            extraActions: [
-                // Anonymize Action//chek the permission and push it to extraaction column and pass it to the manager
-                {
-                    icon: "pi pi-eye-slash",
-                    severity: "warning",
-                    tooltip: "Anonymize Document",
-                    permissions: ["application:anonymize"],
+    const handleTransition = async (
+        id: string,
+        transition: StateTransition
+    ) => {
+        const updated = await ApplicationApi.transitionState?.(
+            id,
+            transition
+        );
 
-                    disabled: (row: Application) =>
-                        row.anonymizationStatus !==
-                        AnonymizationStatus.pending,
+        if (!updated) return;
 
-                    onClick: (row: Application) => {
-                        confirm.ask({
-                            operation: "anonymize document",
-                            onConfirm: async () => {
-                                const updated =
-                                    await ApplicationApi.anonymize(
-                                        row._id!
-                                    );
-
-                                setApplications((prev) =>
-                                    prev.map((app) =>
-                                        app._id === row._id
-                                            ? {
-                                                ...app,
-                                                anonymizationStatus:
-                                                    updated.anonymizationStatus,
-                                                anonymizedDocumentPath:
-                                                    updated.anonymizedDocumentPath
-                                            }
-                                            : app
-                                    )
-                                );
-                            }
-                        });
+        setApplications(prev =>
+            prev.map(item =>
+                item._id === id
+                    ? {
+                        ...item,
+                        status: updated.status
                     }
-                }
-            ],
+                    : item
+            )
+        );
+    };
+
+    const stateActions: RowActionButton<Application>[] =
+        useStateTransitionActions({
+            resource: 'application',
+            statusField: 'status',
+            transitions: APPLICATION_TRANSITIONS,
+            onTransition: handleTransition
         });
-    }, [applications]);
+
+    const columns = [
+        {
+            header: 'Project',
+            field: 'project.title',
+            sortable: true,
+            body: (application: Application) => {
+                const project =
+                    typeof application.project === 'object'
+                        ? application.project
+                        : null;
+
+                const title = project?.title ?? 'Unknown Project';
+
+                return (
+                    <div
+                        className="truncate text-sm font-medium"
+                        title={title}
+                        style={{ maxWidth: '350px' }}
+                    >
+                        {title}
+                    </div>
+                );
+            }
+        },
+        {
+            header: 'Orig Doc',
+            body: (application: Application) =>
+                application.documentPath ? (
+                    <a
+                        href={`${BASE_URL}/${application.documentPath.replace(
+                            /^\\/,
+                            ''
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline"
+                    >
+                        <i className="pi pi-file-pdf text-red-500 text-sm" />
+                        <span>View PDF</span>
+                    </a>
+                ) : (
+                    <span className="text-gray-400 text-xs italic">
+                        No document
+                    </span>
+                )
+        },
+        {
+            header: 'Anon Doc',
+            body: (application: Application) =>
+                application.anonymizedDocumentPath ? (
+                    <a
+                        href={`${BASE_URL}/${application.anonymizedDocumentPath.replace(
+                            /^\\/,
+                            ''
+                        )}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 hover:text-emerald-800 hover:underline"
+                    >
+                        <i className="pi pi-file-pdf text-emerald-500 text-sm" />
+                        <span>View PDF</span>
+                    </a>
+                ) : (
+                    <span className="text-gray-400 text-xs italic">
+                        N/A
+                    </span>
+                )
+        },
+        {
+            header: 'Score',
+            field: 'totalScore',
+            sortable: true,
+            body: (application: Application) => (
+                <span className="font-bold text-sm">
+                    {typeof application.totalScore === 'number'
+                        ? application.totalScore
+                        : '—'}
+                </span>
+            )
+        },
+        {
+            header: 'Status',
+            field: 'status',
+            sortable: true,
+            body: (application: Application) => (
+                <MyBadge
+                    type="status"
+                    value={application.status}
+                />
+            )
+        }
+    ];
+
+    const extraActions: RowActionButton<Application>[] = [
+        {
+            icon: 'pi pi-eye-slash',
+            //: 'Anonymize Document',
+            severity: 'warning',
+            tooltip: 'Anonymize Document',
+            visible: () => { return hasPermission("application:anonymize") },
+
+            disabled: (row: Application) =>
+                row.anonymizationStatus !==
+                AnonymizationStatus.pending,
+
+            onClick: (row: Application) => {
+                confirm.ask({
+                    operation: 'anonymize document',
+                    onConfirm: async () => {
+                        const updated =
+                            await ApplicationApi.anonymize(row._id!);
+
+                        setApplications(prev =>
+                            prev.map(app =>
+                                app._id === row._id
+                                    ? {
+                                        ...app,
+                                        anonymizationStatus:
+                                            updated.anonymizationStatus,
+                                        anonymizedDocumentPath:
+                                            updated.anonymizedDocumentPath
+                                    }
+                                    : app
+                            )
+                        );
+                    }
+                });
+            }
+        }
+    ];
 
     if (loading) {
-        return <div className="p-4 text-center">Loading applications...</div>;
+        return (
+            <div className="p-4 text-center">
+                Loading applications...
+            </div>
+        );
     }
 
-    return <Manager />;
+    return (
+        <ItemDataTable
+            items={applications}
+            columns={columns}
+            rowActions={[
+                ...stateActions,
+                ...extraActions
+            ]}
+            enableSearch
+            expandable={{
+                template: application => (
+                    <ApplicationDetail
+                        application={application}
+                    />
+                )
+            }}
+        />
+    );
 };
 
 export default ApplicationManager;

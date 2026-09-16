@@ -95,8 +95,8 @@ export class PhaseService {
             });
             if (created) {
                 await this.projRepo.incrementTotals(project, {
-                    duration: created.duration ?? 0,
-                    budget: created.budget ?? 0
+                    duration: created.duration,
+                    budget: created.budget
                 });
             }
             return created;
