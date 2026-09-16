@@ -144,24 +144,6 @@ const CollaboratorsManager = () => {
                 items={collaborators}
                 columns={columns}
                 enableSearch={true}
-                expandable={{
-                    template: (collaborator) => {
-                        const projectId =
-                            extractId(collaborator.project);
-
-                        if (!projectId) {
-                            return (
-                                <div className="p-3 text-500">
-                                    No project ID found.
-                                </div>
-                            );
-                        }
-
-                        return (
-                            <ProjectDetail project={projectId} />
-                        );
-                    }
-                }}
             />
         </div>
     );

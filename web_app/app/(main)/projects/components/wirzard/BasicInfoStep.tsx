@@ -193,6 +193,7 @@ export const BasicInfoStep = ({
         };
 
         onUpdate({
+            leadPI: selectedUserObj,
             collaborators: [updatedLead, ...nonLeadCollaborators]
         });
     };
@@ -351,6 +352,7 @@ export const BasicInfoStep = ({
                                     ? 'Loading applicants...'
                                     : 'No applicants found'
                             }
+
                             placeholder={
                                 loadingUsers
                                     ? 'Loading applicants...'

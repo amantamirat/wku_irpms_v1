@@ -44,7 +44,8 @@ export interface IApplicationRepository {
 
     updateStatus(
         id: string,
-        newStatus: ApplicationStatus
+        newStatus: ApplicationStatus,
+        userId: string
     ): Promise<IApplication | null>;
 
     countByProject(
@@ -187,17 +188,28 @@ export class ApplicationRepository
 
     async updateStatus(
         id: string,
-        newStatus: ApplicationStatus
+        status: ApplicationStatus,
+        userId: string
     ): Promise<IApplication | null> {
 
         return Application.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             {
                 $set: {
-                    status: newStatus
+                    status
+                },
+                $push: {
+                    statusHistory: {
+                        status,
+                        changedBy: new mongoose.Types.ObjectId(userId),
+                        changedAt: new Date()
+                    }
                 }
             },
-            { new: true }
+            {
+                new: true,
+                runValidators: true
+            }
         ).exec();
     }
 

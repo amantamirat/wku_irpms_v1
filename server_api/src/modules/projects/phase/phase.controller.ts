@@ -108,7 +108,7 @@ export class PhaseController {
                 userId: req.auth.userId,
             };
 
-            const updated = await this.service.transitionState(dto);
+            const updated = await this.service.transitionState(dto, req.auth.userId);
             successResponse(res, 200, "Phase status updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

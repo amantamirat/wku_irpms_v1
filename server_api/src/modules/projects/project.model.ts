@@ -5,15 +5,9 @@ import { createStatusHistorySchema } from "../../common/schemas/status-history.s
 
 export enum ProjectStatus {
     draft = 'draft',
-    //submitted = "submitted",
-    //rejected = "rejected",
-    //accepted = "accepted",
     approved = "approved",
     refused = 'refused',
-    
     granted = 'granted',
-    active = 'active',
-    terminated = 'terminated',
     completed = 'completed'
 }
 
@@ -34,6 +28,8 @@ export interface IProject extends Document {
     leadPI: mongoose.Types.ObjectId;
     themes: mongoose.Types.ObjectId[];
     currentApplication?: mongoose.Types.ObjectId | null;
+    currentPhase?: mongoose.Types.ObjectId | null;
+
     currentVerification?: mongoose.Types.ObjectId | null;
 
     status: ProjectStatus;
@@ -123,6 +119,13 @@ const ProjectSchema = new Schema<IProject>({
         ref: COLLECTIONS.APPLICATION,
         unique: true,
         sparse: true // allows multiple docs with undefined
+    },
+
+    currentPhase: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.PHASE,
+        unique: true,
+        sparse: true
     },
 
     currentVerification: {

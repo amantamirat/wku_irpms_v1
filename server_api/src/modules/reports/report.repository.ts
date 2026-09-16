@@ -107,7 +107,7 @@ export class ReportRepository {
                     activeProjects: {
                         $sum: {
                             $cond: [
-                                { $eq: ["$status", ProjectStatus.active] },
+                                { $eq: ["$status", ProjectStatus.granted] },
                                 1,
                                 0
                             ]
@@ -124,10 +124,10 @@ export class ReportRepository {
                         }
                     },
 
-                    terminatedProjects: {
+                    refusedProjects: {
                         $sum: {
                             $cond: [
-                                { $eq: ["$status", ProjectStatus.terminated] },
+                                { $eq: ["$status", ProjectStatus.refused] },
                                 1,
                                 0
                             ]
@@ -162,7 +162,7 @@ export class ReportRepository {
                     totalProjects: 1,
                     activeProjects: 1,
                     completedProjects: 1,
-                    terminatedProjects: 1,
+                    refusedProjects: 1,
                     approvedProjects: 1,
                     grantedProjects: 1
                 }

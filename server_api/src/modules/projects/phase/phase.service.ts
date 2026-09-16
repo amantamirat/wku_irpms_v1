@@ -20,29 +20,13 @@ export class PhaseService {
 
     constructor(
         private readonly phaseRepo: IPhaseRepository,
-        private readonly projRepo: IProjectRepository,
+        private readonly projectRepo: IProjectRepository,
         private readonly grantRepo: IGrantRepository,
         private readonly callRepo: ICallRepository,
         private readonly constraintValidator: ConstraintValidationService,
-        private readonly projectAuth: ProjectAuth,
-        private readonly synchronizer: PhaseSynchronizer,
+        private readonly projectAuth: ProjectAuth
     ) { }
 
-    /*
-    async validateProject(project: string) {
-        const projectDoc = await this.projRepo.findById(project);
-        if (!projectDoc) {
-            throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
-        }
-        if (
-            projectDoc.status !== ProjectStatus.draft &&
-            projectDoc.status !== ProjectStatus.approved
-        ) {
-            throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
-        }
-        return projectDoc;
-    }
-*/
     async create(dto: CreatePhaseDto, options?: { skipValidation?: boolean }) {
         const { project, userId } = dto;
         if (!options?.skipValidation) {
@@ -94,7 +78,7 @@ export class PhaseService {
                 order
             });
             if (created) {
-                await this.projRepo.incrementTotals(project, {
+                await this.projectRepo.incrementTotals(project, {
                     duration: created.duration,
                     budget: created.budget
                 });
@@ -132,7 +116,7 @@ export class PhaseService {
 
         const projectId = String(phaseDoc.project);
 
-        const { projectDoc, isLeadPI } = await this.projectAuth.auth(projectId, userId, PERMISSIONS.PHASE.CREATE);
+        const { projectDoc, isLeadPI } = await this.projectAuth.auth(projectId, userId, PERMISSIONS.PHASE.UPDATE);
         if (isLeadPI) {
             if (
                 projectDoc.status !== ProjectStatus.draft
@@ -165,7 +149,7 @@ export class PhaseService {
         const newBudget = updated?.budget ?? 0;
 
         // Adjust totals (delta)
-        await this.projRepo.incrementTotals(
+        await this.projectRepo.incrementTotals(
             projectId,
             {
                 duration: newDuration - oldDuration,
@@ -179,8 +163,7 @@ export class PhaseService {
     // ---------------------------------------------------
     // TRANSITION
     // ---------------------------------------------------
-    async transitionState(dto: TransitionRequestDto) {
-
+    async transitionState(dto: TransitionRequestDto, userId: string) {
         const { id, next, current } = dto;
 
         const currentPhaseDoc = await this.phaseRepo.findById(id);
@@ -202,108 +185,172 @@ export class PhaseService {
 
         const projectId = String(currentPhaseDoc.project);
 
-        const projectDoc = await this.projRepo.findById(projectId);
+        const projectDoc = await this.projectRepo.findById(projectId);
 
         if (!projectDoc)
             throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
-        if (projectDoc.currentVerification)
-            throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS, "A verification already exists for this project.");
+        const phases = await this.phaseRepo.find({
+            project: projectId
+        });
 
         const projectStatus = projectDoc.status;
 
-        const prevPhase = await this.phaseRepo.findPreviousPhase(
-            projectId,
-            currentPhaseDoc.order
+        /**
+         * ---------------------------------------------------
+         * DIVIDE PHASES
+         * ---------------------------------------------------
+         */
+
+        const previousPhases = phases.filter(
+            phase => phase.order < currentPhaseDoc.order
         );
 
-        const nextPhase = await this.phaseRepo.findNextPhase(
-            projectId,
-            currentPhaseDoc.order
+        const nextPhases = phases.filter(
+            phase => phase.order > currentPhaseDoc.order
         );
-
-        const isFirstPhase = !prevPhase;
-        //const isLastPhase = !nextPhase;
 
         /**
-         * PROPOSED <-> APPROVED
+         * ---------------------------------------------------
+         * PROJECT STATUS VALIDATION
+         * ---------------------------------------------------
+         *
+         * Execution states require the project to be granted.
          */
+        const executionStates = [
+            PhaseStatus.active,
+            PhaseStatus.completed,
+            PhaseStatus.terminated,
+        ];
+
+        const involvesExecution =
+            executionStates.includes(from) ||
+            executionStates.includes(to);
+
         if (
-            (from === PhaseStatus.proposed && to === PhaseStatus.approved)
-            || (from === PhaseStatus.approved && to === PhaseStatus.proposed)
+            involvesExecution &&
+            projectStatus !== ProjectStatus.granted
         ) {
-            if (projectStatus !== ProjectStatus.approved)
-                throw new AppError(ERROR_CODES.PROJECT_NOT_APPROVED);
-
-            /*
-            if (
-                prevPhase &&
-                prevPhase.status !== PhaseStatus.approved
-            ) {
-                throw new AppError(ERROR_CODES.PREVIOUS_PHASE_NOT_APPROVED);
-            }
-
-            if (
-                nextPhase &&
-                nextPhase.status !== PhaseStatus.proposed
-            ) {
-                throw new AppError(ERROR_CODES.NEXT_PHASE_NOT_PROPSED);
-            }
-                */
+            throw new AppError(
+                ERROR_CODES.PROJECT_NOT_GRANTED
+            );
         }
 
-        else if (to === PhaseStatus.active || to === PhaseStatus.approved) {
+        /**
+         * ---------------------------------------------------
+         * PHASE EXECUTION
+         * ---------------------------------------------------
+         *
+         * A phase can become active only when:
+         *
+         * 1. Every previous phase is completed.
+         * 2. No later phase is active.
+         * 3. No later phase is completed.
+         * 4. No later phase is terminated.
+         */
+        if (to === PhaseStatus.active) {
 
-            if (
-                prevPhase &&
-                prevPhase.status !== PhaseStatus.completed
-            ) {
-                throw new AppError(ERROR_CODES.PREVIOUS_PHASE_NOT_COMPLETED);
+            /**
+             * All previous phases must be completed.
+             */
+            const hasIncompletePreviousPhase =
+                previousPhases.some(
+                    phase => phase.status !== PhaseStatus.completed
+                );
+
+            if (hasIncompletePreviousPhase) {
+                throw new AppError(
+                    ERROR_CODES.PREVIOUS_PHASE_NOT_COMPLETED
+                );
             }
-            if (
-                nextPhase &&
-                nextPhase.status !== PhaseStatus.approved
-            ) {
-                throw new AppError(ERROR_CODES.NEXT_PHASE_NOT_APPROVED);
+
+            /**
+             * No later phase may already be active
+             * or completed.
+             */
+            const hasLaterExecutedPhase = nextPhases.some(
+                phase => executionStates.includes(phase.status)
+            );
+
+            if (hasLaterExecutedPhase) {
+                throw new AppError(
+                    ERROR_CODES.NEXT_PHASE_ALREADY_EXECUTED
+                );
             }
 
+            /**
+             * APPROVED → ACTIVE
+             *
+             * Consume the phase budget only when the
+             * phase actually starts execution.
+             */
             if (
-                from === PhaseStatus.approved &&
-                to === PhaseStatus.active
+                from === PhaseStatus.approved
             ) {
-
-                if (isFirstPhase) {
-                    if (projectStatus !== ProjectStatus.granted)
-                        throw new AppError(ERROR_CODES.PROJECT_NOT_GRANTED);
-                }
-
                 await this.grantRepo.consumeBudget(
                     projectDoc.grant.toString(),
                     currentPhaseDoc.budget
                 );
             }
-
-            else if (
-                from === PhaseStatus.active &&
-                to === PhaseStatus.approved
-            ) {
-
-                await this.grantRepo.reverseConsumedBudget(
-                    projectDoc.grant.toString(),
-                    currentPhaseDoc.budget
-                );
-            }
         }
+
         /**
+         * ---------------------------------------------------
+         * ACTIVE → APPROVED
+         * ---------------------------------------------------
+         *
+         * Rollback consumed budget.
+         */
+        if (
+            from === PhaseStatus.active &&
+            to === PhaseStatus.approved
+        ) {
+            await this.grantRepo.reverseConsumedBudget(
+                projectDoc.grant.toString(),
+                currentPhaseDoc.budget
+            );
+        }
+
+        /**
+         * ---------------------------------------------------
          * UPDATE PHASE
+         * ---------------------------------------------------
          */
         const updated = await this.phaseRepo.updateStatus(
             id,
-            to
+            to,
+            userId
         );
+
         if (updated) {
-            await this.synchronizer.sync(projectId);
+
+            /**
+             * Phase became active.
+             */
+            if (to === PhaseStatus.active) {
+                await this.projectRepo.update(
+                    projectId,
+                    {
+                        currentPhase: id,
+                    },
+                    userId
+                );
+            }
+
+            /**
+             * Current phase is no longer active.
+             */
+            else if (from === PhaseStatus.active) {
+                await this.projectRepo.update(
+                    projectId,
+                    {
+                        currentPhase: null,
+                    },
+                    userId
+                );
+            }
         }
+
         return updated;
     }
     // ---------------------------------------------------
@@ -317,7 +364,7 @@ export class PhaseService {
             throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
 
         const projectId = String(phaseDoc.project);
-        const { projectDoc, isLeadPI } = await this.projectAuth.auth(projectId, userId, PERMISSIONS.PHASE.CREATE);
+        const { projectDoc, isLeadPI } = await this.projectAuth.auth(projectId, userId, PERMISSIONS.PHASE.DELETE);
         if (isLeadPI) {
             if (
                 projectDoc.status !== ProjectStatus.draft
@@ -357,7 +404,7 @@ export class PhaseService {
             }
         }
         // ✅ Decrement totals BEFORE delete
-        await this.projRepo.incrementTotals(projectId, {
+        await this.projectRepo.incrementTotals(projectId, {
             duration: -(phaseDoc.duration ?? 0),
             budget: -(phaseDoc.budget ?? 0)
         });
@@ -381,11 +428,16 @@ export class PhaseService {
 
 export const PHASE_TRANSITIONS: Record<PhaseStatus, PhaseStatus[]> = {
     [PhaseStatus.proposed]: [
-        PhaseStatus.approved
+        PhaseStatus.approved,
+        PhaseStatus.refused
     ],
 
     [PhaseStatus.approved]: [
         PhaseStatus.active,
+        PhaseStatus.proposed
+    ],
+
+    [PhaseStatus.refused]: [
         PhaseStatus.proposed
     ],
 

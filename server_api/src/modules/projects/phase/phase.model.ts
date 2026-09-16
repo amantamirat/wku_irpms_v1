@@ -1,13 +1,16 @@
 import mongoose, { model, Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
+import { IStatusHistory } from "../../../common/types/status-history";
+import { createStatusHistorySchema } from "../../../common/schemas/status-history.schema";
 
 
 export enum PhaseStatus {
     proposed = 'proposed',
     approved = 'approved',
+    refused = 'refused',
     active = 'active',
     completed = 'completed',
-    terminated = 'terminated',    
+    terminated = 'terminated',
 }
 
 
@@ -22,9 +25,12 @@ export interface IPhase extends Document {
     budget: number;
     description?: string;
     status: PhaseStatus;
+    statusHistory: IStatusHistory<PhaseStatus>[];
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+
 
 
 const PhaseSchema = new Schema<IPhase>(
@@ -71,7 +77,11 @@ const PhaseSchema = new Schema<IPhase>(
             enum: Object.values(PhaseStatus),
             default: PhaseStatus.proposed,
             required: true
-        }
+        },
+        statusHistory: {
+            type: [createStatusHistorySchema(Object.values(PhaseStatus))],
+            default: []
+        },
     },
     {
         timestamps: true,

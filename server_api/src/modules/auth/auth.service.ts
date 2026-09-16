@@ -4,14 +4,12 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { CacheService } from "../../util/cache.service";
+import { AccountStatus, IAccount } from '../accounts/account.model';
+import { IAccountRepository } from "../accounts/account.repository";
 import { MailService, VerificationCodePurpose } from "../mail/mail.service";
 import { SettingKey } from "../settings/setting.model";
 import { SettingService } from "../settings/setting.service";
 import { IUserRepository } from "../users/user.repository";
-import { TransitionHelper } from "../../common/helpers/transition.helper";
-import { AccountStatus, IAccount } from '../accounts/account.model';
-import { IAccountRepository } from "../accounts/account.repository";
-import { Account_TRANSITIONS } from "../accounts/account.service";
 import { ActivateAccountDTO, ChangePasswordDTO, LoginDto, ResetPasswordDto } from "./auth.dto";
 
 

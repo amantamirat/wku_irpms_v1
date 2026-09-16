@@ -12,10 +12,9 @@ export interface IPhaseRepository {
     find(filters: FilterPhases, options?: FilterOptions): Promise<IPhase[]>;
 
     findOne(projectId: string, order: number): Promise<IPhase | null>;
-    findFirstPhase(projectId: string): Promise<IPhase | null>;
+
     findLastPhase(projectId: string): Promise<IPhase | null>;
-    findNextPhase(projectId: string, currentOrder: number): Promise<IPhase | null>;
-    findPreviousPhase(projectId: string, currentOrder: number): Promise<IPhase | null>;
+
 
     create(dto: CreatePhaseDto): Promise<IPhase>;
     createMany(dtos: CreatePhaseDto[]): Promise<IPhase[]>;
@@ -27,7 +26,8 @@ export interface IPhaseRepository {
 
     updateStatus(
         id: string,
-        newStatus: PhaseStatus
+        newStatus: PhaseStatus,
+        userId: string
     ): Promise<IPhase | null>;
 
     countByProject(projectId: string): Promise<number>;
@@ -79,20 +79,7 @@ export class PhaseRepository implements IPhaseRepository {
             .exec();
     }
 
-    /**
-     * Returns the first phase of a project.
-     * First = lowest order.
-     */
-    async findFirstPhase(
-        projectId: string
-    ): Promise<IPhase | null> {
-        return Phase.findOne({
-            project: new mongoose.Types.ObjectId(projectId),
-        })
-            .sort({ order: 1 })
-            .lean<IPhase>()
-            .exec();
-    }
+
 
     /**
      * Returns the last phase of a project.
@@ -109,37 +96,7 @@ export class PhaseRepository implements IPhaseRepository {
             .exec();
     }
 
-    /**
-     * Returns the phase immediately after the given order.
-     */
-    async findNextPhase(
-        projectId: string,
-        currentOrder: number
-    ): Promise<IPhase | null> {
-        return Phase.findOne({
-            project: new mongoose.Types.ObjectId(projectId),
-            order: { $gt: currentOrder },
-        })
-            .sort({ order: 1 })
-            .lean<IPhase>()
-            .exec();
-    }
 
-    /**
- * Returns the phase immediately before the given order.
- */
-    async findPreviousPhase(
-        projectId: string,
-        currentOrder: number
-    ): Promise<IPhase | null> {
-        return Phase.findOne({
-            project: new mongoose.Types.ObjectId(projectId),
-            order: { $lt: currentOrder },
-        })
-            .sort({ order: -1 })
-            .lean<IPhase>()
-            .exec();
-    }
 
     async create(dto: CreatePhaseDto): Promise<IPhase> {
         const data = {
@@ -183,12 +140,28 @@ export class PhaseRepository implements IPhaseRepository {
 
     async updateStatus(
         id: string,
-        newStatus: PhaseStatus
+        status: PhaseStatus,
+        userId: string
     ): Promise<IPhase | null> {
+
         return Phase.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
-            { $set: { status: newStatus } },
-            { new: true }
+            {
+                $set: {
+                    status
+                },
+                $push: {
+                    statusHistory: {
+                        status,
+                        changedBy: new mongoose.Types.ObjectId(userId),
+                        changedAt: new Date()
+                    }
+                }
+            },
+            {
+                new: true,
+                runValidators: true
+            }
         ).exec();
     }
 

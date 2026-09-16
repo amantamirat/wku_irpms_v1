@@ -20,6 +20,8 @@ import { NotificationService } from "../../notifications/notification.service";
 import { ProjectAuth } from "../project.auth";
 import { ProjectStatus } from "../project.model";
 import { CollaboratorStatus } from "./collaborator.model";
+import { IApplicationRepository } from "../applications/application.repository";
+import { ApplicationStatus } from "../applications/application.model";
 
 
 export class CollaboratorService {
@@ -28,6 +30,7 @@ export class CollaboratorService {
         private readonly collabRepo: ICollaboratorRepository,
         private readonly projectRepo: IProjectRepository,
         private readonly callRepo: ICallRepository,
+        private readonly applicationRepo: IApplicationRepository,
         private readonly constraintValidator: ConstraintValidationService,
         private readonly projectAuth: ProjectAuth,
         private readonly notificationService: NotificationService,
@@ -47,10 +50,18 @@ export class CollaboratorService {
                 ) {
                     throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
                 }
+
+                if (projectDoc.currentApplication) {
+                    const currentAppDoc = await this.applicationRepo.findById(String(projectDoc.currentApplication));
+                    if (currentAppDoc?.status === ApplicationStatus.pending) {
+                        throw new AppError(ERROR_CODES.CURRENT_APPLICATION_IS_PENDING);
+                    }
+                }
             }
 
-            const callId = String(projectDoc.call);
-            if (callId) {
+            
+            if (projectDoc.call) {
+                const callId = String(projectDoc.call);
                 const callDoc = await this.callRepo.findById(callId);
                 if (!callDoc) {
                     throw new AppError(

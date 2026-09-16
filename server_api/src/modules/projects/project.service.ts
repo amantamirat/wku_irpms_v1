@@ -32,6 +32,7 @@ import { CallStatus } from "../calls/call.model";
 import { TemplateValidationService } from "../templates/services/template-validation.service";
 import { ApplicationService } from "./applications/application.service";
 import { ProjectAuth } from "./project.auth";
+import { IUserRepository } from "../users/user.repository";
 
 
 export class ProjectService {
@@ -39,6 +40,7 @@ export class ProjectService {
     constructor(
         private readonly projectRepo: IProjectRepository,
 
+        private readonly userRepo: IUserRepository,
         private readonly collabRepo: ICollaboratorRepository,
         private readonly phaseRepo: IPhaseRepository,
         private readonly applicationRepo: IApplicationRepository,
@@ -75,12 +77,16 @@ export class ProjectService {
             if (!isAdmin && !isLeadPI) {
                 throw new AppError(ERROR_CODES.UNAUTHORIZED);
             }
+            const leadDoc = await this.userRepo.findById(leadPI);
+            if (!leadDoc) {
+                throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND);
+            }
             const grantDoc = await this.grantRepo.findById(grant);
             if (!grantDoc) {
-                throw new Error(ERROR_CODES.GRANT_NOT_FOUND);
+                throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
             }
             if (grantDoc.status !== GrantStatus.active) {
-                throw new Error(ERROR_CODES.GRANT_NOT_ACTIVE);
+                throw new AppError(ERROR_CODES.GRANT_NOT_ACTIVE);
             }
         }
 
@@ -133,7 +139,8 @@ export class ProjectService {
                             : CollaboratorStatus.pending,
                     role: isLeadPI
                         ? "Principal Investigator"
-                        : collab.role
+                        : collab.role,
+                    userId
                 },
                 options
             );
@@ -153,13 +160,16 @@ export class ProjectService {
                         title: phase.title,
                         budget: phase.budget,
                         duration: phase.duration,
-                        description: phase.description
+                        description: phase.description,
+                        userId
                     },
                     options
                 );
             }
         }
 
+        const projectDoc = await this.projectRepo.findById(projectId, { populate: true })
+        if (projectDoc) return projectDoc;
         return created;
     }
 
@@ -330,6 +340,14 @@ export class ProjectService {
 
         if (to === ProjectStatus.approved) {
 
+            const collabs = await this.collabRepo.find({ project: id });
+            if (!collabs.every(c => c.status === CollaboratorStatus.verified))
+                throw new AppError(ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED);
+
+            const phases = await this.phaseRepo.find({ project: id });
+            if (!phases.every(p => p.status === PhaseStatus.approved))
+                throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_APPROVED);
+
             if (projectDoc.currentApplication) {
                 if (!projectDoc.call) {
                     throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
@@ -379,21 +397,16 @@ export class ProjectService {
                     );
                 }
             }
+            /*
+                   if (from !== ProjectStatus.granted && to === ProjectStatus.approved) {
+                       await this.notificationService.notifyProjectFinalization(
+                           String(projectDoc.leadPI), projectDoc.title
+                       );
+                   }*/
 
-            const collabs = await this.collabRepo.find({ project: id });
-            if (!collabs.every(c => c.status === CollaboratorStatus.verified))
-                throw new AppError(ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED);
-
-            const phases = await this.phaseRepo.find({ project: id });
-            if (!phases.every(p => p.status === PhaseStatus.approved))
-                throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_APPROVED);
         }
 
-        if (from !== ProjectStatus.granted && to === ProjectStatus.approved) {
-            await this.notificationService.notifyProjectFinalization(
-                String(projectDoc.leadPI), projectDoc.title
-            );
-        }
+
         if (to === ProjectStatus.refused) {
             await this.notificationService.notifyProjectRefusal(
                 String(projectDoc.leadPI), projectDoc.title
@@ -403,15 +416,12 @@ export class ProjectService {
         //rollback notification remain
 
         if (to === ProjectStatus.granted) {
-            /*
-            const collabs = await this.collabRepo.find({ project: id });
-            if (!collabs.every(c => c.status === CollaboratorStatus.verified))
-                throw new AppError(ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED);
+        }
 
+        if (to === ProjectStatus.completed) {
             const phases = await this.phaseRepo.find({ project: id });
-            if (!phases.every(p => p.status === PhaseStatus.approved))
-                throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_APPROVED);*/
-
+            if (!phases.every(p => p.status === PhaseStatus.completed))
+                throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_COMPLETED);
         }
 
         return await this.projectRepo.updateStatus(id, to, userId);

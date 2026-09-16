@@ -58,10 +58,9 @@ export class AccountController {
       const dto: TransitionRequestDto = {
         id: String(id),
         current: current,
-        next: next,
-        userId: req.auth.userId,
+        next: next
       };
-      const updated = await this.service.transitionState(dto);
+      const updated = await this.service.transitionState(dto, req.auth.userId);
       successResponse(res, 200, "User status updated successfully", updated);
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);

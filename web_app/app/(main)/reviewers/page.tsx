@@ -5,7 +5,7 @@ import { extractId } from "@/utils/utils";
 import { useEffect, useState } from "react";
 import ProjectDetail from "../projects/components/ProjectDetail";
 import { ReviewerApi } from "./api/reviewer.api";
-import { Reviewer } from "./models/reviewer.model";
+import { Reviewer, ReviewerTargetType } from "./models/reviewer.model";
 
 const ReviewersManager = () => {
     const [reviewers, setReviewers] = useState<Reviewer[]>([]);
@@ -30,6 +30,23 @@ const ReviewersManager = () => {
 
     const columns = [
         {
+            header: "Evaluator",
+            field: "user.name",
+            sortable: true,
+            body: (collaborator: Reviewer) => {
+                const user =
+                    typeof collaborator.reviewer === "object"
+                        ? collaborator.reviewer
+                        : null;
+
+                return (
+                    <div>
+                        {(user as any)?.name ?? "N/A"}
+                    </div>
+                );
+            }
+        },
+        {
             header: "Project Title",
             field: "project.title",
             body: (collaborator: Reviewer) => {
@@ -52,40 +69,37 @@ const ReviewersManager = () => {
             }
         },
         {
-            header: "Evaluator",
-            field: "user.name",
-            sortable: true,
-            body: (collaborator: Reviewer) => {
-                const user =
-                    typeof collaborator.reviewer === "object"
-                        ? collaborator.reviewer
-                        : null;
+            header: 'Stage',
+            field: 'targetType',
+            body: (reviewer: Reviewer) => {
+                const targetType =
+                    reviewer.targetType ??
+                    (reviewer.application
+                        ? ReviewerTargetType.APPLICATION
+                        : ReviewerTargetType.VERIFICATION);
+
+                if (targetType === ReviewerTargetType.APPLICATION) {
+                    const stageName =
+                        typeof reviewer.application === 'object' &&
+                            typeof reviewer.application?.stage === 'object'
+                            ? reviewer.application.stage?.name
+                            : null;
+
+                    return (
+                        <span className="text-sm text-gray-700 font-medium">
+                            {stageName ?? ReviewerTargetType.APPLICATION}
+                        </span>
+                    );
+                }
 
                 return (
-                    <div>
-                        {(user as any)?.name ?? "N/A"}
-                    </div>
+                    <span className="text-sm text-gray-700 font-medium">
+                        {ReviewerTargetType.VERIFICATION}
+                    </span>
                 );
             }
         },
 
-        {
-            header: "Lead",
-            field: "project.leadPI.name",
-            sortable: true,
-            body: (collaborator: Reviewer) => {
-                const project =
-                    typeof collaborator.project === "object"
-                        ? collaborator.project
-                        : null;
-
-                return (
-                    <div>
-                        {(project?.leadPI as any)?.name ?? "N/A"}
-                    </div>
-                );
-            }
-        },
         {
             header: "Status",
             field: "status",

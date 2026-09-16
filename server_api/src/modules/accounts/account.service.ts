@@ -4,12 +4,12 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
-import { IUserRepository, UserRepository } from "../users/user.repository";
+import { SettingKey } from "../settings/setting.model";
+import { SettingService } from "../settings/setting.service";
+import { IUserRepository } from "../users/user.repository";
 import { CreateAccountDTO, FilterAccountDTO, UpdateAccountDTO } from "./account.dto";
 import { AccountStatus } from "./account.model";
-import { IAccountRepository, AccountRepository } from "./account.repository";
-import { SettingService } from "../settings/setting.service";
-import { SettingKey } from "../settings/setting.model";
+import { IAccountRepository } from "./account.repository";
 
 
 export const Account_TRANSITIONS: Record<AccountStatus, AccountStatus[]> = {
@@ -94,7 +94,7 @@ export class AccountService {
         return updated;
     }
 
-    async transitionState(dto: TransitionRequestDto) {
+    async transitionState(dto: TransitionRequestDto, userId: string) {
         const { id, current, next } = dto;
 
         const user = await this.accountRepo.findById(id);
@@ -113,16 +113,14 @@ export class AccountService {
             to,
             Account_TRANSITIONS
         );
-        return await this.accountRepo.update(id, {
-            status: to
-        });
+        return await this.accountRepo.updateStatus(id, to, userId);
     }
 
     async delete(dto: DeleteDto) {
         const { id } = dto;
-        const userDoc = await this.accountRepo.findById(id);
-        if (!userDoc) throw new AppError(ERROR_CODES.UNAUTHORIZED);
-        if (userDoc.status === AccountStatus.active) {
+        const accDoc = await this.accountRepo.findById(id);
+        if (!accDoc) throw new AppError(ERROR_CODES.ACCOUNT_NOT_FOUND);
+        if (accDoc.status === AccountStatus.active) {
             throw new Error(ERROR_CODES.ACCOUNT_IN_USE);
         }
         return await this.accountRepo.delete(id);

@@ -136,15 +136,12 @@ export default function ProjectDetail({ project, updateProject, enableEditing }:
         });
     }
 
-
     // 2. Conditionally add Application Manager tab if projectData.call exists
     if (projectData?.currentVerification) {
         tabs.push({
             header: "Verifications",
             icon: 'pi pi-fw pi-check-square',
-            // Use PERMISSIONS.APPLICATION?.READ or PERMISSIONS.PROJECT?.READ based on your setup
-            //permission: "verification:read",
-            permission: "project:read",
+            permission: "verification:read",
             content: <VerificationManager project={project} />
         });
     }

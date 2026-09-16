@@ -1,6 +1,6 @@
 import mongoose, { FilterQuery } from "mongoose";
 import { CreateAccountDTO, FilterAccountDTO, UpdateAccountDTO } from './account.dto';
-import { IAccount, Account } from "./account.model";
+import { IAccount, Account, AccountStatus } from "./account.model";
 
 
 export interface IAccountRepository {
@@ -9,6 +9,11 @@ export interface IAccountRepository {
     findByEmail(email: string): Promise<IAccount | null>;
     findAll(): Promise<Partial<IAccount>[]>;
     update(id: string, data: UpdateAccountDTO["data"]): Promise<IAccount | null>;
+    updateStatus(
+        id: string,
+        newStatus: AccountStatus,
+        userId: string
+    ): Promise<IAccount | null>;
     exists(filter: FilterAccountDTO): Promise<boolean>;
     delete(id: string): Promise<void>;
 }
@@ -82,6 +87,33 @@ export class AccountRepository implements IAccountRepository {
             { new: true }
         ).lean<IAccount>();
 
+    }
+
+    async updateStatus(
+        id: string,
+        status: AccountStatus,
+        userId: string
+    ): Promise<IAccount | null> {
+
+        return Account.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            {
+                $set: {
+                    status
+                },
+                $push: {
+                    statusHistory: {
+                        status,
+                        changedBy: new mongoose.Types.ObjectId(userId),
+                        changedAt: new Date()
+                    }
+                }
+            },
+            {
+                new: true,
+                runValidators: true
+            }
+        ).exec();
     }
 
     async exists(filter: FilterAccountDTO): Promise<boolean> {

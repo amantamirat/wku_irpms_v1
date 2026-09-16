@@ -14,24 +14,45 @@ import { BasicInfoStep } from "./BasicInfoStep";
 import { CollaboratorsStep } from "./CollaboratorsStep";
 import { PhasesStep } from "./PhasesStep";
 
+
+
 const ProjectWizard = ({ item, onComplete, onHide, visible }: EntitySaveDialogProps<Project>) => {
     const toast = useRef<Toast>(null);
     const { getUser } = useAuth();
     const appUser = getUser();
     const isEditMode = !!item?._id;
 
+    const createDefaultProject = (): Project => ({
+        title: '',
+        summary: '',
+        themes: [],
+        leadPI: appUser || '',
+        collaborators: appUser
+            ? [{
+                member: appUser._id,
+                role: "Principal Investigator",
+                isLeadPI: true
+            }]
+            : [],
+        phases: [{
+            title: 'Phase 1',
+            order: 1,
+            budget: 1000,
+            duration: 10,
+            description: ''
+        }]
+    });
+
     // --- Core Wizard States ---
     const [activeIndex, setActiveIndex] = useState(0);
     //const [constraints, setConstraints] = useState<Constraint[]>([]);
     const [submitted, setSubmitted] = useState(false);
 
-    const [formData, setFormData] = useState<Project>({
-        title: '',
-        summary: '',
-        themes: [],
-        collaborators: [{ member: appUser as any, role: "Principal Investigator", isLeadPI: true }],
-        phases: [{ title: '', order: 1, budget: 0, duration: 0, description: '' }]
-    });
+    const [formData, setFormData] = useState<Project>(
+        createDefaultProject()
+    );
+
+
 
     const wizardSteps = [
         { label: 'Basic Information' },
@@ -41,18 +62,22 @@ const ProjectWizard = ({ item, onComplete, onHide, visible }: EntitySaveDialogPr
 
     // --- Hydrate Form State Reactively ---
     useEffect(() => {
-        if (visible) {
-            setFormData({
-                ...item,
-                title: item?.title || '',
-                summary: item?.summary || '',
-                themes: item?.themes || [],
-                collaborators: item?.collaborators || [{ member: appUser as any, role: "Principal Investigator", isLeadPI: true }],
-                phases: item?.phases || [{ title: '', order: 1, budget: 0, duration: 0, description: '' }]
-            });
-            setActiveIndex(0);
-            setSubmitted(false);
-        }
+        if (!visible) return;
+
+        setFormData(
+            item?._id
+                ? {
+                    ...item,
+                    title: item.title || '',
+                    summary: item.summary || '',
+                    themes: item.themes || [],
+                    collaborators: item.collaborators || [],
+                    phases: item.phases || []
+                }
+                : createDefaultProject()
+        );
+        setActiveIndex(0);
+        setSubmitted(false);
     }, [item, visible, appUser]);
 
     const updateFormData = (data: Partial<Project>) => {
@@ -74,15 +99,28 @@ const ProjectWizard = ({ item, onComplete, onHide, visible }: EntitySaveDialogPr
             const validation = validateProject(formData);
             if (!validation.valid) throw new Error(validation.message);
 
+            //console.log(formData);
+
             const saved = await ProjectApi.create(formData);
 
-            toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Project created successfully' });
-            if (onComplete) onComplete({
-                ...saved,
-                leadPI: formData.leadPI,
-                grant: formData.grant
+            toast.current?.show({
+                severity: 'success',
+                summary: 'Success',
+                detail: 'Project created successfully',
+                life: 2000
             });
-            onHide();
+
+            setTimeout(() => {
+                if (onComplete) {
+                    onComplete({
+                        ...saved,
+                        leadPI: formData.leadPI,
+                        grant: formData.grant
+                    });
+                }
+
+                onHide();
+            }, 2000);
         } catch (err: any) {
             toast.current?.show({ severity: 'error', summary: 'Submission Error', detail: err.message });
         }

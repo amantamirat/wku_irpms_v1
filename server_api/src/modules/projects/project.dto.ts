@@ -47,6 +47,7 @@ export interface UpdateProjectDTO {
         calendar: string | null;
 
         currentApplication: string | null;
+        currentPhase: string | null;
         currentVerification: string | null;
     }>;
 

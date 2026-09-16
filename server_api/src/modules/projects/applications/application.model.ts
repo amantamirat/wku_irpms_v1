@@ -1,6 +1,8 @@
 // application.model.ts
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
+import { IStatusHistory } from "../../../common/types/status-history";
+import { createStatusHistorySchema } from "../../../common/schemas/status-history.schema";
 
 export enum ApplicationStatus {
     pending = "pending",
@@ -28,6 +30,7 @@ export interface IApplication extends Document {
 
     anonymizationStatus: AnonymizationStatus;
     status: ApplicationStatus;
+    statusHistory: IStatusHistory<ApplicationStatus>[];
 
     createdBy?: mongoose.Types.ObjectId; // User who created the record
     updatedBy?: mongoose.Types.ObjectId; // User who last updated the record
@@ -35,6 +38,11 @@ export interface IApplication extends Document {
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+const ApplicationStatusHistorySchema =
+    createStatusHistorySchema(
+        Object.values(ApplicationStatus)
+    );
 
 const ApplicationSchema = new Schema<IApplication>(
     {
@@ -81,7 +89,10 @@ const ApplicationSchema = new Schema<IApplication>(
             default: ApplicationStatus.pending,
             required: true
         },
-
+        statusHistory: {
+            type: [ApplicationStatusHistorySchema],
+            default: []
+        },
         createdBy: {
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.USER,

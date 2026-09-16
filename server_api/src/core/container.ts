@@ -118,12 +118,11 @@ export const stageService = new StageService(stageRepo, callRepo, evaluationRepo
 
 export const projectAuth = new ProjectAuth(projectRepo, authPermissionService);
 
-export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, callRepo, constraintValidator,
-    projectAuth,
-    notificationService);
+export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, callRepo,
+    applicationRepo, constraintValidator, projectAuth, notificationService);
+
 export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, callRepo, constraintValidator,
-    projectAuth, new PhaseSynchronizer(projectRepo, phaseRepo)
-);
+    projectAuth);
 
 export const applicationService = new ApplicationService(
     applicationRepo, projectRepo, callRepo, stageRepo, reviewerRepo,
@@ -131,7 +130,7 @@ export const applicationService = new ApplicationService(
     new AnonymizerService(applicationRepo, collaboratorRepo), projectAuth,
     notificationService);
 
-export const projectService = new ProjectService(projectRepo, collaboratorRepo, phaseRepo, applicationRepo,
+export const projectService = new ProjectService(projectRepo, userRepo, collaboratorRepo, phaseRepo, applicationRepo,
     grantRepo, callRepo, stageRepo,
     collabService, phaseService, applicationService,
     constraintValidator, templateValidtor, projectAuth,

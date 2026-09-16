@@ -1,5 +1,7 @@
 import mongoose, { Document, Schema, Model } from 'mongoose';
 import { COLLECTIONS } from '../../common/constants/collections.enum';
+import { IStatusHistory } from '../../common/types/status-history';
+import { createStatusHistorySchema } from '../../common/schemas/status-history.schema';
 
 export enum AccountStatus {
   pending = 'pending',
@@ -17,6 +19,7 @@ export interface IAccount extends Document {
   failedLoginAttempts: number; // Moved from optional to required for schema consistency
   lockUntil?: Date;
   status: AccountStatus;
+  statusHistory: IStatusHistory<AccountStatus>[];
   createdAt?: Date;
   updatedAt?: Date;
 }
@@ -65,7 +68,11 @@ const AccountSchema = new Schema<IAccount>(
       enum: Object.values(AccountStatus),
       default: AccountStatus.pending,
       required: true,
-    }
+    },
+    statusHistory: {
+      type: [createStatusHistorySchema(Object.values(AccountStatus))],
+      default: []
+    },
   },
   { timestamps: true }
 );

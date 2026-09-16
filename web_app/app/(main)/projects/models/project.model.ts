@@ -11,15 +11,10 @@ import { Phase } from "../phases/models/phase.model";
 
 export enum ProjectStatus {
     draft = 'draft',
-    submitted = "submitted",
-    rejected = "rejected",
-    accepted = "accepted",
-    approved = "approved",//in this the budget and duration will be modified
-    granted = "granted",
+    approved = 'approved',
     refused = 'refused',
-    active = "active",
-    terminated = 'terminated',
-    completed = 'completed'
+    granted = 'granted',
+    completed = 'completed',
 }
 
 export type Project = {

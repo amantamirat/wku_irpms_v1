@@ -1,42 +1,5 @@
-// --- Helpers & Constants ---
-
 import { TransitionMap } from "@/hooks/useStateTransitionActions";
 import { PhaseStatus } from "./phase.model";
-
-/*
-export const PHASE_STATUS_ORDER: PhaseStatus[] = [
-    PhaseStatus.proposed,
-    PhaseStatus.approved,
-    PhaseStatus.active,
-    PhaseStatus.terminated,
-    PhaseStatus.completed
-];
-
-export const PH_TRANS: Record<PhaseStatus, PhaseStatus[]> = {
-    [PhaseStatus.proposed]: [
-        PhaseStatus.approved
-    ],
-
-    [PhaseStatus.approved]: [
-        PhaseStatus.active,
-        PhaseStatus.proposed
-    ],
-
-    [PhaseStatus.active]: [
-        PhaseStatus.completed,
-        PhaseStatus.terminated,
-        PhaseStatus.approved
-    ],
-
-    [PhaseStatus.completed]: [
-        PhaseStatus.active
-    ],
-
-    [PhaseStatus.terminated]: [
-        PhaseStatus.active
-    ]
-};
-*/
 
 export const PHASE_TRANSITIONS: TransitionMap = {
     [PhaseStatus.proposed]: [
@@ -45,6 +8,12 @@ export const PHASE_TRANSITIONS: TransitionMap = {
             action: "Approve",
             icon: "pi pi-check",
             severity: "success"
+        },
+        {
+            next: PhaseStatus.refused,
+            action: "Refuse",
+            icon: "pi pi-times",
+            severity: "danger"
         }
     ],
 
@@ -55,6 +24,15 @@ export const PHASE_TRANSITIONS: TransitionMap = {
             icon: "pi pi-play",
             severity: "success"
         },
+        {
+            next: PhaseStatus.proposed,
+            action: "Set Proposed",
+            icon: "pi pi-undo",
+            severity: "warning"
+        }
+    ],
+
+    [PhaseStatus.refused]: [
         {
             next: PhaseStatus.proposed,
             action: "Set Proposed",

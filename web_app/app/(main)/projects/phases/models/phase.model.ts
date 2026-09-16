@@ -3,9 +3,10 @@ import { Project } from "../../models/project.model";
 export enum PhaseStatus {
     proposed = 'proposed',
     approved = 'approved',
+    refused = 'refused',
     active = 'active',
-    terminated = 'terminated',
     completed = 'completed',
+    terminated = 'terminated',
 }
 
 /*

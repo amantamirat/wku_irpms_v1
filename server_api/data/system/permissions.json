@@ -724,47 +724,22 @@
   {
     "category": "Project Management",
     "name": "project:transition.draft.approved",
-    "description": "Approve a standalone project from draft status"
+    "description": "Approve a project from draft status"
   },
   {
     "category": "Project Management",
     "name": "project:transition.approved.draft",
-    "description": "Return an approved standalone project to draft status"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:transition.approved.granted",
-    "description": "Grant an approved standalone project for funding"
+    "description": "Return an approved project to draft status"
   },
   {
     "category": "Project Management",
     "name": "project:transition.draft.refused",
-    "description": "Refuse a standalone project from draft status"
+    "description": "Refuse a project from draft status"
   },
   {
     "category": "Project Management",
     "name": "project:transition.refused.draft",
-    "description": "Return a refused standalone project to draft status"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:transition.accepted.approved",
-    "description": "Approve an accepted call-associated project"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:transition.accepted.refused",
-    "description": "Refuse an accepted call-associated project"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:transition.approved.accepted",
-    "description": "Return an approved call-associated project to accepted status"
-  },
-  {
-    "category": "Project Management",
-    "name": "project:transition.refused.accepted",
-    "description": "Return a refused call-associated project to accepted status"
+    "description": "Return a refused project to draft status"
   },
   {
     "category": "Project Management",
@@ -775,6 +750,16 @@
     "category": "Project Management",
     "name": "project:transition.granted.approved",
     "description": "Return a granted project to approved status"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.granted.completed",
+    "description": "Complete a granted project"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.completed.granted",
+    "description": "Return a completed project to granted status"
   },
   {
     "category": "Project Management",
@@ -958,6 +943,16 @@
   },
   {
     "category": "Phase Management",
+    "name": "phase:transition.proposed.refused",
+    "description": "Refuse a proposed phase"
+  },
+  {
+    "category": "Phase Management",
+    "name": "phase:transition.refused.proposed",
+    "description": "Return a refused phase to proposed"
+  },
+  {
+    "category": "Phase Management",
     "name": "phase:transition.approved.active",
     "description": "Move phase from approved to active"
   },
@@ -1136,7 +1131,17 @@
   },
   {
     "category": "Verification Management",
+    "name": "verification:create:own",
+    "description": "Create own verification submissions"
+  },
+  {
+    "category": "Verification Management",
     "name": "verification:read",
+    "description": "View verification submissions"
+  },
+  {
+    "category": "Verification Management",
+    "name": "verification:lookup",
     "description": "View verification submissions"
   },
   {
@@ -1148,6 +1153,11 @@
     "category": "Verification Management",
     "name": "verification:delete",
     "description": "Delete verification submissions"
+  },
+  {
+    "category": "Verification Management",
+    "name": "verification:delete:own",
+    "description": "Delete own verification submissions"
   },
   {
     "category": "Verification Management",

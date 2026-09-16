@@ -470,7 +470,7 @@ export class ApplicationService {
     /**
      * Transition stage status (state machine) use current application
      */
-    async transitionState(dto: TransitionRequestDto) {
+    async transitionState(dto: TransitionRequestDto, userId: string) {
         const { id, current, next } = dto;
 
         const applicationDoc = await this.repository.findById(id);
@@ -543,7 +543,7 @@ export class ApplicationService {
             }
         }
 
-        const updated = await this.repository.updateStatus(id, to);
+        const updated = await this.repository.updateStatus(id, to, userId);
 
         //const synced = await this.synchronizer.sync(projectId);
 

@@ -212,6 +212,13 @@ export class ProjectRepository implements IProjectRepository {
                     : null;
         }
 
+        if (dtoData.currentPhase !== undefined) {
+            updateData.currentPhase =
+                dtoData.currentPhase
+                    ? new mongoose.Types.ObjectId(dtoData.currentPhase)
+                    : null;
+        }
+
         if (dtoData.currentVerification !== undefined) {
             updateData.currentVerification =
                 dtoData.currentVerification
