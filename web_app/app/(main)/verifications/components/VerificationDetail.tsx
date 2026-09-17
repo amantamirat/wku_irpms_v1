@@ -29,7 +29,7 @@ const VrificationDetail = ({ verification: verfication }: VerificationDetailProp
         },
         {
             header: "Project",
-            permission: "project:read",
+            permission: "project:lookup",
             content: projectId ? <ProjectDetail project={projectId} /> : null
         },
     ], [verfication, projectId]);

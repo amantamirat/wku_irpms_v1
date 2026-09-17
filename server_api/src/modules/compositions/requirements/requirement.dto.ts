@@ -1,5 +1,5 @@
+import { IRange } from "../../../common/types/range";
 import { AggregationMode } from "./requirement.model";
-import { IRangeDTO } from "../composition.dto";
 
 /**
  * Create Member Requirement
@@ -16,7 +16,7 @@ export interface CreateRequirementDTO {
 
     mode: AggregationMode;
 
-    threshold: IRangeDTO;
+    threshold: IRange;
 
     userId?: string;
 }
