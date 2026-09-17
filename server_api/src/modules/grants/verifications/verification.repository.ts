@@ -56,6 +56,10 @@ export interface IVerificationRepository {
         changedBy: string
     ): Promise<IVerification | null>;
 
+    exists(
+        filter: FilterVerification
+    ): Promise<boolean>
+
     delete(
         id: string
     ): Promise<IVerification | null>;
@@ -254,6 +258,16 @@ export class VerificationRepository
                 runValidators: true
             }
         );
+    }
+
+
+    async exists(
+        filter: FilterVerification
+    ): Promise<boolean> {
+
+        const result = await Verification.exists(filter);
+
+        return result !== null;
     }
 
 

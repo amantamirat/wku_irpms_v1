@@ -1,25 +1,38 @@
-import { VerificationStatus } from "./verification.model";
 
-export const VERIFICATION_STATUS_ORDER: VerificationStatus[] = [
-    VerificationStatus.submitted,
-    VerificationStatus.verified,
-    VerificationStatus.rejected
-];
+import { TransitionMap } from '@/hooks/useStateTransitionActions';
+import { VerificationStatus } from '../models/verification.model'; // Adjust path if needed
 
-export const VERIFICATION_TRANSITIONS: Record<
-    VerificationStatus,
-    VerificationStatus[]
-> = {
+export const VERIFICATION_TRANSITIONS: TransitionMap = {
     [VerificationStatus.submitted]: [
-        VerificationStatus.verified,
-        VerificationStatus.rejected
+        {
+            next: VerificationStatus.verified,
+            action: "Verify",
+            icon: "pi pi-check",
+            severity: "success"
+        },
+        {
+            next: VerificationStatus.rejected,
+            action: "Reject",
+            icon: "pi pi-times",
+            severity: "danger"
+        }
     ],
 
     [VerificationStatus.verified]: [
-        VerificationStatus.submitted
+        {
+            next: VerificationStatus.submitted,
+            action: "Set Submitted",
+            icon: "pi pi-undo",
+            severity: "warning"
+        }
     ],
 
     [VerificationStatus.rejected]: [
-        VerificationStatus.submitted
+        {
+            next: VerificationStatus.submitted,
+            action: "Set Submitted",
+            icon: "pi pi-undo",
+            severity: "warning"
+        }
     ]
 };

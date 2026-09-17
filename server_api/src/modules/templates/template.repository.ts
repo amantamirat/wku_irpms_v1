@@ -1,6 +1,7 @@
 import { FilterQuery } from "mongoose";
 import { ITemplate, Template } from "./template.model";
 import { CreateTemplateDTO, UpdateTemplateDTO } from "./template.dto";
+import { ResourceStatus } from "../evaluations/evaluation.state-machine";
 
 
 export class TemplateRepository {
@@ -40,6 +41,20 @@ export class TemplateRepository {
                 runValidators: true,
             }
         );
+    }
+
+    async updateStatus(
+        id: string,
+        newStatus: ResourceStatus
+    ): Promise<ITemplate | null> {
+
+        return Template.findByIdAndUpdate(
+            id,
+            { $set: { status: newStatus } },
+            { new: true }
+        )
+            .lean<ITemplate>()
+            .exec();
     }
 
     async delete(id: string): Promise<ITemplate | null> {

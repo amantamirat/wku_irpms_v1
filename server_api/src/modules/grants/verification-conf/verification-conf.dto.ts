@@ -20,7 +20,6 @@ export interface UpdateVerificationConfigurationDTO {
     maxReviewers?: number;
     maxAttempts?: number;
     minAcceptanceScore?: number;
-    status?: VerificationConfigurationStatus;
 }
 
 

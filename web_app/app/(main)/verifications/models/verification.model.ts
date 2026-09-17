@@ -15,9 +15,9 @@ export interface Verification {
     project: string | Project;
     configuration: string | VerificationConfiguration;
     attempt: number;
-    totalScore?:number;
+    totalScore?: number;
     //submittedBy: string;
-    document?: File;
+    file?: File;
     documentPath: string;
     //submittedAt?: string;
     //reviewedAt?: string;
@@ -28,7 +28,7 @@ export interface Verification {
 }
 
 export interface FilterVerification {
-    project?: string;
+    project?: string | Project;
     configuration?: string;
     attempt?: number;
     status?: VerificationStatus;

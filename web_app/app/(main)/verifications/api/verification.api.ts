@@ -54,8 +54,8 @@ export const VerificationApi: EntityApi<
         const sanitized = sanitizeVerification(dto);
         const formData = new FormData();
 
-        if (sanitized.document) {
-            formData.append("document", sanitized.document);
+        if (sanitized.file) {
+            formData.append("document", sanitized.file);
         }
 
         // Since sanitizeVerification ran extractId, project & configuration are strings

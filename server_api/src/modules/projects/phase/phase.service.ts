@@ -14,7 +14,6 @@ import { IProjectRepository } from "../project.repository";
 import { CreatePhaseDto, FilterPhases, UpdatePhaseDto } from "./phase.dto";
 import { PhaseStatus } from "./phase.model";
 import { IPhaseRepository } from "./phase.repository";
-import { PhaseSynchronizer } from "./phase.synchronizer";
 
 export class PhaseService {
 

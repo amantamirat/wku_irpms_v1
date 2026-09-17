@@ -291,6 +291,14 @@ export const PERMISSIONS = {
     UPDATE: "result:update",
     DELETE: "result:delete",
   },
+  VERIFICATION: {
+    CREATE: "verification:create",
+    SUBMIT: "verification:submit",
+    READ: "verification:read",
+    LOOKUP: "verification:lookup",
+    UPDATE: "verification:update",
+    DELETE: "verification:delete",
+  },
   REPORT: {
     OVERVIEW: "report:overview",
   }

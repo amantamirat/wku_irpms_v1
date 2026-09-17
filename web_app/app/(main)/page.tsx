@@ -20,7 +20,7 @@ import MyPendingInvitation from "./dashboard/pending-collabs/MyPendingInvitation
 const Dashboard = () => {
     const { hasPermission } = useAuth();
     const isAdmin = hasPermission([PERMISSIONS.REPORT.OVERVIEW]);
-    const canLookCalls = hasPermission("call:lookup");    
+    const canLookCalls = hasPermission("call:lookup");
     const canLookVerificationConfs = hasPermission("verification-conf:lookup");
 
     const [loadingEvals, setLoadingEvals] = useState(true);
@@ -61,11 +61,11 @@ const Dashboard = () => {
     }, []);
 
     // Check if the left section has any active content (loading states or data)
-    const hasLeftContent = 
-        loadingEvals || 
-        loadingCollabs || 
-        (pendingCollabs && pendingCollabs.length > 0) || 
-        (pendingReviewees && pendingReviewees.length > 0) || 
+    const hasLeftContent =
+        loadingEvals ||
+        loadingCollabs ||
+        (pendingCollabs && pendingCollabs.length > 0) ||
+        (pendingReviewees && pendingReviewees.length > 0) ||
         canLookCalls;
 
     return (
@@ -135,10 +135,7 @@ const Dashboard = () => {
                     {/* Verification Deadlines Widget */}
                     {canLookVerificationConfs && (
                         <div className={`col-12 ${!hasLeftContent ? 'md:col-6' : ''}`}>
-                            <div className="card border-none shadow-1 p-4 mb-4">
-                                <h5 className="m-0 text-xl font-bold mb-3">Verification Deadlines</h5>
-                                <VerificationWindow />
-                            </div>
+                            <VerificationWindow />
                         </div>
                     )}
                 </div>

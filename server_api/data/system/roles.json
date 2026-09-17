@@ -22,7 +22,7 @@
     {
         "name": "president",
         "permissions": [
-            "organization:*",
+            "organization:lookup",
             "grant:*",
             "thematic:*",
             "theme:*",
@@ -31,15 +31,15 @@
             "composition:*",
             "evaluation:*",
             "call:*",
-            "call.stage:*",
+            "stage:*",
             "template:*",
             "project:*",
-            "phase:read",
+            "phase:*",
             "phase-document:*",
-            "collaborator:read",
+            "collaborator:*",
             "application:*",
             "verification:*",
-            "reviewer:read",
+            "reviewer:*",
             "verification-conf:*",
             "report:*"
         ]
@@ -47,9 +47,9 @@
     {
         "name": "director",
         "permissions": [
-            "organization:*:read",
-            "calendar:read",
-            "grant:read",
+            "organization:lookup",
+            "calendar:lookup",
+            "grant:lookup",
             "constraint:*",
             "composition:*",
             "template:*",
@@ -59,12 +59,14 @@
             "theme:*",
             "evaluation:*",
             "criterion:*",
-            "project:read",
-            "collaborator:read",
-            "phase:read",
-            "user:read",
+            "project:lookup",
+            "collaborator:*",
+            "phase:*",
+            "user:lookup",
+            "application:*",
             "reviewer:*",
-            "result:read"
+            "result:*",
+            "verification-conf:*"
         ]
     },
     {
@@ -75,7 +77,6 @@
             "user:lookup",
             "theme:lookup",
             "call:lookup",
-            "verification-conf:lookup",
             "constraint:lookup",
             "project:lookup",
             "project:apply",
@@ -91,8 +92,10 @@
             "phase:create:own",
             "phase:update:own",
             "phase:delete:own",
+            "verification-conf:lookup",
             "verification:lookup",
-            "verification:delete:own",
+            "verification:submit",
+            "verification:delete:own",            
             "reviewer:read"
         ],
         "isDefault": true
@@ -101,7 +104,7 @@
         "name": "reviewer",
         "permissions": [
             "calendar:lookup",
-            "reviewer:read",
+            "reviewer:lookup",
             "reviewer:transition.pending.accepted",
             "reviewer:transition.accepted.submitted",
             "criterion:read",

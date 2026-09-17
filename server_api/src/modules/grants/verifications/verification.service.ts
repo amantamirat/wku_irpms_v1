@@ -1,3 +1,4 @@
+import { PERMISSIONS } from "../../../common/constants/permissions";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
@@ -5,6 +6,7 @@ import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { NotificationService } from "../../notifications/notification.service";
+import { ProjectAuth } from "../../projects/project.auth";
 import { ProjectStatus } from "../../projects/project.model";
 import { IProjectRepository } from "../../projects/project.repository";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
@@ -23,7 +25,8 @@ export class VerificationService {
         private readonly verificationConfRepo: IVerificationConfigurationRepository,
         private readonly projectRepo: IProjectRepository,
         private readonly reviewerRepo: IReviewerRepository,
-        private readonly notificationService?: NotificationService,
+        private readonly projectAuth: ProjectAuth,
+        private readonly notificationService: NotificationService,
     ) { }
     // --------------------------------------------------
     // CREATE VERIFICATION
@@ -31,26 +34,19 @@ export class VerificationService {
     async create(
         dto: CreateVerificationDTO,
         documentPath: string,
-        submittedBy: string
+        userId: string
     ): Promise<IVerification> {
         // ----------------------------------------------
         // 1. Find project
         // ----------------------------------------------
-        const project =
-            await this.projectRepo.findById(
-                dto.project
-            );
+        const { project } = dto;
+        const { projectDoc, isLeadPI } = await this.projectAuth.auth(project, userId, PERMISSIONS.VERIFICATION.CREATE);
 
-        if (!project) {
-            throw new AppError(
-                ERROR_CODES.PROJECT_NOT_FOUND
-            );
-        }
         // ----------------------------------------------
         // 2. Project must be completed
         // ----------------------------------------------
         if (
-            project.status !==
+            projectDoc.status !==
             ProjectStatus.completed
         ) {
             throw new AppError(
@@ -62,7 +58,7 @@ export class VerificationService {
         // ----------------------------------------------
         const configuration =
             await this.verificationConfRepo.findOneByGrant(
-                String(project.grant)
+                String(projectDoc.grant)
             );
 
         if (!configuration) {
@@ -70,39 +66,43 @@ export class VerificationService {
                 ERROR_CODES.VERIFICATION_CONFIGURATION_NOT_FOUND
             );
         }
-        // ----------------------------------------------
-        // 4. Configuration must be active
-        // ----------------------------------------------
-        if (
-            configuration.status !==
-            VerificationConfigurationStatus.active
-        ) {
-            throw new AppError(
-                ERROR_CODES.VERIFICATION_CONFIGURATION_INACTIVE
-            );
+
+        if (isLeadPI) {
+            // ----------------------------------------------
+            // 4. Configuration must be active
+            // ----------------------------------------------
+            if (
+                configuration.status !==
+                VerificationConfigurationStatus.active
+            ) {
+                throw new AppError(
+                    ERROR_CODES.VERIFICATION_CONFIGURATION_INACTIVE
+                );
+            }
+            // ----------------------------------------------
+            // 5. Check deadline
+            // ----------------------------------------------
+            const now = new Date();
+            if (
+                now >
+                new Date(configuration.deadline)
+            ) {
+                throw new AppError(
+                    ERROR_CODES.VERIFICATION_DEADLINE_EXPIRED
+                );
+            }
         }
-        // ----------------------------------------------
-        // 5. Check deadline
-        // ----------------------------------------------
-        const now = new Date();
-        if (
-            now >
-            new Date(configuration.deadline)
-        ) {
-            throw new AppError(
-                ERROR_CODES.VERIFICATION_DEADLINE_EXPIRED
-            );
-        }
+
         // ----------------------------------------------
         // 6. Check current verification
         // ----------------------------------------------
         let attempt = 1;
 
-        if (project.currentVerification) {
+        if (projectDoc.currentVerification) {
 
             const currentVerification =
                 await this.repository.findById(
-                    String(project.currentVerification)
+                    String(projectDoc.currentVerification)
                 );
 
             if (!currentVerification) {
@@ -160,7 +160,7 @@ export class VerificationService {
         // ----------------------------------------------
         const verification =
             await this.repository.create({
-                project: String(project._id),
+                project: String(projectDoc._id),
                 configuration: configuration._id,
                 attempt,
                 status: VerificationStatus.submitted,
@@ -170,18 +170,18 @@ export class VerificationService {
         // 9. Set as current verification
         // ----------------------------------------------
         await this.projectRepo.update(
-            String(project._id), { currentVerification: String(verification._id) }
+            String(projectDoc._id), { currentVerification: String(verification._id) }
         );
         // ----------------------------------------------
         // 10. Send notification
         // ----------------------------------------------
-        if (this.notificationService) {
-            await this.notificationService
-                .notifyVerificationSubmitted(
-                    String(project.leadPI),
-                    project.title
-                );
-        }
+
+        await this.notificationService
+            .notifyVerificationSubmitted(
+                String(projectDoc.leadPI),
+                projectDoc.title
+            );
+
 
         return verification;
     }

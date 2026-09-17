@@ -48,24 +48,7 @@ export const validateTemplate = (
     return { valid: true };
 };
 
-export function sanitizeTemplate(
-    template: Partial<Template>
-): Partial<Template> {
 
-    return {
-        ...template,
-
-        sections: template.sections?.map(section => ({
-            name: section.name,
-            aliases: section.aliases ?? [],
-            required: section.required ?? true,
-            minWords: section.minWords,
-            maxWords: section.maxWords,
-            order: section.order,
-            guidelines: section.guidelines
-        })),
-    };
-}
 
 export const createEmptyTemplate = (): Template => ({
     name: "",

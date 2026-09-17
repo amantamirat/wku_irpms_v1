@@ -10,6 +10,10 @@ import {
     errorResponse
 } from "../../../common/helpers/response";
 import { VerificationConfigurationStatus } from "./verification-conf.model";
+import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
+import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { AuthenticatedRequest } from "../../auth/auth.middleware";
+import { AppError } from "../../../common/errors/app.error";
 
 export class VerificationConfigurationController {
 
@@ -19,15 +23,18 @@ export class VerificationConfigurationController {
 
 
     create = async (
-        req: Request,
+        req: AuthenticatedRequest,
         res: Response
     ) => {
         try {
+             if (!req.auth) {
+            throw new AppError(ERROR_CODES.UNAUTHORIZED);
+        }
             const dto =
                 req.body as CreateVerificationConfigurationDTO;
 
             const configuration =
-                await this.service.create(dto);
+                await this.service.create(dto, req.auth.userId);
 
             successResponse(
                 res,
@@ -151,23 +158,23 @@ export class VerificationConfigurationController {
 
 
     update = async (
-        req: Request,
+        req: AuthenticatedRequest,
         res: Response
     ) => {
+
+        if (!req.auth) {
+            throw new Error(ERROR_CODES.UNAUTHORIZED);
+        }
         try {
             const { id } = req.params;
-
-            console.log("i am call ed update of conf");
 
             const dto =
                 req.body as UpdateVerificationConfigurationDTO;
 
-            console.log(dto);
-
             const configuration =
                 await this.service.update(
                     id,
-                    dto
+                    dto, req.auth.userId
                 );
 
             successResponse(
@@ -184,6 +191,36 @@ export class VerificationConfigurationController {
                 err.message,
                 err
             );
+        }
+    };
+
+
+    transitionState = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            if (!req.auth) {
+                throw new AppError(ERROR_CODES.UNAUTHORIZED);
+            }
+
+            const { id } = req.params;
+            const { current, next } = req.body;
+
+            const dto: TransitionRequestDto = {
+                id: String(id),
+                current,
+                next,
+                userId: req.auth.userId,
+            };
+
+            const updated = await this.service.transitionState(dto, req.auth.userId);
+
+            successResponse(
+                res,
+                200,
+                "Verification configuration status updated successfully",
+                updated
+            );
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
         }
     };
 

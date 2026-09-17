@@ -122,6 +122,9 @@ export class ProjectRepository implements IProjectRepository {
                 .populate("grant")
                 .populate("calendar")
                 .populate("themes")
+                .populate("currentApplication")
+                .populate("currentPhase")
+                .populate("currentVerification")                
                 .populate("createdBy");
         }
 

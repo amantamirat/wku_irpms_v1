@@ -141,7 +141,7 @@ export default function ProjectDetail({ project, updateProject, enableEditing }:
         tabs.push({
             header: "Verifications",
             icon: 'pi pi-fw pi-check-square',
-            permission: "verification:read",
+            permission: "verification:lookup",
             content: <VerificationManager project={project} />
         });
     }

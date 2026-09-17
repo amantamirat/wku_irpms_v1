@@ -1,13 +1,13 @@
-import mongoose, { model, Schema } from "mongoose";
+import { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
-import { EvalStatus } from "./evaluation.state-machine";
+import { ResourceStatus } from "./evaluation.state-machine";
 
 export interface IEvaluation extends Document {
     _id?:string;
     title: string;
     description?: string;
     weight: number;
-    status: EvalStatus;
+    status: ResourceStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -27,8 +27,8 @@ const EvaluationSchema = new Schema<IEvaluation>(
         },
         status: {
             type: String,
-            enum: Object.values(EvalStatus),
-            default: EvalStatus.draft,
+            enum: Object.values(ResourceStatus),
+            default: ResourceStatus.draft,
             required: true
         },
     },

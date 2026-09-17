@@ -1,15 +1,22 @@
+import { TransitionMap } from "@/hooks/useStateTransitionActions";
 import { VerificationConfigurationStatus } from "./verification-conf.model";
 
+export const VERIFICATION_CONFIGURATION_TRANSITIONS: TransitionMap = {
+    [VerificationConfigurationStatus.active]: [
+        {
+            next: VerificationConfigurationStatus.closed,
+            action: "Close",
+            icon: "pi pi-times",
+            severity: "danger"
+        }
+    ],
 
-export const VERIFICATION_CONFIG_STATUS_ORDER: VerificationConfigurationStatus[] = [
-    VerificationConfigurationStatus.active,
-    VerificationConfigurationStatus.closed
-];
-
-export const VERIFICATION_CONFIG_TRANSITIONS: Record<
-    VerificationConfigurationStatus,
-    VerificationConfigurationStatus[]
-> = {
-    [VerificationConfigurationStatus.active]: [VerificationConfigurationStatus.closed],
-    [VerificationConfigurationStatus.closed]: [VerificationConfigurationStatus.active]
+    [VerificationConfigurationStatus.closed]: [
+        {
+            next: VerificationConfigurationStatus.active,
+            action: "Reopen",
+            icon: "pi pi-refresh",
+            severity: "success"
+        }
+    ]
 };

@@ -43,6 +43,14 @@ router.get(
 );
 
 
+router.get(
+  "/lookup",
+  verifyAuthToken,
+  checkPermission("template:lookup"),
+  controller.get
+);
+
+
 /**
  * @route GET /templates/:id
  * @desc Get template by ID

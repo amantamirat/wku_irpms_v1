@@ -1,11 +1,11 @@
-import { EvalStatus } from "./evaluation.state-machine";
+import { ResourceStatus } from "./evaluation.state-machine";
 
 export interface CreateEvaluationDTO {
     title: string;
     description: string;
     weight: number;
     userId?: string;
-    status?: EvalStatus;
+    status?: ResourceStatus;
 }
 
 export interface UpdateEvaluationDTO {
@@ -14,7 +14,7 @@ export interface UpdateEvaluationDTO {
         title: string;
         description: string;
         weight: number;
-        status: EvalStatus;
+        status: ResourceStatus;
     }>;
     userId?: string;
 }
@@ -22,5 +22,5 @@ export interface UpdateEvaluationDTO {
 export interface FilterEvaluationsDTO {
     title?: string;
     weight?: number;
-    status?: EvalStatus;
+    status?: ResourceStatus;
 }

@@ -1,21 +1,19 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { Evaluation, GetEvaluationsOptions, sanitize } from "../models/evaluation.model";
+import { Evaluation, GetEvaluationsOptions } from "../models/evaluation.model";
 import { StateTransition } from "@/api/EntityApi";
+import { sanitize } from "@/utils/utils";
 
 const end_point = "/evaluations";
 
 export const EvaluationApi: EntityApi<Evaluation, GetEvaluationsOptions | undefined> = {
 
     async getAll(options) {
-        const query = new URLSearchParams();
-        if (options) {
-            if (options.status) {
-                query.append("status", String(options.status));
-            }
-        }
-        const qs = query.toString();
-        return ApiClient.get(`${end_point}${qs ? `?${qs}` : ""}`);
+        return ApiClient.get(end_point, options);
+    },
+
+    async lookup(options) {
+        return ApiClient.get(`${end_point}/lookup`, options);
     },
 
     async create(evaluation) {
@@ -35,8 +33,6 @@ export const EvaluationApi: EntityApi<Evaluation, GetEvaluationsOptions | undefi
     },
 
     async transitionState(id: string, dto: StateTransition): Promise<any> {
-        const query = new URLSearchParams();
-        query.append("id", id);
         const url = `${end_point}/${id}`;
         const updated = await ApiClient.patch(url, dto);
         return updated;

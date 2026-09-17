@@ -19,6 +19,7 @@ import { GrantApi } from '../../../grants/api/grant.api';
 import { Grant } from '../../../grants/models/grant.model';
 import { VerificationConfigurationApi } from '../api/verification-conf.api';
 import { VerificationConfiguration, validateVerificationConfiguration } from '../models/verification-conf.model';
+import { useAuth } from '@/contexts/auth-context';
 
 const SaveVerificationConfiguration = ({
     visible,
@@ -27,6 +28,7 @@ const SaveVerificationConfiguration = ({
     onHide,
 }: EntitySaveDialogProps<VerificationConfiguration>) => {
     const toast = useRef<Toast>(null);
+    const { hasPermission } = useAuth();
 
     const [localConfig, setLocalConfig] = useState<Partial<VerificationConfiguration>>({
         ...item,
@@ -46,30 +48,60 @@ const SaveVerificationConfiguration = ({
         return evalObj?.weight ?? 100;
     }, [localConfig.evaluation]);
 
-    // Fetch Grants, Templates, and Evaluations for dropdown options
+    // Fetch Grants, Templates, and Evaluations with permission validation when dialog becomes visible
     useEffect(() => {
+        if (!visible) return;
+
+        // Grant Lookup Permission Check
         if (!isGrantPredefined) {
-            GrantApi.getAll().then(setGrants).catch(console.error);
+            if (hasPermission && !hasPermission('grant:lookup')) {
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Permission Denied',
+                    detail: 'You do not have permission to lookup grants.',
+                    life: 3000,
+                });
+            } else {
+                GrantApi.lookup!().then(setGrants).catch(console.error);
+            }
         }
 
-        TemplateApi.getAll().then(setTemplates).catch(console.error);
+        // Template Lookup Permission Check
+        if (hasPermission && !hasPermission('template:lookup')) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Permission Denied',
+                detail: 'You do not have permission to lookup templates.',
+                life: 3000,
+            });
+        } else {
+            TemplateApi.lookup!().then(setTemplates).catch(console.error);
+        }
 
-        EvaluationApi.getAll({ status: EvaluationStatus.published })
-            .then(setEvaluations)
-            .catch(console.error);
-    }, [isGrantPredefined]);
+        // Evaluation Lookup Permission Check
+        if (hasPermission && !hasPermission('evaluation:lookup')) {
+            toast.current?.show({
+                severity: 'error',
+                summary: 'Permission Denied',
+                detail: 'You do not have permission to lookup evaluations.',
+                life: 3000,
+            });
+        } else {
+            EvaluationApi.lookup!({ status: EvaluationStatus.published })
+                .then(setEvaluations)
+                .catch(console.error);
+        }
+    }, [visible, isGrantPredefined, hasPermission]);
 
     // Sync local state and resolve string IDs to objects once lists load
     useEffect(() => {
         if (!item) return;
 
-        // Resolve evaluation string ID to object if evaluations are loaded
         let resolvedEvaluation = item.evaluation;
         if (resolvedEvaluation && typeof resolvedEvaluation === 'string' && evaluations.length > 0) {
             resolvedEvaluation = evaluations.find((e) => e._id === resolvedEvaluation) || resolvedEvaluation;
         }
 
-        // Resolve template string ID to object if templates are loaded
         let resolvedTemplate = item.template;
         if (resolvedTemplate && typeof resolvedTemplate === 'string' && templates.length > 0) {
             resolvedTemplate = templates.find((t) => t._id === resolvedTemplate) || resolvedTemplate;
@@ -100,7 +132,6 @@ const SaveVerificationConfiguration = ({
         try {
             setSubmitted(true);
 
-            // Min Acceptance Score Validation
             if ((localConfig.minAcceptanceScore ?? 0) > maxPossibleScore) {
                 throw new Error(`Min Acceptance Score cannot exceed Evaluation weight (${maxPossibleScore})`);
             }
@@ -127,7 +158,6 @@ const SaveVerificationConfiguration = ({
                 detail: 'Verification Configuration saved successfully',
                 life: 2000,
             });
-
             onComplete?.({
                 ...saved,
                 evaluation: localConfig.evaluation,
@@ -318,13 +348,13 @@ const SaveVerificationConfiguration = ({
                                     submitted &&
                                     (localConfig.maxReviewers === undefined ||
                                         localConfig.maxReviewers <
-                                        (localConfig.minReviewers || 1)),
+                                            (localConfig.minReviewers || 1)),
                             })}
                         />
                         {submitted &&
                             (localConfig.maxReviewers === undefined ||
                                 localConfig.maxReviewers <
-                                (localConfig.minReviewers || 1)) && (
+                                    (localConfig.minReviewers || 1)) && (
                                 <small className="p-error">
                                     Max Reviewers must be greater than or equal to
                                     Min Reviewers.

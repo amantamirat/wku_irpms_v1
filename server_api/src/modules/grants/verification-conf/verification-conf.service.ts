@@ -1,13 +1,17 @@
 import { FilterOptions } from "../../../common/dtos/filter.dto";
+import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { TransitionHelper } from "../../../common/helpers/transition.helper";
+import { IVerificationRepository } from "../verifications/verification.repository";
 import {
     CreateVerificationConfigurationDTO,
     FilterConfigurationDTO,
     UpdateVerificationConfigurationDTO
 } from "./verification-conf.dto";
 import {
-    IVerificationConfiguration
+    IVerificationConfiguration,
+    VerificationConfigurationStatus
 } from "./verification-conf.model";
 import {
     IVerificationConfigurationRepository
@@ -17,11 +21,13 @@ export class VerificationConfigurationService {
 
     constructor(
         private readonly repository:
-            IVerificationConfigurationRepository
+            IVerificationConfigurationRepository,
+        private readonly verificationRepo:
+            IVerificationRepository
     ) { }
 
     async create(
-        dto: CreateVerificationConfigurationDTO
+        dto: CreateVerificationConfigurationDTO, userId: string
     ): Promise<IVerificationConfiguration> {
 
         // One configuration per grant
@@ -41,11 +47,11 @@ export class VerificationConfigurationService {
 
         this.validateDeadline(dto.deadline);
 
-        return this.repository.create(dto);
+        return this.repository.create(dto, userId);
     }
 
     async getById(
-        id: string, options?:FilterOptions
+        id: string, options?: FilterOptions
     ): Promise<IVerificationConfiguration> {
 
         const configuration =
@@ -81,13 +87,14 @@ export class VerificationConfigurationService {
         return this.repository.find(filter, options);
     }
 
-    async getUpcoming(options?:FilterOptions): Promise<IVerificationConfiguration[]> {
+    async getUpcoming(options?: FilterOptions): Promise<IVerificationConfiguration[]> {
         return this.repository.findUpcoming(options);
     }
 
     async update(
         id: string,
-        dto: UpdateVerificationConfigurationDTO
+        dto: UpdateVerificationConfigurationDTO,
+        userId: string
     ): Promise<IVerificationConfiguration> {
 
         const existing =
@@ -115,7 +122,7 @@ export class VerificationConfigurationService {
         }
 
         const updated =
-            await this.repository.update(id, dto);
+            await this.repository.update(id, dto, userId, { populate: true });
 
         if (!updated) {
             throw new AppError(
@@ -126,10 +133,39 @@ export class VerificationConfigurationService {
         return updated;
     }
 
-    async delete(id: string): Promise<void> {
 
-        const existing =
-            await this.repository.findById(id);
+    async transitionState(dto: TransitionRequestDto, userId: string) {
+        const { id, current, next } = dto;
+
+        const configuration = await this.repository.findById(id);
+
+        if (!configuration) {
+            throw new AppError(ERROR_CODES.VERIFICATION_CONFIGURATION_NOT_FOUND);
+        }
+
+        const from = configuration.status as VerificationConfigurationStatus;
+        const to = next as VerificationConfigurationStatus;
+
+        // Optional UI consistency check
+        if (current && current !== from) {
+            throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
+        }
+
+        TransitionHelper.validateTransition(
+            from,
+            to,
+            VERIFICATION_CONFIGURATION_TRANSITIONS
+        );
+
+        return await this.repository.updateStatus(
+            id,
+            to,
+            userId
+        );
+    }
+
+    async delete(id: string): Promise<void> {
+        const existing = await this.repository.findById(id);
 
         if (!existing) {
             throw new AppError(
@@ -137,9 +173,18 @@ export class VerificationConfigurationService {
             );
         }
 
+        const verificationExists = await this.verificationRepo.exists({
+            configuration: id
+        });
+
+        if (verificationExists) {
+            throw new AppError(
+                ERROR_CODES.VERIFICATION_ALREADY_EXISTS
+            );
+        }
+
         await this.repository.delete(id);
     }
-
     private validateReviewers(
         minReviewers: number,
         maxReviewers: number
@@ -168,3 +213,17 @@ export class VerificationConfigurationService {
         }
     }
 }
+
+
+export const VERIFICATION_CONFIGURATION_TRANSITIONS: Record<
+    VerificationConfigurationStatus,
+    VerificationConfigurationStatus[]
+> = {
+    [VerificationConfigurationStatus.active]: [
+        VerificationConfigurationStatus.closed
+    ],
+
+    [VerificationConfigurationStatus.closed]: [
+        VerificationConfigurationStatus.active
+    ]
+};

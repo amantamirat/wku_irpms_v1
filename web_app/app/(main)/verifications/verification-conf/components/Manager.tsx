@@ -1,9 +1,10 @@
-import { createEntityManager } from "@/components/createEntityManager";
+
+import { createEntityManager } from "@/components/data-table/createEntityManager";
+import { Grant } from "../../../grants/models/grant.model";
 import { VerificationConfigurationApi } from "../api/verification-conf.api";
 import { createEmptyVerificationConfiguration, VerificationConfiguration } from "../models/verification-conf.model";
-import { VERIFICATION_CONFIG_TRANSITIONS, VERIFICATION_CONFIG_STATUS_ORDER } from "../models/verification-conf.state-machine";
 import SaveVerificationConfiguration from "./SaveVerificationConfiguration";
-import { Grant } from "../../../grants/models/grant.model";
+import { VERIFICATION_CONFIGURATION_TRANSITIONS } from "../models/verification-conf.state-machine";
 import MyBadge from "@/templates/MyBadge";
 
 export default createEntityManager<VerificationConfiguration>({
@@ -29,22 +30,21 @@ export default createEntityManager<VerificationConfiguration>({
         { header: "Min Reviewers", field: "minReviewers" },
         { header: "Max Reviewers", field: "maxReviewers" },
         { header: "Max Attempts", field: "maxAttempts" },
-        /*
         {
             field: "status",
             header: "Status",
             sortable: true,
-            body: (v: VerificationConfiguration) =>
-                <MyBadge type="status" value={v.status ?? 'Unknown'} />
-        },*/
+            //style: { width: '150px' },
+            body: (c: VerificationConfiguration) =>
+                <MyBadge type="status" value={c.status ?? "Unknown"} />
+        }
+
     ],
     createNew: createEmptyVerificationConfiguration,
     SaveDialog: SaveVerificationConfiguration,
-    permissionPrefix: "grant",
-    /*
     workflow: {
         statusField: "status",
-        transitions: VERIFICATION_CONFIG_TRANSITIONS,
-        statusOrder: VERIFICATION_CONFIG_STATUS_ORDER
-    }*/
+        transitions: VERIFICATION_CONFIGURATION_TRANSITIONS,
+    },
+    permissionPrefix: "verification-conf",
 });

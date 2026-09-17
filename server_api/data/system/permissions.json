@@ -608,6 +608,11 @@
   },
   {
     "category": "Evaluation Management",
+    "name": "evaluation:lookup",
+    "description": "View evaluation entries"
+  },
+  {
+    "category": "Evaluation Management",
     "name": "evaluation:update",
     "description": "Update evaluation entries"
   },
@@ -657,11 +662,6 @@
     "description": "Delete criterion entries"
   },
   {
-    "category": "Evaluation Management",
-    "name": "criterion:import",
-    "description": "Import criterion entries"
-  },
-  {
     "category": "Template Management",
     "name": "template:create",
     "description": "Create new document templates such as proposal or concept note structures."
@@ -669,6 +669,11 @@
   {
     "category": "Template Management",
     "name": "template:read",
+    "description": "Read and list available templates."
+  },
+  {
+    "category": "Template Management",
+    "name": "template:lookup",
     "description": "View and list available templates."
   },
   {
@@ -1131,8 +1136,8 @@
   },
   {
     "category": "Verification Management",
-    "name": "verification:create:own",
-    "description": "Create own verification submissions"
+    "name": "verification:submit",
+    "description": "Submit own project submissions"
   },
   {
     "category": "Verification Management",
@@ -1203,5 +1208,15 @@
     "category": "Verification Configuration Management",
     "name": "verification-conf:delete",
     "description": "Delete verification configurations"
+  },
+  {
+    "category": "Verification Configuration Management",
+    "name": "verification-conf:transition.active.closed",
+    "description": "Move verification configuration from active to closed"
+  },
+  {
+    "category": "Verification Configuration Management",
+    "name": "verification-conf:transition.closed.active",
+    "description": "Reopen verification configuration from closed to active"
   }
 ]

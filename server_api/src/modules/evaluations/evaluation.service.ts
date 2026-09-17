@@ -6,7 +6,7 @@ import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { CriterionRepository, ICriterionRepository } from "./criteria/criterion.repository";
 import { CreateEvaluationDTO, FilterEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
 import { IEvaluationRepository } from "./evaluation.repository";
-import { EVAL_TRANSITIONS, EvalStatus } from "./evaluation.state-machine";
+import { RESOURCE_TRANSITIONS, ResourceStatus } from "./evaluation.state-machine";
 
 export class EvaluationService {
 
@@ -37,8 +37,8 @@ export class EvaluationService {
         if (!evalDoc) {
             throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
         }
-        const from = evalDoc.status as EvalStatus;
-        const to = next as EvalStatus;
+        const from = evalDoc.status as ResourceStatus;
+        const to = next as ResourceStatus;
         // optional UI consistency check
         if (current && current !== from) {
             throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
@@ -47,11 +47,11 @@ export class EvaluationService {
         TransitionHelper.validateTransition(
             from,
             to,
-            EVAL_TRANSITIONS
+            RESOURCE_TRANSITIONS
         );
 
         // Inside transitionState logic
-        if (to === EvalStatus.published) {
+        if (to === ResourceStatus.published) {
             const criteria = await this.criterionRepo.find({ evaluation: id });
             const totalCriteriaWeight = criteria.reduce((sum, item) => sum + (item.weight || 0), 0);
 
@@ -63,7 +63,7 @@ export class EvaluationService {
             }
         }
 
-        if (next === EvalStatus.draft) {
+        if (next === ResourceStatus.draft) {
             /*
             if (await this.grantStageRepo.exists({ evaluation: id })) {
                 throw new AppError(ERROR_CODES.STAGE_ALREADY_EXISTS);
@@ -86,7 +86,7 @@ export class EvaluationService {
         }
 
         // 2. Restriction: Only allow weight updates if status is 'planned'
-        if (existingEval.status !== EvalStatus.draft) {
+        if (existingEval.status !== ResourceStatus.draft) {
             // If the weight is present in the DTO, remove it or throw error
             if (data.weight !== undefined && data.weight !== existingEval.weight) {
                 // Option A: Silently ignore/remove it (common for UI/UX smoothness)
@@ -114,7 +114,7 @@ export class EvaluationService {
 
         // 2. Safety Check: Only allow deletion if still in 'planned' status
         // This prevents deleting evaluations that are already active or closed (which have historical data)
-        if (evalDoc.status !== EvalStatus.draft) {
+        if (evalDoc.status !== ResourceStatus.draft) {
             throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
         }
 

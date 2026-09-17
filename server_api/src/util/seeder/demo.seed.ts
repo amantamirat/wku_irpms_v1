@@ -33,7 +33,7 @@ import {
 } from "../../modules/thematics/thematic.enum";
 import { ICriterionRepository } from "../../modules/evaluations/criteria/criterion.repository";
 import { IEvaluationRepository } from "../../modules/evaluations/evaluation.repository";
-import { EvalStatus } from "../../modules/evaluations/evaluation.state-machine";
+import { ResourceStatus } from "../../modules/evaluations/evaluation.state-machine";
 
 interface DemoTheme {
     title: string;
@@ -436,7 +436,7 @@ export class DemoSeeder {
                             title: item.title,
                             description: item.description,
                             weight: item.weight ?? 100,
-                            status: EvalStatus.draft
+                            status: ResourceStatus.draft
                         });
 
                     evaluationsSeeded = true;

@@ -1,5 +1,7 @@
 import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
+import { IStatusHistory } from "../../../common/types/status-history";
+import { createStatusHistorySchema } from "../../../common/schemas/status-history.schema";
 
 
 export enum VerificationConfigurationStatus {
@@ -18,6 +20,10 @@ export interface IVerificationConfiguration extends Document {
     template?: mongoose.Types.ObjectId;
     minAcceptanceScore: number;
     status: VerificationConfigurationStatus;
+    statusHistory: IStatusHistory<VerificationConfigurationStatus>[];
+    createdBy?: mongoose.Types.ObjectId; // User who created the record
+    updatedBy?: mongoose.Types.ObjectId; // User who last updated the record
+
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -82,7 +88,19 @@ const VerificationConfigurationSchema =
                 ),
                 default: VerificationConfigurationStatus.active,
                 required: true
-            }
+            },
+            statusHistory: {
+                type: [createStatusHistorySchema(Object.values(VerificationConfigurationStatus))],
+                default: []
+            },
+            createdBy: {
+                type: Schema.Types.ObjectId,
+                ref: COLLECTIONS.USER,
+            },
+            updatedBy: {
+                type: Schema.Types.ObjectId,
+                ref: COLLECTIONS.USER,
+            },
         },
         {
             timestamps: true

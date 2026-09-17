@@ -38,6 +38,13 @@ router.get(
   controller.getAll
 );
 
+router.get(
+  "/lookup",
+  verifyAuthToken,
+  checkPermission("evaluation:lookup"),
+  controller.getAll
+);
+
 /**
  * @route PUT /evaluations/:id
  * @desc Update an existing evaluation

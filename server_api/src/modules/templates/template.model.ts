@@ -1,5 +1,6 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
+import { ResourceStatus } from "../evaluations/evaluation.state-machine";
 
 
 export interface ITemplateSection {
@@ -18,6 +19,7 @@ export interface ITemplate extends Document {
     minPages?: number;
     maxPages?: number;
     sections: ITemplateSection[];
+    status: ResourceStatus;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -83,6 +85,12 @@ const TemplateSchema = new Schema<ITemplate>(
             type: [TemplateSectionSchema],
             default: [],
             required: true,
+        },
+        status: {
+            type: String,
+            enum: Object.values(ResourceStatus),
+            default: ResourceStatus.draft,
+            required: true
         },
     },
     {

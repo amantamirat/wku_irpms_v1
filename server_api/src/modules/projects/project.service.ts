@@ -33,6 +33,8 @@ import { TemplateValidationService } from "../templates/services/template-valida
 import { ApplicationService } from "./applications/application.service";
 import { ProjectAuth } from "./project.auth";
 import { IUserRepository } from "../users/user.repository";
+import { IVerificationRepository } from "../grants/verifications/verification.repository";
+import { VerificationStatus } from "../grants/verifications/verification.model";
 
 
 export class ProjectService {
@@ -43,7 +45,7 @@ export class ProjectService {
         private readonly userRepo: IUserRepository,
         private readonly collabRepo: ICollaboratorRepository,
         private readonly phaseRepo: IPhaseRepository,
-        private readonly applicationRepo: IApplicationRepository,
+        private readonly verificationRepo: IVerificationRepository,
 
         private readonly grantRepo: IGrantRepository,
         private readonly callRepo: ICallRepository,
@@ -361,13 +363,9 @@ export class ProjectService {
                     throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
                 }
 
-                const currentAppDoc = await this.applicationRepo.findById(
+                const currentAppDoc = await this.applicationService.getById(
                     String(projectDoc.currentApplication)
                 );
-
-                if (!currentAppDoc) {
-                    throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
-                }
 
                 const lastStage = await this.stageRepo.getLastStage(
                     String(callDoc._id)
@@ -416,6 +414,22 @@ export class ProjectService {
         //rollback notification remain
 
         if (to === ProjectStatus.granted) {
+
+            if (projectDoc.currentVerification) {
+                const verificationDoc = await this.verificationRepo.findById(
+                    String(projectDoc.currentVerification)
+                );
+                if (!verificationDoc) {
+                    throw new AppError(ERROR_CODES.CURRENT_VERIFICATION_NOT_FOUND);
+                }
+                if (verificationDoc.status === VerificationStatus.submitted) {
+                    throw new AppError(ERROR_CODES.CURRENT_VERIFICATION_SUBMITTED);
+                }
+                if (verificationDoc.status === VerificationStatus.verified) {
+                    throw new AppError(ERROR_CODES.VERIFICATION_ALREADY_VERIFIED);
+                }
+
+            }
         }
 
         if (to === ProjectStatus.completed) {

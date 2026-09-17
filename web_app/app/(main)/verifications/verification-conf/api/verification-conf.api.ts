@@ -63,7 +63,7 @@ export const VerificationConfigurationApi: EntityApi<
     // Transition State
     // ---------------------------
     async transitionState(id: string, dto: StateTransition): Promise<any> {
-        const url = `${end_point}/${id}`;
+         const url = `${end_point}/${id}/transition`; 
         return ApiClient.patch(url, dto);
     },
 

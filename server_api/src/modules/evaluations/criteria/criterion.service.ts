@@ -2,7 +2,7 @@ import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { SettingService } from "../../settings/setting.service";
 import { IEvaluationRepository } from "../evaluation.repository";
-import { EvalStatus } from "../evaluation.state-machine";
+import { ResourceStatus } from "../evaluation.state-machine";
 import {
     CreateCriterionDTO,
     FilterCriteriaDTO,
@@ -26,7 +26,7 @@ export class CriterionService {
     async create(dto: CreateCriterionDTO) {
         const evalDoc = await this.evalRepo.findById(dto.evaluation);
         if (!evalDoc) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
-        if (evalDoc.status !== EvalStatus.draft) throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
+        if (evalDoc.status !== ResourceStatus.draft) throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
 
         if (
             dto.formType === FormType.SINGLE_CHOICE ||
@@ -55,7 +55,7 @@ export class CriterionService {
 
         const evalDoc = await this.evalRepo.findById(String(criterion.evaluation));
         if (!evalDoc) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
-        if (evalDoc.status !== EvalStatus.draft) throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
+        if (evalDoc.status !== ResourceStatus.draft) throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
         // Logic check: If updating options or weight, re-validate
         const newWeight = data.weight ?? criterion.weight;
         const newOptions = data.options ?? criterion.options;
@@ -76,7 +76,7 @@ export class CriterionService {
 
         const evalDoc = await this.evalRepo.findById(String(criterionDoc.evaluation));
         if (!evalDoc) throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
-        if (evalDoc.status !== EvalStatus.draft) {
+        if (evalDoc.status !== ResourceStatus.draft) {
             throw new AppError(ERROR_CODES.EVALUATION_NOT_DRAFT);
         }
         /*

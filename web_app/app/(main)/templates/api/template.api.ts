@@ -1,6 +1,7 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { Template, sanitizeTemplate } from "../models/template.model";
+import { Template } from "../models/template.model";
+import { sanitize } from "@/utils/utils";
 
 
 export const TemplateApi: EntityApi<Template> = {
@@ -9,9 +10,13 @@ export const TemplateApi: EntityApi<Template> = {
         return ApiClient.get('/templates/');
     },
 
+    async lookup() {
+        return ApiClient.get('/templates/lookup');
+    },
+
 
     async create(template) {
-        const sanitized = sanitizeTemplate(template);
+        const sanitized = sanitize(template);
 
         return ApiClient.post(
             '/templates/',
@@ -27,7 +32,7 @@ export const TemplateApi: EntityApi<Template> = {
 
         return ApiClient.put(
             `/templates/${template._id}`,
-            sanitizeTemplate(template)
+            sanitize(template)
         );
     },
 

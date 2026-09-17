@@ -1,18 +1,18 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { BASE_URL } from '@/api/ApiClient';
-import MyBadge from '@/templates/MyBadge';
-import EmptyState from '@/components/EmptyState';
+import {
+    StateTransition
+} from '@/api/EntityApi';
 import {
     ItemDataTable,
     RowActionButton
 } from '@/components/data-table/ItemDataTable';
-import {
-    StateTransition
-} from '@/api/EntityApi';
-import { useStateTransitionActions } from '@/hooks/useStateTransitionActions';
 import { useConfirmDialog } from '@/contexts/ConfirmDialogContext';
+import { useAuth } from '@/contexts/auth-context';
+import { useStateTransitionActions } from '@/hooks/useStateTransitionActions';
+import MyBadge from '@/templates/MyBadge';
+import { useEffect, useState } from 'react';
 import { Stage } from '../../calls/stages/models/stage.model';
 import { ApplicationApi } from '../api/application.api';
 import {
@@ -23,7 +23,6 @@ import {
     APPLICATION_TRANSITIONS
 } from '../models/application.state-machine';
 import ApplicationDetail from './ApplicationDetail';
-import { useAuth } from '@/contexts/auth-context';
 
 interface ApplicationManagerProps {
     stage: Stage;

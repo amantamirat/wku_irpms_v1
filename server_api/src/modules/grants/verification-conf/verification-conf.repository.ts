@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 import {
     CreateVerificationConfigurationDTO,
@@ -7,14 +8,16 @@ import {
 
 import {
     IVerificationConfiguration,
-    VerificationConfiguration
+    VerificationConfiguration,
+    VerificationConfigurationStatus
 } from "./verification-conf.model";
+import { verificationConfRepo } from "../../../core/container";
 
 
 export interface IVerificationConfigurationRepository {
 
     create(
-        data: CreateVerificationConfigurationDTO
+        data: CreateVerificationConfigurationDTO, userId: string
     ): Promise<IVerificationConfiguration>;
 
     findById(
@@ -41,7 +44,14 @@ export interface IVerificationConfigurationRepository {
     update(
         id: string,
         data: UpdateVerificationConfigurationDTO,
+        userId: string,
         options?: FilterOptions
+    ): Promise<IVerificationConfiguration | null>;
+
+    updateStatus(
+        id: string,
+        newStatus: VerificationConfigurationStatus,
+        userId: string
     ): Promise<IVerificationConfiguration | null>;
 
     delete(
@@ -57,20 +67,16 @@ export class VerificationConfigurationRepository
      * Create verification configuration
      */
     async create(
-        data: CreateVerificationConfigurationDTO
+        data: CreateVerificationConfigurationDTO,
+        userId: string
     ): Promise<IVerificationConfiguration> {
 
-        return VerificationConfiguration.create({
-            grant: data.grant,
-            deadline: data.deadline,
-            template: data.template,
-            evaluation: data.evaluation,
-            minReviewers: data.minReviewers,
-            maxReviewers: data.maxReviewers,
-            maxAttempts: data.maxAttempts,
-            minAcceptanceScore: data.minAcceptanceScore,
-            status: data.status
+        const configuration = await VerificationConfiguration.create({
+            ...data,
+            createdBy: userId
         });
+
+        return configuration.populate(["grant", "template"]);
     }
 
 
@@ -182,13 +188,17 @@ export class VerificationConfigurationRepository
     async update(
         id: string,
         data: UpdateVerificationConfigurationDTO,
+        userId: string,
         options?: FilterOptions
     ): Promise<IVerificationConfiguration | null> {
 
         let query = VerificationConfiguration.findByIdAndUpdate(
             id,
             {
-                $set: data
+                $set: {
+                    ...data,
+                    updatedBy: userId
+                }
             },
             {
                 new: true,
@@ -203,6 +213,33 @@ export class VerificationConfigurationRepository
         }
 
         return query;
+    }
+
+    async updateStatus(
+        id: string,
+        status: VerificationConfigurationStatus,
+        userId: string
+    ): Promise<IVerificationConfiguration | null> {
+
+        return VerificationConfiguration.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            {
+                $set: {
+                    status
+                },
+                $push: {
+                    statusHistory: {
+                        status,
+                        changedBy: new mongoose.Types.ObjectId(userId),
+                        changedAt: new Date()
+                    }
+                }
+            },
+            {
+                new: true,
+                runValidators: true
+            }
+        ).exec();
     }
 
 

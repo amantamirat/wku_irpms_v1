@@ -32,7 +32,6 @@ import { CollaboratorRepository } from "../modules/projects/collaborators/collab
 import { CollaboratorService } from "../modules/projects/collaborators/collaborator.service";
 import { PhaseRepository } from "../modules/projects/phase/phase.repository";
 import { PhaseService } from "../modules/projects/phase/phase.service";
-import { PhaseSynchronizer } from "../modules/projects/phase/phase.synchronizer";
 import { ProjectAuth } from "../modules/projects/project.auth";
 import { ProjectRepository } from "../modules/projects/project.repository";
 import { ProjectService } from "../modules/projects/project.service";
@@ -130,7 +129,7 @@ export const applicationService = new ApplicationService(
     new AnonymizerService(applicationRepo, collaboratorRepo), projectAuth,
     notificationService);
 
-export const projectService = new ProjectService(projectRepo, userRepo, collaboratorRepo, phaseRepo, applicationRepo,
+export const projectService = new ProjectService(projectRepo, userRepo, collaboratorRepo, phaseRepo, verificationRepo,
     grantRepo, callRepo, stageRepo,
     collabService, phaseService, applicationService,
     constraintValidator, templateValidtor, projectAuth,

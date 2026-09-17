@@ -24,11 +24,6 @@ export const validateEvaluation = (
 };
 
 
-export function sanitize(evaluation: Partial<Evaluation>): Partial<Evaluation> {
-    return {
-        ...evaluation
-    };
-}
 
 export const createEmptyEval = (): Evaluation => ({
     title: "",

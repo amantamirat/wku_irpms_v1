@@ -5,7 +5,7 @@ import { CreateEvaluationDTO, FilterEvaluationsDTO, UpdateEvaluationDTO } from "
 import { EvaluationService } from "./evaluation.service";
 import { ERROR_CODES } from '../../common/errors/error.codes';
 import { TransitionRequestDto } from '../../common/dtos/transition.dto';
-import { EvalStatus } from './evaluation.state-machine';
+import { ResourceStatus } from './evaluation.state-machine';
 
 export class EvaluationController {
 
@@ -37,7 +37,7 @@ export class EvaluationController {
         try {
             const { status } = req.query;
             const filter: FilterEvaluationsDTO = {
-                status: status as EvalStatus,
+                status: status as ResourceStatus,
             };
             const evaluations = await this.service.get(filter);
             successResponse(res, 200, "Evaluations fetched successfully", evaluations);

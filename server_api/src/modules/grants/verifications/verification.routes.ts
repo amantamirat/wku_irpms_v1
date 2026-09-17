@@ -2,13 +2,14 @@ import { Router } from "express";
 import {
     verifyAuthToken
 } from "../../auth/auth.middleware";
-import { checkTransitionPermission } from '../../../core/container';
+import { checkTransitionPermission, projectAuth } from '../../../core/container';
 import { checkPermission } from '../../../core/container';
 
 import { VerificationController } from "./verification.controller";
 import { VerificationService } from "./verification.service";
 import { notificationService, projectRepo, reviewerRepo, verificationConfRepo, verificationRepo } from "../../../core/container";
 import { upload } from "../../../util/multer";
+import { PERMISSIONS } from "../../../common/constants/permissions";
 
 const verificationService =
     new VerificationService(
@@ -16,6 +17,7 @@ const verificationService =
         verificationConfRepo,
         projectRepo,
         reviewerRepo,
+        projectAuth,
         notificationService,
     );
 
@@ -26,40 +28,18 @@ const controller =
 
 const router = Router();
 
-
 // Create / submit verification
 router.post(
     "/",
     verifyAuthToken,
-    checkPermission("verification:create"),
+    checkPermission([PERMISSIONS.VERIFICATION.CREATE, PERMISSIONS.VERIFICATION.SUBMIT]),
     (req, res, next) => {
         req.headers["x-upload-folder"] = "verifications";
         next();
     },
-
     upload.single("document"),
-
     controller.create
 );
-
-/*
-// Get verifications by configuration
-router.get(
-    "/configuration/:configurationId",
-    verifyActiveAccount,
-    //checkPermission("verification:read"),
-    controller.getByConfiguration
-);
-
-
-// Get verifications by project
-router.get(
-    "/project/:projectId",
-    verifyActiveAccount,
-    //checkPermission("verification:read"),
-    controller.getByProject
-);
-*/
 
 router.get(
     "/",
@@ -68,11 +48,18 @@ router.get(
     controller.find
 );
 
+router.get(
+    "/lookup",
+    verifyAuthToken,
+    checkPermission("verification:lookup"),
+    controller.find
+);
+
 // Get verification by ID
 router.get(
     "/:id",
     verifyAuthToken,
-    checkPermission("verification:read"),
+    checkPermission(PERMISSIONS.VERIFICATION.LOOKUP),
     controller.getById
 );
 

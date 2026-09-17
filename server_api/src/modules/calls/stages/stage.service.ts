@@ -1,7 +1,7 @@
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { IEvaluationRepository } from "../../evaluations/evaluation.repository";
-import { EvalStatus } from "../../evaluations/evaluation.state-machine";
+import { ResourceStatus } from "../../evaluations/evaluation.state-machine";
 import { ICallRepository } from "../call.repository";
 import { CreateStageDTO, FilterStageDto, UpdateStageDTO } from "./stage.dto";
 import { CallStatus } from "../call.model";
@@ -61,7 +61,7 @@ export class StageService {
             throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
         }
 
-        if (evalDoc.status !== EvalStatus.published) {
+        if (evalDoc.status !== ResourceStatus.published) {
             throw new AppError(ERROR_CODES.EVALUATION_NOT_PUBLISHED);
         }
 
