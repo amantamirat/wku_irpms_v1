@@ -1,27 +1,21 @@
 'use client';
 
-import React, { useState, useRef, useEffect } from 'react';
-import { Dialog } from 'primereact/dialog';
-import { Steps } from 'primereact/steps';
-import { Toast } from 'primereact/toast';
+import { EntitySaveDialogProps } from '@/components/createEntityManager';
 import { Button } from 'primereact/button';
+import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
-import { DataTable } from 'primereact/datatable';
-import { Column } from 'primereact/column';
-import { Calendar } from 'primereact/calendar';
-import { InputNumber } from 'primereact/inputnumber';
-import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { Steps } from 'primereact/steps';
+import { Toast } from 'primereact/toast';
+import { useEffect, useRef, useState } from 'react';
 
 // APIs & Models
-import { StageApi } from '../../stages/api/stage.api';
-import { Stage } from '../../stages/models/stage.model';
-import { Call, validateCall } from '../../models/call.model';
 import { sanitize } from '@/utils/utils';
 import { CallApi } from '../../api/call.api';
-import { CallStagesStep } from './CallStagesStep';
-import { CallReviewStep } from './CallReviewStep';
+import { Call, validateCall } from '../../models/call.model';
 import { CallInfoStep } from './CallInfoStep';
+import { CallReviewStep } from './CallReviewStep';
+import { CallStagesStep } from './CallStagesStep';
 
 export const SaveCallWizard = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<Call>) => {
     const toast = useRef<Toast>(null);
@@ -82,23 +76,6 @@ export const SaveCallWizard = ({ visible, item, onHide, onComplete }: EntitySave
                 savedCall = await CallApi.create(payload as Call);
             }
 
-            /*
-            const currentStages = callData.stages || [];
-            if (currentStages.length > 0) {
-                const stagePromises = currentStages.map(stg => {
-                    const stagePayload = { ...stg, call: savedCall._id };
-                    return stg._id ? StageApi.update(stagePayload as Stage) : StageApi.create(stagePayload as Stage);
-                });
-                await Promise.all(stagePromises);
-            }
-                */
-
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Success',
-                detail: isEditMode ? 'Call updated successfully' : 'Call and Stages created successfully',
-                life: 1000
-            });
 
             toast.current?.show({
                 severity: 'success',

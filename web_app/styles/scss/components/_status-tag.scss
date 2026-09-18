@@ -9,11 +9,8 @@
 
 .status-badge {
 
-    &.status-draft {
-        background: #ECEFF1;
-        color: #455A64;
-    }
-
+    &.status-draft, 
+    &.status-upcoming,
     &.status-pending,
     &.status-proposed,
     &.status-planned,
@@ -22,7 +19,7 @@
         color: #8A6D3B;
     }
 
-    &.status-linked,
+    &.status-approved,
     &.status-verified,
     &.status-accepted,
     &.status-published,
@@ -31,37 +28,25 @@
         color: #256029;
     }
 
-    &.status-notlinked,
+
+
     &.status-deleted,
     &.status-suspended,
     &.status-rejected,
     &.status-refused,
+    &.status-declined,
     &.status-terminated,
     &.status-locked {
         background: #FFCDD2;
         color: #d80517;
     }
 
-    &.status-approved,
+
     &.status-closed,
     &.status-archived,
     &.status-granted {
         background: #F3E5F5;
         color: #4A148C;
-    }
-
-
-
-
-
-    &.status-finalization {
-        background: #f1f3f5;
-        color: #495057;
-    }
-
-    &.status-reviewed {
-        background: #FCE4EC;
-        color: #880E4F;
     }
 
     &.status-completed {

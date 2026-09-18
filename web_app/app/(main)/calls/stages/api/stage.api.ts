@@ -8,8 +8,8 @@ const end_point = "/call/stages";
 
 export const StageApi: EntityApi<Stage, FilterStagesDTO | undefined>
     & {
-        getNext: (stageId: string) => Promise<Stage | null>;
-        getUpcoming: () => Promise<Stage[]>;
+        getPrevious: (stageId: string) => Promise<Stage | null>;
+        getAvailable: () => Promise<Stage[]>;
     }
     = {
 
@@ -35,24 +35,13 @@ export const StageApi: EntityApi<Stage, FilterStagesDTO | undefined>
         return ApiClient.get(`${end_point}/${id}`);
     },
 
-
-    async getNext(id: string): Promise<Stage | null> {
-        try {
-            return await ApiClient.get(`${end_point}/next/${id}`);
-        } catch (err: any) {
-            if (err.message === "NEXT_STAGE_NOT_FOUND") {
-                // return null;
-            }
-            //console.log(err.code);
-            if (err.code === "NEXT_STAGE_NOT_FOUND") {
-                return null;
-            }
-            throw err;
-        }
+    async getPrevious(id: string): Promise<Stage | null> {
+        return await ApiClient.get(`${end_point}/previous/${id}`);
     },
 
-    async getUpcoming(): Promise<Stage[]> {
-        return ApiClient.get(`${end_point}/upcoming`);
+
+    async getAvailable(): Promise<Stage[]> {
+        return ApiClient.get(`${end_point}/available`);
     },
 
     /*
@@ -80,7 +69,7 @@ export const StageApi: EntityApi<Stage, FilterStagesDTO | undefined>
     // Transition State
     // ---------------------------
     async transitionState(id: string, dto: StateTransition): Promise<any> {
-        const url = `${end_point}/${id}`;
+        const url = `${end_point}/${id}/transition`;
         return ApiClient.patch(url, dto);
     },
     // ---------------------------

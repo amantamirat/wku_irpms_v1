@@ -2,9 +2,10 @@ import { useAuth } from "@/contexts/auth-context";
 import { TabPanel, TabView } from "primereact/tabview";
 import { useMemo } from "react";
 import { Application } from "../models/application.model";
-import ApplicationReviewerManager from "../../reviewers/application/Manager";
 import ProjectDetail from "../../projects/components/ProjectDetail";
 import { extractId } from "@/utils/utils";
+import ReviewerManager from "../../reviewers/components/Manager";
+import { ReviewerTargetType } from "../../reviewers/models/reviewer.model";
 
 interface ApplicationDetailProps {
     application: Application;
@@ -22,8 +23,8 @@ const ApplicationDetail = ({ application }: ApplicationDetailProps) => {
     const tabs = useMemo(() => [
         {
             header: "Reviewers",
-            permission: "reviewer:lookup",
-            content: <ApplicationReviewerManager application={application} />
+            permission: "reviewer:read",
+            content: <ReviewerManager targetType={ReviewerTargetType.APPLICATION} application={application} />
         },
         {
             header: "Project",

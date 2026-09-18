@@ -8,7 +8,6 @@ export interface CreateApplicationDTO {
     project: string;
     stage: string;
     documentPath: string;
-    //userId: string;
 }
 
 export interface UpdateApplicationDTO {

@@ -16,8 +16,10 @@ import EvaluationDialog from '../components/EvaluationDialog';
 import { useStateTransitionActions } from '@/hooks/useStateTransitionActions';
 import { StateTransition } from '@/api/EntityApi';
 import { REVIEWER_USER_TRANSITIONS } from '../models/reviewer.state-machine';
+import { useAuth } from '@/contexts/auth-context';
 
 const MyReviewersManager = () => {
+    const { hasPermission } = useAuth();
     const [reviewers, setReviewers] = useState<Reviewer[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedReviewer, setSelectedReviewer] =
@@ -67,8 +69,9 @@ const MyReviewersManager = () => {
             icon: 'pi pi-eye',
             severity: 'secondary',
             tooltip: 'Start/View Evaluation',
+            visible: () => { return hasPermission("result:read") },
             disabled: reviewer =>
-                reviewer.status === ReviewerStatus.pending,
+                (reviewer.status === ReviewerStatus.pending || reviewer.status === ReviewerStatus.decliend),
             onClick: reviewer => {
                 setSelectedReviewer(reviewer);
             }

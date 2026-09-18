@@ -82,6 +82,7 @@ const SaveReviewerDialog = ({
             if (onComplete) {
                 onComplete({
                     ...saved,
+                    verification: localReviewer.verification,
                     application: localReviewer.application,
                     reviewer: localReviewer.reviewer
                 });
@@ -131,10 +132,6 @@ const SaveReviewerDialog = ({
                                 onChange={(e) => setLocalReviewer({ ...localReviewer, reviewer: e.value })}
                                 dataKey="_id"
                                 optionLabel="name"
-                                itemTemplate={userTemplate}
-                                valueTemplate={(option) =>
-                                    option ? userTemplate(option) : <span className="p-placeholder">Select a Reviewer</span>
-                                }
                                 placeholder="Select a Reviewer"
                                 filter
                                 className={classNames({

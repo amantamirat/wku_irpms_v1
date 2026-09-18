@@ -256,7 +256,7 @@ export const PERMISSIONS = {
   },
   APPLICATION: {
     CREATE: "application:create",
-    CREATE_OWN: "application:create:own",
+    SUBMIT: "application:submit",
     READ: "application:read",
     UPDATE: "application:update",
     DELETE: "application:delete",

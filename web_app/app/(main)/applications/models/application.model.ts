@@ -31,14 +31,14 @@ export type Application = {
 
 
 
-export interface GetProjectApplicationOptions {
+export interface FilterApplicationOptions {
     project?: string | Project;
     stage?: string | Stage;
     status?: ApplicationStatus;
     //populate?: boolean;
 }
 
-export const validateProjectApplication = (ps: Partial<Application>): { valid: boolean; message?: string } => {
+export const validateApplication = (ps: Partial<Application>): { valid: boolean; message?: string } => {
     if (!ps.project) {
         return { valid: false, message: "Project is required." };
     }
@@ -53,20 +53,6 @@ export const validateProjectApplication = (ps: Partial<Application>): { valid: b
     return { valid: true };
 }
 
-
-export const sanitizeApplication = (app: Partial<Application>): Partial<Application> => {
-    return {
-        ...app,
-        project:
-            typeof app.project === "object" && app.project !== null
-                ? (app.project as Project)._id
-                : app.project,
-        stage:
-            typeof app.stage === "object" && app.stage !== null
-                ? (app.stage as any)._id
-                : app.stage,
-    };
-}
 
 /**
  * Create empty project stage

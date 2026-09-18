@@ -69,7 +69,8 @@ const VerificationManager = ({
         ],
         permissionPrefix: "verification",
         hideSearch: true,
-        hideDefaultActions: !enableEditing
+        hideEditAction: true,
+        hideDeleteAction: !enableEditing
     });
 
     return <Manager key={projectId} />;

@@ -16,12 +16,15 @@ import { Collaborator, CollaboratorStatus } from "./collaborators/models/collabo
 import { ReportDashboard } from "./reports/components/Dashboard";
 import UpcomingDeadlines from "./dashboard/UpcomingDeadlines";
 import MyPendingInvitation from "./dashboard/pending-collabs/MyPendingInvitation";
+import UpcomingStages from "./dashboard/AvailableStages";
+import AvailableStages from "./dashboard/AvailableStages";
 
 const Dashboard = () => {
     const { hasPermission } = useAuth();
     const isAdmin = hasPermission([PERMISSIONS.REPORT.OVERVIEW]);
     const canLookCalls = hasPermission("call:lookup");
     const canLookVerificationConfs = hasPermission("verification-conf:lookup");
+    const canLookStages = hasPermission("stage:lookup");
 
     const [loadingEvals, setLoadingEvals] = useState(true);
     const [loadingCollabs, setLoadingCollabs] = useState(true);
@@ -124,13 +127,13 @@ const Dashboard = () => {
             {/* 🟠 RIGHT COLUMN: Expands to full width (lg:col-12) if left column is absent */}
             <div className={`col-12 ${hasLeftContent ? 'lg:col-4' : 'lg:col-12'}`}>
                 <div className="grid">
-                    {/* Upcoming Deadlines Widget */}
-                    <div className={`col-12 ${!hasLeftContent && canLookVerificationConfs ? 'md:col-6' : ''}`}>
-                        <div className="card border-none shadow-1 p-4 mb-4">
-                            <h5 className="m-0 text-xl font-bold mb-3">Upcoming Deadlines</h5>
-                            <UpcomingDeadlines />
+
+                    {/* Available Deadlines Widget */}
+                    {canLookStages && (
+                        <div className={`col-12 ${!hasLeftContent ? 'md:col-6' : ''}`}>
+                            <AvailableStages />
                         </div>
-                    </div>
+                    )}
 
                     {/* Verification Deadlines Widget */}
                     {canLookVerificationConfs && (
@@ -138,6 +141,7 @@ const Dashboard = () => {
                             <VerificationWindow />
                         </div>
                     )}
+
                 </div>
             </div>
 

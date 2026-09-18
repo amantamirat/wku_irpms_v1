@@ -2,7 +2,8 @@ import { useAuth } from "@/contexts/auth-context";
 import { TabPanel, TabView } from "primereact/tabview";
 import { useMemo } from "react";
 import ProjectDetail from "../../projects/components/ProjectDetail";
-import VerificationReviewerManager from "../../reviewers/verification/Manager";
+import ReviewerManager from "../../reviewers/components/Manager";
+import { ReviewerTargetType } from "../../reviewers/models/reviewer.model";
 import { Verification } from "../models/verification.model";
 
 interface VerificationDetailProps {
@@ -25,7 +26,7 @@ const VrificationDetail = ({ verification: verfication }: VerificationDetailProp
         {
             header: "Reviewers",
             permission: "reviewer:read",
-            content: <VerificationReviewerManager verification={verfication} />
+            content: <ReviewerManager targetType={ReviewerTargetType.VERIFICATION} verification={verfication} />
         },
         {
             header: "Project",

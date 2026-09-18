@@ -27,7 +27,6 @@ import { RoleRepository } from "../modules/permissions/roles/role.repository";
 import { PositionRepository } from "../modules/positions/position.repository";
 import { ApplicationRepository } from "../modules/projects/applications/application.repository";
 import { ApplicationService } from "../modules/projects/applications/application.service";
-import { ApplicationSynchronizer } from "../modules/projects/applications/application.synchronizer";
 import { CollaboratorRepository } from "../modules/projects/collaborators/collaborator.repository";
 import { CollaboratorService } from "../modules/projects/collaborators/collaborator.service";
 import { PhaseRepository } from "../modules/projects/phase/phase.repository";
@@ -125,7 +124,7 @@ export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, 
 
 export const applicationService = new ApplicationService(
     applicationRepo, projectRepo, callRepo, stageRepo, reviewerRepo,
-    templateValidtor, new ApplicationSynchronizer(projectRepo, applicationRepo),
+    templateValidtor,
     new AnonymizerService(applicationRepo, collaboratorRepo), projectAuth,
     notificationService);
 

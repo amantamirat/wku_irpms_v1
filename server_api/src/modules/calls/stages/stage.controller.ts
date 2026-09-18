@@ -3,7 +3,8 @@ import { StageService } from './stage.service';
 import { CreateStageDTO, FilterStageDto, UpdateStageDTO } from './stage.dto';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
 import { AuthenticatedRequest } from '../../auth/auth.middleware';
-//import { StageCategory } from './grant.stage.model';
+import { ERROR_CODES } from '../../../common/errors/error.codes';
+import { TransitionRequestDto } from '../../../common/dtos/transition.dto';
 
 
 export class StageController {
@@ -11,8 +12,10 @@ export class StageController {
     constructor(private readonly service: StageService) {
     }
 
-    create = async (req: Request, res: Response) => {
+    create = async (req: AuthenticatedRequest, res: Response) => {
+
         try {
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const {
                 call,
                 name,
@@ -35,7 +38,7 @@ export class StageController {
                 minAcceptanceScore,
             };
 
-            const stage = await this.service.create(dto);
+            const stage = await this.service.create(dto, req.auth.userId);
 
             successResponse(
                 res,
@@ -95,15 +98,35 @@ export class StageController {
     };
 
 
+    getPrevious = async (req: Request, res: Response) => {
+        try {
+            const { id } = req.params;
+
+            const previousStage = await this.service.getPreviousStage(id);
+
+            successResponse(
+                res,
+                200,
+                'previous stage fetched',
+                previousStage
+            );
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
+    /*
     getNext = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
-            const nextStage = await this.service.getNextStage(id);
+            const nextStage = await this.service.findNextStage(id);
             successResponse(res, 200, 'next stage fetched', nextStage);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     };
+*/
+
 
     getUpcoming = async (
         req: Request,
@@ -111,7 +134,7 @@ export class StageController {
     ) => {
         try {
             const stages =
-                await this.service.getUpcoming({ populate: true });
+                await this.service.getAvailable({ populate: true });
 
             successResponse(
                 res,
@@ -132,6 +155,7 @@ export class StageController {
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
 
             const {
@@ -157,7 +181,7 @@ export class StageController {
                 },
             };
 
-            const updated = await this.service.update(dto);
+            const updated = await this.service.update(dto, req.auth.userId);
 
             successResponse(
                 res,
@@ -169,10 +193,31 @@ export class StageController {
             errorResponse(res, 400, err.message, err);
         }
     };
+
+    transitionState = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
+            const { id } = req.params;
+            const { current, next } = req.body;
+            const dto: TransitionRequestDto = {
+                id: String(id),
+                current: current,
+                next: next,
+                userId: req.auth.userId,
+            };
+            const updated = await this.service.transitionState(dto, req.auth.userId);
+            successResponse(res, 200, "Stage status updated successfully", updated);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
+
     delete = async (req: AuthenticatedRequest, res: Response) => {
         try {
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
-            const deleted = await this.service.delete(id);
+            const deleted = await this.service.delete(id, req.auth.userId);
             successResponse(res, 200, 'Stage deleted successfully', deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

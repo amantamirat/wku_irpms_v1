@@ -1,13 +1,11 @@
 import { ApiClient } from "@/api/ApiClient";
-import { EntityApi } from "@/api/EntityApi";
-import { StateTransition } from "@/api/EntityApi";
-import { GetProjectApplicationOptions, Application, sanitizeApplication } from "../models/application.model";
-import { Project } from "../../projects/models/project.model";
+import { EntityApi, StateTransition } from "@/api/EntityApi";
 import { sanitize } from "@/utils/utils";
+import { Application, FilterApplicationOptions } from "../models/application.model";
 
 const end_point = "/project/applications";
 
-export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions | undefined>
+export const ApplicationApi: EntityApi<Application, FilterApplicationOptions | undefined>
     & {
         anonymize: (id: string) => Promise<Application>;
         withdraw: (id: string) => Promise<boolean>;
@@ -50,7 +48,7 @@ export const ApplicationApi: EntityApi<Application, GetProjectApplicationOptions
     // ---------------------------
     async update(application) {
         // if (!stage._id) throw new Error("_id required");
-        return ApiClient.put(`${end_point}/${application._id}`, sanitizeApplication(application));
+        return ApiClient.put(`${end_point}/${application._id}`, sanitize(application));
     },
 
     // ---------------------------

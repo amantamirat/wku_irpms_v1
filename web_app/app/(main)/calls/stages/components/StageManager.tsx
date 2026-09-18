@@ -1,5 +1,4 @@
 'use client';
-
 import { createEntityManager } from "@/components/data-table/createEntityManager";
 import { Call } from "../../models/call.model";
 import { StageApi } from "../api/stage.api";
@@ -9,9 +8,11 @@ import {
     Stage
 } from "../models/stage.model";
 import SaveStage from "./SaveStage";
+import { STAGE_TRANSITIONS } from "../models/stage.state-machine";
+import MyBadge from "@/templates/MyBadge";
 
 interface StageManagerProps {
-    call?: Call
+    call: Call
 }
 
 const StageManager = ({ call }: StageManagerProps) => {
@@ -67,11 +68,19 @@ const StageManager = ({ call }: StageManagerProps) => {
                             timeStyle: "short",
                         })
                         : "-"
-            }           
+            },
+            {
+                field: "status",
+                header: "Status",
+                sortable: true,
+                style: { width: '150px' },
+                body: (c: Call) =>
+                    <MyBadge type="status" value={c.status ?? "Unknown"} />
+            }
 
         ],
 
-        defaultHiddenFields:["order"],
+        defaultHiddenFields: ["order", "evaluation"],
 
         createNew: () =>
             createEmptyCallStage({
@@ -83,8 +92,12 @@ const StageManager = ({ call }: StageManagerProps) => {
         permissionPrefix: "stage",
 
         query: () => ({
-            call: call ?? undefined,
+            call: call,
         }),
+        workflow: {
+            statusField: "status",
+            transitions: STAGE_TRANSITIONS,
+        },
     });
 
     return <Manager />;

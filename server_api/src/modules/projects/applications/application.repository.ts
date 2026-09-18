@@ -1,5 +1,3 @@
-// application.repository.ts
-
 import mongoose from "mongoose";
 
 import {
@@ -24,17 +22,19 @@ export interface IApplicationRepository {
         options?: FilterOptions
     ): Promise<IApplication | null>;
 
+    findOne(
+        filters?: FilterApplicationDTO,
+        options?: FilterOptions
+    ): Promise<IApplication | null>;
+
     find(
         filters?: FilterApplicationDTO,
         options?: FilterOptions
     ): Promise<IApplication[]>;
 
-    findLatestByProject(
-        projectId: string
-    ): Promise<IApplication | null>;
-
     create(
-        dto: CreateApplicationDTO, userId: string
+        dto: CreateApplicationDTO,
+        userId: string
     ): Promise<IApplication>;
 
     update(
@@ -48,10 +48,6 @@ export interface IApplicationRepository {
         userId: string
     ): Promise<IApplication | null>;
 
-    countByProject(
-        projectId: string
-    ): Promise<number>;
-
     exists(
         filters: FilterApplicationDTO
     ): Promise<boolean>;
@@ -62,15 +58,14 @@ export interface IApplicationRepository {
 }
 
 
-// MongoDB implementation
 export class ApplicationRepository
     implements IApplicationRepository {
 
     /**
-     * Build MongoDB filter from application filters
+     * Build MongoDB filter from application filters.
      */
     private buildFilter(
-        filters: Partial<FilterApplicationDTO> = {}
+        filters: FilterApplicationDTO = {}
     ): Record<string, any> {
 
         const query: Record<string, any> = {};
@@ -94,14 +89,18 @@ export class ApplicationRepository
     }
 
 
+    /**
+     * Find application by ID.
+     */
     async findById(
         id: string,
         options?: FilterOptions
     ): Promise<IApplication | null> {
 
-        let dbQuery = Application.findById(
-            new mongoose.Types.ObjectId(id)
-        );
+        let dbQuery =
+            Application.findById(
+                new mongoose.Types.ObjectId(id)
+            );
 
         if (options?.populate) {
             dbQuery
@@ -115,14 +114,45 @@ export class ApplicationRepository
     }
 
 
+    /**
+     * Find a single application using filters.
+     */
+    async findOne(
+        filters: FilterApplicationDTO = {},
+        options?: FilterOptions
+    ): Promise<IApplication | null> {
+
+        const query =
+            this.buildFilter(filters);
+
+        let dbQuery =
+            Application.findOne(query);
+
+        if (options?.populate) {
+            dbQuery
+                .populate("project")
+                .populate("stage");
+        }
+
+        return dbQuery
+            .lean<IApplication>()
+            .exec();
+    }
+
+
+    /**
+     * Find applications using filters.
+     */
     async find(
         filters: FilterApplicationDTO = {},
         options?: FilterOptions
     ): Promise<IApplication[]> {
 
-        const query = this.buildFilter(filters);
+        const query =
+            this.buildFilter(filters);
 
-        let dbQuery = Application.find(query);
+        let dbQuery =
+            Application.find(query);
 
         if (options?.populate) {
             dbQuery
@@ -136,8 +166,12 @@ export class ApplicationRepository
     }
 
 
+    /**
+     * Create application.
+     */
     async create(
-        dto: CreateApplicationDTO, userId: string
+        dto: CreateApplicationDTO,
+        userId: string
     ): Promise<IApplication> {
 
         const data: Partial<IApplication> = {
@@ -149,13 +183,18 @@ export class ApplicationRepository
 
             documentPath:
                 dto.documentPath,
-            createdBy: new mongoose.Types.ObjectId(userId)
+
+            createdBy:
+                new mongoose.Types.ObjectId(userId)
         };
 
         return Application.create(data);
     }
 
 
+    /**
+     * Update application.
+     */
     async update(
         id: string,
         dtoData: UpdateApplicationDTO["data"]
@@ -168,24 +207,39 @@ export class ApplicationRepository
                 dtoData.totalScore;
         }
 
-        if (dtoData.anonymizedDocumentPath !== undefined) {
+        if (
+            dtoData.anonymizedDocumentPath !==
+            undefined
+        ) {
             updateData.anonymizedDocumentPath =
                 dtoData.anonymizedDocumentPath;
         }
 
-        if (dtoData.anonymizationStatus !== undefined) {
+        if (
+            dtoData.anonymizationStatus !==
+            undefined
+        ) {
             updateData.anonymizationStatus =
                 dtoData.anonymizationStatus;
         }
 
         return Application.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
-            { $set: updateData },
-            { new: true }
-        ).exec();
+            {
+                $set: updateData
+            },
+            {
+                new: true
+            }
+        )
+            .lean<IApplication>()
+            .exec();
     }
 
 
+    /**
+     * Update application status and status history.
+     */
     async updateStatus(
         id: string,
         status: ApplicationStatus,
@@ -201,7 +255,8 @@ export class ApplicationRepository
                 $push: {
                     statusHistory: {
                         status,
-                        changedBy: new mongoose.Types.ObjectId(userId),
+                        changedBy:
+                            new mongoose.Types.ObjectId(userId),
                         changedAt: new Date()
                     }
                 }
@@ -210,54 +265,42 @@ export class ApplicationRepository
                 new: true,
                 runValidators: true
             }
-        ).exec();
-    }
-
-
-    async countByProject(
-        projectId: string
-    ): Promise<number> {
-
-        return Application.countDocuments({
-            project:
-                new mongoose.Types.ObjectId(projectId)
-        }).exec();
-    }
-
-
-    async findLatestByProject(
-        projectId: string
-    ): Promise<IApplication | null> {
-
-        return Application.findOne({
-            project:
-                new mongoose.Types.ObjectId(projectId)
-        })
-            .sort({ createdAt: -1 })
+        )
             .lean<IApplication>()
             .exec();
     }
 
 
+    /**
+     * Check whether an application exists.
+     */
     async exists(
         filters: FilterApplicationDTO
     ): Promise<boolean> {
 
-        const query = this.buildFilter(filters);
+        const query =
+            this.buildFilter(filters);
 
         const result =
-            await Application.exists(query).exec();
+            await Application
+                .exists(query)
+                .exec();
 
         return result !== null;
     }
 
 
+    /**
+     * Delete application by ID.
+     */
     async delete(
         id: string
     ): Promise<IApplication | null> {
 
         return Application.findByIdAndDelete(
             new mongoose.Types.ObjectId(id)
-        ).exec();
+        )
+            .lean<IApplication>()
+            .exec();
     }
 }

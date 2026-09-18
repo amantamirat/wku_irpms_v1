@@ -10,7 +10,7 @@ import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { ApplicationApi } from '../api/application.api';
-import { Application, sanitizeApplication, validateProjectApplication } from '../models/application.model';
+import { Application, sanitizeApplication, validateApplication } from '../models/application.model';
 import { Project } from '../../projects/models/project.model';
 import { Stage } from '../../calls/stages/models/stage.model';
 
@@ -53,7 +53,7 @@ const SaveApplication = ({ visible, item, onHide, onComplete }: EntitySaveDialog
             return;
         }
 
-        const validation = validateProjectApplication(localApplication);
+        const validation = validateApplication(localApplication);
 
         if (!validation.valid) {
             toast.current?.show({

@@ -1,126 +1,161 @@
 'use client';
+
 import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
-import { Divider } from 'primereact/divider';
 import { Tag } from 'primereact/tag';
+import { Divider } from 'primereact/divider';
 import { useRouter } from 'next/navigation';
-// Date Utilities
-import { format, differenceInCalendarDays, isPast } from 'date-fns';
+import {
+    differenceInCalendarDays,
+    format,
+    isPast,
+} from 'date-fns';
 
-// Types
+import { useAuth } from '@/contexts/auth-context';
 import { Call } from '../calls/models/call.model';
 import { Grant } from '../grants/models/grant.model';
 import { Calendar } from '../calendars/models/calendar.model';
 import { Organization } from '../organizations/models/organization.model';
-import { useAuth } from '@/contexts/auth-context';
 
 interface CallCardProps {
     call: Call;
-    onApply?: (callId: string) => void;
 }
 
 export const CallCard = ({ call }: CallCardProps) => {
     const router = useRouter();
     const { hasPermission } = useAuth();
 
-    // Check if user has the project:apply permission
-    const canApply = hasPermission ? hasPermission('project:apply') : false;
-
-    // Direct Data Mapping 
     const grant = call.grant as Grant;
     const calendar = call.calendar as Calendar;
     const organization = call.organization as Organization;
-    const deadline = call.deadline;
-    const today = new Date();
 
-    // Calculate actual days remaining for the primary initial submission
-    const daysLeft = deadline ? differenceInCalendarDays(deadline, today) : 0;
-    const isClosed = deadline ? isPast(deadline) && daysLeft < 0 : false;
-    const isUrgent = daysLeft >= 0 && daysLeft < 5;
+    const deadline = call.deadline ? new Date(call.deadline) : null;
 
-    const proceedToApply = () => {
+    const daysLeft = deadline
+        ? differenceInCalendarDays(deadline, new Date())
+        : null;
+
+    const isClosed = deadline ? isPast(deadline) : false;
+    const isUrgent =
+        daysLeft !== null &&
+        daysLeft >= 0 &&
+        daysLeft <= 5;
+
+    const canApply =
+        hasPermission?.('project:apply') ?? false;
+
+    const apply = () => {
         router.push(`/projects/apply/${call._id}`);
     };
 
     return (
-        <Card className="h-full border-1 border-300 shadow-hover transition-all transition-duration-300 hover:border-primary flex flex-column">
-            {/* TOP SECTION: Metadata */}
-            <div className="flex justify-content-between align-items-start mb-2">
-                <div className="flex">
-                    {calendar?.year && (
-                        <Tag
-                            severity="info"
-                            value={`FY ${calendar.year}`}
-                            rounded
-                            className="white-space-nowrap bg-bluegray-500"
-                        />
-                    )}
-                </div>
+        <Card className="call-card h-full border-1 border-300 shadow-1 hover:shadow-3 transition-all transition-duration-200">
 
-                <div className="text-right ml-2">
-                    <small className="block text-500 uppercase font-bold text-xs">
-                        {organization?.name || 'Unknown'}
-                    </small>
-                </div>
-            </div>
+            {/* Header */}
+            <div className="flex justify-content-between align-items-start gap-2 mb-3">
+                {calendar?.year && (
+                    <Tag
+                        value={`FY ${calendar.year}`}
+                        severity="info"
+                        rounded
+                    />
+                )}
 
-            {/* MIDDLE SECTION: Titles */}
-            <div className="mb-3">
-                <span className="text-xs font-bold text-500 uppercase tracking-wider">
-                    {grant?.title || "Untitled Grant"}
+                <span className="text-xs font-semibold text-color-secondary text-right uppercase letter-spacing-1">
+                    {organization?.name ?? 'UO'}
                 </span>
-                <h4 className="text-xl font-bold m-0 line-height-3 text-900">
-                    {call.title}
-                </h4>
             </div>
 
-            <p className="text-600 text-sm mb-4 line-height-3 line-clamp-2">
-                {call.description}
-            </p>
+            {/* Title */}
+            <div className="mb-3">
+                <div className="text-xs font-semibold text-primary uppercase mb-1">
+                    {grant?.title ?? 'Untitled Grant'}
+                </div>
 
-            {/* HIGHLIGHT SECTION: Financials & Primary Stage Timeline */}
-            <div className="p-3 border-round mb-3 bg-highlight">
-                <div className="flex flex-column gap-2">
+                <h3 className="text-lg font-bold text-color m-0 line-height-2">
+                    {call.title}
+                </h3>
+            </div>
 
-                    {/* Call Deadline Date & Time */}
-                    <div className="flex align-items-center gap-2">
-                        <i className={`pi pi-clock text-sm ${isUrgent ? 'text-orange-500' : 'text-primary'
-                            }`}></i>
-                        <span className="text-xs font-semibold text-color-secondary">
-                            Deadline: {deadline ? format(new Date(deadline), 'MMM dd, yyyy - hh:mm a') : 'N/A'}
-                        </span>
+            {/* Description */}
+            {call.description && (
+                <p className="text-sm text-color-secondary line-height-3 m-0 mb-3 line-clamp-2">
+                    {call.description}
+                </p>
+            )}
+
+
+            {/* Deadline */}
+            <div
+                className={`call-deadline ${isUrgent ? 'call-deadline-urgent' : ''
+                    }`}
+            >
+                <div className="flex align-items-center gap-2">
+                    <i
+                        className={`pi pi-calendar ${isUrgent
+                            ? 'text-orange-500'
+                            : 'text-primary'
+                            }`}
+                    />
+
+                    <div className="flex-1">
+                        <div className="call-deadline-label">
+                            Application deadline
+                        </div>
+
+                        <div className="call-deadline-date">
+                            {deadline
+                                ? format(
+                                    deadline,
+                                    'MMM dd, yyyy • hh:mm a'
+                                )
+                                : 'No deadline specified'}
+                        </div>
                     </div>
                 </div>
 
-                {/* Status/Countdown */}
-                <div className={`flex align-items-center gap-2 border-top-1 pt-2 mt-2 ${isUrgent ? 'border-orange-200' : 'border-300'
-                    }`}>
-                    <i className={`pi pi-clock ${isUrgent ? 'text-orange-500' : 'text-primary'
-                        }`}></i>
-                    <span className={`text-xs font-bold ${isUrgent ? 'text-orange-500' : 'text-primary'
-                        }`}>
-                        {isClosed ? 'Application Closed' : `${daysLeft} days remaining to apply`}
-                    </span>
-                </div>
+                {daysLeft !== null && (
+                    <div className="call-deadline-status">
+                        <span
+                            className={
+                                isClosed
+                                    ? 'text-red-500'
+                                    : isUrgent
+                                        ? 'text-orange-500'
+                                        : 'text-primary'
+                            }
+                        >
+                            {isClosed
+                                ? 'Application closed'
+                                : daysLeft === 0
+                                    ? 'Deadline is today'
+                                    : `${daysLeft} days remaining`}
+                        </span>
+                    </div>
+                )}
             </div>
 
-            <Divider className="my-3 mt-auto" />
+            <Divider className="my-3" />
 
-            {/* FOOTER: Actions */}
-            <div className="flex align-items-center justify-content-between">
-                <div className="flex flex-column">
-                    <small className="text-500 text-xs">Funding Source</small>
-                    <span className="text-xs font-medium">{(grant?.fundingSource) || 'Internal Fund'}</span>
-                </div>
-
+            {/* Footer */}
+            <div className="flex align-items-center justify-content-end">
                 {canApply && (
                     <Button
-                        label={isClosed ? "Closed" : "Apply"}
-                        icon={isClosed ? "pi pi-lock" : "pi pi-pencil"}
+                        label={isClosed ? 'Closed' : 'Apply'}
+                        icon={
+                            isClosed
+                                ? 'pi pi-lock'
+                                : 'pi pi-arrow-right'
+                        }
                         size="small"
-                        className={`p-button-raised ${isUrgent ? 'p-button-warning' : ''}`}
+                        severity={
+                            isUrgent
+                                ? 'warning'
+                                : undefined
+                        }
+                        outlined={!isClosed}
                         disabled={isClosed}
-                        onClick={proceedToApply}
+                        onClick={apply}
                     />
                 )}
             </div>

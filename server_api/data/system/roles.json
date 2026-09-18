@@ -77,11 +77,13 @@
             "user:lookup",
             "theme:lookup",
             "call:lookup",
+            "stage:lookup",
             "constraint:lookup",
             "project:lookup",
             "project:apply",
             "project:update:own",
             "application:lookup",
+            "application:submit",
             "application:delete:own",
             "collaborator:lookup",
             "collaborator:create:own",
@@ -95,8 +97,7 @@
             "verification-conf:lookup",
             "verification:lookup",
             "verification:submit",
-            "verification:delete:own",            
-            "reviewer:read"
+            "verification:delete:own"
         ],
         "isDefault": true
     },
@@ -107,7 +108,6 @@
             "reviewer:lookup",
             "reviewer:transition.pending.accepted",
             "reviewer:transition.accepted.submitted",
-            "criterion:read",
             "result:*"
         ],
         "isDefault": true

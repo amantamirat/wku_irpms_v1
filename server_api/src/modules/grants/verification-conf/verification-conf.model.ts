@@ -19,8 +19,10 @@ export interface IVerificationConfiguration extends Document {
     deadline: Date;
     template?: mongoose.Types.ObjectId;
     minAcceptanceScore: number;
+    
     status: VerificationConfigurationStatus;
     statusHistory: IStatusHistory<VerificationConfigurationStatus>[];
+    
     createdBy?: mongoose.Types.ObjectId; // User who created the record
     updatedBy?: mongoose.Types.ObjectId; // User who last updated the record
 

@@ -174,39 +174,6 @@ export class NotificationService {
         });
     }
 
-    /**
-     async notifyApplicationReturnedToPending(
-     recipientId: string,
-projectTitle: string,
-
-stageName: string,
-
-senderId?: string
-
-) {
-
-return this.notify({
-
-recipient: recipientId,
-
-sender: senderId,
-
-title: "Application Returned for Review",
-
-message:
-
-`Your application "${projectTitle}" for the "${stageName}" ` +
-
-`stage has been returned to pending status for further review.`,
-
-type: NotificationType.INFO,
-
-link: "/dashboard/my-projects"
-
-});
-
-}
-     */
 
     async notifyRollback(
         recipientId: string,
@@ -231,6 +198,7 @@ link: "/dashboard/my-projects"
         });
     }
 
+    /*
     async notifyApplicationWithdrawn(
         recipientId: string,
         projectTitle: string,
@@ -248,25 +216,25 @@ link: "/dashboard/my-projects"
             link: "/dashboard/my-projects"
         });
     }
-
-
-    async notifyProjectFinalization(
-        recipientId: string,
-        projectTitile: string,
-        senderId?: string
-    ) {
-        return this.notify({
-            recipient: recipientId,
-            sender: senderId,
-            title: "Project Requires Finalization",
-            message:
-                `The project "${projectTitile}" has been approved and requires finalization before funding. ` +
-                `Please review and update the project phases, timelines, and budget, and ensure all required information is complete.`,
-            type: NotificationType.INFO,
-            link: "/dashboard/my-projects"
-        });
-    }
-
+*/
+    /*
+        async notifyProjectFinalization(
+            recipientId: string,
+            projectTitile: string,
+            senderId?: string
+        ) {
+            return this.notify({
+                recipient: recipientId,
+                sender: senderId,
+                title: "Project Requires Finalization",
+                message:
+                    `The project "${projectTitile}" has been approved and requires finalization before funding. ` +
+                    `Please review and update the project phases, timelines, and budget, and ensure all required information is complete.`,
+                type: NotificationType.INFO,
+                link: "/dashboard/my-projects"
+            });
+        }
+    */
 
     async notifyProjectRefusal(
         recipientId: string,

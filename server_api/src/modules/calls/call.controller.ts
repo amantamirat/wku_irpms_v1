@@ -11,11 +11,12 @@ export class CallController {
 
     constructor(private readonly service: CallService) { }
 
-    create = async (req: Request, res: Response) => {
+    create = async (req: AuthenticatedRequest, res: Response) => {
         try {
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             //const { grant, calendar, title, description, constraint, composition } = ;
             const dto: CreateCallDTO = req.body;
-            const call = await this.service.create(dto);
+            const call = await this.service.create(dto, req.auth.userId);
             successResponse(res, 201, "Call created successfully", call);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -55,9 +56,8 @@ export class CallController {
             const dto: UpdateCallDTO = {
                 id: String(id),
                 data: { title, description, constraint, composition },
-                userId: userId,
             };
-            const updated = await this.service.update(dto);
+            const updated = await this.service.update(dto, req.auth.userId);
             successResponse(res, 200, "Call updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -75,7 +75,7 @@ export class CallController {
                 next: next,
                 userId: req.auth.userId,
             };
-            const updated = await this.service.transitionState(dto);
+            const updated = await this.service.transitionState(dto, req.auth.userId);
             successResponse(res, 200, "Call status updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

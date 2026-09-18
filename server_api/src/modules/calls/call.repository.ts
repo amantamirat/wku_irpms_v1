@@ -19,16 +19,18 @@ export interface ICallRepository {
         options?: FilterOptions
     ): Promise<ICall[]>;
 
-    create(dto: Omit<CreateCallDTO, "stages">): Promise<ICall>;
+    create(dto: Omit<CreateCallDTO, "stages">, userId: string): Promise<ICall>;
 
     update(
         id: string,
-        data: UpdateCallDTO["data"]
+        data: UpdateCallDTO["data"],
+        userId: string
     ): Promise<ICall | null>;
 
     updateStatus(
         id: string,
-        newStatus: CallStatus
+        newStatus: CallStatus,
+        userId: string
     ): Promise<ICall | null>;
 
     exists(
@@ -122,20 +124,28 @@ export class CallRepository implements ICallRepository {
      * Create call.
      */
     async create(
-        dto: CreateCallDTO
+        dto: Omit<CreateCallDTO, "stages">,
+        userId: string
     ): Promise<ICall> {
 
         return Call.create({
             ...dto,
+
             grant: new mongoose.Types.ObjectId(dto.grant),
+
             calendar: new mongoose.Types.ObjectId(dto.calendar),
+
             organization: new mongoose.Types.ObjectId(dto.organization),
+
             constraint: dto.constraint
                 ? new mongoose.Types.ObjectId(dto.constraint)
                 : undefined,
+
             composition: dto.composition
                 ? new mongoose.Types.ObjectId(dto.composition)
-                : undefined
+                : undefined,
+
+            createdBy: new mongoose.Types.ObjectId(userId)
         });
     }
 
@@ -144,7 +154,8 @@ export class CallRepository implements ICallRepository {
      */
     async update(
         id: string,
-        dtoData: UpdateCallDTO["data"]
+        dtoData: UpdateCallDTO["data"],
+        userId: string
     ): Promise<ICall | null> {
 
         const updateData: Partial<ICall> = {};
@@ -173,10 +184,15 @@ export class CallRepository implements ICallRepository {
                 : undefined;
         }
 
+        updateData.updatedBy = new mongoose.Types.ObjectId(userId);
+
         return Call.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             { $set: updateData },
-            { new: true }
+            {
+                new: true,
+                runValidators: true
+            }
         )
             .lean<ICall>()
             .exec();
@@ -187,13 +203,30 @@ export class CallRepository implements ICallRepository {
      */
     async updateStatus(
         id: string,
-        newStatus: CallStatus
+        newStatus: CallStatus,
+        userId: string
     ): Promise<ICall | null> {
 
         return Call.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
-            { $set: { status: newStatus } },
-            { new: true }
+            {
+                $set: {
+                    status: newStatus,
+                    updatedBy: new mongoose.Types.ObjectId(userId)
+                },
+                $push: {
+                    statusHistory: {
+                        status,
+                        changedBy:
+                            new mongoose.Types.ObjectId(userId),
+                        changedAt: new Date()
+                    }
+                }
+            },
+            {
+                new: true,
+                runValidators: true
+            }
         )
             .lean<ICall>()
             .exec();

@@ -96,7 +96,14 @@ export const REVIEWER_USER_TRANSITIONS: TransitionMap = {
             severity: "danger"
         }
     ],
-
+    [ReviewerStatus.decliend]: [
+        {
+            next: ReviewerStatus.pending,
+            action: "Set Pending",
+            icon: "pi pi-undo",
+            severity: "warning"
+        }
+    ],
     [ReviewerStatus.accepted]: [
         {
             next: ReviewerStatus.submitted,
@@ -121,7 +128,7 @@ export const REVIEWER_USER_TRANSITIONS: TransitionMap = {
     ],
 };
 
-export const REVIEWER_ADMIN_TRANSITIONS: TransitionMap = {   
+export const REVIEWER_ADMIN_TRANSITIONS: TransitionMap = {
 
     [ReviewerStatus.submitted]: [
         {

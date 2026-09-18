@@ -4,7 +4,7 @@ import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 import { Template } from "@/app/(main)/templates/models/template.model";
 
 export enum StageStatus {
-    planned = 'planned',
+    upcoming= 'upcoming',
     active = 'active',
     closed = "closed"
 }
@@ -80,3 +80,5 @@ export const createEmptyCallStage = (
     maxReviewers: stage?.maxReviewers ?? 3,
     minAcceptanceScore: stage?.minAcceptanceScore ?? 50,
 });
+
+

@@ -25,7 +25,7 @@ export class CallService {
     ) {
     }
 
-    async create(dto: CreateCallDTO) {
+    async create(dto: CreateCallDTO, userId: string) {
         const { stages, ...callData } = dto;
 
         if (!stages?.length) {
@@ -73,7 +73,7 @@ export class CallService {
             ...callData,
             organization: String(grantDoc.organization),
             status: CallStatus.planned
-        });
+        }, userId);
 
         // -----------------------------------------
         // Create stages
@@ -83,7 +83,7 @@ export class CallService {
 
             await this.stageService.create({
                 ...stage, call: String(call._id)
-            });
+            }, userId);
         }
 
         return this.repository.findById(String(call._id), { populate: true });
@@ -99,16 +99,16 @@ export class CallService {
         return call;
     }
 
-    async update(dto: UpdateCallDTO) {
+    async update(dto: UpdateCallDTO, userId: string) {
         const { id, data } = dto;
         const callDoc = await this.repository.findById(id);
         if (!callDoc) {
             throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         }
-        return await this.repository.update(id, data);
+        return await this.repository.update(id, data, userId);
     }
 
-    async transitionState(dto: TransitionRequestDto) {
+    async transitionState(dto: TransitionRequestDto, userId: string) {
         const { id, current, next } = dto;
 
         const callDoc = await this.repository.findById(id);
@@ -145,7 +145,7 @@ export class CallService {
             }
         }
 
-        return await this.repository.updateStatus(id, to);
+        return await this.repository.updateStatus(id, to, userId);
     }
 
 

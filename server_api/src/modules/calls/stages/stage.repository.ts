@@ -4,8 +4,9 @@ import {
     FilterStageDto,
     UpdateStageDTO
 } from "./stage.dto";
-import { IStage, Stage } from "./stage.model";
+import { IStage, Stage, StageStatus } from "./stage.model";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
+import mongoose from "mongoose";
 
 
 export interface IStageRepository {
@@ -15,10 +16,6 @@ export interface IStageRepository {
         options?: FilterOptions
     ): Promise<IStage[]>;
 
-    findOne(
-        callId: string,
-        order: number
-    ): Promise<IStage | null>;
 
     getFirstStage(callId: string): Promise<IStage | null>;
     getLastStage(callId: string): Promise<IStage | null>;
@@ -26,19 +23,30 @@ export interface IStageRepository {
         callId: string,
         currentOrder: number
     ): Promise<IStage | null>;
+    findPreviousStage(
+        callId: string,
+        currentOrder: number
+    ): Promise<IStage | null>;
 
-    findUpcoming(options?: FilterOptions): Promise<IStage[]>;
+    findAvailable(options?: FilterOptions): Promise<IStage[]>;
 
-    create(dto: CreateStageDTO): Promise<IStage>;
+    create(dto: CreateStageDTO, userId: string): Promise<IStage>;
 
     update(
         id: string,
-        data: UpdateStageDTO["data"]
+        data: UpdateStageDTO["data"],
+        userId: string
     ): Promise<IStage | null>;
 
     updateMany(filter: any, update: any): Promise<any>;
 
-    countStages(callId: string): Promise<number>;
+    updateStatus(
+        id: string,
+        newStatus: StageStatus,
+        userId: string
+    ): Promise<IStage | null>;
+
+    // countStages(callId: string): Promise<number>;
 
     exists(filters: FilterStageDto): Promise<boolean>;
 
@@ -91,20 +99,6 @@ export class StageRepository implements IStageRepository {
     }
 
 
-    async findOne(
-        callId: string,
-        order: number
-    ): Promise<IStage | null> {
-
-        return Stage.findOne({
-            call: callId,
-            order
-        })
-            .lean<IStage>()
-            .exec();
-    }
-
-
     async getFirstStage(
         callId: string
     ): Promise<IStage | null> {
@@ -145,16 +139,27 @@ export class StageRepository implements IStageRepository {
             .exec();
     }
 
+    async findPreviousStage(
+        callId: string,
+        currentOrder: number
+    ): Promise<IStage | null> {
+        return Stage.findOne({
+            call: callId,
+            order: { $lt: currentOrder }
+        })
+            .sort({ order: -1 })
+            .exec();
+    }
 
-    async findUpcoming(
+
+    async findAvailable(
         options?: FilterOptions
     ): Promise<IStage[]> {
 
         let query = Stage
             .find({
-                deadline: {
-                    $gt: new Date()
-                }
+                order: { $gt: 1 },
+                status: StageStatus.active
             })
             .sort({ deadline: 1 });
 
@@ -169,21 +174,63 @@ export class StageRepository implements IStageRepository {
 
 
     async create(
-        dto: CreateStageDTO
+        dto: CreateStageDTO, userId: string
     ): Promise<IStage> {
 
-        return Stage.create(dto);
+        return Stage.create({
+            ...dto, createdBy:
+                new mongoose.Types.ObjectId(userId)
+        });
     }
 
 
     async update(
         id: string,
-        data: UpdateStageDTO["data"]
+        data: UpdateStageDTO["data"],
+        userId: string
     ): Promise<IStage | null> {
 
         return Stage.findByIdAndUpdate(
             id,
-            { $set: data },
+            {
+                $set: {
+                    ...data,
+                    updatedBy: userId
+                }
+            },
+            {
+                new: true,
+                runValidators: true
+            }
+        )
+            .lean<IStage>()
+            .exec();
+    }
+
+    /**
+         * Update application status and status history.
+         */
+    async updateStatus(
+        id: string,
+        status: StageStatus,
+        userId: string
+    ): Promise<IStage | null> {
+
+        return Stage.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            {
+                $set: {
+                    status
+                },
+                $push: {
+                    statusHistory: {
+                        status,
+                        changedBy:
+                            new mongoose.Types.ObjectId(userId),
+                        changedAt: new Date()
+                    }
+                }
+            },
             {
                 new: true,
                 runValidators: true
@@ -205,6 +252,7 @@ export class StageRepository implements IStageRepository {
     }
 
 
+    /*
     async countStages(
         callId: string
     ): Promise<number> {
@@ -215,7 +263,7 @@ export class StageRepository implements IStageRepository {
             })
             .exec();
     }
-
+*/
 
     async exists(
         filters: FilterStageDto

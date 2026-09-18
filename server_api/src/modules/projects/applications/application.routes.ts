@@ -11,7 +11,7 @@ const router = express.Router();
 router.post(
     "/",
     verifyAuthToken,
-    checkPermission([PERMISSIONS.APPLICATION.CREATE, PERMISSIONS.APPLICATION.CREATE_OWN]),
+    checkPermission([PERMISSIONS.APPLICATION.CREATE, PERMISSIONS.APPLICATION.SUBMIT]),
     (req, res, next) => {
         // Set the dynamic subfolder for this specific endpoint
         req.headers["x-upload-folder"] = "applications";

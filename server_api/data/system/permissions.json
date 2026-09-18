@@ -437,6 +437,26 @@
   },
   {
     "category": "Stage Management",
+    "name": "stage:transition.upcoming.active",
+    "description": "Activate an upcoming stage to allow applications for the stage"
+  },
+  {
+    "category": "Stage Management",
+    "name": "stage:transition.active.closed",
+    "description": "Close an active stage to stop accepting applications"
+  },
+  {
+    "category": "Stage Management",
+    "name": "stage:transition.active.upcoming",
+    "description": "Revert an active stage to upcoming status for adjustments"
+  },
+  {
+    "category": "Stage Management",
+    "name": "stage:transition.closed.active",
+    "description": "Re-open a closed stage and set it back to active"
+  },
+  {
+    "category": "Stage Management",
     "name": "stage:delete",
     "description": "Delete stage entries"
   },
@@ -788,8 +808,8 @@
   },
   {
     "category": "Application Management",
-    "name": "application:create:own",
-    "description": "Create applications for own projects"
+    "name": "application:submit",
+    "description": "Submit applications for own projects"
   },
   {
     "category": "Application Management",

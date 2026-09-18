@@ -203,15 +203,15 @@ export class ProjectService {
             throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
 
         // Get first stage
-        const firstStage = await this.stageRepo.getFirstStage(call);
+        const firstStageDoc = await this.stageRepo.getFirstStage(call);
 
-        if (!firstStage) {
+        if (!firstStageDoc) {
             throw new AppError(
                 ERROR_CODES.FIRST_STAGE_NOT_FOUND
             );
         }
 
-        if (new Date(firstStage.deadline) < new Date()) {
+        if (new Date(firstStageDoc.deadline) < new Date()) {
             throw new AppError(
                 ERROR_CODES.STAGE_DEADLINE_PASSED
             );
@@ -230,10 +230,10 @@ export class ProjectService {
             }
         }
 
-        if (firstStage.template) {
+        if (firstStageDoc.template) {
             const result =
                 await this.templateValidator.validate(
-                    String(firstStage.template),
+                    String(firstStageDoc.template),
                     docPath
                 );
 
@@ -253,12 +253,13 @@ export class ProjectService {
                 calendar: String(callDoc.calendar)
             }, userId, { skipValidation: true });
 
-        await this.applicationService.
-            createFirstApplication({
-                project: String(projectDoc._id),
-                stage: String(firstStage._id),
-                documentPath: docPath,
-            }, userId, { skipValidation: true });
+        await this.applicationService.internalCreate({
+            project: String(projectDoc._id),
+            stage: String(firstStageDoc._id),
+            documentPath: docPath,
+        }, userId, projectDoc, firstStageDoc);
+
+
 
         return projectDoc;
     }
@@ -414,7 +415,6 @@ export class ProjectService {
         //rollback notification remain
 
         if (to === ProjectStatus.granted) {
-
             if (projectDoc.currentVerification) {
                 const verificationDoc = await this.verificationRepo.findById(
                     String(projectDoc.currentVerification)

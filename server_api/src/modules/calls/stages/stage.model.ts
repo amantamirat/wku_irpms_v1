@@ -1,8 +1,10 @@
 import mongoose, { Schema, model } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
+import { IStatusHistory } from "../../../common/types/status-history";
+import { createStatusHistorySchema } from "../../../common/schemas/status-history.schema";
 
 export enum StageStatus {
-    planned = 'planned',
+    upcoming= 'upcoming',
     active = 'active',
     closed = "closed"
 }
@@ -18,7 +20,13 @@ export interface IStage extends Document {
     minAcceptanceScore: number;
     deadline: Date;
     template?: mongoose.Types.ObjectId;
+
     status: StageStatus;
+    statusHistory: IStatusHistory<StageStatus>[];
+
+    createdBy?: mongoose.Types.ObjectId; 
+    updatedBy?: mongoose.Types.ObjectId;
+
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -73,7 +81,19 @@ const StageSchema = new Schema<IStage>(
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.TEMPLATE,
         },
-        status: { type: String, enum: Object.values(StageStatus), default: StageStatus.planned, required: true },
+        status: { type: String, enum: Object.values(StageStatus), default: StageStatus.upcoming, required: true },
+        statusHistory: {
+            type: [createStatusHistorySchema(Object.values(StageStatus))],
+            default: []
+        },
+        createdBy: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.USER,
+        },
+        updatedBy: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.USER,
+        },
     },
     { timestamps: true }
 );

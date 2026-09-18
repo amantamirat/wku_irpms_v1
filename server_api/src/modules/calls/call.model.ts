@@ -1,5 +1,7 @@
 import mongoose, { Document, Schema, model } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
+import { IStatusHistory } from "../../common/types/status-history";
+import { createStatusHistorySchema } from "../../common/schemas/status-history.schema";
 
 export enum CallStatus {
     planned = 'planned',
@@ -13,10 +15,17 @@ export interface ICall extends Document {
     grant: mongoose.Types.ObjectId;
     title: string;
     description?: string;
-    constraint?: mongoose.Types.ObjectId;
-    composition?: mongoose.Types.ObjectId;
+    constraint?: mongoose.Types.ObjectId | null;
+    composition?: mongoose.Types.ObjectId | null;
+
     deadline?: Date | null;
+
     status: CallStatus;
+    statusHistory: IStatusHistory<CallStatus>[];
+
+    createdBy?: mongoose.Types.ObjectId;
+    updatedBy?: mongoose.Types.ObjectId;
+
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -46,6 +55,10 @@ const CallSchema = new Schema<ICall>(
         description: { type: String },
         deadline: { type: Date },
         status: { type: String, enum: Object.values(CallStatus), required: true },
+        statusHistory: {
+            type: [createStatusHistorySchema(Object.values(CallStatus))],
+            default: []
+        },
     },
     { timestamps: true }
 );

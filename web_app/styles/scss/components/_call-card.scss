@@ -1,0 +1,52 @@
+.call-card {
+    background: var(--surface-card) !important;
+    color: var(--text-color);
+
+    .p-card-body {
+        background: var(--surface-card) !important;
+        color: var(--text-color);
+    }
+
+    .p-card-content {
+        background: var(--surface-card) !important;
+        color: var(--text-color);
+    }
+}
+
+/* Application deadline */
+.call-deadline {
+    background: var(--surface-ground);
+    color: var(--text-color);
+    border: 1px solid var(--surface-border);
+    border-radius: var(--border-radius);
+    padding: 1rem;
+    margin-bottom: 1rem;
+}
+
+.call-deadline-urgent {
+    background: color-mix(
+        in srgb,
+        var(--orange-500) 10%,
+        var(--surface-card)
+    );
+}
+
+.call-deadline-label {
+    color: var(--text-color-secondary);
+    font-size: 0.75rem;
+    margin-bottom: 0.25rem;
+}
+
+.call-deadline-date {
+    color: var(--text-color);
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.call-deadline-status {
+    margin-top: 0.75rem;
+    padding-top: 0.75rem;
+    border-top: 1px solid var(--surface-border);
+    font-size: 0.75rem;
+    font-weight: 700;
+}

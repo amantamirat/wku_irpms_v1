@@ -6,9 +6,11 @@ import { ICallRepository } from "../call.repository";
 import { CreateStageDTO, FilterStageDto, UpdateStageDTO } from "./stage.dto";
 import { CallStatus } from "../call.model";
 import { IStageRepository } from "./stage.repository";
-import { IStage } from "./stage.model";
+import { IStage, StageStatus } from "./stage.model";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { IApplicationRepository } from "../../projects/applications/application.repository";
+import { TransitionHelper } from "../../../common/helpers/transition.helper";
+import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 
 export class StageService {
 
@@ -29,11 +31,11 @@ export class StageService {
         return callDoc;
     }
 
-    async syncCallDeadline(callId: string) {
+    async syncCallDeadline(callId: string, userId: string) {
         const firstStage = await this.repository.getFirstStage(callId);
         return this.callRepository.update(callId, {
             deadline: firstStage?.deadline ?? null,
-        });
+        }, userId);
     }
 
 
@@ -76,13 +78,7 @@ export class StageService {
     /**
      * Create a new stage
      */
-    async create(dto: CreateStageDTO) {
-        /*
-        console.trace("STAGE SERVICE CREATE CALLED:", {
-            call: dto.call,
-            name: dto.name,
-            order: dto.order
-        });*/
+    async create(dto: CreateStageDTO, userId: string) {
         await this.validateCreate(dto);
         try {
             const lastStage = await this.repository.getLastStage(dto.call);
@@ -91,17 +87,14 @@ export class StageService {
                 ? lastStage.order + 1
                 : 1;
 
-
-
             const stage = await this.repository.create({
                 ...dto,
                 order
-            });
-
+            }, userId);
 
 
             if (!lastStage) {
-                await this.syncCallDeadline(dto.call);
+                await this.syncCallDeadline(dto.call, userId);
             }
 
             return stage;
@@ -130,8 +123,8 @@ export class StageService {
         return await this.repository.find(dto, options);
     }
 
-    async getUpcoming(options?: FilterOptions): Promise<IStage[]> {
-        return this.repository.findUpcoming(options);
+    async getAvailable(options?: FilterOptions): Promise<IStage[]> {
+        return this.repository.findAvailable(options);
     }
 
 
@@ -141,18 +134,39 @@ export class StageService {
         return stage;
     }
 
+    /*
     async getFirstStage(callId: string) {
         const firstStage = await this.repository.getFirstStage(callId);
         if (!firstStage) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
         return firstStage;
-    }
+    }*/
 
-    async getNextStage(id: string) {
+    /*
+async findNextStage(id: string) {
+    const stageDoc = await this.repository.findById(id);
+    if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+    const nextStage = await this.repository.getNextStage(String(stageDoc.call), stageDoc.order);
+    if (!nextStage) throw new AppError(ERROR_CODES.NEXT_STAGE_NOT_FOUND);
+    return nextStage;
+} */
+
+    async getPreviousStage(id: string) {
         const stageDoc = await this.repository.findById(id);
-        if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-        const nextStage = await this.repository.getNextStage(String(stageDoc.call), stageDoc.order);
-        if (!nextStage) throw new AppError(ERROR_CODES.NEXT_STAGE_NOT_FOUND);
-        return nextStage;
+
+        if (!stageDoc) {
+            throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        }
+
+        const previousStage = await this.repository.findPreviousStage(
+            String(stageDoc.call),
+            stageDoc.order
+        );
+
+        if (!previousStage) {
+            throw new AppError(ERROR_CODES.PREVIOUS_STAGE_NOT_FOUND);
+        }
+
+        return previousStage;
     }
 
 
@@ -163,7 +177,7 @@ export class StageService {
     /**
  * Update a stage
  */
-    async update(dto: UpdateStageDTO) {
+    async update(dto: UpdateStageDTO, userId: string) {
         const { id, data } = dto;
 
         const stageDoc = await this.repository.findById(id);
@@ -209,17 +223,82 @@ export class StageService {
         ) {
             throw new AppError(ERROR_CODES.INVALID_STAGE_CONFIGURATION);
         }
-        const updated = await this.repository.update(id, data);
+        const updated = await this.repository.update(id, data, userId);
         if (stageDoc.order === 1) {
-            await this.syncCallDeadline(String(stageDoc.call));
+            await this.syncCallDeadline(String(stageDoc.call), userId);
         }
         return updated;
+    }
+
+    async transitionState(
+        dto: TransitionRequestDto,
+        userId: string
+    ) {
+        const { id, current, next } = dto;
+
+        const stage = await this.repository.findById(id);
+
+        if (!stage) {
+            throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+        }
+
+        const from = stage.status as StageStatus;
+        const to = next as StageStatus;
+
+        // --------------------------------------------------
+        // Check client state consistency
+        // --------------------------------------------------
+
+        if (current && current !== from) {
+            throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
+        }
+
+        // --------------------------------------------------
+        // Validate transition
+        // --------------------------------------------------
+
+        TransitionHelper.validateTransition(
+            from,
+            to,
+            STAGE_TRANSITIONS
+        );
+
+        // --------------------------------------------------
+        // Active → Upcoming
+        // Only allowed when no applications exist
+        // --------------------------------------------------
+
+        if (
+            from === StageStatus.active &&
+            to === StageStatus.upcoming
+        ) {
+            const hasApplications =
+                await this.applicationRepo.exists({
+                    stage: id
+                });
+
+            if (hasApplications) {
+                throw new AppError(
+                    ERROR_CODES.STAGE_HAS_APPLICATIONS
+                );
+            }
+        }
+
+        // --------------------------------------------------
+        // Update status
+        // --------------------------------------------------
+
+        return await this.repository.updateStatus(
+            id,
+            to,
+            userId
+        );
     }
 
     /**
      * Delete a stage
     */
-    async delete(id: string) {
+    async delete(id: string, userId: string) {
         const stageDoc = await this.repository.findById(id);
 
         if (!stageDoc) {
@@ -254,9 +333,27 @@ export class StageService {
         }
 
         if (order === 1) {
-            await this.syncCallDeadline(String(stageDoc.call));
+            await this.syncCallDeadline(String(stageDoc.call), userId);
         }
 
         return deleted;
     }
 }
+
+export const STAGE_TRANSITIONS: Record<
+    StageStatus,
+    StageStatus[]
+> = {
+    [StageStatus.upcoming]: [
+        StageStatus.active
+    ],
+
+    [StageStatus.active]: [
+        StageStatus.closed,
+        StageStatus.upcoming
+    ],
+
+    [StageStatus.closed]: [
+        StageStatus.active
+    ]
+};

@@ -26,7 +26,7 @@ const UpcomingDeadlines = () => {
             try {
                 // Fetch upcoming stages and verifications concurrently
                 const [stageData, verificationData] = await Promise.all([
-                    StageApi.getUpcoming().catch(() => [] as Stage[]),
+                    StageApi.getAvailable().catch(() => [] as Stage[]),
                     VerificationConfigurationApi.getUpcoming().catch(() => [] as VerificationConfiguration[])
                 ]);
 
