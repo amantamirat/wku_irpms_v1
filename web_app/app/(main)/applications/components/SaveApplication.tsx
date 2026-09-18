@@ -9,10 +9,10 @@ import { Tag } from 'primereact/tag';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
-import { ApplicationApi } from '../api/application.api';
-import { Application, sanitizeApplication, validateApplication } from '../models/application.model';
-import { Project } from '../../projects/models/project.model';
 import { Stage } from '../../calls/stages/models/stage.model';
+import { Project } from '../../projects/models/project.model';
+import { ApplicationApi } from '../api/application.api';
+import { Application, validateApplication } from '../models/application.model';
 
 const SaveApplication = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<Application>) => {
     const toast = useRef<Toast>(null);
@@ -66,11 +66,11 @@ const SaveApplication = ({ visible, item, onHide, onComplete }: EntitySaveDialog
 
         try {
             setIsUploading(true);
-            const payload = sanitizeApplication(localApplication);
+            //const payload = sanitize(localApplication);
 
             const saved = localApplication._id
-                ? await ApplicationApi.update(payload)
-                : await ApplicationApi.create(payload as Application);
+                ? await ApplicationApi.update(localApplication)
+                : await ApplicationApi.create(localApplication);
 
             toast.current?.show({
                 severity: 'success',
