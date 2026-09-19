@@ -3,15 +3,26 @@ export interface IRange {
     max: number;
 }
 
+
 export function isValidRange(range: IRange): boolean {
     return (
         Number.isFinite(range.min) &&
-        Number.isFinite(range.max) &&
+        (range.max === undefined || Number.isFinite(range.max)) &&
+        range.min >= 0 &&
+        (range.max === undefined || range.max >= 0) &&
+        (range.max === undefined || range.min <= range.max)
+    );
+}
+/*
+export function isValidRange(range: IRange): boolean {
+    return (
+        Number.isFinite(range.min) &&
+        (Number.isFinite(range.max) || range.max === Infinity) &&
         range.min >= 0 &&
         range.max >= 0 &&
         range.min <= range.max
     );
-}
+}*/
 /**
  * Formats an IRange object into a readable string (e.g., "10 - 50", "0 - ∞", or "-").
  */

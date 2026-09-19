@@ -218,7 +218,8 @@ export class AuthService {
         await this.repository.update(String(accountDoc._id), {
             password: hashed,
             resetCode: null,
-            resetCodeExpires: null
+            resetCodeExpires: null,
+            status:AccountStatus.active
         });
     }
 

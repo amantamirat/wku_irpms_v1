@@ -46,12 +46,12 @@ export class ConstraintRepository {
 
     async update(
         id: string,
-        dto: UpdateConstraintDTO
+        data: Partial<CreateConstraintDTO>
     ): Promise<IConstraint | null> {
 
         return await Constraint.findByIdAndUpdate(
             id,
-            dto,
+            data,
             {
                 new: true,
                 runValidators: true,

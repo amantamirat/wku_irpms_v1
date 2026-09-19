@@ -1,8 +1,5 @@
 'use client';
-
-import React from "react";
 import { TabView, TabPanel } from "primereact/tabview";
-import { createEntityManager } from "@/components/createEntityManager";
 
 // APIs
 import { CompositionApi } from "./api/composition.api";
@@ -24,6 +21,7 @@ import { MemberRequirement } from "./models/requirement.model";
 import { HistoryRuleView } from "./components/HistoryRuleView";
 import { EligibilityProfileView } from "./components/EligibilityProfileView";
 import { MemberRequirementView } from "./components/MemberRequirementView";
+import { createEntityManager } from "@/components/data-table/createEntityManager";
 
 // --- Helpers for Compositions Tab ---
 const renderEntityName = (
@@ -98,9 +96,26 @@ const CompositionsTab = createEntityManager<Composition>({
             body: (rowData: Composition) => renderEntityName(rowData.leadProfileRule)
         },
         {
-            field: "leadHistoryRule",
-            header: "Lead History Rule",
-            body: (rowData: Composition) => renderEntityName(rowData.leadHistoryRule)
+            field: "leadHistoryRules",
+            header: "Lead History Rules",
+            body: (rowData: Composition) => {
+                if (!rowData.leadHistoryRules || rowData.leadHistoryRules.length === 0) {
+                    return <span className="text-secondary italic">None</span>;
+                }
+                return (
+                    <div className="flex flex-column gap-1">
+                        {rowData.leadHistoryRules.map((hr, idx) => {
+                            const ruleName = typeof hr.rule === 'object' && hr.rule !== null ? hr.rule.name : hr.rule;
+                            return (
+                                <div key={idx} className="flex align-items-center gap-2 text-xs">
+                                    <span className="p-tag p-tag-warning text-xs py-0 px-1">{hr.context}</span>
+                                    <span className="font-medium text-900">{ruleName || `ID: ${hr.rule}`}</span>
+                                </div>
+                            );
+                        })}
+                    </div>
+                );
+            }
         },
         {
             field: "memberRequirements",
@@ -108,7 +123,7 @@ const CompositionsTab = createEntityManager<Composition>({
             body: (rowData: Composition) => renderMemberRequirements(rowData.memberRequirements)
         }
     ],
-    createNew: () => ({ name: "", description: "", memberRequirements: [] }),
+    createNew: () => ({ name: "", description: "", leadHistoryRules: [], memberRequirements: [] }),
     query: () => undefined,
     SaveDialog: SaveComposition,
     permissionPrefix: "composition"

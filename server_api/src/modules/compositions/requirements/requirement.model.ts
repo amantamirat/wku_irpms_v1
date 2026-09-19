@@ -3,6 +3,7 @@ import mongoose, { Schema } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 import { IRange } from "../../../common/types/range";
 import { RangeSchema } from "../../../common/schemas/range.schema";
+import { HistoryContext, IHistoryRuleReference } from "../history/history.model";
 
 export enum AggregationMode {
     COUNT = "COUNT",
@@ -13,7 +14,7 @@ export interface IMemberRequirement extends Document {
     name: string;
     description?: string;
     profile?: mongoose.Types.ObjectId;
-    historyRule?: mongoose.Types.ObjectId;
+    historyRules?: IHistoryRuleReference[];
     mode: AggregationMode;
     threshold: IRange;
     createdAt?: Date;
@@ -39,9 +40,22 @@ const MemberRequirementSchema =
                 type: Schema.Types.ObjectId,
                 ref: COLLECTIONS.ELIGIBILITY_PROFILE
             },
-            historyRule: {
-                type: Schema.Types.ObjectId,
-                ref: COLLECTIONS.HISTORY_RULE
+            historyRules: {
+                type: [
+                    {
+                        context: {
+                            type: String,
+                            enum: Object.values(HistoryContext),
+                            required: true
+                        },
+                        rule: {
+                            type: Schema.Types.ObjectId,
+                            ref: COLLECTIONS.HISTORY_RULE,
+                            required: true
+                        }
+                    }
+                ],
+                default: []
             },
             mode: {
                 type: String,

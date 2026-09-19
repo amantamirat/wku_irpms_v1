@@ -7,6 +7,9 @@ export interface IConstraint extends Document {
     name: string;
     description?: string;
 
+    titleWords?: IRange;
+    summaryWords?: IRange;
+
     participants?: IRange;
     phases?: IRange;
 
@@ -38,6 +41,14 @@ const ConstraintSchema = new Schema<IConstraint>(
         description: {
             type: String,
             trim: true,
+        },
+
+        titleWords: {
+            type: RangeSchema,
+        },
+
+        summaryWords: {
+            type: RangeSchema,
         },
 
         participants: {

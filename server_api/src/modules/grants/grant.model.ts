@@ -2,8 +2,8 @@ import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
 
 export enum FundingSource {
-    INTERNAL = "internal",
-    EXTERNAL = "external",
+    INTERNAL = "Internal",
+    EXTERNAL = "External",
 }
 
 export enum GrantStatus {

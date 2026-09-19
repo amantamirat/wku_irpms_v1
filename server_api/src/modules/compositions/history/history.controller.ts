@@ -38,6 +38,8 @@ export class HistoryController {
                 userId
             };
 
+           
+
 
             const history =
                 await this.service.create(data);
@@ -76,7 +78,7 @@ export class HistoryController {
 
 
             const histories =
-                await this.service.getHistorys();
+                await this.service.findAll();
 
 
 
@@ -119,7 +121,7 @@ export class HistoryController {
 
 
             const history =
-                await this.service.getById(id);
+                await this.service.findById(id);
 
 
 
@@ -173,8 +175,6 @@ export class HistoryController {
                 id: String(id),
 
                 data: req.body,
-
-                userId
 
             };
 

@@ -13,20 +13,41 @@ import { classNames } from 'primereact/utils';
 
 import {
   MemberRequirement,
-  AggregationMode
+  AggregationMode,
+  validateMemberRequirement
 } from '../models/requirement.model';
 import { EligibilityProfile } from '../models/profile.model';
 import { HistoryRule } from '../models/history.model';
+import { HistoryContext, HistoryRuleReference } from '../models/history-rule-reference.model';
 import { MemberRequirementApi } from '../api/requirement.api';
 import { ProfileApi } from '../api/profile.api';
 import { HistoryApi } from '../api/history.api';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
-import { isValidRange } from '@/types/range';
 
 const modeOptions = Object.values(AggregationMode).map((m) => ({
   label: m,
   value: m
 }));
+
+const contextOptions = Object.values(HistoryContext).map((c) => ({
+  label: c,
+  value: c
+}));
+
+const initializeRequirement = (
+  item?: Partial<MemberRequirement>
+): Partial<MemberRequirement> => ({
+  _id: item?._id,
+  name: item?.name ?? '',
+  description: item?.description ?? '',
+  profile: typeof item?.profile === 'object' ? item.profile?._id : item?.profile,
+  historyRules: item?.historyRules?.map((hr) => ({
+    context: hr.context ?? HistoryContext.CALL,
+    rule: typeof hr.rule === 'object' ? (hr.rule?._id ?? '') : (hr.rule ?? '')
+  })) ?? [],
+  mode: item?.mode || AggregationMode.COUNT,
+  threshold: item?.threshold ? { ...item.threshold } : { min: 0, max: Infinity }
+});
 
 const SaveRequirement: React.FC<EntitySaveDialogProps<MemberRequirement>> = ({
   visible,
@@ -36,9 +57,9 @@ const SaveRequirement: React.FC<EntitySaveDialogProps<MemberRequirement>> = ({
 }) => {
   const toast = useRef<Toast>(null);
 
-  const [localRequirement, setLocalRequirement] = useState<Partial<MemberRequirement>>({
-    ...item
-  });
+  const [localRequirement, setLocalRequirement] = useState<Partial<MemberRequirement>>(() =>
+    initializeRequirement(item)
+  );
   const [submitted, setSubmitted] = useState(false);
   const [loadingOptions, setLoadingOptions] = useState(false);
 
@@ -46,7 +67,7 @@ const SaveRequirement: React.FC<EntitySaveDialogProps<MemberRequirement>> = ({
   const [profiles, setProfiles] = useState<EligibilityProfile[]>([]);
   const [historyRules, setHistoryRules] = useState<HistoryRule[]>([]);
 
-  // 🔹 Fetch external profile and history rules on mount / dialog open
+  // Fetch external profile and history rules on mount / dialog open
   useEffect(() => {
     if (!visible) return;
 
@@ -75,46 +96,31 @@ const SaveRequirement: React.FC<EntitySaveDialogProps<MemberRequirement>> = ({
     fetchOptions();
   }, [visible]);
 
-  // 🔹 Sync local state when incoming item changes (extract populated objects to string IDs)
+  // Sync local state when incoming item changes
   useEffect(() => {
-    setLocalRequirement({
-      ...item,
-      profile: typeof item.profile === 'object' ? item.profile?._id : item.profile,
-      historyRule: typeof item.historyRule === 'object' ? item.historyRule?._id : item.historyRule,
-      mode: item.mode || AggregationMode.COUNT,
-      threshold: item.threshold || { min: 0, max: Infinity }
-    });
+    setLocalRequirement(initializeRequirement(item));
   }, [item]);
 
   const clearForm = () => {
     setSubmitted(false);
-    setLocalRequirement({ ...item });
+    setLocalRequirement(initializeRequirement(item));
   };
 
   const validate = (): { valid: boolean; message?: string } => {
-    if (!localRequirement.name || localRequirement.name.trim().length === 0) {
-      return { valid: false, message: 'Requirement Name is required.' };
+    // Use model validation function
+    const baseValidation = validateMemberRequirement(localRequirement as MemberRequirement);
+    if (!baseValidation.valid) {
+      return baseValidation;
     }
 
-    if (!localRequirement.mode) {
-      return { valid: false, message: 'Aggregation Mode is required.' };
-    }
-
-    if (!localRequirement.threshold) {
-      return { valid: false, message: 'Threshold range is required.' };
-    }
-
-    if (!isValidRange(localRequirement.threshold)) {
-      return {
-        valid: false,
-        message: 'Threshold range is invalid. Ensure values are non-negative and Min is less than or equal to Max.'
-      };
-    }
-
-    if (localRequirement.mode === AggregationMode.RATIO) {
+    // Additional ratio range check
+    if (localRequirement.mode === AggregationMode.RATIO && localRequirement.threshold) {
       const { min, max } = localRequirement.threshold;
       if (min > 1 || (max !== Infinity && max > 1)) {
-        return { valid: false, message: 'Ratio thresholds must be between 0.0 and 1.0 (e.g. 0.40 for 40%).' };
+        return {
+          valid: false,
+          message: 'Ratio thresholds must be between 0.0 and 1.0 (e.g. 0.40 for 40%).'
+        };
       }
     }
 
@@ -138,8 +144,15 @@ const SaveRequirement: React.FC<EntitySaveDialogProps<MemberRequirement>> = ({
     try {
       const payload: Partial<MemberRequirement> = {
         ...localRequirement,
-        profile: typeof localRequirement.profile === 'object' ? (localRequirement.profile as EligibilityProfile)._id : localRequirement.profile,
-        historyRule: typeof localRequirement.historyRule === 'object' ? (localRequirement.historyRule as HistoryRule)._id : localRequirement.historyRule
+        profile: typeof localRequirement.profile === 'object'
+          ? (localRequirement.profile as EligibilityProfile)._id
+          : localRequirement.profile,
+        historyRules: localRequirement.historyRules?.map((hr) => ({
+          context: hr.context,
+          rule: typeof hr.rule === 'object'
+            ? ((hr.rule as HistoryRule)._id ?? '')
+            : (hr.rule ?? '')
+        }))
       };
 
       const saved = localRequirement._id
@@ -169,6 +182,38 @@ const SaveRequirement: React.FC<EntitySaveDialogProps<MemberRequirement>> = ({
     onHide();
   };
 
+  const addHistoryRuleRef = () => {
+    setLocalRequirement((prev) => ({
+      ...prev,
+      historyRules: [
+        ...(prev.historyRules || []),
+        { context: HistoryContext.CALL, rule: '' }
+      ]
+    }));
+  };
+
+  const removeHistoryRuleRef = (index: number) => {
+    setLocalRequirement((prev) => ({
+      ...prev,
+      historyRules: prev.historyRules?.filter((_, i) => i !== index) ?? []
+    }));
+  };
+
+  const updateHistoryRuleRef = (
+    index: number,
+    field: keyof HistoryRuleReference,
+    value: any
+  ) => {
+    setLocalRequirement((prev) => {
+      const rules = [...(prev.historyRules || [])];
+      rules[index] = {
+        ...rules[index],
+        [field]: field === 'rule' ? (value ?? '') : value
+      };
+      return { ...prev, historyRules: rules };
+    });
+  };
+
   const profileOptions = profiles.map((p) => ({
     label: p.name + (p.description ? ` (${p.description})` : ''),
     value: p._id
@@ -193,7 +238,7 @@ const SaveRequirement: React.FC<EntitySaveDialogProps<MemberRequirement>> = ({
       <Toast ref={toast} />
       <Dialog
         visible={visible}
-        style={{ width: '680px' }}
+        style={{ width: '720px' }}
         header={localRequirement._id ? 'Edit Member Requirement' : 'Create Member Requirement'}
         modal
         className="p-fluid"
@@ -232,33 +277,77 @@ const SaveRequirement: React.FC<EntitySaveDialogProps<MemberRequirement>> = ({
               />
             </div>
 
-            {/* Reference Filter Selectors */}
-            <div className="formgrid grid mt-3">
-              <div className="field col-6">
-                <label htmlFor="profile">Demographic Eligibility Filter</label>
-                <Dropdown
-                  id="profile"
-                  value={localRequirement.profile}
-                  options={profileOptions}
-                  onChange={(e) => setLocalRequirement({ ...localRequirement, profile: e.value })}
-                  placeholder="Select Profile (Optional)"
-                  showClear
-                  filter
+            {/* Demographic Eligibility Filter */}
+            <div className="field mt-3">
+              <label htmlFor="profile">Demographic Eligibility Filter</label>
+              <Dropdown
+                id="profile"
+                value={localRequirement.profile}
+                options={profileOptions}
+                onChange={(e) => setLocalRequirement({ ...localRequirement, profile: e.value })}
+                placeholder="Select Profile (Optional)"
+                showClear
+                filter
+              />
+            </div>
+
+            {/* History Performance References List */}
+            <div className="surface-border border-1 border-round p-3 mt-3 surface-card">
+              <div className="flex justify-content-between align-items-center mb-3">
+                <div className="font-semibold text-900">History Performance References</div>
+                <Button
+                  label="Add Reference"
+                  icon="pi pi-plus"
+                  size="small"
+                  outlined
+                  onClick={addHistoryRuleRef}
                 />
               </div>
 
-              <div className="field col-6">
-                <label htmlFor="historyRule">History Performance Filter</label>
-                <Dropdown
-                  id="historyRule"
-                  value={localRequirement.historyRule}
-                  options={historyOptions}
-                  onChange={(e) => setLocalRequirement({ ...localRequirement, historyRule: e.value })}
-                  placeholder="Select History Rule (Optional)"
-                  showClear
-                  filter
-                />
-              </div>
+              {(!localRequirement.historyRules || localRequirement.historyRules.length === 0) ? (
+                <p className="text-sm text-secondary italic m-0">
+                  No history performance rules attached. Click "Add Reference" to include history criteria.
+                </p>
+              ) : (
+                localRequirement.historyRules.map((hr, index) => (
+                  <div
+                    key={index}
+                    className="formgrid grid align-items-center surface-ground border-round p-2 mb-2"
+                  >
+                    <div className="field col-4 mb-0">
+                      <label className="text-xs font-medium">Context</label>
+                      <Dropdown
+                        value={hr.context}
+                        options={contextOptions}
+                        onChange={(e) => updateHistoryRuleRef(index, 'context', e.value)}
+                        placeholder="Select Context"
+                      />
+                    </div>
+
+                    <div className="field col-7 mb-0">
+                      <label className="text-xs font-medium">Rule</label>
+                      <Dropdown
+                        value={hr.rule}
+                        options={historyOptions}
+                        onChange={(e) => updateHistoryRuleRef(index, 'rule', e.value)}
+                        placeholder="Select History Rule"
+                        filter
+                      />
+                    </div>
+
+                    <div className="col-1 flex justify-content-center align-items-end pt-4">
+                      <Button
+                        icon="pi pi-trash"
+                        severity="danger"
+                        text
+                        onClick={() => removeHistoryRuleRef(index)}
+                        tooltip="Remove Reference"
+                        tooltipOptions={{ position: 'top' }}
+                      />
+                    </div>
+                  </div>
+                ))
+              )}
             </div>
 
             {/* Aggregation Mode & Threshold Config */}

@@ -250,11 +250,14 @@ const AvailableStages = () => {
                                             {stageName}
                                         </span>
 
-                                        <Tag
+{
+    /**<Tag
                                             value={`Stage ${stage.order}`}
                                             severity="info"
                                             rounded
-                                        />
+                                        /> */
+}
+                                        
                                     </div>
 
                                     {/* DEADLINE */}

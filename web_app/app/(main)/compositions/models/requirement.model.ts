@@ -1,5 +1,5 @@
 import { EligibilityProfile } from "./profile.model";
-import { HistoryRule } from "./history.model";
+import { HistoryRuleReference } from "./history-rule-reference.model";
 import { IRange, isValidRange } from "@/types/range";
 
 export enum AggregationMode {
@@ -9,19 +9,29 @@ export enum AggregationMode {
 
 export type MemberRequirement = {
     _id?: string;
+
     name: string;
+
     description?: string;
+
     profile?: string | EligibilityProfile;
-    historyRule?: string | HistoryRule;
+
+    historyRules?: HistoryRuleReference[];
+
     mode: AggregationMode;
+
     threshold: IRange;
+
     createdAt?: string | Date;
+
     updatedAt?: string | Date;
 };
+
 
 export const validateMemberRequirement = (
     requirement: MemberRequirement
 ): { valid: boolean; message?: string } => {
+
     if (!requirement.name || requirement.name.trim().length === 0) {
         return {
             valid: false,
@@ -46,7 +56,8 @@ export const validateMemberRequirement = (
     if (!isValidRange(requirement.threshold)) {
         return {
             valid: false,
-            message: "Threshold range is invalid. Ensure values are non-negative and Min is less than or equal to Max.",
+            message:
+                "Threshold range is invalid. Ensure values are non-negative and Min is less than or equal to Max.",
         };
     }
 
@@ -54,5 +65,3 @@ export const validateMemberRequirement = (
         valid: true,
     };
 };
-
-

@@ -18,6 +18,7 @@ export interface IProject extends Document {
     organization?: mongoose.Types.ObjectId;
     workspace?: mongoose.Types.ObjectId;
     calendar?: mongoose.Types.ObjectId | null;
+
     call?: mongoose.Types.ObjectId | null;
 
     title: string;
@@ -27,9 +28,9 @@ export interface IProject extends Document {
     totalCollabs?: number;
     leadPI: mongoose.Types.ObjectId;
     themes: mongoose.Types.ObjectId[];
+
     currentApplication?: mongoose.Types.ObjectId | null;
     currentPhase?: mongoose.Types.ObjectId | null;
-
     currentVerification?: mongoose.Types.ObjectId | null;
 
     status: ProjectStatus;
@@ -117,22 +118,22 @@ const ProjectSchema = new Schema<IProject>({
     currentApplication: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.APPLICATION,
-        unique: true,
-        sparse: true // allows multiple docs with undefined
+        //unique: true,
+        //sparse: true // allows multiple docs with undefined
     },
 
     currentPhase: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.PHASE,
-        unique: true,
-        sparse: true
+        //unique: true,
+        //sparse: true
     },
 
     currentVerification: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.VERIFICATION,
-        unique: true,
-        sparse: true // allows multiple docs with undefined
+        //unique: true,
+        //sparse: true // allows multiple docs with undefined
     },
 
     status: {
@@ -157,5 +158,36 @@ const ProjectSchema = new Schema<IProject>({
     },
 
 }, { timestamps: true });
+
+
+ProjectSchema.index(
+    { currentApplication: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+            currentApplication: { $type: "objectId" }
+        }
+    }
+);
+
+ProjectSchema.index(
+    { currentPhase: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+            currentPhase: { $type: "objectId" }
+        }
+    }
+);
+
+ProjectSchema.index(
+    { currentVerification: 1 },
+    {
+        unique: true,
+        partialFilterExpression: {
+            currentVerification: { $type: "objectId" }
+        }
+    }
+);
 
 export const Project = model<IProject>(COLLECTIONS.PROJECT, ProjectSchema);

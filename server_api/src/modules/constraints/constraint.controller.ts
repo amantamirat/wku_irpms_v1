@@ -88,11 +88,10 @@ export class ConstraintController {
         try {
             const { id } = req.params;
 
-            const dto: UpdateConstraintDTO = req.body;
+            const dto: CreateConstraintDTO = req.body;
 
             const updated = await this.service.update(
-                id,
-                dto
+                { id, data: dto }
             );
 
             successResponse(

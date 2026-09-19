@@ -888,23 +888,28 @@
   },
   {
     "category": "Collaborator Management",
+    "name": "collaborator:transition.*",
+    "description": "Perform any valid collaborator membership state transition for any member"
+  },
+  {
+    "category": "Collaborator Management",
     "name": "collaborator:transition.pending.verified",
-    "description": "Verify a pending collaborator membership"
+    "description": "Verify the user's own pending collaborator membership"
   },
   {
     "category": "Collaborator Management",
     "name": "collaborator:transition.pending.declined",
-    "description": "Decline a pending collaborator membership"
+    "description": "Decline the user's own pending collaborator membership"
   },
   {
     "category": "Collaborator Management",
     "name": "collaborator:transition.verified.pending",
-    "description": "Move a verified collaborator membership to pending"
+    "description": "Move the user's own verified collaborator membership to pending"
   },
   {
     "category": "Collaborator Management",
     "name": "collaborator:transition.declined.pending",
-    "description": "Move a declined collaborator membership to pending"
+    "description": "Move the user's own declined collaborator membership to pending"
   },
   {
     "category": "Collaborator Management",

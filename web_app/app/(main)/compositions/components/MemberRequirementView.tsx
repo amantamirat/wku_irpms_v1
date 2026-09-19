@@ -4,6 +4,7 @@ import { Divider } from 'primereact/divider';
 import { Tag } from 'primereact/tag';
 import { EligibilityProfileView } from './EligibilityProfileView';
 import { HistoryRule } from '../models/history.model';
+import { HistoryRuleReference } from '../models/history-rule-reference.model';
 import { MemberRequirement, AggregationMode } from '../models/requirement.model';
 import { IRange } from '@/types/range';
 
@@ -37,6 +38,7 @@ export const MemberRequirementView: React.FC<MemberRequirementViewProps> = ({
     };
 
     const isRatioMode = requirement.mode === AggregationMode.RATIO;
+    const hasHistoryRules = requirement.historyRules && requirement.historyRules.length > 0;
 
     return (
         <div className="member-requirement-view p-3 surface-card border-round shadow-1">
@@ -79,24 +81,33 @@ export const MemberRequirementView: React.FC<MemberRequirementViewProps> = ({
                         </div>
                     </div>
                 </div>
-
-                {/* Linked History Rule Card */}
-                {requirement.historyRule && (
-                    <div className="col-12 md:col-6 p-2">
-                        <div className="flex align-items-center p-2 border-round surface-50 border-1 border-200 h-full">
-                            <i className="pi pi-history mr-3 text-primary text-xl" />
-                            <div className="flex flex-column">
-                                <span className="text-500 font-bold uppercase" style={{ fontSize: '10px' }}>
-                                    Target History Rule
-                                </span>
-                                <span className="text-900 text-sm font-semibold">
-                                    {getHistoryRuleName(requirement.historyRule)}
-                                </span>
-                            </div>
-                        </div>
-                    </div>
-                )}
             </div>
+
+            {/* Linked History Rules List Section */}
+            {hasHistoryRules && (
+                <div className="mt-3">
+                    <div className="text-500 font-bold uppercase mb-2" style={{ fontSize: '10px' }}>
+                        Target History Performance References
+                    </div>
+                    <div className="grid">
+                        {requirement.historyRules!.map((hr: HistoryRuleReference, index: number) => (
+                            <div key={index} className="col-12 md:col-6 p-2">
+                                <div className="flex align-items-center justify-content-between p-2 border-round surface-50 border-1 border-200 h-full">
+                                    <div className="flex align-items-center">
+                                        <i className="pi pi-history mr-3 text-primary text-xl" />
+                                        <div className="flex flex-column">
+                                            <span className="text-900 text-sm font-semibold">
+                                                {getHistoryRuleName(hr.rule)}
+                                            </span>
+                                        </div>
+                                    </div>
+                                    <Tag value={hr.context} severity="warning" className="text-xs" />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                </div>
+            )}
 
             {/* Embedded Eligibility Profile Component */}
             {requirement.profile && (

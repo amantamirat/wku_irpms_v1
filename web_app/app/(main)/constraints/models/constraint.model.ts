@@ -7,6 +7,9 @@ export interface Constraint {
   name: string;
   description?: string;
 
+  titleWords?: IRange;
+  summaryWords?: IRange;
+
   participants?: IRange;
   phases?: IRange;
 
@@ -37,6 +40,8 @@ export const validateConstraint = (
   }
 
   const ranges: [string, IRange | undefined][] = [
+    ["Title words", constraint.titleWords],
+    ["Summary words", constraint.summaryWords],
     ["Participants", constraint.participants],
     ["Phases", constraint.phases],
     ["Budget", constraint.budget],

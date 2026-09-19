@@ -10,7 +10,6 @@ export class HistoryRepository {
     }
 
 
-
     async findAll() {
 
         return HistoryRule
@@ -22,11 +21,31 @@ export class HistoryRepository {
     }
 
 
+    async findById(
+        id: string
+    ): Promise<IHistoryRule | null> {
 
-    async findById(id: string): Promise<IHistoryRule | null> {
         return HistoryRule.findById(id);
     }
 
+
+    async findByName(
+        name: string,
+        excludeId?: string
+    ): Promise<IHistoryRule | null> {
+
+        const query: any = {
+            name
+        };
+
+        if (excludeId) {
+            query._id = {
+                $ne: excludeId
+            };
+        }
+
+        return HistoryRule.findOne(query);
+    }
 
 
     async update(
@@ -44,13 +63,13 @@ export class HistoryRepository {
 
     }
 
-    async delete(id: string) {
+
+    async delete(
+        id: string
+    ) {
 
         return HistoryRule.findByIdAndDelete(id);
 
     }
 
-
 }
-
-

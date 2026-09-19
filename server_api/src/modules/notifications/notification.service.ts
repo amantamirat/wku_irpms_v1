@@ -87,7 +87,7 @@ export class NotificationService {
             title: "New Project Invitation",
             message: `You have been added as a ${role ?? 'collaborator'} to "${projectTitle}".`,
             type: NotificationType.INFO,
-            link: '/projects/collaborators/my-memberships'
+            link: '/projects/my-memberships'
         });
     }
 

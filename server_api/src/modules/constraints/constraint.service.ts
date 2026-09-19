@@ -45,13 +45,14 @@ export class ConstraintService {
 
 
     async update(
-        id: string,
         dto: UpdateConstraintDTO
     ): Promise<IConstraint | null> {
 
-        if (dto.data.name) {
+        const { id, data } = dto
+
+        if (data.name) {
             const exists = await this.repository.exists(
-                dto.data.name,
+                data.name,
                 id
             );
 
@@ -63,9 +64,9 @@ export class ConstraintService {
             }
         }
 
-        this.validateRange(dto.data);
+        this.validateRange(data);
 
-        return await this.repository.update(id, dto);
+        return await this.repository.update(id, data);
     }
 
 
@@ -82,6 +83,8 @@ export class ConstraintService {
     ): void {
 
         const ranges = [
+            ["Title words", dto.titleWords],
+            ["Summary words", dto.summaryWords],
             ["Participants", dto.participants],
             ["Phases", dto.phases],
             ["Budget", dto.budget],
@@ -93,7 +96,6 @@ export class ConstraintService {
             ["Focus areas", dto.focusAreas],
             ["Indicators", dto.indicators],
         ] as const;
-
 
         for (const [name, range] of ranges) {
 

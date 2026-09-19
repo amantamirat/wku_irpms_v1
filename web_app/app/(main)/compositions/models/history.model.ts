@@ -4,26 +4,41 @@ export type HistoryRule = {
     _id?: string;
     name: string;
     description?: string;
-    submitted?: IRange;
-    rejected?: IRange;
-    completed?: IRange;
-    granted?: IRange;
+
+    project?: {
+        granted?: IRange;
+        refused?: IRange;
+        completed?: IRange;
+    };
+
+    application?: {
+        submitted?: IRange;
+        accepted?: IRange;
+        rejected?: IRange;
+    };
+
     createdAt?: string | Date;
     updatedAt?: string | Date;
 };
 
 export const validateHistoryRule = (
-    rule: HistoryRule
+    rule: Partial<HistoryRule>
 ): { valid: boolean; message?: string } => {
     if (!rule.name || rule.name.trim().length === 0) {
-        return { valid: false, message: "Name is required." };
+        return {
+            valid: false,
+            message: "Name is required."
+        };
     }
 
     const metrics: { range?: IRange; label: string }[] = [
-        { range: rule.submitted, label: "Submitted" },
-        { range: rule.rejected, label: "Rejected" },
-        { range: rule.completed, label: "Completed" },
-        { range: rule.granted, label: "Granted" }
+        { range: rule.project?.granted, label: "Granted projects" },
+        { range: rule.project?.refused, label: "Refused projects" },
+        { range: rule.project?.completed, label: "Completed projects" },
+
+        { range: rule.application?.submitted, label: "Submitted applications" },
+        { range: rule.application?.accepted, label: "Accepted applications" },
+        { range: rule.application?.rejected, label: "Rejected applications" }
     ];
 
     for (const metric of metrics) {
@@ -35,5 +50,8 @@ export const validateHistoryRule = (
         }
     }
 
-    return { valid: true };
+    return {
+        valid: true
+    };
 };
+

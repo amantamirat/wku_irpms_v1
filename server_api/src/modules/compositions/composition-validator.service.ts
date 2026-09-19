@@ -1,11 +1,14 @@
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { IRange, matchRange } from "../../common/types/range";
-import { ExperienceRepository } from "../users/experiences/experience.repository";
+import { matchRange } from "../../common/types/range";
 import { IUser } from "../users/user.model";
 import { IComposition } from "./composition.model";
 import { CompositionRepository } from "./composition.repository";
-import { IHistoryRule } from "./history/history.model";
+import {
+    HistoryContext,
+    IHistoryRule,
+    IHistoryRuleReference
+} from "./history/history.model";
 import { HistoryRepository } from "./history/history.repository";
 import { ProfileValidatorService } from "./profile/profile-validator.service";
 import { IEligibilityProfile } from "./profile/profile.model";
@@ -25,64 +28,118 @@ export class CompositionValidationService {
         private readonly profileRepo: ProfileRepository,
         private readonly historyRepo: HistoryRepository,
         private readonly requirementRepo: RequirementRepository,
-        //private readonly exprienceRepo: ExperienceRepository,
         private readonly profileValidator: ProfileValidatorService
     ) { }
 
+
     private async getComposition(id: string): Promise<IComposition> {
+
         const composition = await this.compositionRepo.findById(id);
+
         if (!composition) {
             throw new AppError(ERROR_CODES.COMPOSITION_NOT_FOUND);
         }
+
         return composition;
     }
 
-    private async validateLead(composition: IComposition, lead: IUser, errors: string[]) {
 
+    private async validateLead(
+        composition: IComposition,
+        lead: IUser,
+        errors: string[]
+    ): Promise<void> {
+
+        /*
+         * Lead profile requirement
+         */
         if (composition.leadProfileRule) {
 
-            const profile = await this.profileRepo.findById(String(composition.leadProfileRule));
+            const profile = await this.profileRepo.findById(
+                String(composition.leadProfileRule)
+            );
 
-            if (profile && !this.profileValidator.matches(profile, lead)) {
-                errors.push("Lead does not satisfy the required profile.");
+            if (
+                profile &&
+                !this.profileValidator.matches(profile, lead)
+            ) {
+                errors.push(
+                    "Lead does not satisfy the required profile."
+                );
             }
         }
 
-        if (composition.leadHistoryRule) {
 
-            const history = await this.historyRepo.findById(
-                String(composition.leadHistoryRule)
-            );
+        /*
+         * Lead history requirements
+         */
+        if (composition.leadHistoryRules?.length) {
 
-            if (history && !this.matchHistory(history, lead)) {
-                errors.push("Lead does not satisfy the required history.");
+            for (const historyReference of composition.leadHistoryRules) {
+
+                const historyRule = await this.historyRepo.findById(
+                    String(historyReference.rule)
+                );
+
+                if (
+                    historyRule &&
+                    !this.matchHistory(
+                        historyRule,
+                        lead,
+                        historyReference.context
+                    )
+                ) {
+                    errors.push(
+                        "Lead does not satisfy the required history."
+                    );
+                }
             }
         }
     }
 
 
-    private async validateMembers(requirementIds: string[], members: IUser[], errors: string[]): Promise<void> {
+    private async validateMembers(
+        requirementIds: string[],
+        members: IUser[],
+        errors: string[]
+    ): Promise<void> {
 
         for (const requirementId of requirementIds) {
 
-            const requirement = await this.requirementRepo.findById(requirementId);
+            const requirement = await this.requirementRepo.findById(
+                requirementId,
+                { populate: true }
+            );
 
             if (!requirement) {
                 continue;
             }
 
             const profile = requirement.profile
-                ? (await this.profileRepo.findById(String(requirement.profile))) ?? undefined
+                ? (
+                    typeof requirement.profile === "object"
+                        ? requirement.profile as unknown as IEligibilityProfile
+                        : (
+                            await this.profileRepo.findById(
+                                String(requirement.profile)
+                            ) ?? undefined
+                        )
+                )
                 : undefined;
 
-            const history = requirement.historyRule
-                ? (await this.historyRepo.findById(String(requirement.historyRule))) ?? undefined
-                : undefined;
+            const historyRules = requirement.historyRules ?? [];
 
             let qualifyingCount = 0;
 
             for (const member of members) {
-                if (await this.matchesRequirement(member, profile, history)) {
+
+                if (
+                    await this.matchesRequirement(
+                        member,
+                        profile,
+                        historyRules
+                    )
+                ) {
                     qualifyingCount++;
                 }
             }
@@ -109,40 +166,101 @@ export class CompositionValidationService {
     }
 
 
-    private async matchesRequirement(member: IUser, profile?: IEligibilityProfile,
-        history?: IHistoryRule): Promise<boolean> {
-        return (!profile || await this.profileValidator.matches(profile, member)) &&
-            (!history || this.matchHistory(history, member));
-    }
-
-
-
-
-
-
-    private matchHistory(rule: IHistoryRule, user: IUser): boolean {
+    private async matchesRequirement(
+        member: IUser,
+        profile?: IEligibilityProfile,
+        historyRules: IHistoryRuleReference[] = []
+    ): Promise<boolean> {
 
         /*
-        const history = user.history;
-
-        if (rule.submitted &&
-            !this.matchRange(rule.submitted, history.submitted))
+         * Profile requirement
+         */
+        if (
+            profile &&
+            !this.profileValidator.matches(profile, member)
+        ) {
             return false;
+        }
 
-        if (rule.rejected &&
-            !this.matchRange(rule.rejected, history.rejected))
-            return false;
 
-        if (rule.completed &&
-            !this.matchRange(rule.completed, history.completed))
-            return false;
+        /*
+         * All history rules must be satisfied.
+         */
+        for (const historyReference of historyRules) {
 
-        if (rule.granted &&
-            !this.matchRange(rule.granted, history.granted))
-            return false;
-*/
+            const historyRule =
+                typeof historyReference.rule === "object"
+                    ? historyReference.rule as unknown as IHistoryRule
+                    : await this.historyRepo.findById(
+                        String(historyReference.rule)
+                    );
+
+            if (
+                historyRule &&
+                !this.matchHistory(
+                    historyRule,
+                    member,
+                    historyReference.context
+                )
+            ) {
+                return false;
+            }
+        }
+
         return true;
     }
 
 
+    private matchHistory(
+        rule: IHistoryRule,
+        user: IUser,
+        context: HistoryContext
+    ): boolean {
+
+        /*
+         * Context allows the same history rule to be interpreted
+         * according to where it is used.
+         *
+         * For example:
+         *   LEAD   -> validate the lead's history
+         *   MEMBER -> validate the member's history
+         */
+
+        // TODO: apply the context when your HistoryContext-specific
+        // history metrics are finalized.
+
+        /*
+        const history = user.history;
+
+        if (
+            rule.submitted &&
+            !matchRange(rule.submitted, history.submitted)
+        ) {
+            return false;
+        }
+
+        if (
+            rule.rejected &&
+            !matchRange(rule.rejected, history.rejected)
+        ) {
+            return false;
+        }
+
+        if (
+            rule.completed &&
+            !matchRange(rule.completed, history.completed)
+        ) {
+            return false;
+        }
+
+        if (
+            rule.granted &&
+            !matchRange(rule.granted, history.granted)
+        ) {
+            return false;
+        }
+        */
+
+        return true;
+    }
 }

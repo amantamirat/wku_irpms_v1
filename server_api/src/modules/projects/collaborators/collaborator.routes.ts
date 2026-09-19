@@ -7,8 +7,6 @@ import { checkPermission } from '../../../core/container';
 import { CollaboratorController } from './collaborator.controller';
 
 
-
-
 const controller = new CollaboratorController(collabService);
 const router: Router = Router();
 

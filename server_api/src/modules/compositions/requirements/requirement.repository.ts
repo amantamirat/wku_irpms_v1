@@ -1,8 +1,7 @@
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { MemberRequirement, IMemberRequirement } from "./requirement.model";
 
-
 export class RequirementRepository {
-
 
     async create(
         data: Partial<IMemberRequirement> | any
@@ -10,26 +9,41 @@ export class RequirementRepository {
         return MemberRequirement.create(data);
     }
 
+    async findAll(options?: FilterOptions) {
 
+        let dbQuery = MemberRequirement.find();
 
-    async findAll() {
+        if (options?.populate) {
+            dbQuery
+                .populate("profile")
+                .populate("historyRules.rule");
+        }
 
-        return MemberRequirement
-            .find()
-            .sort({
-                createdAt: -1
-            });
-
+        return dbQuery.sort({
+            createdAt: -1
+        });
     }
 
+    async findById(
+        id: string,
+        options?: FilterOptions
+    ) {
 
+        let dbQuery = MemberRequirement.findById(id);
 
-    async findById(id: string) {
-        return MemberRequirement.findById(id);
+        if (options?.populate) {
+            dbQuery
+                .populate("profile")
+                .populate("historyRules.rule");
+        }
+
+        return dbQuery;
     }
 
-
-    async update(id: string, data: Partial<IMemberRequirement | any>) {
+    async update(
+        id: string,
+        data: Partial<IMemberRequirement> | any
+    ) {
 
         return MemberRequirement.findByIdAndUpdate(
             id,
@@ -38,14 +52,10 @@ export class RequirementRepository {
                 new: true
             }
         );
-
     }
-
-
 
     async delete(id: string) {
         return MemberRequirement.findByIdAndDelete(id);
     }
-
 
 }

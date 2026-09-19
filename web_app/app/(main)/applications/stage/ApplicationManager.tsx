@@ -94,10 +94,10 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
             header: 'Project',
             field: 'project.title',
             sortable: true,
-            body: (application: Application) => {
+            body: (row: Application) => {
                 const project =
-                    typeof application.project === 'object'
-                        ? application.project
+                    typeof row.project === 'object'
+                        ? row.project
                         : null;
 
                 const title = project?.title ?? 'Unknown Project';

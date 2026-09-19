@@ -3,8 +3,8 @@ import { Thematic } from "../../thematics/models/thematic.model";
 import { GrantStatus } from "./grant.state-machine";
 
 export enum FundingSource {
-    INTERNAL = "internal",
-    EXTERNAL = "external",
+    INTERNAL = "Internal",
+    EXTERNAL = "External",
 }
 
 export type Grant = {

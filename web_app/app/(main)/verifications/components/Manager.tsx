@@ -56,10 +56,10 @@ const VerificationManager = ({ configuration }: VerificationManagerProps) => {
             prev.map(item =>
                 item._id === id
                     ? {
-                          ...item,
-                          status: updated.status,
-                          //totalScore: updated.totalScore ?? item.totalScore
-                      }
+                        ...item,
+                        status: updated.status,
+                        //totalScore: updated.totalScore ?? item.totalScore
+                    }
                     : item
             )
         );
@@ -81,9 +81,13 @@ const VerificationManager = ({ configuration }: VerificationManagerProps) => {
             body: (r: Verification) => {
                 const projectTitle = typeof r.project === "object" ? (r.project as any)?.title : r.project;
                 return (
-                    <span className="text-700 truncate block" style={{ maxWidth: '200px' }}>
-                        {projectTitle ?? 'Unknown Project'}
-                    </span>
+                    <div
+                        className="text-700 truncate text-sm"
+                        style={{ maxWidth: "250px" }}
+                        title={projectTitle}
+                    >
+                        {projectTitle}
+                    </div>
                 );
             }
         },

@@ -117,7 +117,7 @@ export class ProfileController {
 
 
             const profile =
-                await this.service.getById(id);
+                await this.service.findById(id);
 
             successResponse(
                 res,

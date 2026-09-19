@@ -55,11 +55,35 @@ export class ConstraintValidationService {
 
         const errors: string[] = [];
 
+        // --------------------------------------------------
+        // Project content
+        // --------------------------------------------------
+
+        this.validateTitleWords(
+            constraint.titleWords,
+            dto.title,
+            errors
+        );
+
+        this.validateSummaryWords(
+            constraint.summaryWords,
+            dto.summary,
+            errors
+        );
+
+        // --------------------------------------------------
+        // Participants
+        // --------------------------------------------------
+
         this.validateParticipants(
             constraint.participants,
             dto.collaborators.length,
             errors
         );
+
+        // --------------------------------------------------
+        // Phases
+        // --------------------------------------------------
 
         this.validatePhasesInternal(
             constraint,
@@ -67,9 +91,43 @@ export class ConstraintValidationService {
             errors
         );
 
+        // --------------------------------------------------
+        // Themes
+        // --------------------------------------------------
+
         await this.validateThemeInternal(
             constraint,
             dto.themes,
+            errors
+        );
+
+        return {
+            valid: errors.length === 0,
+            errors
+        };
+    }
+
+
+    async validateProjectContent(
+        constraintId: string,
+        title: string,
+        summary?: string
+    ): Promise<ConstraintValidationResult> {
+
+        const constraint =
+            await this.getConstraint(constraintId);
+
+        const errors: string[] = [];
+
+        this.validateTitleWords(
+            constraint.titleWords,
+            title,
+            errors
+        );
+
+        this.validateSummaryWords(
+            constraint.summaryWords,
+            summary,
             errors
         );
 
@@ -148,6 +206,52 @@ export class ConstraintValidationService {
         };
     }
 
+    private validateTitleWords(
+        range: IRange | undefined,
+        title: string,
+        errors: string[]
+    ): void {
+
+        if (!range) {
+            return;
+        }
+
+        const count = this.countWords(title);
+
+        if (!matchRange(range, count)) {
+            errors.push(
+                `Project title must contain between ${range.min} and ${range.max} words. Current count: ${count}.`
+            );
+        }
+    }
+
+    private validateSummaryWords(
+        range: IRange | undefined,
+        summary: string | undefined,
+        errors: string[]
+    ): void {
+
+        if (!range) {
+            return;
+        }
+
+        const count = this.countWords(summary ?? '');
+
+        if (!matchRange(range, count)) {
+            errors.push(
+                `Project summary must contain between ${range.min} and ${range.max} words. Current count: ${count}.`
+            );
+        }
+    }
+
+
+    private countWords(text: string): number {
+        return text
+            .trim()
+            .split(/\s+/)
+            .filter(Boolean)
+            .length;
+    }
 
     private validateParticipants(
         range: IRange | undefined,

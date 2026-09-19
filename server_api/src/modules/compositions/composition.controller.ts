@@ -3,7 +3,7 @@ import { CompositionService } from './composition.service';
 import { ERROR_CODES } from '../../common/errors/error.codes';
 import { successResponse, errorResponse } from '../../common/helpers/response';
 import { AuthenticatedRequest } from '../auth/auth.middleware';
-import { CreateCompositionDTO, GetCompositionDTO, UpdateCompositionDTO } from './composition.dto';
+import { CreateCompositionDTO, UpdateCompositionDTO } from './composition.dto';
 
 
 export class CompositionController {

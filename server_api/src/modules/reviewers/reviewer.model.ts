@@ -95,26 +95,33 @@ const ReviewerSchema = new Schema<IReviewer>({
     }
 
 }, { timestamps: true });
-
 ReviewerSchema.index(
     {
+        targetType: 1,
         application: 1,
         reviewer: 1
     },
     {
         unique: true,
-        sparse: true
+        partialFilterExpression: {
+            targetType: ReviewerTargetType.APPLICATION,
+            application: { $exists: true, $ne: null }
+        }
     }
 );
 
 ReviewerSchema.index(
     {
+        targetType: 1,
         verification: 1,
         reviewer: 1
     },
     {
         unique: true,
-        sparse: true
+        partialFilterExpression: {
+            targetType: ReviewerTargetType.VERIFICATION,
+            verification: { $exists: true, $ne: null }
+        }
     }
 );
 export const Reviewer = model<IReviewer>(COLLECTIONS.REVIEWER, ReviewerSchema);

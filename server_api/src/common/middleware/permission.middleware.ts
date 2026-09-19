@@ -74,10 +74,16 @@ export const createCheckTransitionPermission = (
                 );
             }
 
-            const permission =
+            const specificPermission =
                 `${resource}:transition.${current}.${nextStatus}`;
 
-            return checkPermission(permission)(req, res, next);
+            const wildcardPermission =
+                `${resource}:transition.*`;
+
+            return checkPermission([
+                specificPermission,
+                wildcardPermission
+            ])(req, res, next);
         };
     };
 };

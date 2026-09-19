@@ -291,11 +291,11 @@ export default function StageSubmitPage() {
 
                     <div>
                         <h2 className="text-900 m-0">
-                            Submit Stage
+                            {stage?.name ?? 'Submit Application'}
                         </h2>
 
                         <p className="text-500 m-0 mt-1">
-                            Submit your project for this stage.
+                            Submit your application for this stage.
                         </p>
                     </div>
                 </div>
@@ -308,164 +308,6 @@ export default function StageSubmitPage() {
                     text={error}
                     className="w-full mb-4"
                 />
-            )}
-
-            {/* STAGE INFORMATION */}
-            {stage && (
-                <div className="surface-card border-1 surface-border border-round-xl shadow-1 p-4 mb-4">
-
-                    <div className="flex align-items-center gap-2 mb-4">
-                        <i className="pi pi-info-circle text-primary" />
-
-                        <span className="font-semibold text-900">
-                            Stage Information
-                        </span>
-                    </div>
-
-                    <div className="grid">
-
-                        {/* STAGE */}
-                        <div className="col-12 md:col-5">
-                            <div className="flex align-items-start gap-3">
-                                <i className="pi pi-list-check text-primary mt-1" />
-
-                                <div>
-                                    <span className="text-500 text-xs uppercase font-semibold block mb-1">
-                                        Stage
-                                    </span>
-
-                                    <span className="text-900 font-semibold">
-                                        {stage.name || 'Stage'}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* ORDER */}
-                        <div className="col-12 md:col-2">
-                            <div className="flex align-items-start gap-3">
-                                <i className="pi pi-sort-numeric-down text-primary mt-1" />
-
-                                <div>
-                                    <span className="text-500 text-xs uppercase font-semibold block mb-1">
-                                        Order
-                                    </span>
-
-                                    <span className="text-900 font-medium">
-                                        {stage.order}
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* DEADLINE */}
-                        <div className="col-12 md:col-5">
-                            <div className="flex align-items-start gap-3">
-                                <i
-                                    className={`pi pi-calendar mt-1 ${isExpired
-                                        ? 'text-red-500'
-                                        : isUrgent
-                                            ? 'text-orange-500'
-                                            : 'text-primary'
-                                        }`}
-                                />
-
-                                <div>
-                                    <span className="text-500 text-xs uppercase font-semibold block mb-1">
-                                        Deadline
-                                    </span>
-
-                                    {validDeadline ? (
-                                        <>
-                                            <span className="text-900 font-semibold block">
-                                                {format(
-                                                    deadline!,
-                                                    'MMM dd, yyyy'
-                                                )}
-                                            </span>
-
-                                            {isExpired ? (
-                                                <Tag
-                                                    value="Expired"
-                                                    severity="danger"
-                                                    rounded
-                                                    className="mt-1"
-                                                />
-                                            ) : isUrgent ? (
-                                                <Tag
-                                                    value={
-                                                        daysRemaining === 0
-                                                            ? 'Due today'
-                                                            : `${daysRemaining} day${daysRemaining ===
-                                                                1
-                                                                ? ''
-                                                                : 's'
-                                                            } left`
-                                                    }
-                                                    severity="warning"
-                                                    rounded
-                                                    className="mt-1"
-                                                />
-                                            ) : null}
-                                        </>
-                                    ) : (
-                                        <span className="text-500">
-                                            No deadline specified
-                                        </span>
-                                    )}
-                                </div>
-                            </div>
-                        </div>
-
-                        {/* REVIEWERS */}
-                        {(stage.minReviewers !== undefined ||
-                            stage.maxReviewers !== undefined) && (
-                                <div className="col-12 md:col-4">
-                                    <div className="flex align-items-start gap-3">
-                                        <i className="pi pi-users text-primary mt-1" />
-
-                                        <div>
-                                            <span className="text-500 text-xs uppercase font-semibold block mb-1">
-                                                Reviewers
-                                            </span>
-
-                                            <span className="text-900 font-medium">
-                                                {stage.minReviewers ??
-                                                    '-'}
-                                                {' – '}
-                                                {stage.maxReviewers ??
-                                                    '-'}
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                        {/* MIN SCORE */}
-                        {stage.minAcceptanceScore !==
-                            undefined && (
-                                <div className="col-12 md:col-4">
-                                    <div className="flex align-items-start gap-3">
-                                        <i className="pi pi-chart-line text-primary mt-1" />
-
-                                        <div>
-                                            <span className="text-500 text-xs uppercase font-semibold block mb-1">
-                                                Minimum Score
-                                            </span>
-
-                                            <span className="text-900 font-medium">
-                                                {
-                                                    stage.minAcceptanceScore
-                                                }
-                                                %
-                                            </span>
-                                        </div>
-                                    </div>
-                                </div>
-                            )}
-
-                    </div>
-                </div>
             )}
 
             {/* PROJECT */}

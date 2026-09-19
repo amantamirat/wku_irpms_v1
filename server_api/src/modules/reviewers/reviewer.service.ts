@@ -65,6 +65,12 @@ export class ReviewerService {
         } catch (err: any) {
 
             if (err?.code === 11000) {
+                console.error("Duplicate key error:");
+                console.error("Message:", err.message);
+                console.error("Key pattern:", err.keyPattern);
+                console.error("Key value:", err.keyValue);
+                console.error("Index:", err.index);
+                console.error("Full error:", err);
                 throw new AppError(
                     ERROR_CODES.REVIEWER_ALREADY_EXISTS
                 );

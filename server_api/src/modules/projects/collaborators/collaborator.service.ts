@@ -59,7 +59,7 @@ export class CollaboratorService {
                 }
             }
 
-            
+
             if (projectDoc.call) {
                 const callId = String(projectDoc.call);
                 const callDoc = await this.callRepo.findById(callId);
@@ -125,23 +125,21 @@ export class CollaboratorService {
 
     async update(dto: UpdateCollaboratorDto) {
         throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
-        /*
-        const { id, data } = dto;
-        const collabDoc = await this.collabRepo.findById(id);
-        if (!collabDoc) throw new Error(ERROR_CODES.COLLABORATOR_NOT_FOUND);
-        if (collabDoc.status !== CollaboratorStatus.pending)
-            throw new AppError(ERROR_CODES.COLLABORATOR_NOT_PENDING);
-        return await this.collabRepo.update(id, data);*/
     }
 
 
 
-    async transitionState(dto: TransitionRequestDto) {
+    async transitionState(dto: TransitionRequestDto, userId: string) {
         const { id, current, next } = dto;
 
         const collabDoc = await this.collabRepo.findById(id);
         if (!collabDoc) throw new AppError(ERROR_CODES.COLLABORATOR_NOT_FOUND);
         // if (collabDoc.isLeadPI === true) throw new AppError(ERROR_CODES.USER_LEAD_PI);
+
+        if (String(collabDoc.member) !== userId) {
+            //use permission for the special permission
+            throw new AppError(ERROR_CODES.UNAUTHORIZED);
+        }
 
         const from = collabDoc.status as CollaboratorStatus;
         const to = next as CollaboratorStatus;
@@ -182,7 +180,7 @@ export class CollaboratorService {
         if (collabDoc.isLeadPI) {
             throw new AppError(ERROR_CODES.COLLABORATOR_LEAD_PI_CANNOT_DELETE);
         }
-        if (collabDoc.status !== CollaboratorStatus.pending) throw new AppError(ERROR_CODES.COLLABORATOR_NOT_PENDING);
+        if (collabDoc.status === CollaboratorStatus.verified) throw new AppError(ERROR_CODES.COLLABORATOR_ALREADY_VERIFIED);
 
         const project = String(collabDoc.project);
         const { projectDoc, isLeadPI } = await this.projectAuth.auth(project, userId, PERMISSIONS.COLLABORATOR.DELETE);

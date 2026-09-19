@@ -1,10 +1,10 @@
-import { createEntityManager } from "@/components/createEntityManager";
 import { Constraint } from "../models/constraint.model";
 import { ConstraintApi } from "../api/constraint.api";
 import SaveConstraint from "./SaveConstraint";
 import { ConstraintView } from "./ConstraintView";
 import { etbCurrencyFormatter } from "@/utils/utils";
 import { formatRange } from "@/types/range";
+import { createEntityManager } from "@/components/data-table/createEntityManager";
 
 const ConstraintManager = () => {
     const Manager = createEntityManager<Constraint, undefined>({

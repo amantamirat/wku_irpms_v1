@@ -1,5 +1,14 @@
 import { IRange } from "../../../common/types/range";
 import { AggregationMode } from "./requirement.model";
+import { HistoryContext } from "../history/history.model";
+
+/**
+ * History rule reference used by a member requirement.
+ */
+export interface HistoryRuleReferenceDTO {
+    context: HistoryContext;
+    rule: string;
+}
 
 /**
  * Create Member Requirement
@@ -12,7 +21,7 @@ export interface CreateRequirementDTO {
 
     profile?: string;
 
-    historyRule?: string;
+    historyRules?: HistoryRuleReferenceDTO[];
 
     mode: AggregationMode;
 

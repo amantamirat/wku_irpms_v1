@@ -6,6 +6,9 @@ export interface CreateConstraintDTO {
     name: string;
     description?: string;
 
+    titleWords?: IRange;
+    summaryWords?: IRange;
+
     participants?: IRange;
     phases?: IRange;
 
@@ -17,7 +20,6 @@ export interface CreateConstraintDTO {
 
     themes?: IRange;
     subThemes?: IRange;
-
     focusAreas?: IRange;
     indicators?: IRange;
 }
