@@ -62,8 +62,8 @@ export class ApplicationRepository
     implements IApplicationRepository {
 
     /**
-     * Build MongoDB filter from application filters.
-     */
+ * Build MongoDB filter from application filters.
+ */
     private buildFilter(
         filters: FilterApplicationDTO = {}
     ): Record<string, any> {
@@ -73,6 +73,14 @@ export class ApplicationRepository
         if (filters.project) {
             query.project =
                 new mongoose.Types.ObjectId(filters.project);
+        }
+
+        if (filters.projectIds?.length) {
+            query.project = {
+                $in: filters.projectIds.map(
+                    id => new mongoose.Types.ObjectId(id)
+                )
+            };
         }
 
         if (filters.stage) {
@@ -87,7 +95,6 @@ export class ApplicationRepository
 
         return query;
     }
-
 
     /**
      * Find application by ID.

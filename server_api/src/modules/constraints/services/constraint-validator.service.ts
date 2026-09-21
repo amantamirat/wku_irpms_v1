@@ -10,7 +10,7 @@ import {
     matchRange
 } from "../../../common/types/range";
 
-export interface ConstraintValidationResult {
+export interface ValidationResult {
     valid: boolean;
     errors: string[];
 }
@@ -48,7 +48,7 @@ export class ConstraintValidationService {
     async validateProject(
         constraintId: string,
         dto: CreateProjectDTO
-    ): Promise<ConstraintValidationResult> {
+    ): Promise<ValidationResult> {
 
         const constraint =
             await this.getConstraint(constraintId);
@@ -112,7 +112,7 @@ export class ConstraintValidationService {
         constraintId: string,
         title: string,
         summary?: string
-    ): Promise<ConstraintValidationResult> {
+    ): Promise<ValidationResult> {
 
         const constraint =
             await this.getConstraint(constraintId);
@@ -141,7 +141,7 @@ export class ConstraintValidationService {
     async validateParticipantCount(
         constraintId: string,
         count: number
-    ): Promise<ConstraintValidationResult> {
+    ): Promise<ValidationResult> {
 
         const constraint =
             await this.getConstraint(constraintId);
@@ -164,7 +164,7 @@ export class ConstraintValidationService {
     async validatePhases(
         constraintId: string,
         phases: PhaseValidationInput[]
-    ): Promise<ConstraintValidationResult> {
+    ): Promise<ValidationResult> {
 
         const constraint =
             await this.getConstraint(constraintId);
@@ -187,7 +187,7 @@ export class ConstraintValidationService {
     async validateThemes(
         constraintId: string,
         selectedThemes: string[]
-    ): Promise<ConstraintValidationResult> {
+    ): Promise<ValidationResult> {
 
         const constraint =
             await this.getConstraint(constraintId);

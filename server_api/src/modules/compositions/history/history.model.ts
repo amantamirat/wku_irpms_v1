@@ -15,9 +15,17 @@ export interface IHistoryRuleReference {
     rule: mongoose.Types.ObjectId;
 }
 
+export enum HistoryParticipation {
+    LEAD = "LEAD",
+    MEMBER = "MEMBER",
+    ANY = "ANY"
+}
+
 export interface IHistoryRule extends Document {
     name: string;
     description?: string;
+
+    participation?: HistoryParticipation | null;
 
     project?: {
         granted?: IRange;
@@ -28,6 +36,12 @@ export interface IHistoryRule extends Document {
     application?: {
         submitted?: IRange;
         accepted?: IRange;
+        rejected?: IRange;
+    };
+
+    verification?: {
+        submitted?: IRange;
+        verified?: IRange;
         rejected?: IRange;
     };
 
@@ -47,6 +61,13 @@ const HistoryRuleSchema = new Schema<IHistoryRule>(
         description: {
             type: String,
             trim: true
+        },
+
+        participation: {
+            type: String,
+            enum: Object.values(HistoryParticipation),
+            required: true,
+            default: HistoryParticipation.ANY
         },
 
         project: {
@@ -69,6 +90,19 @@ const HistoryRuleSchema = new Schema<IHistoryRule>(
             },
 
             accepted: {
+                type: RangeSchema
+            },
+
+            rejected: {
+                type: RangeSchema
+            }
+        },
+        verification: {
+            submitted: {
+                type: RangeSchema
+            },
+
+            verified: {
                 type: RangeSchema
             },
 

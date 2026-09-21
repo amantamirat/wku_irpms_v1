@@ -52,7 +52,7 @@ export class UserService {
     // GET ALL (with optional filter)
     // -------------------------
     async getAll(filter: FilterUsersDTO, options?: FilterOptions) {
-        return await this.repo.findAll(filter, options);
+        return await this.repo.find(filter, options);
     }
 
     async lookup(filter: FilterUsersDTO) {

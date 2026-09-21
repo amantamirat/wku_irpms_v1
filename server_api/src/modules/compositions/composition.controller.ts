@@ -54,7 +54,7 @@ export class CompositionController {
                 id
             } = req.params;
             const composition =
-                await this.service.getById(id);
+                await this.service.getById(id, { populate: true });
             successResponse(
                 res,
                 200,

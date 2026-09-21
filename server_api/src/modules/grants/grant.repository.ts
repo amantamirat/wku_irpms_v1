@@ -175,6 +175,9 @@ export class GrantRepository implements IGrantRepository {
             ),
             title: dto.title,
             amount: dto.amount,
+            constraint: dto.constraint ? new mongoose.Types.ObjectId(
+                dto.constraint
+            ) : undefined,
             thematic: new mongoose.Types.ObjectId(
                 dto.thematic
             ),
@@ -201,6 +204,12 @@ export class GrantRepository implements IGrantRepository {
 
         if (dtoData.description !== undefined) {
             updateData.description = dtoData.description;
+        }
+
+        if (dtoData.constraint !== undefined) {
+            updateData.constraint = new mongoose.Types.ObjectId(
+                dtoData.constraint
+            );
         }
 
         if (dtoData.amount !== undefined) {

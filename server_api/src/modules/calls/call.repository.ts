@@ -216,7 +216,7 @@ export class CallRepository implements ICallRepository {
                 },
                 $push: {
                     statusHistory: {
-                        status,
+                        status: newStatus,
                         changedBy:
                             new mongoose.Types.ObjectId(userId),
                         changedAt: new Date()

@@ -32,15 +32,24 @@ export class CollaboratorRepository implements ICollaboratorRepository {
             .exec();
     }
 
-    async find(filters: FilterCollaborators, options?: FilterOptions) {
+    async find(
+        filters: FilterCollaborators,
+        options?: FilterOptions
+    ) {
         const query: any = {};
 
         if (filters.project) {
-            query.project = new mongoose.Types.ObjectId(filters.project);
+            query.project =
+                new mongoose.Types.ObjectId(filters.project);
         }
 
         if (filters.member) {
-            query.member = new mongoose.Types.ObjectId(filters.member);
+            query.member =
+                new mongoose.Types.ObjectId(filters.member);
+        }
+
+        if (filters.isLead !== undefined) {
+            query.isLeadPI = filters.isLead;
         }
 
         if (filters.status) {
@@ -51,8 +60,14 @@ export class CollaboratorRepository implements ICollaboratorRepository {
 
         if (options?.populate) {
             dbQuery = dbQuery.populate([
-                { path: 'member', populate: { path: 'workspace' } },
-                { path: 'project', populate: { path: 'leadPI' } }
+                {
+                    path: 'member',
+                    populate: { path: 'workspace' }
+                },
+                {
+                    path: 'project',
+                    populate: { path: 'leadPI' }
+                }
             ]);
         }
 

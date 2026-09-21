@@ -139,10 +139,16 @@ const OwnershipDialog = ({ visible, item, onHide, onComplete }: OwnershipDialogP
         />
     );
 
+    const ownershipUnitOptions = [
+        OrgnUnit.department,
+        OrgnUnit.directorate,
+        OrgnUnit.external,
+    ];
+
     const footer = (
         <div className="flex justify-content-between align-items-center w-full">
             <Dropdown
-                options={Object.values(OrgnUnit)}
+                options={ownershipUnitOptions}
                 placeholder="Add Unit Type..."
                 onChange={(e) => addOwnership(e.value)}
                 className="p-inputtext-sm w-12rem"

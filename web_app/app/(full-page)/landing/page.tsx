@@ -57,7 +57,7 @@ const LandingPage = () => {
                                     <Ripple />
                                 </a>
                             </li>
-                            
+
                         </ul>
                         <div className="flex justify-content-between lg:block border-top-1 lg:border-top-none surface-border py-3 lg:py-0 mt-3 lg:mt-0">
                             {!session ? (
@@ -65,9 +65,12 @@ const LandingPage = () => {
                                     <Link href="/auth/login" passHref>
                                         <Button label="Login" text rounded className="border-none font-light line-height-2 text-blue-500"></Button>
                                     </Link>
-                                    <Link href="/auth/register" passHref>
-                                        <Button label="Register" rounded className="border-none ml-5 font-light line-height-2 bg-blue-500 text-white"></Button>
-                                    </Link>
+                                    {
+                                        // <Link href="/auth/register" passHref>
+                                        <Button label="Register" disabled={true} rounded className="border-none ml-5 font-light line-height-2 bg-blue-500 text-white"></Button>
+                                        //  </Link>
+                                    }
+
                                 </>
                             ) : (
                                 <p>Welcome back, {session.user.name}!</p>

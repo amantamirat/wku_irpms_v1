@@ -7,8 +7,11 @@ import { CalendarRepository } from "../modules/calendar/calendar.repository";
 import { CallRepository } from "../modules/calls/call.repository";
 import { StageRepository } from "../modules/calls/stages/stage.repository";
 import { StageService } from "../modules/calls/stages/stage.service";
+import { CompositionValidationService } from "../modules/compositions/composition-validator.service";
 import { CompositionRepository } from "../modules/compositions/composition.repository";
+import { HistoryValidatorService } from "../modules/compositions/history/history-validator.service";
 import { HistoryRepository } from "../modules/compositions/history/history.repository";
+import { ProfileValidatorService } from "../modules/compositions/profile/profile-validator.service";
 import { ProfileRepository } from "../modules/compositions/profile/profile.repository";
 import { RequirementRepository } from "../modules/compositions/requirements/requirement.repository";
 import { ConstraintRepository } from "../modules/constraints/constraint.repository";
@@ -110,6 +113,23 @@ export const templateValidtor = new TemplateValidationService(
 export const constraintValidator = new ConstraintValidationService(
     constraintRepo, themeRepo);
 
+export const profileValidator = new ProfileValidatorService(
+    exprienceRepo, specializationRepo
+);
+
+export const historyValidator = new HistoryValidatorService(
+    applicationRepo, projectRepo, collaboratorRepo, grantRepo
+);
+
+//validator services 
+export const compositionValidator = new CompositionValidationService(
+    compositionRepo,
+    grantRepo,
+    new ProfileRepository(),
+    new HistoryRepository(),
+    new RequirementRepository(),
+    profileValidator, historyValidator);
+
 
 // Services
 export const stageService = new StageService(stageRepo, callRepo, evaluationRepo, applicationRepo);
@@ -131,7 +151,7 @@ export const applicationService = new ApplicationService(
 export const projectService = new ProjectService(projectRepo, userRepo, collaboratorRepo, phaseRepo, verificationRepo,
     grantRepo, callRepo, stageRepo,
     collabService, phaseService, applicationService,
-    constraintValidator, templateValidtor, projectAuth,
+    constraintValidator, compositionValidator, templateValidtor, projectAuth,
     authPermissionService, notificationService);
 
 export const userService = new UserService(userRepo, organizationRepo, roleRepo);

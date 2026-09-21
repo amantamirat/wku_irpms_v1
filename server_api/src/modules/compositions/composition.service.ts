@@ -18,8 +18,8 @@ export class CompositionService {
     return this.repository.findAll(options);
   }
 
-  async getById(id: string) {
-    const composition = await this.repository.findById(id);
+  async getById(id: string, options: FilterOptions) {
+    const composition = await this.repository.findById(id, options);
     if (!composition) {
       throw new AppError(
         ERROR_CODES.COMPOSITION_NOT_FOUND

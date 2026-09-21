@@ -122,8 +122,8 @@ app.use("/api/reports", reportRoutes);
 app.use("/api/uploads", express.static(path.join(process.cwd(), "uploads")));
 
 const MONGO_URL = process.env.MONGO_URL;
-const PORT = process.env.SERVER_PORT || 5000;
-
+const PORT = Number(process.env.SERVER_PORT) || 5000;
+const HOST = process.env.HOST || 'localhost';
 
 (async () => {
   try {
@@ -134,14 +134,11 @@ const PORT = process.env.SERVER_PORT || 5000;
     await mongoose.connect(MONGO_URL);
     console.log('database connection established');
 
-    // 2. Create the HTTP server explicitly using your Express app
     const httpServer = http.createServer(app);
 
-    // 3. Use the httpServer to listen instead of app.listen
-    httpServer.listen(PORT, () => {
-      console.log(`Server API is running at http://127.0.0.1:${PORT}`);
+    httpServer.listen(PORT, HOST, () => {
+      console.log(`Server API is running at http://${HOST}:${PORT}`);
 
-      // 4. Initialize SocketService with the httpServer instance
       SocketService.init(httpServer);
       console.log('Socket.io initialized successfully');
     });

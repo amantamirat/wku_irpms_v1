@@ -145,7 +145,7 @@ export const CallInfoStep = ({
                         value={extractId(data.grant)}
                         options={grants}
                         optionLabel="title"
-                        dataKey="_id"
+                        optionValue="_id"
                         onChange={(e) =>
                             onUpdate({
                                 grant: e.value

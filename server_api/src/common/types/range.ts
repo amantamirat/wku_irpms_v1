@@ -14,10 +14,10 @@ export function isValidRange(range: IRange): boolean {
 }
 
 export function matchRange(range: IRange, value: number): boolean {
-    if (range.min !== undefined && value < range.min)
+    if (range.min !== undefined && value <= range.min)
         return false;
 
-    if (range.max !== undefined && value > range.max)
+    if (range.max !== undefined && value >= range.max)
         return false;
     return value >= range.min && value <= range.max;
 }

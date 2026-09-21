@@ -20,11 +20,17 @@ export class CompositionRepository {
     return dbQuery.sort({ createdAt: -1 });
   }
 
-  async findById(id: string) {
-    return Composition.findById(id)
-      .populate("leadProfileRule")
-      .populate("leadHistoryRules.rule")
-      .populate("memberRequirements");
+  async findById(id: string, options?: FilterOptions) {
+    let query = Composition.findById(id);
+    
+    if (options?.populate) {
+      query = query
+        .populate("leadProfileRule")
+        .populate("leadHistoryRules.rule")
+        .populate("memberRequirements");
+    }
+
+    return query;
   }
 
   async update(

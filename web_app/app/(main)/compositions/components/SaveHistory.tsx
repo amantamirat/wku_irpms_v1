@@ -9,10 +9,11 @@ import { InputNumber } from 'primereact/inputnumber';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 
-import { HistoryRule, validateHistoryRule } from '../models/history.model';
+import { HistoryParticipation, HistoryRule, validateHistoryRule } from '../models/history.model';
 import { HistoryApi } from '../api/history.api';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
 import { IRange } from '@/types/range';
+import { Dropdown } from 'primereact/dropdown';
 
 type ProjectMetric = 'granted' | 'refused' | 'completed';
 type ApplicationMetric = 'submitted' | 'accepted' | 'rejected';
@@ -24,6 +25,7 @@ const initializeHistory = (
     _id: item?._id,
     name: item?.name ?? '',
     description: item?.description ?? '',
+    participation: item?.participation ?? HistoryParticipation.ANY,
     project: item?.project ? { ...item.project } : undefined,
     application: item?.application ? { ...item.application } : undefined,
     createdAt: item?.createdAt,
@@ -230,6 +232,48 @@ const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
                         }
                         placeholder="Describe the historical requirements for this rule..."
                     />
+                </div>
+
+                {/* Participation */}
+                <div className="field">
+                    <label htmlFor="participation" className="font-semibold">
+                        Participation <span className="text-red-500">*</span>
+                    </label>
+
+                    <Dropdown
+                        id="participation"
+                        value={localHistory.participation}
+                        options={[
+                            {
+                                label: 'Lead PI',
+                                value: HistoryParticipation.LEAD
+                            },
+                            {
+                                label: 'Member',
+                                value: HistoryParticipation.MEMBER
+                            },
+                            {
+                                label: 'Any',
+                                value: HistoryParticipation.ANY
+                            }
+                        ]}
+                        onChange={(e) =>
+                            setLocalHistory((prev) => ({
+                                ...prev,
+                                participation: e.value
+                            }))
+                        }
+                        placeholder="Select participation"
+                        className={classNames({
+                            'p-invalid':
+                                submitted && !localHistory.participation
+                        })}
+                    />
+
+                    <small className="text-600">
+                        Determines whether the history is counted for projects where
+                        the user was the lead PI, a member, or either.
+                    </small>
                 </div>
 
                 {/* Project History */}

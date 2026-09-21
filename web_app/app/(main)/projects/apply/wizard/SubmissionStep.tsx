@@ -7,6 +7,7 @@ import { useState } from 'react';
 import { ApplicationApi } from '../../../applications/api/application.api';
 import { Project } from '../../models/project.model';
 import { ProjectApi } from '@/app/(main)/projects/api/project.api';
+import { ERROR_CODES } from '@/api/error.codes';
 
 // Document/Template Validation Interfaces
 export interface SectionValidationResult {
@@ -26,7 +27,7 @@ export interface TemplateValidationResult {
 }
 
 // Backend Grant Constraint Validation Interface
-export interface ConstraintValidationResult {
+export interface ValidationResult {
     valid: boolean;
     errors: string[];
 }
@@ -45,7 +46,7 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
     // Error States
     const [error, setError] = useState<string | null>(null);
     const [validationDetails, setValidationDetails] = useState<TemplateValidationResult | null>(null);
-    const [constraintDetails, setConstraintDetails] = useState<ConstraintValidationResult | null>(null);
+    const [constraintDetails, setConstraintDetails] = useState<ValidationResult | null>(null);
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
@@ -90,20 +91,30 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
             setLoading(false);
             setSuccess(false);
 
-            // 1. Capture Template/PDF Section Validation Errors
-            if (err?.details?.sections) {
-                setValidationDetails(err.details as TemplateValidationResult);
-                setError("Document validation failed. Please address the issues listed below.");
+            //console.log("error on submission", err);
+            //console.log("error on submission", err.details);
+            //console.log("error on submission", JSON.stringify(err));
+
+            if (err.code === ERROR_CODES.INVALID_CONSTRAINT) {
+                setConstraintDetails(err.details as ValidationResult);
+            } else {
+                // 1. Capture Template/PDF Section Validation Errors
+                if (err?.details?.sections) {
+                    setValidationDetails(err.details as TemplateValidationResult);
+                    setError("Document validation failed. Please address the issues listed below.");
+                }
+                // 2. Capture Grant Constraint Validation Errors
+                else if (err?.details?.errors && Array.isArray(err.details.errors)) {
+                    setConstraintDetails(err.details as ValidationResult);
+                    setError(err?.message || "Grant constraint validation failed.");
+                }
+                // 3. Generic Error Handling
+                else {
+                    setError(err?.message || "Submission failed. Please try again later.");
+                }
             }
-            // 2. Capture Grant Constraint Validation Errors
-            else if (err?.details?.errors && Array.isArray(err.details.errors)) {
-                setConstraintDetails(err.details as ConstraintValidationResult);
-                setError(err?.message || "Grant constraint validation failed.");
-            }
-            // 3. Generic Error Handling
-            else {
-                setError(err?.message || "Submission failed. Please try again later.");
-            }
+
+
 
             console.error("Submission failed", err);
         }
@@ -292,8 +303,8 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                     icon={(loading || success) ? 'pi pi-spin pi-spinner' : 'pi pi-check-circle'}
                     onClick={submitFinalApplication}
                     className={`px-6 shadow-3 transition-all duration-500 ${success
-                            ? 'p-button-info opacity-100'
-                            : 'p-button-success'
+                        ? 'p-button-info opacity-100'
+                        : 'p-button-success'
                         }`}
                     disabled={!selectedFile || loading || success}
                 />

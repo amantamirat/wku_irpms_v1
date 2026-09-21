@@ -20,6 +20,7 @@ import { ThematicStatus } from '../../thematics/models/thematic.state-machine';
 import { GrantApi } from '../api/grant.api';
 import { FundingSource, Grant, validateGrant } from '../models/grant.model';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { extractId } from '@/utils/utils';
 
 const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<Grant>) => {
     const toast = useRef<Toast>(null);
@@ -27,6 +28,7 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [thematics, setThematics] = useState<Thematic[]>([]);
     const [constraints, setConstraints] = useState<Constraint[]>([]);
+
     const [localGrant, setLocalGrant] = useState<Grant>({ ...item });
     const [submitted, setSubmitted] = useState(false);
     const [isSaving, setIsSaving] = useState(false);
@@ -233,6 +235,26 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                         />
                     </div>
 
+                    <div className="field">
+                        <label
+                            htmlFor="constraint"
+                            className="font-semibold block mb-2"
+                        >
+                            Constraint Profile
+                        </label>
+
+                        <Dropdown
+                            id="constraint"
+                            value={extractId(localGrant.constraint)}
+                            options={constraints}
+                            optionLabel="name"
+                            optionValue="_id"
+                            onChange={(e) => updateField('constraint', e.value)}
+                            placeholder="Select Constraint (Optional)"
+                            showClear
+                        />
+                    </div>
+
                     {/* Numeric Input Currency context configuration wrapper */}
                     <div className="field">
                         <label htmlFor="amount" className="font-semibold block mb-2">Amount (ETB)</label>
@@ -268,7 +290,7 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                         </div>
                     )}
 
-                    
+
 
 
                     {/* Detailed Metadata Input Area Wrapper */}

@@ -28,6 +28,7 @@ export interface UpdateCollaboratorDto {
 export interface FilterCollaborators {
     project?: string;
     member?: string;
+    isLead?: boolean;
     status?: CollaboratorStatus,
 }
 

@@ -260,7 +260,7 @@ export class ApplicationService {
 
             await this.notificationService
                 .notifyApplicationSubmitted(
-                    String(projectDoc.leadPI),
+                    userId,
                     projectDoc.title,
                     stageDoc.name
                 );

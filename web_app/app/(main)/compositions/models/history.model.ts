@@ -1,9 +1,17 @@
 import { IRange, isValidRange } from "@/types/range";
 
+export enum HistoryParticipation {
+    LEAD = "LEAD",
+    MEMBER = "MEMBER",
+    ANY = "ANY"
+}
+
 export type HistoryRule = {
     _id?: string;
     name: string;
     description?: string;
+
+    participation?: HistoryParticipation;
 
     project?: {
         granted?: IRange;

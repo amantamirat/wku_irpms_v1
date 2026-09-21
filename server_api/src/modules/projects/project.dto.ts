@@ -4,7 +4,9 @@ import { ProjectStatus } from "./project.model";
 
 
 export interface FilterProjectsDTO {
+    ids?: string[];
     grant?: string;
+    grantIds?: string[];
     calendar?: string;
     leadPI?: string;
     call?: string;

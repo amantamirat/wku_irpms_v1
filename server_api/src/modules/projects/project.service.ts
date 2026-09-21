@@ -35,6 +35,7 @@ import { ProjectAuth } from "./project.auth";
 import { IUserRepository } from "../users/user.repository";
 import { IVerificationRepository } from "../grants/verifications/verification.repository";
 import { VerificationStatus } from "../grants/verifications/verification.model";
+import { CompositionValidationService } from "../compositions/composition-validator.service";
 
 
 export class ProjectService {
@@ -56,6 +57,7 @@ export class ProjectService {
         private readonly applicationService: ApplicationService,
 
         private readonly constraintValidator: ConstraintValidationService,
+        private readonly compositionValidator: CompositionValidationService,
         private readonly templateValidator: TemplateValidationService,
 
         private readonly projectAuth: ProjectAuth,
@@ -193,7 +195,25 @@ export class ProjectService {
         if (!isLeadPI) {
             throw new AppError(ERROR_CODES.UNAUTHORIZED);
         }
+        //
+        const leadUser = await this.userRepo.findById(leadPI);
 
+        if (!leadUser) {
+            throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+        }
+
+        const memberIds = dto.collaborators.map(
+            collaborator => collaborator.member
+        );
+
+        const memberUsers = await this.userRepo.find({
+            ids: memberIds
+        });
+
+        if (memberUsers.length !== memberIds.length) {
+            throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+        }
+        //
         const callDoc = await this.callRepo.findById(call);
 
         if (!callDoc)
@@ -224,6 +244,27 @@ export class ProjectService {
                 throw new AppError(
                     ERROR_CODES.INVALID_CONSTRAINT,
                     "Constraint validation failed",
+                    400,
+                    result
+                );
+            }
+        }
+
+        if (callDoc.composition) {
+            const result =
+                await this.compositionValidator.validate(
+                    String(callDoc.composition),
+                    callDoc,
+                    {
+                        lead: leadUser,
+                        members: memberUsers
+                    }
+                );
+
+            if (!result.valid) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_COMPOSITION,
+                    "Composition validation failed",
                     400,
                     result
                 );
@@ -402,6 +443,21 @@ export class ProjectService {
                            String(projectDoc.leadPI), projectDoc.title
                        );
                    }*/
+
+            const grandDoc = await this.grantRepo.findById(
+                String(projectDoc.grant)
+            );
+
+            if (!grandDoc) {
+                throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+            }
+            if (grandDoc.constraint) {
+                /*
+                this.constraintValidator.validateProject(String(grandDoc.constraint),
+                    projectDoc
+                );*/
+            }
+
 
         }
 

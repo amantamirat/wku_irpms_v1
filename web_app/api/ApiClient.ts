@@ -30,7 +30,7 @@ const handleError = async (
         errorName: string;
         errorCode?: string;
         errorMessage: string;
-        errorDetails?: unknown;
+        errorDetail?: unknown;
         error?: unknown;
     } | null = null;
 
@@ -45,6 +45,8 @@ const handleError = async (
     const errorMessage = errorData?.errorMessage;
     if (errorName === "AppError") {
         const errorCode = errorData?.errorCode;
+
+        //console.log(JSON.stringify(errorData));
         /**
          * * Token is no longer usable.
          * */
@@ -62,7 +64,7 @@ const handleError = async (
         throw new ApiError(errorMessage ?? "Request Failed", {
             code: errorCode,
             status: response.status,
-            details: errorData?.errorDetails
+            details: errorData?.errorDetail
         });
     }
 

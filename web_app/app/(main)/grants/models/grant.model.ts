@@ -1,3 +1,4 @@
+import { Constraint } from "../../constraints/models/constraint.model";
 import { Organization } from "../../organizations/models/organization.model";
 import { Thematic } from "../../thematics/models/thematic.model";
 import { GrantStatus } from "./grant.state-machine";
@@ -12,9 +13,10 @@ export type Grant = {
     fundingSource?: FundingSource;
     organization?: string | Organization;
     title?: string;
-    thematic?: string | Thematic;    
+    thematic?: string | Thematic;
     description?: string;
     amount: number;
+    constraint?: string | Constraint;
     usedBudget?: number;
     status?: GrantStatus;
     createdAt?: Date;
@@ -42,7 +44,7 @@ export function sanitize(grant: Partial<Grant>): Partial<Grant> {
                 ? (grant.organization as Organization)._id
                 : grant.organization,
         thematic: typeof grant.thematic === "object" ? (grant.thematic as Thematic)._id : grant.thematic,
-        
+
     };
 }
 

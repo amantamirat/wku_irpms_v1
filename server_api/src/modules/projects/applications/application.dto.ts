@@ -14,7 +14,7 @@ export interface UpdateApplicationDTO {
     id: string;
     data: Partial<{
         totalScore: number | null;
-        anonymizedDocumentPath:string;
+        anonymizedDocumentPath: string;
         anonymizationStatus: AnonymizationStatus;
     }>;
     userId: string;
@@ -27,9 +27,10 @@ export interface UpdateApplicationStatusDTO {
 
 export interface FilterApplicationDTO {
     project?: string;
+    projectIds?: string[];
     stage?: string;
     call?: string;
-    status?: ApplicationStatus;   
+    status?: ApplicationStatus;
 }
 
 export interface ExistsApplicationDTO {

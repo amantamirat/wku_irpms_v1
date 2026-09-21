@@ -1,23 +1,21 @@
 'use client';
 
-import { useEffect, useState } from "react";
 import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
 import { ProgressSpinner } from "primereact/progressspinner";
+import { useEffect, useState } from "react";
 
+import { CollaboratorApi } from "./collaborators/api/collaborator.api";
+import { Collaborator, CollaboratorStatus } from "./collaborators/models/collaborator.model";
+import AvailableStages from "./dashboard/AvailableStages";
 import CallOpportunityGrid from "./dashboard/CallOpportunityGrid";
 import QuickLinks from "./dashboard/QuickLinks";
 import VerificationWindow from "./dashboard/VerificationWindow";
+import MyPendingInvitation from "./dashboard/pending-collabs/MyPendingInvitation";
 import PendingEvalsManager from "./dashboard/pending-evals/MyPendingEvaluations";
+import { ReportDashboard } from "./reports/components/Dashboard";
 import { ReviewerApi } from "./reviewers/api/reviewer.api";
 import { Reviewer, ReviewerStatus } from "./reviewers/models/reviewer.model";
-import { CollaboratorApi } from "./collaborators/api/collaborator.api";
-import { Collaborator, CollaboratorStatus } from "./collaborators/models/collaborator.model";
-import { ReportDashboard } from "./reports/components/Dashboard";
-import UpcomingDeadlines from "./dashboard/UpcomingDeadlines";
-import MyPendingInvitation from "./dashboard/pending-collabs/MyPendingInvitation";
-import UpcomingStages from "./dashboard/AvailableStages";
-import AvailableStages from "./dashboard/AvailableStages";
 
 const Dashboard = () => {
     const { hasPermission } = useAuth();

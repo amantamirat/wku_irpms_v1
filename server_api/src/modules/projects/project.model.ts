@@ -61,6 +61,7 @@ const ProjectSchema = new Schema<IProject>({
         required: true,
         //immutable: true,
     },
+   
     organization: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.ORGANIZATION,

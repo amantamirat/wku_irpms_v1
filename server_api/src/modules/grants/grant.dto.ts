@@ -11,10 +11,11 @@ export interface CreateGrantDTO {
     fundingSource: FundingSource;
     organization: string;
     title: string;
+    constraint?: string;
     amount: number;
     thematic: string;
     description?: string;
-    status?:GrantStatus;
+    status?: GrantStatus;
 }
 
 export interface UpdateGrantDTO {
@@ -22,6 +23,7 @@ export interface UpdateGrantDTO {
     data: Partial<{
         title: string;
         description: string;
+        constraint?: string;
         amount: number;
     }>;
     userId?: string;

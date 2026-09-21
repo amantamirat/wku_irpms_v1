@@ -86,6 +86,10 @@ export class ProjectRepository implements IProjectRepository {
 
         const query: Record<string, any> = {};
 
+        if (filters.ids?.length) {
+            query._id = { $in: filters.ids.map(id => new mongoose.Types.ObjectId(id)) };
+        }
+
         if (filters.status) {
             query.status = filters.status;
         }
@@ -101,6 +105,11 @@ export class ProjectRepository implements IProjectRepository {
                 filters.grant
             );
         }
+
+        if (filters.grantIds?.length) {
+            query.grant = { $in: filters.grantIds.map(id => new mongoose.Types.ObjectId(id)) };
+        }
+
 
         if (filters.call) {
             query.call = new mongoose.Types.ObjectId(
@@ -124,7 +133,7 @@ export class ProjectRepository implements IProjectRepository {
                 .populate("themes")
                 .populate("currentApplication")
                 .populate("currentPhase")
-                .populate("currentVerification")                
+                .populate("currentVerification")
                 .populate("createdBy");
         }
 

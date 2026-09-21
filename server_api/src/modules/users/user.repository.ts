@@ -6,7 +6,7 @@ import { FilterOptions } from "../../common/dtos/filter.dto";
 export interface IUserRepository {
     findById(id: string, options?: FilterOptions): Promise<IUser | null>;
     findOne({ workspace, name }: FilterUsersDTO): Promise<IUser | null>;
-    findAll(filter?: FilterUsersDTO, options?: FilterOptions): Promise<IUser[]>;
+    find(filter?: FilterUsersDTO, options?: FilterOptions): Promise<IUser[]>;
     create(data: CreateUserDTO): Promise<IUser>;
     update(id: string, data: UpdateUserDTO["data"]): Promise<IUser | null>;
     // Roles management
@@ -56,7 +56,7 @@ export class UserRepository implements IUserRepository {
     // -------------------------
     // FIND ALL WITH OPTIONAL FILTER
     // -------------------------
-    async findAll(filter: FilterUsersDTO, options?: FilterOptions): Promise<IUser[]> {
+    async find(filter: FilterUsersDTO, options?: FilterOptions): Promise<IUser[]> {
         const query: any = {};
         // Handle single workspace filter
         if (filter.workspace) {
