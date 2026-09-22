@@ -1,24 +1,30 @@
 import { Request, Response } from 'express';
-import { successResponse, errorResponse } from '../../common/helpers/response';
+
+import {
+    successResponse,
+    errorResponse
+} from '../../common/helpers/response';
+
 import { AuthenticatedRequest } from '../auth/auth.middleware';
+
 import { UserService } from './user.service';
+
 import {
     CreateUserDTO,
     FilterUsersDTO,
     UpdateUserDTO,
-    UpdateOwnershipsDTO,
-    UpdateRolesDTO,
+    UpdateRolesDTO
 } from './user.dto';
 
 export class UserController {
 
-    constructor(private readonly service: UserService) {
-    }
+    constructor(
+        private readonly service: UserService
+    ) { }
 
-    // POST /applicants
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.auth) throw new Error('User not authorized');
+            if (!req.auth?.userId) return;
 
             const {
                 workspace,
@@ -34,58 +40,166 @@ export class UserController {
             const dto: CreateUserDTO = {
                 workspace,
                 name,
-                birthDate: new Date(birthDate),
+                birthDate: birthDate
+                    ? new Date(birthDate)
+                    : undefined,
                 gender,
                 fin,
                 orcid,
-                accessibility: accessibility || [],
+                accessibility: accessibility ?? [],
                 specializations
             };
 
-            const created = await this.service.create(dto);
-            successResponse(res, 201, 'User created successfully', created);
+            const created = await this.service.create(
+                dto,
+                req.auth.userId
+            );
+
+            successResponse(
+                res,
+                201,
+                'User created successfully',
+                created
+            );
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
     };
 
-    // GET /applicants
-    get = async (req: Request, res: Response) => {
+    // GET /users
+    get = async (
+        req: Request,
+        res: Response
+    ) => {
         try {
-            const { workspace } = req.query;
+            const {
+                workspace,
+                name,
+                specialization,
+                role
+            } = req.query;
 
             const filter: FilterUsersDTO = {
                 workspace: workspace as string,
+                name: name as string,
+                specialization: specialization as string,
+                role: role as string
             };
 
-            const users = await this.service.getAll(filter, { populate: true });
+            const users = await this.service.getAll(
+                filter,
+                { populate: true }
+            );
 
-            successResponse(res, 200, "Users fetched successfully", users);
+            successResponse(
+                res,
+                200,
+                'Users fetched successfully',
+                users
+            );
         } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
+            errorResponse(
+                res,
+                400,
+                err.message,
+                err
+            );
         }
     };
 
-
-    lookup = async (req: AuthenticatedRequest, res: Response) => {
+    // GET /users/lookup
+    lookup = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ) => {
         try {
-            if (!req.auth) throw new Error('User not authorized');
-            const { search, workspace } = req.query;
+            if (!req.auth?.userId) return;
+
+            const {
+                workspace,
+                name,
+                specialization,
+                role
+            } = req.query;
+
             const filter: FilterUsersDTO = {
                 workspace: workspace as string,
+                name: name as string,
+                specialization: specialization as string,
+                role: role as string
             };
+
             const users = await this.service.lookup(filter);
-            successResponse(res, 200, 'Users lookup fetched successfully', users);
+
+            successResponse(
+                res,
+                200,
+                'Users lookup fetched successfully',
+                users
+            );
         } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
+            errorResponse(
+                res,
+                400,
+                err.message,
+                err
+            );
         }
     };
 
-    update = async (req: AuthenticatedRequest, res: Response) => {
+    // GET /users/deleted
+    getDeleted = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ) => {
         try {
-            if (!req.auth) throw new Error('User not authorized');
+            if (!req.auth?.userId) return;
+
+            const {
+                workspace,
+                name,
+                specialization,
+                role
+            } = req.query;
+
+            const filter: FilterUsersDTO = {
+                workspace: workspace as string,
+                name: name as string,
+                specialization: specialization as string,
+                role: role as string
+            };
+
+            const users = await this.service.getDeleted(
+                filter,
+                { populate: true }
+            );
+
+            successResponse(
+                res,
+                200,
+                'Deleted users fetched successfully',
+                users
+            );
+        } catch (err: any) {
+            errorResponse(
+                res,
+                400,
+                err.message,
+                err
+            );
+        }
+    };
+
+    // PATCH /users/:id
+    update = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ) => {
+        try {
+            if (!req.auth?.userId) return;
 
             const { id } = req.params;
+
             const {
                 workspace,
                 name,
@@ -94,12 +208,11 @@ export class UserController {
                 fin,
                 orcid,
                 accessibility,
-                specializations,
+                specializations
             } = req.body;
 
             const dto: UpdateUserDTO = {
                 id,
-                userId: req.auth.userId,
                 data: {
                     workspace,
                     name,
@@ -108,68 +221,160 @@ export class UserController {
                     fin,
                     orcid,
                     accessibility,
-                    specializations,
-                },
+                    specializations
+                }
             };
 
-            const updated = await this.service.update(dto);
-            successResponse(res, 200, 'User updated successfully', updated);
+            const updated = await this.service.update(
+                dto,
+                req.auth.userId
+            );
+
+            successResponse(
+                res,
+                200,
+                'User updated successfully',
+                updated
+            );
         } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
+            errorResponse(
+                res,
+                400,
+                err.message,
+                err
+            );
         }
     };
 
-    // PATCH /applicants/roles?id=xxx
-    updateRoles = async (req: AuthenticatedRequest, res: Response) => {
+    // PATCH /users/:id/roles
+    updateRoles = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ) => {
         try {
-            if (!req.auth) throw new Error('User not authorized');
+            if (!req.auth?.userId) return;
 
             const { id } = req.params;
             const { roles } = req.body;
 
             const dto: UpdateRolesDTO = {
                 id,
-                roles,
-                userId: req.auth.userId,
+                roles
             };
 
-            const updated = await this.service.updateRoles(dto);
-            successResponse(res, 200, 'User roles updated successfully', updated);
+            const updated = await this.service.updateRoles(
+                dto,
+                req.auth.userId
+            );
+
+            successResponse(
+                res,
+                200,
+                'User roles updated successfully',
+                updated
+            );
         } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
+            errorResponse(
+                res,
+                400,
+                err.message,
+                err
+            );
         }
     };
 
-    // PATCH /applicants/ownerships?id=xxx
-    updateOwnerships = async (req: AuthenticatedRequest, res: Response) => {
+    // PATCH /users/:id/scope
+    updateScope = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ) => {
         try {
-            if (!req.auth) throw new Error('User not authorized');
+            if (!req.auth?.userId) return;
 
             const { id } = req.params;
-            const { ownerships } = req.body;
+            const { scope } = req.body;
 
-            const dto: UpdateOwnershipsDTO = {
+            const updated = await this.service.updateScope(
                 id,
-                ownerships,
-                userId: req.auth.userId,
-            };
+                scope,
+                req.auth.userId
+            );
 
-            const updated = await this.service.updateOwnerships(dto);
-            successResponse(res, 200, 'User ownerships updated successfully', updated);
+            successResponse(
+                res,
+                200,
+                'User scope updated successfully',
+                updated
+            );
         } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
+            errorResponse(
+                res,
+                400,
+                err.message,
+                err
+            );
         }
     };
 
-    // DELETE /applicants?id=xxx
-    delete = async (req: AuthenticatedRequest, res: Response) => {
+    // DELETE /users/:id
+    delete = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ) => {
         try {
-            if (!req.auth) throw new Error('User not authorized');
+            if (!req.auth?.userId) return;
+
             const { id } = req.params;
-            const deleted = await this.service.delete(id);
-            successResponse(res, 200, 'User deleted successfully', deleted);
+
+            const deleted = await this.service.delete(
+                id,
+                req.auth.userId
+            );
+
+            successResponse(
+                res,
+                200,
+                'User deleted successfully',
+                deleted
+            );
         } catch (err: any) {
-            errorResponse(res, 400, err.message, err);
+            errorResponse(
+                res,
+                400,
+                err.message,
+                err
+            );
+        }
+    };
+
+    // PATCH /users/:id/restore
+    restore = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ) => {
+        try {
+            if (!req.auth?.userId) return;
+
+            const { id } = req.params;
+
+            const restored = await this.service.restore(
+                id,
+                req.auth.userId
+            );
+
+            successResponse(
+                res,
+                200,
+                'User restored successfully',
+                restored
+            );
+        } catch (err: any) {
+            errorResponse(
+                res,
+                400,
+                err.message,
+                err
+            );
         }
     };
 }

@@ -70,8 +70,36 @@ export class ApplicationController {
     // ---------------------------------------------------
     // GET
     // ---------------------------------------------------
-    get = async (req: Request, res: Response) => {
+    get = async (req: AuthenticatedRequest, res: Response) => {
         try {
+            if (!req.auth) {
+                return
+            }
+            const { project, stage, status, populate, skip, limit } = req.query;
+
+            const dto: FilterApplicationDTO = {
+                project: project as string,
+                stage: stage as string,
+                status: status as any,
+                //...(populate !== undefined && { populate: populate === "true" }),
+                //skip: skip ? Number(skip) : undefined,
+                //limit: limit ? Number(limit) : undefined,
+            };
+            const applications = await this.service.read(dto, req.auth.userId, req.auth.scope, { populate: true });
+            
+            successResponse(res, 200, "Project documents fetched successfully", applications);
+
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
+
+    lookup = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            if (!req.auth) {
+                return
+            }
             const { project, stage, status, populate, skip, limit } = req.query;
 
             const dto: FilterApplicationDTO = {
@@ -83,6 +111,8 @@ export class ApplicationController {
                 //limit: limit ? Number(limit) : undefined,
             };
             const applications = await this.service.get(dto, { populate: true });
+            //const applications = await this.service.get(dto, { populate: true });
+
             successResponse(res, 200, "Project documents fetched successfully", applications);
 
         } catch (err: any) {

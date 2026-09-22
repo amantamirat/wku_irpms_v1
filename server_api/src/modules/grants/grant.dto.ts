@@ -1,9 +1,15 @@
 import { FundingSource, GrantStatus } from "./grant.model";
 
 export interface FilterGrantsDTO {
+    ids?: string[];
+
     organization?: string;
+    organizationIds?: string[];
+
     thematic?: string;
-    fundingSource?: FundingSource;
+
+    fundingSource?: string;
+
     status?: GrantStatus;
 }
 

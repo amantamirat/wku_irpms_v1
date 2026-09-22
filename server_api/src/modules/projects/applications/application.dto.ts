@@ -28,6 +28,11 @@ export interface UpdateApplicationStatusDTO {
 export interface FilterApplicationDTO {
     project?: string;
     projectIds?: string[];
+
+    grantIds?: string[];
+    organizationIds?: string[];
+    workspaceIds?: string[];
+
     stage?: string;
     call?: string;
     status?: ApplicationStatus;

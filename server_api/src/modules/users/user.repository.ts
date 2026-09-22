@@ -1,72 +1,218 @@
-import User, { IUser, IOwnership } from "./user.model";
-import { CreateUserDTO, UpdateUserDTO, FilterUsersDTO, UpdateRolesDTO, ExistsUserDTO } from "./user.dto";
 import mongoose from "mongoose";
+import User, {
+    IUser,
+    Gender,
+    Accessibility,
+    UserScope
+} from "./user.model";
+
+import {
+    CreateUserDTO,
+    UpdateUserDTO,
+    FilterUsersDTO,
+    UpdateRolesDTO
+} from "./user.dto";
+
 import { FilterOptions } from "../../common/dtos/filter.dto";
+import { toObjectId } from "../../common/utils/mongoose.utils";
+import { AppError } from "../../common/errors/app.error";
+import { ERROR_CODES } from "../../common/errors/error.codes";
+
+
+export interface CreateUserData {
+    workspace?: mongoose.Types.ObjectId;
+    name: string;
+    birthDate?: Date;
+    gender?: Gender;
+    fin?: string;
+    orcid?: string;
+    accessibility?: Accessibility[];
+    specializations?: mongoose.Types.ObjectId[];
+    roles: mongoose.Types.ObjectId[];
+    scope: UserScope;
+    isSystem?: boolean;
+    createdBy?: mongoose.Types.ObjectId;
+}
+
 
 export interface IUserRepository {
-    findById(id: string, options?: FilterOptions): Promise<IUser | null>;
-    findOne({ workspace, name }: FilterUsersDTO): Promise<IUser | null>;
-    find(filter?: FilterUsersDTO, options?: FilterOptions): Promise<IUser[]>;
-    create(data: CreateUserDTO): Promise<IUser>;
-    update(id: string, data: UpdateUserDTO["data"]): Promise<IUser | null>;
-    // Roles management
-    updateRoles(userId: string, dto: UpdateRolesDTO): Promise<IUser | null>;
-    // ownership management
-    updateOwnerships(id: string, ownerships: IOwnership[]): Promise<IUser | null>;
-    exists(filters: ExistsUserDTO): Promise<boolean>;
-    delete(id: string): Promise<IUser | null>;
+
+    // -------------------------
+    // READ ACTIVE USERS
+    // -------------------------
+
+    findById(
+        id: string,
+        options?: FilterOptions
+    ): Promise<IUser | null>;
+
+    findOne(
+        filters: FilterUsersDTO
+    ): Promise<IUser | null>;
+
+    find(
+        filter: FilterUsersDTO,
+        options?: FilterOptions
+    ): Promise<IUser[]>;
+
+
+    // -------------------------
+    // READ DELETED USERS
+    // -------------------------
+
+    findDeleted(
+        filter: FilterUsersDTO,
+        options?: FilterOptions
+    ): Promise<IUser[]>;
+
+
+    // -------------------------
+    // CREATE
+    // -------------------------
+
+    create(
+        data: CreateUserData
+    ): Promise<IUser>;
+
+
+    // -------------------------
+    // UPDATE
+    // -------------------------
+
+    update(
+        id: string,
+        data: UpdateUserDTO["data"],
+        updatedBy?: string
+    ): Promise<IUser | null>;
+
+    updateRoles(
+        userId: string,
+        dto: UpdateRolesDTO,
+        updatedBy?: string
+    ): Promise<IUser | null>;
+
+    updateScope(
+        id: string,
+        scope: string[] | "*" | null,
+        updatedBy?: string
+    ): Promise<IUser | null>;
+
+
+    // -------------------------
+    // DELETE / RESTORE
+    // -------------------------
+
+    softDelete(
+        id: string,
+        deletedBy?: string
+    ): Promise<IUser | null>;
+
+    restore(
+        id: string,
+        restoredBy?: string
+    ): Promise<IUser | null>;
+
+
+    // -------------------------
+    // EXISTS
+    // -------------------------
+
+    exists(
+        filters: FilterUsersDTO
+    ): Promise<boolean>;
 }
 
 
 export class UserRepository implements IUserRepository {
+
     // -------------------------
-    // FIND BY ID
+    // FIND ACTIVE BY ID
     // -------------------------
-    async findById(id: string, options?: FilterOptions): Promise<IUser | null> {
-        let query = User.findById(new mongoose.Types.ObjectId(id));
+
+    async findById(
+        id: string,
+        options?: FilterOptions
+    ): Promise<IUser | null> {
+
+        let query = User.findOne({
+            _id: toObjectId(id),
+            deletedAt: null
+        });
 
         if (options?.populate) {
-            query = query
-                .populate("workspace")
-                .populate({
-                    path: "roles",
-                    populate: { path: "permissions" }
-                })
-                .populate("ownerships");
+            query = query.populate("workspace");
         }
+
         return query
             .lean<IUser>()
             .exec();
     }
 
 
-    async findOne({ workspace, name }: FilterUsersDTO) {
-        const filter: Record<string, any> = {};
+    // -------------------------
+    // FIND ONE ACTIVE
+    // -------------------------
+
+    async findOne(
+        { workspace, name }: FilterUsersDTO
+    ): Promise<IUser | null> {
+
+        const filter: Record<string, unknown> = {
+            deletedAt: null
+        };
+
         if (workspace) {
-            filter.workspace = new mongoose.Types.ObjectId(workspace);
+            filter.workspace = toObjectId(workspace);
         }
+
         if (name) {
             filter.name = name;
         }
+
         return User.findOne(filter)
             .lean<IUser>()
             .exec();
     }
 
+
     // -------------------------
-    // FIND ALL WITH OPTIONAL FILTER
+    // FIND ACTIVE USERS
     // -------------------------
-    async find(filter: FilterUsersDTO, options?: FilterOptions): Promise<IUser[]> {
-        const query: any = {};
-        // Handle single workspace filter
+
+    async find(
+        filter: FilterUsersDTO,
+        options?: FilterOptions
+    ): Promise<IUser[]> {
+
+        const query: Record<string, unknown> = {
+            deletedAt: null,
+            isSystem: { $ne: true }
+        };
+
         if (filter.workspace) {
-            query.workspace = new mongoose.Types.ObjectId(filter.workspace);
+            query.workspace = toObjectId(filter.workspace);
         }
-        // Handle array of user IDs filter
-        if (filter.ids && filter.ids.length > 0) {
+
+        if (filter.ids?.length) {
             query._id = {
-                $in: filter.ids.map(id => new mongoose.Types.ObjectId(id))
+                $in: filter.ids.map(toObjectId)
             };
+        }
+
+        if (filter.name) {
+            query.name = filter.name;
+        }
+
+        if (filter.specialization) {
+            query.specializations = toObjectId(
+                filter.specialization
+            );
+        }
+
+        if (filter.role) {
+            query.roles = toObjectId(
+                filter.role
+            );
         }
 
         let dbQuery = User.find(query);
@@ -79,93 +225,344 @@ export class UserRepository implements IUserRepository {
             .lean<IUser[]>()
             .exec();
     }
+
+
+    // -------------------------
+    // FIND DELETED USERS
+    // -------------------------
+
+    async findDeleted(
+        filter: FilterUsersDTO,
+        options?: FilterOptions
+    ): Promise<IUser[]> {
+
+        const query: Record<string, unknown> = {
+            deletedAt: {
+                $ne: null
+            }
+        };
+
+        if (filter.workspace) {
+            query.workspace = toObjectId(
+                filter.workspace
+            );
+        }
+
+        if (filter.ids?.length) {
+            query._id = {
+                $in: filter.ids.map(toObjectId)
+            };
+        }
+
+        if (filter.name) {
+            query.name = filter.name;
+        }
+
+        if (filter.specialization) {
+            query.specializations = toObjectId(
+                filter.specialization
+            );
+        }
+
+        if (filter.role) {
+            query.roles = toObjectId(
+                filter.role
+            );
+        }
+
+        let dbQuery = User.find(query);
+
+        if (options?.populate) {
+            dbQuery = dbQuery
+                .populate("workspace");
+        }
+
+        return dbQuery
+            .lean<IUser[]>()
+            .exec();
+    }
+
+
     // -------------------------
     // CREATE
     // -------------------------
-    async create(dto: CreateUserDTO): Promise<IUser> {
-        const data: Partial<IUser> = {
-            workspace: dto.workspace ? new mongoose.Types.ObjectId(dto.workspace) : undefined,
-            name: dto.name,
-            birthDate: dto.birthDate,
-            gender: dto.gender,
-            fin: dto.fin,
-            orcid: dto.orcid,
-            // Map roles to ObjectIds
-            roles: dto.roles?.map(role => new mongoose.Types.ObjectId(role)),
-            // Map specializations to ObjectIds
-            specializations: dto.specializations?.map(spec => new mongoose.Types.ObjectId(spec)),
-            // Ensure accessibility is at least an empty array
-            accessibility: dto.accessibility ?? [],
-            // Map the DTO "ownerships" to the Schema "ownership" field
-            ownerships: dto.ownerships ?? []
-        };
+
+    async create(
+        data: CreateUserData
+    ): Promise<IUser> {
 
         return User.create(data);
     }
+
+
     // -------------------------
     // UPDATE
     // -------------------------
-    async update(id: string, dtoData: UpdateUserDTO["data"]): Promise<IUser | null> {
-        const toUpdate: any = {};
 
-        if (dtoData.workspace) toUpdate.workspace = new mongoose.Types.ObjectId(dtoData.workspace);
-        if (dtoData.name) toUpdate.name = dtoData.name;
-        if (dtoData.birthDate) toUpdate.birthDate = dtoData.birthDate;
-        if (dtoData.gender) toUpdate.gender = dtoData.gender;
-        if (dtoData.fin) toUpdate.fin = dtoData.fin;
-        if (dtoData.orcid) toUpdate.orcid = dtoData.orcid;
-        if (dtoData.accessibility) toUpdate.accessibility = dtoData.accessibility;
-        if (dtoData.specializations) {
-            toUpdate.specializations = dtoData.specializations?.map(id => new mongoose.Types.ObjectId(id))
+    async update(
+        id: string,
+        dto: UpdateUserDTO["data"],
+        updatedBy?: string
+    ): Promise<IUser | null> {
+
+        const userId = toObjectId(id);
+
+        const updatedById = updatedBy
+            ? toObjectId(updatedBy)
+            : undefined;
+
+        const update: Record<string, unknown> = {};
+
+        if (dto.workspace !== undefined) {
+            update.workspace = dto.workspace
+                ? toObjectId(dto.workspace)
+                : null;
         }
-        return User.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
-            { $set: toUpdate },
-            { new: true }
-        ).lean<IUser>();
 
-    }
-    // -------------------------
-    // ROLES UPDATE
-    // -------------------------
-    async updateRoles(id: string, dto: UpdateRolesDTO): Promise<IUser | null> {
-        return User.findByIdAndUpdate(
-            id,
-            { $set: { roles: dto.roles.map(id => new mongoose.Types.ObjectId(id)), updatedAt: new Date() } },
+        if (dto.name !== undefined) {
+            update.name = dto.name;
+        }
+
+        if (dto.birthDate !== undefined) {
+            update.birthDate = dto.birthDate;
+        }
+
+        if (dto.gender !== undefined) {
+            update.gender = dto.gender;
+        }
+
+        if (dto.fin !== undefined) {
+            update.fin = dto.fin;
+        }
+
+        if (dto.orcid !== undefined) {
+            update.orcid = dto.orcid;
+        }
+
+        if (dto.accessibility !== undefined) {
+            update.accessibility = dto.accessibility;
+        }
+
+        if (dto.specializations !== undefined) {
+            update.specializations =
+                dto.specializations.map(toObjectId);
+        }
+
+        return User.findOneAndUpdate(
+            {
+                _id: userId,
+                deletedAt: null
+            },
+            {
+                $set: {
+                    ...update,
+                    ...(updatedById && {
+                        updatedBy: updatedById
+                    }),
+                    updatedAt: new Date()
+                }
+            },
             { new: true }
-        ).lean<IUser>();
-    }
-    // -------------------------
-    // OWNERSHIP UPDATE
-    // -------------------------
-    async updateOwnerships(id: string, ownerships: IOwnership[]) {
-        return User.findByIdAndUpdate(
-            id,
-            { ownerships },
-            { new: true }
-        );
+        )
+            .lean<IUser>()
+            .exec();
     }
 
-    async exists(filters: ExistsUserDTO): Promise<boolean> {
-        const query: any = {};
+
+    // -------------------------
+    // UPDATE ROLES
+    // -------------------------
+
+    async updateRoles(
+        id: string,
+        dto: UpdateRolesDTO,
+        updatedBy?: string
+    ): Promise<IUser | null> {
+
+        const updatedById = updatedBy
+            ? toObjectId(updatedBy)
+            : undefined;
+
+        return User.findOneAndUpdate(
+            {
+                _id: toObjectId(id),
+                deletedAt: null
+            },
+            {
+                $set: {
+                    roles: dto.roles.map(toObjectId),
+                    ...(updatedById && {
+                        updatedBy: updatedById
+                    }),
+                    updatedAt: new Date()
+                }
+            },
+            { new: true }
+        )
+            .lean<IUser>()
+            .exec();
+    }
+
+
+    // -------------------------
+    // UPDATE SCOPE
+    // -------------------------
+
+    async updateScope(
+        userId: string,
+        scope: string[] | "*" | null,
+        updatedBy: string
+    ): Promise<IUser> {
+
+        const user =
+            await User.findOneAndUpdate(
+                {
+                    _id: toObjectId(userId),
+                    deletedAt: null
+                },
+                {
+                    $set: {
+                        scope,
+                        updatedBy
+                    }
+                },
+                {
+                    new: true
+                }
+            )
+                .lean<IUser>()
+                .exec();
+
+        if (!user) {
+            throw new AppError(
+                ERROR_CODES.USER_NOT_FOUND
+            );
+        }
+
+        return user;
+    }
+
+
+    // -------------------------
+    // SOFT DELETE
+    // -------------------------
+
+    async softDelete(
+        id: string,
+        deletedBy?: string
+    ): Promise<IUser | null> {
+
+        const userId = toObjectId(id);
+
+        const deletedById = deletedBy
+            ? toObjectId(deletedBy)
+            : undefined;
+
+        return User.findOneAndUpdate(
+            {
+                _id: userId,
+                deletedAt: null
+            },
+            {
+                $set: {
+                    deletedAt: new Date(),
+                    deletedBy: deletedById ?? null,
+                    updatedAt: new Date(),
+                    ...(deletedById && {
+                        updatedBy: deletedById
+                    })
+                }
+            },
+            { new: true }
+        )
+            .lean<IUser>()
+            .exec();
+    }
+
+
+    // -------------------------
+    // RESTORE
+    // -------------------------
+
+    async restore(
+        id: string,
+        restoredBy?: string
+    ): Promise<IUser | null> {
+
+        const userId = toObjectId(id);
+
+        const restoredById = restoredBy
+            ? toObjectId(restoredBy)
+            : undefined;
+
+        return User.findOneAndUpdate(
+            {
+                _id: userId,
+                deletedAt: {
+                    $ne: null
+                }
+            },
+            {
+                $set: {
+                    deletedAt: null,
+                    deletedBy: null,
+                    updatedAt: new Date(),
+                    ...(restoredById && {
+                        updatedBy: restoredById
+                    })
+                }
+            },
+            { new: true }
+        )
+            .lean<IUser>()
+            .exec();
+    }
+
+
+    // -------------------------
+    // EXISTS ACTIVE USER
+    // -------------------------
+
+    async exists(
+        filters: FilterUsersDTO
+    ): Promise<boolean> {
+
+        const query: Record<string, unknown> = {
+            deletedAt: null
+        };
+
         if (filters.workspace) {
-            query.workspace = new mongoose.Types.ObjectId(filters.workspace);
+            query.workspace = toObjectId(
+                filters.workspace
+            );
         }
+
         if (filters.specialization) {
-            query.specializations = new mongoose.Types.ObjectId(filters.specialization);
-            // This automatically checks if the array contains the ObjectId
+            query.specializations = toObjectId(
+                filters.specialization
+            );
         }
+
         if (filters.role) {
-            query.roles = new mongoose.Types.ObjectId(filters.role);
+            query.roles = toObjectId(
+                filters.role
+            );
         }
-        const result = await User.exists(query).exec();
+
+        if (filters.ids?.length) {
+            query._id = {
+                $in: filters.ids.map(toObjectId)
+            };
+        }
+
+        if (filters.name) {
+            query.name = filters.name;
+        }
+
+        const result = await User
+            .exists(query)
+            .exec();
+
         return result !== null;
     }
-    // -------------------------
-    // DELETE
-    // -------------------------
-    async delete(id: string): Promise<IUser | null> {
-        return User.findByIdAndDelete(new mongoose.Types.ObjectId(id)).exec();
-    }
 }
-

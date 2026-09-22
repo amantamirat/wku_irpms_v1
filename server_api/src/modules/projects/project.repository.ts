@@ -1,14 +1,24 @@
-// project.repository.ts
 import mongoose from "mongoose";
+
 import { FilterOptions } from "../../common/dtos/filter.dto";
+
+
 import {
     CreateProjectDTO,
     FilterProjectsDTO,
     UpdateProjectDTO
 } from "./project.dto";
-import { IProject, Project, ProjectStatus } from "./project.model";
+
+import {
+    IProject,
+    Project,
+    ProjectStatus
+} from "./project.model";
+import { toObjectId } from "../../common/utils/mongoose.utils";
+
 
 export interface IProjectRepository {
+
     findById(
         id: string,
         options?: FilterOptions
@@ -16,11 +26,16 @@ export interface IProjectRepository {
 
     find(
         filters: FilterProjectsDTO,
-        options?: FilterOptions
-    ): Promise<Partial<IProject>[]>;
+        options?: FilterOptions,
+        scopeFilter?: Record<string, unknown>,
+    ): Promise<IProject[]>;
+
+    findIdsByFilter(
+        scopeFilter: Record<string, unknown>
+    ): Promise<mongoose.Types.ObjectId[]>;
 
     create(
-        dto: CreateProjectDTO,
+        data: CreateProjectData,
         userId: string
     ): Promise<IProject>;
 
@@ -41,7 +56,7 @@ export interface IProjectRepository {
 
     updateStatus(
         id: string,
-        newStatus: ProjectStatus,
+        status: ProjectStatus,
         userId: string
     ): Promise<IProject | null>;
 
@@ -55,7 +70,83 @@ export interface IProjectRepository {
 }
 
 
-export class ProjectRepository implements IProjectRepository {
+/**
+ * Data required by the repository to persist a project.
+ *
+ * workspace and organization are resolved by the service,
+ * not supplied directly by the client.
+ */
+export interface CreateProjectData
+    extends CreateProjectDTO {
+
+    organization: string;
+    workspace: string;
+}
+
+
+export class ProjectRepository
+    implements IProjectRepository {
+
+    private buildFilter(
+        filters: FilterProjectsDTO
+    ): Record<string, unknown> {
+
+        const query: Record<string, unknown> = {};
+
+        if (filters.ids?.length) {
+            query._id = {
+                $in: filters.ids.map(toObjectId)
+            };
+        }
+
+        if (filters.grant) {
+            query.grant = toObjectId(
+                filters.grant
+            );
+        }
+
+        if (filters.grantIds?.length) {
+            query.grant = {
+                $in: filters.grantIds.map(toObjectId)
+            };
+        }
+
+        if (filters.organization) {
+            query.organization =
+                toObjectId(filters.organization);
+        }
+
+        if (filters.workspace) {
+            query.workspace =
+                toObjectId(filters.workspace);
+        }
+
+        if (filters.calendar) {
+            query.calendar =
+                toObjectId(filters.calendar);
+        }
+
+        if (filters.call) {
+            query.call =
+                toObjectId(filters.call);
+        }
+
+        if (filters.leadPI) {
+            query.leadPI =
+                toObjectId(filters.leadPI);
+        }
+
+        if (filters.title) {
+            query.title = filters.title;
+        }
+
+        if (filters.status) {
+            query.status = filters.status;
+        }
+
+        return query;
+    }
+
 
     async findById(
         id: string,
@@ -63,72 +154,15 @@ export class ProjectRepository implements IProjectRepository {
     ): Promise<IProject | null> {
 
         let dbQuery = Project.findById(
-            new mongoose.Types.ObjectId(id)
+            toObjectId(id)
         );
 
         if (options?.populate) {
             dbQuery = dbQuery
                 .populate("leadPI")
-                .populate("calendar")
                 .populate("grant")
-                .populate("themes")
-                .populate("createdBy");
-        }
-
-        return dbQuery.lean<IProject>().exec();
-    }
-
-
-    async find(
-        filters: FilterProjectsDTO,
-        options?: FilterOptions
-    ): Promise<Partial<IProject>[]> {
-
-        const query: Record<string, any> = {};
-
-        if (filters.ids?.length) {
-            query._id = { $in: filters.ids.map(id => new mongoose.Types.ObjectId(id)) };
-        }
-
-        if (filters.status) {
-            query.status = filters.status;
-        }
-
-        if (filters.leadPI) {
-            query.leadPI = new mongoose.Types.ObjectId(
-                filters.leadPI
-            );
-        }
-
-        if (filters.grant) {
-            query.grant = new mongoose.Types.ObjectId(
-                filters.grant
-            );
-        }
-
-        if (filters.grantIds?.length) {
-            query.grant = { $in: filters.grantIds.map(id => new mongoose.Types.ObjectId(id)) };
-        }
-
-
-        if (filters.call) {
-            query.call = new mongoose.Types.ObjectId(
-                filters.call
-            );
-        }
-
-        if (filters.calendar) {
-            query.calendar = new mongoose.Types.ObjectId(
-                filters.calendar
-            );
-        }
-
-        let dbQuery = Project.find(query);
-
-        if (options?.populate) {
-            dbQuery = dbQuery
-                .populate("leadPI")
-                .populate("grant")
+                .populate("organization")
+                .populate("workspace")
                 .populate("calendar")
                 .populate("themes")
                 .populate("currentApplication")
@@ -137,118 +171,166 @@ export class ProjectRepository implements IProjectRepository {
                 .populate("createdBy");
         }
 
-        return dbQuery.lean<IProject[]>().exec();
+        return dbQuery
+            .lean<IProject>()
+            .exec();
+    }
+
+
+    async find(
+        filters: FilterProjectsDTO,
+        options?: FilterOptions,
+        scopeFilter?: Record<string, unknown>
+    ): Promise<IProject[]> {
+
+        const filter =
+            this.buildFilter(filters);
+
+        const query = scopeFilter
+            ? { $and: [scopeFilter, filter] }
+            : filter;
+
+        let dbQuery =
+            Project.find(query);
+
+        if (options?.populate) {
+            dbQuery = dbQuery
+                .populate("leadPI")
+                .populate("grant")
+                .populate("organization")
+                .populate("workspace")
+                .populate("calendar")
+                .populate("themes")
+                .populate("currentApplication")
+                .populate("currentPhase")
+                .populate("currentVerification")
+                .populate("createdBy");
+        }
+
+        return dbQuery
+            .lean<IProject[]>()
+            .exec();
+    }
+
+    async findIdsByFilter(
+        filter: Record<string, unknown>
+    ): Promise<mongoose.Types.ObjectId[]> {
+        const projects =
+            await Project.find(filter).select("_id").lean<{ _id: mongoose.Types.ObjectId }[]>().exec();
+        return projects.map(project => project._id);
     }
 
 
     async create(
-        dto: CreateProjectDTO,
+        data: CreateProjectData,
         userId: string
     ): Promise<IProject> {
 
-        const data = {
-            ...dto,
+        const project = {
+            grant: toObjectId(data.grant),
 
-            calendar: dto.calendar
-                ? new mongoose.Types.ObjectId(dto.calendar)
+            organization:
+                toObjectId(data.organization),
+
+            workspace:
+                toObjectId(data.workspace),
+
+            calendar: data.calendar
+                ? toObjectId(data.calendar)
                 : undefined,
 
-            call: dto.call
-                ? new mongoose.Types.ObjectId(dto.call)
+            call: data.call
+                ? toObjectId(data.call)
                 : undefined,
 
-            grant: new mongoose.Types.ObjectId(dto.grant),
+            title: data.title,
 
-            leadPI: new mongoose.Types.ObjectId(dto.leadPI),
+            summary: data.summary,
 
-            themes: dto.themes?.map(
-                themeId => new mongoose.Types.ObjectId(themeId)
-            ),
+            leadPI: toObjectId(data.leadPI),
 
-            createdBy: new mongoose.Types.ObjectId(userId)
+            themes: data.themes.map(toObjectId),
+
+            createdBy: toObjectId(userId)
         };
 
-        return Project.create(data);
+        return Project.create(project);
     }
+
 
     async update(
         id: string,
-        dtoData: UpdateProjectDTO["data"],
+        data: UpdateProjectDTO["data"],
         userId?: string
     ): Promise<IProject | null> {
 
         const updateData: Partial<IProject> = {};
 
-        if (dtoData.title !== undefined) {
-            updateData.title = dtoData.title;
+        if (data.title !== undefined) {
+            updateData.title = data.title;
         }
 
-        if (dtoData.summary !== undefined) {
-            updateData.summary = dtoData.summary;
+        if (data.summary !== undefined) {
+            updateData.summary = data.summary;
         }
 
-        if (dtoData.totalBudget !== undefined) {
-            updateData.totalBudget = dtoData.totalBudget;
+        if (data.themes !== undefined) {
+            updateData.themes =
+                data.themes.map(toObjectId);
         }
 
-        if (dtoData.totalDuration !== undefined) {
-            updateData.totalDuration = dtoData.totalDuration;
-        }
-
-        if (dtoData.totalCollabs !== undefined) {
-            updateData.totalCollabs = dtoData.totalCollabs;
-        }
-
-        if (dtoData.themes !== undefined) {
-            updateData.themes = dtoData.themes.map(
-                themeId => new mongoose.Types.ObjectId(themeId)
-            );
-        }
-
-        if (dtoData.call !== undefined) {
-            updateData.call = dtoData.call
-                ? new mongoose.Types.ObjectId(dtoData.call)
+        if (data.call !== undefined) {
+            updateData.call = data.call
+                ? toObjectId(data.call)
                 : null;
         }
 
-        if (dtoData.calendar !== undefined) {
-            updateData.calendar = dtoData.calendar
-                ? new mongoose.Types.ObjectId(dtoData.calendar)
+        if (data.calendar !== undefined) {
+            updateData.calendar = data.calendar
+                ? toObjectId(data.calendar)
                 : null;
         }
 
-        if (dtoData.currentApplication !== undefined) {
+        if (data.currentApplication !== undefined) {
             updateData.currentApplication =
-                dtoData.currentApplication
-                    ? new mongoose.Types.ObjectId(dtoData.currentApplication)
+                data.currentApplication
+                    ? toObjectId(
+                        data.currentApplication
+                    )
                     : null;
         }
 
-        if (dtoData.currentPhase !== undefined) {
+        if (data.currentPhase !== undefined) {
             updateData.currentPhase =
-                dtoData.currentPhase
-                    ? new mongoose.Types.ObjectId(dtoData.currentPhase)
+                data.currentPhase
+                    ? toObjectId(
+                        data.currentPhase
+                    )
                     : null;
         }
 
-        if (dtoData.currentVerification !== undefined) {
+        if (data.currentVerification !== undefined) {
             updateData.currentVerification =
-                dtoData.currentVerification
-                    ? new mongoose.Types.ObjectId(dtoData.currentVerification)
+                data.currentVerification
+                    ? toObjectId(
+                        data.currentVerification
+                    )
                     : null;
         }
 
         if (userId) {
-            updateData.updatedBy = new mongoose.Types.ObjectId(userId);
+            updateData.updatedBy =
+                toObjectId(userId);
         }
 
         return Project.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
+            toObjectId(id),
             {
                 $set: updateData
             },
             {
-                new: true
+                new: true,
+                runValidators: true
             }
         ).exec();
     }
@@ -261,24 +343,39 @@ export class ProjectRepository implements IProjectRepository {
             budget?: number;
             collabs?: number;
         }
-    ) {
+    ): Promise<IProject | null> {
+
+        const increment: Record<string, number> = {};
+
+        if (delta.duration !== undefined) {
+            increment.totalDuration =
+                delta.duration;
+        }
+
+        if (delta.budget !== undefined) {
+            increment.totalBudget =
+                delta.budget;
+        }
+
+        if (delta.collabs !== undefined) {
+            increment.totalCollabs =
+                delta.collabs;
+        }
+
+        if (!Object.keys(increment).length) {
+            return Project.findById(
+                toObjectId(projectId)
+            ).exec();
+        }
+
         return Project.findByIdAndUpdate(
-            projectId,
+            toObjectId(projectId),
             {
-                $inc: {
-                    ...(delta.duration !== undefined && {
-                        totalDuration: delta.duration
-                    }),
-                    ...(delta.budget !== undefined && {
-                        totalBudget: delta.budget
-                    }),
-                    ...(delta.collabs !== undefined && {
-                        totalCollabs: delta.collabs
-                    })
-                }
+                $inc: increment
             },
             {
-                new: true
+                new: true,
+                runValidators: true
             }
         ).exec();
     }
@@ -291,18 +388,17 @@ export class ProjectRepository implements IProjectRepository {
     ): Promise<IProject | null> {
 
         return Project.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
+            toObjectId(id),
             {
                 $set: {
                     status
                 },
+
                 $push: {
                     statusHistory: {
                         status,
                         changedBy:
-                            new mongoose.Types.ObjectId(
-                                userId
-                            ),
+                            toObjectId(userId),
                         changedAt: new Date()
                     }
                 }
@@ -319,37 +415,11 @@ export class ProjectRepository implements IProjectRepository {
         filters: FilterProjectsDTO
     ): Promise<boolean> {
 
-        const query: Record<string, any> = {};
+        const query =
+            this.buildFilter(filters);
 
-        if (filters.title) {
-            query.title = filters.title;
-        }
-
-        if (filters.leadPI) {
-            query.leadPI = new mongoose.Types.ObjectId(
-                filters.leadPI
-            );
-        }
-
-        if (filters.grant) {
-            query.grant = new mongoose.Types.ObjectId(
-                filters.grant
-            );
-        }
-
-        if (filters.call) {
-            query.call = new mongoose.Types.ObjectId(
-                filters.call
-            );
-        }
-
-        if (filters.calendar) {
-            query.calendar = new mongoose.Types.ObjectId(
-                filters.calendar
-            );
-        }
-
-        const result = await Project.exists(query).exec();
+        const result =
+            await Project.exists(query).exec();
 
         return result !== null;
     }
@@ -359,7 +429,9 @@ export class ProjectRepository implements IProjectRepository {
         id: string
     ): Promise<IProject | null> {
 
-        return Project.findByIdAndDelete(id).exec();
+        return Project.findByIdAndDelete(
+            toObjectId(id)
+        ).exec();
     }
 }
 

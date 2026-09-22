@@ -23,7 +23,6 @@ const AppNotificationSidebar = ({
 
     const router = useRouter();
 
-    // ✅ Relative time (e.g., 2 days ago)
     const formatTimeAgo = (dateString: string) => {
         const date = new Date(dateString);
         const now = new Date();
@@ -36,33 +35,31 @@ const AppNotificationSidebar = ({
         return `${Math.floor(diff / 86400)} days ago`;
     };
 
-    // ✅ Style by type
+    // ✅ Updated: Use theme-aware background/border styles or dark-compatible tints
     const getNotificationStyle = (type: NotificationType, isRead: boolean) => {
-        if (isRead) return "surface-100 opacity-70 hover:opacity-100";
+        if (isRead) return "surface-card opacity-70 hover:opacity-100 border-1 surface-border";
 
         switch (type) {
             case NotificationType.INFO:
-                return "bg-green-50 border-left-3 border-green-500";
+                return "surface-card border-left-3 border-green-500 border-1 surface-border";
             case NotificationType.ERROR:
-                return "bg-red-50 border-left-3 border-red-500";
+                return "surface-card border-left-3 border-red-500 border-1 surface-border";
             case NotificationType.WARNING:
-                return "bg-yellow-50 border-left-3 border-yellow-500";
+                return "surface-card border-left-3 border-yellow-500 border-1 surface-border";
             default:
-                return "bg-blue-50 border-left-3 border-blue-500";
+                return "surface-card border-left-3 border-blue-500 border-1 surface-border";
         }
     };
 
-    // ✅ Icon by type
     const getIcon = (type: string) => {
         return classNames("pi mr-2 text-lg", {
-            "pi-check-circle text-green-600": type === "SUCCESS",
-            "pi-times-circle text-red-600": type === "ERROR",
-            "pi-exclamation-triangle text-yellow-600": type === "WARNING",
-            "pi-info-circle text-blue-600": !type || type === "INFO"
+            "pi-check-circle text-green-500": type === "SUCCESS",
+            "pi-times-circle text-red-500": type === "ERROR",
+            "pi-exclamation-triangle text-yellow-500": type === "WARNING",
+            "pi-info-circle text-blue-500": !type || type === "INFO"
         });
     };
 
-    // ✅ Dot color
     const getDotColor = (type: string) => {
         return classNames("absolute border-circle", {
             "bg-green-500": type === "SUCCESS",
@@ -83,7 +80,7 @@ const AppNotificationSidebar = ({
 
                 {/* Header */}
                 <div className="flex align-items-center justify-content-between px-4 pb-4 border-bottom-1 surface-border">
-                    <span className="text-2xl font-semibold">Notifications</span>
+                    <span className="text-2xl font-semibold text-color">Notifications</span>
 
                     {notifications.length > 0 && (
                         <button
@@ -99,7 +96,7 @@ const AppNotificationSidebar = ({
                 <div className="flex-grow-1 overflow-y-auto mt-3">
 
                     {notifications.length === 0 ? (
-                        <div className="flex flex-column align-items-center justify-content-center h-full text-600">
+                        <div className="flex flex-column align-items-center justify-content-center h-full text-500">
                             <i className="pi pi-bell-slash text-4xl mb-2"></i>
                             <span>No notifications yet</span>
                         </div>
@@ -134,22 +131,22 @@ const AppNotificationSidebar = ({
                                     <div className="flex align-items-center">
                                         <i className={getIcon(n.type)}></i>
                                         <span className={classNames("font-semibold", {
-                                            'text-900': !n.isRead,
-                                            'text-600': n.isRead
+                                            'text-color': !n.isRead,
+                                            'text-color-secondary': n.isRead
                                         })}>
                                             {n.title}
                                         </span>
                                     </div>
 
-                                    <small className="text-500 ml-2 whitespace-nowrap">
+                                    <small className="text-color-secondary ml-2 whitespace-nowrap">
                                         {formatTimeAgo(n.createdAt)}
                                     </small>
                                 </div>
 
                                 {/* Message */}
                                 <p className={classNames("m-0 text-sm line-height-3", {
-                                    'text-700': !n.isRead,
-                                    'text-500': n.isRead
+                                    'text-color': !n.isRead,
+                                    'text-color-secondary': n.isRead
                                 })}>
                                     {n.message}
                                 </p>

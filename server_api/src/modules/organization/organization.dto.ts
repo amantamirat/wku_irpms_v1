@@ -26,6 +26,7 @@ export interface UpdateOrganizationDTO {
 }
 
 export interface FilterOrganizationsDTO {
+    ids?:string[];
     type?: Unit;
     parent?: string;
     name?: string;

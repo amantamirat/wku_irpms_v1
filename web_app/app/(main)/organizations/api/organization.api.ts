@@ -11,6 +11,10 @@ export const OrganizationApi: EntityApi<Organization, FilterOrganization | undef
         return ApiClient.get(end_point, options);
     },
 
+    async getById(id: string) {
+        return ApiClient.get(`${end_point}/${id}`);
+    },
+
     async lookup(options) {
         return ApiClient.get(`${end_point}/lookup`, options);
     },

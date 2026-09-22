@@ -65,8 +65,17 @@
             "user:lookup",
             "application:*",
             "reviewer:*",
-            "result:*",
             "verification-conf:*"
+        ]
+    },
+    {
+        "name": "head",
+        "permissions": [
+            "user:lookup",
+            "application:read",
+            "call:lookup",
+            "stage:lookup",
+            "reviewer:*"
         ]
     },
     {

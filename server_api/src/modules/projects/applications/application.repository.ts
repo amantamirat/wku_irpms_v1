@@ -29,7 +29,8 @@ export interface IApplicationRepository {
 
     find(
         filters?: FilterApplicationDTO,
-        options?: FilterOptions
+        options?: FilterOptions,
+        scopeFilter?: Record<string, unknown>
     ): Promise<IApplication[]>;
 
     create(
@@ -119,8 +120,6 @@ export class ApplicationRepository
             .lean<IApplication>()
             .exec();
     }
-
-
     /**
      * Find a single application using filters.
      */
@@ -152,11 +151,16 @@ export class ApplicationRepository
      */
     async find(
         filters: FilterApplicationDTO = {},
-        options?: FilterOptions
+        options?: FilterOptions,
+        scopeFilter?: Record<string, unknown>
     ): Promise<IApplication[]> {
 
-        const query =
+        const filter =
             this.buildFilter(filters);
+
+        const query = scopeFilter
+            ? { $and: [scopeFilter, filter] }
+            : filter;
 
         let dbQuery =
             Application.find(query);

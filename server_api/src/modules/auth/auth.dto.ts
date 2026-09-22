@@ -1,4 +1,3 @@
-import { AccountStatus } from '../accounts/account.model';
 
 export interface LoginDto {
     email: string;
@@ -13,15 +12,6 @@ export interface ActivateAccountDTO {
 export interface ResetPasswordDto extends ActivateAccountDTO {
     email: string;
     password: string;
-}
-
-export default interface JwtPayload {
-    accountId: string;
-    userId: string;
-    email: string;
-    status: AccountStatus;
-    iat?: number;
-    exp?: number;
 }
 
 export interface ChangePasswordDTO {

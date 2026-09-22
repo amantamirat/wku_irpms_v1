@@ -86,12 +86,12 @@
   {
     "category": "User Management",
     "name": "user:read",
-    "description": "View users"
+    "description": "View active users"
   },
   {
     "category": "User Management",
     "name": "user:lookup",
-    "description": "Search and select users for contextual workflows such as adding collaborators or assigning reviewers"
+    "description": "Search and select active users for contextual workflows such as adding collaborators or assigning reviewers"
   },
   {
     "category": "User Management",
@@ -105,13 +105,23 @@
   },
   {
     "category": "User Management",
-    "name": "user:ownership:update",
-    "description": "Assign or modify organizational ownership scope for an user"
+    "name": "user:scope:update",
+    "description": "Assign or modify organizational read scope for a user"
   },
   {
     "category": "User Management",
     "name": "user:delete",
-    "description": "Delete users"
+    "description": "Soft-delete users"
+  },
+  {
+    "category": "User Management",
+    "name": "user:deleted:read",
+    "description": "View deleted users"
+  },
+  {
+    "category": "User Management",
+    "name": "user:restore",
+    "description": "Restore deleted users"
   },
   {
     "category": "Organization Management",

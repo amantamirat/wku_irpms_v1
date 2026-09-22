@@ -2,11 +2,11 @@ import { Router } from "express";
 import { AuthController } from "./auth.controller";
 import { AuthService } from "./auth.service";
 import { verifyAuthToken } from "./auth.middleware";
-import { accountRepo, settingService, userRepo } from "../../core/container";
+import { accountRepo, organizationRepo, roleRepo, settingService, userRepo } from "../../core/container";
 
 
 const router = Router();
-const service = new AuthService(accountRepo, userRepo, settingService);
+const service = new AuthService(accountRepo, userRepo, roleRepo, organizationRepo, settingService);
 const controller = new AuthController(service);
 
 router.post("/login", controller.login);

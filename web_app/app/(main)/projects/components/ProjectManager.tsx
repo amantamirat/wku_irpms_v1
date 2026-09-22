@@ -20,6 +20,16 @@ const ProjectManager = createEntityManager<Project>({
             sortable: true
         },
         {
+            header: "Organization",
+            field: "organization.name",
+            sortable: true
+        },
+        {
+            header: "Workspace",
+            field: "workspace.name",
+            sortable: true
+        },
+        {
             header: "Title",
             field: "title",
             sortable: true,
@@ -69,7 +79,8 @@ const ProjectManager = createEntityManager<Project>({
             )
         }
     ],
-    defaultHiddenFields: ["calendar.year"],
+    defaultHiddenFields: ["calendar.year", "organization.name", "workspace.name"],
+    enableColumnToggle: true,
     createNew: () => ({
         title: "",
         summary: "",

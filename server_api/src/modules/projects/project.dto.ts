@@ -5,31 +5,42 @@ import { ProjectStatus } from "./project.model";
 
 export interface FilterProjectsDTO {
     ids?: string[];
+
     grant?: string;
     grantIds?: string[];
+
+    organization?: string;
+    workspace?: string;
+
     calendar?: string;
-    leadPI?: string;
     call?: string;
+
+    leadPI?: string;
+
     title?: string;
+
     status?: ProjectStatus;
 }
 
 
 export interface CreateProjectDTO {
-    calendar?: string;
-    call?: string;
     grant: string;
+
     title: string;
     summary?: string;
+
     leadPI: string;
+
     themes: string[];
+
     collaborators: CollaboratorDto[];
     phases: PhaseDto[];
-    status?: ProjectStatus;
+
+    calendar?: string;
+    call?: string;
+
     docPath?: string;
 }
-
-// UPDATE Project
 
 
 export interface UpdateProjectDTO {
@@ -38,10 +49,6 @@ export interface UpdateProjectDTO {
     data: Partial<{
         title: string;
         summary: string;
-
-        totalBudget: number;
-        totalDuration: number;
-        totalCollabs: number;
 
         themes: string[];
 
@@ -52,12 +59,4 @@ export interface UpdateProjectDTO {
         currentPhase: string | null;
         currentVerification: string | null;
     }>;
-
-    userId: string;
 }
-
-
-
-
-
-

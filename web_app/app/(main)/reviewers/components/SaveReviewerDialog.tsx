@@ -10,7 +10,6 @@ import { useEffect, useRef, useState } from "react";
 
 import { UserApi } from "@/app/(main)/users/api/user.api";
 import { User } from "@/app/(main)/users/models/user.model";
-import { userTemplate } from "@/app/(main)/users/models/user.template";
 import { EntitySaveDialogProps } from "@/components/createEntityManager";
 import { ReviewerApi } from "../api/reviewer.api";
 import { Reviewer, validateReviewer } from "../models/reviewer.model";

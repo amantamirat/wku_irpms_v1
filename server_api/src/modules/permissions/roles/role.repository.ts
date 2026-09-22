@@ -1,31 +1,80 @@
 import mongoose from "mongoose";
 import { Role, IRole } from "./role.model";
 import { CreateRoleDto, UpdateRoleDto } from "./role.dto";
-import { boolean } from "joi";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
+import { toObjectId } from "../../../common/utils/mongoose.utils";
+import { IPermission } from "../permission.model";
+
+export type PopulatedRole = Omit<IRole, "permissions"> & {
+    permissions: IPermission[];
+};
 
 export interface IRoleRepository {
-    findById(id: string): Promise<IRole | null>;
+
+    findById(
+        id: string,
+        options?: FilterOptions
+    ): Promise<IRole | null>;
+
+    findByIds(
+        ids: string[],
+        options?: FilterOptions
+    ): Promise<IRole[] | PopulatedRole[]>;
+
     findAll(): Promise<Partial<IRole>[]>;
+
     findDefaults(): Promise<Partial<IRole>[]>;
-    findByName(roleName: string, populate?: boolean): Promise<IRole | null>;
+
+    findByName(
+        roleName: string,
+        options?: FilterOptions
+    ): Promise<IRole | null>;
+
     create(data: CreateRoleDto): Promise<IRole>;
-    update(id: string, data: UpdateRoleDto["data"]): Promise<IRole | null>;
+
+    update(
+        id: string,
+        data: UpdateRoleDto["data"]
+    ): Promise<IRole | null>;
+
     delete(id: string): Promise<IRole | null>;
 }
 
 export class RoleRepository implements IRoleRepository {
 
-    async findByName(roleName: string, populate?: boolean): Promise<IRole | null> {
+    async findByName(roleName: string, options?: FilterOptions): Promise<IRole | null> {
         const query = Role.findOne({ name: roleName });
-        if (populate) {
+        if (options?.populate) {
             query.populate("permissions");
         }
         return query.lean<IRole>();
     }
 
-    async findById(id: string) {
-        return Role.findById(new mongoose.Types.ObjectId(id))
-            .lean<IRole>()
+    async findById(id: string, options?: FilterOptions) {
+        const query = Role.findById(toObjectId(id))
+        if (options?.populate) {
+            query.populate("permissions");
+        }
+        return query.lean<IRole>();
+    }
+
+    async findByIds(
+        ids: string[],
+        options?: FilterOptions
+    ): Promise<IRole[] | PopulatedRole[]> {
+
+        const query = Role.find({
+            _id: {
+                $in: ids.map(toObjectId)
+            }
+        });
+
+        if (options?.populate) {
+            query.populate("permissions");
+        }
+
+        return query
+            .lean<IRole[]>()
             .exec();
     }
 

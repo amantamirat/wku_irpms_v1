@@ -2,12 +2,12 @@ import { Router } from 'express';
 import { RoleController } from './role.controller';
 
 import { PERMISSIONS } from '../../../common/constants/permissions';
-import { roleRepo } from '../../../core/container';
+import { roleRepo, userRepo } from '../../../core/container';
 import { verifyAuthToken } from '../../auth/auth.middleware';
 import { checkPermission } from '../../../core/container';
 import { RoleService } from './role.service';
 
-const service = new RoleService(roleRepo);
+const service = new RoleService(roleRepo, userRepo);
 const controller = new RoleController(service);
 const router: Router = Router();
 

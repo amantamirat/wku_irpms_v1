@@ -141,8 +141,11 @@ export class ProjectController {
 
   get = async (req: AuthenticatedRequest, res: Response) => {
     try {
+      if (!req.auth) {
+        return
+      }
       const filters = buildProjectFilter(req.query);
-      const projects = await this.service.getProjects(filters, { populate: true });
+      const projects = await this.service.readProjects(filters, req.auth.userId, req.auth.scope, { populate: true });
       successResponse(
         res,
         200,
@@ -158,7 +161,7 @@ export class ProjectController {
   lookup = async (req: AuthenticatedRequest, res: Response) => {
     try {
       const filters = buildProjectFilter(req.query);
-      const projects = await this.service.getProjects(filters);
+      const projects = await this.service.lookup(filters);
       successResponse(
         res,
         200,
@@ -236,11 +239,10 @@ export class ProjectController {
           title,
           summary,
           themes
-        },
-        userId: req.auth.userId,
+        }
       };
 
-      const updated = await this.service.update(dto);
+      const updated = await this.service.update(dto, req.auth.userId);
 
       successResponse(
         res,

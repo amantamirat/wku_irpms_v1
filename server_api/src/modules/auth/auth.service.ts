@@ -1,23 +1,27 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import jwt, { JwtPayload } from "jsonwebtoken";
+import { Unit } from "../../common/constants/enums";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { CacheService } from "../../util/cache.service";
 import { AccountStatus, IAccount } from '../accounts/account.model';
 import { IAccountRepository } from "../accounts/account.repository";
 import { MailService, VerificationCodePurpose } from "../mail/mail.service";
+import { IOrganizationRepository } from "../organization/organization.repository";
+import { IRoleRepository, PopulatedRole } from "../permissions/roles/role.repository";
 import { SettingKey } from "../settings/setting.model";
 import { SettingService } from "../settings/setting.service";
 import { IUserRepository } from "../users/user.repository";
 import { ActivateAccountDTO, ChangePasswordDTO, LoginDto, ResetPasswordDto } from "./auth.dto";
-
 
 export class AuthService {
 
     constructor(
         private readonly repository: IAccountRepository,
         private readonly userRepository: IUserRepository,
+        private readonly roleRepository: IRoleRepository,
+        private readonly organizationRepo: IOrganizationRepository,
         private readonly settingService: SettingService,
         private readonly mailService = new MailService(),
     ) { }
@@ -26,70 +30,137 @@ export class AuthService {
 
         const { email, password } = dto;
 
-        const accountDoc = await this.repository.findByEmail(email);
-        if (!accountDoc)
-            throw new AppError(ERROR_CODES.ACCOUNT_NOT_FOUND);
+        const accountDoc =
+            await this.repository.findByEmail(email);
 
-        if (accountDoc.status === AccountStatus.suspended)
-            throw new AppError(ERROR_CODES.ACCOUNT_SUSPENDED,
-                "Account is suspended. Contact support.");
-
-        if (accountDoc.lockUntil && accountDoc.lockUntil > new Date())
-            throw new AppError(ERROR_CODES.ACCOUNT_LOCKED,
-                "Account temporarily locked due to too many failed login attempts");
-
-        const isMatch = await bcrypt.compare(password, accountDoc.password);
-        if (!isMatch) {
-            await this.handleFailedLogin(accountDoc);
-            throw new AppError(ERROR_CODES.INVALID_CREDENTIALS);
+        if (!accountDoc) {
+            throw new AppError(
+                ERROR_CODES.ACCOUNT_NOT_FOUND
+            );
         }
 
-        // Password is correct from here
+        if (accountDoc.status === AccountStatus.suspended) {
+            throw new AppError(
+                ERROR_CODES.ACCOUNT_SUSPENDED,
+                "Account is suspended. Contact support."
+            );
+        }
+
+        if (
+            accountDoc.lockUntil &&
+            accountDoc.lockUntil > new Date()
+        ) {
+            throw new AppError(
+                ERROR_CODES.ACCOUNT_LOCKED,
+                "Account temporarily locked due to too many failed login attempts"
+            );
+        }
+
+        const isMatch = await bcrypt.compare(
+            password,
+            accountDoc.password
+        );
+
+        if (!isMatch) {
+            await this.handleFailedLogin(accountDoc);
+
+            throw new AppError(
+                ERROR_CODES.INVALID_CREDENTIALS
+            );
+        }
+
         if (accountDoc.status === AccountStatus.pending) {
-            await this.sendCode(email, "activation");
+
+            await this.sendCode(
+                email,
+                "activation"
+            );
+
             throw new AppError(
                 ERROR_CODES.ACCOUNT_PENDING,
                 "Account is not activated. A verification code has been sent to your email."
             );
         }
 
-        const accountId = String(accountDoc._id);
+        const accountId =
+            String(accountDoc._id);
 
-        const userDoc = await this.userRepository.findById(
-            String(accountDoc.user), { populate: true }
-        );
+        const userId =
+            String(accountDoc.user);
 
-        if (!userDoc)
-            throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+        const userDoc =
+            await this.userRepository.findById(userId);
+
+        if (!userDoc) {
+            throw new AppError(
+                ERROR_CODES.USER_NOT_FOUND
+            );
+        }
+
+        /*
+         * Resolve roles and permissions.
+         */
+        const roles =
+            await this.roleRepository.findByIds(
+                userDoc.roles.map(role => String(role)),
+                { populate: true }
+            );
+
+        const populatedRoles =
+            roles as PopulatedRole[];
 
         const permissions = [
             ...new Set(
-                userDoc.roles?.flatMap((role: any) =>
-                    role.permissions?.map((p: any) => p.name)
-                ) || []
+                populatedRoles.flatMap(role =>
+                    role.permissions.map(
+                        permission => permission.name
+                    )
+                )
             )
         ];
 
-        const ownerships = userDoc.ownerships || [];
-        const userId = String(userDoc._id);
+        /*
+         * Resolve authorization scope.
+         */
+        let scope: string[] | "*" | null;
 
+        if (userDoc.scope === "*") {
 
+            scope = "*";
+
+        } else if (Array.isArray(userDoc.scope)) {
+
+            scope = userDoc.scope.map(
+                id => String(id)
+            );
+
+        } else {
+
+            scope = null;
+        }
+
+        /*
+         * Refresh authorization cache.
+         */
         CacheService.invalidateUser(userId);
 
-        CacheService.setUserPermissions(userId, permissions);
-
-        CacheService.setUserOrganizations(
+        CacheService.setUserPermissions(
             userId,
-            ownerships.flatMap((o: any) =>
-                o.scope === "*" ? ["*"] : o.scope.map((id: any) => String(id))
-            )
+            permissions
         );
+
+        /*
+        CacheService.setUserScope(
+            userId,
+            scope
+        );*/
 
         const payload: JwtPayload = {
             accountId,
-            userId: userId,
+            userId,
             email,
-            status: accountDoc.status
+            status: accountDoc.status,
+            scope
         };
 
         const expiryHours =
@@ -98,28 +169,37 @@ export class AuthService {
                 2
             );
 
-        const token = jwt.sign(payload, process.env.KEY as string, {
-            expiresIn: `${expiryHours}h`
-        });
+        const token =
+            jwt.sign(
+                payload,
+                process.env.KEY as string,
+                {
+                    expiresIn: `${expiryHours}h`
+                }
+            );
 
-
-        await this.repository.update(accountId, {
-            lastLogin: new Date(),
-            failedLoginAttempts: 0,
-            lockUntil: null,
-            resetCode: null,
-            resetCodeExpires: null
-        });
+        await this.repository.update(
+            accountId,
+            {
+                lastLogin: new Date(),
+                failedLoginAttempts: 0,
+                lockUntil: null,
+                resetCode: null,
+                resetCodeExpires: null
+            }
+        );
 
         return {
             token,
+
             user: {
                 _id: userDoc._id,
                 name: userDoc.name,
                 email: accountDoc.email,
+                scope
             },
+
             permissions,
-            ownerships,
             status: accountDoc.status
         };
     }
@@ -219,7 +299,7 @@ export class AuthService {
             password: hashed,
             resetCode: null,
             resetCodeExpires: null,
-            status:AccountStatus.active
+            status: AccountStatus.active
         });
     }
 

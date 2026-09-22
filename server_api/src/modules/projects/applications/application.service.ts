@@ -1,3 +1,4 @@
+import { Unit } from "../../../common/constants/enums";
 import { PERMISSIONS } from "../../../common/constants/permissions";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
@@ -6,16 +7,21 @@ import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { AnonymizerService } from "../../../util/anonymizer/anonymizer.service";
+import { AuthPermissionService } from "../../auth/auth.permission-service";
+import { AuthScope } from "../../auth/auth.types";
+import ScopeFilterService from "../../auth/scope-filter.service";
 import { ICallRepository } from "../../calls/call.repository";
 import { IStage } from "../../calls/stages/stage.model";
 import { IStageRepository } from "../../calls/stages/stage.repository";
+import { GrantRepository } from "../../grants/grant.repository";
 import { NotificationService } from "../../notifications/notification.service";
+import { OrganizationRepository } from "../../organization/organization.repository";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
 import { ReviewerStatus } from "../../reviewers/reviewer.state-machine";
 import { TemplateValidationService } from "../../templates/services/template-validation.service";
 import { ProjectAuth } from "../project.auth";
 import { IProject, ProjectStatus } from "../project.model";
-import { IProjectRepository } from "../project.repository";
+import { ProjectRepository } from "../project.repository";
 import {
     CreateApplicationDTO,
     FilterApplicationDTO,
@@ -28,7 +34,7 @@ export class ApplicationService {
 
     constructor(
         private readonly repository: IApplicationRepository,
-        private readonly projectRepo: IProjectRepository,
+        private readonly projectRepo: ProjectRepository,
         private readonly callRepo: ICallRepository,
         private readonly stageRepo: IStageRepository,
         private readonly reviewerRepo: IReviewerRepository,
@@ -36,6 +42,7 @@ export class ApplicationService {
         private readonly anonymizerService: AnonymizerService,
         private readonly projectAuth: ProjectAuth,
         private readonly notificationService: NotificationService,
+        private readonly scopeFilterService: ScopeFilterService,
     ) {
     }
 
@@ -288,6 +295,19 @@ export class ApplicationService {
 
             throw err;
         }
+    }
+
+
+
+    async read(
+        filter: FilterApplicationDTO,
+        userId: string,
+        scope: AuthScope,
+        options?: FilterOptions
+    ) {
+        const scopeFilter =
+            await this.scopeFilterService.getApplicationFilter(scope);
+        return await this.repository.find(filter, options, scopeFilter);
     }
 
     /**

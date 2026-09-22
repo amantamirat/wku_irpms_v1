@@ -1,41 +1,42 @@
-import {
-    CreateProjectDTO,
-    FilterProjectsDTO,
-    UpdateProjectDTO,
-} from "./project.dto";
-import { IProjectRepository } from "./project.repository";
+import { PERMISSIONS } from "../../common/constants/permissions";
 import { DeleteDto } from "../../common/dtos/delete.dto";
+import { FilterOptions } from "../../common/dtos/filter.dto";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
+import { AuthPermissionService } from "../auth/auth.permission-service";
+import { AuthScope } from "../auth/auth.types";
+import ScopeFilterService from "../auth/scope-filter.service";
+import { CallStatus } from "../calls/call.model";
 import { ICallRepository } from "../calls/call.repository";
+import { IStageRepository } from "../calls/stages/stage.repository";
+import { CompositionValidationService } from "../compositions/composition-validator.service";
 import { ConstraintValidationService } from "../constraints/services/constraint-validator.service";
 import { GrantStatus } from "../grants/grant.model";
 import { IGrantRepository } from "../grants/grant.repository";
+import { VerificationStatus } from "../grants/verifications/verification.model";
+import { IVerificationRepository } from "../grants/verifications/verification.repository";
 import { NotificationService } from "../notifications/notification.service";
+import { TemplateValidationService } from "../templates/services/template-validation.service";
+import { IUserRepository } from "../users/user.repository";
+import { ApplicationStatus } from "./applications/application.model";
+import { ApplicationService } from "./applications/application.service";
 import { CollaboratorStatus } from "./collaborators/collaborator.model";
 import { ICollaboratorRepository } from "./collaborators/collaborator.repository";
 import { CollaboratorService } from "./collaborators/collaborator.service";
 import { PhaseStatus } from "./phase/phase.model";
 import { IPhaseRepository } from "./phase/phase.repository";
 import { PhaseService } from "./phase/phase.service";
-import { ProjectStatus } from "./project.model";
-import { PROJECT_TRANSITIONS } from "./project.state-machine";
-import { FilterOptions } from "../../common/dtos/filter.dto";
-import { AuthPermissionService } from "../auth/auth.permission-service";
-import { PERMISSIONS } from "../../common/constants/permissions";
-import { IApplicationRepository } from "./applications/application.repository";
-import { IStageRepository } from "../calls/stages/stage.repository";
-import { ApplicationStatus } from "./applications/application.model";
-import { CallStatus } from "../calls/call.model";
-import { TemplateValidationService } from "../templates/services/template-validation.service";
-import { ApplicationService } from "./applications/application.service";
 import { ProjectAuth } from "./project.auth";
-import { IUserRepository } from "../users/user.repository";
-import { IVerificationRepository } from "../grants/verifications/verification.repository";
-import { VerificationStatus } from "../grants/verifications/verification.model";
-import { CompositionValidationService } from "../compositions/composition-validator.service";
+import {
+    CreateProjectDTO,
+    FilterProjectsDTO,
+    UpdateProjectDTO,
+} from "./project.dto";
+import { ProjectStatus } from "./project.model";
+import { IProjectRepository } from "./project.repository";
+import { PROJECT_TRANSITIONS } from "./project.state-machine";
 
 
 export class ProjectService {
@@ -63,10 +64,14 @@ export class ProjectService {
         private readonly projectAuth: ProjectAuth,
         private readonly authPermissionService: AuthPermissionService,
         private readonly notificationService: NotificationService,
-
+        private readonly scopeFilterService: ScopeFilterService,
     ) { }
 
-    async create(dto: CreateProjectDTO, userId: string, options?: { skipValidation?: boolean }) {
+    async create(
+        dto: CreateProjectDTO,
+        userId: string,
+        options?: { skipValidation?: boolean }
+    ) {
         const {
             grant,
             title,
@@ -75,26 +80,57 @@ export class ProjectService {
             phases
         } = dto;
 
+        const isLeadPI = leadPI === userId;
+
         if (!options?.skipValidation) {
-            const isLeadPI = leadPI === userId;
-            const isAdmin = await this.authPermissionService.hasPermission(userId, PERMISSIONS.PROJECT.CREATE);
+            const isAdmin =
+                await this.authPermissionService.hasPermission(
+                    userId,
+                    PERMISSIONS.PROJECT.CREATE
+                );
+
             if (!isAdmin && !isLeadPI) {
                 throw new AppError(ERROR_CODES.UNAUTHORIZED);
             }
-            const leadDoc = await this.userRepo.findById(leadPI);
-            if (!leadDoc) {
-                throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND);
-            }
-            const grantDoc = await this.grantRepo.findById(grant);
-            if (!grantDoc) {
-                throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
-            }
+        }
+
+        // Lead PI is required because project.workspace
+        // is derived from the lead PI's workspace.
+        const leadDoc = await this.userRepo.findById(leadPI);
+
+        if (!leadDoc) {
+            throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND);
+        }
+
+        if (!leadDoc.workspace) {
+            throw new AppError(
+                ERROR_CODES.WORKSPACE_NOT_FOUND,
+                "The lead PI does not have a workspace."
+            );
+        }
+
+        // Grant is required because project.organization
+        // is derived from the grant's organization.
+        const grantDoc = await this.grantRepo.findById(grant);
+
+        if (!grantDoc) {
+            throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+        }
+
+        if (!grantDoc.organization) {
+            throw new AppError(
+                ERROR_CODES.ORGANIZATION_NOT_FOUND,
+                "The grant does not have an organization."
+            );
+        }
+
+        if (!options?.skipValidation) {
             if (grantDoc.status !== GrantStatus.active) {
                 throw new AppError(ERROR_CODES.GRANT_NOT_ACTIVE);
             }
         }
 
-
+        // Prevent duplicate project titles.
         if (await this.projectRepo.exists({ title })) {
             throw new AppError(
                 ERROR_CODES.PROJECT_ALREADY_EXISTS,
@@ -102,46 +138,56 @@ export class ProjectService {
             );
         }
 
-        const created = await this.projectRepo.create({
-            ...dto, status: ProjectStatus.draft,
-        }, userId);
+        // Derive authorization/scope anchors server-side.
+        const created = await this.projectRepo.create(
+            {
+                ...dto,
+                workspace: String(leadDoc.workspace),
+                organization: String(grantDoc.organization)
+            },
+            userId
+        );
 
         if (!created) {
             throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         }
 
         const projectId = String(created._id);
-        // Prepare collaborators
+
+        // --------------------------------------------------
+        // Collaborators
+        // --------------------------------------------------
+
         const projectCollaborators = [...(collaborators || [])];
-        // Make sure the Lead PI is also a collaborator
-        if (leadPI) {
-            const leadExists = projectCollaborators.some(
-                collab => collab.member === leadPI
-            );
-            if (!leadExists) {
-                projectCollaborators.unshift({
-                    member: leadPI,
-                    isLeadPI: true,
-                    role: "Principal Investigator"
-                });
-            }
+
+        // Make sure the Lead PI is also a collaborator.
+        const leadExists = projectCollaborators.some(
+            collab => collab.member === leadPI
+        );
+
+        if (!leadExists) {
+            projectCollaborators.unshift({
+                member: leadPI,
+                isLeadPI: true,
+                role: "Principal Investigator"
+            });
         }
 
-        // Create collaborators
         for (const collab of projectCollaborators) {
-            const isLeadPI = leadPI === collab.member;
+            const collaboratorIsLeadPI =
+                leadPI === collab.member;
 
             await this.collabService.create(
                 {
                     project: projectId,
                     projectTitle: title,
                     member: collab.member,
-                    isLeadPI,
+                    isLeadPI: collaboratorIsLeadPI,
                     status:
                         userId === collab.member
                             ? CollaboratorStatus.verified
                             : CollaboratorStatus.pending,
-                    role: isLeadPI
+                    role: collaboratorIsLeadPI
                         ? "Principal Investigator"
                         : collab.role,
                     userId
@@ -150,7 +196,10 @@ export class ProjectService {
             );
         }
 
-        // Create phases
+        // --------------------------------------------------
+        // Phases
+        // --------------------------------------------------
+
         if (phases?.length) {
             const orderedPhases = [...phases].sort(
                 (a, b) => a.order - b.order
@@ -172,9 +221,13 @@ export class ProjectService {
             }
         }
 
-        const projectDoc = await this.projectRepo.findById(projectId, { populate: true })
-        if (projectDoc) return projectDoc;
-        return created;
+        // Return the fully populated project.
+        const projectDoc = await this.projectRepo.findById(
+            projectId,
+            { populate: true }
+        );
+
+        return projectDoc ?? created;
     }
 
     async apply(dto: CreateProjectDTO, userId: string) {
@@ -300,13 +353,25 @@ export class ProjectService {
             documentPath: docPath,
         }, userId, projectDoc, firstStageDoc);
 
-
-
         return projectDoc;
     }
 
+    async readProjects(
+        filter: FilterProjectsDTO,
+        userId: string,
+        scope: AuthScope,
+        options?: FilterOptions
+    ) {
+        const scopeFilter =
+            this.scopeFilterService.getProjectFilter(scope);
 
-    async getProjects(filter: FilterProjectsDTO, options?: FilterOptions) {
+        return this.projectRepo.find(
+            filter,
+            options, scopeFilter
+        );
+    }
+
+    async lookup(filter: FilterProjectsDTO, options?: FilterOptions) {
         return this.projectRepo.find(filter, options);
     }
 
@@ -329,8 +394,8 @@ export class ProjectService {
     // ---------------------------------------------------
     // UPDATE
     // ---------------------------------------------------
-    async update(dto: UpdateProjectDTO) {
-        const { id, data, userId } = dto;
+    async update(dto: UpdateProjectDTO, userId: string) {
+        const { id, data } = dto;
 
         const { projectDoc, isLeadPI } = await this.projectAuth.auth(id, userId, PERMISSIONS.PROJECT.UPDATE);
 

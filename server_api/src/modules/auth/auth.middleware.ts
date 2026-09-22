@@ -7,8 +7,7 @@ import { AppError } from '../../common/errors/app.error';
 import { ERROR_CODES } from '../../common/errors/error.codes';
 import { errorResponse } from '../../common/helpers/response';
 import { checkPermission } from '../../core/container';
-
-import JwtPayload from './auth.dto';
+import { JwtPayload } from './auth.types';
 
 dotenv.config();
 

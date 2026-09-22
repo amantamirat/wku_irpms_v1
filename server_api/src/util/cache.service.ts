@@ -7,37 +7,29 @@ export const cache = new NodeCache({
 
 export class CacheService {
 
-    private static userOrganizationsKey(userId: string): string {
-        return `user:${userId}:organizations`;
-    }
-
     private static userPermissionsKey(userId: string): string {
         return `user:${userId}:permissions`;
     }
 
-    static getUserOrganizations(userId: string): string[] | undefined {
-        return cache.get<string[]>(this.userOrganizationsKey(userId));
+    static getUserPermissions(
+        userId: string
+    ): string[] | undefined {
+        return cache.get<string[]>(
+            this.userPermissionsKey(userId)
+        );
     }
 
-    static setUserOrganizations(userId: string, orgIds: string[]): void {
-        cache.set(this.userOrganizationsKey(userId), orgIds);
-    }
-
-    static getUserPermissions(userId: string): string[] | undefined {
-        return cache.get<string[]>(this.userPermissionsKey(userId));
-    }
-
-    static setUserPermissions(userId: string, permissions: string[]): void {
-        cache.set(this.userPermissionsKey(userId), permissions);
-    }
-
-    static hasOrganizationOwnership(userId: string, organizationId: string): boolean {
-        const orgs = this.getUserOrganizations(userId);
-        return orgs ? orgs.includes(organizationId) : false;
+    static setUserPermissions(
+        userId: string,
+        permissions: string[]
+    ): void {
+        cache.set(
+            this.userPermissionsKey(userId),
+            permissions
+        );
     }
 
     static invalidateUser(userId: string): void {
         cache.del(this.userPermissionsKey(userId));
-        cache.del(this.userOrganizationsKey(userId));
     }
 }

@@ -3,6 +3,7 @@ import { createCheckPermission, createCheckTransitionPermission } from "../commo
 import { AccountRepository } from "../modules/accounts/account.repository";
 import { AccountService } from "../modules/accounts/account.service";
 import { AuthPermissionService } from "../modules/auth/auth.permission-service";
+import ScopeFilterService from "../modules/auth/scope-filter.service";
 import { CalendarRepository } from "../modules/calendar/calendar.repository";
 import { CallRepository } from "../modules/calls/call.repository";
 import { StageRepository } from "../modules/calls/stages/stage.repository";
@@ -72,7 +73,7 @@ export const roleRepo = new RoleRepository();
 export const accountRepo = new AccountRepository();
 export const accountService = new AccountService(accountRepo, userRepo, settingService);
 //middleware and auth
-export const authPermissionService = new AuthPermissionService(userRepo);
+export const authPermissionService = new AuthPermissionService(userRepo, roleRepo);
 export const checkPermission = createCheckPermission(authPermissionService);
 export const checkTransitionPermission = createCheckTransitionPermission(checkPermission);
 
@@ -142,17 +143,20 @@ export const collabService = new CollaboratorService(collaboratorRepo, projectRe
 export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, callRepo, constraintValidator,
     projectAuth);
 
+export const filterService = new ScopeFilterService(projectRepo);
+
 export const applicationService = new ApplicationService(
     applicationRepo, projectRepo, callRepo, stageRepo, reviewerRepo,
     templateValidtor,
     new AnonymizerService(applicationRepo, collaboratorRepo), projectAuth,
-    notificationService);
+    notificationService, filterService
+);
 
 export const projectService = new ProjectService(projectRepo, userRepo, collaboratorRepo, phaseRepo, verificationRepo,
     grantRepo, callRepo, stageRepo,
     collabService, phaseService, applicationService,
     constraintValidator, compositionValidator, templateValidtor, projectAuth,
-    authPermissionService, notificationService);
+    authPermissionService, notificationService, filterService);
 
 export const userService = new UserService(userRepo, organizationRepo, roleRepo);
 

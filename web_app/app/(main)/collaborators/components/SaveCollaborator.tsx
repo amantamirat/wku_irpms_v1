@@ -1,18 +1,17 @@
 'use client';
 
-import { useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
+import { useEffect, useRef, useState } from "react";
 
 import { UserApi } from "@/app/(main)/users/api/user.api";
 import { User } from "@/app/(main)/users/models/user.model";
-import { userTemplate } from "@/app/(main)/users/models/user.template";
+import { EntitySaveDialogProps } from "@/components/createEntityManager";
 import { CollaboratorApi } from "../api/collaborator.api";
 import { Collaborator, roleOptions } from "../models/collaborator.model";
-import { EntitySaveDialogProps } from "@/components/createEntityManager";
 
 const SaveCollaborator = ({
     visible,

@@ -71,23 +71,35 @@ export class GrantRepository implements IGrantRepository {
 
         const query: Record<string, any> = {};
 
-        if (filters.organization) {
-            query.organization = new mongoose.Types.ObjectId(
-                filters.organization
-            );
+        if (filters.ids?.length) {
+            query._id = {
+                $in: filters.ids.map(
+                    id => new mongoose.Types.ObjectId(id)
+                )
+            };
+        }
+
+        if (filters.organizationIds?.length) {
+            query.organization = {
+                $in: filters.organizationIds.map(
+                    id => new mongoose.Types.ObjectId(id)
+                )
+            };
+        } else if (filters.organization) {
+            query.organization =
+                new mongoose.Types.ObjectId(filters.organization);
         }
 
         if (filters.thematic) {
-            query.thematic = new mongoose.Types.ObjectId(
-                filters.thematic
-            );
+            query.thematic =
+                new mongoose.Types.ObjectId(filters.thematic);
         }
 
-        if ("fundingSource" in filters && filters.fundingSource) {
+        if (filters.fundingSource) {
             query.fundingSource = filters.fundingSource;
         }
 
-        if ("status" in filters && filters.status) {
+        if (filters.status) {
             query.status = filters.status;
         }
 

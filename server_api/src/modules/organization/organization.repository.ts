@@ -20,6 +20,7 @@ import {
 
 import { Unit } from "../../common/constants/enums";
 import { FilterOptions } from "../../common/dtos/filter.dto";
+import { toObjectId } from "../../common/utils/mongoose.utils";
 
 
 export interface IOrganizationRepository {
@@ -212,23 +213,30 @@ export class OrganizationRepository implements IOrganizationRepository {
     // ------------------------------------
     // BUILD FILTER
     // ------------------------------------
+
     private buildFilter(
         filters: FilterOrganizationsDTO
-    ): Record<string, any> {
+    ): Record<string, unknown> {
 
-        const query: Record<string, any> = {};
+        const query: Record<string, unknown> = {
+            deletedAt: null
+        };
 
-        if (filters.type !== undefined) {
+        if (filters.ids?.length) {
+            query._id = {
+                $in: filters.ids.map(toObjectId)
+            };
+        }
+
+        if (filters.type) {
             query.type = filters.type;
         }
 
-        if (filters.parent !== undefined) {
-            query.parent = new mongoose.Types.ObjectId(
-                filters.parent
-            );
+        if (filters.parent) {
+            query.parent = toObjectId(filters.parent);
         }
 
-        if (filters.name !== undefined) {
+        if (filters.name) {
             query.name = filters.name;
         }
 

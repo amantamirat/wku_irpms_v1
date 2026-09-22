@@ -7,7 +7,10 @@ export enum Gender {
     Female = 'Female'
 }
 
-export const userUnits = [Unit.department, Unit.external];
+export const userUnits = [
+    Unit.department,
+    Unit.external
+];
 
 export enum Accessibility {
     Visual = 'Visual',
@@ -18,95 +21,177 @@ export enum Accessibility {
     Other = 'Other'
 }
 
-export interface IOwnership {
-    unitType: Unit;          // College | Department | Directorate | ...
-    scope: string[] | "*";   // resource IDs OR wildcard
-}
+export type UserScope =
+    | mongoose.Types.ObjectId[]
+    | "*"
+    | null;
 
 export interface IUser extends Document {
+
     workspace?: mongoose.Types.ObjectId;
+
     name: string;
+
     birthDate?: Date;
+
     gender?: Gender;
+
     fin?: string;
+
     orcid?: string;
+
     accessibility?: Accessibility[];
+
     specializations?: mongoose.Types.ObjectId[];
+
     roles: mongoose.Types.ObjectId[];
-    ownerships: IOwnership[];
-    //clusterGroup:number;
+
+    // Authorization scope
+    scope?: UserScope;
+
+    isSystem?: boolean;
+
+    // Audit
+    createdBy?: mongoose.Types.ObjectId;
+
+    updatedBy?: mongoose.Types.ObjectId;
+
+    // Soft deletion
+    deletedAt?: Date | null;
+
+    deletedBy?: mongoose.Types.ObjectId | null;
+
     createdAt?: Date;
+
     updatedAt?: Date;
 }
 
-const OwnershipSchema = new Schema<IOwnership>(
+
+const UserSchema = new Schema<IUser>(
     {
-        unitType: {
+        workspace: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.ORGANIZATION,
+        },
+
+        name: {
             type: String,
-            enum: Object.values(Unit),
             required: true
         },
+
+        birthDate: {
+            type: Date,
+        },
+
+        gender: {
+            type: String,
+            enum: Object.values(Gender),
+            default: Gender.Female
+        },
+
+        fin: {
+            type: String,
+            unique: true,
+            match: [/^\d{12}$/, "Invalid FIN number"],
+            sparse: true
+        },
+
+        orcid: {
+            type: String,
+            unique: true,
+            sparse: true,
+            match: [
+                /^\d{4}-\d{4}-\d{4}-\d{4}$/,
+                "Invalid ORCID format"
+            ]
+        },
+
+        accessibility: {
+            type: [String],
+            enum: Object.values(Accessibility),
+            default: []
+        },
+
+        specializations: [{
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.SPECIALIZATION
+        }],
+
+        roles: [{
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.ROLE
+        }],
+
         scope: {
             type: Schema.Types.Mixed,
-            required: true
+            default: null,
+            validate: {
+                validator: (value: unknown) => {
+
+                    if (value === null) {
+                        return true;
+                    }
+
+                    if (value === "*") {
+                        return true;
+                    }
+
+                    if (Array.isArray(value)) {
+                        return value.every(
+                            id => mongoose.Types.ObjectId.isValid(id)
+                        );
+                    }
+
+                    return false;
+                },
+                message:
+                    'Scope must be null, "*", or an array of valid organization IDs.'
+            }
+        },
+
+        isSystem: {
+            type: Boolean,
+            default: false
+        },
+
+        // -------------------------
+        // Audit
+        // -------------------------
+
+        createdBy: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.USER,
+        },
+
+        updatedBy: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.USER,
+        },
+
+        // -------------------------
+        // Soft deletion
+        // -------------------------
+
+        deletedAt: {
+            type: Date,
+            default: null
+        },
+
+        deletedBy: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.USER,
+            default: null
         }
     },
-    { _id: false }
+    {
+        timestamps: true
+    }
+);
+UserSchema.index({ deletedAt: 1 });
+
+const User = model<IUser>(
+    COLLECTIONS.USER,
+    UserSchema
 );
 
-const UserSchema = new Schema<IUser>({
-    workspace: {
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.ORGANIZATION,
-    },
-    name: {
-        type: String,
-        required: true
-    },
-    birthDate: {
-        type: Date,
-        //required: true
-    },
-    gender: {
-        type: String,
-        enum: Object.values(Gender),
-        //required: true,
-        default: Gender.Female
-    },
-    fin: {
-        type: String,
-        unique: true,
-        match: [/^\d{12}$/, "Invalid FIN number"],
-        sparse: true
-    },
-    orcid: {
-        type: String,
-        unique: true,
-        sparse: true,
-        match: [/^\d{4}-\d{4}-\d{4}-\d{4}$/, "Invalid ORCID format"]
-    },
-    accessibility: {
-        type: [String],
-        enum: Object.values(Accessibility),
-        default: []
-    },
-    //no compeletion date is specified here
-    specializations: [{
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.SPECIALIZATION
-    }],
-    roles: [{
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.ROLE
-    }],
-    ownerships: {
-        type: [OwnershipSchema],
-        default: []
-    }
-}, { timestamps: true });
-
-const User = model<IUser>(COLLECTIONS.USER, UserSchema);
 export default User;
-
-
-

@@ -1,5 +1,5 @@
 import { Accessibility, Gender } from "./user.model";
-import { IOwnership } from "./user.model";
+
 
 export interface CreateUserDTO {
     workspace?: string;
@@ -9,16 +9,15 @@ export interface CreateUserDTO {
     fin?: string;
     orcid?: string;
     accessibility?: Accessibility[];
-    roles?: string[];
-    ownerships?: IOwnership[];
     specializations?: string[];
-    userId?: string;
 }
+
 
 export interface UpdateUserDTO {
     id: string;
+
     data: Partial<{
-        workspace: string;
+        workspace: string | null;
         name: string;
         birthDate: Date;
         gender: Gender;
@@ -27,32 +26,23 @@ export interface UpdateUserDTO {
         accessibility: Accessibility[];
         specializations: string[];
     }>;
-    userId?: string;
 }
 
-//since it has the separete permission //create dto, repo and route
+
 export interface UpdateRolesDTO {
-    id: string;       // target user
-    roles: string[];      // array of role IDs to assign
-    userId?: string;    // actor, for auditing
+    id: string;
+    roles: string[];
 }
 
-export interface UpdateOwnershipsDTO {
-    id: string;                     // target applicant
-    ownerships: IOwnership[]; // full ownership definition
-    userId: string;             // actor (auditing / permission)
+export interface ScopeDataDTO {
+    scope: string[] | "*" | null;
 }
+
 
 export interface FilterUsersDTO {
     ids?: string[];
     workspace?: string;
     name?: string;
-   // populate?: boolean;
-}
-
-export interface ExistsUserDTO {
-    workspace?: string;
     specialization?: string;
     role?: string;
 }
-
