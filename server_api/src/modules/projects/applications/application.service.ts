@@ -13,6 +13,8 @@ import ScopeFilterService from "../../auth/scope-filter.service";
 import { ICallRepository } from "../../calls/call.repository";
 import { IStage } from "../../calls/stages/stage.model";
 import { IStageRepository } from "../../calls/stages/stage.repository";
+import { CompositionValidationService } from "../../compositions/composition-validator.service";
+import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
 import { GrantRepository } from "../../grants/grant.repository";
 import { NotificationService } from "../../notifications/notification.service";
 import { OrganizationRepository } from "../../organization/organization.repository";
@@ -33,7 +35,7 @@ import { IApplicationRepository } from "./application.repository";
 export class ApplicationService {
 
     constructor(
-        private readonly repository: IApplicationRepository,
+        private readonly applicationRepo: IApplicationRepository,
         private readonly projectRepo: ProjectRepository,
         private readonly callRepo: ICallRepository,
         private readonly stageRepo: IStageRepository,
@@ -43,6 +45,9 @@ export class ApplicationService {
         private readonly projectAuth: ProjectAuth,
         private readonly notificationService: NotificationService,
         private readonly scopeFilterService: ScopeFilterService,
+
+        //private readonly constraintValidator: ConstraintValidationService,
+        private readonly compositionValidator: CompositionValidationService,
     ) {
     }
 
@@ -102,6 +107,12 @@ export class ApplicationService {
 
         if (projectDoc.call) {
 
+            const callDoc = await this.callRepo.findById(String(projectDoc.call));
+
+            if (!callDoc) {
+                throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+            }
+
             if (
                 !stageDoc.call ||
                 String(projectDoc.call) !==
@@ -112,12 +123,27 @@ export class ApplicationService {
                     "The application stage does not belong to the project's call."
                 );
             }
-        }
 
+            if (callDoc.composition) {
+
+                const result = await this.compositionValidator.validateByProjectId(
+                    String(callDoc.composition),
+                    project
+                );
+
+                if (!result.valid) {
+                    throw new AppError(
+                        ERROR_CODES.INVALID_COMPOSITION,
+                        "Document validation failed",
+                        400,
+                        result
+                    );
+                }
+            }
+        }
         // --------------------------------------------------
         // Check previous stage
         // --------------------------------------------------
-
         const previousStage =
             await this.stageRepo.findPreviousStage(
                 String(stageDoc.call),
@@ -128,20 +154,17 @@ export class ApplicationService {
             // --------------------------------------------------
             // Project must have a current application
             // --------------------------------------------------
-
             if (!projectDoc.currentApplication) {
                 throw new AppError(
                     ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND,
                     "Project does not have a current application."
                 );
             }
-
             // --------------------------------------------------
             // Get current application
             // --------------------------------------------------
-
             const currentAppDoc =
-                await this.repository.findById(
+                await this.applicationRepo.findById(
                     String(projectDoc.currentApplication)
                 );
 
@@ -150,11 +173,9 @@ export class ApplicationService {
                     ERROR_CODES.APPLICATION_NOT_FOUND
                 );
             }
-
             // --------------------------------------------------
             // Current application must be at previous stage
             // --------------------------------------------------
-
             if (
                 String(currentAppDoc.stage) !==
                 String(previousStage._id)
@@ -164,11 +185,9 @@ export class ApplicationService {
                     "The project is not currently at the required previous stage."
                 );
             }
-
             // --------------------------------------------------
             // Previous application must be accepted
             // --------------------------------------------------
-
             if (
                 currentAppDoc.status !==
                 ApplicationStatus.accepted
@@ -185,7 +204,6 @@ export class ApplicationService {
         // --------------------------------------------------
 
         if (stageDoc.template) {
-
             const result =
                 await this.templateValidator.validate(
                     String(stageDoc.template),
@@ -201,7 +219,6 @@ export class ApplicationService {
                 );
             }
         }
-
         // --------------------------------------------------
         // Create application
         // --------------------------------------------------
@@ -214,11 +231,11 @@ export class ApplicationService {
     }
 
     /**
- * Internal application creation.
- *
- * Assumes all business validations have already
- * been completed by the caller.
- */
+     * Internal application creation.
+     *
+     * Assumes all business validations have already
+     * been completed by the caller.
+     */
     async internalCreate(
         dto: CreateApplicationDTO,
         userId: string,
@@ -231,7 +248,7 @@ export class ApplicationService {
             // Create application
             // --------------------------------------------------
             const created =
-                await this.repository.create(
+                await this.applicationRepo.create(
                     dto,
                     userId
                 );
@@ -307,21 +324,21 @@ export class ApplicationService {
     ) {
         const scopeFilter =
             await this.scopeFilterService.getApplicationFilter(scope);
-        return await this.repository.find(filter, options, scopeFilter);
+        return await this.applicationRepo.find(filter, options, scopeFilter);
     }
 
     /**
      * Get project applications
      */
     async get(dto: FilterApplicationDTO, options?: FilterOptions) {
-        return await this.repository.find(dto, options);
+        return await this.applicationRepo.find(dto, options);
     }
 
     /**
      * Get by ID
      */
     async getById(id: string) {
-        const appDoc = await this.repository.findById(id);
+        const appDoc = await this.applicationRepo.findById(id);
         if (!appDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
         return appDoc;
     }
@@ -356,7 +373,7 @@ export class ApplicationService {
         );
 
         if (totalWeight === 0) {
-            await this.repository.update(id, {
+            await this.applicationRepo.update(id, {
                 totalScore: 0
             });
 
@@ -372,7 +389,7 @@ export class ApplicationService {
                 0
             ) / totalWeight;
 
-        await this.repository.update(id, {
+        await this.applicationRepo.update(id, {
             totalScore: score
         });
 
@@ -385,7 +402,7 @@ export class ApplicationService {
     async transitionState(dto: TransitionRequestDto, userId: string) {
         const { id, current, next } = dto;
 
-        const applicationDoc = await this.repository.findById(id);
+        const applicationDoc = await this.applicationRepo.findById(id);
         if (!applicationDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
 
         const projectId = String(applicationDoc.project);
@@ -455,7 +472,7 @@ export class ApplicationService {
             }
         }
 
-        const updated = await this.repository.updateStatus(id, to, userId);
+        const updated = await this.applicationRepo.updateStatus(id, to, userId);
 
         //const synced = await this.synchronizer.sync(projectId);
 
@@ -523,7 +540,7 @@ export class ApplicationService {
         // --------------------------------------------------
 
         const applicationDoc =
-            await this.repository.findById(id);
+            await this.applicationRepo.findById(id);
 
         if (!applicationDoc) {
             throw new AppError(
@@ -622,7 +639,7 @@ export class ApplicationService {
         if (previousStage) {
 
             const previousApplication =
-                await this.repository.findOne({
+                await this.applicationRepo.findOne({
                     project: projectId,
                     stage: String(previousStage._id)
                 });
@@ -643,7 +660,7 @@ export class ApplicationService {
         // --------------------------------------------------
 
         const deleted =
-            await this.repository.delete(id);
+            await this.applicationRepo.delete(id);
 
         if (!deleted) {
             throw new AppError(

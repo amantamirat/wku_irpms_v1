@@ -73,7 +73,7 @@ export class GrantService {
         // If the admin is trying to change the total amount
         if (data.amount !== undefined && data.amount !== grantDoc.amount) {
 
-            const calls = await this.callRepo.find({ grant: id });
+           // const calls = await this.callRepo.find({ grant: id });
             const totalAllocated = 0//calls.reduce((sum, a) => sum + (a.budget || 0), 0);
 
             const minimumAllowed = Math.max(

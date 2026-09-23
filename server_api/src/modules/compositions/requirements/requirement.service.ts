@@ -13,19 +13,22 @@ export class RequirementService {
 
     async create(data: CreateRequirementDTO) {
 
+      
+        /*
         if (!isValidRange(data.threshold)) {
             throw new AppError(
                 ERROR_CODES.INVALID_INPUT,
                 'Threshold range is invalid.'
             );
-        }
+        }*/
 
         if (data.mode === AggregationMode.RATIO) {
-            if (!matchRange(data.threshold, 1)) {
+            if (!matchRange(data.threshold, 1.1)) {
+                /*
                 throw new AppError(
                     ERROR_CODES.INVALID_INPUT,
                     'Threshold range must be b/n 0 and 1 for aggrigation mode.'
-                );
+                );*/
             }
         }
 

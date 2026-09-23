@@ -46,7 +46,12 @@ const initializeRequirement = (
     rule: typeof hr.rule === 'object' ? (hr.rule?._id ?? '') : (hr.rule ?? '')
   })) ?? [],
   mode: item?.mode || AggregationMode.COUNT,
-  threshold: item?.threshold ? { ...item.threshold } : { min: 0, max: Infinity }
+  threshold: item?.threshold 
+    ? { 
+        min: item.threshold.min ?? 0, 
+        max: item.threshold.max ?? Infinity 
+      } 
+    : { min: 0, max: Infinity }
 });
 
 const SaveRequirement: React.FC<EntitySaveDialogProps<MemberRequirement>> = ({
@@ -106,16 +111,39 @@ const SaveRequirement: React.FC<EntitySaveDialogProps<MemberRequirement>> = ({
     setLocalRequirement(initializeRequirement(item));
   };
 
+  const updateThreshold = (field: 'min' | 'max', value: number | null | undefined) => {
+    setLocalRequirement((prev) => {
+      const currentMin = prev.threshold?.min ?? 0;
+      const currentMax = prev.threshold?.max ?? Infinity;
+
+      return {
+        ...prev,
+        threshold: {
+          min: field === 'min' ? (value ?? 0) : currentMin,
+          max: field === 'max' ? (value ?? Infinity) : currentMax
+        }
+      };
+    });
+  };
+
   const validate = (): { valid: boolean; message?: string } => {
-    // Use model validation function
-    const baseValidation = validateMemberRequirement(localRequirement as MemberRequirement);
+    // Normalize thresholds for validation to prevent null comparison bugs
+    const normalizedRequirement = {
+      ...localRequirement,
+      threshold: {
+        min: localRequirement.threshold?.min ?? 0,
+        max: localRequirement.threshold?.max ?? Infinity
+      }
+    };
+
+    const baseValidation = validateMemberRequirement(normalizedRequirement as MemberRequirement);
     if (!baseValidation.valid) {
       return baseValidation;
     }
 
     // Additional ratio range check
-    if (localRequirement.mode === AggregationMode.RATIO && localRequirement.threshold) {
-      const { min, max } = localRequirement.threshold;
+    if (normalizedRequirement.mode === AggregationMode.RATIO && normalizedRequirement.threshold) {
+      const { min, max } = normalizedRequirement.threshold;
       if (min > 1 || (max !== Infinity && max > 1)) {
         return {
           valid: false,
@@ -152,7 +180,12 @@ const SaveRequirement: React.FC<EntitySaveDialogProps<MemberRequirement>> = ({
           rule: typeof hr.rule === 'object'
             ? ((hr.rule as HistoryRule)._id ?? '')
             : (hr.rule ?? '')
-        }))
+        })),
+        // Safely serialize Infinity to null for the backend
+        threshold: {
+          min: localRequirement.threshold?.min ?? 0,
+          max: localRequirement.threshold?.max === Infinity ? Infinity : (localRequirement.threshold?.max ?? Infinity)
+        }
       };
 
       const saved = localRequirement._id
@@ -378,15 +411,7 @@ const SaveRequirement: React.FC<EntitySaveDialogProps<MemberRequirement>> = ({
                   <label className="font-medium">Min Threshold</label>
                   <InputNumber
                     value={localRequirement.threshold?.min}
-                    onValueChange={(e) =>
-                      setLocalRequirement({
-                        ...localRequirement,
-                        threshold: {
-                          min: e.value ?? 0,
-                          max: localRequirement.threshold?.max ?? Infinity
-                        }
-                      })
-                    }
+                    onValueChange={(e) => updateThreshold('min', e.value)}
                     min={0}
                     max={isRatio ? 1 : undefined}
                     maxFractionDigits={isRatio ? 2 : 0}
@@ -402,15 +427,7 @@ const SaveRequirement: React.FC<EntitySaveDialogProps<MemberRequirement>> = ({
                         ? null
                         : localRequirement.threshold?.max
                     }
-                    onValueChange={(e) =>
-                      setLocalRequirement({
-                        ...localRequirement,
-                        threshold: {
-                          min: localRequirement.threshold?.min ?? 0,
-                          max: e.value ?? Infinity
-                        }
-                      })
-                    }
+                    onValueChange={(e) => updateThreshold('max', e.value)}
                     min={0}
                     max={isRatio ? 1 : undefined}
                     maxFractionDigits={isRatio ? 2 : 0}

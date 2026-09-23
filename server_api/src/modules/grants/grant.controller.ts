@@ -90,10 +90,10 @@ export class GrantController {
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;
-            const { title, description, amount } = req.body;
+            const { title, description, constraint, amount } = req.body;
             const dto: UpdateGrantDTO = {
                 id: String(id),
-                data: { title, description, amount }
+                data: { title, description, constraint, amount }
             };
             const updated = await this.service.update(dto);
             successResponse(res, 200, "Grant updated successfully", updated);

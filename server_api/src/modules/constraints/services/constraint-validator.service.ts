@@ -9,6 +9,8 @@ import {
     IRange,
     matchRange
 } from "../../../common/types/range";
+import { PhaseRepository } from "../../projects/phase/phase.repository";
+import { ProjectRepository } from "../../projects/project.repository";
 
 export interface ValidationResult {
     valid: boolean;
@@ -25,6 +27,8 @@ export class ConstraintValidationService {
     constructor(
         private readonly constraintRepo: ConstraintRepository,
         private readonly themeRepo: ThemeRepository,
+        private readonly projectRepo: ProjectRepository,
+        private readonly phaseRepo: PhaseRepository,
     ) { }
 
 
@@ -42,6 +46,75 @@ export class ConstraintValidationService {
         }
 
         return constraint;
+    }
+
+    async validateProjectById(
+        constraintId: string,
+        projectId: string
+    ): Promise<ValidationResult> {
+
+        const constraint =
+            await this.getConstraint(constraintId);
+
+        const projectDoc = await this.projectRepo.findById(projectId);
+        if (!projectDoc) {
+            throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
+        }
+
+        const errors: string[] = [];
+
+        // --------------------------------------------------
+        // Project content
+        // --------------------------------------------------
+
+        this.validateTitleWords(
+            constraint.titleWords,
+            projectDoc.title,
+            errors
+        );
+
+        this.validateSummaryWords(
+            constraint.summaryWords,
+            projectDoc.summary,
+            errors
+        );
+
+        // --------------------------------------------------
+        // Participants
+        // --------------------------------------------------
+
+        this.validateParticipants(
+            constraint.participants,
+            projectDoc.totalCollabs ?? 0,
+            errors
+        );
+
+        const phases = await this.phaseRepo.find({ project: projectId });
+
+        // --------------------------------------------------
+        // Phases
+        // --------------------------------------------------
+
+        this.validatePhasesInternal(
+            constraint,
+            phases,
+            errors
+        );
+
+        // --------------------------------------------------
+        // Themes
+        // --------------------------------------------------
+
+        await this.validateThemeInternal(
+            constraint,
+            projectDoc.themes.map(theme => theme.toString()),
+            errors
+        );
+
+        return {
+            valid: errors.length === 0,
+            errors
+        };
     }
 
 

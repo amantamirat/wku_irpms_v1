@@ -40,6 +40,7 @@ export class PhaseService {
                 }
             }
 
+            /*
             if (projectDoc.call) {
                 const callDoc = await this.callRepo.findById(String(projectDoc.call));
                 if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
@@ -64,6 +65,7 @@ export class PhaseService {
                     }
                 }
             }
+                */
         }
         try {
             const lastPhase = await this.phaseRepo.findLastPhase(project);
@@ -124,6 +126,7 @@ export class PhaseService {
             }
         }
 
+        /*
         if (projectDoc.call) {
             const callDoc = await this.callRepo.findById(String(projectDoc.call));
             if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
@@ -138,6 +141,7 @@ export class PhaseService {
                 }
             }
         }
+            */
 
         const oldDuration = phaseDoc.duration ?? 0;
         const oldBudget = phaseDoc.budget ?? 0;
@@ -371,6 +375,7 @@ export class PhaseService {
                 throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
             }
         }
+        /*
         if (projectDoc.call) {
             const callDoc = await this.callRepo.findById(String(projectDoc.call));
             if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
@@ -402,6 +407,7 @@ export class PhaseService {
                 }
             }
         }
+        */
         // ✅ Decrement totals BEFORE delete
         await this.projectRepo.incrementTotals(projectId, {
             duration: -(phaseDoc.duration ?? 0),

@@ -2,7 +2,7 @@ import { Router } from "express";
 import {
     verifyAuthToken
 } from "../../auth/auth.middleware";
-import { checkTransitionPermission, projectAuth } from '../../../core/container';
+import { checkTransitionPermission, filterService, projectAuth } from '../../../core/container';
 import { checkPermission } from '../../../core/container';
 
 import { VerificationController } from "./verification.controller";
@@ -10,6 +10,7 @@ import { VerificationService } from "./verification.service";
 import { notificationService, projectRepo, reviewerRepo, verificationConfRepo, verificationRepo } from "../../../core/container";
 import { upload } from "../../../util/multer";
 import { PERMISSIONS } from "../../../common/constants/permissions";
+import ScopeFilterService from "../../auth/scope-filter.service";
 
 const verificationService =
     new VerificationService(
@@ -19,6 +20,7 @@ const verificationService =
         reviewerRepo,
         projectAuth,
         notificationService,
+        filterService
     );
 
 const controller =

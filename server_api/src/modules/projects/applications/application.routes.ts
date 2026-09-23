@@ -47,7 +47,7 @@ router.get(
     "/lookup",
     verifyAuthToken,
     checkPermission("application:lookup"),
-    controller.get
+    controller.lookup
 );
 
 router.get(

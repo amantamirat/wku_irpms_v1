@@ -167,10 +167,14 @@ export class VerificationController {
 
 
     find = async (
-        req: Request,
+        req: AuthenticatedRequest,
         res: Response
     ) => {
         try {
+
+            if (!req.auth) {
+                return;
+            }
 
             const {
                 project,
@@ -201,6 +205,7 @@ export class VerificationController {
             const verifications =
                 await this.service.find(
                     filters,
+                    req.auth.scope,
                     {
                         populate: true
                     }

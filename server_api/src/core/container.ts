@@ -112,7 +112,7 @@ export const templateValidtor = new TemplateValidationService(
 );
 //validator services 
 export const constraintValidator = new ConstraintValidationService(
-    constraintRepo, themeRepo);
+    constraintRepo, themeRepo, projectRepo, phaseRepo);
 
 export const profileValidator = new ProfileValidatorService(
     exprienceRepo, specializationRepo
@@ -126,6 +126,9 @@ export const historyValidator = new HistoryValidatorService(
 export const compositionValidator = new CompositionValidationService(
     compositionRepo,
     grantRepo,
+    projectRepo,
+    userRepo,
+    collaboratorRepo,
     new ProfileRepository(),
     new HistoryRepository(),
     new RequirementRepository(),
@@ -149,7 +152,7 @@ export const applicationService = new ApplicationService(
     applicationRepo, projectRepo, callRepo, stageRepo, reviewerRepo,
     templateValidtor,
     new AnonymizerService(applicationRepo, collaboratorRepo), projectAuth,
-    notificationService, filterService
+    notificationService, filterService, compositionValidator
 );
 
 export const projectService = new ProjectService(projectRepo, userRepo, collaboratorRepo, phaseRepo, verificationRepo,

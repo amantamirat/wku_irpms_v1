@@ -35,11 +35,7 @@ export interface UpdateGrantDTO {
     userId?: string;
 }
 
-export interface TransitionGrantDTO {
-    id: string;
-    to: GrantStatus;
-    userId: string;
-}
+
 
 
 

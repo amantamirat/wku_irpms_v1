@@ -38,7 +38,8 @@ export interface IVerificationRepository {
 
     find(
         filters?: FilterVerification,
-        options?: FilterOptions
+        options?: FilterOptions,
+        scopeFilter?: Record<string, unknown>
     ): Promise<IVerification[]>;
 
     count(
@@ -148,10 +149,12 @@ export class VerificationRepository
 
     async find(
         filters: FilterVerification = {},
-        options?: FilterOptions
+        options?: FilterOptions,
+        scopeFilter?: Record<string, unknown>
     ): Promise<IVerification[]> {
 
         const filter: FilterQuery<IVerification> = {};
+
 
         if (filters.project) {
             filter.project =
@@ -179,21 +182,26 @@ export class VerificationRepository
                     : filters.status;
         }
 
-        const query =
+        const query = scopeFilter
+            ? { $and: [scopeFilter, filter] }
+            : filter;
+
+
+        const data =
             Verification
-                .find(filter)
+                .find(query)
                 .sort({
                     createdAt: -1
                 });
 
         if (options?.populate) {
 
-            query
+            data
                 .populate("project")
                 .populate("configuration");
         }
 
-        return query;
+        return data;
     }
 
 

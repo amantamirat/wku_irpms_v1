@@ -87,7 +87,7 @@ const normalizeError = (
     }
 
     return new ApiError(
-        "Unable to connect to the server. Please check your internet connection or try again later.",
+        "Unable to connect to the server. Please check your network connection or try again later.",
         {
             code: "SERVER_UNREACHABLE",
             status: 0,

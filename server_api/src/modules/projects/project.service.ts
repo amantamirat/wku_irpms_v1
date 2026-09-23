@@ -517,13 +517,19 @@ export class ProjectService {
                 throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
             }
             if (grandDoc.constraint) {
-                /*
-                this.constraintValidator.validateProject(String(grandDoc.constraint),
-                    projectDoc
-                );*/
+
+                const result = await this.constraintValidator.validateProjectById(String(grandDoc.constraint),
+                    id
+                );
+                if (!result.valid) {
+                    throw new AppError(
+                        ERROR_CODES.INVALID_CONSTRAINT,
+                        "Constraint validation failed",
+                        400,
+                        result
+                    );
+                }
             }
-
-
         }
 
 

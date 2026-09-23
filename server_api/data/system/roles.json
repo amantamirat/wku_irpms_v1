@@ -69,6 +69,22 @@
         ]
     },
     {
+        "name": "vice dean",
+        "permissions": [
+            "organization:lookup",
+            "calendar:lookup",
+            "grant:lookup",
+            "project:read",
+            "project:lookup",
+            "collaborator:lookup",
+            "phase:lookup",
+            "user:lookup",
+            "application:*",
+            "reviewer:*",
+            "verification-conf:*"
+        ]
+    },
+    {
         "name": "head",
         "permissions": [
             "user:lookup",

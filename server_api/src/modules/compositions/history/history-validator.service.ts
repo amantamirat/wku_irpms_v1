@@ -47,6 +47,7 @@ export class HistoryValidatorService {
             validationContext
         );
 
+        //console.log("context", validationContext)
         //console.log("user", JSON.stringify(user));
         //console.log("metrics", metrics);
 
@@ -59,7 +60,7 @@ export class HistoryValidatorService {
 
                 if (!matchRange(
                     rule.project.granted,
-                    metrics.granted
+                    metrics.granted, true
                 )) {
                     return false;
                 }
@@ -69,7 +70,7 @@ export class HistoryValidatorService {
 
                 if (!matchRange(
                     rule.project.refused,
-                    metrics.refused
+                    metrics.refused, true
                 )) {
                     return false;
                 }
@@ -79,7 +80,7 @@ export class HistoryValidatorService {
 
                 if (!matchRange(
                     rule.project.completed,
-                    metrics.completed
+                    metrics.completed, true
                 )) {
                     return false;
                 }
@@ -94,7 +95,7 @@ export class HistoryValidatorService {
 
                 if (!matchRange(
                     rule.application.submitted,
-                    metrics.submitted
+                    metrics.submitted, true
                 )) {
                     return false;
                 }
@@ -104,7 +105,7 @@ export class HistoryValidatorService {
 
                 if (!matchRange(
                     rule.application.accepted,
-                    metrics.accepted
+                    metrics.accepted, true
                 )) {
                     return false;
                 }
@@ -114,7 +115,7 @@ export class HistoryValidatorService {
 
                 if (!matchRange(
                     rule.application.rejected,
-                    metrics.rejected
+                    metrics.rejected, true
                 )) {
                     return false;
                 }
