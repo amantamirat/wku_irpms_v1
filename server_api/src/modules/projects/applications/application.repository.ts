@@ -13,6 +13,7 @@ import {
 } from "./application.model";
 
 import { FilterOptions } from "../../../common/dtos/filter.dto";
+import { ScopeFilter } from "../../auth/auth.types";
 
 
 export interface IApplicationRepository {
@@ -30,7 +31,7 @@ export interface IApplicationRepository {
     find(
         filters?: FilterApplicationDTO,
         options?: FilterOptions,
-        scopeFilter?: Record<string, unknown>
+        scopeFilter?: ScopeFilter
     ): Promise<IApplication[]>;
 
     create(
@@ -152,7 +153,7 @@ export class ApplicationRepository
     async find(
         filters: FilterApplicationDTO = {},
         options?: FilterOptions,
-        scopeFilter?: Record<string, unknown>
+        scopeFilter?: ScopeFilter
     ): Promise<IApplication[]> {
 
         const filter =

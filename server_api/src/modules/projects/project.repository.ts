@@ -15,6 +15,7 @@ import {
     ProjectStatus
 } from "./project.model";
 import { toObjectId } from "../../common/utils/mongoose.utils";
+import { ScopeFilter } from "../auth/auth.types";
 
 
 export interface IProjectRepository {
@@ -27,7 +28,7 @@ export interface IProjectRepository {
     find(
         filters: FilterProjectsDTO,
         options?: FilterOptions,
-        scopeFilter?: Record<string, unknown>,
+        scopeFilter?: ScopeFilter,
     ): Promise<IProject[]>;
 
     findIdsByFilter(
@@ -180,7 +181,7 @@ export class ProjectRepository
     async find(
         filters: FilterProjectsDTO,
         options?: FilterOptions,
-        scopeFilter?: Record<string, unknown>
+        scopeFilter?: ScopeFilter
     ): Promise<IProject[]> {
 
         const filter =

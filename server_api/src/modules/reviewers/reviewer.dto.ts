@@ -1,7 +1,4 @@
-
-
 // reviewer.dto.ts
-
 import { ReviewerTargetType } from "./reviewer.model";
 import { ReviewerStatus } from "./reviewer.state-machine";
 

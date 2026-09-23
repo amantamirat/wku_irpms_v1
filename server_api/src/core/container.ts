@@ -135,24 +135,26 @@ export const compositionValidator = new CompositionValidationService(
     profileValidator, historyValidator);
 
 
+export const filterService = new ScopeFilterService(projectRepo);
+
 // Services
 export const stageService = new StageService(stageRepo, callRepo, evaluationRepo, applicationRepo);
 
 export const projectAuth = new ProjectAuth(projectRepo, authPermissionService);
 
 export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, callRepo,
-    applicationRepo, constraintValidator, projectAuth, notificationService);
+    applicationRepo, constraintValidator, projectAuth, notificationService, filterService);
 
 export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, callRepo, constraintValidator,
     projectAuth);
 
-export const filterService = new ScopeFilterService(projectRepo);
+
 
 export const applicationService = new ApplicationService(
     applicationRepo, projectRepo, callRepo, stageRepo, reviewerRepo,
     templateValidtor,
     new AnonymizerService(applicationRepo, collaboratorRepo), projectAuth,
-    notificationService, filterService, compositionValidator
+    notificationService, filterService, constraintValidator,compositionValidator
 );
 
 export const projectService = new ProjectService(projectRepo, userRepo, collaboratorRepo, phaseRepo, verificationRepo,

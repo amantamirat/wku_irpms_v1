@@ -46,7 +46,7 @@ export class ApplicationService {
         private readonly notificationService: NotificationService,
         private readonly scopeFilterService: ScopeFilterService,
 
-        //private readonly constraintValidator: ConstraintValidationService,
+        private readonly constraintValidator: ConstraintValidationService,
         private readonly compositionValidator: CompositionValidationService,
     ) {
     }
@@ -122,6 +122,19 @@ export class ApplicationService {
                     ERROR_CODES.INVALID_STAGE,
                     "The application stage does not belong to the project's call."
                 );
+            }
+
+            if (callDoc.constraint) {
+                const constraintId = String(callDoc.constraint);
+                const result = await this.constraintValidator.validateProjectById(constraintId, project);
+                if (!result.valid) {
+                    throw new AppError(
+                        ERROR_CODES.INVALID_CONSTRAINT,
+                        "Constraint validation failed",
+                        400,
+                        result
+                    );
+                }
             }
 
             if (callDoc.composition) {

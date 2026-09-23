@@ -14,14 +14,16 @@ import { PERMISSIONS } from "../../../common/constants/permissions";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
+import { AuthScope } from "../../auth/auth.types";
+import ScopeFilterService from "../../auth/scope-filter.service";
 import { ICallRepository } from "../../calls/call.repository";
 import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
 import { NotificationService } from "../../notifications/notification.service";
+import { ApplicationStatus } from "../applications/application.model";
+import { IApplicationRepository } from "../applications/application.repository";
 import { ProjectAuth } from "../project.auth";
 import { ProjectStatus } from "../project.model";
 import { CollaboratorStatus } from "./collaborator.model";
-import { IApplicationRepository } from "../applications/application.repository";
-import { ApplicationStatus } from "../applications/application.model";
 
 
 export class CollaboratorService {
@@ -34,6 +36,7 @@ export class CollaboratorService {
         private readonly constraintValidator: ConstraintValidationService,
         private readonly projectAuth: ProjectAuth,
         private readonly notificationService: NotificationService,
+        private readonly scopeFilterService: ScopeFilterService,
     ) {
     }
 
@@ -98,6 +101,13 @@ export class CollaboratorService {
             }
             throw err;
         }
+    }
+
+    async read(filter: FilterCollaborators, scope: AuthScope, options?: FilterOptions) {
+        const scopeFilter =
+            await this.scopeFilterService.getCollaboratorFilter(scope);
+        const collaborators = await this.collabRepo.find(filter, options, scopeFilter);
+        return collaborators;
     }
 
     async get(filter: FilterCollaborators, options?: FilterOptions) {

@@ -1,7 +1,7 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
 import { verifyAuthToken } from '../auth/auth.middleware';
-import { checkTransitionPermission } from '../../core/container';
+import { checkTransitionPermission, filterService } from '../../core/container';
 import { checkPermission } from '../../core/container';
 import { CriterionRepository } from '../evaluations/criteria/criterion.repository';
 import { ResultRepository } from './results/result.repository';
@@ -21,7 +21,7 @@ const policy = new ReviewerPolicy(reviewerRepo, projectRepo, applicationRepo, st
 );
 
 const service = new ReviewerService(
-    reviewerRepo, resultRepo, criterionRepo, policy, notificationService);
+    reviewerRepo, resultRepo, criterionRepo, policy, notificationService, filterService);
 const controller = new ReviewerController(service);
 const router: Router = Router();
 

@@ -41,9 +41,25 @@ export class CollaboratorController {
     };
 
     // -----------------------
+    get = async (req: AuthenticatedRequest, res: Response) => {
+        try {
+            if (!req.auth) { return; }
+            const { project, member, status } = req.query;
+            const collaborators = await this.service.read({
+                project: project ? (project as string) : undefined,
+                member: member ? (member as string) : undefined,
+                status: status ? (status as CollaboratorStatus) : undefined
+            }, req.auth.scope, { populate: true });
+            successResponse(res, 200, 'Collaborators fetched successfully', collaborators);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
+    // -----------------------
     // Fetch / Query
     // -----------------------
-    get = async (req: AuthenticatedRequest, res: Response) => {
+    lookup = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { project, member, status } = req.query;
             const collaborators = await this.service.get({

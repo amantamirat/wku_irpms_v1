@@ -4,6 +4,8 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
+import { AuthScope } from "../auth/auth.types";
+import ScopeFilterService from "../auth/scope-filter.service";
 import { FormType } from "../evaluations/criteria/criterion.model";
 import { ICriterionRepository } from "../evaluations/criteria/criterion.repository";
 import { NotificationService } from "../notifications/notification.service";
@@ -22,6 +24,7 @@ export class ReviewerService {
         private readonly criterionRepo: ICriterionRepository,
         private readonly policy: ReviewerPolicy,
         private readonly notificationService: NotificationService,
+        private readonly scopeFilterService: ScopeFilterService,
     ) {
     }
 
@@ -96,6 +99,12 @@ export class ReviewerService {
             }
         );
     };
+
+    async read(filter: FilterReviewersDto, scope: AuthScope, options?: FilterOptions) {
+        const scopeFilter =
+            await this.scopeFilterService.getReviewerFilter(scope);
+        return this.repository.find(filter, options, scopeFilter);
+    }
 
     async getReviewers(filter: FilterReviewersDto, options?: FilterOptions) {
         return this.repository.find(filter, options);

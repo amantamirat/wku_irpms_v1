@@ -1,12 +1,17 @@
+import mongoose from "mongoose";
 import { IProjectRepository } from "../projects/project.repository";
-import { AuthScope } from "./auth.types";
+import { AuthScope, ScopeFilter } from "./auth.types";
 
 class ScopeFilterService {
-    constructor(private readonly projectRepo: IProjectRepository) { }
+
+    constructor(
+        private readonly projectRepo: IProjectRepository
+    ) { }
 
     getProjectFilter(
         scope: AuthScope
-    ): Record<string, unknown> {
+    ): ScopeFilter {
+
         if (scope === "*") {
             return {};
         }
@@ -33,45 +38,120 @@ class ScopeFilterService {
         };
     }
 
-    // --- Private Helper ---
-    private async getProjectIds(scope: AuthScope): Promise<any[]> {
+    private async getProjectIds(
+        scope: AuthScope
+    ): Promise<mongoose.Types.ObjectId[]> {
+
         if (scope === "*" || !scope?.length) {
             return [];
         }
-        const projectFilter = this.getProjectFilter(scope);
-        return await this.projectRepo.findIdsByFilter(projectFilter);
+
+        const projectFilter =
+            this.getProjectFilter(scope);
+
+        return this.projectRepo.findIdsByFilter(
+            projectFilter
+        );
     }
 
-    // --- Public Entity Filters ---
-
     async getApplicationFilter(
-        scope: string[] | "*" | null
-    ): Promise<Record<string, unknown>> {
-        if (scope === "*") return {};
-        if (!scope?.length) return { project: { $in: [] } };
+        scope: AuthScope
+    ): Promise<ScopeFilter> {
 
-        const projectIds = await this.getProjectIds(scope);
-        return { project: { $in: projectIds } };
+        if (scope === "*") return {};
+
+        if (!scope?.length) {
+            return {
+                project: { $in: [] }
+            };
+        }
+
+        const projectIds =
+            await this.getProjectIds(scope);
+
+        return {
+            project: { $in: projectIds }
+        };
+    }
+
+    async getCollaboratorFilter(
+        scope: AuthScope
+    ): Promise<ScopeFilter> {
+
+        if (scope === "*") return {};
+
+        if (!scope?.length) {
+            return {
+                project: { $in: [] }
+            };
+        }
+
+        const projectIds =
+            await this.getProjectIds(scope);
+
+        return {
+            project: { $in: projectIds }
+        };
+    }
+
+     async getReviewerFilter(
+        scope: AuthScope
+    ): Promise<ScopeFilter> {
+
+        if (scope === "*") return {};
+
+        if (!scope?.length) {
+            return {
+                project: { $in: [] }
+            };
+        }
+
+        const projectIds =
+            await this.getProjectIds(scope);
+
+        return {
+            project: { $in: projectIds }
+        };
     }
 
     async getPhaseFilter(
-        scope: string[] | "*" | null
-    ): Promise<Record<string, unknown>> {
-        if (scope === "*") return {};
-        if (!scope?.length) return { project: { $in: [] } };
+        scope: AuthScope
+    ): Promise<ScopeFilter> {
 
-        const projectIds = await this.getProjectIds(scope);
-        return { project: { $in: projectIds } };
+        if (scope === "*") return {};
+
+        if (!scope?.length) {
+            return {
+                project: { $in: [] }
+            };
+        }
+
+        const projectIds =
+            await this.getProjectIds(scope);
+
+        return {
+            project: { $in: projectIds }
+        };
     }
 
     async getVerificationFilter(
-        scope: string[] | "*" | null
-    ): Promise<Record<string, unknown>> {
-        if (scope === "*") return {};
-        if (!scope?.length) return { project: { $in: [] } };
+        scope: AuthScope
+    ): Promise<ScopeFilter> {
 
-        const projectIds = await this.getProjectIds(scope);
-        return { project: { $in: projectIds } };
+        if (scope === "*") return {};
+
+        if (!scope?.length) {
+            return {
+                project: { $in: [] }
+            };
+        }
+
+        const projectIds =
+            await this.getProjectIds(scope);
+
+        return {
+            project: { $in: projectIds }
+        };
     }
 }
 

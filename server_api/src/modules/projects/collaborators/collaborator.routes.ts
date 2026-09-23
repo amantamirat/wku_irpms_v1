@@ -23,7 +23,7 @@ router.get(
     '/lookup',
     verifyAuthToken,
     checkPermission("collaborator:lookup"),
-    controller.get
+    controller.lookup
 );
 
 router.get('/me', verifyAuthToken,

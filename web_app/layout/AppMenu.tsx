@@ -51,7 +51,7 @@ const AppMenu = () => {
                     label: 'Collaborators',
                     icon: 'pi pi-users',
                     to: '/collaborators',
-                    permission: 'application:read',
+                    permission: 'collaborator:read',
                 },
 
                 {

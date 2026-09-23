@@ -44,8 +44,11 @@ export class ReviewerController {
     // -----------------------
     // GET
     // -----------------------
-    get = async (req: Request, res: Response) => {
+    get = async (req: AuthenticatedRequest, res: Response) => {
         try {
+            if (!req.auth) {
+                return
+            }
             const { application, verification, reviewer, status } = req.query;
 
             const filter: FilterReviewersDto = {
@@ -67,7 +70,7 @@ export class ReviewerController {
                         : status as ReviewerStatus
                     : undefined
             };
-            const reviewers = await this.service.getReviewers(filter, { populate: true });
+            const reviewers = await this.service.read(filter, req.auth.scope, { populate: true });
             successResponse(res, 200, "Reviewers fetched successfully", reviewers);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
