@@ -5,7 +5,9 @@ import { IStatusHistory } from "../../../common/types/status-history";
 import { createStatusHistorySchema } from "../../../common/schemas/status-history.schema";
 
 export enum ApplicationStatus {
-    pending = "pending",
+    submitted = "submitted",
+    shortlisted = "shortlisted",
+    notShortlisted = "notShortlisted",
     accepted = "accepted",
     rejected = "rejected"
 }
@@ -31,6 +33,10 @@ export interface IApplication extends Document {
     anonymizationStatus: AnonymizationStatus;
     status: ApplicationStatus;
     statusHistory: IStatusHistory<ApplicationStatus>[];
+    /**
+     * User responsible for assigning reviewers to this application.
+     */
+    reviewerAssigner?: mongoose.Types.ObjectId | null;
 
     createdBy?: mongoose.Types.ObjectId; // User who created the record
     updatedBy?: mongoose.Types.ObjectId; // User who last updated the record
@@ -83,10 +89,16 @@ const ApplicationSchema = new Schema<IApplication>(
             required: true
         },
 
+        reviewerAssigner: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.USER,
+            default: null
+        },
+
         status: {
             type: String,
             enum: Object.values(ApplicationStatus),
-            default: ApplicationStatus.pending,
+            default: ApplicationStatus.submitted,
             required: true
         },
         statusHistory: {

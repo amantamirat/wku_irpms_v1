@@ -56,7 +56,7 @@ export class CollaboratorService {
 
                 if (projectDoc.currentApplication) {
                     const currentAppDoc = await this.applicationRepo.findById(String(projectDoc.currentApplication));
-                    if (currentAppDoc?.status === ApplicationStatus.pending) {
+                    if (currentAppDoc?.status === ApplicationStatus.submitted) {
                         throw new AppError(ERROR_CODES.CURRENT_APPLICATION_IS_PENDING);
                     }
                 }
@@ -168,9 +168,7 @@ export class CollaboratorService {
             const projectDoc = await this.projectRepo.findById(String(collabDoc.project));
             if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
             const projectStatus = projectDoc.status;
-            if (projectStatus !== ProjectStatus.draft //&&
-                // projectStatus !== ProjectStatus.submitted // &&
-                // projectStatus !== ProjectStatus.accepted
+            if (projectStatus !== ProjectStatus.draft 
             ) {
                 throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
             }

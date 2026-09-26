@@ -1,4 +1,3 @@
-//reviewer.model.ts
 import mongoose, { model, Schema } from "mongoose";
 import { ReviewerStatus } from "./reviewer.state-machine";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
@@ -6,21 +5,32 @@ import { IStatusHistory } from "../../common/types/status-history";
 import { createStatusHistorySchema } from "../../common/schemas/status-history.schema";
 
 export enum ReviewerTargetType {
-    APPLICATION = 'APPLICATION',
-    VERIFICATION = 'VERIFICATION'
+    APPLICATION = "APPLICATION",
+    VERIFICATION = "VERIFICATION"
 }
 
 export interface IReviewer extends Document {
+    _id: mongoose.Types.ObjectId;
+
     targetType: ReviewerTargetType;
+
     reviewer: mongoose.Types.ObjectId;
     project: mongoose.Types.ObjectId;
+
     application?: mongoose.Types.ObjectId;
     verification?: mongoose.Types.ObjectId;
+
     evaluation: mongoose.Types.ObjectId;
-    score?: number;
+
+    score?: number | null;
     weight?: number;
+
     status: ReviewerStatus;
     statusHistory: IStatusHistory<ReviewerStatus>[];
+
+    createdBy?: mongoose.Types.ObjectId;
+    updatedBy?: mongoose.Types.ObjectId;
+
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -30,71 +40,89 @@ const ReviewerStatusHistorySchema =
         Object.values(ReviewerStatus)
     );
 
-const ReviewerSchema = new Schema<IReviewer>({
-    targetType: {
-        type: String,
-        enum: Object.values(ReviewerTargetType),
-        required: true,
-        immutable: true
-    },
+const ReviewerSchema = new Schema<IReviewer>(
+    {
+        targetType: {
+            type: String,
+            enum: Object.values(ReviewerTargetType),
+            required: true,
+            immutable: true
+        },
 
-    reviewer: {
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.USER,
-        required: true,
-        immutable: true
-    },
+        reviewer: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.USER,
+            required: true,
+            immutable: true
+        },
 
-    project: {
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.PROJECT,
-        required: true,
-        immutable: true
-    },
+        project: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.PROJECT,
+            required: true,
+            immutable: true
+        },
 
-    application: {
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.APPLICATION,
-        immutable: true,
-        sparse: true
-    },
+        application: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.APPLICATION,
+            immutable: true,
+            sparse: true
+        },
 
-    verification: {
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.VERIFICATION,
-        immutable: true,
-        sparse: true
-    },
-    evaluation: {
-        type: Schema.Types.ObjectId,
-        ref: COLLECTIONS.EVALUATION,
-        immutable: true,
-        sparse: true
-    },
-    score: {
-        type: Number,
-        min: 0
-    },
+        verification: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.VERIFICATION,
+            immutable: true,
+            sparse: true
+        },
 
-    weight: {
-        type: Number,
-        min: 1,
-        default: 1
-    },
+        evaluation: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.EVALUATION,
+            required: true,
+            immutable: true
+        },
 
-    status: {
-        type: String,
-        enum: Object.values(ReviewerStatus),
-        default: ReviewerStatus.pending,
-        required: true
+        score: {
+            type: Number,
+            min: 0
+        },
+
+        weight: {
+            type: Number,
+            min: 1,
+            default: 1
+        },
+
+        status: {
+            type: String,
+            enum: Object.values(ReviewerStatus),
+            default: ReviewerStatus.pending,
+            required: true
+        },
+
+        statusHistory: {
+            type: [ReviewerStatusHistorySchema],
+            default: []
+        },
+
+        createdBy: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.USER,
+            immutable: true
+        },
+
+        updatedBy: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.USER
+        }
     },
-    
-    statusHistory: {
-        type: [ReviewerStatusHistorySchema],
-        default: []
+    {
+        timestamps: true
     }
+);
 
-}, { timestamps: true });
 ReviewerSchema.index(
     {
         targetType: 1,
@@ -124,4 +152,8 @@ ReviewerSchema.index(
         }
     }
 );
-export const Reviewer = model<IReviewer>(COLLECTIONS.REVIEWER, ReviewerSchema);
+
+export const Reviewer = model<IReviewer>(
+    COLLECTIONS.REVIEWER,
+    ReviewerSchema
+);

@@ -1,15 +1,16 @@
 //result.repository.ts
 import mongoose from "mongoose";
 import { Result, IResult } from "./result.model";
-import { CreateResultDTO, ExistsResultsDTO, GetResultsDTO, UpdateResultDTO } from "./result.dto";
+import { CreateResultDTO, FilterResultsDTO, UpdateResultDTO } from "./result.dto";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 
 export interface IResultRepository {
     findById(id: string): Promise<IResult | null>;
-    find(options: GetResultsDTO): Promise<Partial<IResult>[]>;
+    find(filters: FilterResultsDTO, options?: FilterOptions): Promise<Partial<IResult>[]>;
     //create(data: CreateResultDTO): Promise<IResult>;
     insertMany(data: CreateResultDTO[]): Promise<IResult[]>;
     update(id: string, data: UpdateResultDTO["data"]): Promise<IResult | null>;
-    exists(filters: ExistsResultsDTO): Promise<boolean>;
+    exists(filters: FilterResultsDTO): Promise<boolean>;
     delete(id: string): Promise<void>;
     deleteByReviewer(reviewerId: string): Promise<number>;
 }
@@ -21,18 +22,17 @@ export class ResultRepository implements IResultRepository {
         return Result.findById(new mongoose.Types.ObjectId(id)).lean<IResult>().exec();
     }
 
-    async find(options: GetResultsDTO) {
+    async find(filters: FilterResultsDTO, options?: FilterOptions) {
         const query: any = {};
 
-        if (options.reviewer) {
-            query.reviewer = new mongoose.Types.ObjectId(options.reviewer);
+        if (filters.reviewer) {
+            query.reviewer = new mongoose.Types.ObjectId(filters.reviewer);
         }
 
         let dbQuery = Result.find(query);
 
-        if (options.populate) {
+        if (options?.populate) {
             dbQuery = dbQuery.populate("criterion");
-            //dbQuery = dbQuery.populate("criterion selectedOptions");
         }
 
         return dbQuery.lean<IResult[]>().exec();
@@ -87,7 +87,7 @@ export class ResultRepository implements IResultRepository {
         ).exec();
     }
 
-    async exists(filters: ExistsResultsDTO): Promise<boolean> {
+    async exists(filters: FilterResultsDTO): Promise<boolean> {
         const query: any = {};
 
         if (filters.reviewer) {
@@ -102,7 +102,7 @@ export class ResultRepository implements IResultRepository {
         if (filters.selectedOption) {
             query.selectedOption = new mongoose.Types.ObjectId(filters.selectedOption);
         }
-            */
+        */
 
         const result = await Result.exists(query).exec();
         return result !== null;

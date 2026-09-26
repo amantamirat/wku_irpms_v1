@@ -178,6 +178,7 @@ export class ProjectRepository
     }
 
 
+
     async find(
         filters: FilterProjectsDTO,
         options?: FilterOptions,
@@ -201,18 +202,20 @@ export class ProjectRepository
                 .populate("organization")
                 .populate("workspace")
                 .populate("calendar")
-                .populate("themes")
-                .populate("currentApplication")
-                .populate("currentPhase")
-                .populate("currentVerification")
+                //.populate("themes")
+                //.populate("currentApplication")
+                //.populate("currentPhase")
+                //.populate("currentVerification")
                 .populate("createdBy");
         }
 
         return dbQuery
+            .sort({ createdAt: -1 }) // newest first
             .lean<IProject[]>()
             .exec();
     }
 
+    
     async findIdsByFilter(
         filter: Record<string, unknown>
     ): Promise<mongoose.Types.ObjectId[]> {

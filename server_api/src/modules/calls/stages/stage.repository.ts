@@ -8,6 +8,10 @@ import { IStage, Stage, StageStatus } from "./stage.model";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 import mongoose from "mongoose";
 
+export interface CreateStageData extends CreateStageDTO {
+    order: number;
+}
+
 
 export interface IStageRepository {
     findById(id: string): Promise<IStage | null>;
@@ -30,7 +34,7 @@ export interface IStageRepository {
 
     findAvailable(options?: FilterOptions): Promise<IStage[]>;
 
-    create(dto: CreateStageDTO, userId: string): Promise<IStage>;
+    create(dto: CreateStageData, userId: string): Promise<IStage>;
 
     update(
         id: string,
@@ -174,7 +178,7 @@ export class StageRepository implements IStageRepository {
 
 
     async create(
-        dto: CreateStageDTO, userId: string
+        dto: CreateStageData, userId: string
     ): Promise<IStage> {
 
         return Stage.create({

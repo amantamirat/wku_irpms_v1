@@ -257,7 +257,8 @@ export class CollaboratorRepository
                 new mongoose.Types.ObjectId(dto.project),
 
             member:
-                new mongoose.Types.ObjectId(dto.member)
+                new mongoose.Types.ObjectId(dto.member),
+            //createdBY
         };
 
         return Collaborator

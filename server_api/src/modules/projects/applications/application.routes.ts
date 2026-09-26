@@ -42,7 +42,14 @@ router.get(
     controller.get
 );
 
-//used the same get function
+// My assigned applications
+router.get(
+    "/my-assigned",
+    verifyAuthToken,
+    checkPermission("application:assigned:read"),
+    controller.getMyAssignedApplications
+);
+
 router.get(
     "/lookup",
     verifyAuthToken,
@@ -57,31 +64,22 @@ router.get(
     controller.getById
 );
 
-/*
-router.post(
-    "/:id/calculate-score",
-    verifyActiveAccount,
-    checkPermission("application:calculateTotalScore"),
-    controller.calculateTotalScore
-);
-*/
+
 
 router.post(
     "/:id/anonymize",
     verifyAuthToken,
     checkPermission("application:anonymize"),
-    //checkPermission("application:calculateTotalScore"),
     controller.anonymize
 );
 
-/*
+
 router.patch(
-    "/",
-    verifyActiveAccount,
-    checkStatusPermission("document"),
-    controller.updateStatus
+    "/:id/reviewer-assigner",
+    verifyAuthToken,
+    checkPermission("application:reviewerAssigner:update"),
+    controller.updateReviewerAssigner
 );
-*/
 
 router.patch(
     "/:id/transition",
@@ -97,12 +95,5 @@ router.delete(
     controller.delete
 );
 
-/*
-router.post(
-    "/:id/withdraw",
-    verifyAuthToken,
-    checkPermission("application:withdraw"),
-    controller.withdraw
-);
-*/
+
 export default router;

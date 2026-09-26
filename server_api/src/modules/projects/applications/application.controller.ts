@@ -2,15 +2,43 @@ import fs from "fs";
 import path from "path";
 import { Request, Response } from "express";
 import { errorResponse, successResponse } from "../../../common/helpers/response";
-import { ApplyProjectDTO, CreateApplicationDTO, FilterApplicationDTO } from "./application.dto";
+import { CreateApplicationDTO, FilterApplicationDTO } from "./application.dto";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { AuthenticatedRequest } from "../../auth/auth.middleware";
 import { ApplicationService } from "./application.service";
+import { ApplicationStatus } from "./application.model";
 
 export class ApplicationController {
+
+    private buildFilter(query: Request["query"]): FilterApplicationDTO {
+        const {
+            project,
+            stage,
+            status,
+            reviewerAssigner
+        } = query;
+
+        return {
+            project: project
+                ? String(project)
+                : undefined,
+
+            stage: stage
+                ? String(stage)
+                : undefined,
+
+            status:
+                status ? String(status) as ApplicationStatus
+                    : undefined,
+
+            reviewerAssigner: reviewerAssigner
+                ? String(reviewerAssigner)
+                : undefined
+        };
+    }
 
     constructor(private readonly service: ApplicationService) {
     }
@@ -70,25 +98,29 @@ export class ApplicationController {
     // ---------------------------------------------------
     // GET
     // ---------------------------------------------------
-    get = async (req: AuthenticatedRequest, res: Response) => {
+    get = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ) => {
         try {
             if (!req.auth) {
-                return
+                throw new Error(ERROR_CODES.UNAUTHORIZED);
             }
-            const { project, stage, status, populate, skip, limit } = req.query;
 
-            const dto: FilterApplicationDTO = {
-                project: project as string,
-                stage: stage as string,
-                status: status as any,
-                //...(populate !== undefined && { populate: populate === "true" }),
-                //skip: skip ? Number(skip) : undefined,
-                //limit: limit ? Number(limit) : undefined,
-            };
-            const applications = await this.service.read(dto, req.auth.userId, req.auth.scope, { populate: true });
-            
-            successResponse(res, 200, "Project documents fetched successfully", applications);
+            const filter = this.buildFilter(req.query);
 
+            const applications = await this.service.readApplications(
+                filter,
+                req.auth.scope,
+                { populate: true }
+            );
+
+            successResponse(
+                res,
+                200,
+                "Applications fetched successfully",
+                applications
+            );
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
@@ -102,15 +134,9 @@ export class ApplicationController {
             }
             const { project, stage, status, populate, skip, limit } = req.query;
 
-            const dto: FilterApplicationDTO = {
-                project: project as string,
-                stage: stage as string,
-                status: status as any,
-                //...(populate !== undefined && { populate: populate === "true" }),
-                //skip: skip ? Number(skip) : undefined,
-                //limit: limit ? Number(limit) : undefined,
-            };
-            const applications = await this.service.get(dto, { populate: true });
+            const filter = this.buildFilter(req.query);
+
+            const applications = await this.service.get(filter, { populate: true });
             //const applications = await this.service.get(dto, { populate: true });
 
             successResponse(res, 200, "Project documents fetched successfully", applications);
@@ -152,6 +178,66 @@ export class ApplicationController {
                 err.message,
                 err
             );
+        }
+    };
+
+
+    getMyAssignedApplications = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ) => {
+        try {
+            if (!req.auth) {
+                throw new Error(ERROR_CODES.UNAUTHORIZED);
+            }
+
+            const filter = this.buildFilter(req.query);
+
+            const applications =
+                await this.service.getMyAssignedApplications(
+                    req.auth.userId,
+                    filter,
+                    { populate: true }
+                );
+
+            successResponse(
+                res,
+                200,
+                "My assigned applications fetched successfully",
+                applications
+            );
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
+
+    updateReviewerAssigner = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ) => {
+        try {
+            if (!req.auth) {
+                throw new AppError(ERROR_CODES.UNAUTHORIZED);
+            }
+
+            const { id } = req.params;
+            const { reviewerAssigner } = req.body;
+
+            const updated = await this.service.updateReviewerAssigner(
+                id,
+                reviewerAssigner ?? null,
+                req.auth.userId
+            );
+
+            successResponse(
+                res,
+                200,
+                "Application reviewer assigner updated successfully",
+                updated
+            );
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
         }
     };
 

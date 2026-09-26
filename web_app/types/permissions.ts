@@ -249,6 +249,7 @@ export const PERMISSIONS = {
   REVIEWER: {
     CREATE: "reviewer:create",
     READ: "reviewer:read",
+    LOOKUP: "reviewer:lookup",
     UPDATE: "reviewer:update",
     STATUS: {
       PEND: "reviewer:status.pending",

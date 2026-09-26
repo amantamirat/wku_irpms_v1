@@ -18,7 +18,7 @@ export class ProfileValidatorService {
 
         // Gender
         if (
-            profile.gender !== undefined &&
+            profile.gender &&
             user.gender !== profile.gender
         ) {
             return false;
@@ -26,14 +26,18 @@ export class ProfileValidatorService {
 
         // Age
         if (profile.age) {
-            if (!user.birthDate) {
+            /*
+           if (!user.birthDate) {
                 return false;
-            }
-            const age = this.calculateAge(user.birthDate);
+            }*/
+            if (user.birthDate) {
+                const age = this.calculateAge(user.birthDate);
 
-            if (!matchRange(profile.age, age)) {
-                return false;
+                if (!matchRange(profile.age, age)) {
+                    return false;
+                }
             }
+
         }
 
         // Experience
@@ -130,7 +134,7 @@ export class ProfileValidatorService {
     ): number {
 
         if (!experiences?.length) {
-            return 0;
+            return 1;
         }
 
         const now = new Date();

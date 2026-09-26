@@ -1,3 +1,4 @@
+// ApplicationManager.tsx
 'use client';
 
 import { BASE_URL } from '@/api/ApiClient';
@@ -23,6 +24,8 @@ import {
     APPLICATION_TRANSITIONS
 } from '../models/application.state-machine';
 import ApplicationDetail from './ApplicationDetail';
+import { UserApi } from '../../users/api/user.api';
+import { ReviewerAssignerDialog } from './ReviewerAssignerDialog';
 
 interface ApplicationManagerProps {
     stage: Stage;
@@ -30,11 +33,18 @@ interface ApplicationManagerProps {
 
 const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
     const confirm = useConfirmDialog();
+    const { hasPermission } = useAuth();
 
     const [applications, setApplications] = useState<Application[]>([]);
     const [loading, setLoading] = useState(true);
 
-    const { hasPermission } = useAuth();
+    // Dialog state for Reviewer Assigner
+    const [assignerDialogVisible, setAssignerDialogVisible] = useState(false);
+    const [activeApplication, setActiveApplication] = useState<Application | null>(null);
+    const [users, setUsers] = useState<any[]>([]);
+    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+    const [savingAssigner, setSavingAssigner] = useState(false);
+    const [dialogError, setDialogError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchApplications = async () => {
@@ -43,7 +53,7 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
             setLoading(true);
 
             try {
-                const data = await ApplicationApi.getAll({ stage }, true);
+                const data = await ApplicationApi.getAll({ stage });
                 setApplications(Array.isArray(data) ? data : []);
             } catch (error) {
                 console.error(
@@ -57,6 +67,67 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
 
         fetchApplications();
     }, [stage]);
+
+    // Fetch users when the dialog opens
+    const handleOpenAssignerDialog = async (application: Application) => {
+        setActiveApplication(application);
+        const currentAssignerId = typeof application.reviewerAssigner === 'object'
+            ? (application.reviewerAssigner as any)?._id
+            : application.reviewerAssigner;
+
+        setSelectedUserId(currentAssignerId || null);
+        setDialogError(null);
+        setAssignerDialogVisible(true);
+
+        if (users.length === 0) {
+            try {
+                const userData = await UserApi.lookup!();
+                setUsers(Array.isArray(userData) ? userData : []);
+            } catch (err) {
+                console.error("Failed to fetch users list", err);
+                setDialogError("Failed to load user list.");
+            }
+        }
+    };
+
+    const handleSaveAssigner = async () => {
+        if (!activeApplication?._id) return;
+
+        setSavingAssigner(true);
+        setDialogError(null);
+
+        try {
+            const updated = await ApplicationApi.updateReviewerAssigner(
+                activeApplication._id,
+                selectedUserId
+            );
+
+            setApplications(prev =>
+                prev.map(app =>
+                    app._id === activeApplication._id
+                        ? { ...app, reviewerAssigner: updated.reviewerAssigner }
+                        : app
+                )
+            );
+
+            setAssignerDialogVisible(false);
+        } catch (error: any) {
+            console.error("Failed to update reviewer assigner", error);
+            setDialogError(error?.message || "Failed to update reviewer assigner. Please try again.");
+        } finally {
+            setSavingAssigner(false);
+        }
+    };
+
+    const updateApplication = (updated: Application) => {
+        setApplications(prev =>
+            prev.map(application =>
+                application._id === updated._id
+                    ? updated
+                    : application
+            )
+        );
+    };
 
     const handleTransition = async (
         id: string,
@@ -115,6 +186,7 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
         },
         {
             header: 'Orig Doc',
+            field: 'origDoc',
             body: (application: Application) =>
                 application.documentPath ? (
                     <a
@@ -137,6 +209,7 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
         },
         {
             header: 'Anon Doc',
+            field: 'anonDoc',
             body: (application: Application) =>
                 application.anonymizedDocumentPath ? (
                     <a
@@ -164,10 +237,29 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
             body: (application: Application) => (
                 <span className="font-bold text-sm">
                     {typeof application.totalScore === 'number'
-                        ? application.totalScore
+                        ? application.totalScore.toFixed(2)
                         : '—'}
                 </span>
             )
+        },
+        {
+            header: 'Reviewer Assigner',
+            field: "assigner",
+            body: (row: Application) => {
+                const assigner = row.reviewerAssigner;
+                const assignerName = typeof assigner === 'object' && assigner !== null
+                    ? (assigner as any).name
+                    : (assigner ? 'Assigned User' : null);
+
+                return assignerName ? (
+                    <span className="inline-flex align-items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 border-round text-xs font-medium">
+                        <i className="pi pi-user text-xs"></i>
+                        {assignerName}
+                    </span>
+                ) : (
+                    <span className="text-gray-400 text-xs italic">Unassigned</span>
+                );
+            }
         },
         {
             header: 'Status',
@@ -184,16 +276,20 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
 
     const extraActions: RowActionButton<Application>[] = [
         {
+            icon: 'pi pi-user-plus',
+            severity: 'info',
+            tooltip: 'Manage Reviewer Assigner',
+            visible: () => hasPermission("application:reviewerAssigner:update"),
+            onClick: (row: Application) => handleOpenAssignerDialog(row)
+        },
+        {
             icon: 'pi pi-eye-slash',
-            //: 'Anonymize Document',
             severity: 'warning',
             tooltip: 'Anonymize Document',
-            visible: () => { return hasPermission("application:anonymize") },
-
+            visible: () => hasPermission("application:anonymize"),
             disabled: (row: Application) =>
                 row.anonymizationStatus !==
                 AnonymizationStatus.pending,
-
             onClick: (row: Application) => {
                 confirm.ask({
                     operation: 'anonymize document',
@@ -229,22 +325,39 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
     }
 
     return (
-        <ItemDataTable
-            items={applications}
-            columns={columns}
-            rowActions={[
-                ...stateActions,
-                ...extraActions
-            ]}
-            enableSearch
-            expandable={{
-                template: application => (
-                    <ApplicationDetail
-                        application={application}
-                    />
-                )
-            }}
-        />
+        <>
+            <ItemDataTable
+                items={applications}
+                columns={columns}
+                rowActions={[
+                    ...stateActions,
+                    ...extraActions
+                ]}
+                enableSearch
+                enableColumnToggle
+                defaultHiddenFields={["assigner", "origDoc", "anonDoc"]}
+                expandable={{
+                    template: application => (
+                        <ApplicationDetail
+                            application={application}
+                            updateApplication={updateApplication}
+                        />
+                    )
+                }}
+            />
+
+            {/* Separated Reviewer Assigner Dialog Component */}
+            <ReviewerAssignerDialog
+                visible={assignerDialogVisible}
+                onHide={() => setAssignerDialogVisible(false)}
+                users={users}
+                selectedUserId={selectedUserId}
+                setSelectedUserId={setSelectedUserId}
+                onSave={handleSaveAssigner}
+                saving={savingAssigner}
+                errorMessage={dialogError}
+            />
+        </>
     );
 };
 

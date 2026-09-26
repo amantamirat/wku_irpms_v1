@@ -6,7 +6,7 @@ import { FormType } from "../../evaluations/criteria/criterion.model";
 import { ICriterionRepository } from "../../evaluations/criteria/criterion.repository";
 import { IReviewerRepository } from "../reviewer.repository";
 import { ReviewerStatus } from "../reviewer.state-machine";
-import { CreateResultDTO, GetResultsDTO, UpdateResultDTO } from "./result.dto";
+import { CreateResultDTO, FilterResultsDTO, UpdateResultDTO } from "./result.dto";
 import { IResultRepository } from "./result.repository";
 
 
@@ -16,7 +16,6 @@ export class ResultService {
         private readonly repository: IResultRepository,
         private readonly reviewerRepo: IReviewerRepository,
         private readonly criterionRepository: ICriterionRepository,
-        //private readonly optionRepository: IOptionRepository = new OptionRepository(),
     ) { }
 
 
@@ -41,8 +40,8 @@ export class ResultService {
 
     }
 
-    async getResults(options: GetResultsDTO) {
-        return this.repository.find({ ...options, populate: true });
+    async getResults(filters: FilterResultsDTO) {
+        return this.repository.find(filters, { populate: true });
     }
 
     private async validateResult(
@@ -112,15 +111,15 @@ export class ResultService {
         return { dto };
     }
 
-    async update(dto: UpdateResultDTO) {
-        const { id, applicantId } = dto;
+    async update(dto: UpdateResultDTO, userId: string) {
+        const { id } = dto;
         const resultDoc = await this.repository.findById(id);
         if (!resultDoc) throw new AppError(ERROR_CODES.RESULT_NOT_FOUND);
 
         const reviewerDoc = await this.reviewerRepo.findById(String(resultDoc.reviewer));
         if (!reviewerDoc) throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
 
-        if (String(reviewerDoc.reviewer) !== applicantId)
+        if (String(reviewerDoc.reviewer) !== userId)
             throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
         if (reviewerDoc.status !== ReviewerStatus.accepted)

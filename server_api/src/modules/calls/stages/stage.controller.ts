@@ -24,6 +24,7 @@ export class StageController {
                 minReviewers,
                 maxReviewers,
                 deadline,
+                reviewersDeadline,
                 minAcceptanceScore,
             } = req.body;
 
@@ -35,6 +36,7 @@ export class StageController {
                 minReviewers,
                 maxReviewers,
                 deadline,
+                reviewersDeadline,
                 minAcceptanceScore,
             };
 
@@ -165,6 +167,7 @@ export class StageController {
                 minReviewers,
                 maxReviewers,
                 deadline,
+                reviewersDeadline,
                 minAcceptanceScore,
             } = req.body;
 
@@ -177,6 +180,7 @@ export class StageController {
                     ...(minReviewers !== undefined && { minReviewers }),
                     ...(maxReviewers !== undefined && { maxReviewers }),
                     ...(deadline !== undefined && { deadline }),
+                    ...(reviewersDeadline !== undefined && { reviewersDeadline }),
                     ...(minAcceptanceScore !== undefined && { minAcceptanceScore }),
                 },
             };

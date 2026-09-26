@@ -2,18 +2,29 @@ import mongoose from "mongoose";
 
 import {
     CreateApplicationDTO,
-    FilterApplicationDTO,
-    UpdateApplicationDTO
+    FilterApplicationDTO
 } from "./application.dto";
 
 import {
     ApplicationStatus,
     IApplication,
-    Application
+    Application,
+    AnonymizationStatus
 } from "./application.model";
 
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { ScopeFilter } from "../../auth/auth.types";
+import { toObjectId } from "../../../common/utils/mongoose.utils";
+
+
+
+export interface UpdateApplicationData {
+    status: ApplicationStatus;//ApplicationStatus.shortlisted | ApplicationStatus.accepted | ApplicationStatus.rejected;
+    totalScore: number | null;
+    anonymizedDocumentPath: string;
+    anonymizationStatus: AnonymizationStatus;
+    reviewerAssigner: string | null;
+}
 
 
 export interface IApplicationRepository {
@@ -41,7 +52,8 @@ export interface IApplicationRepository {
 
     update(
         id: string,
-        data: UpdateApplicationDTO["data"]
+        data: Partial<UpdateApplicationData>,
+        userId?: string
     ): Promise<IApplication | null>;
 
     updateStatus(
@@ -74,20 +86,25 @@ export class ApplicationRepository
 
         if (filters.project) {
             query.project =
-                new mongoose.Types.ObjectId(filters.project);
+                toObjectId(filters.project);
+        }
+
+        if (filters.reviewerAssigner) {
+            query.reviewerAssigner =
+                toObjectId(filters.reviewerAssigner);
         }
 
         if (filters.projectIds?.length) {
             query.project = {
                 $in: filters.projectIds.map(
-                    id => new mongoose.Types.ObjectId(id)
+                    id => toObjectId(id)
                 )
             };
         }
 
         if (filters.stage) {
             query.stage =
-                new mongoose.Types.ObjectId(filters.stage);
+                toObjectId(filters.stage);
         }
 
         if (filters.status) {
@@ -108,7 +125,7 @@ export class ApplicationRepository
 
         let dbQuery =
             Application.findById(
-                new mongoose.Types.ObjectId(id)
+                toObjectId(id)
             );
 
         if (options?.populate) {
@@ -188,16 +205,16 @@ export class ApplicationRepository
 
         const data: Partial<IApplication> = {
             project:
-                new mongoose.Types.ObjectId(dto.project),
+                toObjectId(dto.project),
 
             stage:
-                new mongoose.Types.ObjectId(dto.stage),
+                toObjectId(dto.stage),
 
             documentPath:
                 dto.documentPath,
 
             createdBy:
-                new mongoose.Types.ObjectId(userId)
+                toObjectId(userId)
         };
 
         return Application.create(data);
@@ -209,10 +226,21 @@ export class ApplicationRepository
      */
     async update(
         id: string,
-        dtoData: UpdateApplicationDTO["data"]
+        dtoData: Partial<UpdateApplicationData>,
+        userId?: string
     ): Promise<IApplication | null> {
 
         const updateData: Partial<IApplication> = {};
+
+        if (dtoData.reviewerAssigner !== undefined) {
+            updateData.reviewerAssigner =
+                dtoData.reviewerAssigner ? toObjectId(dtoData.reviewerAssigner) : null
+        }
+
+        if (dtoData.status !== undefined) {
+            updateData.status =
+                dtoData.status;
+        }
 
         if (dtoData.totalScore !== undefined) {
             updateData.totalScore =
@@ -233,6 +261,11 @@ export class ApplicationRepository
         ) {
             updateData.anonymizationStatus =
                 dtoData.anonymizationStatus;
+        }
+
+        if (userId) {
+            updateData.updatedBy =
+                toObjectId(userId);
         }
 
         return Application.findByIdAndUpdate(
@@ -268,7 +301,7 @@ export class ApplicationRepository
                     statusHistory: {
                         status,
                         changedBy:
-                            new mongoose.Types.ObjectId(userId),
+                            toObjectId(userId),
                         changedAt: new Date()
                     }
                 }

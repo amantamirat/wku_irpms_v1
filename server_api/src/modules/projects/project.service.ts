@@ -234,13 +234,13 @@ export class ProjectService {
         const {
             call,
             leadPI,
-            docPath
+            documentPath
         } = dto;
 
         if (!call)
             throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
 
-        if (!docPath)
+        if (!documentPath)
             throw new AppError(ERROR_CODES.FILE_NOT_FOUND);
 
         const isLeadPI = leadPI === userId;
@@ -272,9 +272,6 @@ export class ProjectService {
         if (!callDoc)
             throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
 
-        if (callDoc.status !== CallStatus.active)
-            throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
-
         // Get first stage
         const firstStageDoc = await this.stageRepo.getFirstStage(call);
 
@@ -286,60 +283,19 @@ export class ProjectService {
 
         if (new Date(firstStageDoc.deadline) < new Date()) {
             throw new AppError(
-                ERROR_CODES.STAGE_DEADLINE_PASSED
+                ERROR_CODES.CALL_DEADLINE_PASSED
             );
         }
 
-        if (callDoc.constraint) {
-            const constraintId = String(callDoc.constraint);
-            const result = await this.constraintValidator.validateProject(constraintId, dto);
-            if (!result.valid) {
-                throw new AppError(
-                    ERROR_CODES.INVALID_CONSTRAINT,
-                    "Constraint validation failed",
-                    400,
-                    result
-                );
+
+        await this.applicationService.validateCallStage(String(firstStageDoc._id),
+            documentPath, undefined, { ...dto, collaboratorsCount: dto.collaborators.length },
+            {
+                lead: leadUser,
+                members: memberUsers
             }
-        }
+        )
 
-        if (callDoc.composition) {
-            const result =
-                await this.compositionValidator.validate(
-                    String(callDoc.composition),
-                    callDoc,
-                    {
-                        lead: leadUser,
-                        members: memberUsers
-                    }
-                );
-
-            if (!result.valid) {
-                throw new AppError(
-                    ERROR_CODES.INVALID_COMPOSITION,
-                    "Composition validation failed",
-                    400,
-                    result
-                );
-            }
-        }
-
-        if (firstStageDoc.template) {
-            const result =
-                await this.templateValidator.validate(
-                    String(firstStageDoc.template),
-                    docPath
-                );
-
-            if (!result.valid) {
-                throw new AppError(
-                    ERROR_CODES.INVALID_DOCUMENT,
-                    "Document validation failed",
-                    400,
-                    result
-                );
-            }
-        }
         const projectDoc =
             await this.create({
                 ...dto,
@@ -350,7 +306,7 @@ export class ProjectService {
         await this.applicationService.internalCreate({
             project: String(projectDoc._id),
             stage: String(firstStageDoc._id),
-            documentPath: docPath,
+            documentPath: documentPath,
         }, userId, projectDoc, firstStageDoc);
 
         return projectDoc;
@@ -404,6 +360,7 @@ export class ProjectService {
                 throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
             }
         }
+        /*
 
         const nextThemes = data.themes ?? projectDoc.themes.map(String);
         const themesChanged =
@@ -429,6 +386,7 @@ export class ProjectService {
                 }
             }
         }
+        */
         return this.projectRepo.update(id, data, userId);
     }
 

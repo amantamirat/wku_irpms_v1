@@ -4,7 +4,7 @@ import { IStatusHistory } from "../../../common/types/status-history";
 import { createStatusHistorySchema } from "../../../common/schemas/status-history.schema";
 
 export enum StageStatus {
-    upcoming= 'upcoming',
+    upcoming = 'upcoming',
     active = 'active',
     closed = "closed"
 }
@@ -19,12 +19,14 @@ export interface IStage extends Document {
     maxReviewers: number;
     minAcceptanceScore: number;
     deadline: Date;
+
+    reviewersDeadline?: Date | null;
     template?: mongoose.Types.ObjectId;
 
     status: StageStatus;
     statusHistory: IStatusHistory<StageStatus>[];
 
-    createdBy?: mongoose.Types.ObjectId; 
+    createdBy?: mongoose.Types.ObjectId;
     updatedBy?: mongoose.Types.ObjectId;
 
     createdAt?: Date;
@@ -77,6 +79,7 @@ const StageSchema = new Schema<IStage>(
             required: true
         },
         deadline: { type: Date, required: true },
+        reviewersDeadline: { type: Date, default: null },
         template: {
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.TEMPLATE,

@@ -1,14 +1,10 @@
 //result.dto.ts
 
-export interface GetResultsDTO {
-    reviewer?: string;
-    populate?: boolean;
-}
-
-export interface ExistsResultsDTO {
+export interface FilterResultsDTO {
     reviewer?: string;
     criterion?: string;
 }
+
 
 export interface CreateResultDTO {
     reviewer: string;
@@ -16,7 +12,6 @@ export interface CreateResultDTO {
     score?: number | null;
     selectedOptions?: string;
     comment?: string;
-    applicantId?: string;
 }
 
 export interface UpdateResultDTO {
@@ -26,6 +21,5 @@ export interface UpdateResultDTO {
         selectedOptions: string[];
         comment: string;
     }>;
-    applicantId: string;
 }
 

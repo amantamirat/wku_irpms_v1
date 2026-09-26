@@ -1,15 +1,28 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi, StateTransition } from "@/api/EntityApi";
 import { sanitize } from "@/utils/utils";
-import { Application, FilterApplicationOptions } from "../models/application.model";
+import {
+    Application,
+    FilterApplicationOptions
+} from "../models/application.model";
 
 const end_point = "/project/applications";
 
-export const ApplicationApi: EntityApi<Application, FilterApplicationOptions | undefined>
-    & {
-        anonymize: (id: string) => Promise<Application>;
-        withdraw: (id: string) => Promise<boolean>;
-    } = {
+export const ApplicationApi: EntityApi<
+    Application,
+    FilterApplicationOptions | undefined
+> & {
+    anonymize: (id: string) => Promise<Application>;
+    //withdraw: (id: string) => Promise<boolean>;
+    updateReviewerAssigner: (
+        id: string,
+        reviewerAssigner: string | null
+    ) => Promise<Application>;
+
+    getMyAssignedApplications: (
+        options?: FilterApplicationOptions
+    ) => Promise<Application[]>;
+} = {
 
     // ---------------------------
     // Fetch / Query
@@ -17,9 +30,11 @@ export const ApplicationApi: EntityApi<Application, FilterApplicationOptions | u
     async getAll(options) {
         return ApiClient.get(end_point, options);
     },
+
     async lookup(options) {
         return ApiClient.get(`${end_point}/lookup`, options);
     },
+
     // ---------------------------
     // Get By Id
     // ---------------------------
@@ -27,60 +42,97 @@ export const ApplicationApi: EntityApi<Application, FilterApplicationOptions | u
         return ApiClient.get(`${end_point}/${id}`);
     },
 
+    async getMyAssignedApplications(options) {
+        return ApiClient.get(
+            `${end_point}/my-assigned`,
+            options
+        );
+    },
+
     // ---------------------------
     // Create
     // ---------------------------
     async create(application) {
         const sanitized = sanitize(application);
+
         const formData = new FormData();
+
         formData.append("project", sanitized.project as string);
         formData.append("stage", sanitized.stage as string);
-        if (application.file)
+
+        if (application.file) {
             formData.append("document", application.file);
+        }
+
         return ApiClient.post(`${end_point}`, formData);
     },
-
-
-    
 
     // ---------------------------
     // Update
     // ---------------------------
     async update(application) {
-        // if (!stage._id) throw new Error("_id required");
-        return ApiClient.put(`${end_point}/${application._id}`, sanitize(application));
+        return ApiClient.put(
+            `${end_point}/${application._id}`,
+            sanitize(application)
+        );
+    },
+
+    // ---------------------------
+    // Reviewer Assigner
+    // ---------------------------
+    async updateReviewerAssigner(
+        id: string,
+        reviewerAssigner: string | null
+    ): Promise<Application> {
+        return ApiClient.patch(
+            `${end_point}/${id}/reviewer-assigner`,
+            {
+                reviewerAssigner
+            }
+        );
     },
 
     // ---------------------------
     // Transition State
     // ---------------------------
-    async transitionState(id: string, dto: StateTransition): Promise<any> {
-        const url = `${end_point}/${id}/transition`;
-        return ApiClient.patch(url, dto);
+    async transitionState(
+        id: string,
+        dto: StateTransition
+    ): Promise<any> {
+        return ApiClient.patch(
+            `${end_point}/${id}/transition`,
+            dto
+        );
     },
 
+    // ---------------------------
+    // Anonymize
+    // ---------------------------
+    async anonymize(id: string): Promise<Application> {
+        return ApiClient.post(
+            `${end_point}/${id}/anonymize`,
+            {}
+        );
+    },
+
+    // ---------------------------
+    // Withdraw
+    // ---------------------------
     /*
-    async calculateTotalScore(id: string): Promise<number> {
-        const res = await ApiClient.post(`${end_point}/${id}/calculate-score`, {});
-        return res.totalScore;
-    },*/
-
-    async anonymize(id) {
+    async withdraw(id: string): Promise<boolean> {
         return ApiClient.post(
-            `${end_point}/${id}/anonymize`, {}
+            `${end_point}/${id}/withdraw`,
+            {}
         );
     },
-
-    async withdraw(id) {
-        return ApiClient.post(
-            `${end_point}/${id}/withdraw`, {}
-        );
-    },
+    */
 
     // ---------------------------
     // Delete
     // ---------------------------
     async delete(application) {
-        return ApiClient.delete(`${end_point}/${application._id}`);
+        return ApiClient.delete(
+            `${end_point}/${application._id}`
+        );
     },
 };

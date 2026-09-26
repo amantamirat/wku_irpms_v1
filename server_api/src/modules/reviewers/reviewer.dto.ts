@@ -3,8 +3,8 @@ import { ReviewerTargetType } from "./reviewer.model";
 import { ReviewerStatus } from "./reviewer.state-machine";
 
 
-
 export interface FilterReviewersDto {
+    project?: string;
     application?: string;
     verification?: string;
     reviewer?: string;
@@ -18,7 +18,6 @@ export interface CreateReviewerDTO {
     verification?: string;
     reviewer: string;
     weight: number;
-    userId?: string;
 }
 
 
@@ -28,7 +27,6 @@ export interface UpdateReviewerDTO {
         score: number;
         weight: number;
     }>;
-    userId: string;
 }
 
 

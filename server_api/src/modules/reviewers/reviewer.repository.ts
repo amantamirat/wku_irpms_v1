@@ -5,39 +5,25 @@ import {
     Reviewer,
     ReviewerTargetType
 } from "./reviewer.model";
-
 import { ReviewerStatus } from "./reviewer.state-machine";
-
 import { FilterOptions } from "../../common/dtos/filter.dto";
-
 import { FilterReviewersDto } from "./reviewer.dto";
-
 import { ScopeFilter } from "../auth/auth.types";
-
+import { toObjectId } from "../../common/utils/mongoose.utils";
 
 export interface CreateReviewerData {
     targetType: ReviewerTargetType;
-
     reviewer: string;
     project: string;
-
     application?: string;
     verification?: string;
-
     evaluation: string;
-
-    score?: number;
-    weight?: number;
-
-    status?: ReviewerStatus;
+    weight: number;
+    createdBy: string;
 }
 
-
 export interface IReviewerRepository {
-
-    create(
-        data: CreateReviewerData
-    ): Promise<IReviewer>;
+    create(data: CreateReviewerData): Promise<IReviewer>;
 
     findById(
         id: string,
@@ -55,18 +41,14 @@ export interface IReviewerRepository {
         scopeFilter?: ScopeFilter
     ): Promise<IReviewer[]>;
 
-    count(
-        filters?: FilterReviewersDto
-    ): Promise<number>;
+    count(filters?: FilterReviewersDto): Promise<number>;
 
     update(
         id: string,
         data: Partial<IReviewer>
     ): Promise<IReviewer | null>;
 
-    exists(
-        filters: FilterReviewersDto
-    ): Promise<boolean>;
+    exists(filters: FilterReviewersDto): Promise<boolean>;
 
     updateStatus(
         id: string,
@@ -74,208 +56,119 @@ export interface IReviewerRepository {
         changedBy: string
     ): Promise<IReviewer | null>;
 
-    delete(
-        id: string
-    ): Promise<IReviewer | null>;
+    delete(id: string): Promise<IReviewer | null>;
 }
 
+export class ReviewerRepository implements IReviewerRepository {
 
-export class ReviewerRepository
-    implements IReviewerRepository {
-
-
-    /**
-     * Build MongoDB filter from reviewer filters.
-     */
     private buildFilter(
         filters: FilterReviewersDto = {}
     ): Record<string, any> {
-
-        const query: Record<string, any> = {};
-
-        if (filters.application) {
-            query.application =
-                new mongoose.Types.ObjectId(
-                    filters.application
-                );
-        }
-
-        if (filters.verification) {
-            query.verification =
-                new mongoose.Types.ObjectId(
-                    filters.verification
-                );
-        }
-
-        if (filters.reviewer) {
-            query.reviewer =
-                new mongoose.Types.ObjectId(
-                    filters.reviewer
-                );
-        }
-
-        /*
-        if (filters.project) {
-            query.project =
-                new mongoose.Types.ObjectId(
-                    filters.project
-                );
-        }
-        */
-
-        if (filters.status) {
-            query.status =
-                filters.status;
-        }
-
-        /*
-        if (filters.targetType) {
-            query.targetType =
-                filters.targetType;
-        }
-        */
-
-        return query;
+        return {
+            ...(filters.application && {
+                application: toObjectId(filters.application)
+            }),
+            ...(filters.verification && {
+                verification: toObjectId(filters.verification)
+            }),
+            ...(filters.reviewer && {
+                reviewer: toObjectId(filters.reviewer)
+            }),
+            ...(filters.project && {
+                project: toObjectId(filters.project)
+            }),
+            ...(filters.status && {
+                status: filters.status
+            })
+        };
     }
 
-
-    /**
-     * Create reviewer.
-     */
     async create(
         data: CreateReviewerData
     ): Promise<IReviewer> {
 
-        const reviewer =
-            await Reviewer.create({
-                targetType:
-                    data.targetType,
+        const reviewer = await Reviewer.create({
+            targetType: data.targetType,
+            reviewer: toObjectId(data.reviewer),
+            project: toObjectId(data.project),
 
-                reviewer:
-                    new mongoose.Types.ObjectId(
-                        data.reviewer
-                    ),
+            ...(data.application && {
+                application: toObjectId(data.application)
+            }),
 
-                project:
-                    new mongoose.Types.ObjectId(
-                        data.project
-                    ),
+            ...(data.verification && {
+                verification: toObjectId(data.verification)
+            }),
 
-                application:
-                    data.application
-                        ? new mongoose.Types.ObjectId(
-                            data.application
-                        )
-                        : undefined,
+            evaluation: toObjectId(data.evaluation),
+            weight: data.weight,
 
-                verification:
-                    data.verification
-                        ? new mongoose.Types.ObjectId(
-                            data.verification
-                        )
-                        : undefined,
-
-                evaluation:
-                    new mongoose.Types.ObjectId(
-                        data.evaluation
-                    ),
-
-                score:
-                    data.score,
-
-                weight:
-                    data.weight,
-
-                status:
-                    data.status
-            });
+            createdBy: toObjectId(data.createdBy),
+            updatedBy: toObjectId(data.createdBy)
+        });
 
         return reviewer.toObject() as IReviewer;
     }
 
-
-    /**
-     * Find reviewer by ID.
-     */
     async findById(
         id: string,
         options?: FilterOptions
     ): Promise<IReviewer | null> {
 
-        let dbQuery =
-            Reviewer.findById(
-                new mongoose.Types.ObjectId(id)
-            );
+        const query = Reviewer.findById(toObjectId(id));
 
         if (options?.populate) {
-            dbQuery
+            query
                 .populate("reviewer")
                 .populate("project")
                 .populate("application")
-                .populate("verification");
+                .populate("verification")
+                .populate("evaluation")
+                .populate("createdBy")
+                .populate("updatedBy");
         }
 
-        return dbQuery
-            .lean<IReviewer>()
-            .exec();
+        return query.lean<IReviewer>().exec();
     }
 
-
-    /**
-     * Find a single reviewer using filters.
-     */
     async findOne(
         filters: FilterReviewersDto = {},
         options?: FilterOptions
     ): Promise<IReviewer | null> {
 
-        const filter =
-            this.buildFilter(filters);
-
-        let dbQuery =
-            Reviewer.findOne(filter);
+        const query = Reviewer.findOne(
+            this.buildFilter(filters)
+        );
 
         if (options?.populate) {
-            dbQuery
+            query
                 .populate("reviewer")
                 .populate("project")
                 .populate("application")
-                .populate("verification");
+                .populate("verification")
+                .populate("evaluation")
+                .populate("createdBy")
+                .populate("updatedBy");
         }
 
-        return dbQuery
-            .lean<IReviewer>()
-            .exec();
+        return query.lean<IReviewer>().exec();
     }
 
-
-    /**
-     * Find reviewers using filters.
-     */
     async find(
         filters: FilterReviewersDto = {},
         options?: FilterOptions,
         scopeFilter?: ScopeFilter
     ): Promise<IReviewer[]> {
 
-        const filter =
-            this.buildFilter(filters);
+        const filter = this.buildFilter(filters);
 
         const query = scopeFilter
-            ? {
-                $and: [
-                    scopeFilter,
-                    filter
-                ]
-            }
+            ? { $and: [scopeFilter, filter] }
             : filter;
 
-        let dbQuery =
-            Reviewer
-                .find(query)
-                .sort({
-                    createdAt: -1
-                });
+        const dbQuery = Reviewer
+            .find(query)
+            .sort({ createdAt: -1 });
 
         if (options?.populate) {
             dbQuery
@@ -283,48 +176,33 @@ export class ReviewerRepository
                 .populate("project")
                 .populate({
                     path: "application",
-                    populate: {
-                        path: "stage"
-                    }
+                    populate: { path: "stage" }
                 })
-                .populate("verification");
+                .populate("verification")
+                .populate("evaluation")
+                .populate("createdBy")
+                .populate("updatedBy");
         }
 
-        return dbQuery
-            .lean<IReviewer[]>()
-            .exec();
+        return dbQuery.lean<IReviewer[]>().exec();
     }
 
-
-    /**
-     * Count reviewers using filters.
-     */
     async count(
         filters: FilterReviewersDto = {}
     ): Promise<number> {
-
-        const filter =
-            this.buildFilter(filters);
-
         return Reviewer
-            .countDocuments(filter)
+            .countDocuments(this.buildFilter(filters))
             .exec();
     }
 
-
-    /**
-     * Update reviewer.
-     */
     async update(
         id: string,
         data: Partial<IReviewer>
     ): Promise<IReviewer | null> {
 
         return Reviewer.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
-            {
-                $set: data
-            },
+            toObjectId(id),
+            { $set: data },
             {
                 new: true,
                 runValidators: true
@@ -334,33 +212,19 @@ export class ReviewerRepository
             .exec();
     }
 
-
-    /**
-     * Check whether a reviewer exists.
-     */
     async exists(
         filters: FilterReviewersDto
     ): Promise<boolean> {
 
-        const filter =
-            this.buildFilter(filters);
+        const filter = this.buildFilter(filters);
 
         if (!Object.keys(filter).length) {
             return false;
         }
 
-        const result =
-            await Reviewer
-                .exists(filter)
-                .exec();
-
-        return result !== null;
+        return !!await Reviewer.exists(filter);
     }
 
-
-    /**
-     * Update reviewer status and status history.
-     */
     async updateStatus(
         id: string,
         status: ReviewerStatus,
@@ -368,23 +232,17 @@ export class ReviewerRepository
     ): Promise<IReviewer | null> {
 
         return Reviewer.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
+            toObjectId(id),
             {
                 $set: {
-                    status
+                    status,
+                    updatedBy: toObjectId(changedBy)
                 },
-
                 $push: {
                     statusHistory: {
                         status,
-
-                        changedBy:
-                            new mongoose.Types.ObjectId(
-                                changedBy
-                            ),
-
-                        changedAt:
-                            new Date()
+                        changedBy: toObjectId(changedBy),
+                        changedAt: new Date()
                     }
                 }
             },
@@ -397,16 +255,12 @@ export class ReviewerRepository
             .exec();
     }
 
-
-    /**
-     * Delete reviewer by ID.
-     */
     async delete(
         id: string
     ): Promise<IReviewer | null> {
 
         return Reviewer.findByIdAndDelete(
-            new mongoose.Types.ObjectId(id)
+            toObjectId(id)
         )
             .lean<IReviewer>()
             .exec();

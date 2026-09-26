@@ -1,14 +1,13 @@
 'use client';
 
-import { useEffect, useState } from 'react';
 import { useParams, useRouter } from 'next/navigation';
+import { useEffect, useState } from 'react';
 
 import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 import { FileUpload, FileUploadSelectEvent } from 'primereact/fileupload';
 import { Message } from 'primereact/message';
 import { Skeleton } from 'primereact/skeleton';
-import { Tag } from 'primereact/tag';
 
 import { ProjectApi } from '@/app/(main)/projects/api/project.api';
 import {
@@ -21,10 +20,11 @@ import {
     ApplicationStatus
 } from '@/app/(main)/applications/models/application.model';
 
-import { format } from 'date-fns';
-import { Stage } from '@/app/(main)/calls/stages/models/stage.model';
 import { StageApi } from '@/app/(main)/calls/stages/api/stage.api';
+import { Stage } from '@/app/(main)/calls/stages/models/stage.model';
 import { ApplicationApi } from '../../../api/application.api';
+import { TemplateValidationResult, ValidationResult } from '@/app/(main)/projects/apply/wizard/SubmissionStep';
+import { ERROR_CODES } from '@/api/error.codes';
 
 export default function StageSubmitPage() {
     const params = useParams();
@@ -44,6 +44,9 @@ export default function StageSubmitPage() {
     const [success, setSuccess] = useState(false);
 
     const [error, setError] = useState<string | null>(null);
+    const [constraintDetails, setConstraintDetails] = useState<ValidationResult | null>(null);
+    const [templateDetails, setTemplateDetails] = useState<TemplateValidationResult | null>(null);
+
 
     useEffect(() => {
         if (!stageId) return;
@@ -118,15 +121,16 @@ export default function StageSubmitPage() {
                     setSelectedProject(eligibleProjects[0]);
                 }
             } catch (err: any) {
+                /*
                 console.error(
                     'Failed to load stage submission data',
                     err
-                );
-
+                );*/
                 setError(
                     err?.message ||
                     'Failed to load stage submission details.'
                 );
+
             } finally {
                 setLoading(false);
             }
@@ -153,6 +157,8 @@ export default function StageSubmitPage() {
         try {
             setSubmitting(true);
             setError(null);
+             setConstraintDetails(null);
+            setTemplateDetails(null);
 
             await ApplicationApi.create({
                 project: selectedProject._id!,
@@ -172,6 +178,15 @@ export default function StageSubmitPage() {
                 err?.message ||
                 'Stage submission failed. Please try again.'
             );
+
+            if (err.code === ERROR_CODES.INVALID_CONSTRAINT || err.code === ERROR_CODES.INVALID_COMPOSITION) {
+                setConstraintDetails(err.details as ValidationResult);
+            }
+            if (err.code === ERROR_CODES.INVALID_DOCUMENT) {
+                setTemplateDetails(err.details as TemplateValidationResult);
+                //setError("Document validation failed. Please address the issues listed below.");
+
+            }
         } finally {
             setSubmitting(false);
         }
@@ -309,6 +324,79 @@ export default function StageSubmitPage() {
                     className="w-full mb-4"
                 />
             )}
+
+            {/* Constraint Validation Failure Display */}
+            {constraintDetails && (
+                <div className="surface-card border-left-3 border-orange-500 shadow-2 p-4 border-round-lg mb-3">
+                    <div className="flex align-items-center text-orange-700 font-bold text-lg mb-2">
+                        <i className="pi pi-shield mr-2 text-xl"></i>
+                        Call Requirement Check Failed
+                    </div>
+                    <p className="text-700 text-sm mt-0 mb-3">
+                        Your application submission does not satisfy all call guidelines/constraints:
+                    </p>
+                    <div className="bg-orange-50 p-3 border-round border-1 border-orange-200">
+                        <ul className="m-0 pl-3 text-sm text-orange-900">
+                            {constraintDetails.errors.map((errItem, idx) => (
+                                <li key={idx} className="mb-1 font-medium">{errItem}</li>
+                            ))}
+                        </ul>
+                    </div>
+                </div>
+            )}
+
+
+            {/* Structured Document Validation Failure Display */}
+            {templateDetails && (
+                <div className="surface-card border-left-3 border-red-500 shadow-2 p-4 border-round-lg">
+                    <div className="flex align-items-center text-red-700 font-bold text-lg mb-2">
+                        <i className="pi pi-exclamation-triangle mr-2 text-xl"></i>
+                        Document Validation Failed
+                    </div>
+                    <p className="text-700 text-sm mt-0 mb-3">
+                        Your document does not meet the template requirements (Score: <strong>{templateDetails.score}%</strong>). Please update the PDF and re-upload.
+                    </p>
+
+                    {/* Top-Level Document Issues */}
+                    {templateDetails.issues?.length > 0 && (
+                        <div className="mb-3 bg-red-50 p-3 border-round border-1 border-red-200">
+                            <span className="font-semibold text-red-800 text-xs uppercase block mb-1">General Issues:</span>
+                            <ul className="m-0 pl-3 text-sm text-red-700">
+                                {templateDetails.issues.map((issue, idx) => (
+                                    <li key={idx} className="mb-1">{issue}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {/* Section-by-Section Breakdowns */}
+                    <div className="surface-50 p-3 border-round border-1 border-200">
+                        <span className="font-semibold text-800 text-xs uppercase block mb-2">Section Breakdown:</span>
+                        <div className="flex flex-column gap-2">
+                            {templateDetails.sections.map((section, idx) => (
+                                <div key={idx} className="bg-white p-2 border-round border-1 border-300">
+                                    <div className="flex align-items-center justify-content-between">
+                                        <div className="flex align-items-center">
+                                            <i className={`pi ${section.passed ? 'pi-check-circle text-green-500' : 'pi-times-circle text-red-500'} mr-2`}></i>
+                                            <span className="font-medium text-sm text-900">{section.name}</span>
+                                        </div>
+                                        <span className="text-xs text-500">{section.wordCount} words</span>
+                                    </div>
+
+                                    {section.issues.length > 0 && (
+                                        <ul className="m-0 pt-2 pl-4 text-xs text-red-600">
+                                            {section.issues.map((issue, iIdx) => (
+                                                <li key={iIdx}>{issue}</li>
+                                            ))}
+                                        </ul>
+                                    )}
+                                </div>
+                            ))}
+                        </div>
+                    </div>
+                </div>
+            )}
+
 
             {/* PROJECT */}
             <div className="surface-card border-1 surface-border border-round-xl shadow-1 p-4 mb-4">

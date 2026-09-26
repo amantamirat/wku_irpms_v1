@@ -4,14 +4,16 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
+import { AuthPermissionService } from "../auth/auth.permission-service";
 import { AuthScope } from "../auth/auth.types";
 import ScopeFilterService from "../auth/scope-filter.service";
+import { IStageRepository } from "../calls/stages/stage.repository";
 import { FormType } from "../evaluations/criteria/criterion.model";
 import { ICriterionRepository } from "../evaluations/criteria/criterion.repository";
 import { NotificationService } from "../notifications/notification.service";
 import { IResultRepository } from "./results/result.repository";
 import { CreateReviewerDTO, FilterReviewersDto, UpdateReviewerDTO } from "./reviewer.dto";
-import { ReviewerTargetType } from "./reviewer.model";
+import { IReviewer, ReviewerTargetType } from "./reviewer.model";
 import { PreparedReviewer, ReviewerPolicy } from "./reviewer.policy";
 import { IReviewerRepository } from "./reviewer.repository";
 import { REVIEWER_TRANSITIONS, ReviewerStatus } from "./reviewer.state-machine";
@@ -19,16 +21,17 @@ import { REVIEWER_TRANSITIONS, ReviewerStatus } from "./reviewer.state-machine";
 export class ReviewerService {
 
     constructor(
-        private readonly repository: IReviewerRepository,
+        private readonly reviewerRepo: IReviewerRepository,
         private readonly resultRepo: IResultRepository,
         private readonly criterionRepo: ICriterionRepository,
+        //private readonly stageRepo: IStageRepository,
         private readonly policy: ReviewerPolicy,
         private readonly notificationService: NotificationService,
-        private readonly scopeFilterService: ScopeFilterService,
+        private readonly scopeFilterService: ScopeFilterService
     ) {
     }
 
-    async create(dto: CreateReviewerDTO) {
+    async create(dto: CreateReviewerDTO, userId: string) {
         const { targetType, application, verification, reviewer, weight } = dto;
 
         let prepared: PreparedReviewer;
@@ -38,14 +41,15 @@ export class ReviewerService {
                 throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
 
             prepared = await this.policy.prepareApplicationReviewer(
-                application, reviewer);
+                application, reviewer, userId);
+
 
         } else if (targetType === ReviewerTargetType.VERIFICATION) {
             if (!verification)
                 throw new AppError(ERROR_CODES.VERIFICATION_NOT_FOUND);
 
             prepared = await this.policy.prepareVerificationReviewer(
-                verification, reviewer);
+                verification, reviewer, userId);
 
         } else {
             throw new AppError(
@@ -56,11 +60,10 @@ export class ReviewerService {
         prepared.data.weight = weight;
         try {
 
-            const created = await this.repository.create(prepared.data);
+            const created = await this.reviewerRepo.create({ ...prepared.data, createdBy: userId });
 
             await this.notificationService.notifyReviewerAssigned(
-                reviewer,
-                prepared.project.title,
+                reviewer, prepared.projectDoc.title,
                 prepared.contextName,
             );
             return created;
@@ -88,7 +91,7 @@ export class ReviewerService {
         filter?: Partial<FilterReviewersDto>,
         options?: FilterOptions
     ) => {
-        return this.repository.find(
+        return this.reviewerRepo.find(
             {
                 ...filter,
                 reviewer: userId
@@ -100,21 +103,22 @@ export class ReviewerService {
         );
     };
 
+
     async read(filter: FilterReviewersDto, scope: AuthScope, options?: FilterOptions) {
         const scopeFilter =
             await this.scopeFilterService.getReviewerFilter(scope);
-        return this.repository.find(filter, options, scopeFilter);
+        return this.reviewerRepo.find(filter, options, scopeFilter);
     }
 
     async getReviewers(filter: FilterReviewersDto, options?: FilterOptions) {
-        return this.repository.find(filter, options);
+        return this.reviewerRepo.find(filter, options);
     }
 
     // --- Update reviewer data (weight) ---
-    async update(dto: UpdateReviewerDTO) {
-        const { id, data, userId } = dto;
+    async update(dto: UpdateReviewerDTO, userId: string) {
+        const { id, data } = dto;
         const { weight } = data;
-        const reviewerDoc = await this.repository.findById(id);
+        const reviewerDoc = await this.reviewerRepo.findById(id);
         if (!reviewerDoc) throw new Error(ERROR_CODES.REVIEWER_NOT_FOUND);
         if (reviewerDoc.status !== ReviewerStatus.pending) {
             throw new Error(ERROR_CODES.REVIEWER_NOT_PENDING);
@@ -122,93 +126,180 @@ export class ReviewerService {
         if (!weight || (weight === 0 || weight < 0))
             throw new Error(ERROR_CODES.INVALID_REVIEWER_WEIGHT);
 
-        const updated = await this.repository.update(id, { weight });
+        const updated = await this.reviewerRepo.update(id, { weight });
         return updated;
     }
 
-    async transitionState(dto: TransitionRequestDto) {
-        const { id, current, next, userId } = dto;
-        if (!userId) return;
-        const reviewerDoc = await this.repository.findById(id);
+    async transitionState(dto: TransitionRequestDto, userId: string) {
+        const { id, current, next } = dto;
+
+        const reviewerDoc = await this.reviewerRepo.findById(id);
 
         if (!reviewerDoc) {
             throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
         }
 
-        if (reviewerDoc.application) {
-            await this.policy.validateApplication(String(reviewerDoc.application));
-        }
-
-        if (reviewerDoc.verification) {
-            await this.policy.validateVerification(String(reviewerDoc.verification));
-        }
-
         const from = reviewerDoc.status as ReviewerStatus;
         const to = next as ReviewerStatus;
 
+        // Prevent stale client state
         if (current && current !== from) {
             throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
         }
 
+        // Validate state-machine transition
         TransitionHelper.validateTransition(
             from,
             to,
             REVIEWER_TRANSITIONS
         );
 
-        if (from === ReviewerStatus.pending && to === ReviewerStatus.accepted) {
-            if (String(reviewerDoc.reviewer) !== userId)
-                throw new AppError(ERROR_CODES.UNAUTHORIZED);
+        const transition = `${from}->${to}`;
 
-            const existingResults = await this.resultRepo.find({ reviewer: id });
-            if (existingResults.length === 0) {
+        switch (transition) {
+            case `${ReviewerStatus.pending}->${ReviewerStatus.accepted}`:
+                await this.acceptReviewer(reviewerDoc, userId);
+                break;
 
-                const criteria = await this.criterionRepo.find({ evaluation: String(reviewerDoc.evaluation) });
-                await this.resultRepo.insertMany(
-                    criteria.map(c => ({
-                        reviewer: id,
-                        criterion: String(c._id),
-                        score: null,
-                        //isrequired
-                    }))
-                );
-            }
-        } else if (from === ReviewerStatus.accepted && to === ReviewerStatus.submitted) {
-            if (String(reviewerDoc.reviewer) !== userId)
-                throw new AppError(ERROR_CODES.UNAUTHORIZED);
+            case `${ReviewerStatus.accepted}->${ReviewerStatus.pending}`:
+                await this.resultRepo.deleteByReviewer(id);
+                break;
 
-            const results = await this.resultRepo.find({ reviewer: id, populate: true });
-            const incomplete = results.some(r => {
-                const type = (r.criterion as any)?.formType;
-                if (type === FormType.OPEN) return false;
-                return r.score === null || r.score === undefined;
-            });
-            if (incomplete) {
-                throw new AppError(ERROR_CODES.INCOMPELTE_CRITERIA);
-            }
-            let score = results.reduce((sum, r) => sum + (r.score ?? 0), 0);
-            await this.repository.update(id, { score });
+            case `${ReviewerStatus.accepted}->${ReviewerStatus.submitted}`:
+                await this.submitReviewer(reviewerDoc, userId);
+                break;
+
+            case `${ReviewerStatus.submitted}->${ReviewerStatus.accepted}`:
+                await this.reviewerRepo.update(id, { score: null });
+                break;
+
+            case `${ReviewerStatus.submitted}->${ReviewerStatus.approved}`:
+                break;
+
+            case `${ReviewerStatus.approved}->${ReviewerStatus.submitted}`:
+                break;
         }
 
-        if (to === ReviewerStatus.approved) {
-            //await this.synchronizer.sync(projectStageId);
+        const updated = await this.reviewerRepo.updateStatus(id, to, userId);
+
+        //let targetDoc;
+
+        if (from === ReviewerStatus.approved || to === ReviewerStatus.approved) {
+            await this.recalculateTargetScore(reviewerDoc);
         }
 
-        if (from === ReviewerStatus.approved && to === ReviewerStatus.submitted) {
-
-        }
-
-        const updated = await this.repository.updateStatus(id, to, userId);
         return updated;
+        // return { reviewerDoc: updated, targetDoc: targetDoc };
+    }
+
+    private async acceptReviewer(
+        reviewerDoc: IReviewer,
+        userId: string
+    ): Promise<void> {
+        if (String(reviewerDoc.reviewer) !== userId) {
+            throw new AppError(ERROR_CODES.UNAUTHORIZED);
+        }
+
+        const existingResults = await this.resultRepo.find({
+            reviewer: String(reviewerDoc._id)
+        });
+
+        if (existingResults.length > 0) {
+            return;
+        }
+
+        const criteria = await this.criterionRepo.find({
+            evaluation: String(reviewerDoc.evaluation)
+        });
+
+        if (criteria.length === 0) {
+            return;
+        }
+
+        await this.resultRepo.insertMany(
+            criteria.map(criterion => ({
+                reviewer: String(reviewerDoc._id),
+                criterion: String(criterion._id),
+                score: null
+            }))
+        );
+    }
+
+    private async submitReviewer(
+        reviewerDoc: IReviewer,
+        userId: string
+    ): Promise<void> {
+        if (String(reviewerDoc.reviewer) !== userId) {
+            throw new AppError(ERROR_CODES.UNAUTHORIZED);
+        }
+
+        const results = await this.resultRepo.find(
+            {
+                reviewer: String(reviewerDoc._id)
+            },
+            {
+                populate: true
+            }
+        );
+
+        const incomplete = results.some(result => {
+            const criterion = result.criterion as any;
+
+            if (criterion?.formType === FormType.OPEN) {
+                return false;
+            }
+
+            return result.score === null ||
+                result.score === undefined;
+        });
+
+        if (incomplete) {
+            throw new AppError(ERROR_CODES.INCOMPELTE_CRITERIA);
+        }
+
+        const score = results.reduce(
+            (total, result) => total + (result.score ?? 0),
+            0
+        );
+
+        await this.reviewerRepo.update(
+            String(reviewerDoc._id),
+            { score }
+        );
+    }
+
+
+    private async recalculateTargetScore(
+        reviewerDoc: IReviewer
+    ): Promise<any> {
+        switch (reviewerDoc.targetType) {
+            case ReviewerTargetType.APPLICATION:
+                return await this.policy.calculateApplicationScore(
+                    String(reviewerDoc.application)
+                );
+            case ReviewerTargetType.VERIFICATION:
+                return await this.policy.calculateVerificationScore(
+                    String(reviewerDoc.verification)
+                );
+        }
     }
 
     async delete(id: string) {
-        const reviewerDoc = await this.repository.findById(id);
+        const reviewerDoc = await this.reviewerRepo.findById(id);
+
         if (!reviewerDoc) throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
-        if (reviewerDoc.status !== ReviewerStatus.pending)
-            throw new AppError(ERROR_CODES.REVIEWER_NOT_PENDING);
-        const deleted = await this.repository.delete(id);
-        await this.resultRepo.deleteByReviewer(id);
+
+        // Deny deletion if a result already exists
+        const resultExists = await this.resultRepo.exists({
+            reviewer: id
+        });
+
+        if (resultExists)
+            throw new AppError(ERROR_CODES.RESULT_ALREADY_EXISTS);
+
+
+        const deleted = await this.reviewerRepo.delete(id);
+
         return deleted
     }
 }

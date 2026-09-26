@@ -5,13 +5,12 @@ import Link from "next/link";
 import { Button } from "primereact/button";
 import { Collaborator } from "../../collaborators/models/collaborator.model";
 
-interface MyPendingInvitationProps {
+interface MyPendingInvitationsProps {
     items: Collaborator[];
 }
 
-export function MyPendingInvitation({ items }: MyPendingInvitationProps) {
+export function MyPendingInvitations({ items }: MyPendingInvitationsProps) {
     
-
     const columns = [
         {
             header: "Project Title",
@@ -75,4 +74,4 @@ export function MyPendingInvitation({ items }: MyPendingInvitationProps) {
     );
 }
 
-export default MyPendingInvitation;
+export default MyPendingInvitations;

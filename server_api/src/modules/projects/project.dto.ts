@@ -39,7 +39,7 @@ export interface CreateProjectDTO {
     calendar?: string;
     call?: string;
 
-    docPath?: string;
+    documentPath?: string;
 }
 
 

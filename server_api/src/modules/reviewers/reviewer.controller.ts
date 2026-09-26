@@ -11,7 +11,43 @@ import {
 import { ReviewerService } from "./reviewer.service";
 import { ReviewerStatus } from "./reviewer.state-machine";
 
+
+
 export class ReviewerController {
+
+    private buildFilter(query: Request["query"]): FilterReviewersDto {
+        const {
+            project,
+            application,
+            verification,
+            reviewer,
+            status
+        } = query;
+
+        return {
+            project: project
+                ? String(project)
+                : undefined,
+
+            application: application
+                ? String(application)
+                : undefined,
+
+            verification: verification
+                ? String(verification)
+                : undefined,
+
+            reviewer: reviewer
+                ? String(reviewer)
+                : undefined,
+
+            status: status
+                ? Array.isArray(status)
+                    ? status.map(String) as ReviewerStatus[]
+                    : String(status) as ReviewerStatus
+                : undefined
+        };
+    }
 
 
     constructor(private readonly service: ReviewerService) {
@@ -31,10 +67,9 @@ export class ReviewerController {
                 verification: verification,
                 application: application,
                 reviewer,
-                weight,
-                userId: req.auth.userId
+                weight
             };
-            const created = await this.service.create(dto);
+            const created = await this.service.create(dto, req.auth.userId);
             successResponse(res, 201, "Reviewer created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -44,34 +79,29 @@ export class ReviewerController {
     // -----------------------
     // GET
     // -----------------------
-    get = async (req: AuthenticatedRequest, res: Response) => {
+    get = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ) => {
         try {
             if (!req.auth) {
-                return
+                throw new Error(ERROR_CODES.UNAUTHORIZED);
             }
-            const { application, verification, reviewer, status } = req.query;
 
-            const filter: FilterReviewersDto = {
-                application: application
-                    ? String(application)
-                    : undefined,
+            const filter = this.buildFilter(req.query);
 
-                reviewer: reviewer
-                    ? String(reviewer)
-                    : undefined,
+            const reviewers = await this.service.read(
+                filter,
+                req.auth.scope,
+                { populate: true }
+            );
 
-                verification: verification
-                    ? String(verification)
-                    : undefined,
-
-                status: status
-                    ? Array.isArray(status)
-                        ? status as ReviewerStatus[]
-                        : status as ReviewerStatus
-                    : undefined
-            };
-            const reviewers = await this.service.read(filter, req.auth.scope, { populate: true });
-            successResponse(res, 200, "Reviewers fetched successfully", reviewers);
+            successResponse(
+                res,
+                200,
+                "Reviewers fetched successfully",
+                reviewers
+            );
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
@@ -80,31 +110,22 @@ export class ReviewerController {
     // -----------------------
     // LOOKUP NO POPULATE
     // -----------------------
-    lookup = async (req: Request, res: Response) => {
+    lookup = async (
+        req: Request,
+        res: Response
+    ) => {
         try {
-            const { application, verification, reviewer, status } = req.query;
+            const filter = this.buildFilter(req.query);
 
-            const filter: FilterReviewersDto = {
-                application: application
-                    ? String(application)
-                    : undefined,
+            const reviewers =
+                await this.service.getReviewers(filter, { populate: true });
 
-                reviewer: reviewer
-                    ? String(reviewer)
-                    : undefined,
-
-                verification: verification
-                    ? String(verification)
-                    : undefined,
-
-                status: status
-                    ? Array.isArray(status)
-                        ? status as ReviewerStatus[]
-                        : status as ReviewerStatus
-                    : undefined
-            };
-            const reviewers = await this.service.getReviewers(filter);
-            successResponse(res, 200, "Reviewers fetched successfully", reviewers);
+            successResponse(
+                res,
+                200,
+                "Reviewers fetched successfully",
+                reviewers
+            );
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }
@@ -146,9 +167,8 @@ export class ReviewerController {
             const dto: UpdateReviewerDTO = {
                 id: String(id),
                 data: { weight },
-                userId: req.auth.userId
             };
-            const updated = await this.service.update(dto);
+            const updated = await this.service.update(dto, req.auth.userId);
             successResponse(res, 200, "Reviewer updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -164,9 +184,8 @@ export class ReviewerController {
                 id: String(id),
                 current: current,
                 next: next,
-                userId: req.auth.userId,
             };
-            const updated = await this.service.transitionState(dto);
+            const updated = await this.service.transitionState(dto, req.auth.userId);
             successResponse(res, 200, "Reviewer status updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

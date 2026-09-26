@@ -11,6 +11,8 @@ import {
 interface UseCrudActionsProps<T> {
     resource: string;
 
+    createLabel?:string;
+
     itemName?: string;
     /**
      * Disable all default CRUD actions.
@@ -65,6 +67,7 @@ export interface CrudActions<T> {
 
 export function useCrudActions<T extends { _id?: string }>({
     resource,
+    createLabel,
     itemName = 'Item',
 
     hideDefaultActions = false,
@@ -109,7 +112,7 @@ export function useCrudActions<T extends { _id?: string }>({
 
         if (canCreate) {
             toolbarActions.push({
-                label: `Create ${itemName}`,
+                label: createLabel ?? `Add ${itemName}`,
                 icon: 'pi pi-plus',
                 severity: 'success',
                 onClick: onCreate,
@@ -163,7 +166,7 @@ export function useCrudActions<T extends { _id?: string }>({
                 severity: 'danger',
                 tooltip: `Delete ${itemName}`,
                 text: true,
-               // rounded: true,
+                // rounded: true,
                 disabled: disableDeleteRow,
 
                 onClick: (row) => {

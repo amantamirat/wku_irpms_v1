@@ -6,11 +6,11 @@ import { Button } from "primereact/button";
 import { Reviewer, ReviewerTargetType } from "../../reviewers/models/reviewer.model";
 
 
-interface MyPendingInvitationProps {
+interface MyPendingEvaluationsProps {
     items: Reviewer[];
 }
 
-export function MyPendingEvalsManager({ items }: MyPendingInvitationProps) {
+export function MyPendingEvaluations({ items }: MyPendingEvaluationsProps) {
 
 
     const columns = [
@@ -87,4 +87,4 @@ export function MyPendingEvalsManager({ items }: MyPendingInvitationProps) {
     );
 }
 
-export default MyPendingEvalsManager;
+export default MyPendingEvaluations;

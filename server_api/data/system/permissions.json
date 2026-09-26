@@ -538,22 +538,47 @@
   {
     "category": "Reviewer Management",
     "name": "reviewer:create",
-    "description": "Create new reviewers"
+    "description": "Assign reviewers to any valid application"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:create:own",
+    "description": "Assign reviewers only to applications assigned to the current user"
   },
   {
     "category": "Reviewer Management",
     "name": "reviewer:read",
-    "description": "View reviewers"
+    "description": "View any reviewers"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:read:own",
+    "description": "View reviewers for applications assigned to the current user"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:update",
+    "description": "Edit any reviewer details like weight"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:update:own",
+    "description": "Edit reviewer details for applications assigned to the current user"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:delete",
+    "description": "Delete any reviewers"
+  },
+  {
+    "category": "Reviewer Management",
+    "name": "reviewer:delete:own",
+    "description": "Delete reviewers for applications assigned to the current user"
   },
   {
     "category": "Reviewer Management",
     "name": "reviewer:lookup",
     "description": "View reviewers"
-  },
-  {
-    "category": "Reviewer Management",
-    "name": "reviewer:update",
-    "description": "Edit reviewer details like weight"
   },
   {
     "category": "Reviewer Management",
@@ -604,11 +629,6 @@
     "category": "Reviewer Management",
     "name": "reviewer:transition.rejected.submitted",
     "description": "Revert reviewer status from rejected to submitted"
-  },
-  {
-    "category": "Reviewer Management",
-    "name": "reviewer:delete",
-    "description": "Delete reviewers"
   },
   {
     "category": "Result Management",
@@ -843,6 +863,16 @@
   },
   {
     "category": "Application Management",
+    "name": "application:reviewerAssigner:update",
+    "description": "Assign or remove the user responsible for assigning reviewers to an application"
+  },
+  {
+    "category": "Application Management",
+    "name": "application:assigned:read",
+    "description": "View applications assigned to the current user"
+  },
+  {
+    "category": "Application Management",
     "name": "application:delete",
     "description": "Delete application entries"
   },
@@ -853,23 +883,43 @@
   },
   {
     "category": "Application Management",
-    "name": "application:transition.pending.accepted",
-    "description": "Accept a pending application"
+    "name": "application:transition.submitted.shortlisted",
+    "description": "Shortlist a submitted application"
   },
   {
     "category": "Application Management",
-    "name": "application:transition.pending.rejected",
-    "description": "Reject a pending application"
+    "name": "application:transition.submitted.notShortlisted",
+    "description": "Exclude a submitted application from the shortlist"
   },
   {
     "category": "Application Management",
-    "name": "application:transition.accepted.pending",
-    "description": "Revert an accepted application back to pending"
+    "name": "application:transition.shortlisted.accepted",
+    "description": "Accept a shortlisted application"
   },
   {
     "category": "Application Management",
-    "name": "application:transition.rejected.pending",
-    "description": "Reopen a rejected application and move it back to pending"
+    "name": "application:transition.shortlisted.rejected",
+    "description": "Reject a shortlisted application"
+  },
+  {
+    "category": "Application Management",
+    "name": "application:transition.shortlisted.submitted",
+    "description": "Reopen a shortlisted application and return it to submitted"
+  },
+  {
+    "category": "Application Management",
+    "name": "application:transition.notShortlisted.submitted",
+    "description": "Reopen an excluded application and return it to submitted"
+  },
+  {
+    "category": "Application Management",
+    "name": "application:transition.accepted.shortlisted",
+    "description": "Reopen an accepted application and return it to shortlisted"
+  },
+  {
+    "category": "Application Management",
+    "name": "application:transition.rejected.shortlisted",
+    "description": "Reopen a rejected application and return it to shortlisted"
   },
   {
     "category": "Collaborator Management",

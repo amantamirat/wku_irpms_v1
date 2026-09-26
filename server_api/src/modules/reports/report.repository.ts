@@ -226,7 +226,7 @@ export class ReportRepository {
                                 {
                                     $eq: [
                                         "$status",
-                                        ApplicationStatus.pending
+                                        ApplicationStatus.submitted
                                     ]
                                 },
                                 1,

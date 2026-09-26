@@ -9,7 +9,7 @@
 
 .status-badge {
 
-    &.status-draft, 
+    &.status-draft,
     &.status-upcoming,
     &.status-pending,
     &.status-proposed,
@@ -43,6 +43,7 @@
 
 
     &.status-closed,
+    &.status-shortlisted,
     &.status-archived,
     &.status-granted {
         background: #F3E5F5;

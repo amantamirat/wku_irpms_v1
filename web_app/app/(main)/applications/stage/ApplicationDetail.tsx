@@ -9,9 +9,10 @@ import { ReviewerTargetType } from "../../reviewers/models/reviewer.model";
 
 interface ApplicationDetailProps {
     application: Application;
+    updateApplication?: (application: Application) => void;
 }
 
-const ApplicationDetail = ({ application }: ApplicationDetailProps) => {
+const ApplicationDetail = ({ application, updateApplication }: ApplicationDetailProps) => {
 
     const { hasPermission } = useAuth();
 
@@ -23,8 +24,9 @@ const ApplicationDetail = ({ application }: ApplicationDetailProps) => {
     const tabs = useMemo(() => [
         {
             header: "Reviewers",
-            permission: "reviewer:read",
-            content: <ReviewerManager targetType={ReviewerTargetType.APPLICATION} application={application} />
+            permission: "reviewer:lookup",
+            content: <ReviewerManager targetType={ReviewerTargetType.APPLICATION} application={application}
+                updateApplication={updateApplication} />
         },
         {
             header: "Project",

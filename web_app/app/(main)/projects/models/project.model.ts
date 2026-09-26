@@ -22,6 +22,8 @@ export type Project = {
     grant?: string | Grant;
     calendar?: string | Calendar;
     call?: string | Call;
+    organization?: string|Organization;
+    workspace?: string|Organization;
     title: string;
     summary?: string;
     status?: ProjectStatus;

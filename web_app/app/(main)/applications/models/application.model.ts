@@ -1,10 +1,13 @@
 import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
 import { Project } from "../../projects/models/project.model";
+import { User } from "../../users/models/user.model";
 
 export enum ApplicationStatus {
-    pending = 'pending',
-    accepted = 'accepted',
-    rejected = 'rejected'
+    submitted = "submitted",
+    shortlisted = "shortlisted",
+    notShortlisted = "notShortlisted",
+    accepted = "accepted",
+    rejected = "rejected"
 }
 
 export enum AnonymizationStatus {
@@ -24,6 +27,7 @@ export type Application = {
     totalScore?: number | null;
     anonymizationStatus: AnonymizationStatus;
     anonymizedDocumentPath?: string;
+    reviewerAssigner?: string | User | null;
     status: ApplicationStatus;
     createdAt?: Date;
     updatedAt?: Date;
@@ -32,6 +36,7 @@ export type Application = {
 
 
 export interface FilterApplicationOptions {
+    reviewerAssigner?: string | User;
     project?: string | Project;
     stage?: string | Stage;
     status?: ApplicationStatus;
@@ -62,7 +67,7 @@ export const createEmptyApplication = (
 ): Application => ({
     project: app?.project ?? "",
     stage: app?.stage ?? "",
-    status: app?.status ?? ApplicationStatus.pending,
+    status: app?.status ?? ApplicationStatus.submitted,
     anonymizationStatus: app?.anonymizationStatus ?? AnonymizationStatus.pending
 });
 

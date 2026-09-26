@@ -36,6 +36,7 @@ export type Reviewer = {
 
 export interface FilterReviewersOptions {
     targetType?: ReviewerTargetType;
+    project?: string | Project;
     reviewer?: string | User;
     application?: string | Application;
     verification?: string | Verification;

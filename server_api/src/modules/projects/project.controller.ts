@@ -101,7 +101,7 @@ export class ProjectController {
       const dto: CreateProjectDTO = {
         ...project,
         grant: "",
-        docPath: relativeDocPath,
+        documentPath: relativeDocPath,
         collaborators: project.collaborators ?? [],
         themes: project.themes ?? [],
         phases: project.phases ?? []

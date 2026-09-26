@@ -10,7 +10,7 @@ interface QuickLinkItem {
     label: string;
     description: string;
     icon: string;
-    permission: string;
+    permission: string | string[];
     color: string;
 }
 
@@ -25,60 +25,63 @@ export default function QuickLinks() {
             description: 'Manage your research, project and deliverables',
             icon: 'pi pi-briefcase',
             permission: PERMISSIONS.PROJECT.LOOKUP,
-            color: 'bg-blue-100 text-blue-700'
+            color: 'bg-blue-50 text-blue-600 border-blue-200'
         },
         {
-            // Update: Changed from /reviewers/my-evaluations to your actual path
+            href: '/dashboard/assigned-applications',
+            label: 'Assign Reviewers',
+            description: 'Assign and manage evaluators for submitted applications',
+            icon: 'pi pi-user-plus',
+            permission: 'application:assigned:read',
+            color: 'bg-teal-50 text-teal-600 border-teal-200'
+        },
+        {
             href: '/dashboard/my-evaluations',
             label: 'My Evaluations',
             description: 'Evaluate submitted proposals and scores',
             icon: 'pi pi-check-square',
-            permission: PERMISSIONS.REVIEWER.READ,
-            color: 'bg-orange-100 text-orange-700'
+            permission: PERMISSIONS.REVIEWER.LOOKUP,
+            color: 'bg-orange-50 text-orange-600 border-orange-200'
         },
         {
-            // Update: Ensure this matches your CollaboratorPage route
             href: '/dashboard/my-memberships',
             label: 'My Memberships',
             description: 'View teams and joint project efforts',
             icon: 'pi pi-users',
             permission: PERMISSIONS.COLLABORATOR.LOOKUP,
-            color: 'bg-purple-100 text-purple-700'
-        },
-        /*
-                {
-                    href: '/reports/financial',
-                    label: 'Grant Tracking',
-                    description: 'Monitor budget spend and funding',
-                    icon: 'pi pi-money-bill',
-                    permission: PERMISSIONS.PERMISSION.READ,
-                    color: 'bg-green-100 text-green-700'
-                }*/
+            color: 'bg-purple-50 text-purple-600 border-purple-200'
+        }
     ], []);
 
-    const allowedLinks = links.filter(link => hasPermission([link.permission]));
+    const allowedLinks = links.filter(link => hasPermission(link.permission));
 
     if (allowedLinks.length === 0) return null;
 
     return (
         <div className="col-12 mt-4">
-            <h5 className="mb-3 font-bold text-900">Quick Access</h5>
+            <div className="flex align-items-center justify-content-between mb-3">
+                <h5 className="m-0 font-bold text-900 text-lg">Quick Access</h5>
+                <span className="text-sm text-500 font-medium">Frequently used tools</span>
+            </div>
             <div className="grid">
                 {allowedLinks.map((link, index) => (
                     <div key={index} className="col-12 md:col-6 lg:col-3">
                         <div
-                            className="p-3 shadow-1 border-round surface-card h-full cursor-pointer hover:shadow-3 transition-duration-200 p-ripple"
+                            className="p-4 surface-card border-1 surface-border border-round-xl h-full cursor-pointer shadow-sm hover:shadow-md hover:border-primary transition-all transition-duration-200 p-ripple flex flex-column justify-content-between relative overflow-hidden"
                             onClick={() => router.push(link.href)}
                         >
-                            <div className="flex align-items-center mb-3">
-                                <div className={`w-3rem h-3rem flex align-items-center justify-content-center border-round ${link.color}`}>
-                                    <i className={`${link.icon} text-2xl`}></i>
+                            <div>
+                                <div className="flex align-items-center justify-content-between mb-3">
+                                    <div className={`w-3rem h-3rem flex align-items-center justify-content-center border-round-lg ${link.color} border-1`}>
+                                        <i className={`${link.icon} text-xl`}></i>
+                                    </div>
+                                    <i className="pi pi-arrow-right text-400 text-sm"></i>
                                 </div>
-                                <span className="text-900 font-medium ml-3">{link.label}</span>
+                                <h6 className="text-900 font-semibold m-0 mb-2 text-base">{link.label}</h6>
+                                <p className="text-600 text-xs m-0 line-height-3">
+                                    {link.description}
+                                </p>
                             </div>
-                            <span className="text-600 text-sm line-height-3">
-                                {link.description}
-                            </span>
                             <Ripple />
                         </div>
                     </div>

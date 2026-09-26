@@ -1,6 +1,6 @@
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { CreatePhaseDto } from "../../projects/phase/phase.dto";
+import { CreatePhaseDto, PhaseDto } from "../../projects/phase/phase.dto";
 import { CreateProjectDTO } from "../../projects/project.dto";
 import { ThemeRepository } from "../../thematics/themes/theme.repository";
 import { IConstraint } from "../constraint.model";
@@ -21,6 +21,14 @@ type PhaseValidationInput = Pick<
     CreatePhaseDto,
     "title" | "budget" | "duration"
 >;
+
+export interface ConstraintValidationInput {
+    title: string;
+    summary?: string;
+    collaboratorsCount: number;
+    themes: string[];
+    phases: PhaseDto[];
+}
 
 export class ConstraintValidationService {
 
@@ -120,7 +128,7 @@ export class ConstraintValidationService {
 
     async validateProject(
         constraintId: string,
-        dto: CreateProjectDTO
+        dto: ConstraintValidationInput
     ): Promise<ValidationResult> {
 
         const constraint =
@@ -150,7 +158,7 @@ export class ConstraintValidationService {
 
         this.validateParticipants(
             constraint.participants,
-            dto.collaborators.length,
+            dto.collaboratorsCount,
             errors
         );
 

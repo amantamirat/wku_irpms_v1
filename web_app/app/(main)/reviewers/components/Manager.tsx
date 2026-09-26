@@ -11,15 +11,17 @@ import { FilterReviewersOptions, Reviewer, ReviewerStatus, ReviewerTargetType } 
 import { REVIEWER_ADMIN_TRANSITIONS } from "../models/reviewer.state-machine";
 import { RowActionButton } from "@/components/data-table/ItemDataTable";
 import { useAuth } from "@/contexts/auth-context";
+import { ApplicationApi } from "../../applications/api/application.api";
 
 interface ReviewerManagerProps {
     targetType: ReviewerTargetType,
     application?: Application;
+    updateApplication?: (application: Application) => void;
     verification?: Verification;
 }
 
 
-const ReviewerManager = ({ targetType, application, verification }: ReviewerManagerProps) => {
+const ReviewerManager = ({ targetType, application, updateApplication, verification }: ReviewerManagerProps) => {
 
 
     const { hasPermission } = useAuth();
@@ -47,8 +49,10 @@ const ReviewerManager = ({ targetType, application, verification }: ReviewerMana
     const Manager = useMemo(() => {
         return createEntityManager<Reviewer, FilterReviewersOptions>({
             title: "Reviewers",
+            createLabel: "Assign Reviewer",
             itemName: "Reviewer",
             api: ReviewerApi,
+            useLookup: true,
             query: () => ({
                 targetType,
                 application,
@@ -85,7 +89,26 @@ const ReviewerManager = ({ targetType, application, verification }: ReviewerMana
             ],
             workflow: {
                 statusField: "status",
-                transitions: REVIEWER_ADMIN_TRANSITIONS
+                transitions: REVIEWER_ADMIN_TRANSITIONS,
+                onTransitionComplete: async (
+                    previous,
+                    updated,
+                    transition
+                ) => {
+                    if (updateApplication && application) {
+                        if (previous.status === ReviewerStatus.approved ||
+                            updated.status === ReviewerStatus.approved) {
+                            const appDoc = await ApplicationApi.getById!(application?._id!);
+                            if (appDoc) {
+                                updateApplication({
+                                    ...appDoc,
+                                    project: application.project,
+                                    stage: application.stage
+                                });
+                            }
+                        }
+                    }
+                }
             },
             permissionPrefix: "reviewer",
             hideSearch: true,

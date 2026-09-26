@@ -1,14 +1,16 @@
 import { Request, Response } from "express";
 import { errorResponse, successResponse } from "../../../common/helpers/response";
 import { ResultService } from "./result.service";
-import { CreateResultDTO, GetResultsDTO, UpdateResultDTO } from "./result.dto";
+import { CreateResultDTO, FilterResultsDTO, UpdateResultDTO } from "./result.dto";
 import { AuthenticatedRequest } from "../../auth/auth.middleware";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 
 export class ResultController {
 
-    constructor(private readonly service: ResultService) {}
+    constructor(private readonly service: ResultService) {
+
+    }
 
     // -----------------------
     // CREATE
@@ -24,8 +26,7 @@ export class ResultController {
                 criterion,
                 score,
                 selectedOptions,
-                comment,
-                applicantId: req.auth.userId,
+                comment
             };
 
             const created = await this.service.create(dto);
@@ -42,7 +43,7 @@ export class ResultController {
         try {
             const { reviewer } = req.query;
 
-            const filter: GetResultsDTO = {
+            const filter: FilterResultsDTO = {
                 reviewer: String(reviewer)
             };
 
@@ -69,11 +70,10 @@ export class ResultController {
                     ...(score !== undefined && { score }),
                     ...(selectedOptions !== undefined && { selectedOptions }),
                     ...(comment !== undefined && { comment })
-                },
-                applicantId: req.auth.userId
+                }
             };
 
-            const updated = await this.service.update(dto);
+            const updated = await this.service.update(dto, req.auth.userId);
             successResponse(res, 200, "Result updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -90,8 +90,7 @@ export class ResultController {
             const { id } = req.params;
 
             const dto: DeleteDto = {
-                id: String(id),
-                userId: req.auth.userId
+                id: String(id)
             };
 
             const deleted = await this.service.delete(dto);

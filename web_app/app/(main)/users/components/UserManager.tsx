@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from "react";
+import { useMemo, useRef, useState } from "react";
 
 import {
     FilterUsersOptions,
@@ -15,7 +15,7 @@ import SaveUser from "./SaveUser";
 import { Badge } from "primereact/badge";
 import UserDetail from "./UserDetail";
 
-import { createEntityManager } from "@/components/data-table/createEntityManager";
+import { createEntityManager, EntityManagerRef } from "@/components/data-table/createEntityManager";
 import { useAuth } from "@/contexts/auth-context";
 import ScopeDialog from "./dialogs/ScopeDialog";
 
@@ -24,186 +24,192 @@ const ManageUsers = () => {
     const [roleDialogVisible, setRoleDialogVisible] = useState(false);
     const [scopeDialogVisible, setScopeDialogVisible] = useState(false);
 
+
     const [selectedUser, setSelectedUser] =
         useState<User | null>(null);
 
+    const entityManagerRef =
+        useRef<EntityManagerRef<User>>(null);
+
     const { hasPermission } = useAuth();
 
-    const EntityManager =
-        createEntityManager<User, FilterUsersOptions>({
-            title: "Manage Users",
-            itemName: "User",
+    const EntityManager = useMemo(
+        () =>
+            createEntityManager<User, FilterUsersOptions>({
+                title: "Manage Users",
+                itemName: "User",
 
-            api: UserApi,
+                api: UserApi,
 
-            columns: [
-                {
-                    header: "Full Name",
-                    field: "name",
-                    sortable: true
-                },
+                columns: [
+                    {
+                        header: "Full Name",
+                        field: "name",
+                        sortable: true
+                    },
 
-                {
-                    header: "Workspace",
-                    field: "workspace.name"
-                },
+                    {
+                        header: "Workspace",
+                        field: "workspace.name"
+                    },
 
-                {
-                    header: "Birth Date",
-                    field: "birthDate",
-                    body: (u: User) =>
-                        u.birthDate
-                            ? new Date(
-                                u.birthDate
-                            ).toLocaleDateString()
-                            : '-'
-                },
+                    {
+                        header: "Birth Date",
+                        field: "birthDate",
+                        body: (u: User) =>
+                            u.birthDate
+                                ? new Date(
+                                    u.birthDate
+                                ).toLocaleDateString()
+                                : '-'
+                    },
 
-                {
-                    header: "Gender",
-                    field: "gender",
-                    body: (u: User) => (
-                        <MyBadge
-                            type="gender"
-                            value={u.gender ?? "N/A"}
-                        />
-                    )
-                },
-
-                {
-                    header: "Specs Count",
-                    field: "specializations.length",
-                    body: (u: User) => (
-                        <div className="flex align-items-center">
-                            <Badge
-                                value={
-                                    u.specializations?.length || 0
-                                }
-                                severity={
-                                    u.specializations?.length
-                                        ? 'info'
-                                        : 'warning'
-                                }
+                    {
+                        header: "Gender",
+                        field: "gender",
+                        body: (u: User) => (
+                            <MyBadge
+                                type="gender"
+                                value={u.gender ?? "N/A"}
                             />
+                        )
+                    },
 
-                            <span className="ml-2 text-sm text-500">
-                                Items
-                            </span>
-                        </div>
-                    )
-                },
-
-                {
-                    header: "Roles",
-                    field: "roles",
-                    body: (u: User) => (
-                        <div className="flex gap-1">
-                            {u.roles?.length ? (
+                    {
+                        header: "Specs Count",
+                        field: "specializations.length",
+                        body: (u: User) => (
+                            <div className="flex align-items-center">
                                 <Badge
-                                    value={`${u.roles.length} Roles`}
+                                    value={
+                                        u.specializations?.length || 0
+                                    }
+                                    severity={
+                                        u.specializations?.length
+                                            ? 'info'
+                                            : 'warning'
+                                    }
                                 />
-                            ) : (
-                                <span className="text-gray-400 text-xs">
-                                    No Roles
+
+                                <span className="ml-2 text-sm text-500">
+                                    Items
                                 </span>
-                            )}
-                        </div>
-                    )
-                },
+                            </div>
+                        )
+                    },
 
-                {
-                    header: "Scope",
-                    field: "scope",
-                    body: (u: User) => {
+                    {
+                        header: "Roles",
+                        field: "roles",
+                        body: (u: User) => (
+                            <div className="flex gap-1">
+                                {u.roles?.length ? (
+                                    <Badge
+                                        value={`${u.roles.length} Roles`}
+                                    />
+                                ) : (
+                                    <span className="text-gray-400 text-xs">
+                                        No Roles
+                                    </span>
+                                )}
+                            </div>
+                        )
+                    },
 
-                        if (u.scope === "*") {
-                            return (
-                                <MyBadge
-                                    type="status"
-                                    value="Full Access"
-                                />
-                            );
-                        }
+                    {
+                        header: "Scope",
+                        field: "scope",
+                        body: (u: User) => {
 
-                        if (u.scope) {
-                            return (
-                                <div className="flex align-items-center gap-2">
+                            if (u.scope === "*") {
+                                return (
                                     <MyBadge
                                         type="status"
-                                        value={
-                                            u.unitType ?? "Scoped"
-                                        }
+                                        value="Full Access"
                                     />
-                                </div>
+                                );
+                            }
+
+                            if (u.scope) {
+                                return (
+                                    <div className="flex align-items-center gap-2">
+                                        <MyBadge
+                                            type="status"
+                                            value={
+                                                u.unitType ?? "Scoped"
+                                            }
+                                        />
+                                    </div>
+                                );
+                            }
+
+                            return (
+                                <span className="text-gray-400 text-xs">
+                                    No Scope
+                                </span>
                             );
                         }
-
-                        return (
-                            <span className="text-gray-400 text-xs">
-                                No Scope
-                            </span>
-                        );
                     }
-                }
-            ],
+                ],
 
-            createNew: createEmptyUser,
+                createNew: createEmptyUser,
 
-            SaveDialog: SaveUser,
+                SaveDialog: SaveUser,
 
-            permissionPrefix: "user",
+                permissionPrefix: "user",
 
-            expandable: {
-                template: (user) => (
-                    <UserDetail user={user} />
-                )
-            },
-
-            extraRowActions: [
-
-                /*
-                 * Manage Roles
-                 */
-                {
-                    icon: "pi pi-shield",
-                    severity: "info",
-                    tooltip: "Manage Roles",
-
-                    visible: () =>
-                        hasPermission(
-                            "user:role:update"
-                        ),
-
-                    onClick: (row: User) => {
-                        setSelectedUser(row);
-                        setRoleDialogVisible(true);
-                    }
+                expandable: {
+                    template: (user) => (
+                        <UserDetail user={user} />
+                    )
                 },
 
-                /*
-                 * Manage Organizational Scope
-                 */
-                {
-                    icon: "pi pi-sitemap",
-                    severity: "warning",
-                    tooltip: "Manage Scope",
+                extraRowActions: [
 
-                    visible: () =>
-                        hasPermission(
-                            "user:scope:update"
-                        ),
+                    /*
+                     * Manage Roles
+                     */
+                    {
+                        icon: "pi pi-shield",
+                        severity: "info",
+                        tooltip: "Manage Roles",
 
-                    onClick: (row: User) => {
-                        setSelectedUser(row);
-                        setScopeDialogVisible(true);
+                        visible: () =>
+                            hasPermission(
+                                "user:role:update"
+                            ),
+
+                        onClick: (row: User) => {
+                            setSelectedUser(row);
+                            setRoleDialogVisible(true);
+                        }
+                    },
+
+                    /*
+                     * Manage Organizational Scope
+                     */
+                    {
+                        icon: "pi pi-sitemap",
+                        severity: "warning",
+                        tooltip: "Manage Scope",
+
+                        visible: () =>
+                            hasPermission(
+                                "user:scope:update"
+                            ),
+
+                        onClick: (row: User) => {
+                            setSelectedUser(row);
+                            setScopeDialogVisible(true);
+                        }
                     }
-                }
-            ]
-        });
+                ]
+            })
+        , [hasPermission]);
 
     return (
         <>
-            <EntityManager />
+            <EntityManager ref={entityManagerRef} />
 
             {selectedUser && roleDialogVisible && (
                 <RoleDialog
@@ -215,7 +221,10 @@ const ManageUsers = () => {
                         setSelectedUser(null);
                     }}
 
-                    onComplete={() => {
+                    onComplete={(updatedUser) => {
+                        entityManagerRef.current?.updateItem(
+                            updatedUser
+                        );
                         setRoleDialogVisible(false);
                         setSelectedUser(null);
                     }}
@@ -232,7 +241,10 @@ const ManageUsers = () => {
                         setSelectedUser(null);
                     }}
 
-                    onComplete={() => {
+                    onComplete={(updatedUser) => {
+                        entityManagerRef.current?.updateItem(
+                            updatedUser
+                        );
                         setScopeDialogVisible(false);
                         setSelectedUser(null);
                     }}

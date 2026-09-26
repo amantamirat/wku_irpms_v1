@@ -13,21 +13,22 @@ import ScopeFilterService from "../../auth/scope-filter.service";
 import { ICallRepository } from "../../calls/call.repository";
 import { IStage } from "../../calls/stages/stage.model";
 import { IStageRepository } from "../../calls/stages/stage.repository";
-import { CompositionValidationService } from "../../compositions/composition-validator.service";
-import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
+import { CompositionValidationInput, CompositionValidationService } from "../../compositions/composition-validator.service";
+import { ConstraintValidationInput, ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
 import { GrantRepository } from "../../grants/grant.repository";
 import { NotificationService } from "../../notifications/notification.service";
 import { OrganizationRepository } from "../../organization/organization.repository";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
 import { ReviewerStatus } from "../../reviewers/reviewer.state-machine";
 import { TemplateValidationService } from "../../templates/services/template-validation.service";
+import { IUserRepository } from "../../users/user.repository";
+import { ICollaboratorRepository } from "../collaborators/collaborator.repository";
 import { ProjectAuth } from "../project.auth";
 import { IProject, ProjectStatus } from "../project.model";
 import { ProjectRepository } from "../project.repository";
 import {
     CreateApplicationDTO,
     FilterApplicationDTO,
-    UpdateApplicationDTO
 } from "./application.dto";
 import { ApplicationStatus, IApplication } from "./application.model";
 import { IApplicationRepository } from "./application.repository";
@@ -48,28 +49,25 @@ export class ApplicationService {
 
         private readonly constraintValidator: ConstraintValidationService,
         private readonly compositionValidator: CompositionValidationService,
+
+        private readonly collaboratorRepo: ICollaboratorRepository,
+        private readonly userRepo: IUserRepository
     ) {
     }
 
-    /**
- * Create a new application for a project stage.
- */
-    async create(
-        dto: CreateApplicationDTO,
-        userId: string
+    async validateCallStage(
+        stageId: string,
+        documentPath: string,
+        projectDoc?: IProject,
+        constraintInput?: ConstraintValidationInput,
+        compositionInput?: CompositionValidationInput
     ) {
-        const {
-            project,
-            stage,
-            documentPath
-        } = dto;
-
         // --------------------------------------------------
         // Get requested stage
         // --------------------------------------------------
 
         const stageDoc =
-            await this.stageRepo.findById(stage);
+            await this.stageRepo.findById(stageId);
 
         if (!stageDoc) {
             throw new AppError(
@@ -78,9 +76,22 @@ export class ApplicationService {
         }
 
         // --------------------------------------------------
-        // Stage deadline
+        // Validate project's call
         // --------------------------------------------------
 
+        if (
+            projectDoc?.call &&
+            String(projectDoc.call) !==
+            String(stageDoc.call)
+        ) {
+            throw new AppError(
+                ERROR_CODES.INVALID_STAGE,
+                "The application stage does not belong to the project's call."
+            );
+        }
+        // --------------------------------------------------
+        // Stage deadline
+        // --------------------------------------------------
         if (
             new Date(stageDoc.deadline) < new Date()
         ) {
@@ -89,71 +100,13 @@ export class ApplicationService {
             );
         }
 
-        // --------------------------------------------------
-        // Authorization + project
-        // --------------------------------------------------
 
-        const {
-            projectDoc
-        } = await this.projectAuth.auth(
-            project,
-            userId,
-            PERMISSIONS.APPLICATION.CREATE
-        );
+        const callDoc = await this.callRepo.findById(String(stageDoc.call));
 
-        // --------------------------------------------------
-        // Validate project's call
-        // --------------------------------------------------
-
-        if (projectDoc.call) {
-
-            const callDoc = await this.callRepo.findById(String(projectDoc.call));
-
-            if (!callDoc) {
-                throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
-            }
-
-            if (
-                !stageDoc.call ||
-                String(projectDoc.call) !==
-                String(stageDoc.call)
-            ) {
-                throw new AppError(
-                    ERROR_CODES.INVALID_STAGE,
-                    "The application stage does not belong to the project's call."
-                );
-            }
-
-            if (callDoc.constraint) {
-                const constraintId = String(callDoc.constraint);
-                const result = await this.constraintValidator.validateProjectById(constraintId, project);
-                if (!result.valid) {
-                    throw new AppError(
-                        ERROR_CODES.INVALID_CONSTRAINT,
-                        "Constraint validation failed",
-                        400,
-                        result
-                    );
-                }
-            }
-
-            if (callDoc.composition) {
-
-                const result = await this.compositionValidator.validateByProjectId(
-                    String(callDoc.composition),
-                    project
-                );
-
-                if (!result.valid) {
-                    throw new AppError(
-                        ERROR_CODES.INVALID_COMPOSITION,
-                        "Document validation failed",
-                        400,
-                        result
-                    );
-                }
-            }
+        if (!callDoc) {
+            throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         }
+
         // --------------------------------------------------
         // Check previous stage
         // --------------------------------------------------
@@ -167,7 +120,7 @@ export class ApplicationService {
             // --------------------------------------------------
             // Project must have a current application
             // --------------------------------------------------
-            if (!projectDoc.currentApplication) {
+            if (!projectDoc?.currentApplication) {
                 throw new AppError(
                     ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND,
                     "Project does not have a current application."
@@ -212,6 +165,59 @@ export class ApplicationService {
             }
         }
 
+
+        if (callDoc.constraint) {
+            let result;
+            if (projectDoc?._id) {
+                result =
+                    await this.constraintValidator.
+                        validateProjectById(String(callDoc.constraint), String(projectDoc._id));
+            }
+            if (constraintInput) {
+                result =
+                    await this.constraintValidator
+                        .validateProject(String(callDoc.constraint), constraintInput);
+            }
+
+            if (!result?.valid) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_CONSTRAINT,
+                    "Constraint validation failed",
+                    400,
+                    result
+                );
+            }
+
+        }
+
+
+        if (callDoc.composition) {
+
+            let result;
+            if (projectDoc?._id) {
+                result =
+                    await this.compositionValidator.validateByProjectId(
+                        String(callDoc.composition),
+                        String(projectDoc._id)
+                    );
+            }
+            if (compositionInput) {
+                result =
+                    await this.compositionValidator
+                        .validate(String(callDoc.composition), callDoc, compositionInput);
+            }
+
+            if (!result?.valid) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_COMPOSITION,
+                    "Document validation failed",
+                    400,
+                    result
+                );
+            }
+        }
+
+
         // --------------------------------------------------
         // Validate document against stage template
         // --------------------------------------------------
@@ -232,6 +238,37 @@ export class ApplicationService {
                 );
             }
         }
+        return { stageDoc: stageDoc }
+
+    }
+
+    /**
+ * Create a new application for a project stage.
+ */
+    async create(
+        dto: CreateApplicationDTO,
+        userId: string
+    ) {
+        const {
+            project,
+            stage,
+            documentPath
+        } = dto;
+
+        // --------------------------------------------------
+        // Authorization + project
+        // --------------------------------------------------
+        const {
+            projectDoc
+        } = await this.projectAuth.auth(
+            project,
+            userId,
+            PERMISSIONS.APPLICATION.CREATE
+        );
+
+        const { stageDoc } =
+            await this.validateCallStage(stage, documentPath, projectDoc);
+
         // --------------------------------------------------
         // Create application
         // --------------------------------------------------
@@ -327,11 +364,9 @@ export class ApplicationService {
         }
     }
 
-
-
-    async read(
+    async readApplications(
         filter: FilterApplicationDTO,
-        userId: string,
+        //userId: string,
         scope: AuthScope,
         options?: FilterOptions
     ) {
@@ -356,6 +391,20 @@ export class ApplicationService {
         return appDoc;
     }
 
+    getMyAssignedApplications = async (
+        userId: string,
+        filter?: FilterApplicationDTO,
+        options?: FilterOptions
+    ) => {
+        return this.applicationRepo.find(
+            {
+                ...filter,
+                reviewerAssigner: userId
+            },
+            options
+        );
+    };
+
 
     /**
      * Get by ID
@@ -367,47 +416,137 @@ export class ApplicationService {
     /**
      * Update stage 
      */
-    async update(dto: UpdateApplicationDTO) {
+    async update(dto: any) {
         throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
     }
 
 
-    private async calculateTotalScore(id: string): Promise<number> {
-        const approvedReviews =
-            await this.reviewerRepo.find({
-                application: id,
-                status: ReviewerStatus.approved
-            });
+    public async updateReviewerAssigner(
+        applicationId: string,
+        reviewerAssigner: string | null,
+        userId: string
+    ): Promise<IApplication> {
 
-        const totalWeight = approvedReviews.reduce(
-            (sum, review) =>
-                sum + (review.weight ?? 1),
-            0
-        );
+        const applicationDoc =
+            await this.applicationRepo.findById(applicationId);
 
-        if (totalWeight === 0) {
-            await this.applicationRepo.update(id, {
-                totalScore: 0
-            });
-
-            return 0;
+        if (!applicationDoc) {
+            throw new AppError(
+                ERROR_CODES.APPLICATION_NOT_FOUND
+            );
         }
 
-        const score =
-            approvedReviews.reduce(
-                (sum, review) =>
-                    sum +
-                    (review.score ?? 0) *
-                    (review.weight ?? 1),
-                0
-            ) / totalWeight;
+        if (applicationDoc.status !== ApplicationStatus.shortlisted) {
+            throw new AppError(
+                ERROR_CODES.INVALID_APPLICATION_STATUS,
+                "The application must be shortlisted before a reviewer assigner can be assigned."
+            );
+        }
 
-        await this.applicationRepo.update(id, {
-            totalScore: score
-        });
+        let reviewerAssignerDoc: any = null;
 
-        return score;
+        // Validate the new reviewer assigner
+        if (reviewerAssigner) {
+            reviewerAssignerDoc =
+                await this.userRepo.findById(reviewerAssigner);
+
+            if (!reviewerAssignerDoc) {
+                throw new AppError(
+                    ERROR_CODES.USER_NOT_FOUND
+                );
+            }
+
+            const isCollaborator =
+                await this.collaboratorRepo.exists({
+                    project: String(applicationDoc.project),
+                    member: reviewerAssigner
+                });
+
+            if (isCollaborator) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_REVIEWER,
+                    `User ${reviewerAssignerDoc.name ?? reviewerAssigner} is already a member in the project.`
+                );
+            }
+        }
+
+        const previousReviewerAssigner =
+            applicationDoc.reviewerAssigner
+                ? String(applicationDoc.reviewerAssigner)
+                : null;
+
+        const updatedApplication =
+            await this.applicationRepo.update(
+                applicationId,
+                {
+                    reviewerAssigner
+                },
+                userId
+            );
+
+        if (!updatedApplication) {
+            throw new AppError(
+                ERROR_CODES.APPLICATION_NOT_FOUND
+            );
+        }
+
+        // Nothing else to notify when the value did not actually change.
+        if (
+            previousReviewerAssigner ===
+            (reviewerAssigner ? String(reviewerAssigner) : null)
+        ) {
+            return updatedApplication;
+        }
+
+        const projectDoc =
+            await this.projectRepo.findById(
+                String(applicationDoc.project)
+            );
+
+        if (!projectDoc) {
+            throw new AppError(
+                ERROR_CODES.PROJECT_NOT_FOUND
+            );
+        }
+
+        const stageDoc =
+            await this.stageRepo.findById(
+                String(applicationDoc.stage)
+            );
+
+        if (!stageDoc) {
+            throw new AppError(
+                ERROR_CODES.STAGE_NOT_FOUND
+            );
+        }
+
+        // New reviewer assigner
+        if (reviewerAssigner) {
+            await this.notificationService.notifyReviewerAssigner(
+                reviewerAssigner,
+                projectDoc.title,
+                stageDoc.name,
+                userId
+            );
+        }
+
+        // Previous reviewer assigner was removed/replaced.
+        if (
+            previousReviewerAssigner &&
+            previousReviewerAssigner !== String(reviewerAssigner)
+        ) {
+            await this.notificationService.notifyReviewerAssignerRemoved(
+                previousReviewerAssigner,
+                projectDoc.title,
+                stageDoc.name,
+                userId
+            );
+        }
+
+        return updatedApplication;
     }
+
+
 
     /**
      * Transition stage status (state machine) use current application
@@ -416,32 +555,29 @@ export class ApplicationService {
         const { id, current, next } = dto;
 
         const applicationDoc = await this.applicationRepo.findById(id);
+
         if (!applicationDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
 
-        const projectId = String(applicationDoc.project);
-        const projectDoc = await this.projectRepo.findById(projectId);
+        const projectDoc = await this.projectRepo.findById(String(applicationDoc.project));
 
         if (!projectDoc) {
             throw new AppError(
                 ERROR_CODES.PROJECT_NOT_FOUND
             );
         }
-        if (!projectDoc.currentApplication) {
-            throw new AppError(ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND);
-        }
-        if (String(projectDoc.currentApplication) !== id) {
-            throw new AppError(ERROR_CODES.INVALID_APPLICATION_STATUS);
-        }
 
-        const stageId = String(applicationDoc.stage);
-        const stageDoc = await this.stageRepo.findById(stageId);
-        if (!stageDoc)
-            throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-
-        const projStatus = projectDoc.status;
-
-        if (projStatus !== ProjectStatus.draft) {
+        if (projectDoc.status !== ProjectStatus.draft) {
             throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+        }
+
+        if (
+            !projectDoc.currentApplication ||
+            String(projectDoc.currentApplication) !== id
+        ) {
+            throw new AppError(
+                ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND,
+                "This application is not the current application for the project."
+            );
         }
 
         const from = applicationDoc.status as ApplicationStatus;
@@ -457,50 +593,83 @@ export class ApplicationService {
             to,
             APPLICATION_TRANSITIONS
         );
+
+        if (to === ApplicationStatus.shortlisted) {
+            const hasUnverified =
+                await this.collaboratorRepo.existsUnverified(
+                    String(applicationDoc.project)
+                );
+
+            if (hasUnverified) {
+                throw new AppError(
+                    ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED,
+                    'All project collaborators must be verified before reviewers can be assigned.'
+                );
+            }
+        }
+        else if (to === ApplicationStatus.submitted) {
+            if (
+                await this.reviewerRepo.exists({
+                    application: id
+                })
+            ) {
+                throw new AppError(
+                    ERROR_CODES.REVIEWER_ALREADY_EXISTS
+                );
+            }
+        }
+
+        const stageDoc = await this.stageRepo.findById(String(applicationDoc.stage));
+
+        if (!stageDoc)
+            throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+
         if (
             to === ApplicationStatus.accepted ||
             to === ApplicationStatus.rejected
         ) {
-            const approvedCount =
-                await this.reviewerRepo.count({ application: id, status: ReviewerStatus.approved });
-            if (
-                approvedCount <
-                stageDoc.minReviewers
-            ) {
+
+            if (!applicationDoc.totalScore) {
                 throw new AppError(
-                    ERROR_CODES.INSUFFICIENT_REVIEWS,
-                    `At least ${stageDoc.minReviewers} approved reviews are required before computing score.`
+                    ERROR_CODES.SCORE_NOT_COMPUTED
                 );
             }
-            const totalScore = await this.calculateTotalScore(id);
 
             if (to === ApplicationStatus.accepted) {
                 const minAcceptanceScore = stageDoc.minAcceptanceScore ?? 0;
-                if ((totalScore ?? 0) < minAcceptanceScore) {
+                if (applicationDoc.totalScore < minAcceptanceScore) {
                     throw new AppError(
                         ERROR_CODES.SCORE_BELOW_THRESHOLD,
-                        `Cannot accept. Minimum required score is ${minAcceptanceScore}, but got ${totalScore}.`
-                    );
+                        `Application cannot be accepted. Minimum required score: ${minAcceptanceScore}; actual score: ${applicationDoc.totalScore}.`);
                 }
+
             }
         }
 
         const updated = await this.applicationRepo.updateStatus(id, to, userId);
 
-        //const synced = await this.synchronizer.sync(projectId);
 
         if (this.notificationService) {
             const leadUser = String(projectDoc.leadPI);
             const title = projectDoc.title;
             const stageName = stageDoc.name;
 
-            if (to === ApplicationStatus.rejected) {
+            if (to === ApplicationStatus.shortlisted) {
+                await this.notificationService.notifyApplicationShortlisted(
+                    leadUser,
+                    title,
+                    stageName
+                );
+            }
+
+            else if (to === ApplicationStatus.rejected) {
                 await this.notificationService.notifyApplicationRejected(
                     leadUser,
                     title,
                     stageName
                 );
             } else if (to === ApplicationStatus.accepted) {
+
                 let nextStageInfo:
                     | { name: string; deadline?: Date }
                     | undefined;
@@ -523,11 +692,11 @@ export class ApplicationService {
                     nextStageInfo
                 );
             }
-            else if (to === ApplicationStatus.pending) {
+            else if (to === ApplicationStatus.submitted) {
                 await this.notificationService.notifyRollback(
                     leadUser,
                     title,
-                    ApplicationStatus.pending,
+                    ApplicationStatus.submitted,
                     stageName,
                 );
             }
@@ -538,10 +707,7 @@ export class ApplicationService {
 
     /**
      * Delete 
-     */
-    /**
- * Delete the current pending application.
- */
+    */
     async delete(
         dto: DeleteDto,
         userId: string
@@ -570,10 +736,10 @@ export class ApplicationService {
 
         if (
             applicationDoc.status !==
-            ApplicationStatus.pending
+            ApplicationStatus.submitted
         ) {
             throw new AppError(
-                ERROR_CODES.APPLICATION_NOT_PENDING
+                ERROR_CODES.INVALID_APPLICATION_STATUS, "Application is not in submitted state"
             );
         }
 
@@ -598,7 +764,7 @@ export class ApplicationService {
             String(id)
         ) {
             throw new AppError(
-                ERROR_CODES.INVALID_APPLICATION_STATUS,
+                ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND,
                 "This application is not the current application for the project."
             );
         }
@@ -704,8 +870,31 @@ export class ApplicationService {
 
 }
 
-export const APPLICATION_TRANSITIONS: Record<ApplicationStatus, ApplicationStatus[]> = {
-    [ApplicationStatus.pending]: [ApplicationStatus.accepted, ApplicationStatus.rejected],
-    [ApplicationStatus.accepted]: [ApplicationStatus.pending],
-    [ApplicationStatus.rejected]: [ApplicationStatus.pending]
+
+export const APPLICATION_TRANSITIONS: Record<
+    ApplicationStatus,
+    ApplicationStatus[]
+> = {
+    [ApplicationStatus.submitted]: [
+        ApplicationStatus.shortlisted,
+        ApplicationStatus.notShortlisted
+    ],
+
+    [ApplicationStatus.shortlisted]: [
+        ApplicationStatus.submitted,
+        ApplicationStatus.accepted,
+        ApplicationStatus.rejected
+    ],
+
+    [ApplicationStatus.notShortlisted]: [
+        ApplicationStatus.submitted
+    ],
+
+    [ApplicationStatus.accepted]: [
+        ApplicationStatus.shortlisted
+    ],
+
+    [ApplicationStatus.rejected]: [
+        ApplicationStatus.shortlisted
+    ]
 };

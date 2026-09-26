@@ -61,9 +61,9 @@
             "criterion:*",
             "project:lookup",
             "collaborator:*",
-            "phase:*",
+            "phase:transition*",
             "user:lookup",
-            "application:*",
+            "application:transition:*",
             "reviewer:*",
             "verification-conf:*"
         ]
@@ -88,10 +88,13 @@
         "name": "head",
         "permissions": [
             "user:lookup",
-            "application:read",
             "call:lookup",
             "stage:lookup",
-            "reviewer:*"
+            "application:assigned:read",
+            "reviewer:create:own",
+            "reviewer:read:own",
+            "reviewer:update:own",
+            "reviewer:delete:own"
         ]
     },
     {

@@ -24,6 +24,11 @@ import { ProfileRepository } from "./profile/profile.repository";
 import { AggregationMode } from "./requirements/requirement.model";
 import { RequirementRepository } from "./requirements/requirement.repository";
 
+export interface CompositionValidationInput {
+    lead: IUser;
+    members: IUser[];
+}
+
 export class CompositionValidationService {
 
     constructor(
@@ -87,7 +92,7 @@ export class CompositionValidationService {
             composition.memberRequirements?.map(
                 id => String(id)
             ) ?? [],
-            collaborators.map(member => String(member)) ?? [],
+            collaborators.map(collab => String(collab.member)) ?? [],
             validationContext,
             errors
         );
@@ -104,10 +109,7 @@ export class CompositionValidationService {
     public async validate(
         compositionId: string,
         call: ICall,
-        dto: {
-            lead: IUser;
-            members: IUser[];
-        }
+        dto: CompositionValidationInput
     ): Promise<ValidationResult> {
 
         const composition =
@@ -132,12 +134,14 @@ export class CompositionValidationService {
 
         const errors: string[] = [];
 
-        await this.validateLead(
+        const isLeadValid = await this.validateLead(
             composition,
             dto.lead,
             validationContext,
             errors
         );
+
+        console.log("isleadvalid", isLeadValid)
 
         await this.validateMembers(
             composition.memberRequirements?.map(
@@ -178,14 +182,14 @@ export class CompositionValidationService {
         lead: IUser | string,
         validationContext: HistoryValidationContext,
         errors: string[]
-    ): Promise<void> {
+    ): Promise<boolean> {
 
 
         const profileDoc = composition.leadProfileRule ? await this.profileRepo.findById(
             String(composition.leadProfileRule)
         ) : undefined;
 
-        await this.validateUser(
+        return await this.validateUser(
             lead,
             validationContext,
             {
@@ -236,10 +240,13 @@ export class CompositionValidationService {
                     userDoc
                 );
 
+
             if (!matches) {
                 errors?.push(
                     `${userDoc.name} does not satisfy the required profile.`
                 );
+                //console.log(profile);
+                //console.log(`${userDoc.name} does not satisfy the required profile.`);
                 return false;
             }
         }

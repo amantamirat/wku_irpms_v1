@@ -27,9 +27,6 @@ export class ProfileRepository {
     async findById(
         id: string
     ): Promise<IEligibilityProfile | null> {
-
-        console.log("EligibilityProfile.findById ID:", id)
-
         return EligibilityProfile.findById(id);
     }
 

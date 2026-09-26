@@ -26,12 +26,14 @@ const SaveReviewerDialog = ({
     const [localReviewer, setLocalReviewer] = useState<Reviewer>({ ...item });
     const [users, setUsers] = useState<User[]>([]);
     const [submitted, setSubmitted] = useState(false);
+    const [loading, setLoading] = useState(false);
 
     const isEditMode = !!item?._id;
 
     useEffect(() => {
         setLocalReviewer({ ...item });
         setSubmitted(false);
+        setLoading(false);
     }, [item, visible]);
 
     useEffect(() => {
@@ -43,6 +45,11 @@ const SaveReviewerDialog = ({
                 }
             } catch (err) {
                 console.error("Failed to fetch users:", err);
+                toast.current?.show({
+                    severity: 'error',
+                    summary: 'Lookup Failed',
+                    detail: 'Could not load users list.'
+                });
             }
         };
         fetchUsers();
@@ -55,14 +62,16 @@ const SaveReviewerDialog = ({
         if (!validation.valid) {
             toast.current?.show({
                 severity: 'warn',
-                summary: 'Validation',
+                summary: 'Validation Warning',
                 detail: validation.message
             });
             return;
         }
 
         try {
+            setLoading(true);
             let saved: Reviewer;
+            
             if (isEditMode) {
                 saved = await ReviewerApi.update({
                     _id: localReviewer._id,
@@ -75,7 +84,8 @@ const SaveReviewerDialog = ({
             toast.current?.show({
                 severity: 'success',
                 summary: 'Success',
-                detail: 'Reviewer saved'
+                detail: isEditMode ? 'Reviewer updated successfully' : 'Reviewer added successfully',
+                life: 3000
             });
 
             if (onComplete) {
@@ -87,20 +97,37 @@ const SaveReviewerDialog = ({
                 });
             }
 
+            onHide();
+
         } catch (err: any) {
             toast.current?.show({
                 severity: 'error',
                 summary: 'Error',
-                detail: err.message || 'Failed to save reviewer'
+                detail: err.message || 'Failed to save reviewer',
+                life: 4000
             });
+        } finally {
+            setLoading(false);
         }
     };
 
     const footer = (
-        <>
-            <Button label="Cancel" icon="pi pi-times" text onClick={onHide} />
-            <Button label="Save Reviewer" icon="pi pi-check" onClick={saveReviewer} />
-        </>
+        <div className="flex justify-content-end gap-2 pt-2">
+            <Button 
+                label="Cancel" 
+                icon="pi pi-times" 
+                outlined 
+                severity="secondary"
+                onClick={onHide} 
+                disabled={loading}
+            />
+            <Button 
+                label={isEditMode ? "Save Changes" : "Create Reviewer"} 
+                icon={loading ? "pi pi-spin pi-spinner" : "pi pi-check"} 
+                onClick={saveReviewer} 
+                disabled={loading}
+            />
+        </div>
     );
 
     return (
@@ -109,20 +136,27 @@ const SaveReviewerDialog = ({
 
             <Dialog
                 visible={visible}
-                style={{ width: '500px' }}
-                header={isEditMode ? 'Edit Reviewer' : 'Add Reviewer'}
+                style={{ width: '450px' }}
+                header={
+                    <div className="flex align-items-center gap-2">
+                        <i className={`pi ${isEditMode ? 'pi-user-edit' : 'pi-user-plus'} text-primary text-xl`} />
+                        <span className="text-xl font-bold">{isEditMode ? 'Edit Reviewer' : 'Add New Reviewer'}</span>
+                    </div>
+                }
                 modal
-                className="p-fluid"
+                className="p-fluid shadow-lg"
                 footer={footer}
                 onHide={onHide}
+                dismissableMask={!loading}
             >
-                <div className="formgrid grid">
+                <div className="formgrid grid mt-2">
 
                     {/* Applicant selection only shown in Create Mode */}
                     {!isEditMode && (
-                        <div className="field col-12">
-                            <label htmlFor="user" className="font-bold">
-                                Reviewer
+                        <div className="field col-12 mb-4">
+                            <label htmlFor="user" className="font-medium text-900 block mb-2">
+                                <i className="pi pi-user mr-2 text-primary" />
+                                Select Reviewer <span className="text-red-500">*</span>
                             </label>
                             <Dropdown
                                 id="user"
@@ -131,33 +165,38 @@ const SaveReviewerDialog = ({
                                 onChange={(e) => setLocalReviewer({ ...localReviewer, reviewer: e.value })}
                                 dataKey="_id"
                                 optionLabel="name"
-                                placeholder="Select a Reviewer"
+                                placeholder="Choose a user from the system..."
                                 filter
-                                className={classNames({
-                                    'p-invalid': submitted && !localReviewer.reviewer
-                                })}
+                                showClear
+                                className={classNames({ 'p-invalid': submitted && !localReviewer.reviewer })}
                             />
                             {submitted && !localReviewer.reviewer && (
-                                <small className="p-error">Reviewer is required.</small>
+                                <small className="p-error block mt-1">
+                                    <i className="pi pi-exclamation-circle mr-1" /> Reviewer is required.
+                                </small>
                             )}
                         </div>
                     )}
 
                     {/* Weight Field */}
-                    <div className="field col-12">
-                        <label htmlFor="weight" className="font-bold">
-                            Weight
+                    <div className="field col-12 mb-2">
+                        <label htmlFor="weight" className="font-medium text-900 block mb-2">
+                            <i className="pi pi-sliders-h mr-2 text-primary" />
+                            Weight Assignment <span className="text-red-500">*</span>
                         </label>
                         <InputNumber
                             id="weight"
                             value={localReviewer.weight}
                             onValueChange={(e) => setLocalReviewer({ ...localReviewer, weight: e.value ?? 1 })}
                             min={0}
-                            placeholder="Enter weight"
-                            className={classNames({
-                                'p-invalid': submitted && (localReviewer.weight === null || localReviewer.weight === undefined)
-                            })}
+                            mode="decimal"
+                            showButtons
+                            placeholder="Enter weight value"
+                            className={classNames({ 'p-invalid': submitted && (localReviewer.weight === null || localReviewer.weight === undefined) })}
                         />
+                        <small className="text-color-secondary block mt-1">
+                            Defines the distribution weight for this reviewer.
+                        </small>
                     </div>
 
                 </div>

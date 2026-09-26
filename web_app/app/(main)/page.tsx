@@ -11,11 +11,14 @@ import AvailableStages from "./dashboard/AvailableStages";
 import CallOpportunityGrid from "./dashboard/CallOpportunityGrid";
 import QuickLinks from "./dashboard/QuickLinks";
 import VerificationWindow from "./dashboard/VerificationWindow";
-import MyPendingInvitation from "./dashboard/pending-collabs/MyPendingInvitation";
-import PendingEvalsManager from "./dashboard/pending-evals/MyPendingEvaluations";
+import MyPendingInvitations from "./dashboard/pending-invitations/MyPendingInvitations";
+import MyPendingEvaluations from "./dashboard/pending-evaluations/MyPendingEvaluations";
 import { ReportDashboard } from "./reports/components/Dashboard";
 import { ReviewerApi } from "./reviewers/api/reviewer.api";
 import { Reviewer, ReviewerStatus } from "./reviewers/models/reviewer.model";
+import { Application, ApplicationStatus } from "./applications/models/application.model";
+import { ApplicationApi } from "./applications/api/application.api";
+import PendingApplications from "./dashboard/pending-applications/PendingApplications";
 
 const Dashboard = () => {
     const { hasPermission } = useAuth();
@@ -23,12 +26,15 @@ const Dashboard = () => {
     const canLookCalls = hasPermission("call:lookup");
     const canLookVerificationConfs = hasPermission("verification-conf:lookup");
     const canLookStages = hasPermission("stage:lookup");
+    const canReadAssignedApplications = hasPermission("application:assigned:read");
 
     const [loadingEvals, setLoadingEvals] = useState(true);
     const [loadingCollabs, setLoadingCollabs] = useState(true);
+    const [loadingAppls, setLoadingAppls] = useState(true);
 
     const [pendingReviewees, setPendingReviewees] = useState<Reviewer[] | undefined>(undefined);
-    const [pendingCollabs, setPendingCollabs] = useState<Collaborator[] | undefined>(undefined);
+    const [pendingCollaborations, setPendingCollaborations] = useState<Collaborator[] | undefined>(undefined);
+    const [shortApplications, setShortApplications] = useState<Application[] | undefined>(undefined);
 
     useEffect(() => {
         // Fetch Pending Evaluations
@@ -49,7 +55,7 @@ const Dashboard = () => {
             setLoadingCollabs(true);
             try {
                 const data = await CollaboratorApi.me({ status: CollaboratorStatus.pending });
-                setPendingCollabs(Array.isArray(data) ? data : []);
+                setPendingCollaborations(Array.isArray(data) ? data : []);
             } catch (error) {
                 console.error("Error fetching pending collaborations", error);
             } finally {
@@ -57,16 +63,36 @@ const Dashboard = () => {
             }
         };
 
+        // Fetch assigned application
+        const fetchShortlistedApplications = async () => {
+            setLoadingAppls(true);
+            try {
+                const data = await ApplicationApi.getMyAssignedApplications({ status: ApplicationStatus.shortlisted });
+                setShortApplications(Array.isArray(data) ? data : []);
+            } catch (error) {
+                console.error("Error fetching shortlisted applications", error);
+            } finally {
+                setLoadingAppls(false);
+            }
+        };
+
         fetchPendingEvals();
         fetchCollabInvitation();
-    }, []);
+        if (canReadAssignedApplications) {
+            fetchShortlistedApplications();
+        }
+
+    }, [canReadAssignedApplications]);
 
     // Check if the left section has any active content (loading states or data)
     const hasLeftContent =
         loadingEvals ||
         loadingCollabs ||
-        (pendingCollabs && pendingCollabs.length > 0) ||
+        loadingAppls ||
+        (pendingCollaborations && pendingCollaborations.length > 0) ||
         (pendingReviewees && pendingReviewees.length > 0) ||
+        (shortApplications && shortApplications.length > 0) ||
+        canReadAssignedApplications ||
         canLookCalls;
 
     return (
@@ -83,7 +109,7 @@ const Dashboard = () => {
                 <div className="col-12 lg:col-8">
 
                     {/* 1. Collaboration Invitations */}
-                    {(loadingCollabs || (pendingCollabs && pendingCollabs.length > 0)) && (
+                    {(loadingCollabs || (pendingCollaborations && pendingCollaborations.length > 0)) && (
                         <div className="card border-none shadow-1 p-4 mb-4">
                             {loadingCollabs ? (
                                 <div className="flex flex-column align-items-center justify-content-center p-4">
@@ -91,7 +117,7 @@ const Dashboard = () => {
                                     <span className="mt-2 text-500 text-sm font-medium">Loading pending collaborations...</span>
                                 </div>
                             ) : (
-                                <MyPendingInvitation items={pendingCollabs!} />
+                                <MyPendingInvitations items={pendingCollaborations!} />
                             )}
                         </div>
                     )}
@@ -105,12 +131,26 @@ const Dashboard = () => {
                                     <span className="mt-2 text-500 text-sm font-medium">Loading pending evaluations...</span>
                                 </div>
                             ) : (
-                                <PendingEvalsManager items={pendingReviewees!} />
+                                <MyPendingEvaluations items={pendingReviewees!} />
                             )}
                         </div>
                     )}
 
-                    {/* 3. Call Opportunities */}
+                    {/* 3. Pending Shortlisted/Assigned Applications */}
+                    {canReadAssignedApplications && (loadingAppls || (shortApplications && shortApplications.length > 0)) && (
+                        <div className="card border-none shadow-1 p-4 mb-4">
+                            {loadingAppls ? (
+                                <div className="flex flex-column align-items-center justify-content-center p-4">
+                                    <ProgressSpinner style={{ width: '35px', height: '35px' }} strokeWidth="4" />
+                                    <span className="mt-2 text-500 text-sm font-medium">Loading pending applications...</span>
+                                </div>
+                            ) : (
+                                <PendingApplications items={shortApplications!} />
+                            )}
+                        </div>
+                    )}
+
+                    {/* 4. Call Opportunities */}
                     {canLookCalls && (
                         <div className="card border-none shadow-1 p-4 mb-4">
                             <div className="flex align-items-center justify-content-between mb-4">
@@ -119,6 +159,11 @@ const Dashboard = () => {
                             <CallOpportunityGrid />
                         </div>
                     )}
+
+                    {/* 🔗 QUICK LINKS (Moved inside left column to avoid spacing gaps) */}
+                    <div className="mt-4">
+                        <QuickLinks />
+                    </div>
                 </div>
             )}
 
@@ -143,10 +188,12 @@ const Dashboard = () => {
                 </div>
             </div>
 
-            {/* 🔗 QUICK LINKS ROW */}
-            <div className="col-12">
-                <QuickLinks />
-            </div>
+            {/* Fallback QuickLinks if left column isn't rendered */}
+            {!hasLeftContent && (
+                <div className="col-12">
+                    <QuickLinks />
+                </div>
+            )}
         </div>
     );
 };

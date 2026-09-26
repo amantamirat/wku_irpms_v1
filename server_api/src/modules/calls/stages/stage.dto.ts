@@ -2,8 +2,9 @@
 export interface CreateStageDTO {
     call: string;
     name: string;
-    order?: number;
+
     deadline: Date;
+    reviewersDeadline?: Date;
 
     template?: string;
 
@@ -18,6 +19,8 @@ export interface UpdateStageDTO {
     data: Partial<{
         name: string;
         deadline: Date;
+        
+        reviewersDeadline?: Date;
 
         template: string | null;
 

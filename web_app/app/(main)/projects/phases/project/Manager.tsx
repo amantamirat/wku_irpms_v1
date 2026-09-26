@@ -8,6 +8,7 @@ import { PhaseApi } from "../api/phase.api";
 import SavePhase from "../components/SavePhase";
 import { FilterPhaseOptions, Phase } from "../models/phase.model";
 import { PHASE_TRANSITIONS } from "../models/phase.state-machine";
+import { etbCurrencyFormatter } from "@/utils/utils";
 
 interface PhaseManagerProps {
     project: Project;
@@ -48,13 +49,9 @@ const PhaseManager = ({
                 header: "Budget",
                 field: "budget",
                 sortable: true,
-                body: (r: Phase) => (
+                body: (phase: Phase) => (
                     <span className="font-mono text-green-700">
-                        {new Intl.NumberFormat("en-US", {
-                            style: "currency",
-                            currency: "ETB",
-                            maximumFractionDigits: 0
-                        }).format(r.budget)}
+                        {etbCurrencyFormatter.format(phase.budget)}
                     </span>
                 )
             },

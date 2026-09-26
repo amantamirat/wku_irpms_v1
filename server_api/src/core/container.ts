@@ -154,7 +154,8 @@ export const applicationService = new ApplicationService(
     applicationRepo, projectRepo, callRepo, stageRepo, reviewerRepo,
     templateValidtor,
     new AnonymizerService(applicationRepo, collaboratorRepo), projectAuth,
-    notificationService, filterService, constraintValidator,compositionValidator
+    notificationService, filterService, constraintValidator, compositionValidator,
+    collaboratorRepo, userRepo
 );
 
 export const projectService = new ProjectService(projectRepo, userRepo, collaboratorRepo, phaseRepo, verificationRepo,

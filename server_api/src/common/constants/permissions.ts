@@ -267,15 +267,11 @@ export const PERMISSIONS = {
     READ: "reviewer:read",
     LOOKUP: "reviewer:lookup",
     UPDATE: "reviewer:update",
-    // CHANGE_STATUS: "reviewer:change_status", // New permission for status transitions
-    // APPROVE: "reviewer:approve",      // Keep as special approval permission
-    STATUS: {
-      PEND: "reviewer:status.pending",
-      SUBMIT: "reviewer:status.submitted",
-      ACCEPT: "reviewer:status.accepted",
-      APPROVE: "reviewer:status.approved"
-    },
+    CREATE_OWN: "reviewer:create:own",
+    READ_OWN: "reviewer:read:own",
+    UPDATE_OWN: "reviewer:update:own",    
     DELETE: "reviewer:delete",
+    DELETE_OWN: "reviewer:delete:own",
   },
 
   POSITION: {
