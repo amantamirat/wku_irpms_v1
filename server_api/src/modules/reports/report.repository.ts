@@ -4,7 +4,7 @@ import { FundingSource, Grant } from "../grants/grant.model";
 import { Application, ApplicationStatus } from "../projects/applications/application.model";
 import { Phase, PhaseStatus } from "../projects/phase/phase.model";
 import { Project, ProjectStatus } from "../projects/project.model";
-import { Reviewer } from "../reviewers/reviewer.model";
+import { Reviewer, ReviewerTargetType } from "../reviewers/reviewer.model";
 import { ReviewerStatus } from "../reviewers/reviewer.state-machine";
 import { IReportFilter } from "./report.types";
 
@@ -52,19 +52,16 @@ export class ReportRepository {
         const [
             portfolio,
             applications,
-            //evaluation,
-            financial,
-            // phases,
-            //departments
+            evaluations
         ] = await Promise.all([
 
             this.getPortfolio(projectMatch),
 
             this.getApplications(projectMatch),
 
-            // this.getEvaluation(projectMatch),
+            this.getEvaluations(projectMatch),
 
-            this.getFinancial(filter),
+            //this.getFinancial(filter),
 
             // this.getPhases(projectMatch),
 
@@ -75,8 +72,7 @@ export class ReportRepository {
         return {
             portfolio,
             applications,
-            //  evaluation,
-            financial,
+            evaluations,
             // phases,
             /*
             researchOrganization: {
@@ -89,9 +85,7 @@ export class ReportRepository {
     async getPortfolio(
         projectMatch: Record<string, any>
     ) {
-
         const [result] = await Project.aggregate([
-
             {
                 $match: projectMatch
             },
@@ -104,7 +98,37 @@ export class ReportRepository {
                         $sum: 1
                     },
 
-                    activeProjects: {
+                    draftProjects: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$status", ProjectStatus.draft] },
+                                1,
+                                0
+                            ]
+                        }
+                    },
+
+                    approvedProjects: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$status", ProjectStatus.approved] },
+                                1,
+                                0
+                            ]
+                        }
+                    },
+
+                    refusedProjects: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$status", ProjectStatus.refused] },
+                                1,
+                                0
+                            ]
+                        }
+                    },
+
+                    grantedProjects: {
                         $sum: {
                             $cond: [
                                 { $eq: ["$status", ProjectStatus.granted] },
@@ -123,31 +147,10 @@ export class ReportRepository {
                             ]
                         }
                     },
-
-                    refusedProjects: {
+                    terminatedProjects: {
                         $sum: {
                             $cond: [
-                                { $eq: ["$status", ProjectStatus.refused] },
-                                1,
-                                0
-                            ]
-                        }
-                    },
-
-                    approvedProjects: {
-                        $sum: {
-                            $cond: [
-                                { $eq: ["$status", ProjectStatus.approved] },
-                                1,
-                                0
-                            ]
-                        }
-                    },
-
-                    grantedProjects: {
-                        $sum: {
-                            $cond: [
-                                { $eq: ["$status", ProjectStatus.granted] },
+                                { $eq: ["$status", ProjectStatus.terminated] },
                                 1,
                                 0
                             ]
@@ -160,30 +163,29 @@ export class ReportRepository {
                 $project: {
                     _id: 0,
                     totalProjects: 1,
-                    activeProjects: 1,
-                    completedProjects: 1,
-                    refusedProjects: 1,
+                    draftProjects: 1,
                     approvedProjects: 1,
-                    grantedProjects: 1
+                    refusedProjects: 1,
+                    grantedProjects: 1,
+                    completedProjects: 1,
+                    terminatedProjects: 1,
                 }
             }
-
         ]);
 
         return result ?? {
             totalProjects: 0,
-            activeProjects: 0,
-            completedProjects: 0,
-            terminatedProjects: 0,
+            draftProjects: 0,
             approvedProjects: 0,
-            grantedProjects: 0
+            refusedProjects: 0,
+            grantedProjects: 0,
+            completedProjects: 0
         };
     }
 
     async getApplications(
         projectMatch: Record<string, any>
     ) {
-
         const projectIds = await Project
             .find(projectMatch)
             .select("_id")
@@ -191,19 +193,23 @@ export class ReportRepository {
 
         const ids = projectIds.map(project => project._id);
 
+        const emptyResult = {
+            total: 0,
+            submitted: 0,
+            shortlisted: 0,
+            notShortlisted: 0,
+            accepted: 0,
+            rejected: 0,
+            shortlistingRate: 0,
+            acceptanceRate: 0,
+            averageScore: null
+        };
+
         if (!ids.length) {
-            return {
-                total: 0,
-                pending: 0,
-                accepted: 0,
-                rejected: 0,
-                acceptanceRate: 0,
-                averageScore: null
-            };
+            return emptyResult;
         }
 
         const [result] = await Application.aggregate([
-
             {
                 $match: {
                     project: {
@@ -220,13 +226,43 @@ export class ReportRepository {
                         $sum: 1
                     },
 
-                    pending: {
+                    submitted: {
                         $sum: {
                             $cond: [
                                 {
                                     $eq: [
                                         "$status",
                                         ApplicationStatus.submitted
+                                    ]
+                                },
+                                1,
+                                0
+                            ]
+                        }
+                    },
+
+                    shortlisted: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $eq: [
+                                        "$status",
+                                        ApplicationStatus.shortlisted
+                                    ]
+                                },
+                                1,
+                                0
+                            ]
+                        }
+                    },
+
+                    notShortlisted: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $eq: [
+                                        "$status",
+                                        ApplicationStatus.notShortlisted
                                     ]
                                 },
                                 1,
@@ -273,28 +309,32 @@ export class ReportRepository {
         ]);
 
         if (!result) {
-            return {
-                total: 0,
-                pending: 0,
-                accepted: 0,
-                rejected: 0,
-                acceptanceRate: 0,
-                averageScore: null
-            };
+            return emptyResult;
         }
 
-        const decided =
+        const shortlistingDecided =
+            result.shortlisted +
+            result.notShortlisted;
+
+        const finalDecided =
             result.accepted +
-            result.rejected;
+            result.rejected +
+            result.notShortlisted;
 
         return {
             total: result.total,
-            pending: result.pending,
+            submitted: result.submitted,
+            shortlisted: result.shortlisted,
+            notShortlisted: result.notShortlisted,
             accepted: result.accepted,
             rejected: result.rejected,
 
-            acceptanceRate: decided > 0
-                ? (result.accepted / decided) * 100
+            shortlistingRate: shortlistingDecided > 0
+                ? (result.shortlisted / shortlistingDecided) * 100
+                : 0,
+
+            acceptanceRate: finalDecided > 0
+                ? (result.accepted / finalDecided) * 100
                 : 0,
 
             averageScore: result.averageScore !== null
@@ -303,9 +343,18 @@ export class ReportRepository {
         };
     }
 
-    async getEvaluation(
+    async getEvaluations(
         projectMatch: Record<string, any>
     ) {
+        const emptyResult = {
+            totalReviews: 0,
+            completedReviews: 0,
+            pendingReviews: 0,
+            declinedReviews: 0,
+            rejectedReviews: 0,
+            completionRate: 0,
+            averageScore: null
+        };
 
         const projectIds = await Project
             .find(projectMatch)
@@ -315,14 +364,7 @@ export class ReportRepository {
         const ids = projectIds.map(project => project._id);
 
         if (!ids.length) {
-            return {
-                totalReviews: 0,
-                completedReviews: 0,
-                pendingReviews: 0,
-                declinedReviews: 0,
-                completionRate: 0,
-                averageScore: null
-            };
+            return emptyResult;
         }
 
         const applicationIds = await Application
@@ -337,20 +379,14 @@ export class ReportRepository {
         const appIds = applicationIds.map(app => app._id);
 
         if (!appIds.length) {
-            return {
-                totalReviews: 0,
-                completedReviews: 0,
-                pendingReviews: 0,
-                declinedReviews: 0,
-                completionRate: 0,
-                averageScore: null
-            };
+            return emptyResult;
         }
 
         const [result] = await Reviewer.aggregate([
 
             {
                 $match: {
+                    targetType: ReviewerTargetType.APPLICATION,
                     application: {
                         $in: appIds
                     }
@@ -373,7 +409,8 @@ export class ReportRepository {
                                         "$status",
                                         [
                                             ReviewerStatus.submitted,
-                                            ReviewerStatus.approved
+                                            ReviewerStatus.accepted,
+                                            ReviewerStatus.rejected
                                         ]
                                     ]
                                 },
@@ -387,9 +424,12 @@ export class ReportRepository {
                         $sum: {
                             $cond: [
                                 {
-                                    $eq: [
+                                    $in: [
                                         "$status",
-                                        ReviewerStatus.pending
+                                        [
+                                            ReviewerStatus.pending,
+                                            ReviewerStatus.verified
+                                        ]
                                     ]
                                 },
                                 1,
@@ -399,6 +439,21 @@ export class ReportRepository {
                     },
 
                     declinedReviews: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $eq: [
+                                        "$status",
+                                        ReviewerStatus.declined
+                                    ]
+                                },
+                                1,
+                                0
+                            ]
+                        }
+                    },
+
+                    rejectedReviews: {
                         $sum: {
                             $cond: [
                                 {
@@ -421,14 +476,7 @@ export class ReportRepository {
         ]);
 
         if (!result) {
-            return {
-                totalReviews: 0,
-                completedReviews: 0,
-                pendingReviews: 0,
-                declinedReviews: 0,
-                completionRate: 0,
-                averageScore: null
-            };
+            return emptyResult;
         }
 
         return {
@@ -436,14 +484,16 @@ export class ReportRepository {
             completedReviews: result.completedReviews,
             pendingReviews: result.pendingReviews,
             declinedReviews: result.declinedReviews,
+            rejectedReviews: result.rejectedReviews,
 
             completionRate:
                 result.totalReviews > 0
                     ? Number(
                         (
                             result.completedReviews /
-                            result.totalReviews
-                            * 100).toFixed(2)
+                            result.totalReviews *
+                            100
+                        ).toFixed(2)
                     )
                     : 0,
 
@@ -551,9 +601,11 @@ export class ReportRepository {
     async getPhases(
         projectMatch: Record<string, any>
     ) {
-
         const projectIds = await Project
-            .find(projectMatch)
+            .find({
+                ...projectMatch,
+                status: ProjectStatus.granted
+            })
             .select("_id")
             .lean();
 
@@ -623,7 +675,7 @@ export class ReportRepository {
                                 {
                                     $eq: [
                                         "$status",
-                                        PhaseStatus.terminated
+                                        PhaseStatus.cancelled
                                     ]
                                 },
                                 1,
@@ -672,30 +724,18 @@ export class ReportRepository {
     async getDepartments(
         projectMatch: Record<string, any>
     ) {
-
         return Project.aggregate([
-
             {
-                $match: projectMatch
-            },
-
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "leadPI",
-                    foreignField: "_id",
-                    as: "pi"
+                $match: {
+                    ...projectMatch,
+                    status: ProjectStatus.granted
                 }
-            },
-
-            {
-                $unwind: "$pi"
             },
 
             {
                 $lookup: {
                     from: COLLECTIONS.ORGANIZATION,
-                    localField: "pi.workspace",
+                    localField: "workspace",
                     foreignField: "_id",
                     as: "department"
                 }
@@ -737,7 +777,6 @@ export class ReportRepository {
                     count: -1
                 }
             }
-
         ]);
     }
 

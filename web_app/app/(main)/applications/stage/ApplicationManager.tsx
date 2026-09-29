@@ -18,7 +18,8 @@ import { Stage } from '../../calls/stages/models/stage.model';
 import { ApplicationApi } from '../api/application.api';
 import {
     AnonymizationStatus,
-    Application
+    Application,
+    ApplicationStatus
 } from '../models/application.model';
 import {
     APPLICATION_TRANSITIONS
@@ -190,7 +191,7 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
             body: (application: Application) =>
                 application.documentPath ? (
                     <a
-                        href={`${BASE_URL}/${application.documentPath.replace(
+                        href={`${BASE_URL}/uploads/${application.documentPath.replace(
                             /^\\/,
                             ''
                         )}`}
@@ -213,7 +214,7 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
             body: (application: Application) =>
                 application.anonymizedDocumentPath ? (
                     <a
-                        href={`${BASE_URL}/${application.anonymizedDocumentPath.replace(
+                        href={`${BASE_URL}/uploads/${application.anonymizedDocumentPath.replace(
                             /^\\/,
                             ''
                         )}`}
@@ -280,6 +281,9 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
             severity: 'info',
             tooltip: 'Manage Reviewer Assigner',
             visible: () => hasPermission("application:reviewerAssigner:update"),
+            disabled: (row: Application) =>
+                row.status !==
+                ApplicationStatus.shortlisted,
             onClick: (row: Application) => handleOpenAssignerDialog(row)
         },
         {

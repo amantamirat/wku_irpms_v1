@@ -3,33 +3,36 @@ export interface IRange {
     max: number;
 }
 
-export function isValidRange(range: IRange): boolean {
-    return (
-        Number.isFinite(range.min) &&
-        Number.isFinite(range.max) &&
-        range.min >= 0 &&
-        range.max > 0 &&
-        range.min <= range.max
-    );
-}
-
-export function matchRange(
-    range: IRange,
-    value: number,
-    includeMin = false,
-    includeMax = false
-): boolean {
+export function isValid(range: IRange): boolean {
     if (
         range.min !== undefined &&
-        (includeMin ? value < range.min : value <= range.min)
-    )
+        range.max !== undefined &&
+        range.min > range.max
+    ) {
+        return false;
+    }
+
+    return true;
+}
+
+
+export function matchesRange(
+    range: IRange,
+    value: number,
+    inclusiveMax = false,
+): boolean {
+    if (range.min !== undefined && value < range.min)
         return false;
 
-    if (
-        range.max !== undefined &&
-        (includeMax ? value > range.max : value >= range.max)
-    )
-        return false;
+    if (range.max !== undefined) {
+        if (inclusiveMax) {
+            if (value > range.max)
+                return false;
+        } else {
+            if (value >= range.max)
+                return false;
+        }
+    }
 
     return true;
 }

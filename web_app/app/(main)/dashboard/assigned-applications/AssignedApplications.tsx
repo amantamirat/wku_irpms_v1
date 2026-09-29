@@ -77,7 +77,10 @@ const AssignedApplications = () => {
             header: "Document",
             body: (app: Application) => app.documentPath ? (
                 <a
-                    href={`${BASE_URL}/${app.documentPath.replace(/^\\/, "")}`}
+                    href={`${BASE_URL}/uploads/${app.documentPath.replace(
+                        /^\\/,
+                        ''
+                    )}`}
                     target="_blank"
                     rel="noopener noreferrer"
                     className="text-blue-600 hover:underline inline-flex items-center gap-1 font-medium text-sm"

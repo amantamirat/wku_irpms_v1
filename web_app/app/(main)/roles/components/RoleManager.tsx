@@ -2,6 +2,7 @@ import { createEmptyRole, Role } from "../models/role.model";
 import SaveRole from "./SaveRole";
 import { RoleApi } from "../api/role.api";
 import { createEntityManager } from "@/components/data-table/createEntityManager";
+import RoleDetail from "./RoleDetail";
 
 
 export default createEntityManager<Role>({
@@ -14,5 +15,10 @@ export default createEntityManager<Role>({
     ],
     createNew: createEmptyRole,
     SaveDialog: SaveRole,
-    permissionPrefix: "role"
+    permissionPrefix: "role",
+    expandable: {
+        template: (role) => (
+            <RoleDetail roleId={role._id!} />
+        )
+    },
 })

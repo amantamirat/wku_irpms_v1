@@ -26,13 +26,3 @@ export const validate = (pt: PhaseDocument): { valid: boolean; message?: string 
     return { valid: true };
 };
 
-
-export const sanitize = (pd: Partial<PhaseDocument>): PhaseDocument => {
-    return {
-        ...pd,
-        phase:
-            typeof pd.phase === "object" && pd.phase !== null
-                ? (pd.phase as any)._id
-                : pd.phase,
-    } as PhaseDocument;
-}

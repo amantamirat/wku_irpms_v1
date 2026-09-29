@@ -122,7 +122,7 @@ export class ResultService {
         if (String(reviewerDoc.reviewer) !== userId)
             throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
-        if (reviewerDoc.status !== ReviewerStatus.accepted)
+        if (reviewerDoc.status !== ReviewerStatus.verified)
             throw new AppError(ERROR_CODES.REVIEWER_NOT_ACCEPTED);
 
         await this.validateResult(String(resultDoc.criterion), dto.data);

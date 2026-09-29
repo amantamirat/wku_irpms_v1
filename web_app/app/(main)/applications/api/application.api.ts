@@ -52,17 +52,20 @@ export const ApplicationApi: EntityApi<
     // ---------------------------
     // Create
     // ---------------------------
-    async create(application) {
-        const sanitized = sanitize(application);
-
+    async create(application: Partial<Application>): Promise<any> {
         const formData = new FormData();
 
-        formData.append("project", sanitized.project as string);
-        formData.append("stage", sanitized.stage as string);
-
+        // 1. Separate the file if it exists (using your backend's expected "document" key)
         if (application.file) {
-            formData.append("document", application.file);
+            formData.append("file", application.file);
         }
+
+        // 2. Separate the file out so sanitize only runs on metadata
+        const { file, ...applicationWithoutFile } = application;
+        const sanitized = sanitize(applicationWithoutFile);
+
+        // 3. Wrap the rest of the application data into a single stringified JSON object
+        formData.append("application", JSON.stringify(sanitized));
 
         return ApiClient.post(`${end_point}`, formData);
     },

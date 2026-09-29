@@ -10,13 +10,19 @@ export const createStatusHistorySchema = <T extends string>(
             status: {
                 type: String,
                 enum: statuses,
-                //required: true
+                required: true
+            },
+
+            reason: {
+                type: String,
+                trim: true,
+                maxlength: 1000
             },
 
             changedBy: {
                 type: Schema.Types.ObjectId,
                 ref: COLLECTIONS.USER,
-                //required: true
+                required: true
             },
 
             changedAt: {

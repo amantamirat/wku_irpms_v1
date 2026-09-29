@@ -5,6 +5,7 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
+import { FileStorageService } from "../../common/services/file-storage.service";
 import { AuthPermissionService } from "../auth/auth.permission-service";
 import { AuthScope } from "../auth/auth.types";
 import ScopeFilterService from "../auth/scope-filter.service";
@@ -65,6 +66,7 @@ export class ProjectService {
         private readonly authPermissionService: AuthPermissionService,
         private readonly notificationService: NotificationService,
         private readonly scopeFilterService: ScopeFilterService,
+        private readonly fileStorage: FileStorageService
     ) { }
 
     async create(
@@ -230,86 +232,79 @@ export class ProjectService {
         return projectDoc ?? created;
     }
 
-    async apply(dto: CreateProjectDTO, userId: string) {
-        const {
-            call,
-            leadPI,
-            documentPath
-        } = dto;
+    async apply(
+        dto: Omit<CreateProjectDTO, "documentPath" | "grant">,
+        userId: string,
+        file: Express.Multer.File
+    ) {
+        try {
+            const { call, leadPI } = dto;
 
-        if (!call)
-            throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+            if (!call) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+            if (leadPI !== userId) throw new AppError(ERROR_CODES.UNAUTHORIZED);
 
-        if (!documentPath)
-            throw new AppError(ERROR_CODES.FILE_NOT_FOUND);
+            const leadUser = await this.userRepo.findById(leadPI);
+            if (!leadUser) throw new AppError(ERROR_CODES.USER_NOT_FOUND);
 
-        const isLeadPI = leadPI === userId;
-
-        if (!isLeadPI) {
-            throw new AppError(ERROR_CODES.UNAUTHORIZED);
-        }
-        //
-        const leadUser = await this.userRepo.findById(leadPI);
-
-        if (!leadUser) {
-            throw new AppError(ERROR_CODES.USER_NOT_FOUND);
-        }
-
-        const memberIds = dto.collaborators.map(
-            collaborator => collaborator.member
-        );
-
-        const memberUsers = await this.userRepo.find({
-            ids: memberIds
-        });
-
-        if (memberUsers.length !== memberIds.length) {
-            throw new AppError(ERROR_CODES.USER_NOT_FOUND);
-        }
-        //
-        const callDoc = await this.callRepo.findById(call);
-
-        if (!callDoc)
-            throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
-
-        // Get first stage
-        const firstStageDoc = await this.stageRepo.getFirstStage(call);
-
-        if (!firstStageDoc) {
-            throw new AppError(
-                ERROR_CODES.FIRST_STAGE_NOT_FOUND
-            );
-        }
-
-        if (new Date(firstStageDoc.deadline) < new Date()) {
-            throw new AppError(
-                ERROR_CODES.CALL_DEADLINE_PASSED
-            );
-        }
-
-
-        await this.applicationService.validateCallStage(String(firstStageDoc._id),
-            documentPath, undefined, { ...dto, collaboratorsCount: dto.collaborators.length },
-            {
-                lead: leadUser,
-                members: memberUsers
+            const memberIds = dto.collaborators.map(c => c.member);
+            const memberUsers = await this.userRepo.find({ ids: memberIds });
+            if (memberUsers.length !== memberIds.length) {
+                throw new AppError(ERROR_CODES.USER_NOT_FOUND);
             }
-        )
 
-        const projectDoc =
-            await this.create({
-                ...dto,
-                grant: String(callDoc.grant),
-                calendar: String(callDoc.calendar)
-            }, userId, { skipValidation: true });
+            const callDoc = await this.callRepo.findById(call);
+            if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
 
-        await this.applicationService.internalCreate({
-            project: String(projectDoc._id),
-            stage: String(firstStageDoc._id),
-            documentPath: documentPath,
-        }, userId, projectDoc, firstStageDoc);
+            const firstStageDoc = await this.stageRepo.getFirstStage(call);
+            if (!firstStageDoc) throw new AppError(ERROR_CODES.FIRST_STAGE_NOT_FOUND);
 
-        return projectDoc;
+            if (new Date(firstStageDoc.deadline) < new Date()) {
+                throw new AppError(ERROR_CODES.CALL_DEADLINE_PASSED);
+            }
+
+            // Validate against the temp file
+            await this.applicationService.validateCallStage(
+                String(firstStageDoc._id),
+                file.path,
+                undefined,
+                { ...dto, collaboratorsCount: dto.collaborators.length },
+                { lead: leadUser, members: memberUsers }
+            );
+
+            // The project must exist first: the file path needs its id
+            const projectDoc = await this.create(
+                {
+                    ...dto,
+                    grant: String(callDoc.grant),
+                    calendar: String(callDoc.calendar),
+                },
+                userId,
+                { skipValidation: true }
+            );
+
+            try {
+                await this.applicationService.internalCreate(
+                    {
+                        project: String(projectDoc._id),
+                        stage: String(firstStageDoc._id),
+                    },
+                    userId,
+                    projectDoc,
+                    firstStageDoc,
+                    file
+                );
+            } catch (err) {
+                // Don't leave a project without its application
+                await this.projectRepo.delete(String(projectDoc._id)); // adjust to your repo API
+                throw err;
+            }
+
+            return projectDoc;
+        } catch (error) {
+            // No-op if internalCreate already moved or discarded the file
+            await this.fileStorage.discardTemp(file.path);
+            throw error;
+        }
     }
 
     async readProjects(

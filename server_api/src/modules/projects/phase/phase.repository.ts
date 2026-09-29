@@ -46,7 +46,10 @@ export class PhaseRepository implements IPhaseRepository {
             .exec();
     }
 
-    async find(filters: FilterPhases, options?: FilterOptions): Promise<IPhase[]> {
+    async find(
+        filters: FilterPhases,
+        options?: FilterOptions
+    ): Promise<IPhase[]> {
         const query: Record<string, unknown> = {};
 
         if (filters.project) {
@@ -57,9 +60,14 @@ export class PhaseRepository implements IPhaseRepository {
             .sort({ order: 1 });
 
         if (options?.populate) {
-            phaseQuery = phaseQuery.populate({
-                path: "project",
-            });
+            phaseQuery = phaseQuery
+                .populate({
+                    path: "project",
+                })
+                .populate({
+                    path: "statusHistory.changedBy",
+                    select: "_id name",
+                });
         }
 
         return phaseQuery

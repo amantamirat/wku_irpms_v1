@@ -26,8 +26,6 @@ export interface CreateRequirementDTO {
     mode: AggregationMode;
 
     threshold: IRange;
-
-    userId?: string;
 }
 
 

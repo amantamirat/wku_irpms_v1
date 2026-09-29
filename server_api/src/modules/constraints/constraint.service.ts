@@ -3,7 +3,7 @@ import { CreateConstraintDTO, UpdateConstraintDTO } from "./constraint.dto";
 import { IConstraint } from "./constraint.model";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { isValidRange } from "../../common/types/range";
+import { isValid } from "../../common/types/range";
 
 
 export class ConstraintService {
@@ -103,7 +103,7 @@ export class ConstraintService {
                 continue;
             }
 
-            if (!isValidRange(range)) {
+            if (!isValid(range)) {
                 throw new AppError(
                     ERROR_CODES.INVALID_INPUT,
                     `${name} range is invalid.`

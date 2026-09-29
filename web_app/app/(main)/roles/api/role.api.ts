@@ -15,6 +15,13 @@ export const RoleApi: EntityApi<Role> = {
         return ApiClient.post(end_point, sanitized)
     },
 
+    async getById(
+        id: string
+    ) {
+        const data = await ApiClient.get(`${end_point}/${id}`);
+        return data;
+    },
+
     async update(role) {
         if (!role._id) throw new Error("_id required")
         return ApiClient.put(`${end_point}/${role._id}`, sanitize(role))

@@ -1,3 +1,4 @@
+// reports/page.tsx
 'use client';
 
 import { useState, useEffect } from 'react';
@@ -16,10 +17,11 @@ import { DepartmentWidget } from './components/DepartmentWidget';
 import { PhaseWidget } from './components/PhaseWidget';
 import { PortfolioWidget } from './components/PortfolioWidget';
 import { ApplicationWidget } from './components/ApplicationWidget';
+import { EvaluationWidget } from './components/EvaluationWidget';
 import { FinancialWidget } from './components/FinancialWidget';
 
-// Available Report Types
-type ReportType = 'dashboard' | 'departments' | 'phases' | 'portfolio' | 'applications' | 'financial';
+// Available Report Types (Added 'evaluations')
+type ReportType = 'dashboard' | 'departments' | 'phases' | 'portfolio' | 'applications' | 'evaluations' | 'financial';
 
 const REPORT_OPTIONS = [
   { label: 'Dashboard Overview', value: 'dashboard', icon: 'pi pi-th-large' },
@@ -27,6 +29,7 @@ const REPORT_OPTIONS = [
   { label: 'Phase Progress', value: 'phases', icon: 'pi pi-sitemap' },
   { label: 'Portfolio Detail', value: 'portfolio', icon: 'pi pi-folder' },
   { label: 'Applications', value: 'applications', icon: 'pi pi-file-edit' },
+  { label: 'Evaluations', value: 'evaluations', icon: 'pi pi-star' },
   { label: 'Financials', value: 'financial', icon: 'pi pi-dollar' },
 ];
 
@@ -79,6 +82,9 @@ export default function ReportsPage() {
           break;
         case 'applications':
           data = await ReportApi.getApplications(appliedFilter);
+          break;
+        case 'evaluations':
+          data = await ReportApi.getEvaluations(appliedFilter);
           break;
         case 'financial':
           // Optional endpoint execution
@@ -196,6 +202,7 @@ export default function ReportsPage() {
         {selectedReport === 'departments' && <DepartmentWidget departments={reportData} loading={loading} />}
         {selectedReport === 'portfolio' && <PortfolioWidget data={reportData} />}
         {selectedReport === 'applications' && <ApplicationWidget data={reportData} loading={loading} />}
+        {selectedReport === 'evaluations' && <EvaluationWidget data={reportData} loading={loading} />}
         {selectedReport === 'financial' && <FinancialWidget data={reportData} />}
         {selectedReport === 'phases' && <PhaseWidget data={reportData} loading={loading} />}
       </div>

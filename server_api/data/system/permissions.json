@@ -582,33 +582,28 @@
   },
   {
     "category": "Reviewer Management",
-    "name": "reviewer:transition.pending.accepted",
-    "description": "Move reviewer status from pending to accepted"
+    "name": "reviewer:transition.pending.verified",
+    "description": "Move reviewer status from pending to verified"
   },
   {
     "category": "Reviewer Management",
-    "name": "reviewer:transition.accepted.submitted",
-    "description": "Move reviewer status from accepted to submitted"
+    "name": "reviewer:transition.verified.submitted",
+    "description": "Move reviewer status from verified to submitted"
   },
   {
     "category": "Reviewer Management",
-    "name": "reviewer:transition.accepted.pending",
-    "description": "Revert reviewer status from accepted to pending"
-  },
-  {
-    "category": "Reviewer Management",
-    "name": "reviewer:transition.submitted.approved",
-    "description": "Move reviewer status from submitted to approved"
+    "name": "reviewer:transition.verified.pending",
+    "description": "Revert reviewer status from verified to pending"
   },
   {
     "category": "Reviewer Management",
     "name": "reviewer:transition.submitted.accepted",
-    "description": "Revert reviewer status from submitted to accepted"
+    "description": "Move reviewer status from submitted to accepted"
   },
   {
     "category": "Reviewer Management",
-    "name": "reviewer:transition.approved.submitted",
-    "description": "Revert reviewer status from approved to submitted"
+    "name": "reviewer:transition.accepted.submitted",
+    "description": "Revert reviewer status from accepted to submitted"
   },
   {
     "category": "Reviewer Management",
@@ -815,6 +810,16 @@
     "category": "Project Management",
     "name": "project:transition.completed.granted",
     "description": "Return a completed project to granted status"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.granted.terminated",
+    "description": "Terminate a granted project"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.terminated.granted",
+    "description": "Restore a terminated project to granted status"
   },
   {
     "category": "Project Management",
@@ -1072,20 +1077,169 @@
     "description": "Reopen a terminated phase back to active"
   },
   {
-    "category": "Phase Document Management",
-    "name": "phase-document:create"
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:create",
+    "description": "Create phase activity entries"
+  },
+  {
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:create:own",
+    "description": "Create phase activities for own projects"
+  },
+  {
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:read",
+    "description": "Read phase activity entries"
+  },
+  {
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:lookup",
+    "description": "Lookup phase activity entries"
+  },
+  {
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:update",
+    "description": "Update phase activity entries"
+  },
+  {
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:update:own",
+    "description": "Update phase activities for own projects"
+  },
+  {
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:delete",
+    "description": "Delete phase activity entries"
+  },
+  {
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:delete:own",
+    "description": "Delete phase activities from own projects"
+  },
+  {
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:transition.planned.approved",
+    "description": "Approve a planned phase activity"
+  },
+  {
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:transition.planned.refused",
+    "description": "Refuse a planned phase activity"
+  },
+  {
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:transition.approved.active",
+    "description": "Move an approved phase activity to active"
+  },
+  {
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:transition.approved.planned",
+    "description": "Return an approved phase activity to planned"
+  },
+  {
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:transition.refused.planned",
+    "description": "Return a refused phase activity to planned"
+  },
+  {
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:transition.active.completed",
+    "description": "Move an active phase activity to completed"
+  },
+  {
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:transition.active.cancelled",
+    "description": "Cancel an active phase activity"
+  },
+  {
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:transition.active.approved",
+    "description": "Return an active phase activity to approved"
+  },
+  {
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:transition.completed.active",
+    "description": "Reopen a completed phase activity"
+  },
+  {
+    "category": "Phase Activity Management",
+    "name": "phaseActivity:transition.cancelled.active",
+    "description": "Reactivate a cancelled phase activity"
+  },
+  {
+    "category": "Phase Equipment Management",
+    "name": "phaseEquipment:create",
+    "description": "Create phase equipment entries"
+  },
+  {
+    "category": "Phase Equipment Management",
+    "name": "phaseEquipment:create:own",
+    "description": "Create phase equipment for own projects"
+  },
+  {
+    "category": "Phase Equipment Management",
+    "name": "phaseEquipment:read",
+    "description": "Read phase equipment entries"
+  },
+  {
+    "category": "Phase Equipment Management",
+    "name": "phaseEquipment:lookup",
+    "description": "Lookup phase equipment entries"
+  },
+  {
+    "category": "Phase Equipment Management",
+    "name": "phaseEquipment:update",
+    "description": "Update phase equipment entries"
+  },
+  {
+    "category": "Phase Equipment Management",
+    "name": "phaseEquipment:update:own",
+    "description": "Update phase equipment for own projects"
+  },
+  {
+    "category": "Phase Equipment Management",
+    "name": "phaseEquipment:delete",
+    "description": "Delete phase equipment entries"
+  },
+  {
+    "category": "Phase Equipment Management",
+    "name": "phaseEquipment:delete:own",
+    "description": "Delete phase equipment from own projects"
   },
   {
     "category": "Phase Document Management",
-    "name": "phase-document:read"
+    "name": "phaseDocument:create",
+    "description": "Create phase document entries"
   },
   {
     "category": "Phase Document Management",
-    "name": "phase-document:update"
+    "name": "phaseDocument:create:own",
+    "description": "Create phase documents for own projects"
   },
   {
     "category": "Phase Document Management",
-    "name": "phase-document:delete"
+    "name": "phaseDocument:read",
+    "description": "Read phase document entries"
+  },
+  {
+    "category": "Phase Document Management",
+    "name": "phaseDocument:read:own",
+    "description": "Read phase documents from own projects"
+  },
+  {
+    "category": "Phase Document Management",
+    "name": "phaseDocument:update",
+    "description": "Update phase document entries"
+  },
+  {
+    "category": "Phase Document Management",
+    "name": "phaseDocument:delete",
+    "description": "Delete phase document entries"
+  },
+  {
+    "category": "Phase Document Management",
+    "name": "phaseDocument:delete:own",
+    "description": "Delete phase documents from own projects"
   },
   {
     "category": "Report Management",

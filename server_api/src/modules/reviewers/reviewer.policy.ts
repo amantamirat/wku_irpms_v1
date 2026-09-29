@@ -7,6 +7,7 @@ import { VerificationStatus } from "../grants/verifications/verification.model";
 import { IVerificationRepository } from "../grants/verifications/verification.repository";
 import { ApplicationStatus } from "../projects/applications/application.model";
 import { IApplicationRepository } from "../projects/applications/application.repository";
+import { ApplicationService } from "../projects/applications/application.service";
 import { ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
 import { IProject } from "../projects/project.model";
 import { IProjectRepository } from "../projects/project.repository";
@@ -20,6 +21,12 @@ export interface PreparedReviewer {
     projectDoc: IProject;
     contextName: string;
 }
+
+const OPEN_STATUSES = [
+    ReviewerStatus.pending,
+    ReviewerStatus.verified,
+    ReviewerStatus.submitted,
+];
 export class ReviewerPolicy {
 
     constructor(
@@ -32,6 +39,7 @@ export class ReviewerPolicy {
         private readonly verificationConfRepo: IVerificationConfigurationRepository,
         private readonly verificationRepo: IVerificationRepository,
         private readonly authPermissionService: AuthPermissionService,
+        private readonly applicationService: ApplicationService
     ) { }
 
     async validateReviewer(projectId: string, reviewerId: string) {
@@ -204,50 +212,65 @@ export class ReviewerPolicy {
     }
 
 
+
+
     public async calculateApplicationScore(
-        applicationId: string
-    ): Promise<any | null> {
+        applicationId: string,
+        userId: string,
+        opts: { finalize?: boolean } = {}
+    ) {
+        const applicationDoc = await this.applicationRepo.findById(applicationId);
+        if (!applicationDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
 
-        const applicationDoc =
-            await this.applicationRepo.findById(applicationId);
+        const stageDoc = await this.stageRepo.findById(String(applicationDoc.stage));
+        if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
-        if (!applicationDoc) {
-            throw new AppError(
-                ERROR_CODES.APPLICATION_NOT_FOUND
+        const minReviewers = stageDoc.minReviewers ?? 0;
+
+        const all = await this.repository.find({ application: applicationId });
+        const accepted = all.filter(r => r.status === ReviewerStatus.accepted);
+        const stillOpen = all.filter(r => OPEN_STATUSES.includes(r.status)).length;
+
+        const totalScore = this.calculateWeightedScore(accepted, minReviewers); // may be null
+
+        const isDecided =
+            applicationDoc.status === ApplicationStatus.accepted ||
+            applicationDoc.status === ApplicationStatus.rejected;
+
+        // 1. Decided, but a review is open again -> roll back to shortlisted
+        if (isDecided) {
+            if (stillOpen === 0) return applicationDoc;
+
+            await this.applicationService.transitionState(
+                { id: applicationId, current: applicationDoc.status, next: ApplicationStatus.shortlisted },
+                userId
             );
+
+            // score is provisional again (null if below minReviewers)
+            return await this.applicationRepo.update(applicationId, { totalScore });
         }
 
-        const stageDoc =
-            await this.stageRepo.findById(
-                String(applicationDoc.stage)
-            );
+        // 2. Not enough accepted reviews yet: no score, no decision
+        if (totalScore === null) return applicationDoc;
 
-        if (!stageDoc) {
-            throw new AppError(
-                ERROR_CODES.STAGE_NOT_FOUND
-            );
+        // 3. Provisional score
+        const updated = await this.applicationRepo.update(applicationId, { totalScore });
+
+        const roundClosed = stillOpen === 0 || opts.finalize === true;
+
+        if (!roundClosed || applicationDoc.status !== ApplicationStatus.shortlisted) {
+            return updated;
         }
 
-        const reviewers = await this.repository.find({
-            application: applicationId,
-            status: ReviewerStatus.approved
-        });
+        // 4. Decide
+        const next = totalScore >= (stageDoc.minAcceptanceScore ?? 0)
+            ? ApplicationStatus.accepted
+            : ApplicationStatus.rejected;
 
-        const applicationScore = this.calculateWeightedScore(reviewers, stageDoc.minReviewers ?? 0);
-
-        let status;
-
-        if (applicationScore === null) {
-            status = ApplicationStatus.shortlisted
-        } else if (applicationScore >= stageDoc.minAcceptanceScore) {
-            status = ApplicationStatus.accepted;
-        } else {
-            status = ApplicationStatus.rejected;
-        }
-        //needs to be updated
-        return await this.applicationRepo.update(applicationId, {
-            totalScore: applicationScore, status: status
-        });
+        return await this.applicationService.transitionState(
+            { id: applicationId, current: applicationDoc.status, next },
+            userId
+        );
     }
 
 
@@ -277,7 +300,7 @@ export class ReviewerPolicy {
 
         const reviewers = await this.repository.find({
             verification: verificationId,
-            status: ReviewerStatus.approved
+            status: ReviewerStatus.accepted
         });
 
         const verificationScore = this.calculateWeightedScore(

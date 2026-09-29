@@ -4,10 +4,8 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
-import { AuthPermissionService } from "../auth/auth.permission-service";
 import { AuthScope } from "../auth/auth.types";
 import ScopeFilterService from "../auth/scope-filter.service";
-import { IStageRepository } from "../calls/stages/stage.repository";
 import { FormType } from "../evaluations/criteria/criterion.model";
 import { ICriterionRepository } from "../evaluations/criteria/criterion.repository";
 import { NotificationService } from "../notifications/notification.service";
@@ -157,26 +155,26 @@ export class ReviewerService {
         const transition = `${from}->${to}`;
 
         switch (transition) {
-            case `${ReviewerStatus.pending}->${ReviewerStatus.accepted}`:
+            case `${ReviewerStatus.pending}->${ReviewerStatus.verified}`:
                 await this.acceptReviewer(reviewerDoc, userId);
                 break;
 
-            case `${ReviewerStatus.accepted}->${ReviewerStatus.pending}`:
+            case `${ReviewerStatus.verified}->${ReviewerStatus.pending}`:
                 await this.resultRepo.deleteByReviewer(id);
                 break;
 
-            case `${ReviewerStatus.accepted}->${ReviewerStatus.submitted}`:
+            case `${ReviewerStatus.verified}->${ReviewerStatus.submitted}`:
                 await this.submitReviewer(reviewerDoc, userId);
                 break;
 
-            case `${ReviewerStatus.submitted}->${ReviewerStatus.accepted}`:
+            case `${ReviewerStatus.submitted}->${ReviewerStatus.verified}`:
                 await this.reviewerRepo.update(id, { score: null });
                 break;
 
-            case `${ReviewerStatus.submitted}->${ReviewerStatus.approved}`:
+            case `${ReviewerStatus.submitted}->${ReviewerStatus.accepted}`:
                 break;
 
-            case `${ReviewerStatus.approved}->${ReviewerStatus.submitted}`:
+            case `${ReviewerStatus.accepted}->${ReviewerStatus.submitted}`:
                 break;
         }
 
@@ -184,9 +182,9 @@ export class ReviewerService {
 
         //let targetDoc;
 
-        if (from === ReviewerStatus.approved || to === ReviewerStatus.approved) {
-            await this.recalculateTargetScore(reviewerDoc);
-        }
+        // if (from === ReviewerStatus.accepted || to === ReviewerStatus.accepted) {
+        await this.recalculateTargetScore(reviewerDoc, userId);
+        //}
 
         return updated;
         // return { reviewerDoc: updated, targetDoc: targetDoc };
@@ -270,12 +268,12 @@ export class ReviewerService {
 
 
     private async recalculateTargetScore(
-        reviewerDoc: IReviewer
+        reviewerDoc: IReviewer, userId: string
     ): Promise<any> {
         switch (reviewerDoc.targetType) {
             case ReviewerTargetType.APPLICATION:
                 return await this.policy.calculateApplicationScore(
-                    String(reviewerDoc.application)
+                    String(reviewerDoc.application), userId
                 );
             case ReviewerTargetType.VERIFICATION:
                 return await this.policy.calculateVerificationScore(

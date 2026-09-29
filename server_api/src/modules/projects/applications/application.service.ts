@@ -1,3 +1,4 @@
+import { randomUUID } from "crypto";
 import { Unit } from "../../../common/constants/enums";
 import { PERMISSIONS } from "../../../common/constants/permissions";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
@@ -6,6 +7,7 @@ import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
+import { FileStorageService } from "../../../common/services/file-storage.service";
 import { AnonymizerService } from "../../../util/anonymizer/anonymizer.service";
 import { AuthPermissionService } from "../../auth/auth.permission-service";
 import { AuthScope } from "../../auth/auth.types";
@@ -32,6 +34,7 @@ import {
 } from "./application.dto";
 import { ApplicationStatus, IApplication } from "./application.model";
 import { IApplicationRepository } from "./application.repository";
+import path from "path";
 
 export class ApplicationService {
 
@@ -51,7 +54,8 @@ export class ApplicationService {
         private readonly compositionValidator: CompositionValidationService,
 
         private readonly collaboratorRepo: ICollaboratorRepository,
-        private readonly userRepo: IUserRepository
+        private readonly userRepo: IUserRepository,
+        private readonly fileStorage: FileStorageService
     ) {
     }
 
@@ -216,8 +220,6 @@ export class ApplicationService {
                 );
             }
         }
-
-
         // --------------------------------------------------
         // Validate document against stage template
         // --------------------------------------------------
@@ -246,122 +248,92 @@ export class ApplicationService {
  * Create a new application for a project stage.
  */
     async create(
-        dto: CreateApplicationDTO,
-        userId: string
+        data: Omit<CreateApplicationDTO, "documentPath">,
+        userId: string,
+        file: Express.Multer.File
     ) {
-        const {
-            project,
-            stage,
-            documentPath
-        } = dto;
+        try {
+            const { projectDoc } = await this.projectAuth.auth(
+                data.project,
+                userId,
+                PERMISSIONS.APPLICATION.CREATE
+            );
 
-        // --------------------------------------------------
-        // Authorization + project
-        // --------------------------------------------------
-        const {
-            projectDoc
-        } = await this.projectAuth.auth(
-            project,
-            userId,
-            PERMISSIONS.APPLICATION.CREATE
-        );
+            // Validate against the temp file; nothing is moved yet
+            const { stageDoc } = await this.validateCallStage(
+                data.stage,
+                file.path,
+                projectDoc
+            );
 
-        const { stageDoc } =
-            await this.validateCallStage(stage, documentPath, projectDoc);
-
-        // --------------------------------------------------
-        // Create application
-        // --------------------------------------------------
-        return this.internalCreate(
-            dto,
-            userId,
-            projectDoc,
-            stageDoc
-        );
+            return await this.internalCreate(data, userId, projectDoc, stageDoc, file);
+        } catch (error) {
+            // No-op if internalCreate already moved the file
+            await this.fileStorage.discardTemp(file.path);
+            throw error;
+        }
     }
 
     /**
      * Internal application creation.
      *
-     * Assumes all business validations have already
-     * been completed by the caller.
+     * Assumes business validations are done. Owns the file lifecycle:
+     * moves the temp file into
+     * projects/<projectId>/applications/<uuid>.<ext> and removes it if the
+     * DB work fails.
      */
     async internalCreate(
-        dto: CreateApplicationDTO,
+        data: Omit<CreateApplicationDTO, "documentPath">,
         userId: string,
         projectDoc: IProject,
-        stageDoc: IStage
+        stageDoc: IStage,
+        file: Express.Multer.File
     ): Promise<IApplication> {
+        let savedPath: string | null = null;
+        let created: IApplication;
 
         try {
-            // --------------------------------------------------
-            // Create application
-            // --------------------------------------------------
-            const created =
-                await this.applicationRepo.create(
-                    dto,
-                    userId
-                );
-
-            // --------------------------------------------------
-            // Update project
-            //
-            // Always point to the newly created application.
-            // First application also establishes the project's call.
-            // --------------------------------------------------
-
-            const projectUpdate: any = {
-                currentApplication:
-                    String(created._id)
-            };
-
-            if (
-                !projectDoc.call &&
-                stageDoc.call
-            ) {
-                projectUpdate.call =
-                    String(stageDoc.call);
-            }
-
-            await this.projectRepo.update(
-                dto.project,
-                projectUpdate
+            const ext = path.extname(file.originalname).toLowerCase();
+            savedPath = await this.fileStorage.move(
+                file.path,
+                `projects/${String(data.project)}/applications`,
+                `${randomUUID()}${ext}`
             );
 
-            // --------------------------------------------------
-            // Notification
-            // --------------------------------------------------
+            created = await this.applicationRepo.create(
+                { ...data, documentPath: savedPath },
+                userId
+            );
 
-            await this.notificationService
-                .notifyApplicationSubmitted(
-                    userId,
-                    projectDoc.title,
-                    stageDoc.name
-                );
-
-            // --------------------------------------------------
-            // Anonymize document
-            // --------------------------------------------------
-
-            // Fire and forget
-            this.anonymizerService
-                .anonymizeApplication(
-                    String(created._id)
-                );
-
-            return created;
-
-        } catch (err: any) {
-
-            // MongoDB duplicate key
-            if (err?.code === 11000) {
-                throw new AppError(
-                    ERROR_CODES.APPLICATION_ALREADY_EXISTS
-                );
+            const projectUpdate: any = { currentApplication: String(created._id) };
+            if (!projectDoc.call && stageDoc.call) {
+                projectUpdate.call = String(stageDoc.call);
             }
+            await this.projectRepo.update(data.project, projectUpdate);
+        } catch (err: any) {
+            if (savedPath) await this.fileStorage.delete(savedPath);
+            await this.fileStorage.discardTemp(file.path);
 
+            if (err?.code === 11000) {
+                throw new AppError(ERROR_CODES.APPLICATION_ALREADY_EXISTS);
+            }
             throw err;
         }
+
+        // Past the point of no return: the application exists, so failures
+        // below must not delete the file.
+        await this.notificationService.notifyApplicationSubmitted(
+            userId,
+            projectDoc.title,
+            stageDoc.name
+        );
+
+        // Fire and forget
+        this.anonymizerService
+            .anonymizeApplication(String(created._id))
+            .catch(err => console.error("Anonymization failed:", err));
+
+        return created;
     }
 
     async readApplications(
@@ -619,6 +591,8 @@ export class ApplicationService {
             }
         }
 
+        
+
         const stageDoc = await this.stageRepo.findById(String(applicationDoc.stage));
 
         if (!stageDoc)
@@ -654,7 +628,7 @@ export class ApplicationService {
             const title = projectDoc.title;
             const stageName = stageDoc.name;
 
-            if (to === ApplicationStatus.shortlisted) {
+            if (from === ApplicationStatus.submitted && to === ApplicationStatus.shortlisted) {
                 await this.notificationService.notifyApplicationShortlisted(
                     leadUser,
                     title,

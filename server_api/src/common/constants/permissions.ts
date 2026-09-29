@@ -243,10 +243,39 @@ export const PERMISSIONS = {
     DELETE_OWN: "phase:delete:own",
   },
   PHASE_DOCUMENT: {
-    CREATE: "phase:document:create",
-    READ: "phase:document:read",
-    UPDATE: "phase:document:update",
-    DELETE: "phase:document:delete",
+    CREATE: "phaseDocument:create",
+    CREATE_OWN: "phaseDocument:create:own",
+    READ: "phaseDocument:read",
+    READ_OWN: "phaseDocument:read:own",
+    UPDATE: "phaseDocument:update",
+    DELETE: "phaseDocument:delete",
+    DELETE_OWN: "phaseDocument:delete:own",
+  },
+  PHASE_ACTIVITY: {
+    CREATE: "phaseActivity:create",
+    CREATE_OWN: "phaseActivity:create:own",
+
+    READ: "phaseActivity:read",
+    LOOKUP: "phaseActivity:lookup",
+
+    UPDATE: "phaseActivity:update",
+    UPDATE_OWN: "phaseActivity:update:own",
+
+    DELETE: "phaseActivity:delete",
+    DELETE_OWN: "phaseActivity:delete:own",
+  },
+  PHASE_EQUIPMENT: {
+    CREATE: "phaseEquipment:create",
+    CREATE_OWN: "phaseEquipment:create:own",
+
+    READ: "phaseEquipment:read",
+    //LOOKUP: "phaseEquipment:lookup",
+
+    UPDATE: "phaseEquipment:update",
+    UPDATE_OWN: "phaseEquipment:update:own",
+
+    DELETE: "phaseEquipment:delete",
+    DELETE_OWN: "phaseEquipment:delete:own",
   },
   PROJECT_THEME: {
     CREATE: "project_theme:create",
@@ -269,7 +298,7 @@ export const PERMISSIONS = {
     UPDATE: "reviewer:update",
     CREATE_OWN: "reviewer:create:own",
     READ_OWN: "reviewer:read:own",
-    UPDATE_OWN: "reviewer:update:own",    
+    UPDATE_OWN: "reviewer:update:own",
     DELETE: "reviewer:delete",
     DELETE_OWN: "reviewer:delete:own",
   },

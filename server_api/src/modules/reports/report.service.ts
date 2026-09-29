@@ -23,7 +23,7 @@ export class ReportService {
     }
 
     async getEvaluation(filter: IReportFilter) {
-        return this.repository.getEvaluation(filter);
+        return this.repository.getEvaluations(filter);
     }
 
     async getFinancial(filter: IReportFilter) {

@@ -39,7 +39,7 @@ const ReviewerManager = ({ targetType, application, updateApplication, verificat
             tooltip: 'Start/View Evaluation',
             visible: () => { return hasPermission("result:read") },
             disabled: reviewer =>
-                (reviewer.status === ReviewerStatus.pending || reviewer.status === ReviewerStatus.decliend),
+                (reviewer.status === ReviewerStatus.pending || reviewer.status === ReviewerStatus.declined),
             onClick: reviewer => {
                 setSelectedReviewer(reviewer);
             }
@@ -96,8 +96,8 @@ const ReviewerManager = ({ targetType, application, updateApplication, verificat
                     transition
                 ) => {
                     if (updateApplication && application) {
-                        if (previous.status === ReviewerStatus.approved ||
-                            updated.status === ReviewerStatus.approved) {
+                        if (previous.status === ReviewerStatus.accepted ||
+                            updated.status === ReviewerStatus.accepted) {
                             const appDoc = await ApplicationApi.getById!(application?._id!);
                             if (appDoc) {
                                 updateApplication({

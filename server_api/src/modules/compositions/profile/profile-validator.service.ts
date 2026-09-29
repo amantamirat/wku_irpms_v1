@@ -1,4 +1,4 @@
-import { matchRange } from "../../../common/types/range";
+import { matchesRange } from "../../../common/types/range";
 import { SpecializationRepository } from "../../organization/specializations/specialization.repository";
 import { ExperienceRepository } from "../../users/experiences/experience.repository";
 import { IUser } from "../../users/user.model";
@@ -33,7 +33,7 @@ export class ProfileValidatorService {
             if (user.birthDate) {
                 const age = this.calculateAge(user.birthDate);
 
-                if (!matchRange(profile.age, age)) {
+                if (!matchesRange(profile.age, age)) {
                     return false;
                 }
             }
@@ -47,7 +47,7 @@ export class ProfileValidatorService {
 
             const experienceYears = this.calculateTotalExperienceYears(experiences);
 
-            if (!matchRange(profile.experienceYears, experienceYears)
+            if (!matchesRange(profile.experienceYears, experienceYears)
             ) {
                 return false;
             }

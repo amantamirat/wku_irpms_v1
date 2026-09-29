@@ -141,7 +141,7 @@ const EvaluatorManager = ({
     // Submittable only when in edit mode, accepted status, complete criteria, and no pending un-saved edits
     const isSubmittable = Boolean(
         editMode &&
-        reviewerStatus === ReviewerStatus.accepted &&
+        reviewerStatus === ReviewerStatus.verified &&
         isComplete &&
         !isDirty
     );
@@ -222,7 +222,7 @@ const EvaluatorManager = ({
         }
     };
 
-    const fullUrl = documentPath ? `${BASE_URL}/${documentPath.replace(/^\\/, "")}` : undefined;
+    const fullUrl = documentPath ? `${BASE_URL}/uploads/${documentPath.replace(/^\\/, "")}` : undefined;
     const isDisabled = !editMode;
 
     return (

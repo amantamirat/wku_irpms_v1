@@ -68,6 +68,7 @@ export function sanitizeSetting(setting: Partial<Setting>): Partial<Setting> {
 
     // Remove internal database fields if sending an update
     delete sanitized._id;
+    //delete sanitized.createdAt
     delete sanitized.updatedAt;
 
     return sanitized;

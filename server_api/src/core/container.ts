@@ -1,5 +1,6 @@
 // container.ts
 import { createCheckPermission, createCheckTransitionPermission } from "../common/middleware/permission.middleware";
+import { FileStorageService } from "../common/services/file-storage.service";
 import { AccountRepository } from "../modules/accounts/account.repository";
 import { AccountService } from "../modules/accounts/account.service";
 import { AuthPermissionService } from "../modules/auth/auth.permission-service";
@@ -33,6 +34,8 @@ import { ApplicationRepository } from "../modules/projects/applications/applicat
 import { ApplicationService } from "../modules/projects/applications/application.service";
 import { CollaboratorRepository } from "../modules/projects/collaborators/collaborator.repository";
 import { CollaboratorService } from "../modules/projects/collaborators/collaborator.service";
+import { PhaseActivityRepository } from "../modules/projects/phase/activities/phase-activity.repository";
+import { PhaseActivityService } from "../modules/projects/phase/activities/phase-activity.service";
 import { PhaseRepository } from "../modules/projects/phase/phase.repository";
 import { PhaseService } from "../modules/projects/phase/phase.service";
 import { ProjectAuth } from "../modules/projects/project.auth";
@@ -52,6 +55,8 @@ import { ExperienceRepository } from "../modules/users/experiences/experience.re
 import { UserRepository } from "../modules/users/user.repository";
 import { UserService } from "../modules/users/user.service";
 import { AnonymizerService } from "../util/anonymizer/anonymizer.service";
+
+export const fileStorageService = new FileStorageService();
 
 export const notificationRepo = new NotificationRepository();
 export const settingRepo = new SettingRepository();
@@ -93,6 +98,7 @@ export const compositionRepo = new CompositionRepository();
 export const projectRepo = new ProjectRepository();
 export const collaboratorRepo = new CollaboratorRepository();
 export const phaseRepo = new PhaseRepository();
+export const phaseActivityRepo = new PhaseActivityRepository();
 //call repos
 export const callRepo = new CallRepository();
 export const stageRepo = new StageRepository();
@@ -145,6 +151,9 @@ export const projectAuth = new ProjectAuth(projectRepo, authPermissionService);
 export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, callRepo,
     applicationRepo, constraintValidator, projectAuth, notificationService, filterService);
 
+export const phaseActivityService = new PhaseActivityService(phaseActivityRepo, phaseRepo, projectAuth)
+
+
 export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, callRepo, constraintValidator,
     projectAuth);
 
@@ -153,16 +162,16 @@ export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, 
 export const applicationService = new ApplicationService(
     applicationRepo, projectRepo, callRepo, stageRepo, reviewerRepo,
     templateValidtor,
-    new AnonymizerService(applicationRepo, collaboratorRepo), projectAuth,
+    new AnonymizerService(applicationRepo, collaboratorRepo, fileStorageService), projectAuth,
     notificationService, filterService, constraintValidator, compositionValidator,
-    collaboratorRepo, userRepo
+    collaboratorRepo, userRepo, fileStorageService
 );
 
 export const projectService = new ProjectService(projectRepo, userRepo, collaboratorRepo, phaseRepo, verificationRepo,
     grantRepo, callRepo, stageRepo,
     collabService, phaseService, applicationService,
     constraintValidator, compositionValidator, templateValidtor, projectAuth,
-    authPermissionService, notificationService, filterService);
+    authPermissionService, notificationService, filterService, fileStorageService);
 
 export const userService = new UserService(userRepo, organizationRepo, roleRepo);
 

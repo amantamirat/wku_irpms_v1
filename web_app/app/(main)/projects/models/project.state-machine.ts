@@ -50,6 +50,12 @@ export const PROJECT_TRANSITIONS: TransitionMap = {
             severity: "success",
         },
         {
+            next: ProjectStatus.terminated,
+            action: "Terminate",
+            icon: "pi pi-ban",
+            severity: "danger",
+        },
+        {
             next: ProjectStatus.approved,
             action: "Set Approved",
             icon: "pi pi-undo",
@@ -58,6 +64,15 @@ export const PROJECT_TRANSITIONS: TransitionMap = {
     ],
 
     [ProjectStatus.completed]: [
+        {
+            next: ProjectStatus.granted,
+            action: "Set Granted",
+            icon: "pi pi-undo",
+            severity: "warning",
+        },
+    ],
+
+    [ProjectStatus.terminated]: [
         {
             next: ProjectStatus.granted,
             action: "Set Granted",

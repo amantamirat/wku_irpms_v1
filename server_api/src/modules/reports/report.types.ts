@@ -23,18 +23,22 @@ export interface IReportFilter {
 
 export interface IPortfolioReport {
     totalProjects: number;
-    activeProjects: number;
+    draftProjects: number;
+    approvedProjects: number;
+    refusedProjects: number;
+    grantedProjects: number;
     completedProjects: number;
     terminatedProjects: number;
-    approvedProjects: number;
-    grantedProjects: number;
 }
 
 export interface IApplicationReport {
     total: number;
-    pending: number;
+    submitted: number;
+    shortlisted: number;
+    notShortlisted: number;
     accepted: number;
     rejected: number;
+    shortlistingRate: number;
     acceptanceRate: number;
     averageScore: number | null;
 }
@@ -44,6 +48,7 @@ export interface IEvaluationReport {
     completedReviews: number;
     pendingReviews: number;
     declinedReviews: number;
+    rejectedReviews: number;
     completionRate: number;
     averageScore: number | null;
 }
@@ -76,8 +81,8 @@ export type IDepartmentReport = IOrganizationMetric[];
 export interface IDashboardReport {
     portfolio: IPortfolioReport;
     applications: IApplicationReport;
-    //evaluation: IEvaluationReport;
-    financial: IFinancialReport;
+    evaluations: IEvaluationReport;
+    //financial: IFinancialReport;
     //phases: IPhaseReport;
     //departments: IDepartmentReport;
 }

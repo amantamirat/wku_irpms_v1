@@ -92,45 +92,24 @@ export class ProjectController {
       if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
       if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
 
-      const project = JSON.parse(req.body.project) as CreateProjectDTO;
-
-      const relativeDocPath = path
-        .relative(process.cwd(), req.file.path)
-        .replace(/\\/g, "/");
-
-      const dto: CreateProjectDTO = {
-        ...project,
-        grant: "",
-        documentPath: relativeDocPath,
-        collaborators: project.collaborators ?? [],
-        themes: project.themes ?? [],
-        phases: project.phases ?? []
-      };
+      // documentPath and grant are set server-side, never trusted from the client
+      const { documentPath, grant, ...project } = JSON.parse(
+        req.body.project
+      ) as CreateProjectDTO;
 
       const submitted = await this.service.apply(
-        dto,
-        req.auth.userId
+        {
+          ...project,
+          collaborators: project.collaborators ?? [],
+          themes: project.themes ?? [],
+          phases: project.phases ?? [],
+        },
+        req.auth.userId,
+        req.file
       );
 
-      successResponse(
-        res,
-        201,
-        "Project submitted successfully",
-        submitted
-      );
-
+      successResponse(res, 201, "Project submitted successfully", submitted);
     } catch (err: any) {
-      if (req.file?.path) {
-        fs.unlink(req.file.path, (unlinkErr) => {
-          if (unlinkErr) {
-            console.error(
-              `Failed to delete orphaned file at ${req.file?.path}:`,
-              unlinkErr
-            );
-          }
-        });
-      }
-
       errorResponse(res, 400, err.message, err);
     }
   };

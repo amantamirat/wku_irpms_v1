@@ -1,23 +1,24 @@
+
 import { TransitionMap } from "@/hooks/useStateTransitionActions";
 import { ReviewerStatus } from "./reviewer.model";
 
 export const REVIEWER_TRANSITIONS: TransitionMap = {
     [ReviewerStatus.pending]: [
         {
-            next: ReviewerStatus.accepted,
-            action: "Accept",
+            next: ReviewerStatus.verified,
+            action: "Verify",
             icon: "pi pi-check",
             severity: "success"
         },
         {
-            next: ReviewerStatus.decliend,
+            next: ReviewerStatus.declined,
             action: "Decline",
             icon: "pi pi-times",
             severity: "danger"
         }
     ],
 
-    [ReviewerStatus.decliend]: [
+    [ReviewerStatus.declined]: [
         {
             next: ReviewerStatus.pending,
             action: "Set Pending",
@@ -26,7 +27,7 @@ export const REVIEWER_TRANSITIONS: TransitionMap = {
         }
     ],
 
-    [ReviewerStatus.accepted]: [
+    [ReviewerStatus.verified]: [
         {
             next: ReviewerStatus.submitted,
             action: "Submit",
@@ -43,8 +44,8 @@ export const REVIEWER_TRANSITIONS: TransitionMap = {
 
     [ReviewerStatus.submitted]: [
         {
-            next: ReviewerStatus.approved,
-            action: "Approve",
+            next: ReviewerStatus.accepted,
+            action: "Accept",
             icon: "pi pi-check-circle",
             severity: "success"
         },
@@ -55,14 +56,14 @@ export const REVIEWER_TRANSITIONS: TransitionMap = {
             severity: "danger"
         },
         {
-            next: ReviewerStatus.accepted,
-            action: "Set Accepted",
+            next: ReviewerStatus.verified,
+            action: "Set Verified",
             icon: "pi pi-undo",
             severity: "warning"
         }
     ],
 
-    [ReviewerStatus.approved]: [
+    [ReviewerStatus.accepted]: [
         {
             next: ReviewerStatus.submitted,
             action: "Set Submitted",
@@ -84,19 +85,20 @@ export const REVIEWER_TRANSITIONS: TransitionMap = {
 export const REVIEWER_USER_TRANSITIONS: TransitionMap = {
     [ReviewerStatus.pending]: [
         {
-            next: ReviewerStatus.accepted,
-            action: "Accept",
+            next: ReviewerStatus.verified,
+            action: "Verify",
             icon: "pi pi-check",
             severity: "success"
         },
         {
-            next: ReviewerStatus.decliend,
+            next: ReviewerStatus.declined,
             action: "Decline",
             icon: "pi pi-times",
             severity: "danger"
         }
     ],
-    [ReviewerStatus.decliend]: [
+
+    [ReviewerStatus.declined]: [
         {
             next: ReviewerStatus.pending,
             action: "Set Pending",
@@ -104,7 +106,8 @@ export const REVIEWER_USER_TRANSITIONS: TransitionMap = {
             severity: "warning"
         }
     ],
-    [ReviewerStatus.accepted]: [
+
+    [ReviewerStatus.verified]: [
         {
             next: ReviewerStatus.submitted,
             action: "Submit",
@@ -118,22 +121,22 @@ export const REVIEWER_USER_TRANSITIONS: TransitionMap = {
             severity: "warning"
         }
     ],
+
     [ReviewerStatus.submitted]: [
         {
-            next: ReviewerStatus.accepted,
-            action: "Set Accepted",
+            next: ReviewerStatus.verified,
+            action: "Set Verified",
             icon: "pi pi-undo",
             severity: "warning"
         }
-    ],
+    ]
 };
 
 export const REVIEWER_ADMIN_TRANSITIONS: TransitionMap = {
-
     [ReviewerStatus.submitted]: [
         {
-            next: ReviewerStatus.approved,
-            action: "Approve",
+            next: ReviewerStatus.accepted,
+            action: "Accept",
             icon: "pi pi-check-circle",
             severity: "success"
         },
@@ -144,14 +147,14 @@ export const REVIEWER_ADMIN_TRANSITIONS: TransitionMap = {
             severity: "danger"
         },
         {
-            next: ReviewerStatus.accepted,
-            action: "Set Accepted",
+            next: ReviewerStatus.verified,
+            action: "Set Verified",
             icon: "pi pi-undo",
             severity: "warning"
         }
     ],
 
-    [ReviewerStatus.approved]: [
+    [ReviewerStatus.accepted]: [
         {
             next: ReviewerStatus.submitted,
             action: "Set Submitted",
@@ -173,26 +176,62 @@ export const REVIEWER_ADMIN_TRANSITIONS: TransitionMap = {
 /*
 export const REVIEWER_STATUS_ORDER: ReviewerStatus[] = [
     ReviewerStatus.pending,
-    ReviewerStatus.accepted,
+    ReviewerStatus.verified,
     ReviewerStatus.submitted,
-    ReviewerStatus.approved
+    ReviewerStatus.accepted
 ];
 
 export const REVIEWER_TRANSITIONS: Record<ReviewerStatus, ReviewerStatus[]> = {
-    [ReviewerStatus.pending]: [ReviewerStatus.accepted],
-    [ReviewerStatus.accepted]: [ReviewerStatus.submitted, ReviewerStatus.pending],
-    [ReviewerStatus.submitted]: [ReviewerStatus.approved, ReviewerStatus.accepted],
-    [ReviewerStatus.approved]: [ReviewerStatus.submitted]
+    [ReviewerStatus.pending]: [
+        ReviewerStatus.verified,
+        ReviewerStatus.declined
+    ],
+    [ReviewerStatus.verified]: [
+        ReviewerStatus.submitted,
+        ReviewerStatus.pending
+    ],
+    [ReviewerStatus.submitted]: [
+        ReviewerStatus.accepted,
+        ReviewerStatus.rejected,
+        ReviewerStatus.verified
+    ],
+    [ReviewerStatus.accepted]: [
+        ReviewerStatus.submitted
+    ],
+    [ReviewerStatus.rejected]: [
+        ReviewerStatus.submitted
+    ],
+    [ReviewerStatus.declined]: [
+        ReviewerStatus.pending
+    ]
 };
 
 export const REVIEWER_USER_TRANSITIONS: Partial<Record<ReviewerStatus, ReviewerStatus[]>> = {
-    [ReviewerStatus.pending]: [ReviewerStatus.accepted],
-    [ReviewerStatus.accepted]: [ReviewerStatus.submitted, ReviewerStatus.pending],
+    [ReviewerStatus.pending]: [
+        ReviewerStatus.verified,
+        ReviewerStatus.declined
+    ],
+    [ReviewerStatus.verified]: [
+        ReviewerStatus.submitted,
+        ReviewerStatus.pending
+    ],
+    [ReviewerStatus.submitted]: [
+        ReviewerStatus.verified
+    ]
 };
 
 export const REVIEWER_ADMIN_TRANSITIONS: Partial<Record<ReviewerStatus, ReviewerStatus[]>> = {
-    [ReviewerStatus.submitted]: [ReviewerStatus.approved, ReviewerStatus.accepted],
-    [ReviewerStatus.approved]: [ReviewerStatus.submitted]
+    [ReviewerStatus.submitted]: [
+        ReviewerStatus.accepted,
+        ReviewerStatus.rejected,
+        ReviewerStatus.verified
+    ],
+    [ReviewerStatus.accepted]: [
+        ReviewerStatus.submitted
+    ],
+    [ReviewerStatus.rejected]: [
+        ReviewerStatus.submitted
+    ]
 };
-
 */
+

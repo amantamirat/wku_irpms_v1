@@ -71,7 +71,7 @@ const MyReviewersManager = () => {
             tooltip: 'Start/View Evaluation',
             visible: () => { return hasPermission("result:read") },
             disabled: reviewer =>
-                (reviewer.status === ReviewerStatus.pending || reviewer.status === ReviewerStatus.decliend),
+                (reviewer.status === ReviewerStatus.pending || reviewer.status === ReviewerStatus.declined),
             onClick: reviewer => {
                 setSelectedReviewer(reviewer);
             }

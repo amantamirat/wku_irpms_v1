@@ -1,4 +1,5 @@
 import { DeleteDto } from "../../../common/dtos/delete.dto";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { IUserRepository, UserRepository } from "../../users/user.repository";
@@ -23,7 +24,28 @@ export class RoleService {
     }
 
 
+    // ---------------------------------------------------
+    // GET BY ID
+    // ---------------------------------------------------
 
+    async getById(
+        id: string,
+        options?: FilterOptions
+    ) {
+
+        const role =
+            await this.repository.findById(
+                id,
+                options
+            );
+
+        if (!role)
+            throw new AppError(
+                ERROR_CODES.ROLE_NOT_FOUND
+            );
+
+        return role;
+    }
 
     async update(dto: UpdateRoleDto) {
         const { id, data } = dto;

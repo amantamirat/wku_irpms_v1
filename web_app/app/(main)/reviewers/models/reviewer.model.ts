@@ -12,10 +12,10 @@ export enum ReviewerTargetType {
 
 export enum ReviewerStatus {
     pending = 'pending',
-    accepted = 'accepted',
-    decliend = 'declined',
+    verified = 'verified',
+    declined = 'declined',
     submitted = 'submitted',
-    approved = 'approved',
+    accepted = 'accepted',
     rejected = 'rejected'
 }
 

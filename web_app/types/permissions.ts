@@ -220,17 +220,31 @@ export const PERMISSIONS = {
     DELETE: "phase:delete",
   },
   PHASE_DOCUMENT: {
-    CREATE: "phase:document:create",
-    READ: "phase:document:read",
-    UPDATE: "phase:document:update",
-    DELETE: "phase:document:delete",
+    CREATE: "phaseDocument:create",
+    CREATE_OWN: "phaseDocument:create:own",
+
+    READ: "phaseDocument:read",
+    READ_OWN: "phaseDocument:read:own",
+
+    UPDATE: "phaseDocument:update",
+
+    DELETE: "phaseDocument:delete",
+    DELETE_OWN: "phaseDocument:delete:own",
   },
-  PROJECT_THEME: {
-    CREATE: "project_theme:create",
-    READ: "project_theme:read",
-    UPDATE: "project_theme:update",
-    DELETE: "project_theme:delete",
+  PHASE_ACTIVITY: {
+    CREATE: "phaseActivity:create",
+    CREATE_OWN: "phaseActivity:create:own",
+
+    READ: "phaseActivity:read",
+    LOOKUP: "phaseActivity:lookup",
+
+    UPDATE: "phaseActivity:update",
+    UPDATE_OWN: "phaseActivity:update:own",
+
+    DELETE: "phaseActivity:delete",
+    DELETE_OWN: "phaseActivity:delete:own",
   },
+
   DOCUMENT: {
     CREATE: "document:create",
     READ: "document:read",

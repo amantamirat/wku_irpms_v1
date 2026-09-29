@@ -1,6 +1,6 @@
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { matchRange } from "../../common/types/range";
+import { matchesRange } from "../../common/types/range";
 import { ICall } from "../calls/call.model";
 import { ValidationResult } from "../constraints/services/constraint-validator.service";
 import { GrantRepository } from "../grants/grant.repository";
@@ -141,7 +141,7 @@ export class CompositionValidationService {
             errors
         );
 
-        console.log("isleadvalid", isLeadValid)
+        // console.log("isleadvalid", isLeadValid)
 
         await this.validateMembers(
             composition.memberRequirements?.map(
@@ -337,7 +337,7 @@ export class CompositionValidationService {
                         ? qualifyingCount / members.length
                         : 0;
 
-            if (!matchRange(requirement.threshold, value, true, true)) {
+            if (!matchesRange(requirement.threshold, value, true)) {
                 const currentValue =
                     requirement.mode === AggregationMode.RATIO
                         ? `${(value * 100).toFixed(1)}%`

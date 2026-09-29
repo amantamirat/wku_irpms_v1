@@ -10,12 +10,14 @@ import { ApplicationRepository } from "../../modules/projects/applications/appli
 import { CollaboratorRepository } from "../../modules/projects/collaborators/collaborator.repository";
 import { PdfExtractorService } from "../../modules/templates/services/pdf-extractor.service";
 import { IUser } from "../../modules/users/user.model";
+import { FileStorageService } from "../../common/services/file-storage.service";
 
 export class AnonymizerService {
 
     constructor(
         private readonly applicationRepo: ApplicationRepository,
         private readonly collaboratorRepo: CollaboratorRepository,
+        private readonly fileStorage: FileStorageService,
         private readonly pdfExtractor: PdfExtractorService = new PdfExtractorService(),
         private readonly layoutExtractor: PdfLayoutExtractorService = new PdfLayoutExtractorService(),
         private readonly locationMatcher: PdfEntityLocationMatcher = new PdfEntityLocationMatcher(),
@@ -65,9 +67,10 @@ export class AnonymizerService {
                 .map(member => member.name)
                 .filter(Boolean);
 
+            const absoluteInput = this.fileStorage.resolve(application.documentPath);
             const result =
                 await this.anonymize(
-                    application.documentPath, memberNames
+                    absoluteInput, memberNames
                 );
             //console.log(result.outputPath);
 
@@ -77,17 +80,14 @@ export class AnonymizerService {
                 );
             }
 
-            const relativeAnonymizedPath =
-                path
-                    .relative(process.cwd(), result.outputPath)
-                    .replace(/\\/g, '/');
+            const storedAnonymizedPath = this.fileStorage.toStoredPath(result.outputPath);
 
             const updated =
                 await this.applicationRepo.update(
                     applicationId,
                     {
                         anonymizedDocumentPath:
-                            relativeAnonymizedPath,
+                            storedAnonymizedPath,
 
                         anonymizationStatus:
                             AnonymizationStatus.completed

@@ -1,4 +1,4 @@
-import { CacheService } from "../../util/cache.service";
+import { CacheService } from "../../common/services/cache.service";
 import { IUserRepository } from "../users/user.repository";
 import { IRoleRepository, PopulatedRole } from "../permissions/roles/role.repository";
 

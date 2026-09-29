@@ -9,10 +9,48 @@ interface Props {
 
 export const PortfolioWidget = ({ data }: Props) => {
   const cards = [
-    { title: 'Total Projects', value: data?.totalProjects ?? 0, icon: 'pi-folder', color: 'blue' },
-    { title: 'Active', value: data?.activeProjects ?? 0, icon: 'pi-sync', color: 'green' },
-    { title: 'Completed', value: data?.completedProjects ?? 0, icon: 'pi-check-circle', color: 'purple' },
-    { title: 'Terminated', value: data?.terminatedProjects ?? 0, icon: 'pi-times-circle', color: 'red' },
+    {
+      title: 'Total Projects',
+      value: data?.totalProjects ?? 0,
+      icon: 'pi-folder',
+      color: 'blue'
+    },
+    {
+      title: 'Draft',
+      value: data?.draftProjects ?? 0,
+      icon: 'pi-file',
+      color: 'gray'
+    },
+    {
+      title: 'Approved',
+      value: data?.approvedProjects ?? 0,
+      icon: 'pi-check',
+      color: 'green'
+    },
+    {
+      title: 'Refused',
+      value: data?.refusedProjects ?? 0,
+      icon: 'pi-times',
+      color: 'red'
+    },
+    {
+      title: 'Granted',
+      value: data?.grantedProjects ?? 0,
+      icon: 'pi-send',
+      color: 'orange'
+    },
+    {
+      title: 'Completed',
+      value: data?.completedProjects ?? 0,
+      icon: 'pi-check-circle',
+      color: 'purple'
+    },
+    {
+      title: 'Terminated',
+      value: data?.terminatedProjects ?? 0,
+      icon: 'pi-ban',
+      color: 'red'
+    }
   ];
 
   return (

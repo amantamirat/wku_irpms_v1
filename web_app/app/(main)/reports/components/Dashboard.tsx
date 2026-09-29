@@ -10,6 +10,7 @@ import { ReportApi } from '../api/report.api';
 import { PortfolioWidget } from './PortfolioWidget';
 import { FinancialWidget } from './FinancialWidget';
 import { ApplicationWidget } from './ApplicationWidget';
+import { EvaluationWidget } from './EvaluationWidget';
 
 interface DashboardProps {
   filter?: IReportFilter;
@@ -61,13 +62,13 @@ export const ReportDashboard = ({ filter, initialData, loading: externalLoading 
       {/* 1. PORTFOLIO WIDGET */}
       <PortfolioWidget data={report.portfolio} />
 
-      {/* 2. FINANCIAL & APPLICATIONS GRID */}
+      {/* 2. EVALUATIONS & APPLICATIONS GRID */}
       <div className="grid">
         <div className="col-12 lg:col-6">
-          <FinancialWidget data={report.financial} />
+          <ApplicationWidget data={report.applications} loading={loading} />
         </div>
         <div className="col-12 lg:col-6">
-          <ApplicationWidget data={report.applications} loading={loading} />
+          <EvaluationWidget data={report.evaluations} loading={loading} />
         </div>
       </div>
     </div>

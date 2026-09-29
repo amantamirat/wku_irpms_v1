@@ -23,6 +23,10 @@ router.get('/',
     controller.get
 );
 
+router.get('/:id', verifyAuthToken,
+    checkPermission(PERMISSIONS.ROLE.READ),
+    controller.getById);
+
 router.put('/:id',
     verifyAuthToken,
     checkPermission([PERMISSIONS.ROLE.UPDATE]),

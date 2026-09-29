@@ -24,7 +24,7 @@ export const EvaluationDialog: React.FC<EvaluationDialogProps> = ({
     header = "Evaluation Details",
 }) => {
     const isVisible = visible ?? Boolean(reviewer);
-    const isEditMode = enableEvaluation && reviewer?.status === ReviewerStatus.accepted;
+    const isEditMode = enableEvaluation && reviewer?.status === ReviewerStatus.verified;
 
     const project = typeof reviewer?.project === "object" ? reviewer.project : null;
     const application = typeof reviewer?.application === "object" ? reviewer.application : null;
@@ -43,7 +43,7 @@ export const EvaluationDialog: React.FC<EvaluationDialogProps> = ({
 
     const handleSubmitEvaluation = async () => {
         if (!reviewer?._id) return;
-        await ReviewerApi.transitionState!(reviewer._id, { current: ReviewerStatus.accepted, next: ReviewerStatus.submitted });
+        await ReviewerApi.transitionState!(reviewer._id, { current: ReviewerStatus.verified, next: ReviewerStatus.submitted });
         if (onSubmitted) {
             onSubmitted();
         }

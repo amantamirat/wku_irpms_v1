@@ -8,7 +8,7 @@ import { checkPermission } from '../../../core/container';
 import { VerificationController } from "./verification.controller";
 import { VerificationService } from "./verification.service";
 import { notificationService, projectRepo, reviewerRepo, verificationConfRepo, verificationRepo } from "../../../core/container";
-import { upload } from "../../../util/multer";
+import { upload } from "../../../common/middleware/fileUpload.middleware";
 import { PERMISSIONS } from "../../../common/constants/permissions";
 import ScopeFilterService from "../../auth/scope-filter.service";
 

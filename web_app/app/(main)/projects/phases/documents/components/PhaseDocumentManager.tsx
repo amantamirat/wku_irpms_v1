@@ -1,12 +1,12 @@
 'use client';
 
-import React from 'react';
-import { createEntityManager } from "@/components/createEntityManager";
+
 import { PhaseDocApi } from "../api/phase.doc.api";
 import { FilterPhaseDocOptions, PhaseDocument } from "../model/phase.doc";
 import { Phase } from '../../models/phase.model';
 import SavePhaseDocument from './SavePhaseDocument';
-
+import { createEntityManager } from "@/components/data-table/createEntityManager";
+import { BASE_URL } from "@/api/ApiClient";
 
 interface PhaseDocumentManagerProps {
     phase: Phase;
@@ -34,9 +34,13 @@ const PhaseDocumentManager = ({ phase }: PhaseDocumentManagerProps) => {
                 body: (row: PhaseDocument) =>
                     row.documentPath ? (
                         <a
-                            href={row.documentPath}
+                            href={`${BASE_URL}/uploads/${row.documentPath.replace(
+                                /^\\/,
+                                ''
+                            )}`}
                             target="_blank"
                             rel="noopener noreferrer"
+                            className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline"
                         >
                             View Document
                         </a>
@@ -52,7 +56,7 @@ const PhaseDocumentManager = ({ phase }: PhaseDocumentManagerProps) => {
 
         SaveDialog: SavePhaseDocument,
 
-        permissionPrefix: "phase-document",
+        permissionPrefix: "phaseDocument",
 
         query: () => ({
             phase: phase,

@@ -9,7 +9,7 @@ import { InputText } from 'primereact/inputtext';
 import { Message } from 'primereact/message';
 import { Toast } from 'primereact/toast';
 import { TreeNode } from 'primereact/treenode';
-import { TreeSelect } from 'primereact/treeselect';
+import { TreeSelect, TreeSelectChangeEvent } from 'primereact/treeselect';
 import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { RoleApi } from '../api/role.api';
@@ -67,8 +67,8 @@ const SaveRole = (props: EntitySaveDialogProps<Role>) => {
 
     // 3. Map Role Permissions to TreeSelect Keys
     useEffect(() => {
-        if (localRole.permissions) {
-            const keys = localRole.permissions.reduce((acc: any, id: string) => {
+        if (localRole.permissions && Array.isArray(localRole.permissions)) {
+            const keys = (localRole.permissions as string[]).reduce((acc: Record<string, any>, id: string) => {
                 acc[id] = { checked: true, partialChecked: false };
                 return acc;
             }, {});
@@ -76,11 +76,13 @@ const SaveRole = (props: EntitySaveDialogProps<Role>) => {
         }
     }, [localRole.permissions]);
 
-    const onPermissionChange = (e: any) => {
-        setSelectedKeys(e.value);
+    const onPermissionChange = (e: TreeSelectChangeEvent) => {
+        const value = e.value as Record<string, any>;
+        setSelectedKeys(value);
+        
         // Only collect IDs (leaves), ignore category keys
-        const selectedIds = Object.keys(e.value || {}).filter(
-            (key) => e.value[key]?.checked && /^[a-fA-F0-9]{24}$/.test(key)
+        const selectedIds = Object.keys(value || {}).filter(
+            (key) => value[key]?.checked && /^[a-fA-F0-9]{24}$/.test(key)
         );
         setLocalRole(prev => ({ ...prev, permissions: selectedIds }));
     };
@@ -95,7 +97,7 @@ const SaveRole = (props: EntitySaveDialogProps<Role>) => {
             const saved = isEdit 
                 ? await RoleApi.update(localRole) 
                 : await RoleApi.create(localRole);
-            
+
             toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Role configuration saved' });
             onComplete?.({ ...saved, permissions: localRole.permissions });
             onHide();

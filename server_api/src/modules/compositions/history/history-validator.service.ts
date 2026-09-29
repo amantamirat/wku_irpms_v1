@@ -1,20 +1,19 @@
-import { matchRange } from "../../../common/types/range";
+import { matchesRange } from "../../../common/types/range";
+import { FundingSource } from "../../grants/grant.model";
+import { GrantRepository } from "../../grants/grant.repository";
+import { ApplicationStatus } from "../../projects/applications/application.model";
+import { ApplicationRepository } from "../../projects/applications/application.repository";
+import { FilterCollaborators } from "../../projects/collaborators/collaborator.dto";
+import { CollaboratorRepository } from "../../projects/collaborators/collaborator.repository";
+import { FilterProjectsDTO } from "../../projects/project.dto";
+import { IProject, ProjectStatus } from "../../projects/project.model";
+import { ProjectRepository } from "../../projects/project.repository";
 import { IUser } from "../../users/user.model";
 import {
     HistoryContext,
     HistoryParticipation,
     IHistoryRule
 } from "./history.model";
-import { ProjectRepository } from "../../projects/project.repository";
-import { ApplicationRepository } from "../../projects/applications/application.repository";
-import { FilterProjectsDTO } from "../../projects/project.dto";
-import { CollaboratorStatus } from "../../projects/collaborators/collaborator.model";
-import { CollaboratorRepository } from "../../projects/collaborators/collaborator.repository";
-import { GrantRepository } from "../../grants/grant.repository";
-import { IProject, ProjectStatus } from "../../projects/project.model";
-import { FundingSource } from "../../grants/grant.model";
-import { ApplicationStatus } from "../../projects/applications/application.model";
-import { FilterCollaborators } from "../../projects/collaborators/collaborator.dto";
 
 export interface HistoryValidationContext {
     call: string;
@@ -58,9 +57,9 @@ export class HistoryValidatorService {
         if (rule.project) {
             if (rule.project?.granted) {
 
-                if (!matchRange(
+                if (!matchesRange(
                     rule.project.granted,
-                    metrics.granted, true
+                    metrics.granted
                 )) {
                     return false;
                 }
@@ -68,9 +67,9 @@ export class HistoryValidatorService {
 
             if (rule.project?.refused) {
 
-                if (!matchRange(
+                if (!matchesRange(
                     rule.project.refused,
-                    metrics.refused, true
+                    metrics.refused
                 )) {
                     return false;
                 }
@@ -78,9 +77,9 @@ export class HistoryValidatorService {
 
             if (rule.project?.completed) {
 
-                if (!matchRange(
+                if (!matchesRange(
                     rule.project.completed,
-                    metrics.completed, true
+                    metrics.completed
                 )) {
                     return false;
                 }
@@ -93,9 +92,9 @@ export class HistoryValidatorService {
         if (rule.application) {
             if (rule.application?.submitted) {
 
-                if (!matchRange(
+                if (!matchesRange(
                     rule.application.submitted,
-                    metrics.submitted, true
+                    metrics.submitted
                 )) {
                     return false;
                 }
@@ -103,9 +102,9 @@ export class HistoryValidatorService {
 
             if (rule.application?.accepted) {
 
-                if (!matchRange(
+                if (!matchesRange(
                     rule.application.accepted,
-                    metrics.accepted, true
+                    metrics.accepted
                 )) {
                     return false;
                 }
@@ -113,9 +112,9 @@ export class HistoryValidatorService {
 
             if (rule.application?.rejected) {
 
-                if (!matchRange(
+                if (!matchesRange(
                     rule.application.rejected,
-                    metrics.rejected, true
+                    metrics.rejected
                 )) {
                     return false;
                 }

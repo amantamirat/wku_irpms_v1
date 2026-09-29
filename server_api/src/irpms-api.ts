@@ -1,9 +1,14 @@
 import path from 'path';
 import cors from 'cors';
 import dotenv from 'dotenv';
-import express, { Application } from 'express';
 import http from 'http'; // 1. Import the native http module
 import mongoose from 'mongoose';
+
+import express, { Application, Request, Response, NextFunction } from "express";
+import multer from "multer";
+import { AppError } from "./common/errors/app.error";
+import { ERROR_CODES } from "./common/errors/error.codes";
+
 
 import organizationRoutes from './modules/organization/organization.routes';
 import specializationRoutes from './modules/organization/specializations/specialization.routes';
@@ -39,6 +44,8 @@ import collaboratorRoutes from './modules/projects/collaborators/collaborator.ro
 import projectRoutes from './modules/projects/project.routes';
 
 import phaseDocRoutes from './modules/projects/phase/documents/phase.doc.routes';
+import phaseActivityRoutes from './modules/projects/phase/activities/phase-activity.routes';
+import phaseEquipmentRoutes from './modules/projects/phase/equipments/phase-equipment.routes';
 import phaseRoutes from './modules/projects/phase/phase.routes';
 
 import applicationRoutes from './modules/projects/applications/application.routes';
@@ -56,6 +63,7 @@ import settingRoutes from './modules/settings/setting.routes';
 
 
 import { SocketService } from './modules/notifications/socket.service';
+import { errorResponse } from './common/helpers/response';
 
 dotenv.config();
 const app: Application = express();
@@ -111,15 +119,36 @@ app.use("/api/project/results", resultRoutes);
 
 app.use("/api/projects", projectRoutes);
 app.use("/api/project/phases", phaseRoutes);
+app.use("/api/project/phases/activities", phaseActivityRoutes);
 app.use("/api/project/phase/documents", phaseDocRoutes);
+app.use("/api/project/phases/equipments", phaseEquipmentRoutes);
 app.use("/api/project/collaborators", collaboratorRoutes);
 //app.use("/api/collaborator/assignments", assignmentRoutes);
 app.use("/api/project/applications", applicationRoutes);
 
 app.use("/api/reports", reportRoutes);
 
-
 app.use("/api/uploads", express.static(path.join(process.cwd(), "uploads")));
+
+
+// ---- Global error handler (must be LAST, after all routes) ----
+app.use((err: unknown, _req: Request, res: Response, _next: NextFunction) => {
+
+  if (err instanceof AppError) {
+    const status =
+      err.code === ERROR_CODES.FILE_TOO_LARGE ? 413 :
+        err.code === ERROR_CODES.INVALID_FILE_FORMAT ? 415 :
+          (err as any).statusCode ?? 400;
+
+    return errorResponse(res, status, err.message, err);
+  }
+
+  if (err instanceof multer.MulterError) {
+    return errorResponse(res, 400, "File upload failed", err.message);
+  }
+
+  return errorResponse(res, 500, "Internal server error", err);
+});
 
 const MONGO_URL = process.env.MONGO_URL;
 const PORT = Number(process.env.SERVER_PORT) || 5000;

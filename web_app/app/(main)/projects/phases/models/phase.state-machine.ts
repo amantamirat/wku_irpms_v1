@@ -49,8 +49,8 @@ export const PHASE_TRANSITIONS: TransitionMap = {
             severity: "success"
         },
         {
-            next: PhaseStatus.terminated,
-            action: "Terminate",
+            next: PhaseStatus.cancelled,
+            action: "Cancel",
             icon: "pi pi-times",
             severity: "danger"
         },
@@ -71,7 +71,7 @@ export const PHASE_TRANSITIONS: TransitionMap = {
         }
     ],
 
-    [PhaseStatus.terminated]: [
+    [PhaseStatus.cancelled]: [
         {
             next: PhaseStatus.active,
             action: "Reactivate",

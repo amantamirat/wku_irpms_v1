@@ -42,22 +42,20 @@ export const ProjectApi: IProjectApi = {
 
     async apply(project: Partial<Project>): Promise<any> {
         const formData = new FormData();
-        const sanitized = sanitize(project);
 
-        // 1. Separate the file from the rest of the data
+        // 1. Append the real file directly
         if (project.file) {
-            // Backend usually expects 'document' or 'file' - 
-            // Based on your controller, make sure Multer is configured for this key
             formData.append("file", project.file);
-            delete project.file;
         }
 
-        // 2. Wrap the REST of the project data into a single stringified JSON object
-        // This satisfies: project = JSON.parse(req.body.project);
+        // 2. Separate file out so sanitize only handles text/metadata
+        const { file, ...projectWithoutFile } = project;
+        const sanitized = sanitize(projectWithoutFile);
+
+        // 3. Stringify clean metadata
         formData.append("project", JSON.stringify(sanitized));
 
-        const created = await ApiClient.post(`${end_point}/apply`, formData);
-        return created;
+        return ApiClient.post(`${end_point}/apply`, formData);
     },
 
     async update(project: Partial<Project>): Promise<Project> {

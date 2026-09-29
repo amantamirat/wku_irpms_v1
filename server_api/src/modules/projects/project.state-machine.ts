@@ -19,10 +19,15 @@ export const PROJECT_TRANSITIONS: Partial<
 
     [ProjectStatus.granted]: [
         ProjectStatus.completed,
+        ProjectStatus.terminated,
         ProjectStatus.approved, // Rollback
     ],
 
     [ProjectStatus.completed]: [
         ProjectStatus.granted, // Rollback
+    ],
+
+    [ProjectStatus.terminated]: [
+        ProjectStatus.granted, // Restore
     ],
 };

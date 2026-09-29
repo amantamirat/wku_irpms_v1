@@ -5,7 +5,7 @@ import { verifyAuthToken } from '../auth/auth.middleware';
 import { checkTransitionPermission } from '../../core/container';
 import { checkPermission } from '../../core/container';
 import { ProjectController } from './project.controller';
-import { upload } from '../../util/multer';
+import { upload } from '../../common/middleware/fileUpload.middleware';
 
 const controller = new ProjectController(projectService);
 const router: Router = Router();
@@ -20,12 +20,7 @@ router.post(
     "/apply",
     verifyAuthToken,
     checkPermission("project:apply"),
-    (req, res, next) => {
-        // Set the dynamic subfolder for this specific endpoint
-        req.headers["x-upload-folder"] = "applications";
-        next();
-    },
-    upload.single("file"),
+    upload.single("file", ["application/pdf"]),
     controller.apply
 );
 

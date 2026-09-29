@@ -42,30 +42,25 @@ export class ApplicationController {
 
     constructor(private readonly service: ApplicationService) {
     }
-    // ---------------------------------------------------
-    // CREATE
-    // ---------------------------------------------------
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
             if (!req.auth) throw new AppError(ERROR_CODES.UNAUTHORIZED);
             if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
-            const { project, stage } = req.body;
 
-            const relativeDocPath = path.relative(process.cwd(), req.file.path).replace(/\\/g, '/');
-            const dto: CreateApplicationDTO = {
-                project,
-                stage,
-                documentPath: relativeDocPath
-            };
-            const created = await this.service.create(dto, req.auth.userId);
+            // documentPath is set by the service, never trusted from the client
+            const { documentPath, ...application } = JSON.parse(
+                req.body.application
+            ) as CreateApplicationDTO;
+
+            const created = await this.service.create(
+                application,
+                req.auth.userId,
+                req.file
+            );
+
             successResponse(res, 201, "Project application created successfully", created);
-
         } catch (err: any) {
-            if (req.file && req.file.path) {
-                fs.unlink(req.file.path, (unlinkErr) => {
-                    if (unlinkErr) console.error(`Failed to delete orphaned file at ${req.file?.path}:`, unlinkErr);
-                });
-            }
+            // Temp file cleanup now lives in the service
             errorResponse(res, 400, err.message, err);
         }
     };

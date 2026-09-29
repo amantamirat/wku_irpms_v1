@@ -11,20 +11,20 @@ export const PhaseDocApi: EntityApi<PhaseDocument, FilterPhaseDocOptions> = {
         return ApiClient.get(end_point, options);
     },
 
-    async create(phaseDoc) {
-        const sanitized = sanitize(phaseDoc);
-
+    async create(phaseDoc: Partial<PhaseDocument>): Promise<any> {
         const formData = new FormData();
 
-        formData.append("phase", sanitized.phase as string);
-
-        if (sanitized.description) {
-            formData.append("description", sanitized.description);
-        }
-
+        // 1. Append the real file directly from phaseDoc if it exists
         if (phaseDoc.file) {
-            formData.append("document", phaseDoc.file);
+            formData.append("file", phaseDoc.file);
         }
+
+        // 2. Separate the file out so sanitize only runs on text/metadata fields
+        const { file, ...phaseWithoutFile } = phaseDoc;
+        const sanitized = sanitize(phaseWithoutFile);
+
+        // 3. Wrap the clean metadata into a JSON string
+        formData.append("phaseDoc", JSON.stringify(sanitized));
 
         return ApiClient.post(end_point, formData);
     },

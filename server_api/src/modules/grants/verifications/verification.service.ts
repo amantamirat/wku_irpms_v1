@@ -269,7 +269,7 @@ export class VerificationService {
         const approvedReviews =
             await this.reviewerRepo.find({
                 verification: id,
-                status: ReviewerStatus.approved
+                status: ReviewerStatus.accepted
             });
 
         const totalWeight = approvedReviews.reduce(
@@ -383,7 +383,7 @@ export class VerificationService {
             const approvedCount =
                 await this.reviewerRepo.count({
                     verification: id,
-                    status: ReviewerStatus.approved
+                    status: ReviewerStatus.accepted
                 });
 
             if (approvedCount < configuration.minReviewers) {

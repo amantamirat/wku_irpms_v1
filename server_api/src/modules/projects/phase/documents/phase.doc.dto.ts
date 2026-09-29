@@ -1,11 +1,9 @@
-
-
 export interface CreatePhaseDocDTO {
     phase: string;
     description: string;
     documentPath: string;
 }
 
-export interface GetPhaseDocDTO {
+export interface FilterPhaseDocDTO {
     phase: string;
 }

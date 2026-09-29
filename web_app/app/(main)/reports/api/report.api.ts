@@ -38,7 +38,7 @@ export const ReportApi = {
   /**
    * Get evaluation report
    */
-  async getEvaluation(filter?: IReportFilter): Promise<IEvaluationReport> {
+  async getEvaluations(filter?: IReportFilter): Promise<IEvaluationReport> {
     const data = await ApiClient.get(`${ENDPOINT}/evaluation`, {
       params: filter,
     });

@@ -4,7 +4,7 @@ import jwt, { JwtPayload } from "jsonwebtoken";
 import { Unit } from "../../common/constants/enums";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { CacheService } from "../../util/cache.service";
+import { CacheService } from "../../common/services/cache.service";
 import { AccountStatus, IAccount } from '../accounts/account.model';
 import { IAccountRepository } from "../accounts/account.repository";
 import { MailService, VerificationCodePurpose } from "../mail/mail.service";

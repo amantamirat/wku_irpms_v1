@@ -7,7 +7,7 @@ import { AuthenticatedRequest } from '../../auth/auth.middleware';
 
 export class RoleController {
 
-    constructor(private readonly service: RoleService) {}
+    constructor(private readonly service: RoleService) { }
 
     create = async (req: Request, res: Response) => {
         try {
@@ -27,6 +27,42 @@ export class RoleController {
             errorResponse(res, 400, err.message, err);
         }
     };
+
+    // -----------------------
+    // Get By ID
+    // -----------------------
+    getById = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ) => {
+        try {
+            const { id } = req.params;
+
+            const role =
+                await this.service.getById(
+                    String(id),
+                    {
+                        populate: true,
+                    }
+                );
+
+            successResponse(
+                res,
+                200,
+                "Role fetched successfully",
+                role
+            );
+
+        } catch (err: any) {
+            errorResponse(
+                res,
+                400,
+                err.message,
+                err
+            );
+        }
+    };
+
 
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {

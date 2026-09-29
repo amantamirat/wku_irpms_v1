@@ -44,6 +44,11 @@ export const sanitize = <T>(
         sanitizedObj[key] = sanitize(value, false);
     }
 
+    // Remove internal database fields if sending an update
+    // delete sanitizedObj._id;
+    //delete sanitizedObj.createdAt
+    //delete sanitizedObj.updatedAt;
+
     return sanitizedObj as Unpopulate<T>;
 };
 

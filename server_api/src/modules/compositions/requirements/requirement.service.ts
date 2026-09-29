@@ -1,6 +1,6 @@
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { isValidRange, matchRange } from "../../../common/types/range";
+import { isValid } from "../../../common/types/range";
 import { CreateRequirementDTO, UpdateRequirementDTO } from "./requirement.dto";
 import { AggregationMode } from "./requirement.model";
 import { RequirementRepository } from "./requirement.repository";
@@ -13,22 +13,26 @@ export class RequirementService {
 
     async create(data: CreateRequirementDTO) {
 
-      
-        /*
-        if (!isValidRange(data.threshold)) {
+
+        if (!isValid(data.threshold)) {
             throw new AppError(
                 ERROR_CODES.INVALID_INPUT,
                 'Threshold range is invalid.'
             );
-        }*/
+        }
 
         if (data.mode === AggregationMode.RATIO) {
-            if (!matchRange(data.threshold, 1.1)) {
-                /*
+            const { min, max } = data.threshold;
+
+            if (
+                min < 0 ||
+                max > 1 ||
+                min > max
+            ) {
                 throw new AppError(
                     ERROR_CODES.INVALID_INPUT,
-                    'Threshold range must be b/n 0 and 1 for aggrigation mode.'
-                );*/
+                    'Threshold range must be between 0 and 1 for aggregation mode RATIO.'
+                );
             }
         }
 

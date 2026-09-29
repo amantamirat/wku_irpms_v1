@@ -223,7 +223,7 @@ export class PhaseService {
         const executionStates = [
             PhaseStatus.active,
             PhaseStatus.completed,
-            PhaseStatus.terminated,
+            PhaseStatus.cancelled,
         ];
 
         const involvesExecution =
@@ -296,7 +296,6 @@ export class PhaseService {
                 );
             }
         }
-
         /**
          * ---------------------------------------------------
          * ACTIVE → APPROVED
@@ -448,7 +447,7 @@ export const PHASE_TRANSITIONS: Record<PhaseStatus, PhaseStatus[]> = {
 
     [PhaseStatus.active]: [
         PhaseStatus.completed,
-        PhaseStatus.terminated,
+        PhaseStatus.cancelled,
         PhaseStatus.approved
     ],
 
@@ -456,7 +455,7 @@ export const PHASE_TRANSITIONS: Record<PhaseStatus, PhaseStatus[]> = {
         PhaseStatus.active
     ],
 
-    [PhaseStatus.terminated]: [
+    [PhaseStatus.cancelled]: [
         PhaseStatus.active
     ]
 };

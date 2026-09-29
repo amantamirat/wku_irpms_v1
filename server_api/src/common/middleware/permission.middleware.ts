@@ -78,7 +78,7 @@ export const createCheckTransitionPermission = (
                 `${resource}:transition.${current}.${nextStatus}`;
 
             const wildcardPermission =
-                `${resource}:transition.*`;
+                `${resource}:transition.all`;
 
             return checkPermission([
                 specificPermission,

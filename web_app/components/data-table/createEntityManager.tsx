@@ -448,6 +448,28 @@ export function createEntityManager<
         ];
 
       /*
+ * -----------------------------------------
+ * IMPERATIVE HANDLE
+ * -----------------------------------------
+ */
+
+      useImperativeHandle(
+        ref,
+        () => ({
+          updateItem,
+          removeItem,
+          refresh,
+          getById,
+        }),
+        [
+          updateItem,
+          removeItem,
+          refresh,
+          getById,
+        ]
+      );
+
+      /*
        * -----------------------------------------
        * ERROR
        * -----------------------------------------
@@ -470,23 +492,6 @@ export function createEntityManager<
           />
         );
       }
-
-      useImperativeHandle(
-        ref,
-        () => ({
-          updateItem,
-          removeItem,
-          refresh,
-          getById
-        }),
-        [
-          updateItem,
-          removeItem,
-          refresh,
-          getById
-        ]
-      );
-
       /*
        * -----------------------------------------
        * RENDER

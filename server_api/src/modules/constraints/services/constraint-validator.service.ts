@@ -1,16 +1,15 @@
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
+import {
+    IRange,
+    matchesRange
+} from "../../../common/types/range";
 import { CreatePhaseDto, PhaseDto } from "../../projects/phase/phase.dto";
-import { CreateProjectDTO } from "../../projects/project.dto";
+import { PhaseRepository } from "../../projects/phase/phase.repository";
+import { ProjectRepository } from "../../projects/project.repository";
 import { ThemeRepository } from "../../thematics/themes/theme.repository";
 import { IConstraint } from "../constraint.model";
 import { ConstraintRepository } from "../constraint.repository";
-import {
-    IRange,
-    matchRange
-} from "../../../common/types/range";
-import { PhaseRepository } from "../../projects/phase/phase.repository";
-import { ProjectRepository } from "../../projects/project.repository";
 
 export interface ValidationResult {
     valid: boolean;
@@ -299,7 +298,7 @@ export class ConstraintValidationService {
 
         const count = this.countWords(title);
 
-        if (!matchRange(range, count)) {
+        if (!matchesRange(range, count)) {
             errors.push(
                 `Project title must contain between ${range.min} and ${range.max} words. Current count: ${count}.`
             );
@@ -318,7 +317,7 @@ export class ConstraintValidationService {
 
         const count = this.countWords(summary ?? '');
 
-        if (!matchRange(range, count)) {
+        if (!matchesRange(range, count)) {
             errors.push(
                 `Project summary must contain between ${range.min} and ${range.max} words. Current count: ${count}.`
             );
@@ -340,7 +339,7 @@ export class ConstraintValidationService {
         errors: string[]
     ): void {
 
-        if (range && !matchRange(range, count)) {
+        if (range && !matchesRange(range, count)) {
             errors.push(
                 `Participants must be between ${range.min} and ${range.max}. Current count: ${count}.`
             );
@@ -354,7 +353,7 @@ export class ConstraintValidationService {
         errors: string[]
     ): void {
 
-        if (range && !matchRange(range, count)) {
+        if (range && !matchesRange(range, count)) {
             errors.push(
                 `Phases must be between ${range.min} and ${range.max}. Current count: ${count}.`
             );
@@ -368,7 +367,7 @@ export class ConstraintValidationService {
         errors: string[]
     ): void {
 
-        if (range && !matchRange(range, budget)) {
+        if (range && !matchesRange(range, budget)) {
             errors.push(
                 `Project budget must be between ${range.min} and ${range.max}. Current budget: ${budget}.`
             );
@@ -382,7 +381,7 @@ export class ConstraintValidationService {
         errors: string[]
     ): void {
 
-        if (range && !matchRange(range, duration)) {
+        if (range && !matchesRange(range, duration)) {
             errors.push(
                 `Project duration must be between ${range.min} and ${range.max}. Current duration: ${duration}.`
             );
@@ -428,7 +427,7 @@ export class ConstraintValidationService {
 
             if (
                 constraint.budgetPerPhase &&
-                !matchRange(
+                !matchesRange(
                     constraint.budgetPerPhase,
                     phase.budget
                 )
@@ -440,7 +439,7 @@ export class ConstraintValidationService {
 
             if (
                 constraint.durationPerPhase &&
-                !matchRange(
+                !matchesRange(
                     constraint.durationPerPhase,
                     phase.duration
                 )
@@ -499,7 +498,7 @@ export class ConstraintValidationService {
         errors: string[]
     ): void {
 
-        if (range && !matchRange(range, count)) {
+        if (range && !matchesRange(range, count)) {
             errors.push(
                 `${label} count must be between ${range.min} and ${range.max}. Current count: ${count}.`
             );

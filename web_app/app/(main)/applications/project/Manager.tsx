@@ -54,7 +54,10 @@ const ApplicationManager = ({
                 header: "Document",
                 body: (ps: Application) => ps.documentPath ? (
                     <a
-                        href={`${BASE_URL}/${ps.documentPath.replace(/^\\/, "")}`}
+                         href={`${BASE_URL}/uploads/${ps.documentPath.replace(
+                            /^\\/,
+                            ''
+                        )}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         className="text-blue-600 hover:underline inline-flex items-center gap-1 font-medium text-sm"

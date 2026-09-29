@@ -1,3 +1,4 @@
+import { IStatusHistory } from "@/components/StatusHistoryWidget";
 import { Project } from "../../models/project.model";
 
 export enum PhaseStatus {
@@ -6,17 +7,8 @@ export enum PhaseStatus {
     refused = 'refused',
     active = 'active',
     completed = 'completed',
-    terminated = 'terminated',
+    cancelled = 'cancelled',
 }
-
-/*
-// 1. Define the Breakdown type to match the backend sub-schema
-export type PhaseBreakdown = {
-    activity: string;
-    duration: number;
-    budget: number;
-};
-*/
 
 export type Phase = {
     _id?: string;
@@ -26,8 +18,8 @@ export type Phase = {
     duration: number;        // Total duration
     budget: number;          // Total budget
     description?: string;
-    //breakdown: PhaseBreakdown[]; // The nested array we added
     status?: PhaseStatus;
+    statusHistory?: IStatusHistory<PhaseStatus>[];
     createdAt?: Date;
     updatedAt?: Date;
 };
@@ -54,31 +46,6 @@ export const validatePhase = (phase: Phase): { valid: boolean; message?: string 
     if (!phase.description || phase.description.trim() === '') {
         return { valid: false, message: 'Phase description is required.' };
     }
-
-    /*
-    // 2. Breakdown Requirements
-    // Since Simple Mode is removed, we require at least one activity
-    if (!phase.breakdown || phase.breakdown.length === 0) {
-        return { valid: false, message: 'At least one activity is required in the breakdown.' };
-    }
-
-    // 3. Individual Activity Validation
-    for (const [index, item] of phase.breakdown.entries()) {
-        const activityNum = index + 1;
-
-        if (!item.activity || item.activity.trim() === '') {
-            return { valid: false, message: `Activity #${activityNum} is missing a description.` };
-        }
-
-        if (item.duration === undefined || item.duration <= 0) {
-            return { valid: false, message: `Activity #${activityNum} must have a duration greater than 0.` };
-        }
-
-        if (item.budget === undefined || item.budget < 0) {
-            return { valid: false, message: `Activity #${activityNum} cannot have a negative budget.` };
-        }
-    }
-*/
     // 4. Final Totals Check (Safety check)
     if (!phase.duration || phase.duration <= 0) {
         return { valid: false, message: 'Total calculated duration must be greater than 0.' };

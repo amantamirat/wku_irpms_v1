@@ -9,7 +9,7 @@ export enum PhaseStatus {
     refused = 'refused',
     active = 'active',
     completed = 'completed',
-    terminated = 'terminated',
+    cancelled = 'cancelled',
 }
 
 
@@ -28,9 +28,6 @@ export interface IPhase extends Document {
     createdAt?: Date;
     updatedAt?: Date;
 }
-
-
-
 
 const PhaseSchema = new Schema<IPhase>(
     {
@@ -70,7 +67,6 @@ const PhaseSchema = new Schema<IPhase>(
             type: String,
             trim: true
         },
-        // breakdown: [PhaseBreakdownSchema], // Embedding the array
         status: {
             type: String,
             enum: Object.values(PhaseStatus),

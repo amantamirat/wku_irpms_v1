@@ -1,6 +1,6 @@
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { isValidRange } from "../../../common/types/range";
+import { isValid } from "../../../common/types/range";
 import { CreateProfileDTO, UpdateProfileDTO } from "./profile.dto";
 import { ProfileRepository } from "./profile.repository";
 import { IEligibilityProfile } from "./profile.model";
@@ -120,7 +120,7 @@ export class ProfileService {
                 continue;
             }
 
-            if (!isValidRange(range)) {
+            if (!isValid(range)) {
                 throw new AppError(
                     ERROR_CODES.INVALID_INPUT,
                     `${name} range is invalid.`

@@ -9,6 +9,7 @@ import SavePhase from "../components/SavePhase";
 import { FilterPhaseOptions, Phase } from "../models/phase.model";
 import { PHASE_TRANSITIONS } from "../models/phase.state-machine";
 import { etbCurrencyFormatter } from "@/utils/utils";
+import PhaseDetail from "../components/PhaseDetail";
 
 interface PhaseManagerProps {
     project: Project;
@@ -55,6 +56,7 @@ const PhaseManager = ({
                     </span>
                 )
             },
+            /*
             {
                 header: "Description",
                 field: "description",
@@ -68,6 +70,7 @@ const PhaseManager = ({
                     </div>
                 )
             },
+            */
             {
                 field: "status",
                 header: "Status",
@@ -99,11 +102,15 @@ const PhaseManager = ({
             transitions: PHASE_TRANSITIONS
         },
 
+        expandable: {
+            template: (project) => (
+                <PhaseDetail phase={project} />
+            )
+        },
+
         hideSearch: true,
         hideDefaultActions: !enableEditing
     });
-
-    // Fixed: Added key={project?.id} for clean re-renders on project change
     return <Manager key={project?._id} />;
 };
 
