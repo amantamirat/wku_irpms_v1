@@ -6,6 +6,16 @@ import {
     UpdatePhaseDto,
 } from "./phase.dto";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
+import { toObjectId } from "../../../common/utils/mongoose.utils";
+
+export interface CreatePhaseData {
+    project: string;
+    title: string;
+    order: number;
+    duration: number;
+    budget: number;
+    description?: string;
+}
 
 export interface IPhaseRepository {
     findById(id: string): Promise<IPhase | null>;
@@ -16,7 +26,7 @@ export interface IPhaseRepository {
     findLastPhase(projectId: string): Promise<IPhase | null>;
 
 
-    create(dto: CreatePhaseDto): Promise<IPhase>;
+    create(data: CreatePhaseData): Promise<IPhase>;
     createMany(dtos: CreatePhaseDto[]): Promise<IPhase[]>;
 
     update(
@@ -104,16 +114,11 @@ export class PhaseRepository implements IPhaseRepository {
             .exec();
     }
 
-
-
-    async create(dto: CreatePhaseDto): Promise<IPhase> {
-        const data = {
-            ...dto,
-            project: new mongoose.Types.ObjectId(dto.project),
-        };
-
-        const created = await Phase.create(data);
-
+    async create(data: CreatePhaseData): Promise<IPhase> {
+        const created = await Phase.create({
+            ...data,
+            project: toObjectId(data.project),
+        });
         return created;
     }
 

@@ -1,20 +1,20 @@
 // modules/report/components/Dashboard.tsx
 'use client';
 
-import { useEffect, useState } from 'react';
-import { Skeleton } from 'primereact/skeleton';
-import { IDashboardReport, IReportFilter } from '../models/report.types';
+import { useState, useEffect } from 'react';
 import { ReportApi } from '../api/report.api';
+import { IDashboardReport, IReportFilter } from '../models/report.types';
 
-// Import your standalone widgets
-import { PortfolioWidget } from './PortfolioWidget';
-import { FinancialWidget } from './FinancialWidget';
+// Import all related widgets & skeletons
+import { PortfolioWidget, PortfolioWidgetSkeleton } from './PortfolioWidget';
 import { ApplicationWidget } from './ApplicationWidget';
 import { EvaluationWidget } from './EvaluationWidget';
+import { VerificationWidget } from './VerificationWidget';
+import { ListDepartmentWidget } from './ListDepartmentWidget';
+import { SingleDepartmentWidget } from './SingleDepartmentWidget'; // Make sure to import this
 
 interface DashboardProps {
   filter?: IReportFilter;
-  /** Pass data directly if already fetched by parent, otherwise fetched via filter */
   initialData?: IDashboardReport | null;
   loading?: boolean;
 }
@@ -26,6 +26,7 @@ export const ReportDashboard = ({ filter, initialData, loading: externalLoading 
   useEffect(() => {
     if (initialData) {
       setReport(initialData);
+      setLoading(false);
       return;
     }
 
@@ -44,10 +45,24 @@ export const ReportDashboard = ({ filter, initialData, loading: externalLoading 
     loadData();
   }, [filter, initialData]);
 
+  // 1. Show skeletons explicitly when loading is true
   if (loading) {
-    return <DashboardSkeleton />;
+    return (
+      <div className="flex flex-column gap-4">
+        <PortfolioWidgetSkeleton />
+        <div className="grid">
+          <div className="col-12 lg:col-6"><ApplicationWidget loading={true} /></div>
+          <div className="col-12 lg:col-6"><EvaluationWidget loading={true} /></div>
+        </div>
+        <div className="grid">
+          <div className="col-12 lg:col-6"><VerificationWidget loading={true} /></div>
+          <div className="col-12 lg:col-6"><ListDepartmentWidget loading={true} /></div>
+        </div>
+      </div>
+    );
   }
 
+  // 2. Show error/empty message only if loading is finished and there's no report data
   if (!report) {
     return (
       <div className="surface-card shadow-1 border-round-xl p-5 text-center text-500">
@@ -57,55 +72,40 @@ export const ReportDashboard = ({ filter, initialData, loading: externalLoading 
     );
   }
 
+  // Check if departments data is a single item or an array with length of 1
+  const departmentsData = report?.departments;
+  const isSingleDepartment = Array.isArray(departmentsData) 
+    ? departmentsData.length === 1 
+    : departmentsData != null; // Handle if it's a single object directly depending on your types
+
   return (
     <div className="flex flex-column gap-4">
-      {/* 1. PORTFOLIO WIDGET */}
-      <PortfolioWidget data={report.portfolio} />
+      {/* 1. PORTFOLIO OVERVIEW */}
+      <PortfolioWidget data={report?.portfolio} loading={false} />
 
-      {/* 2. EVALUATIONS & APPLICATIONS GRID */}
+      {/* 2. APPLICATIONS & EVALUATIONS */}
       <div className="grid">
         <div className="col-12 lg:col-6">
-          <ApplicationWidget data={report.applications} loading={loading} />
+          <ApplicationWidget data={report?.applications} loading={false} />
         </div>
         <div className="col-12 lg:col-6">
-          <EvaluationWidget data={report.evaluations} loading={loading} />
+          <EvaluationWidget data={report?.reviewers} loading={false} />
+        </div>
+      </div>
+
+      {/* 3. VERIFICATIONS & DEPARTMENTS (Conditional check for single department) */}
+      <div className="grid">
+        <div className="col-12 lg:col-6">
+          <VerificationWidget data={report?.verifications} loading={false} />
+        </div>
+        <div className="col-12 lg:col-6">
+          {Array.isArray(departmentsData) && departmentsData.length === 1 ? (
+            <SingleDepartmentWidget department={departmentsData[0]} loading={false} />
+          ) : (
+            <ListDepartmentWidget departments={departmentsData} loading={false} />
+          )}
         </div>
       </div>
     </div>
   );
 };
-
-/* ============================================================================
- * LOADING SKELETON
- * ============================================================================ */
-const DashboardSkeleton = () => (
-  <div className="flex flex-column gap-4">
-    {/* Skeleton for Portfolio */}
-    <div className="grid">
-      {[1, 2, 3, 4].map((i) => (
-        <div key={i} className="col-12 sm:col-6 lg:col-3">
-          <div className="surface-card p-3 border-round-xl shadow-1">
-            <Skeleton width="50%" className="mb-2" />
-            <Skeleton width="80%" height="2rem" />
-          </div>
-        </div>
-      ))}
-    </div>
-
-    {/* Skeleton for Financial and Applications */}
-    <div className="grid">
-      <div className="col-12 lg:col-6">
-        <div className="surface-card p-4 border-round-xl shadow-1 h-18rem">
-          <Skeleton width="40%" className="mb-3" />
-          <Skeleton width="100%" height="11rem" />
-        </div>
-      </div>
-      <div className="col-12 lg:col-6">
-        <div className="surface-card p-4 border-round-xl shadow-1 h-18rem">
-          <Skeleton width="40%" className="mb-3" />
-          <Skeleton width="100%" height="11rem" />
-        </div>
-      </div>
-    </div>
-  </div>
-);

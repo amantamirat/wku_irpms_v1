@@ -335,7 +335,7 @@ export class DemoSeeder {
         const filter: Record<string, unknown> = {
             title: item.title,
             thematicArea: thematicId,
-            parent: parent ?? undefined
+           // parent: parent ?? undefined
         };
 
         let theme =

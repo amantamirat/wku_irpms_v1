@@ -15,7 +15,7 @@ import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { AuthScope } from "../../auth/auth.types";
-import ScopeFilterService from "../../auth/scope-filter.service";
+import ScopeFilterService from "../../../common/services/scope-filter.service";
 import { ICallRepository } from "../../calls/call.repository";
 import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
 import { NotificationService } from "../../notifications/notification.service";

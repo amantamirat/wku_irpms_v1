@@ -9,69 +9,87 @@ import { ReportController } from "./report.controller";
 import {
     verifyAuthToken
 } from "../auth/auth.middleware";
-import { checkPermission } from '../../core/container';
+import { checkPermission, fileStorageService, filterService } from '../../core/container';
 
 import { PERMISSIONS } from "../../common/constants/permissions";
 
 
+
 const router: Router = Router();
 
-const repository =
-    new ReportRepository();
-
-const service =
-    new ReportService(repository);
-
-const controller =
-    new ReportController(service);
-
+const repository = new ReportRepository();
+const service = new ReportService(repository, filterService);
+const controller = new ReportController(service);
 
 // All report endpoints require authentication
-// and report overview permission.
-router.use(
-    verifyAuthToken,
-    checkPermission([
-        PERMISSIONS.REPORT.OVERVIEW
-    ])
-);
+router.use(verifyAuthToken);
 
-
+// Dashboard requires dashboard permission
 router.get(
     "/dashboard",
+    checkPermission([
+        PERMISSIONS.REPORT.DASHBOARD
+    ]),
     controller.getDashboard
 );
 
+// Other reports require overview permission
 router.get(
     "/portfolio",
+    checkPermission([
+        PERMISSIONS.REPORT.OVERVIEW
+    ]),
     controller.getPortfolio
 );
 
 router.get(
     "/applications",
+    checkPermission([
+        PERMISSIONS.REPORT.OVERVIEW
+    ]),
     controller.getApplications
 );
 
 router.get(
-    "/evaluation",
-    controller.getEvaluation
+    "/verifications",
+    checkPermission([
+        PERMISSIONS.REPORT.OVERVIEW
+    ]),
+    controller.getVerifications
 );
-/*
+
 router.get(
-    "/financial",
-    controller.getFinancial
+    "/evaluations",
+    checkPermission([
+        PERMISSIONS.REPORT.OVERVIEW
+    ]),
+    controller.getEvaluations
 );
-*/
-/*
-router.get(
-    "/phases",
-    controller.getPhases
-);
-*/
 
 router.get(
     "/departments",
+    checkPermission([
+        PERMISSIONS.REPORT.OVERVIEW
+    ]),
     controller.getDepartments
 );
 
+/////////////////////////////////////////////////////
+
+router.get(
+    "/directorates",
+    checkPermission([
+        PERMISSIONS.REPORT.OVERVIEW
+    ]),
+    controller.getDirectorateReport
+);
+
+router.get(
+    "/financial",
+    checkPermission([
+        PERMISSIONS.REPORT.OVERVIEW
+    ]),
+    controller.getFinancial
+);
 
 export default router;

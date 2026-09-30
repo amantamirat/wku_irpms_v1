@@ -11,7 +11,7 @@ import { FileStorageService } from "../../../common/services/file-storage.servic
 import { AnonymizerService } from "../../../util/anonymizer/anonymizer.service";
 import { AuthPermissionService } from "../../auth/auth.permission-service";
 import { AuthScope } from "../../auth/auth.types";
-import ScopeFilterService from "../../auth/scope-filter.service";
+import ScopeFilterService from "../../../common/services/scope-filter.service";
 import { ICallRepository } from "../../calls/call.repository";
 import { IStage } from "../../calls/stages/stage.model";
 import { IStageRepository } from "../../calls/stages/stage.repository";

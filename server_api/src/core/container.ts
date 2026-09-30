@@ -4,7 +4,7 @@ import { FileStorageService } from "../common/services/file-storage.service";
 import { AccountRepository } from "../modules/accounts/account.repository";
 import { AccountService } from "../modules/accounts/account.service";
 import { AuthPermissionService } from "../modules/auth/auth.permission-service";
-import ScopeFilterService from "../modules/auth/scope-filter.service";
+import ScopeFilterService from "../common/services/scope-filter.service";
 import { CalendarRepository } from "../modules/calendar/calendar.repository";
 import { CallRepository } from "../modules/calls/call.repository";
 import { StageRepository } from "../modules/calls/stages/stage.repository";
@@ -154,8 +154,7 @@ export const collabService = new CollaboratorService(collaboratorRepo, projectRe
 export const phaseActivityService = new PhaseActivityService(phaseActivityRepo, phaseRepo, projectAuth)
 
 
-export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, callRepo, constraintValidator,
-    projectAuth);
+export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, projectAuth);
 
 
 

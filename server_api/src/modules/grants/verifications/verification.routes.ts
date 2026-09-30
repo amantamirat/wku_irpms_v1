@@ -10,7 +10,7 @@ import { VerificationService } from "./verification.service";
 import { notificationService, projectRepo, reviewerRepo, verificationConfRepo, verificationRepo } from "../../../core/container";
 import { upload } from "../../../common/middleware/fileUpload.middleware";
 import { PERMISSIONS } from "../../../common/constants/permissions";
-import ScopeFilterService from "../../auth/scope-filter.service";
+import ScopeFilterService from "../../../common/services/scope-filter.service";
 
 const verificationService =
     new VerificationService(

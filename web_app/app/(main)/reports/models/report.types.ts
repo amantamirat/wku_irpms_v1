@@ -1,7 +1,6 @@
 ///report/report.types.ts
 
 import { FundingSource } from "../../grants/models/grant.model";
-import { ProjectStatus } from "../../projects/models/project.model";
 
 export interface IReportFilter {
   dateFrom?: Date;
@@ -9,16 +8,22 @@ export interface IReportFilter {
 
   grant?: string;
   call?: string;
+  workspace?: string;
+  organization?: string;
+  calendar?: string;
 
   fundingSource?: FundingSource;
-
-  department?: string;
-  college?: string;
-
-  theme?: string;
-
-  projectStatus?: ProjectStatus;
 }
+
+
+export interface IDashboardReport {
+  portfolio: IPortfolioReport;
+  applications: IApplicationReport;
+  reviewers: IReviewersReport;
+  verifications: IVerificationReport;
+  departments: IDepartmentReport[];
+}
+
 
 export interface IPortfolioReport {
   totalProjects: number;
@@ -42,7 +47,19 @@ export interface IApplicationReport {
   averageScore: number | null;
 }
 
-export interface IEvaluationReport {
+export interface IVerificationReport {
+  totalVerifications: number;
+  submittedVerifications: number;
+  verifiedVerifications: number;
+  rejectedVerifications: number;
+  verificationRate: number;          // percentage, 0-100
+  rejectionRate: number;             // percentage, 0-100
+  averageScore: number | null;       // null if no scores
+  averageReviewTime: number | null;  // in days, null if nothing reviewed yet
+  averageVerificationAttempts: number;
+}
+
+export interface IReviewersReport {
   totalReviews: number;
   completedReviews: number;
   pendingReviews: number;
@@ -52,14 +69,53 @@ export interface IEvaluationReport {
   averageScore: number | null;
 }
 
+
+export interface IDepartmentReport {
+  _id: string;
+  name: string;
+  projects: number;
+  totalBudget: number;
+  completed: number;
+  approved: number;
+  granted: number;
+  terminated: number;
+}
+
+
+export interface IDirectorateFinancialReport {
+  _id: string;
+  name: string;
+
+  allocated: number;
+  committed: number;
+  used: number;
+
+  remaining: number;
+  unallocated: number;
+
+  utilization: number;
+  commitmentRate: number;
+
+  overCommitted: boolean;
+
+  grantCount: number;
+  projectCount: number;
+}
+
 export interface IFinancialReport {
-  totalGrantAmount: number;
-  usedGrantBudget: number;
-  remainingGrantBudget: number;
-  utilizationRate: number;
+  totalGrantAmount: number;        // total awarded
+  usedGrantBudget: number;         // used
+  committedGrantBudget: number;    // committed (approved but not yet spent)
+  unallocatedGrantBudget: number;  // awarded - used - committed
+  remainingGrantBudget: number;    // awarded - used (keep if other code uses it)
+  utilizationRate: number;         // used / awarded * 100
   internalFunding: number;
   externalFunding: number;
 }
+
+
+
+////
 
 export interface IPhaseReport {
   total: number;
@@ -75,13 +131,4 @@ export interface IOrganizationMetric {
   count: number;
 }
 
-export type IDepartmentReport = IOrganizationMetric[];
 
-export interface IDashboardReport {
-  portfolio: IPortfolioReport;
-  applications: IApplicationReport;
-  evaluations: IEvaluationReport;
-  //financial: IFinancialReport;
-  //phases: IPhaseReport;
-  //departments: IDepartmentReport;
-}

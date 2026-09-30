@@ -53,8 +53,8 @@ const SaveUser = ({ visible, item, onHide, onComplete }: EntitySaveDialogProps<U
         const loadFormData = async () => {
             try {
                 const [departments, externals] = await Promise.all([
-                    OrganizationApi.getAll({ type: OrgnUnit.department }),
-                    OrganizationApi.getAll({ type: OrgnUnit.external })
+                    OrganizationApi.lookup!({ type: OrgnUnit.department }),
+                    OrganizationApi.lookup!({ type: OrgnUnit.external })
                 ]);
                 setWorkspaces([...departments, ...externals]);
 

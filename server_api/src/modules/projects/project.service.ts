@@ -8,7 +8,7 @@ import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { FileStorageService } from "../../common/services/file-storage.service";
 import { AuthPermissionService } from "../auth/auth.permission-service";
 import { AuthScope } from "../auth/auth.types";
-import ScopeFilterService from "../auth/scope-filter.service";
+import ScopeFilterService from "../../common/services/scope-filter.service";
 import { CallStatus } from "../calls/call.model";
 import { ICallRepository } from "../calls/call.repository";
 import { IStageRepository } from "../calls/stages/stage.repository";
@@ -203,15 +203,16 @@ export class ProjectService {
         // --------------------------------------------------
 
         if (phases?.length) {
+            /*
             const orderedPhases = [...phases].sort(
                 (a, b) => a.order - b.order
-            );
+            );*/
 
-            for (const phase of orderedPhases) {
+            for (const phase of phases) {
                 await this.phaseService.create(
                     {
                         project: projectId,
-                        order: phase.order,
+                        // order: phase.order,
                         title: phase.title,
                         budget: phase.budget,
                         duration: phase.duration,

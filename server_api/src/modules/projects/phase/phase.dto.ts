@@ -12,7 +12,7 @@ export interface PhaseBreakdownDto {
 // 2. Base Phase structure
 export interface PhaseDto {
     title:string;
-    order: number;           // Added: critical for the unique index {project, order}
+    //order: number;           // Added: critical for the unique index {project, order}
     duration: number;        // Total duration of the phase
     budget: number;          // Total budget of the phase
     description: string;

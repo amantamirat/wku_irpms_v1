@@ -1246,6 +1246,10 @@
     "name": "report:overview"
   },
   {
+    "category": "Report Management",
+    "name": "report:dashboard"
+  },
+  {
     "category": "Enrollment Management",
     "name": "enrollment:create",
     "description": "Enroll a user as a student in a specified calendar and program",

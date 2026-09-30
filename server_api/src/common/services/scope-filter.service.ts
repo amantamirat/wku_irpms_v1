@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
-import { IProjectRepository } from "../projects/project.repository";
-import { AuthScope, ScopeFilter } from "./auth.types";
+import { IProjectRepository } from "../../modules/projects/project.repository";
+import { AuthScope, ScopeFilter } from "../../modules/auth/auth.types";
+import { toObjectId } from "../utils/mongoose.utils";
 
 class ScopeFilterService {
 
@@ -22,16 +23,20 @@ class ScopeFilterService {
             };
         }
 
+        const scopeIds = scope.map(
+            id => toObjectId(id)
+        );
+
         return {
             $or: [
                 {
                     workspace: {
-                        $in: scope
+                        $in: scopeIds
                     }
                 },
                 {
                     organization: {
-                        $in: scope
+                        $in: scopeIds
                     }
                 }
             ]
@@ -94,7 +99,7 @@ class ScopeFilterService {
         };
     }
 
-     async getReviewerFilter(
+    async getReviewerFilter(
         scope: AuthScope
     ): Promise<ScopeFilter> {
 

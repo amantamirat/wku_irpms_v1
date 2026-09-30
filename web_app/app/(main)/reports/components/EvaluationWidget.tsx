@@ -3,11 +3,11 @@
 
 import { useState, useEffect } from 'react';
 import { Chart } from 'primereact/chart';
-import { IEvaluationReport } from '../models/report.types';
+import { IReviewersReport } from '../models/report.types';
 import { GridSkeleton } from '@/components/Skeletons';
 
 interface Props {
-  data?: IEvaluationReport;
+  data?: IReviewersReport;
   loading?: boolean;
 }
 
@@ -92,7 +92,7 @@ export const EvaluationWidget = ({ data, loading }: Props) => {
         <div>
           <h4 className="text-xl font-bold text-900 m-0 flex align-items-center gap-2">
             <i className="pi pi-star text-primary text-xl" />
-            Evaluation Analytics
+            Reviewers Analytics
           </h4>
           <span className="text-xs text-500 font-medium">Overview of review progression</span>
         </div>

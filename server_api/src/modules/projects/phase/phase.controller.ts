@@ -29,7 +29,7 @@ export class PhaseController {
 
             const data: CreatePhaseDto = {
                 title,
-                order: Number(order),
+               // order: Number(order),
                 duration: Number(duration),
                 budget: Number(budget),
                 description,

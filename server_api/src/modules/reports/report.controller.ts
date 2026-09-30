@@ -13,6 +13,9 @@ import {
 } from "./report.types";
 
 import { successResponse } from "../../common/helpers/response";
+import { toObjectId } from "../../common/utils/mongoose.utils";
+import { console } from "inspector";
+import { AuthenticatedRequest } from "../auth/auth.middleware";
 
 
 export class ReportController {
@@ -31,80 +34,73 @@ export class ReportController {
             dateTo,
             grant,
             call,
-            fundingSource,
-            department,
-            college,
-            theme,
-            projectStatus
+            workspace,
+            organization,
+            calendar,
+            fundingSource
         } = req.query;
 
         return {
-
             ...(dateFrom && {
-                dateFrom: new Date(
-                    dateFrom as string
-                )
+                dateFrom: new Date(dateFrom as string)
             }),
 
             ...(dateTo && {
-                dateTo: new Date(
-                    dateTo as string
-                )
+                dateTo: new Date(dateTo as string)
             }),
 
             ...(grant && {
-                grant: new mongoose.Types.ObjectId(
+                grant: toObjectId(
                     grant as string
                 )
             }),
 
             ...(call && {
-                call: new mongoose.Types.ObjectId(
+                call: toObjectId(
                     call as string
                 )
             }),
 
+            ...(workspace && {
+                workspace: toObjectId(
+                    workspace as string
+                )
+            }),
+
+            ...(organization && {
+                organization: toObjectId(
+                    organization as string
+                )
+            }),
+
+            ...(calendar && {
+                calendar: toObjectId(
+                    calendar as string
+                )
+            }),
+
             ...(fundingSource && {
-                fundingSource:
-                    fundingSource as FundingSource
-            }),
-
-            ...(department && {
-                department: new mongoose.Types.ObjectId(
-                    department as string
-                )
-            }),
-
-            ...(college && {
-                college: new mongoose.Types.ObjectId(
-                    college as string
-                )
-            }),
-
-            ...(theme && {
-                theme: new mongoose.Types.ObjectId(
-                    theme as string
-                )
-            }),
-
-            ...(projectStatus && {
-                projectStatus:
-                    projectStatus as ProjectStatus
+                fundingSource: fundingSource as FundingSource
             })
         };
     }
 
 
     getDashboard = async (
-        req: Request,
+        req: AuthenticatedRequest,
         res: Response
     ) => {
+
+        if (!req.auth) {
+            return
+        }
 
         const filter = this.buildFilter(req);
 
         const report =
             await this.reportService.getDashboard(
-                filter
+                filter,
+                req.auth.scope
             );
 
         successResponse(
@@ -119,10 +115,10 @@ export class ReportController {
         req: Request,
         res: Response
     ) => {
-
+        const filter = this.buildFilter(req);
         const report =
             await this.reportService.getPortfolio(
-                this.buildFilter(req)
+                filter
             );
 
         successResponse(
@@ -153,13 +149,32 @@ export class ReportController {
     };
 
 
-    getEvaluation = async (
+    getVerifications = async (
         req: Request,
         res: Response
     ) => {
 
         const report =
-            await this.reportService.getEvaluation(
+            await this.reportService.getVerifications(
+                this.buildFilter(req)
+            );
+
+        successResponse(
+            res,
+            200,
+            "Verification report fetched successfully",
+            report
+        );
+    };
+
+
+    getEvaluations = async (
+        req: Request,
+        res: Response
+    ) => {
+
+        const report =
+            await this.reportService.getEvaluations(
                 this.buildFilter(req)
             );
 
@@ -171,6 +186,44 @@ export class ReportController {
         );
     };
 
+    getDepartments = async (
+        req: Request,
+        res: Response
+    ) => {
+
+        const filter = this.buildFilter(req);
+
+        const report =
+            await this.reportService.getDepartments(
+                filter
+            );
+        successResponse(
+            res,
+            200,
+            "Department report fetched successfully",
+            report
+        );
+    };
+
+    /////////////////////////////////////////////////////////////////////////////
+    getDirectorateReport = async (
+        req: Request,
+        res: Response
+    ) => {
+
+        const report =
+            await this.reportService.getDirectorateReport();
+
+        successResponse(
+            res,
+            200,
+            "Directorate report fetched successfully",
+            report
+        );
+    };
+
+
+
 
     getFinancial = async (
         req: Request,
@@ -179,7 +232,6 @@ export class ReportController {
 
         const report =
             await this.reportService.getFinancial(
-                this.buildFilter(req)
             );
 
         successResponse(
@@ -210,23 +262,5 @@ export class ReportController {
     };
 
 
-    getDepartments = async (
-        req: Request,
-        res: Response
-    ) => {
 
-        const filter = this.buildFilter(req);
-
-        const report =
-            await this.reportService.getDepartments(
-                filter
-            );
-
-        successResponse(
-            res,
-            200,
-            "Department report fetched successfully",
-            report
-        );
-    };
 }

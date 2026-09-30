@@ -5,8 +5,6 @@ import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
-import { ICallRepository } from "../../calls/call.repository";
-import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
 import { IGrantRepository } from "../../grants/grant.repository";
 import { ProjectAuth } from "../project.auth";
 import { ProjectStatus } from "../project.model";
@@ -21,8 +19,6 @@ export class PhaseService {
         private readonly phaseRepo: IPhaseRepository,
         private readonly projectRepo: IProjectRepository,
         private readonly grantRepo: IGrantRepository,
-        private readonly callRepo: ICallRepository,
-        private readonly constraintValidator: ConstraintValidationService,
         private readonly projectAuth: ProjectAuth
     ) { }
 
@@ -31,7 +27,6 @@ export class PhaseService {
         if (!options?.skipValidation) {
             if (!userId) { return }
             const { projectDoc, isLeadPI } = await this.projectAuth.auth(project, userId, PERMISSIONS.PHASE.CREATE);
-
             if (isLeadPI) {
                 if (
                     projectDoc.status !== ProjectStatus.draft
@@ -39,33 +34,6 @@ export class PhaseService {
                     throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
                 }
             }
-
-            /*
-            if (projectDoc.call) {
-                const callDoc = await this.callRepo.findById(String(projectDoc.call));
-                if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
-
-                if (callDoc.constraint) {
-                    const existingPhases = await this.phaseRepo.find({ project });
-                    const proposedPhases = [...existingPhases, dto];
-
-                    const validationResult =
-                        await this.constraintValidator.validatePhases(
-                            String(callDoc.constraint),
-                            proposedPhases
-                        );
-
-                    if (!validationResult.valid) {
-                        throw new AppError(
-                            ERROR_CODES.INVALID_CONSTRAINT,
-                            "invalid phases",
-                            400,
-                            validationResult
-                        );
-                    }
-                }
-            }
-                */
         }
         try {
             const lastPhase = await this.phaseRepo.findLastPhase(project);
@@ -125,23 +93,6 @@ export class PhaseService {
                 throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
             }
         }
-
-        /*
-        if (projectDoc.call) {
-            const callDoc = await this.callRepo.findById(String(projectDoc.call));
-            if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
-            if (callDoc.constraint) {
-                const updatedPhase = { ...phaseDoc, ...data };
-                const existingPhases = await this.phaseRepo.find({ project: projectId });
-                const updatedPhases = existingPhases.map(p => String(p._id) === id ? updatedPhase : p);
-                const validationResult = await this.constraintValidator.validatePhases(String(callDoc.constraint), updatedPhases);
-                if (!validationResult.valid) {
-                    throw new AppError(ERROR_CODES.INVALID_CONSTRAINT,
-                        "invalid phases", 400, validationResult);
-                }
-            }
-        }
-            */
 
         const oldDuration = phaseDoc.duration ?? 0;
         const oldBudget = phaseDoc.budget ?? 0;
@@ -325,7 +276,6 @@ export class PhaseService {
         );
 
         if (updated) {
-
             /**
              * Phase became active.
              */
@@ -338,7 +288,6 @@ export class PhaseService {
                     userId
                 );
             }
-
             /**
              * Current phase is no longer active.
              */

@@ -326,6 +326,7 @@ export const PERMISSIONS = {
   },
   REPORT: {
     OVERVIEW: "report:overview",
+    DASHBOARD: "report:dashboard",
   }
 } as const;
 

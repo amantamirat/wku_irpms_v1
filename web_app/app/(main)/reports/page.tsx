@@ -1,82 +1,82 @@
-// reports/page.tsx
 'use client';
 
-import { useState, useEffect } from 'react';
-import { Dropdown } from 'primereact/dropdown';
-import { Calendar } from 'primereact/calendar';
-import { Button } from 'primereact/button';
-import { SelectButton } from 'primereact/selectbutton';
+import { CalendarApi } from '@/app/(main)/calendars/api/calendar.api'; // Adjust path if needed based on your structure
 import { GrantApi } from '@/app/(main)/grants/api/grant.api';
 import { Grant } from '@/app/(main)/grants/models/grant.model';
-import { IReportFilter } from './models/report.types';
+import { SelectButton } from 'primereact/selectbutton';
+import { useEffect, useState } from 'react';
 import { ReportApi } from './api/report.api';
+import { IReportFilter } from './models/report.types';
 
-// Widget Imports
-import { ReportDashboard } from './components/Dashboard';
-import { DepartmentWidget } from './components/DepartmentWidget';
-import { PhaseWidget } from './components/PhaseWidget';
-import { PortfolioWidget } from './components/PortfolioWidget';
+// Components & Widgets
+import { OrganizationApi } from '../organizations/api/organization.api';
+import { OrgnUnit } from '../organizations/models/organization.model';
 import { ApplicationWidget } from './components/ApplicationWidget';
+import { DirectorateWidget } from './components/DirectorateWidget';
 import { EvaluationWidget } from './components/EvaluationWidget';
 import { FinancialWidget } from './components/FinancialWidget';
+import { ListDepartmentWidget } from './components/ListDepartmentWidget';
+import { PortfolioWidget } from './components/PortfolioWidget';
+import { ReportFilterPanel } from './components/ReportFilterPanel';
+import { VerificationWidget } from './components/VerificationWidget';
 
-// Available Report Types (Added 'evaluations')
-type ReportType = 'dashboard' | 'departments' | 'phases' | 'portfolio' | 'applications' | 'evaluations' | 'financial';
+type ReportType = 'departments' | 'directorates' | 'phases' | 'portfolio' | 'applications' | 'evaluations' | 'verifications' | 'financial';
 
 const REPORT_OPTIONS = [
-  { label: 'Dashboard Overview', value: 'dashboard', icon: 'pi pi-th-large' },
-  { label: 'Department Analytics', value: 'departments', icon: 'pi pi-building' },
-  { label: 'Phase Progress', value: 'phases', icon: 'pi pi-sitemap' },
-  { label: 'Portfolio Detail', value: 'portfolio', icon: 'pi pi-folder' },
+  { label: 'Portfolio', value: 'portfolio', icon: 'pi pi-folder' },
   { label: 'Applications', value: 'applications', icon: 'pi pi-file-edit' },
   { label: 'Evaluations', value: 'evaluations', icon: 'pi pi-star' },
-  { label: 'Financials', value: 'financial', icon: 'pi pi-dollar' },
+  { label: 'Verifications', value: 'verifications', icon: 'pi pi-verified' },
+  { label: 'Departments', value: 'departments', icon: 'pi pi-building' },
+  { label: 'Directorates', value: 'directorates', icon: 'pi pi-sitemap' },
+  { label: 'Financials', value: 'financial', icon: 'pi pi-bitcoin' },
 ];
 
 export default function ReportsPage() {
-  // 1. REPORT SELECTION STATE
-  const [selectedReport, setSelectedReport] = useState<ReportType>('dashboard');
-
-  // 2. FILTER FORM STATE (Staging changes before apply)
+  const [selectedReport, setSelectedReport] = useState<ReportType>('portfolio');
   const [filterForm, setFilterForm] = useState<IReportFilter>({});
-
-  // 3. APPLIED FILTER STATE (Triggers API fetch)
   const [appliedFilter, setAppliedFilter] = useState<IReportFilter>({});
 
-  // 4. DATA & LOADING STATES
   const [grants, setGrants] = useState<Grant[]>([]);
+  const [calendars, setCalendars] = useState<any[]>([]); // Added calendar state
+  const [workspaces, setWorkpaces] = useState<any[]>([]);
+  const [directorates, setDirectorates] = useState<any[]>([]);
+
   const [reportData, setReportData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
 
-  // Fetch Grants for the Dropdown on Mount
+  // Fetch Grants and Calendars on Mount
   useEffect(() => {
-    const fetchGrants = async () => {
+    const fetchLookups = async () => {
       try {
-        const data = await GrantApi.lookup!();
-        setGrants(data || []);
+        const [grantData, calendarData, departmentData, externalData, directorateData] = await Promise.all([
+          GrantApi.lookup ? GrantApi.lookup() : Promise.resolve([]),
+          CalendarApi.lookup ? CalendarApi.lookup() : Promise.resolve([]),
+          OrganizationApi.lookup!({ type: OrgnUnit.department }),
+          OrganizationApi.lookup!({ type: OrgnUnit.external }),
+          OrganizationApi.lookup!({ type: OrgnUnit.directorate })
+        ]);
+        setGrants(grantData || []);
+        setCalendars(calendarData || []);
+        setWorkpaces([...departmentData, ...externalData]);
+        setDirectorates(directorateData)
       } catch (err) {
-        console.error('Failed to load grants:', err);
+        console.error('Failed to load filter lookups:', err);
       }
     };
-    fetchGrants();
+    fetchLookups();
   }, []);
 
-  // Fetch data whenever selectedReport or appliedFilter changes
+  // Fetch Data on Report Type or Applied Filter Change
   useEffect(() => {
     fetchActiveReport();
   }, [selectedReport, appliedFilter]);
 
   const fetchActiveReport = async () => {
-    // Dashboard fetches its own sub-widgets internally
-    if (selectedReport === 'dashboard') return;
-
     setLoading(true);
     try {
       let data = null;
       switch (selectedReport) {
-        case 'departments':
-          data = await ReportApi.getDepartments(appliedFilter);
-          break;
         case 'portfolio':
           data = await ReportApi.getPortfolio(appliedFilter);
           break;
@@ -86,11 +86,19 @@ export default function ReportsPage() {
         case 'evaluations':
           data = await ReportApi.getEvaluations(appliedFilter);
           break;
+        case 'verifications':
+          data = await ReportApi.getVerifications(appliedFilter);
+          break;
+        case 'directorates':
+          data = await ReportApi.getDirectorateReport(appliedFilter);
+          break;
         case 'financial':
-          // Optional endpoint execution
+          data = await ReportApi.getFinancial(appliedFilter);
+          break;
+        case 'departments':
+          data = await ReportApi.getDepartmentReport(appliedFilter);
           break;
         case 'phases':
-          // Optional endpoint execution
           break;
       }
       setReportData(data);
@@ -102,13 +110,19 @@ export default function ReportsPage() {
     }
   };
 
-  const handleApplyFilter = () => {
-    setAppliedFilter({ ...filterForm });
-  };
-
+  const handleApplyFilter = () => setAppliedFilter({ ...filterForm });
   const handleResetFilter = () => {
     setFilterForm({});
     setAppliedFilter({});
+  };
+
+  const reportItemTemplate = (option: { label: string; icon: string }) => {
+    return (
+      <div className="flex items-center gap-2 py-1">
+        <i className={option.icon} />
+        <span className="text-sm font-medium">{option.label}</span>
+      </div>
+    );
   };
 
   return (
@@ -119,92 +133,39 @@ export default function ReportsPage() {
         <span className="text-600 text-sm">Select a report module, apply filters, and query performance data.</span>
       </div>
 
-      {/* 1. REPORT TYPE SWITCHER */}
+      {/* REPORT TYPE SWITCHER */}
       <div className="surface-card shadow-1 p-3 border-round-xl overflow-x-auto">
         <SelectButton
           value={selectedReport}
           options={REPORT_OPTIONS}
           onChange={(e) => e.value && setSelectedReport(e.value)}
           optionLabel="label"
+          itemTemplate={reportItemTemplate}
           className="p-button-sm flex-nowrap"
         />
       </div>
 
-      {/* 2. FILTER PANEL */}
-      <div className="surface-card shadow-1 p-4 border-round-xl">
-        <h4 className="text-sm font-semibold text-700 m-0 mb-3 flex align-items-center gap-2">
-          <i className="pi pi-filter text-primary" /> Filter Options
-        </h4>
+      {/* REUSABLE FILTER PANEL */}
+      <ReportFilterPanel
+        filterForm={filterForm}
+        setFilterForm={setFilterForm}
+        grants={grants}
+        calendars={calendars}
+        workspaces={workspaces}
+        organizations={directorates}
+        onApply={handleApplyFilter}
+        onReset={handleResetFilter}
+      />
 
-        <div className="grid align-items-end">
-          {/* Grant Filter */}
-          <div className="col-12 sm:col-6 lg:col-3">
-            <label className="text-700 font-medium text-xs block mb-1">Grant</label>
-            <Dropdown
-              value={filterForm.grant}
-              options={grants}
-              onChange={(e) => setFilterForm({ ...filterForm, grant: e.value })}
-              optionLabel="title"
-              optionValue="_id"
-              placeholder="All Grants"
-              className="w-full p-inputtext-sm"
-              showClear
-            />
-          </div>
-
-          {/* Date From */}
-          <div className="col-12 sm:col-6 lg:col-3">
-            <label className="text-700 font-medium text-xs block mb-1">Date From</label>
-            <Calendar
-              value={filterForm.dateFrom ? new Date(filterForm.dateFrom) : null}
-              onChange={(e) => setFilterForm({ ...filterForm, dateFrom: e.value as Date })}
-              placeholder="Start Date"
-              dateFormat="yy-mm-dd"
-              className="w-full p-inputtext-sm"
-              showIcon
-            />
-          </div>
-
-          {/* Date To */}
-          <div className="col-12 sm:col-6 lg:col-3">
-            <label className="text-700 font-medium text-xs block mb-1">Date To</label>
-            <Calendar
-              value={filterForm.dateTo ? new Date(filterForm.dateTo) : null}
-              onChange={(e) => setFilterForm({ ...filterForm, dateTo: e.value as Date })}
-              placeholder="End Date"
-              dateFormat="yy-mm-dd"
-              className="w-full p-inputtext-sm"
-              showIcon
-            />
-          </div>
-
-          {/* Actions */}
-          <div className="col-12 lg:col-3 flex gap-2 justify-content-end">
-            <Button
-              label="Reset"
-              icon="pi pi-refresh"
-              className="p-button-outlined p-button-secondary p-button-sm w-full sm:w-auto"
-              onClick={handleResetFilter}
-            />
-            <Button
-              label="Apply Filter"
-              icon="pi pi-search"
-              className="p-button-primary p-button-sm w-full sm:w-auto"
-              onClick={handleApplyFilter}
-            />
-          </div>
-        </div>
-      </div>
-
-      {/* 3. DYNAMIC REPORT RENDERER */}
+      {/* DYNAMIC REPORT RENDERER */}
       <div className="mt-2">
-        {selectedReport === 'dashboard' && <ReportDashboard filter={appliedFilter} />}
-        {selectedReport === 'departments' && <DepartmentWidget departments={reportData} loading={loading} />}
         {selectedReport === 'portfolio' && <PortfolioWidget data={reportData} />}
         {selectedReport === 'applications' && <ApplicationWidget data={reportData} loading={loading} />}
         {selectedReport === 'evaluations' && <EvaluationWidget data={reportData} loading={loading} />}
+        {selectedReport === 'verifications' && <VerificationWidget data={reportData} loading={loading} />}
+        {selectedReport === 'departments' && <ListDepartmentWidget departments={reportData} loading={loading} />}
+        {selectedReport === 'directorates' && <DirectorateWidget data={reportData} />}
         {selectedReport === 'financial' && <FinancialWidget data={reportData} />}
-        {selectedReport === 'phases' && <PhaseWidget data={reportData} loading={loading} />}
       </div>
     </div>
   );

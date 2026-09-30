@@ -176,14 +176,14 @@ export class LegacySeeder {
 
         return [
             {
-                order: 1,
+                // order: 1,
                 title: "Research Phase I",
                 budget: half,
                 duration: 60,
                 description: "Initial project implementation"
             },
             {
-                order: 2,
+                // order: 2,
                 title: "Research Phase II",
                 budget: half,
                 duration: 60,

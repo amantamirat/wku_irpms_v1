@@ -5,7 +5,7 @@ import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { AuthScope } from "../auth/auth.types";
-import ScopeFilterService from "../auth/scope-filter.service";
+import ScopeFilterService from "../../common/services/scope-filter.service";
 import { FormType } from "../evaluations/criteria/criterion.model";
 import { ICriterionRepository } from "../evaluations/criteria/criterion.repository";
 import { NotificationService } from "../notifications/notification.service";

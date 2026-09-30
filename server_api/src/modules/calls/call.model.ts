@@ -1,7 +1,7 @@
 import mongoose, { Document, Schema, model } from "mongoose";
 import { COLLECTIONS } from "../../common/constants/collections.enum";
-import { IStatusHistory } from "../../common/types/status-history";
 import { createStatusHistorySchema } from "../../common/schemas/status-history.schema";
+import { IStatusHistory } from "../../common/types/status-history";
 
 export enum CallStatus {
     planned = 'planned',
@@ -59,10 +59,20 @@ const CallSchema = new Schema<ICall>(
             type: [createStatusHistorySchema(Object.values(CallStatus))],
             default: []
         },
+        createdBy: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.USER
+        },
+
+        updatedBy: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.USER
+        }
     },
     { timestamps: true }
 );
-
-
+CallSchema.index({ organization: 1 });
+CallSchema.index({ calendar: 1 });
+CallSchema.index({ grant: 1 });
 export const Call = model<ICall>(COLLECTIONS.CALL, CallSchema);
 

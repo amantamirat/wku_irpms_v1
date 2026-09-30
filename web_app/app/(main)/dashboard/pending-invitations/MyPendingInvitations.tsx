@@ -37,15 +37,7 @@ export function MyPendingInvitations({ items }: MyPendingInvitationsProps) {
         },
     ];
 
-    /*
-    if (!items || items.length === 0) {
-      return (
-        <div className="card border-none shadow-1 p-4 mb-4 text-center text-500">
-          No pending invitations...
-        </div>
-      );
-    }*/
-
+    
     return (
         <div className="card border-none shadow-1 p-4 mb-4">
             <div className="flex align-items-center justify-content-between mb-4">

@@ -1,14 +1,17 @@
-
 import { COLLECTIONS } from "../../common/constants/collections.enum";
+import { ScopeFilter } from "../auth/auth.types";
 import { FundingSource, Grant } from "../grants/grant.model";
+import { Verification, VerificationStatus } from "../grants/verifications/verification.model";
 import { Application, ApplicationStatus } from "../projects/applications/application.model";
 import { Phase, PhaseStatus } from "../projects/phase/phase.model";
 import { Project, ProjectStatus } from "../projects/project.model";
 import { Reviewer, ReviewerTargetType } from "../reviewers/reviewer.model";
 import { ReviewerStatus } from "../reviewers/reviewer.state-machine";
-import { IReportFilter } from "./report.types";
+import { IDashboardReport, IDepartmentReport, IReportFilter, IVerificationReport } from "./report.types";
 
-function buildProjectMatch(filter: IReportFilter) {
+export function buildProjectMatch(
+    filter: IReportFilter
+): Record<string, any> {
 
     const match: Record<string, any> = {};
 
@@ -20,12 +23,16 @@ function buildProjectMatch(filter: IReportFilter) {
         match.call = filter.call;
     }
 
-    if (filter.theme) {
-        match.themes = filter.theme;
+    if (filter.workspace) {
+        match.workspace = filter.workspace;
     }
 
-    if (filter.projectStatus) {
-        match.status = filter.projectStatus;
+    if (filter.organization) {
+        match.organization = filter.organization;
+    }
+
+    if (filter.calendar) {
+        match.calendar = filter.calendar;
     }
 
     if (filter.dateFrom || filter.dateTo) {
@@ -43,42 +50,61 @@ function buildProjectMatch(filter: IReportFilter) {
     return match;
 }
 
+function combineProjectFilters(
+    projectFilter: Record<string, any>,
+    scopeFilter: ScopeFilter
+) {
+    if (Object.keys(scopeFilter).length === 0) {
+        return projectFilter;
+    }
+
+    return {
+        $and: [
+            projectFilter,
+            scopeFilter
+        ]
+    };
+}
+
 export class ReportRepository {
 
-    async getDashboard(filter: IReportFilter) {
+    async getDashboard(filter: IReportFilter,
+        scopeFilter: ScopeFilter): Promise<IDashboardReport> {
 
-        const projectMatch = buildProjectMatch(filter);
+        const projectFilter = buildProjectMatch(filter);
+
+        const projectMatch = combineProjectFilters(
+            projectFilter,
+            scopeFilter
+        );
 
         const [
             portfolio,
             applications,
-            evaluations
+            reviewers,
+            verifications,
+            departments
+
         ] = await Promise.all([
 
             this.getPortfolio(projectMatch),
 
             this.getApplications(projectMatch),
 
-            this.getEvaluations(projectMatch),
+            this.getReviewerReport(projectMatch),
 
-            //this.getFinancial(filter),
+            this.getVerificationReport(projectMatch),
 
-            // this.getPhases(projectMatch),
-
-            // this.getDepartments(projectMatch)
+            this.getDepartmentReport(projectMatch),
 
         ]);
 
         return {
             portfolio,
             applications,
-            evaluations,
-            // phases,
-            /*
-            researchOrganization: {
-                byDepartment: departments,
-                byCollege: []
-            }*/
+            reviewers,
+            verifications,
+            departments
         };
     }
 
@@ -179,13 +205,15 @@ export class ReportRepository {
             approvedProjects: 0,
             refusedProjects: 0,
             grantedProjects: 0,
-            completedProjects: 0
+            completedProjects: 0,
+            terminatedProjects: 0
         };
     }
 
     async getApplications(
         projectMatch: Record<string, any>
     ) {
+
         const projectIds = await Project
             .find(projectMatch)
             .select("_id")
@@ -343,7 +371,283 @@ export class ReportRepository {
         };
     }
 
-    async getEvaluations(
+    async getVerificationReport(
+        projectMatch: Record<string, any>
+    ): Promise<IVerificationReport> {
+
+        const projectIds = await Project
+            .find(projectMatch)
+            .select("_id")
+            .lean();
+
+        const ids = projectIds.map(project => project._id);
+
+        const emptyResult: IVerificationReport = {
+            totalVerifications: 0,
+            submittedVerifications: 0,
+            verifiedVerifications: 0,
+            rejectedVerifications: 0,
+            verificationRate: 0,
+            rejectionRate: 0,
+            averageScore: null,
+            averageReviewTime: null,
+            averageVerificationAttempts: 0
+        };
+
+        if (!ids.length) {
+            return emptyResult;
+        }
+
+        const [result] = await Verification.aggregate([
+            {
+                $match: {
+                    project: {
+                        $in: ids
+                    }
+                }
+            },
+            {
+                $set: {
+                    submittedAt: "$createdAt",
+
+                    reviewedAtFromHistory: {
+                        $max: {
+                            $map: {
+                                input: {
+                                    $filter: {
+                                        input: {
+                                            $ifNull: [
+                                                "$statusHistory",
+                                                []
+                                            ]
+                                        },
+                                        as: "history",
+                                        cond: {
+                                            $in: [
+                                                "$$history.status",
+                                                [
+                                                    VerificationStatus.verified,
+                                                    VerificationStatus.rejected
+                                                ]
+                                            ]
+                                        }
+                                    }
+                                },
+                                as: "history",
+                                in: "$$history.changedAt"
+                            }
+                        }
+                    }
+                }
+            },
+
+            /*
+             * Review duration in days.
+             */
+            {
+                $set: {
+                    reviewTime: {
+                        $cond: [
+                            {
+                                $and: [
+                                    {
+                                        $ne: [
+                                            "$submittedAt",
+                                            null
+                                        ]
+                                    },
+                                    {
+                                        $ne: [
+                                            "$reviewedAtFromHistory",
+                                            null
+                                        ]
+                                    }
+                                ]
+                            },
+                            {
+                                $divide: [
+                                    {
+                                        $subtract: [
+                                            "$reviewedAtFromHistory",
+                                            "$submittedAt"
+                                        ]
+                                    },
+                                    1000 * 60 * 60 * 24
+                                ]
+                            },
+                            null
+                        ]
+                    }
+                }
+            },
+
+            /*
+             * Produce report metrics.
+             */
+            {
+                $group: {
+                    _id: null,
+
+                    totalVerifications: {
+                        $sum: 1
+                    },
+
+                    submittedVerifications: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $eq: [
+                                        "$status",
+                                        VerificationStatus.submitted
+                                    ]
+                                },
+                                1,
+                                0
+                            ]
+                        }
+                    },
+
+                    verifiedVerifications: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $eq: [
+                                        "$status",
+                                        VerificationStatus.verified
+                                    ]
+                                },
+                                1,
+                                0
+                            ]
+                        }
+                    },
+
+                    rejectedVerifications: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $eq: [
+                                        "$status",
+                                        VerificationStatus.rejected
+                                    ]
+                                },
+                                1,
+                                0
+                            ]
+                        }
+                    },
+
+                    averageScore: {
+                        $avg: "$totalScore"
+                    },
+
+                    averageReviewTime: {
+                        $avg: "$reviewTime"
+                    },
+
+                    averageVerificationAttempts: {
+                        $avg: "$attempt"
+                    }
+                }
+            },
+
+            /*
+             * Calculate percentages.
+             */
+            {
+                $set: {
+                    verificationRate: {
+                        $cond: [
+                            {
+                                $gt: [
+                                    "$totalVerifications",
+                                    0
+                                ]
+                            },
+                            {
+                                $multiply: [
+                                    {
+                                        $divide: [
+                                            "$verifiedVerifications",
+                                            "$totalVerifications"
+                                        ]
+                                    },
+                                    100
+                                ]
+                            },
+                            0
+                        ]
+                    },
+
+                    rejectionRate: {
+                        $cond: [
+                            {
+                                $gt: [
+                                    "$totalVerifications",
+                                    0
+                                ]
+                            },
+                            {
+                                $multiply: [
+                                    {
+                                        $divide: [
+                                            "$rejectedVerifications",
+                                            "$totalVerifications"
+                                        ]
+                                    },
+                                    100
+                                ]
+                            },
+                            0
+                        ]
+                    }
+                }
+            },
+
+            {
+                $project: {
+                    _id: 0,
+
+                    totalVerifications: 1,
+                    submittedVerifications: 1,
+                    verifiedVerifications: 1,
+                    rejectedVerifications: 1,
+
+                    verificationRate: 1,
+                    rejectionRate: 1,
+
+                    averageScore: 1,
+                    averageReviewTime: 1,
+                    averageVerificationAttempts: 1
+                }
+            }
+        ]);
+
+        if (!result) {
+            return emptyResult;
+        }
+
+        return {
+            ...result,
+
+            averageScore:
+                result.averageScore !== null
+                    ? Number(result.averageScore.toFixed(2))
+                    : null,
+
+            averageReviewTime:
+                result.averageReviewTime !== null
+                    ? Number(result.averageReviewTime.toFixed(2))
+                    : null,
+
+            averageVerificationAttempts:
+                result.averageVerificationAttempts !== null
+                    ? Number(result.averageVerificationAttempts.toFixed(2))
+                    : 0
+        };
+    }
+
+    async getReviewerReport(
         projectMatch: Record<string, any>
     ) {
         const emptyResult = {
@@ -356,50 +660,29 @@ export class ReportRepository {
             averageScore: null
         };
 
-        const projectIds = await Project
+        const projects = await Project
             .find(projectMatch)
             .select("_id")
             .lean();
 
-        const ids = projectIds.map(project => project._id);
+        const projectIds = projects.map(project => project._id);
 
-        if (!ids.length) {
-            return emptyResult;
-        }
-
-        const applicationIds = await Application
-            .find({
-                project: {
-                    $in: ids
-                }
-            })
-            .select("_id")
-            .lean();
-
-        const appIds = applicationIds.map(app => app._id);
-
-        if (!appIds.length) {
+        if (!projectIds.length) {
             return emptyResult;
         }
 
         const [result] = await Reviewer.aggregate([
-
             {
                 $match: {
-                    targetType: ReviewerTargetType.APPLICATION,
-                    application: {
-                        $in: appIds
-                    }
+                    // targetType: ReviewerTargetType.APPLICATION,
+                    project: { $in: projectIds }
                 }
             },
-
             {
                 $group: {
                     _id: null,
 
-                    totalReviews: {
-                        $sum: 1
-                    },
+                    totalReviews: { $sum: 1 },
 
                     completedReviews: {
                         $sum: {
@@ -441,12 +724,7 @@ export class ReportRepository {
                     declinedReviews: {
                         $sum: {
                             $cond: [
-                                {
-                                    $eq: [
-                                        "$status",
-                                        ReviewerStatus.declined
-                                    ]
-                                },
+                                { $eq: ["$status", ReviewerStatus.declined] },
                                 1,
                                 0
                             ]
@@ -456,21 +734,14 @@ export class ReportRepository {
                     rejectedReviews: {
                         $sum: {
                             $cond: [
-                                {
-                                    $eq: [
-                                        "$status",
-                                        ReviewerStatus.rejected
-                                    ]
-                                },
+                                { $eq: ["$status", ReviewerStatus.rejected] },
                                 1,
                                 0
                             ]
                         }
                     },
 
-                    averageScore: {
-                        $avg: "$score"
-                    }
+                    averageScore: { $avg: "$score" }
                 }
             }
         ]);
@@ -490,72 +761,202 @@ export class ReportRepository {
                 result.totalReviews > 0
                     ? Number(
                         (
-                            result.completedReviews /
-                            result.totalReviews *
+                            (result.completedReviews / result.totalReviews) *
                             100
                         ).toFixed(2)
                     )
                     : 0,
 
             averageScore:
-                result.averageScore !== null
+                result.averageScore !== null && result.averageScore !== undefined
                     ? Number(result.averageScore.toFixed(2))
                     : null
         };
     }
 
-    async getFinancial(
-        filter: IReportFilter
-    ) {
 
+    async getDepartmentReport(
+        projectMatch: Record<string, any>
+    ): Promise<IDepartmentReport[]> {
+        return Project.aggregate([
+            {
+                $match: {
+                    ...projectMatch,
+                    status: {
+                        $in: [
+                            ProjectStatus.approved,
+                            ProjectStatus.granted,
+                            ProjectStatus.completed,
+                            ProjectStatus.terminated,
+                        ],
+                    },
+                },
+            },
+            {
+                $group: {
+                    _id: "$workspace",
+
+                    projects: { $sum: 1 },
+
+                    totalBudget: {
+                        $sum: {
+                            $ifNull: ["$totalBudget", 0],
+                        },
+                    },
+
+                    approved: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$status", ProjectStatus.approved] },
+                                1,
+                                0,
+                            ],
+                        },
+                    },
+
+                    granted: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$status", ProjectStatus.granted] },
+                                1,
+                                0,
+                            ],
+                        },
+                    },
+
+                    completed: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$status", ProjectStatus.completed] },
+                                1,
+                                0,
+                            ],
+                        },
+                    },
+
+                    terminated: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$status", ProjectStatus.terminated] },
+                                1,
+                                0,
+                            ],
+                        },
+                    },
+                },
+            },
+            {
+                $lookup: {
+                    from: "organizations",
+                    localField: "_id",
+                    foreignField: "_id",
+                    as: "workspace",
+                },
+            },
+            {
+                $addFields: {
+                    name: {
+                        $ifNull: [
+                            { $arrayElemAt: ["$workspace.name", 0] },
+                            "Unknown",
+                        ],
+                    },
+                },
+            },
+            {
+                $project: {
+                    workspace: 0,
+                },
+            },
+            {
+                $sort: {
+                    totalBudget: -1,
+                },
+            },
+        ]);
+    }
+
+
+    async getDirectorateReport(fiscalYear?: string) {
+        const match: Record<string, any> = { fundingSource: FundingSource.INTERNAL };
+        if (fiscalYear) match.fiscalYear = fiscalYear;
+
+        return Grant.aggregate([
+            { $match: match },
+            {
+                $lookup: {
+                    from: "projects",
+                    let: { grantId: "$_id" },
+                    pipeline: [
+                        {
+                            $match: {
+                                $expr: { $eq: ["$grant", "$$grantId"] },
+                                status: { $in: [ProjectStatus.approved, ProjectStatus.granted, ProjectStatus.completed] },
+                            },
+                        },
+                        { $group: { _id: null, committed: { $sum: { $ifNull: ["$totalBudget", 0] } }, count: { $sum: 1 } } },
+                    ],
+                    as: "proj",
+                },
+            },
+            {
+                $addFields: {
+                    committed: { $ifNull: [{ $first: "$proj.committed" }, 0] },
+                    projectCount: { $ifNull: [{ $first: "$proj.count" }, 0] },
+                },
+            },
+            {
+                $group: {
+                    _id: "$organization",
+                    allocated: { $sum: "$amount" },
+                    committed: { $sum: "$committed" },
+                    used: { $sum: "$usedBudget" },
+                    grantCount: { $sum: 1 },
+                    projectCount: { $sum: "$projectCount" },
+                },
+            },
+            {
+                $addFields: {
+                    unallocated: { $subtract: ["$allocated", { $max: ["$committed", "$used"] }] },
+                    utilization: {
+                        $cond: [{ $gt: ["$allocated", 0] }, { $round: [{ $multiply: [{ $divide: ["$used", "$allocated"] }, 100] }, 2] }, 0],
+                    },
+                    commitmentRate: {
+                        $cond: [{ $gt: ["$allocated", 0] }, { $round: [{ $multiply: [{ $divide: ["$committed", "$allocated"] }, 100] }, 2] }, 0],
+                    },
+                },
+            },
+            { $lookup: { from: "organizations", localField: "_id", foreignField: "_id", as: "org" } },
+            { $addFields: { name: { $first: "$org.name" } } },
+            { $project: { org: 0 } },
+            { $sort: { allocated: -1 } },
+        ]);
+    }
+
+
+    async getFinancial(filter?: IReportFilter) {
         const match: Record<string, any> = {};
 
-        if (filter.fundingSource) {
+        if (filter?.fundingSource) {
             match.fundingSource = filter.fundingSource;
         }
 
         const [result] = await Grant.aggregate([
             { $match: match },
-
             {
                 $group: {
                     _id: null,
-
-                    totalGrantAmount: {
-                        $sum: "$amount"
-                    },
-
-                    usedGrantBudget: {
-                        $sum: "$usedBudget"
-                    },
-
+                    totalGrantAmount: { $sum: "$amount" },
+                    usedGrantBudget: { $sum: "$usedBudget" },
+                    committedGrantBudget: { $sum: "$committedBudget" }, // <-- your field name here
                     internalFunding: {
                         $sum: {
-                            $cond: [
-                                {
-                                    $eq: [
-                                        "$fundingSource",
-                                        FundingSource.INTERNAL
-                                    ]
-                                },
-                                "$amount",
-                                0
-                            ]
+                            $cond: [{ $eq: ["$fundingSource", FundingSource.INTERNAL] }, "$amount", 0]
                         }
                     },
-
                     externalFunding: {
                         $sum: {
-                            $cond: [
-                                {
-                                    $eq: [
-                                        "$fundingSource",
-                                        FundingSource.EXTERNAL
-                                    ]
-                                },
-                                "$amount",
-                                0
-                            ]
+                            $cond: [{ $eq: ["$fundingSource", FundingSource.EXTERNAL] }, "$amount", 0]
                         }
                     }
                 }
@@ -566,6 +967,8 @@ export class ReportRepository {
             return {
                 totalGrantAmount: 0,
                 usedGrantBudget: 0,
+                committedGrantBudget: 0,
+                unallocatedGrantBudget: 0,
                 remainingGrantBudget: 0,
                 utilizationRate: 0,
                 internalFunding: 0,
@@ -573,30 +976,26 @@ export class ReportRepository {
             };
         }
 
-        const remaining =
-            result.totalGrantAmount -
-            result.usedGrantBudget;
+        const { totalGrantAmount, usedGrantBudget, committedGrantBudget } = result;
 
         return {
-            totalGrantAmount: result.totalGrantAmount,
-            usedGrantBudget: result.usedGrantBudget,
-            remainingGrantBudget: remaining,
-
+            totalGrantAmount,
+            usedGrantBudget,
+            committedGrantBudget,
+            remainingGrantBudget: totalGrantAmount - usedGrantBudget,
+            unallocatedGrantBudget: totalGrantAmount - usedGrantBudget - committedGrantBudget,
             utilizationRate:
-                result.totalGrantAmount > 0
-                    ? Number(
-                        (
-                            result.usedGrantBudget /
-                            result.totalGrantAmount *
-                            100
-                        ).toFixed(2)
-                    )
+                totalGrantAmount > 0
+                    ? Number(((usedGrantBudget / totalGrantAmount) * 100).toFixed(2))
                     : 0,
-
             internalFunding: result.internalFunding,
             externalFunding: result.externalFunding
         };
     }
+
+
+
+
 
     async getPhases(
         projectMatch: Record<string, any>
@@ -721,64 +1120,9 @@ export class ReportRepository {
         };
     }
 
-    async getDepartments(
-        projectMatch: Record<string, any>
-    ) {
-        return Project.aggregate([
-            {
-                $match: {
-                    ...projectMatch,
-                    status: ProjectStatus.granted
-                }
-            },
 
-            {
-                $lookup: {
-                    from: COLLECTIONS.ORGANIZATION,
-                    localField: "workspace",
-                    foreignField: "_id",
-                    as: "department"
-                }
-            },
 
-            {
-                $unwind: "$department"
-            },
 
-            {
-                $match: {
-                    "department.type": "department"
-                }
-            },
-
-            {
-                $group: {
-                    _id: "$department._id",
-                    name: {
-                        $first: "$department.name"
-                    },
-                    count: {
-                        $sum: 1
-                    }
-                }
-            },
-
-            {
-                $project: {
-                    _id: 0,
-                    organization: "$_id",
-                    name: 1,
-                    count: 1
-                }
-            },
-
-            {
-                $sort: {
-                    count: -1
-                }
-            }
-        ]);
-    }
 
     /*
 

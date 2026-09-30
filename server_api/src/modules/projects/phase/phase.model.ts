@@ -25,6 +25,10 @@ export interface IPhase extends Document {
     description?: string;
     status: PhaseStatus;
     statusHistory: IStatusHistory<PhaseStatus>[];
+
+    createdBy?: mongoose.Types.ObjectId;
+    updatedBy?: mongoose.Types.ObjectId;
+    
     createdAt?: Date;
     updatedAt?: Date;
 }

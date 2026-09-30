@@ -1,41 +1,62 @@
 // report.service.ts
-
 import { IReportFilter } from "./report.types";
-import { ReportRepository } from "./report.repository";
+import { buildProjectMatch, ReportRepository } from "./report.repository";
+import { AuthScope } from "../auth/auth.types";
+import ScopeFilterService from "../../common/services/scope-filter.service";
 
 export class ReportService {
 
     constructor(
-        private readonly repository: ReportRepository
+        private readonly repository: ReportRepository,
+        private readonly scopeFilterService: ScopeFilterService,
     ) { }
 
-    async getDashboard(filter: IReportFilter) {
-
-        return this.repository.getDashboard(filter);
+    async getDashboard(filter: IReportFilter, scope: AuthScope) {
+        const scopeFilter =
+            this.scopeFilterService.getProjectFilter(scope);
+        return this.repository.getDashboard(filter, scopeFilter);
     }
 
     async getPortfolio(filter: IReportFilter) {
-        return this.repository.getPortfolio(filter);
+        const projectMatch = buildProjectMatch(filter);
+        return this.repository.getPortfolio(projectMatch);
     }
 
     async getApplications(filter: IReportFilter) {
-        return this.repository.getApplications(filter);
+        const projectMatch = buildProjectMatch(filter);
+        return this.repository.getApplications(projectMatch);
     }
 
-    async getEvaluation(filter: IReportFilter) {
-        return this.repository.getEvaluations(filter);
+    async getEvaluations(filter: IReportFilter) {
+        const projectMatch = buildProjectMatch(filter);
+        return this.repository.getReviewerReport(projectMatch);
     }
 
-    async getFinancial(filter: IReportFilter) {
-        return this.repository.getFinancial(filter);
-    }
-
-    async getPhases(filter: IReportFilter) {
-        return this.repository.getPhases(filter);
+    async getVerifications(filter: IReportFilter) {
+        const projectMatch = buildProjectMatch(filter);
+        return this.repository.getVerificationReport(projectMatch);
     }
 
     async getDepartments(filter: IReportFilter) {
-        return this.repository.getDepartments(filter);
+        const projectMatch = buildProjectMatch(filter);
+        return this.repository.getDepartmentReport(projectMatch);
+    }
+
+    ////////////////////////////////////////////////////////////////////
+
+    async getDirectorateReport(filter?: IReportFilter) {
+        const directorateReport = await this.repository.getDirectorateReport();
+        //console.log(directorateReport);
+        return directorateReport;
+    }
+
+    async getFinancial(filter?: IReportFilter) {
+        return this.repository.getFinancial(filter);
+    }
+
+    /////////////////////////////////////////////////
+    async getPhases(filter: IReportFilter) {
+        return this.repository.getPhases(filter);
     }
 
     /*
