@@ -4,6 +4,8 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
+import ScopeFilterService from "../../common/services/scope-filter.service";
+import { AuthScope } from "../auth/auth.types";
 import { CalendarStatus } from "../calendar/calendar.model";
 import { ICalendarRepository } from "../calendar/calendar.repository";
 import { GrantStatus } from "../grants/grant.model";
@@ -21,11 +23,14 @@ export class CallService {
         private readonly grantRepo: IGrantRepository,
         private readonly calendarRepo: ICalendarRepository,
         private readonly projectRepo: IProjectRepository,
-        private readonly stageService: StageService
+        private readonly stageService: StageService,
+        private readonly scopeFilterService: ScopeFilterService,
     ) {
     }
 
-    async create(dto: CreateCallDTO, userId: string) {
+    async create(dto: CreateCallDTO, userId: string, scope: AuthScope) {
+
+
         const { stages, ...callData } = dto;
 
         if (!stages?.length) {
@@ -37,6 +42,13 @@ export class CallService {
 
         if (!grantDoc) {
             throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+        }
+
+        if (scope !== "*") {
+            if (!scope || !scope.length || !scope.includes(String(grantDoc.organization))) {
+                throw new AppError(ERROR_CODES.SCOPE_ACCESS_DENIED,
+                    "You do not have access to the grant organization.");
+            }
         }
 
         if (grantDoc.status !== GrantStatus.active) {
@@ -78,9 +90,7 @@ export class CallService {
         // -----------------------------------------
         // Create stages
         // -----------------------------------------
-
         for (const stage of stages) {
-
             await this.stageService.create({
                 ...stage, call: String(call._id)
             }, userId);
@@ -89,7 +99,14 @@ export class CallService {
         return this.repository.findById(String(call._id), { populate: true });
     }
 
-    async getCalls(filter: FilterCallDTO, options?: FilterOptions) {
+    async readCalls(filter: FilterCallDTO, scope: AuthScope, options?: FilterOptions) {
+        const scopeFilter =
+            this.scopeFilterService.getCallFilter(scope);
+        return await this.repository.find(filter, options, scopeFilter);
+    }
+
+
+    async lookCalls(filter: FilterCallDTO, options?: FilterOptions) {
         return await this.repository.find(filter, options);
     }
 
@@ -99,22 +116,52 @@ export class CallService {
         return call;
     }
 
-    async update(dto: UpdateCallDTO, userId: string) {
+    async update(
+        dto: UpdateCallDTO,
+        userId: string,
+        scope: AuthScope
+    ) {
         const { id, data } = dto;
+
         const callDoc = await this.repository.findById(id);
+
         if (!callDoc) {
             throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         }
+
+        if (
+            scope !== "*" &&
+            (!scope?.length ||
+                !scope.includes(String(callDoc.organization)))
+        ) {
+            throw new AppError(
+                ERROR_CODES.SCOPE_ACCESS_DENIED,
+                "You do not have access to the call organization."
+            );
+        }
+
         return await this.repository.update(id, data, userId);
     }
 
-    async transitionState(dto: TransitionRequestDto, userId: string) {
+    async transitionState(dto: TransitionRequestDto, userId: string, scope: AuthScope) {
         const { id, current, next } = dto;
 
         const callDoc = await this.repository.findById(id);
         if (!callDoc) {
-            throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
+            throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         }
+
+        if (
+            scope !== "*" &&
+            (!scope?.length ||
+                !scope.includes(String(callDoc.organization)))
+        ) {
+            throw new AppError(
+                ERROR_CODES.SCOPE_ACCESS_DENIED,
+                "You do not have access to the call organization."
+            );
+        }
+
         const from = callDoc.status as CallStatus;
         const to = next as CallStatus;
         // optional UI consistency check

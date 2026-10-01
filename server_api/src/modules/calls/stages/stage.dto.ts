@@ -24,6 +24,8 @@ export interface UpdateStageDTO {
 
         template: string | null;
 
+        evaluation: string;
+
         minReviewers: number;
         maxReviewers: number;
         minAcceptanceScore: number;

@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { PhaseActivityStatus } from "./phase-activity.model";
 
 export interface CreatePhaseActivityDto {
@@ -33,6 +34,6 @@ export interface UpdatePhaseActivityDto {
 }
 
 export interface FilterPhaseActivities {
-    phase?: string;
+    phase?: string | mongoose.Types.ObjectId;
     status?: PhaseActivityStatus;
 }

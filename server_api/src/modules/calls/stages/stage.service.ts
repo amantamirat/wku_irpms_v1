@@ -181,10 +181,12 @@ async findNextStage(id: string) {
         const { id, data } = dto;
 
         const stageDoc = await this.repository.findById(id);
+
         if (!stageDoc) {
             throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
         }
 
+        // Resolve effective values after the update
         const minReviewers =
             data.minReviewers ?? stageDoc.minReviewers;
 
@@ -194,39 +196,60 @@ async findNextStage(id: string) {
         const minAcceptanceScore =
             data.minAcceptanceScore ?? stageDoc.minAcceptanceScore;
 
-        // 4. Reviewer validation
+        const evaluationId =
+            data.evaluation ?? stageDoc.evaluation;
+
+        // 1. Reviewer validation
         if (minReviewers > maxReviewers) {
-            throw new AppError(ERROR_CODES.INVALID_REVIEWER_RANGE);
+            throw new AppError(
+                ERROR_CODES.INVALID_REVIEWER_RANGE
+            );
         }
 
-        // 5. Evaluation validation
+        // 2. Prevent negative values
+        if (
+            minReviewers < 0 ||
+            maxReviewers < 0 ||
+            minAcceptanceScore < 0
+        ) {
+            throw new AppError(
+                ERROR_CODES.INVALID_STAGE_CONFIGURATION
+            );
+        }
+
+        // 3. Evaluation validation
         const evalDoc = await this.evalRepository.findById(
-            stageDoc.evaluation.toString()
+            evaluationId.toString()
         );
 
         if (!evalDoc) {
-            throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+            throw new AppError(
+                ERROR_CODES.EVALUATION_NOT_FOUND
+            );
         }
 
-        // 6. Minimum score validation
+        // 4. Minimum score validation
         if (minAcceptanceScore > evalDoc.weight) {
             throw new AppError(
                 ERROR_CODES.MIN_SCORE_EXCEEDS_EVALUATION_WEIGHT
             );
         }
 
-        // 7. Prevent negative values
-        if (
-            minReviewers < 0 ||
-            maxReviewers < 0 ||
-            minAcceptanceScore < 0
-        ) {
-            throw new AppError(ERROR_CODES.INVALID_STAGE_CONFIGURATION);
-        }
-        const updated = await this.repository.update(id, data, userId);
+        // 5. Update stage
+        const updated = await this.repository.update(
+            id,
+            data,
+            userId
+        );
+
+        // 6. Sync call deadline for first stage
         if (stageDoc.order === 1) {
-            await this.syncCallDeadline(String(stageDoc.call), userId);
+            await this.syncCallDeadline(
+                String(stageDoc.call),
+                userId
+            );
         }
+
         return updated;
     }
 

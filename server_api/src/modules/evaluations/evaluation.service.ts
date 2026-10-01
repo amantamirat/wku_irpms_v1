@@ -3,6 +3,7 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
+import { FormType } from "./criteria/criterion.model";
 import { CriterionRepository, ICriterionRepository } from "./criteria/criterion.repository";
 import { CreateEvaluationDTO, FilterEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
 import { IEvaluationRepository } from "./evaluation.repository";
@@ -53,6 +54,24 @@ export class EvaluationService {
         // Inside transitionState logic
         if (to === ResourceStatus.published) {
             const criteria = await this.criterionRepo.find({ evaluation: id });
+
+            // Validate options for Single/Multiple criteria
+            for (const criterion of criteria) {
+                if (
+                    criterion.formType === FormType.SINGLE_CHOICE ||
+                    criterion.formType === FormType.MULTIPLE_CHOICE
+                ) {
+                    const optionCount = criterion.options?.length || 0;
+
+                    if (optionCount <= 1) {
+                        throw new AppError(
+                            ERROR_CODES.EVALUATION_INVALID_CRITERIA,
+                            `Cannot publish: Criterion "${criterion.title}" must have more than one option.`
+                        );
+                    }
+                }
+            }
+            // Validate total criteria weight
             const totalCriteriaWeight = criteria.reduce((sum, item) => sum + (item.weight || 0), 0);
 
             if (Math.abs(totalCriteriaWeight - evalDoc.weight) > 0.001) {

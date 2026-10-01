@@ -1,11 +1,22 @@
 import mongoose from "mongoose";
+import { FilterOptions } from "../../common/dtos/filter.dto";
 import {
-    CreateCallDTO,
     FilterCallDTO,
     UpdateCallDTO
 } from "./call.dto";
 import { Call, CallStatus, ICall } from "./call.model";
-import { FilterOptions } from "../../common/dtos/filter.dto";
+import { ScopeFilter } from "../auth/auth.types";
+
+export interface CreateCallData {
+    grant: string;
+    organization: string;
+    calendar: string;
+    title: string;
+    constraint?: string;
+    composition?: string;
+    description?: string;
+    status: CallStatus;
+}
 
 export interface ICallRepository {
 
@@ -16,10 +27,11 @@ export interface ICallRepository {
 
     find(
         filters?: FilterCallDTO,
-        options?: FilterOptions
+        options?: FilterOptions,
+        scopeFilter?: ScopeFilter
     ): Promise<ICall[]>;
 
-    create(dto: Omit<CreateCallDTO, "stages">, userId: string): Promise<ICall>;
+    create(dto: CreateCallData, userId: string): Promise<ICall>;
 
     update(
         id: string,
@@ -101,10 +113,15 @@ export class CallRepository implements ICallRepository {
      */
     async find(
         filters: FilterCallDTO = {},
-        options?: FilterOptions
+        options?: FilterOptions,
+        scopeFilter?: ScopeFilter
     ): Promise<ICall[]> {
 
-        const query = this.buildFilter(filters);
+        const filter = this.buildFilter(filters);
+
+        const query = scopeFilter
+            ? { $and: [scopeFilter, filter] }
+            : filter;
 
         let dbQuery = Call.find(query);
 
@@ -124,25 +141,25 @@ export class CallRepository implements ICallRepository {
      * Create call.
      */
     async create(
-        dto: Omit<CreateCallDTO, "stages">,
+        data: CreateCallData,
         userId: string
     ): Promise<ICall> {
 
         return Call.create({
-            ...dto,
+            ...data,
 
-            grant: new mongoose.Types.ObjectId(dto.grant),
+            grant: new mongoose.Types.ObjectId(data.grant),
 
-            calendar: new mongoose.Types.ObjectId(dto.calendar),
+            calendar: new mongoose.Types.ObjectId(data.calendar),
 
-            organization: new mongoose.Types.ObjectId(dto.organization),
+            organization: new mongoose.Types.ObjectId(data.organization),
 
-            constraint: dto.constraint
-                ? new mongoose.Types.ObjectId(dto.constraint)
+            constraint: data.constraint
+                ? new mongoose.Types.ObjectId(data.constraint)
                 : undefined,
 
-            composition: dto.composition
-                ? new mongoose.Types.ObjectId(dto.composition)
+            composition: data.composition
+                ? new mongoose.Types.ObjectId(data.composition)
                 : undefined,
 
             createdBy: new mongoose.Types.ObjectId(userId)

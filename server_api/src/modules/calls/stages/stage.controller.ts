@@ -163,10 +163,11 @@ export class StageController {
             const {
                 name,
                 template,
-                order,
+                // order,
                 minReviewers,
                 maxReviewers,
                 deadline,
+                evaluation,
                 reviewersDeadline,
                 minAcceptanceScore,
             } = req.body;
@@ -176,7 +177,8 @@ export class StageController {
                 data: {
                     ...(name !== undefined && { name }),
                     ...(template !== undefined && { template }),
-                    ...(order !== undefined && { order }),
+                    ...(evaluation !== undefined && { evaluation }),
+                    // ...(order !== undefined && { order }),
                     ...(minReviewers !== undefined && { minReviewers }),
                     ...(maxReviewers !== undefined && { maxReviewers }),
                     ...(deadline !== undefined && { deadline }),

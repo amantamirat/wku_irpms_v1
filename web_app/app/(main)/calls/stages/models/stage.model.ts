@@ -4,7 +4,7 @@ import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 import { Template } from "@/app/(main)/templates/models/template.model";
 
 export enum StageStatus {
-    upcoming= 'upcoming',
+    upcoming = 'upcoming',
     active = 'active',
     closed = "closed"
 }
@@ -16,12 +16,14 @@ export type Stage = {
     order: number;
     deadline: Date;
 
-    template?: string | Template;
+    template?: string | Template | null;
 
     evaluation?: string | Evaluation;
     minReviewers?: number;
     maxReviewers?: number;
     minAcceptanceScore?: number;
+
+    reviewersDeadline?: Date;
 
     status?: StageStatus;
     createdAt?: Date;

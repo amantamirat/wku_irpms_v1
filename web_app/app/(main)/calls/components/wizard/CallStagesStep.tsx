@@ -53,7 +53,14 @@ export const CallStagesStep = ({ data, onUpdate, onNext, onBack }: CallStagesSte
         const nextOrder = stages.length + 1;
         updateStagesList([
             ...stages,
-            { name: '', order: nextOrder, minAcceptanceScore: 50, deadline: undefined, evaluation: undefined }
+            { 
+                name: '', 
+                order: nextOrder, 
+                minAcceptanceScore: 50, 
+                deadline: undefined, 
+                reviewersDeadline: undefined, 
+                evaluation: undefined 
+            }
         ]);
     };
 
@@ -68,9 +75,9 @@ export const CallStagesStep = ({ data, onUpdate, onNext, onBack }: CallStagesSte
         updateStagesList(updated);
     };
 
-    // Updated validation: Requires name, deadline, and evaluation form
+    // Updated validation: Requires name, submission deadline, reviewers deadline, and evaluation form
     const isStageValid = (stage: Partial<Stage>) => {
-        return !!stage.name?.trim() && !!stage.deadline && !!stage.evaluation;
+        return !!stage.name?.trim() && !!stage.deadline && !!stage.reviewersDeadline && !!stage.evaluation;
     };
 
     const validateAndNext = () => {
@@ -114,7 +121,7 @@ export const CallStagesStep = ({ data, onUpdate, onNext, onBack }: CallStagesSte
 
                         <div className="p-fluid grid">
                             {/* Stage Name */}
-                            <div className="field col-12 md:col-6">
+                            <div className="field col-12 md:col-4">
                                 <label className="font-bold text-sm">Stage Name *</label>
                                 <Dropdown
                                     value={stage.name || ''}
@@ -127,8 +134,8 @@ export const CallStagesStep = ({ data, onUpdate, onNext, onBack }: CallStagesSte
                                 {submitted && !stage.name?.trim() && <small className="p-error">Stage Name required.</small>}
                             </div>
 
-                            {/* Deadline */}
-                            <div className="field col-12 md:col-6">
+                            {/* Submission Deadline */}
+                            <div className="field col-12 md:col-4">
                                 <label className="font-bold text-sm">Submission Deadline *</label>
                                 <Calendar
                                     value={stage.deadline ? new Date(stage.deadline) : null}
@@ -140,6 +147,21 @@ export const CallStagesStep = ({ data, onUpdate, onNext, onBack }: CallStagesSte
                                     className={classNames({ 'p-invalid': submitted && !stage.deadline })}
                                 />
                                 {submitted && !stage.deadline && <small className="p-error">Deadline required.</small>}
+                            </div>
+
+                            {/* Reviewers Deadline */}
+                            <div className="field col-12 md:col-4">
+                                <label className="font-bold text-sm">Reviewers Deadline *</label>
+                                <Calendar
+                                    value={stage.reviewersDeadline ? new Date(stage.reviewersDeadline) : null}
+                                    onChange={(e) => updateStageField(index, 'reviewersDeadline', e.value)}
+                                    showIcon
+                                    showTime
+                                    hourFormat="24"
+                                    placeholder="Select reviewers deadline"
+                                    className={classNames({ 'p-invalid': submitted && !stage.reviewersDeadline })}
+                                />
+                                {submitted && !stage.reviewersDeadline && <small className="p-error">Reviewers deadline required.</small>}
                             </div>
 
                             {/* Evaluation Form (Required) */}

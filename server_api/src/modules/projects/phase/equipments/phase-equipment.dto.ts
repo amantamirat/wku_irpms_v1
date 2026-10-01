@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { EquipmentUnit, PhaseEquipmentStatus } from "./phase-equipment.model";
 
 export interface CreatePhaseEquipmentDto {
@@ -40,7 +41,7 @@ export interface UpdatePhaseEquipmentStatusDto {
 }
 
 export interface FilterPhaseEquipments {
-    phase?: string;
+    phase?: string | mongoose.Types.ObjectId;
 
     status?: PhaseEquipmentStatus;
 }

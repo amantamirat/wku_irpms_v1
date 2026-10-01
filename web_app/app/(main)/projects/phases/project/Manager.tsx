@@ -1,5 +1,6 @@
 'use client';
 
+import { useMemo } from "react";
 import { createEntityManager } from "@/components/data-table/createEntityManager";
 import MyBadge from "@/templates/MyBadge";
 
@@ -21,97 +22,90 @@ const PhaseManager = ({
     project,
     enableEditing
 }: PhaseManagerProps) => {
-    const Manager = createEntityManager<Phase, FilterPhaseOptions>({
-        itemName: "Phase",
-        api: PhaseApi,
-        useLookup: true,
 
-        query: () => ({ project }),
-        columns: [
-            {
-                header: "Title",
-                field: "title",
-                sortable: true,
-                body: (r: Phase) => (
-                    <span className="font-semibold">
-                        {r.title}
-                    </span>
-                )
-            },
-            {
-                header: "Duration",
-                field: "duration",
-                sortable: true,
-                body: (r: Phase) => (
-                    `${r.duration} days`
-                )
-            },
-            {
-                header: "Budget",
-                field: "budget",
-                sortable: true,
-                body: (phase: Phase) => (
-                    <span className="font-mono text-green-700">
-                        {etbCurrencyFormatter.format(phase.budget)}
-                    </span>
-                )
-            },
-            /*
-            {
-                header: "Description",
-                field: "description",
-                body: (r: Phase) => (
-                    <div
-                        className="truncate text-sm text-500"
-                        style={{ maxWidth: "250px" }}
-                        title={r.description}
-                    >
-                        {r.description || "No description provided"}
-                    </div>
-                )
-            },
-            */
-            {
-                field: "status",
-                header: "Status",
-                sortable: true,
-                body: (p: Phase) => (
-                    <MyBadge
-                        type="status"
-                        value={p.status ?? "Proposed"}
-                    />
-                )
-            }
-        ],
+    const Manager = useMemo(
+        () =>
+            createEntityManager<Phase, FilterPhaseOptions>({
+                itemName: "Phase",
+                api: PhaseApi,
+                useLookup: true,
 
-        permissionPrefix: "phase",
+                query: () => ({ project }),
 
-        createNew: () => ({
-            project,
-            title: "",
-            order: 1,
-            duration: 0,
-            budget: 0,
-            description: ""
-        }),
+                columns: [
+                    {
+                        header: "Title",
+                        field: "title",
+                        sortable: true,
+                        body: (r: Phase) => (
+                            <span className="font-semibold">
+                                {r.title}
+                            </span>
+                        )
+                    },
+                    {
+                        header: "Duration",
+                        field: "duration",
+                        sortable: true,
+                        body: (r: Phase) => `${r.duration} days`
+                    },
+                    {
+                        header: "Budget",
+                        field: "budget",
+                        sortable: true,
+                        body: (phase: Phase) => (
+                            <span className="font-mono text-green-700">
+                                {etbCurrencyFormatter.format(phase.budget)}
+                            </span>
+                        )
+                    },
+                    {
+                        field: "status",
+                        header: "Status",
+                        sortable: true,
+                        body: (p: Phase) => (
+                            <MyBadge
+                                type="status"
+                                value={p.status ?? "Proposed"}
+                            />
+                        )
+                    }
+                ],
 
-        SaveDialog: SavePhase,
+                permissionPrefix: "phase",
 
-        workflow: {
-            statusField: "status",
-            transitions: PHASE_TRANSITIONS
-        },
+                createNew: () => ({
+                    project,
+                    title: "",
+                    order: 1,
+                    duration: 0,
+                    budget: 0,
+                    description: ""
+                }),
 
-        expandable: {
-            template: (project) => (
-                <PhaseDetail phase={project} />
-            )
-        },
+                SaveDialog: SavePhase,
 
-        hideSearch: true,
-        hideDefaultActions: !enableEditing
-    });
-    return <Manager key={project?._id} />;
+                workflow: {
+                    statusField: "status",
+                    transitions: PHASE_TRANSITIONS
+                },
+
+                expandable: {
+                    template: (phase) => (
+                        <PhaseDetail phase={phase} />
+                    )
+                },
+
+                hideSearch: true,
+                hideDefaultActions: !enableEditing
+            }),
+        [
+            project._id,
+            enableEditing
+        ]
+    );
+
+    return <Manager />;
 };
 
 export default PhaseManager;

@@ -55,7 +55,7 @@ const AppMenu = () => {
                 },
 
                 {
-                    label: 'Evaluators',
+                    label: 'Reviewers',
                     icon: 'pi pi-user-edit',
                     to: '/reviewers',
                     permission: 'reviewer:read',

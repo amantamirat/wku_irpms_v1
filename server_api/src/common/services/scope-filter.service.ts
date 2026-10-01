@@ -158,6 +158,28 @@ class ScopeFilterService {
             project: { $in: projectIds }
         };
     }
+
+
+    getCallFilter(
+        scope: AuthScope
+    ): ScopeFilter {
+
+        if (scope === "*") return {};
+
+        if (!scope?.length) {
+            return {
+                organization: { $in: [] }
+            };
+        }
+
+        const scopeIds = scope.map(
+            id => toObjectId(id)
+        );
+
+        return {
+            organization: { $in: scopeIds }
+        };
+    }
 }
 
 export default ScopeFilterService;

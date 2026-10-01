@@ -17,8 +17,8 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 // API & Models
 import { CallApi } from '@/app/(main)/calls/api/call.api';
 import { Call } from '@/app/(main)/calls/models/call.model';
-import { TemplateApi } from '@/app/(main)/templates/api/template.api'; // Adjust path as needed
-import { Template } from '@/app/(main)/templates/models/template.model'; // Adjust path as needed
+import { TemplateApi } from '@/app/(main)/templates/api/template.api';
+import { Template } from '@/app/(main)/templates/models/template.model';
 import { StageApi } from '../api/stage.api';
 import { Stage } from '../models/stage.model';
 
@@ -38,6 +38,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
     const [localStage, setLocalStage] = useState<Partial<Stage>>({
         ...item,
         deadline: item?.deadline ? new Date(item.deadline) : undefined,
+        reviewersDeadline: item?.reviewersDeadline ? new Date(item.reviewersDeadline) : undefined,
     });
 
     const [submitted, setSubmitted] = useState(false);
@@ -76,6 +77,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
         setLocalStage({
             ...item,
             deadline: item?.deadline ? new Date(item.deadline) : undefined,
+            reviewersDeadline: item?.reviewersDeadline ? new Date(item.reviewersDeadline) : undefined,
         });
     }, [item]);
 
@@ -89,6 +91,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
         setLocalStage({
             ...item,
             deadline: undefined,
+            reviewersDeadline: undefined,
         });
     };
 
@@ -105,6 +108,9 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
             }
             if (!localStage.deadline) {
                 throw new Error('Deadline is required.');
+            }
+            if (!localStage.reviewersDeadline) {
+                throw new Error('Reviewers Deadline is required.');
             }
 
             if ((localStage.minAcceptanceScore ?? 0) > maxPossibleScore) {
@@ -211,17 +217,33 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                     {submitted && !localStage.deadline && <small className="p-error">Deadline is required.</small>}
                 </div>
 
+                {/* Reviewers Deadline */}
+                <div className="field">
+                    <label className="font-bold">Reviewers Deadline</label>
+                    <Calendar
+                        value={localStage.reviewersDeadline}
+                        onChange={(e) => setLocalStage((p) => ({ ...p, reviewersDeadline: e.value as Date }))}
+                        showIcon
+                        placeholder="Select Reviewers Deadline"
+                        showTime
+                        stepMinute={5}
+                        hourFormat='12'
+                        className={classNames({ 'p-invalid': submitted && !localStage.reviewersDeadline })}
+                    />
+                    {submitted && !localStage.reviewersDeadline && <small className="p-error">Reviewers Deadline is required.</small>}
+                </div>
+
                 {/* Template Selection */}
                 <div className="field">
                     <label className="font-bold">Submission Template</label>
                     <Dropdown
-                        value={localStage.template}
+                        value={localStage.template || null}
                         dataKey="_id"
                         options={templates}
-                        optionLabel="name" // Change to "name" or appropriate property if needed
+                        optionLabel="name"
                         placeholder="Select a Template (Optional)"
                         showClear
-                        onChange={(e) => setLocalStage((p) => ({ ...p, template: e.value }))}
+                        onChange={(e) => setLocalStage((p) => ({ ...p, template: e.value ?? null }))}
                     />
                 </div>
 

@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { calendarRepo, callRepo, grantRepo, projectRepo, stageService } from '../../core/container';
+import { calendarRepo, callRepo, filterService, grantRepo, projectRepo, stageService } from '../../core/container';
 import { verifyAuthToken } from '../auth/auth.middleware';
 import { checkTransitionPermission } from '../../core/container';
 import { checkPermission } from '../../core/container';
 import { CallController } from './call.controller';
 import { CallService } from './call.service';
 
-const service = new CallService(callRepo, grantRepo, calendarRepo, projectRepo, stageService);
+const service = new CallService(callRepo, grantRepo, calendarRepo, projectRepo, stageService, filterService);
 const controller = new CallController(service);
 const router = Router();
 
@@ -17,12 +17,13 @@ router.post(
     checkPermission([PERMISSIONS.CALL.CREATE]),
     controller.create
 );
-// Lookup - currently uses the same get controller
+
+
 router.get(
     '/lookup',
     verifyAuthToken,
     checkPermission("call:lookup"),
-    controller.get
+    controller.look
 );
 // Get
 router.get(

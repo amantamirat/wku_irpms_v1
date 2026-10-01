@@ -9,6 +9,10 @@ import { IGrantRepository } from "../../grants/grant.repository";
 import { ProjectAuth } from "../project.auth";
 import { ProjectStatus } from "../project.model";
 import { IProjectRepository } from "../project.repository";
+import { PhaseActivityStatus } from "./activities/phase-activity.model";
+import { IPhaseActivityRepository } from "./activities/phase-activity.repository";
+import { PhaseEquipmentStatus } from "./equipments/phase-equipment.model";
+import { IPhaseEquipmentRepository } from "./equipments/phase-equipment.repository";
 import { CreatePhaseDto, FilterPhases, UpdatePhaseDto } from "./phase.dto";
 import { PhaseStatus } from "./phase.model";
 import { IPhaseRepository } from "./phase.repository";
@@ -19,6 +23,8 @@ export class PhaseService {
         private readonly phaseRepo: IPhaseRepository,
         private readonly projectRepo: IProjectRepository,
         private readonly grantRepo: IGrantRepository,
+        private readonly activityRepo: IPhaseActivityRepository,
+        private readonly equipmentRepo: IPhaseEquipmentRepository,
         private readonly projectAuth: ProjectAuth
     ) { }
 
@@ -114,18 +120,41 @@ export class PhaseService {
         return updated;
     }
 
+
+    calculateDurationDays = (
+        startDate: Date | string,
+        endDate: Date | string
+    ): number => {
+
+        const start = new Date(startDate);
+        const end = new Date(endDate);
+
+        start.setHours(0, 0, 0, 0);
+        end.setHours(0, 0, 0, 0);
+
+        const diffTime = end.getTime() - start.getTime();
+
+        if (diffTime < 0) {
+            return 0;
+        }
+
+        return Math.ceil(
+            diffTime / (1000 * 60 * 60 * 24)
+        ) + 1;
+    };
+
     // ---------------------------------------------------
     // TRANSITION
     // ---------------------------------------------------
     async transitionState(dto: TransitionRequestDto, userId: string) {
         const { id, next, current } = dto;
 
-        const currentPhaseDoc = await this.phaseRepo.findById(id);
+        const phaseDoc = await this.phaseRepo.findById(id);
 
-        if (!currentPhaseDoc)
+        if (!phaseDoc)
             throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
 
-        const from = currentPhaseDoc.status as PhaseStatus;
+        const from = phaseDoc.status as PhaseStatus;
         const to = next as PhaseStatus;
 
         if (current && current !== from)
@@ -137,7 +166,7 @@ export class PhaseService {
             PHASE_TRANSITIONS
         );
 
-        const projectId = String(currentPhaseDoc.project);
+        const projectId = String(phaseDoc.project);
 
         const projectDoc = await this.projectRepo.findById(projectId);
 
@@ -157,12 +186,134 @@ export class PhaseService {
          */
 
         const previousPhases = phases.filter(
-            phase => phase.order < currentPhaseDoc.order
+            phase => phase.order < phaseDoc.order
         );
 
         const nextPhases = phases.filter(
-            phase => phase.order > currentPhaseDoc.order
+            phase => phase.order > phaseDoc.order
         );
+        if (to === PhaseStatus.approved) {
+
+            const [activities, equipment] = await Promise.all([
+                this.activityRepo.find({
+                    phase: phaseDoc._id
+                }),
+                this.equipmentRepo.find({
+                    phase: phaseDoc._id
+                })
+            ]);
+
+            // -----------------------------------------
+            // 1. At least one activity is required
+            // -----------------------------------------
+            if (!activities.length) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_APPROVAL_REQUIRES_ACTIVITY
+                );
+            }
+
+            // -----------------------------------------
+            // 2. All activities must be approved
+            // -----------------------------------------
+            const unapprovedActivity = activities.find(
+                activity =>
+                    activity.status !== PhaseActivityStatus.approved
+            );
+
+            if (unapprovedActivity) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_ACTIVITIES_MUST_BE_APPROVED
+                );
+            }
+
+            // -----------------------------------------
+            // 3. Calculate total activity duration
+            // -----------------------------------------
+            const MS_PER_DAY = 1000 * 60 * 60 * 24;
+
+            const activityDuration = activities.reduce(
+                (total, activity) => {
+
+                    if (!activity.startDate || !activity.endDate) {
+                        throw new AppError(
+                            ERROR_CODES.PHASE_ACTIVITY_DATES_REQUIRED
+                        );
+                    }
+
+                    const duration = this.calculateDurationDays(
+                        activity.startDate,
+                        activity.endDate
+                    );
+
+                    if (duration <= 0) {
+                        throw new AppError(
+                            ERROR_CODES.PHASE_ACTIVITY_INVALID_DATES
+                        );
+                    }
+
+                    return total + duration;
+                },
+                0
+            );
+
+            // -----------------------------------------
+            // 4. Activity duration must equal phase duration
+            // -----------------------------------------
+            if (activityDuration !== Number(phaseDoc.duration)) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_DURATION_MISMATCH
+                );
+            }
+
+            // -----------------------------------------
+            // 5. All equipment must be approved
+            // -----------------------------------------
+            const unapprovedEquipment = equipment.find(
+                item =>
+                    item.status !== PhaseEquipmentStatus.approved
+            );
+
+            if (unapprovedEquipment) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_EQUIPMENT_MUST_BE_APPROVED
+                );
+            }
+
+            // -----------------------------------------
+            // 6. Calculate activity cost
+            // -----------------------------------------
+            const activityCost = activities.reduce(
+                (total, activity) =>
+                    total + Number(activity.cost || 0),
+                0
+            );
+
+            // -----------------------------------------
+            // 7. Calculate equipment cost
+            // -----------------------------------------
+            const equipmentCost = equipment.reduce(
+                (total, item) =>
+                    total +
+                    Number(item.unitPrice || 0) *
+                    Number(item.quantity || 0),
+                0
+            );
+
+            // -----------------------------------------
+            // 8. Total cost must equal phase budget
+            // -----------------------------------------
+            const totalCost = activityCost + equipmentCost;
+
+            if (
+                Math.abs(
+                    totalCost - Number(phaseDoc.budget)
+                ) > 0.01
+            ) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_BUDGET_MISMATCH
+                );
+            }
+        }
 
         /**
          * ---------------------------------------------------
@@ -243,7 +394,7 @@ export class PhaseService {
             ) {
                 await this.grantRepo.consumeBudget(
                     projectDoc.grant.toString(),
-                    currentPhaseDoc.budget
+                    phaseDoc.budget
                 );
             }
         }
@@ -260,7 +411,7 @@ export class PhaseService {
         ) {
             await this.grantRepo.reverseConsumedBudget(
                 projectDoc.grant.toString(),
-                currentPhaseDoc.budget
+                phaseDoc.budget
             );
         }
 

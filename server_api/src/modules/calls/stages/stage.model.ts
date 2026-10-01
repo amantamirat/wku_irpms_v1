@@ -55,7 +55,7 @@ const StageSchema = new Schema<IStage>(
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.EVALUATION,
             required: true,
-            immutable: true,
+           // immutable: true,
         },
         minReviewers: {
             type: Number,

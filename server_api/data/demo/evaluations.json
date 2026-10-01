@@ -796,6 +796,10 @@
                     {
                         "title": "Meets the criterion",
                         "score": 5
+                    },
+                    {
+                        "title": "Does not meet the criterion",
+                        "score": 0
                     }
                 ]
             },
@@ -807,6 +811,10 @@
                     {
                         "title": "Meets the criterion",
                         "score": 15
+                    },
+                    {
+                        "title": "Does not meet the criterion",
+                        "score": 0
                     }
                 ]
             },
@@ -818,6 +826,10 @@
                     {
                         "title": "Meets the criterion",
                         "score": 15
+                    },
+                    {
+                        "title": "Does not meet the criterion",
+                        "score": 0
                     }
                 ]
             },
@@ -829,6 +841,10 @@
                     {
                         "title": "Meets the criterion",
                         "score": 20
+                    },
+                    {
+                        "title": "Does not meet the criterion",
+                        "score": 0
                     }
                 ]
             },
@@ -840,6 +856,10 @@
                     {
                         "title": "Meets the criterion",
                         "score": 8
+                    },
+                    {
+                        "title": "Does not meet the criterion",
+                        "score": 0
                     }
                 ]
             },
@@ -851,6 +871,10 @@
                     {
                         "title": "Meets the criterion",
                         "score": 7
+                    },
+                    {
+                        "title": "Does not meet the criterion",
+                        "score": 0
                     }
                 ]
             },
@@ -862,6 +886,10 @@
                     {
                         "title": "Meets the criterion",
                         "score": 20
+                    },
+                    {
+                        "title": "Does not meet the criterion",
+                        "score": 0
                     }
                 ]
             },
@@ -873,6 +901,10 @@
                     {
                         "title": "Meets the criterion",
                         "score": 10
+                    },
+                    {
+                        "title": "Does not meet the criterion",
+                        "score": 0
                     }
                 ]
             },

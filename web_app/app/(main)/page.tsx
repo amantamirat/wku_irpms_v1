@@ -29,6 +29,11 @@ const Dashboard = () => {
                 </div>
             )}
 
+            {/* 🚀 QUICK ACCESS / NAVIGATION MENU */}
+            <div className="col-12 mb-2">
+                <QuickLinks />
+            </div>
+
             {/* 🔵 LEFT COLUMN: Core Work */}
             <div className="col-12 lg:col-8">
                 
@@ -46,11 +51,6 @@ const Dashboard = () => {
                         <CallOpportunityGrid />
                     </div>
                 )}
-
-                {/* QUICK LINKS */}
-                <div className="mt-4">
-                    <QuickLinks />
-                </div>
             </div>
 
             {/* 🟠 RIGHT COLUMN: Deadlines & Widgets */}

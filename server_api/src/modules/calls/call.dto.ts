@@ -12,7 +12,6 @@ export interface CreateCallDTO {
     description?: string;
     stages?: CreateStageDTO[];
     status?: CallStatus;
-    userId?: string;
 }
 
 // Base fields for updating any call
@@ -26,14 +25,11 @@ export interface UpdateCallDTO {
         composition: string;
         deadline: Date | null;
     }>;
-    userId?: string;
 }
 
-// Options for querying calls
 export interface FilterCallDTO {
     calendar?: string;
     grant?: string;
     status?: CallStatus;
-    //populate?: boolean;
 }
 

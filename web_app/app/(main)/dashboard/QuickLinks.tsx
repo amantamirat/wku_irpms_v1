@@ -58,10 +58,11 @@ export default function QuickLinks() {
     if (allowedLinks.length === 0) return null;
 
     return (
-        <div className="col-12 mt-4">
+        <div className="col-12 mt-2">
             <div className="flex align-items-center justify-content-between mb-3">
-                <h5 className="m-0 font-bold text-900 text-lg">Quick Access</h5>
-                <span className="text-sm text-500 font-medium">My tools</span>
+                {/* 🌟 Improved professional titles */}
+                <h5 className="m-0 font-bold text-900 text-lg">Workspace Navigation</h5>
+                <span className="text-sm text-500 font-medium">Primary Modules</span>
             </div>
             <div className="grid">
                 {allowedLinks.map((link, index) => (

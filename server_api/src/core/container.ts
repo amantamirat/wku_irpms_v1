@@ -55,6 +55,7 @@ import { ExperienceRepository } from "../modules/users/experiences/experience.re
 import { UserRepository } from "../modules/users/user.repository";
 import { UserService } from "../modules/users/user.service";
 import { AnonymizerService } from "../util/anonymizer/anonymizer.service";
+import { PhaseEquipmentRepository } from "../modules/projects/phase/equipments/phase-equipment.repository";
 
 export const fileStorageService = new FileStorageService();
 
@@ -98,7 +99,8 @@ export const compositionRepo = new CompositionRepository();
 export const projectRepo = new ProjectRepository();
 export const collaboratorRepo = new CollaboratorRepository();
 export const phaseRepo = new PhaseRepository();
-export const phaseActivityRepo = new PhaseActivityRepository();
+export const activityRepo = new PhaseActivityRepository();
+export const equipmentRepo = new PhaseEquipmentRepository();
 //call repos
 export const callRepo = new CallRepository();
 export const stageRepo = new StageRepository();
@@ -151,10 +153,10 @@ export const projectAuth = new ProjectAuth(projectRepo, authPermissionService);
 export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, callRepo,
     applicationRepo, constraintValidator, projectAuth, notificationService, filterService);
 
-export const phaseActivityService = new PhaseActivityService(phaseActivityRepo, phaseRepo, projectAuth)
+export const phaseActivityService = new PhaseActivityService(activityRepo, phaseRepo, projectAuth)
 
 
-export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, projectAuth);
+export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, activityRepo, equipmentRepo, projectAuth);
 
 
 

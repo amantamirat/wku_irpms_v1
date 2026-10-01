@@ -5,6 +5,7 @@ import { PERMISSIONS } from "../../../../common/constants/permissions";
 import {
     checkPermission,
     checkTransitionPermission,
+    equipmentRepo,
     phaseRepo,
     projectAuth,
 } from "../../../../core/container";
@@ -16,7 +17,7 @@ import { PhaseEquipmentRepository } from "./phase-equipment.repository";
 import { PhaseEquipmentService } from "./phase-equipment.service";
 
 const controller = new PhaseEquipmentController(
-    new PhaseEquipmentService(new PhaseEquipmentRepository(), phaseRepo, projectAuth)
+    new PhaseEquipmentService(equipmentRepo, phaseRepo, projectAuth)
 );
 
 const router: Router = Router();

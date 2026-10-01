@@ -211,7 +211,7 @@ export default function ProjectDetail({ project, updateProject, enableEditing, s
             </div>
 
             {/* Tabs */}
-            <TabView key={projectData?._id} className="mt-2" renderActiveOnly={true}>
+            <TabView className="mt-2" renderActiveOnly={true}>
                 {allowedTabs.map((tab) => (
                     <TabPanel key={tab.header} header={tab.header} leftIcon={tab.icon + " mr-2"}>
                         <div className="pt-4">
