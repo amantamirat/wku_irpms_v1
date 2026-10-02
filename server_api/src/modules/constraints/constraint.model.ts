@@ -19,6 +19,9 @@ export interface IConstraint extends Document {
     budgetPerPhase?: IRange;
     durationPerPhase?: IRange;
 
+    activitiesPerPhase?: IRange;
+    equipmentsPerPhase?: IRange;
+
     themes?: IRange;
     subThemes?: IRange;
 
@@ -72,6 +75,14 @@ const ConstraintSchema = new Schema<IConstraint>(
         },
 
         durationPerPhase: {
+            type: RangeSchema,
+        },
+
+        activitiesPerPhase: {
+            type: RangeSchema,
+        },
+
+        equipmentsPerPhase: {
             type: RangeSchema,
         },
 

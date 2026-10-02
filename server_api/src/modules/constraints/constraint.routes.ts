@@ -1,99 +1,85 @@
 import { Router } from "express";
+
 import { ConstraintController } from "./constraint.controller";
 import { ConstraintService } from "./constraint.service";
 
-
+import { verifyAuthToken } from "../auth/auth.middleware";
 import {
-    verifyAuthToken,
-} from "../auth/auth.middleware";
-import { checkPermission } from '../../core/container';
-import { constraintRepo } from "../../core/container";
+    checkPermission,
+    constraintRepo,
+} from "../../core/container";
 
+import { PERMISSIONS } from "../../common/constants/permissions";
 
 const service = new ConstraintService(constraintRepo);
 const controller = new ConstraintController(service);
 
+const router: Router = Router();
 
-const router = Router();
+//----------------------------------------
+// CREATE CONSTRAINT
+//----------------------------------------
 
-
-/**
- * @route POST /constraints
- * @desc Create a new constraint profile
- * @access Protected
- */
 router.post(
     "/",
     verifyAuthToken,
-    checkPermission("constraint:create"),
+    checkPermission([PERMISSIONS.CONSTRAINT.CREATE]),
     controller.create
 );
 
-/**
- * @route GET /constraints/:id
- * @desc Get constraint by ID
- * @access Protected
- */
-router.get(
-    "/lookup",
-    verifyAuthToken,
-    checkPermission("constraint:lookup"),
-    controller.get
-);
+//----------------------------------------
+// GET CONSTRAINTS
+//----------------------------------------
 
-/**
- * @route GET /constraints/:id
- * @desc Get constraint by ID
- * @access Protected
- */
-router.get(
-    "/:id",
-    verifyAuthToken,
-    checkPermission("constraint:lookup"),
-    controller.getById
-);
-
-
-
-/**
- * @route GET /constraints
- * @desc Get all constraint profiles
- * @access Protected
- */
 router.get(
     "/",
     verifyAuthToken,
-    checkPermission("constraint:read"),
+    checkPermission([PERMISSIONS.CONSTRAINT.READ]),
     controller.get
 );
 
+//----------------------------------------
+// LOOKUP CONSTRAINTS
+//----------------------------------------
 
+router.get(
+    "/lookup",
+    verifyAuthToken,
+    checkPermission([PERMISSIONS.CONSTRAINT.LOOKUP]),
+    controller.get
+);
 
+//----------------------------------------
+// GET CONSTRAINT BY ID
+//----------------------------------------
 
-/**
- * @route PUT /constraints/:id
- * @desc Update constraint profile
- * @access Protected
- */
+router.get(
+    "/:id",
+    verifyAuthToken,
+    checkPermission([PERMISSIONS.CONSTRAINT.LOOKUP]),
+    controller.getById
+);
+
+//----------------------------------------
+// UPDATE CONSTRAINT
+//----------------------------------------
+
 router.put(
     "/:id",
     verifyAuthToken,
-    checkPermission("constraint:update"),
+    checkPermission([PERMISSIONS.CONSTRAINT.UPDATE]),
     controller.update
 );
 
+//----------------------------------------
+// DELETE CONSTRAINT
+//----------------------------------------
 
-/**
- * @route DELETE /constraints/:id
- * @desc Delete constraint profile
- * @access Protected
- */
 router.delete(
     "/:id",
     verifyAuthToken,
-    checkPermission("constraint:delete"),
+    checkPermission([PERMISSIONS.CONSTRAINT.DELETE]),
     controller.delete
 );
-
 
 export default router;

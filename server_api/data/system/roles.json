@@ -50,8 +50,8 @@
             "organization:lookup",
             "calendar:lookup",
             "grant:lookup",
-            "constraint:*",
-            "composition:*",
+            "constraint:lookup",
+            "composition:lookup",
             "template:*",
             "call:*",
             "stage:*",
@@ -107,6 +107,7 @@
             "reviewer:read:own",
             "reviewer:update:own",
             "reviewer:delete:own",
+            "reviewer:transition.submitted.accepted",
             "report:dashborad"
         ]
     },

@@ -18,6 +18,9 @@ export interface CreateConstraintDTO {
     budgetPerPhase?: IRange;
     durationPerPhase?: IRange;
 
+    activitiesPerPhase?: IRange;
+    equipmentsPerPhase?: IRange;
+
     themes?: IRange;
     subThemes?: IRange;
     focusAreas?: IRange;

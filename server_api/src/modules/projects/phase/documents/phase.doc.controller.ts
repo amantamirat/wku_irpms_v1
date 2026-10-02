@@ -21,13 +21,21 @@ export class PhaseDocumentController {
             if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
 
-            const { documentPath, ...phaseDoc } = JSON.parse(
+            const phaseDoc = JSON.parse(
                 req.body.phaseDoc
             ) as CreatePhaseDocDTO;
 
-            const created = await this.service.create(phaseDoc, req.file);
+            const created = await this.service.create(
+                phaseDoc,
+                req.file
+            );
 
-            successResponse(res, 201, "Phase document created successfully", created);
+            successResponse(
+                res,
+                201,
+                "Phase document created successfully",
+                created
+            );
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
         }

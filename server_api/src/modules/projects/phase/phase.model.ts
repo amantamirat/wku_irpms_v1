@@ -28,7 +28,7 @@ export interface IPhase extends Document {
 
     createdBy?: mongoose.Types.ObjectId;
     updatedBy?: mongoose.Types.ObjectId;
-    
+
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -81,6 +81,16 @@ const PhaseSchema = new Schema<IPhase>(
             type: [createStatusHistorySchema(Object.values(PhaseStatus))],
             default: []
         },
+
+        createdBy: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.USER
+        },
+
+        updatedBy: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.USER
+        }
     },
     {
         timestamps: true,

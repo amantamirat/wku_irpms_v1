@@ -1,14 +1,13 @@
 import { Router } from "express";
 import { PERMISSIONS } from "../../../../common/constants/permissions";
-import { checkPermission, fileStorageService, phaseRepo } from '../../../../core/container';
 import { upload } from "../../../../common/middleware/fileUpload.middleware";
+import { checkPermission, fileStorageService, phaseDocRepo, phaseRepo } from '../../../../core/container';
 import { verifyAuthToken } from "../../../auth/auth.middleware";
 import { PhaseDocumentController } from "./phase.doc.controller";
-import { PhaseDocumentRepository } from "./phase.doc.repository";
 import { PhaseDocumentService } from "./phase.doc.service";
 
 const controller = new PhaseDocumentController(new PhaseDocumentService(
-    new PhaseDocumentRepository(), phaseRepo, fileStorageService));
+    phaseDocRepo, phaseRepo, fileStorageService));
 const router: Router = Router();
 
 router.post('/', verifyAuthToken,

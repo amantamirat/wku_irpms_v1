@@ -375,6 +375,11 @@
   },
   {
     "category": "Composition Management",
+    "name": "composition:lookup",
+    "description": "Look composition entries"
+  },
+  {
+    "category": "Composition Management",
     "name": "composition:update",
     "description": "Update composition entries"
   },

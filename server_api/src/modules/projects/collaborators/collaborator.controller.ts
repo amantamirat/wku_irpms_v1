@@ -62,7 +62,7 @@ export class CollaboratorController {
     lookup = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { project, member, status } = req.query;
-            const collaborators = await this.service.get({
+            const collaborators = await this.service.look({
                 project: project ? (project as string) : undefined,
                 member: member ? (member as string) : undefined,
                 status: status ? (status as CollaboratorStatus) : undefined

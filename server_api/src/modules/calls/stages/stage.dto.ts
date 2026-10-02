@@ -7,6 +7,7 @@ export interface CreateStageDTO {
     reviewersDeadline?: Date;
 
     template?: string;
+    constraint?: string | null;
 
     evaluation: string;
     minReviewers: number;
@@ -19,12 +20,14 @@ export interface UpdateStageDTO {
     data: Partial<{
         name: string;
         deadline: Date;
-        
+
         reviewersDeadline?: Date;
 
         template: string | null;
 
         evaluation: string;
+
+        constraint: string | null;
 
         minReviewers: number;
         maxReviewers: number;

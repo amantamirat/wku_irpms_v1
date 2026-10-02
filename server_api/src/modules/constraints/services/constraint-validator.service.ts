@@ -1,9 +1,11 @@
+import mongoose from "mongoose";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import {
     IRange,
     matchesRange
 } from "../../../common/types/range";
+import { PhaseActivityRepository } from "../../projects/phase/activities/phase-activity.repository";
 import { CreatePhaseDto, PhaseDto } from "../../projects/phase/phase.dto";
 import { PhaseRepository } from "../../projects/phase/phase.repository";
 import { ProjectRepository } from "../../projects/project.repository";
@@ -16,10 +18,13 @@ export interface ValidationResult {
     errors: string[];
 }
 
+
 type PhaseValidationInput = Pick<
     CreatePhaseDto,
     "title" | "budget" | "duration"
->;
+> & {
+    _id?: string | mongoose.Types.ObjectId;
+};
 
 export interface ConstraintValidationInput {
     title: string;
@@ -36,6 +41,7 @@ export class ConstraintValidationService {
         private readonly themeRepo: ThemeRepository,
         private readonly projectRepo: ProjectRepository,
         private readonly phaseRepo: PhaseRepository,
+        private readonly activityRepo: PhaseActivityRepository,
     ) { }
 
 
@@ -389,11 +395,11 @@ export class ConstraintValidationService {
     }
 
 
-    private validatePhasesInternal(
+    private async validatePhasesInternal(
         constraint: IConstraint,
         phases: PhaseValidationInput[],
         errors: string[]
-    ): void {
+    ): Promise<void> {
 
         this.validatePhaseCount(
             constraint.phases,
@@ -425,6 +431,9 @@ export class ConstraintValidationService {
 
         for (const phase of phases) {
 
+            // ---------------------------------------------
+            // Budget per phase
+            // ---------------------------------------------
             if (
                 constraint.budgetPerPhase &&
                 !matchesRange(
@@ -437,6 +446,9 @@ export class ConstraintValidationService {
                 );
             }
 
+            // ---------------------------------------------
+            // Duration per phase
+            // ---------------------------------------------
             if (
                 constraint.durationPerPhase &&
                 !matchesRange(
@@ -447,6 +459,30 @@ export class ConstraintValidationService {
                 errors.push(
                     `Phase "${phase.title}" duration must be between ${constraint.durationPerPhase.min} and ${constraint.durationPerPhase.max}. Current duration: ${phase.duration}.`
                 );
+            }
+
+            // ---------------------------------------------
+            // Activities per phase
+            // ---------------------------------------------
+            if (
+                constraint.activitiesPerPhase &&
+                phase._id
+            ) {
+                const activityCount =
+                    await this.activityRepo.countByPhase(
+                        phase._id.toString()
+                    );
+
+                if (
+                    !matchesRange(
+                        constraint.activitiesPerPhase,
+                        activityCount
+                    )
+                ) {
+                    errors.push(
+                        `Phase "${phase.title}" must contain between ${constraint.activitiesPerPhase.min} and ${constraint.activitiesPerPhase.max} activities. Current count: ${activityCount}.`
+                    );
+                }
             }
         }
     }

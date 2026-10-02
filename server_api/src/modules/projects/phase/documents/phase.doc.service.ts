@@ -14,23 +14,24 @@ export class PhaseDocumentService {
         private readonly repository: IPhaseDocumentRepository,
         private readonly phaseRepo: IPhaseRepository,
         private readonly fileStorage: FileStorageService
+        //projectAuth
     ) { }
 
     async create(
-        data: Omit<CreatePhaseDocDTO, "documentPath">,
+        dto: CreatePhaseDocDTO,
         file: Express.Multer.File
     ) {
         let savedPath: string | null = null;
 
         try {
-            const phase = await this.phaseRepo.findById(data.phase);
+            const phase = await this.phaseRepo.findById(dto.phase);
             if (!phase) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
             if (phase.status !== PhaseStatus.active)
                 throw new AppError(ERROR_CODES.PHASE_NOT_ACTIVE);
 
             // Adjust `phase.project` to however your Phase model stores the project id
             const projectId = String(phase.project);
-            const phaseId = String(data.phase);
+            const phaseId = String(dto.phase);
 
             // Unique, safe filename (never trust the original name for the path)
             const ext = path.extname(file.originalname).toLowerCase();
@@ -44,8 +45,8 @@ export class PhaseDocumentService {
             );
 
             return await this.repository.create({
-                ...data,
-                documentPath: savedPath, // e.g. "projects/abc/phases/xyz/1f3e...pdf"
+                ...dto,
+                documentPath: savedPath
             });
         } catch (error) {
             if (savedPath) {

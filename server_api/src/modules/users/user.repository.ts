@@ -1,22 +1,21 @@
 import mongoose from "mongoose";
 import User, {
-    IUser,
-    Gender,
     Accessibility,
+    Gender,
+    IUser,
     UserScope
 } from "./user.model";
 
 import {
-    CreateUserDTO,
-    UpdateUserDTO,
     FilterUsersDTO,
-    UpdateRolesDTO
+    UpdateRolesDTO,
+    UpdateUserDTO
 } from "./user.dto";
 
 import { FilterOptions } from "../../common/dtos/filter.dto";
-import { toObjectId } from "../../common/utils/mongoose.utils";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
+import { toObjectId } from "../../common/utils/mongoose.utils";
 
 
 export interface CreateUserData {
@@ -55,6 +54,9 @@ export interface IUserRepository {
         options?: FilterOptions
     ): Promise<IUser[]>;
 
+    findIdsByFilter(
+        scopeFilter: Record<string, unknown>
+    ): Promise<mongoose.Types.ObjectId[]>;
 
     // -------------------------
     // READ DELETED USERS
@@ -224,6 +226,14 @@ export class UserRepository implements IUserRepository {
         return dbQuery
             .lean<IUser[]>()
             .exec();
+    }
+
+    async findIdsByFilter(
+        filter: Record<string, unknown>
+    ): Promise<mongoose.Types.ObjectId[]> {
+        const users =
+            await User.find(filter).select("_id").lean<{ _id: mongoose.Types.ObjectId }[]>().exec();
+        return users.map(user => user._id);
     }
 
 

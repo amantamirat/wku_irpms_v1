@@ -206,7 +206,11 @@ export class ProjectRepository
                 //.populate("currentApplication")
                 //.populate("currentPhase")
                 //.populate("currentVerification")
-                .populate("createdBy");
+                .populate("createdBy")
+                .populate({
+                    path: "statusHistory.changedBy",
+                    select: "_id name",
+                });
         }
 
         return dbQuery

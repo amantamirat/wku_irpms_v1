@@ -61,7 +61,7 @@ export class CallController {
             ]);
 
             const calls = await this.service.lookCalls(
-                filter
+                filter, {populate:true}
             );
 
             successResponse(

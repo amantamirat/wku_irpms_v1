@@ -110,7 +110,7 @@ export class CollaboratorService {
         return collaborators;
     }
 
-    async get(filter: FilterCollaborators, options?: FilterOptions) {
+    async look(filter: FilterCollaborators, options?: FilterOptions) {
         const collaborators = await this.collabRepo.find(filter, options);
         return collaborators;
     }

@@ -11,6 +11,8 @@ import { ProjectStatus } from "../project.model";
 import { IProjectRepository } from "../project.repository";
 import { PhaseActivityStatus } from "./activities/phase-activity.model";
 import { IPhaseActivityRepository } from "./activities/phase-activity.repository";
+import { PhaseDocumentType } from "./documents/phase.doc.model";
+import { IPhaseDocumentRepository } from "./documents/phase.doc.repository";
 import { PhaseEquipmentStatus } from "./equipments/phase-equipment.model";
 import { IPhaseEquipmentRepository } from "./equipments/phase-equipment.repository";
 import { CreatePhaseDto, FilterPhases, UpdatePhaseDto } from "./phase.dto";
@@ -23,6 +25,7 @@ export class PhaseService {
         private readonly phaseRepo: IPhaseRepository,
         private readonly projectRepo: IProjectRepository,
         private readonly grantRepo: IGrantRepository,
+        private readonly phaseDocRepo: IPhaseDocumentRepository,
         private readonly activityRepo: IPhaseActivityRepository,
         private readonly equipmentRepo: IPhaseEquipmentRepository,
         private readonly projectAuth: ProjectAuth
@@ -192,6 +195,11 @@ export class PhaseService {
         const nextPhases = phases.filter(
             phase => phase.order > phaseDoc.order
         );
+        if (to === PhaseStatus.proposed) {
+            if (projectDoc.status !== ProjectStatus.draft) {
+                throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+            }
+        }
         if (to === PhaseStatus.approved) {
 
             const [activities, equipment] = await Promise.all([
@@ -413,6 +421,35 @@ export class PhaseService {
                 projectDoc.grant.toString(),
                 phaseDoc.budget
             );
+        }
+
+        if (to === PhaseStatus.completed) {
+            const activities = await this.activityRepo.find({
+                phase: phaseDoc._id,
+            });
+
+            if (
+                activities.length === 0 ||
+                activities.some(
+                    activity =>
+                        activity.status !== PhaseActivityStatus.completed
+                )
+            ) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_ACTIVITIES_NOT_COMPLETED
+                );
+            }
+
+            const hasProgressReport = await this.phaseDocRepo.exists({
+                phase: String(phaseDoc._id),
+                type: PhaseDocumentType.progressReport,
+            });
+
+            if (!hasProgressReport) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_PROGRESS_REPORT_REQUIRED
+                );
+            }
         }
 
         /**

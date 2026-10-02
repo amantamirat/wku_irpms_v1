@@ -18,6 +18,10 @@ export enum ProjectStatus {
     terminated = "terminated"
 }
 
+export interface IProjectObjectives {
+    general: string;
+    specific: string[];
+}
 
 export interface IProject extends Document {
 
@@ -61,6 +65,10 @@ export interface IProject extends Document {
     leadPI: mongoose.Types.ObjectId;
 
     themes: mongoose.Types.ObjectId[];
+
+    keywords?: string[];
+
+    objectives?: IProjectObjectives;
 
     currentApplication?: mongoose.Types.ObjectId | null;
 
@@ -140,6 +148,11 @@ const ProjectSchema = new Schema<IProject>(
             trim: true
         },
 
+        keywords: {
+            type: [String],
+            default: []
+        },
+
         totalBudget: {
             type: Number,
             min: 0
@@ -167,6 +180,18 @@ const ProjectSchema = new Schema<IProject>(
                 ref: COLLECTIONS.THEME
             }],
             default: []
+        },
+
+        objectives: {
+            general: {
+                type: String,
+                trim: true
+            },
+
+            specific: {
+                type: [String],
+                default: []
+            }
         },
 
         currentApplication: {

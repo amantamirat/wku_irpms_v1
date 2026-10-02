@@ -1,5 +1,5 @@
 import { randomUUID } from "crypto";
-import { Unit } from "../../../common/constants/enums";
+import path from "path";
 import { PERMISSIONS } from "../../../common/constants/permissions";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
@@ -8,20 +8,16 @@ import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { FileStorageService } from "../../../common/services/file-storage.service";
-import { AnonymizerService } from "../../../util/anonymizer/anonymizer.service";
-import { AuthPermissionService } from "../../auth/auth.permission-service";
-import { AuthScope } from "../../auth/auth.types";
 import ScopeFilterService from "../../../common/services/scope-filter.service";
+import { AnonymizerService } from "../../../util/anonymizer/anonymizer.service";
+import { AuthScope } from "../../auth/auth.types";
 import { ICallRepository } from "../../calls/call.repository";
 import { IStage } from "../../calls/stages/stage.model";
 import { IStageRepository } from "../../calls/stages/stage.repository";
 import { CompositionValidationInput, CompositionValidationService } from "../../compositions/composition-validator.service";
 import { ConstraintValidationInput, ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
-import { GrantRepository } from "../../grants/grant.repository";
 import { NotificationService } from "../../notifications/notification.service";
-import { OrganizationRepository } from "../../organization/organization.repository";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
-import { ReviewerStatus } from "../../reviewers/reviewer.state-machine";
 import { TemplateValidationService } from "../../templates/services/template-validation.service";
 import { IUserRepository } from "../../users/user.repository";
 import { ICollaboratorRepository } from "../collaborators/collaborator.repository";
@@ -34,7 +30,6 @@ import {
 } from "./application.dto";
 import { ApplicationStatus, IApplication } from "./application.model";
 import { IApplicationRepository } from "./application.repository";
-import path from "path";
 
 export class ApplicationService {
 
@@ -223,6 +218,21 @@ export class ApplicationService {
         // --------------------------------------------------
         // Validate document against stage template
         // --------------------------------------------------
+
+        if (stageDoc.constraint && projectDoc?._id) {
+            const result =
+                await this.constraintValidator.
+                    validateProjectById(String(stageDoc.constraint), String(projectDoc._id));
+
+            if (!result?.valid) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_CONSTRAINT,
+                    "Stage Constraint validation failed",
+                    400,
+                    result
+                );
+            }
+        }
 
         if (stageDoc.template) {
             const result =
@@ -591,7 +601,7 @@ export class ApplicationService {
             }
         }
 
-        
+
 
         const stageDoc = await this.stageRepo.findById(String(applicationDoc.stage));
 

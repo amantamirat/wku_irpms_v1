@@ -250,20 +250,27 @@ export class PhaseActivityService {
                 ERROR_CODES.PHASE_NOT_FOUND
             );
 
-        const projectId =
-            String(phaseDoc.project);
 
-            /*
-        await this.projectAuth.auth(
-            projectId,
-            userId,
-            PERMISSIONS.PHASE_ACTIVITY.UPDATE
-        );*/
+        /*
+                const projectId =
+                    String(phaseDoc.project);
+        
+                
+            await this.projectAuth.auth(
+                projectId,
+                userId,
+                PERMISSIONS.PHASE_ACTIVITY.UPDATE
+            );*/
 
         /**
          * Activity execution is only possible
          * while its phase is active.
          */
+        if (to === PhaseActivityStatus.planned) {
+            if (phaseDoc.status !== PhaseStatus.proposed) {
+                throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
+            }
+        }
         const executionStates = [
             PhaseActivityStatus.active,
             PhaseActivityStatus.completed,

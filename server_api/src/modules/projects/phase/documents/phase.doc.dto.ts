@@ -1,9 +1,12 @@
+import { PhaseDocumentType } from "./phase.doc.model";
+
 export interface CreatePhaseDocDTO {
     phase: string;
+    type: PhaseDocumentType;
     description: string;
-    documentPath: string;
 }
 
 export interface FilterPhaseDocDTO {
-    phase: string;
+    phase?: string;
+    type?: PhaseDocumentType;
 }

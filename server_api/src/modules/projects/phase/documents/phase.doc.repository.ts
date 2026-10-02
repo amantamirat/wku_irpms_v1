@@ -1,42 +1,84 @@
 import mongoose from "mongoose";
-import { IPhaseDocument, PhaseDocument } from "./phase.doc.model";
-import { CreatePhaseDocDTO, FilterPhaseDocDTO } from "./phase.doc.dto";
 import { FilterOptions } from "../../../../common/dtos/filter.dto";
+import { FilterPhaseDocDTO } from "./phase.doc.dto";
+import {
+    IPhaseDocument,
+    PhaseDocument,
+    PhaseDocumentType
+} from "./phase.doc.model";
 
-export interface IPhaseDocumentRepository {
-    findById(id: string, options?: FilterOptions): Promise<IPhaseDocument | null>;
-    find(filters: FilterPhaseDocDTO, options?: FilterOptions): Promise<Partial<IPhaseDocument>[]>;
-    create(dto: CreatePhaseDocDTO): Promise<IPhaseDocument>;
-    delete(id: string): Promise<IPhaseDocument | null>;
+export interface CreatePhaseDocData {
+    phase: string;
+    type: PhaseDocumentType;
+    description: string;
+    documentPath: string;
 }
 
-export class PhaseDocumentRepository implements IPhaseDocumentRepository {
+export interface IPhaseDocumentRepository {
 
-    async findById(id: string, options?: FilterOptions) {
+    findById(
+        id: string,
+        options?: FilterOptions
+    ): Promise<IPhaseDocument | null>;
+
+    find(
+        filters: FilterPhaseDocDTO,
+        options?: FilterOptions
+    ): Promise<Partial<IPhaseDocument>[]>;
+
+    exists(
+        filter: FilterPhaseDocDTO
+    ): Promise<boolean>;
+
+    create(
+        dto: CreatePhaseDocData
+    ): Promise<IPhaseDocument>;
+
+    delete(
+        id: string
+    ): Promise<IPhaseDocument | null>;
+}
+
+export class PhaseDocumentRepository
+    implements IPhaseDocumentRepository {
+
+    async findById(
+        id: string,
+        options?: FilterOptions
+    ) {
         const query = PhaseDocument.findById(
             new mongoose.Types.ObjectId(id)
         );
 
         if (options?.populate) {
-             query.populate("phase");
-        }       
+            query.populate("phase");
+        }
 
         return query
             .lean<IPhaseDocument>()
             .exec();
     }
 
-    async find(filters: FilterPhaseDocDTO, options?: FilterOptions) {
-        const query: any = {};
+    async find(
+        filters: FilterPhaseDocDTO,
+        options?: FilterOptions
+    ) {
+        const query: Record<string, any> = {};
 
         if (filters.phase) {
-            query.phase = new mongoose.Types.ObjectId(filters.phase);
+            query.phase = new mongoose.Types.ObjectId(
+                filters.phase
+            );
+        }
+
+        if (filters.type) {
+            query.type = filters.type;
         }
 
         const dbQuery = PhaseDocument.find(query);
 
         if (options?.populate) {
-            query.populate("phase");
+            dbQuery.populate("phase");
         }
 
         return dbQuery
@@ -44,13 +86,31 @@ export class PhaseDocumentRepository implements IPhaseDocumentRepository {
             .exec();
     }
 
-    async create(dto: CreatePhaseDocDTO) {
-        const data: any = {
-            ...dto,
-            phase: new mongoose.Types.ObjectId(dto.phase),
-        };
+    async exists(
+        filters: FilterPhaseDocDTO
+    ): Promise<boolean> {
+        const query: Record<string, any> = {};
 
-        return PhaseDocument.create(data);
+        if (filters.phase) {
+            query.phase = new mongoose.Types.ObjectId(filters.phase);
+        }
+
+        if (filters.type) {
+            query.type = filters.type;
+        }
+
+        const exists = await PhaseDocument.exists(query);
+
+        return !!exists;
+    }
+
+    async create(
+        dto: CreatePhaseDocData
+    ) {
+        return PhaseDocument.create({
+            ...dto,
+            phase: new mongoose.Types.ObjectId(dto.phase)
+        });
     }
 
     async delete(id: string) {

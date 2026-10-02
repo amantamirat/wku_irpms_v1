@@ -127,6 +127,7 @@ export const PERMISSIONS = {
   CONSTRAINT: {
     CREATE: "constraint:create",
     READ: "constraint:read",
+    LOOKUP: "constraint:lookup",
     UPDATE: "constraint:update",
     DELETE: "constraint:delete",
   },
@@ -134,6 +135,7 @@ export const PERMISSIONS = {
   COMPOSITION: {
     CREATE: "composition:create",
     READ: "composition:read",
+    LOOKUP: "composition:lookup",
     UPDATE: "composition:update",
     DELETE: "composition:delete",
   },
