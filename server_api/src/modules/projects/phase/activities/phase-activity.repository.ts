@@ -62,6 +62,24 @@ export interface IPhaseActivityRepository {
     ): Promise<any>;
 }
 
+
+/**
+ * Data accepted by the repository on create.
+ * `duration` is computed by the service, never sent by the client.
+ */
+export interface CreatePhaseActivityData extends CreatePhaseActivityDto {
+    duration: number;
+}
+
+/**
+ * Data accepted by the repository on update.
+ * `duration` is recomputed by the service whenever the update runs.
+ */
+export type UpdatePhaseActivityData =
+    UpdatePhaseActivityDto["data"] & {
+        duration?: number;
+    };
+
 export class PhaseActivityRepository
     implements IPhaseActivityRepository {
 
@@ -131,7 +149,7 @@ export class PhaseActivityRepository
 
 
     async create(
-        dto: CreatePhaseActivityDto
+        dto: CreatePhaseActivityData
     ): Promise<IPhaseActivity> {
 
         const data = {
@@ -145,7 +163,7 @@ export class PhaseActivityRepository
     }
 
     async createMany(
-        dtos: CreatePhaseActivityDto[]
+        dtos: CreatePhaseActivityData[]
     ): Promise<IPhaseActivity[]> {
 
         const data = dtos.map(dto => ({
@@ -165,7 +183,7 @@ export class PhaseActivityRepository
 
     async update(
         id: string,
-        data: UpdatePhaseActivityDto["data"]
+        data: UpdatePhaseActivityData
     ): Promise<IPhaseActivity | null> {
 
         return PhaseActivity.findByIdAndUpdate(

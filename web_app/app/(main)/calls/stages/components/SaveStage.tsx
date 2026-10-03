@@ -19,6 +19,8 @@ import { CallApi } from '@/app/(main)/calls/api/call.api';
 import { Call } from '@/app/(main)/calls/models/call.model';
 import { TemplateApi } from '@/app/(main)/templates/api/template.api';
 import { Template } from '@/app/(main)/templates/models/template.model';
+import { ConstraintApi } from '@/app/(main)/constraints/api/constraint.api';
+import { Constraint } from '@/app/(main)/constraints/models/constraint.model';
 import { StageApi } from '../api/stage.api';
 import { Stage } from '../models/stage.model';
 
@@ -45,8 +47,11 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
     const [calls, setCalls] = useState<Call[] | undefined>(undefined);
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
     const [templates, setTemplates] = useState<Template[]>([]);
+    const [constraints, setConstraints] = useState<Constraint[]>([]);
 
     const isCallPredefined = !!item?.call;
+
+    const extractId = (val: any) => (typeof val === 'object' && val !== null ? val._id : val);
 
     // Helper to extract the max score from the selected evaluation
     const maxPossibleScore = useMemo(() => {
@@ -61,7 +66,7 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
         }
     }, [isCallPredefined]);
 
-    // Fetch published evaluations and templates
+    // Fetch published evaluations, templates, and constraints
     useEffect(() => {
         EvaluationApi.getAll({ status: EvaluationStatus.published })
             .then(setEvaluations)
@@ -69,6 +74,10 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
 
         TemplateApi.getAll()
             .then(setTemplates)
+            .catch(console.error);
+
+        ConstraintApi.getAll()
+            .then(setConstraints)
             .catch(console.error);
     }, []);
 
@@ -134,7 +143,8 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
             onComplete?.({ 
                 ...saved, 
                 evaluation: localStage.evaluation,
-                template: localStage.template 
+                template: localStage.template,
+                constraint: localStage.constraint
             });
         } catch (err: any) {
             toast.current?.show({
@@ -244,6 +254,20 @@ const SaveStage = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                         placeholder="Select a Template (Optional)"
                         showClear
                         onChange={(e) => setLocalStage((p) => ({ ...p, template: e.value ?? null }))}
+                    />
+                </div>
+
+                {/* Constraint Profile */}
+                <div className="field">
+                    <label className="font-bold">Constraint Profile</label>
+                    <Dropdown
+                        value={extractId(localStage.constraint)}
+                        options={constraints}
+                        optionLabel="name"
+                        optionValue="_id"
+                        placeholder="Select Constraint (Optional)"
+                        showClear
+                        onChange={(e) => setLocalStage((p) => ({ ...p, constraint: e.value ?? null }))}
                     />
                 </div>
 

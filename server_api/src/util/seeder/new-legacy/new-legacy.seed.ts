@@ -3,7 +3,7 @@ import path from 'path';
 import { Unit } from '../../../common/constants/enums';
 import { AppError } from '../../../common/errors/app.error';
 import { ERROR_CODES } from '../../../common/errors/error.codes';
-import { accountService, calendarRepo, grantRepo, organizationRepo, projectService, thematicRepo, themeRepo, userService } from '../../../core/container';
+import { calendarRepo, grantRepo, organizationRepo, projectService, thematicRepo, themeRepo, userService } from '../../../core/container';
 import { CalendarStatus } from '../../../modules/calendar/calendar.model';
 import { ICalendarRepository } from '../../../modules/calendar/calendar.repository';
 import { FundingSource, GrantStatus } from '../../../modules/grants/grant.model';
@@ -18,13 +18,14 @@ import { IThematicRepository } from '../../../modules/thematics/thematic.reposit
 import { ThematicStatus } from '../../../modules/thematics/thematic.state-machine';
 import { IThemeRepository } from "../../../modules/thematics/themes/theme.repository";
 import { UserService } from '../../../modules/users/user.service';
-import { ExtractedMember, LegacyProjectDTO } from "./legacy.dto";
-import { AccountService } from '../../../modules/accounts/account.service';
+import { NewLegacyProjectDTO } from './new-legacy.dto';
+import { CollaboratorStatus } from '../../../modules/projects/collaborators/collaborator.model';
+import { IPhaseActivityDetailCost } from '../../../modules/projects/phase/activities/phase-activity.model';
 
-export class LegacySeeder {
+export class NewLegacySeeder {
 
-    private readonly LEGACY_GRANT = "Legacy Grant";
-    private readonly LEGACY_THEMATICS = "Legacy Thematics";
+    private readonly LEGACY_GRANT = "NEW Legacy Grant";
+    private readonly LEGACY_THEMATICS = "NEW Legacy Thematics";
     private readonly RESEARCH_DIRECTORATE = "Research";
 
     constructor(
@@ -34,35 +35,38 @@ export class LegacySeeder {
         private readonly themeRepo: IThemeRepository,
         private readonly calendarRepo: ICalendarRepository,
         private readonly userService: UserService,
-        private readonly accountService: AccountService,
         private readonly projectService: ProjectService
     ) { }
 
     async run() {
-        console.log("🚀 Starting legacy migration...");
+        console.log("🚀 Starting new legacy migration...");
 
         const projects = await this.loadProjects();
-        await this.seedColleges(projects);
-        await this.seedDepartments(projects);
-
+        await this.seedDirectorates();
         await this.seedLegacyCalendars(projects);
         await this.seedLegacyThemes(projects);
 
-        //await this.seedUsers();
 
-        await this.seedDirectorates();
 
         const grant = await this.seedLegacyGrant(projects);
         await this.seedProjects(String(grant._id), projects);
     }
 
-    private async loadProjects(): Promise<LegacyProjectDTO[]> {
+    private async loadProjects(): Promise<NewLegacyProjectDTO[]> {
+
         const filePath = path.join(
             process.cwd(),
-            "data/legacy/info.json"
+            "data/legacy/NewIRIMS.json"
         );
+
         const rawData = await fs.readFile(filePath, "utf-8");
-        return JSON.parse(rawData);
+
+        const normalizedData = rawData
+            .replace(/\bNaN\b/g, "null")
+            .replace(/\bInfinity\b/g, "null")
+            .replace(/\b-Infinity\b/g, "null");
+
+        return JSON.parse(normalizedData);
     }
 
     private parseName(raw: string) {
@@ -90,123 +94,323 @@ export class LegacySeeder {
         };
     }
 
-    private parseTeamMembers(
-        detail: string
-    ): ExtractedMember[] {
+    private async createTempUser(parsedName: string) {
+        const temporaryDepartment =
+            await this.organizationRepo.findOne({
+                name: "Temporary Department",
+                type: Unit.department,
+            });
 
-        return detail
-            .split(";")
-            .map(member => {
+        if (!temporaryDepartment) {
+            throw new AppError(
+                ERROR_CODES.ORGANIZATION_NOT_FOUND,
+                "Temporary Department not found"
+            );
+        }
 
-                const match = member.match(
-                    /(.*?)\s*\[(.*?)\s*\/\s*(.*?)\]/
-                );
+        const user = await this.userService.create({
+            name: parsedName,
+            workspace: String(temporaryDepartment._id),
+        });
 
-                if (!match) return null;
-
-                const parsedName =
-                    this.parseName(match[1].trim());
-
-                return {
-                    name: parsedName.name,
-                    department: match[2].trim(),
-                    college: match[3].trim()
-                };
-            })
-            .filter(Boolean) as ExtractedMember[];
-    }
-
-    private async buildCollaborators(
-        item: LegacyProjectDTO
-    ) {
-        const members = this.parseTeamMembers(
-            item.Team_Members_Detail
+        console.log(
+            `  ✓ Temporary user created: ${parsedName}`
         );
 
-        const parsedPIName = this.parseName(item.PI_Name).name;
+        if (!user) {
+            throw new AppError("ERROR ON CREATING TEMP USER");
+        }
+
+        return user;
+    }
+
+
+    private async buildCollaborators(
+        item: NewLegacyProjectDTO
+    ): Promise<CollaboratorDto[]> {
 
         const collaborators: CollaboratorDto[] = [];
 
-        for (const member of members) {
+        const principalResearcherName =
+            this.parseName(item.PrincipalResearcher).name;
 
-            const affliation = await this.organizationRepo.findOne(
-                { name: member.department }
-            );
+        const collaboratorData = [
+            {
+                name: item.Collaborator1,
+                role: item.Collaborator1Contribution,
+            },
+            {
+                name: item.Collaborator2,
+                role: item.Collaborator2Contribution,
+            },
+            {
+                name: item.Collaborator3,
+                role: item.Collaborator3Contribution,
+            },
+            {
+                name: item.Collaborator4,
+                role: item.Collaborator4Contribution,
+            },
+            {
+                name: item.Collaborator5,
+                role: item.Collaborator5Contribution,
+            },
+            {
+                name: item.Collaborator6,
+                role: item.Collaborator6Contribution,
+            },
+            {
+                name: item.Collaborator7,
+                role: item.Collaborator7Contribution,
+            },
+            {
+                name: item.Collaborator8,
+                role: item.Collaborator8Contribution,
+            },
+        ];
 
-            if (!affliation) {
-                throw new AppError(ERROR_CODES.ORGANIZATION_NOT_FOUND,
-                    `Department not found ${member.department}`
-                );
+        const addedUsers = new Set<string>();
+
+        // Add listed collaborators
+        for (const collaborator of collaboratorData) {
+
+            if (!collaborator.name) {
+                continue;
             }
 
-            const parsedMemberName = this.parseName(member.name).name;
+            const parsedName =
+                this.parseName(collaborator.name).name;
 
-            const user =
-                await this.userService.findOne({
-                    workspace: String(affliation._id),
-                    name: parsedMemberName
-                });
+            let user = await this.userService.findOne({
+                name: parsedName
+            });
 
+            // Create temporary user if not found
             if (!user) {
-                throw new AppError(ERROR_CODES.USER_NOT_FOUND,
-                    `User not found ${member.name} department ${member.department}`
-                );
+                user = await this.createTempUser(parsedName);
             }
 
+            const userId = String(user._id);
+
+            if (addedUsers.has(userId)) {
+                continue;
+            }
+
+            addedUsers.add(userId);
+
+            const isLeadPI =
+                parsedName === principalResearcherName;
 
             collaborators.push({
-                member: String(user._id),
+                member: userId,
                 role:
-                    parsedMemberName === parsedPIName
-                        ? "Principal Investigator"
-                        : "Co-Investigator",
-                isLeadPI:
-                    parsedMemberName === parsedPIName
+                    collaborator.role?.trim() ||
+                    (
+                        isLeadPI
+                            ? "Principal Investigator"
+                            : "Co-Investigator"
+                    ),
+                status: CollaboratorStatus.verified,
+                isLeadPI
             });
+        }
+
+        // ---------------------------------------------------------
+        // Make sure Principal Researcher is included as Lead PI
+        // ---------------------------------------------------------
+
+        const principalUser =
+            await this.userService.findOne({
+                name: principalResearcherName
+            }) ??
+            await this.createTempUser(principalResearcherName);
+
+        const principalUserId =
+            String(principalUser._id);
+
+        if (!addedUsers.has(principalUserId)) {
+
+            collaborators.push({
+                member: principalUserId,
+                role: "Principal Investigator",
+                isLeadPI: true
+            });
+
+            addedUsers.add(principalUserId);
         }
 
         return collaborators;
     }
 
+
+
+    private buildPhaseActivities(
+        researchPlanDetails?: string | null
+    ): {
+        title: string;
+        cost: number;
+        detailCost: IPhaseActivityDetailCost;
+    }[] {
+        if (
+            !researchPlanDetails ||
+            typeof researchPlanDetails !== "string"
+        ) {
+            return [];
+        }
+
+        return researchPlanDetails
+            .split(/\r?\n/)
+            .map(line => line.trim())
+            .filter(Boolean)
+            .map(line => {
+
+                const parts = line.split("|").map(part => part.trim());
+
+                const values: Record<string, string> = {};
+
+                for (const part of parts) {
+                    const [key, ...rest] = part.split("=");
+
+                    if (!key || rest.length === 0) {
+                        continue;
+                    }
+
+                    values[key.trim()] = rest.join("=").trim();
+                }
+
+                const title = values.Activity;
+
+                const participants = Number(values.Participants);
+                const duration = Number(values.RequiredDays);
+                const cost = Number(values.Cost);
+
+                if (
+                    !title ||
+                    !Number.isFinite(participants) ||
+                    !Number.isFinite(duration) ||
+                    !Number.isFinite(cost)
+                ) {
+                    return null;
+                }
+
+                const unitPrice =
+                    participants > 0 && duration > 0
+                        ? cost / (participants * duration)
+                        : 0;
+
+                return {
+                    title,
+                    cost,
+                    detailCost: {
+                        participants,
+                        duration,
+                        unitPrice,
+                    },
+                };
+            })
+            .filter(
+                (
+                    activity
+                ): activity is {
+                    title: string;
+                    cost: number;
+                    detailCost: IPhaseActivityDetailCost;
+                } => activity !== null
+            );
+    }
+
+
     private buildPhases(
-        budget: number
+        item: NewLegacyProjectDTO
     ): PhaseDto[] {
 
-        const half = budget / 2;
-
-        return [
+        const phaseData = [
             {
-                // order: 1,
-                title: "Research Phase I",
-                budget: half,
-                duration: 60,
-                description: "Initial project implementation"
+                order: 1,
+                budget: item.Phase1Cost,
+                startDate: item.Phase1StartDate,
+                endDate: item.Phase1EndDate,
+                activities: item.Phase1Activities,
+                researchPlanDetails: item.Phase1ResearchPlanDetails,
             },
             {
-                // order: 2,
-                title: "Research Phase II",
-                budget: half,
-                duration: 60,
-                description: "Final implementation and reporting"
-            }
+                order: 2,
+                budget: item.Phase2Cost,
+                startDate: item.Phase2StartDate,
+                endDate: item.Phase2EndDate,
+                activities: item.Phase2Activities,
+                researchPlanDetails: item.Phase2ResearchPlanDetails,
+            },
+            {
+                order: 3,
+                budget: item.Phase3Cost,
+                startDate: item.Phase3StartDate,
+                endDate: item.Phase3EndDate,
+                activities: item.Phase3Activities,
+                researchPlanDetails: item.Phase3ResearchPlanDetails,
+            },
+            {
+                order: 4,
+                budget: item.Phase4Cost,
+                startDate: item.Phase4StartDate,
+                endDate: item.Phase4EndDate,
+                activities: item.Phase4Activities,
+                researchPlanDetails: item.Phase4ResearchPlanDetails,
+            },
+            {
+                order: 5,
+                budget: item.Phase5Cost,
+                startDate: item.Phase5StartDate,
+                endDate: item.Phase5EndDate,
+                activities: item.Phase5Activities,
+                researchPlanDetails: item.Phase5ResearchPlanDetails,
+            },
         ];
+
+        const numberOfPhases = Math.min(
+            Math.max(item.NumberOfPhases || 0, 0),
+            phaseData.length
+        );
+
+        return phaseData
+            .slice(0, numberOfPhases)
+            .map(phase => ({
+                order: phase.order,
+                title: `Phase ${phase.order}`,
+
+                budget: phase.budget as number,
+
+                duration:
+                    Math.ceil(
+                        (phase.endDate as number) -
+                        (phase.startDate as number)
+                    ) + 1,
+
+                description:
+                    phase.activities ||
+                    `Research Phase ${phase.order} implementation`,
+
+                activities: this.buildPhaseActivities(
+                    phase.researchPlanDetails
+                ),
+            }));
     }
 
 
     private async mapToCreateProjectDTO(
-        item: LegacyProjectDTO,
+        item: NewLegacyProjectDTO,
         grantId: string,
         thematicId: string
     ): Promise<CreateProjectDTO> {
 
         const year = Number(
-            item.Academic_Year?.substring(0, 4)
+            item.AcYear?.substring(0, 4)
         );
 
         if (!year) {
             throw new AppError(
                 ERROR_CODES.CALENDAR_NOT_FOUND,
-                `Invalid academic year ${item.Academic_Year}`
+                `Invalid academic year ${item.AcYear}`
             );
         }
 
@@ -230,14 +434,14 @@ export class LegacySeeder {
         if (!pi) {
             throw new AppError(
                 ERROR_CODES.LEAD_PI_NOT_FOUND,
-                `PI not found ${item.PI_Name}`
+                `PI not found ${item.PrincipalResearcher}`
             );
         }
 
         if (!item.SubTheme) {
             throw new AppError(
                 ERROR_CODES.THEME_NOT_FOUND,
-                `SubTheme missing for project ${item.Project_Title}`
+                `SubTheme missing for project ${item.ConceptNoteTitle}`
             );
         }
 
@@ -256,23 +460,20 @@ export class LegacySeeder {
         return {
             grant: grantId,
             calendar: String(calendar._id),
-            title: item.Project_Title,
-            //summary: `L project ${item.Academic_Year}`,
+            title: item.ConceptNoteTitle,
             leadPI: pi.member,
             themes: [
                 String(theme._id)
             ],
             collaborators,
-            phases: this.buildPhases(
-                item.Approved_Budget
-            )
+            phases: this.buildPhases(item)
         };
     }
 
 
     async seedProjects(
         grantId: string,
-        projects: LegacyProjectDTO[]
+        projects: NewLegacyProjectDTO[]
     ) {
         const grantDoc = await this.grantRepo.findById(grantId);
 
@@ -294,9 +495,25 @@ export class LegacySeeder {
                     String(grantDoc.thematic)
                 );
 
+                console.log(
+                    "\n+++++++++++++++++++++++++++++++++++++++++++"
+                );
+
+                console.dir(dto, {
+                    depth: null,
+                    colors: true,
+                });
+
+                console.log(
+                    "+++++++++++++++++++++++++++++++++++++++++++\n"
+                );
+
+                /*
+
                 await this.projectService.create(
                     dto, dto.leadPI, { skipValidation: true }
                 );
+                */
 
                 created++;
 
@@ -307,7 +524,7 @@ export class LegacySeeder {
 
                     console.error(
                         `❌ Seed failed [${error.code}]: ` +
-                        `${error.message}: ${item.Project_Title}`
+                        `${error.message}: ${item.ConceptNoteTitle}`
                     );
 
                     continue;
@@ -317,7 +534,7 @@ export class LegacySeeder {
                     skipped++;
 
                     console.log(
-                        `⏭️ Duplicate skipped: ${item.Project_Title}`
+                        `⏭️ Duplicate skipped: ${item.ConceptNoteTitle}`
                     );
 
                     continue;
@@ -345,98 +562,6 @@ Failed         : ${failed}
     }
 
 
-    async seedColleges(projects: LegacyProjectDTO[]) {
-        const colleges = new Set<string>();
-
-        for (const item of projects) {
-            if (item.PI_College) {
-                colleges.add(item.PI_College.trim());
-            }
-
-            const members = this.parseTeamMembers(
-                item.Team_Members_Detail
-            );
-
-            for (const member of members) {
-                colleges.add(member.college.trim());
-            }
-        }
-
-        let seeded = false;
-
-        for (const collegeName of colleges) {
-            const exists = await this.organizationRepo.findOne({
-                name: collegeName,
-                type: Unit.college
-            });
-
-            if (exists) {
-                continue;
-            }
-
-            await this.organizationRepo.create({
-                type: Unit.college,
-                name: collegeName
-            });
-
-            seeded = true;
-        }
-
-        if (seeded) {
-            console.log("✅ Colleges seeded");
-        }
-    }
-
-    async seedDepartments(projects: LegacyProjectDTO[]) {
-
-        const departments = new Map<string, string>();
-
-        for (const item of projects) {
-            // PI department
-            if (item.PI_Department &&
-                item.PI_College
-            ) {
-                departments.set(
-                    `${item.PI_Department}-${item.PI_College}`, item.PI_Department
-                );
-            }
-            // Team member departments
-            const members = this.parseTeamMembers(item.Team_Members_Detail);
-            for (const member of members) {
-                departments.set(`${member.department}-${member.college}`, member.department);
-
-            }
-
-        }
-        let seeded = false;
-        for (const key of departments.keys()) {
-            const [
-                departmentName,
-                collegeName
-            ] = key.split("-");
-            const college =
-                await this.organizationRepo.findOne(
-                    { name: collegeName }
-                );
-            if (!college) {
-                console.warn(`Missing college ${collegeName}`);
-                continue;
-            }
-            const exists = await this.organizationRepo.exists({ name: departmentName });
-
-            if (exists)
-                continue;
-
-            await this.organizationRepo.create({
-                type: Unit.department, name: departmentName,
-                parent: String(college._id)
-            });
-            seeded = true;
-        }
-
-        if (seeded)
-            console.log("✅ Departments seeded");
-    }
 
     async seedDirectorates() {
         const directorates = [
@@ -470,97 +595,8 @@ Failed         : ${failed}
         }
     }
 
-    private buildEmail(name: string): string {
-        const parts = name
-            .trim()
-            .toLowerCase()
-            .replace(/[^a-z0-9\s]+/g, ' ')
-            .split(/\s+/)
-            .filter(Boolean);
 
-        if (parts.length < 2) {
-            throw new AppError(
-                ERROR_CODES.INVALID_USER,
-                `Cannot generate email for ${name}`
-            );
-        }
-
-        return `${parts[0]}.${parts[1]}@wku.edu.et`;
-    }
-
-    async seedUsers() {
-        const defaultPassword = process.env.SEEDER_DEFAULT_PASSWORD;
-
-        if (!defaultPassword) {
-            console.warn(
-                "⚠️ SEEDER_DEFAULT_PASSWORD is not configured. " +
-                "Users will be seeded, but accounts will not be created."
-            );
-        }
-
-        const filePath = path.join(
-            process.cwd(),
-            'data/legacy',
-            'researchers.json'
-        );
-
-        const rawData = await fs.readFile(filePath, 'utf-8');
-        const users = JSON.parse(rawData);
-
-        let seeded = false;
-
-        for (const item of users) {
-            const departmentName = item.Department;
-
-            const department = await this.organizationRepo.findOne({
-                name: departmentName
-            });
-
-            if (!department) {
-                console.warn(`Department ${departmentName} does not exist`);
-                continue;
-            }
-
-            const parsed = this.parseName(item.Name);
-
-            const existedUser = await this.userService.findOne({
-                workspace: String(department._id),
-                name: parsed.name
-            });
-
-            let userDoc = existedUser;
-
-            if (!userDoc) {
-                userDoc = await this.userService.create({
-                    name: parsed.name,
-                    workspace: String(department._id),
-                    gender: item.Gender
-                });
-
-                seeded = true;
-            }
-
-            // Only create account if password is configured
-            if (defaultPassword) {
-                const email = this.buildEmail(parsed.name);
-                const emailExist = await this.accountService.exists({ email });
-                const userExist = await this.accountService.exists({ user: String(userDoc._id) });
-                if (!emailExist && !userExist) {
-                    await this.accountService.create({
-                        user: String(userDoc._id),
-                        email,
-                        password: defaultPassword,
-                    });
-                }
-            }
-        }
-
-        if (seeded) {
-            console.log("✅ Users seeded");
-        }
-    }
-
-    async seedLegacyThemes(projects: LegacyProjectDTO[]) {
+    async seedLegacyThemes(projects: NewLegacyProjectDTO[]) {
         // 1. Find or create the legacy thematic area
         const thematic =
             await this.thematicRepo.findOne({
@@ -638,12 +674,12 @@ Failed         : ${failed}
         console.log("✅ Legacy themes seeded");
     }
 
-    async seedLegacyCalendars(projects: LegacyProjectDTO[]) {
+    async seedLegacyCalendars(projects: NewLegacyProjectDTO[]) {
         const years = new Set<number>();
 
         for (const project of projects) {
             const academicYear =
-                project.Academic_Year?.trim();
+                project.AcYear?.trim();
 
             if (!academicYear)
                 continue;
@@ -682,7 +718,7 @@ Failed         : ${failed}
         console.log("✅ Legacy calendars seeded");
     }
 
-    async seedLegacyGrant(projects: LegacyProjectDTO[]) {
+    async seedLegacyGrant(projects: NewLegacyProjectDTO[]) {
         // Find Legacy Thematics
         const thematic = await this.thematicRepo.findOne({
             title: this.LEGACY_THEMATICS
@@ -713,7 +749,7 @@ Failed         : ${failed}
         const totalApprovedBudget =
             projects.reduce(
                 (total, project) =>
-                    total + (project.Approved_Budget || 0),
+                    total + (project.ApprovedBudget || 0),
                 0
             );
 
@@ -740,15 +776,14 @@ Failed         : ${failed}
 }
 
 
-export function createLegacySeeder() {
-    return new LegacySeeder(
+export function createNewLegacySeeder() {
+    return new NewLegacySeeder(
         organizationRepo,
         grantRepo,
         thematicRepo,
         themeRepo,
         calendarRepo,
         userService,
-        accountService,
         projectService
     );
 }

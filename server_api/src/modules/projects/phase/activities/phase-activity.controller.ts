@@ -10,9 +10,33 @@ import {
     FilterPhaseActivities,
     UpdatePhaseActivityDto,
 } from "./phase-activity.dto";
+import { IPhaseActivityDetailCost } from "./phase-activity.model";
 import { PhaseActivityService } from "./phase-activity.service";
 import { ERROR_CODES } from "../../../../common/errors/error.codes";
 import { TransitionRequestDto } from "../../../../common/dtos/transition.dto";
+
+/**
+ * Normalises the raw detailCost from the request body.
+ * Returns undefined when it is not provided.
+ */
+const parseDetailCost = (
+    value: any
+): IPhaseActivityDetailCost | undefined => {
+    if (value === undefined || value === null) return undefined;
+
+    return {
+        participants: Number(value.participants),
+        unitPrice: Number(value.unitPrice),
+        duration: Number(value.duration)
+    };
+};
+
+/**
+ * Converts a raw value to a Date, or undefined when not provided.
+ * Invalid values become an Invalid Date, which the service rejects.
+ */
+const parseDate = (value: any): Date | undefined =>
+    value === undefined || value === null ? undefined : new Date(value);
 
 export class PhaseActivityController {
 
@@ -36,9 +60,8 @@ export class PhaseActivityController {
                 phase,
                 title,
                 description,
-                participants,
-                //requiredDays,
                 cost,
+                detailCost,
                 startDate,
                 endDate,
             } = req.body;
@@ -47,18 +70,14 @@ export class PhaseActivityController {
                 phase: phase as string,
                 title,
                 description,
-                participants:
-                    participants !== undefined
-                        ? Number(participants)
-                        : undefined,
-                /*
-        requiredDays:
-            requiredDays !== undefined
-                ? Number(requiredDays)
-                : undefined,*/
+
                 cost: Number(cost),
-                startDate,
-                endDate
+                detailCost: parseDetailCost(detailCost),
+
+                // required; a missing value becomes an Invalid Date
+                // and is rejected by the service
+                startDate: new Date(startDate),
+                endDate: new Date(endDate),
             };
 
             const created =
@@ -178,9 +197,8 @@ export class PhaseActivityController {
             const {
                 title,
                 description,
-                participants,
-                //requiredDays,
                 cost,
+                detailCost,
                 startDate,
                 endDate,
             } = req.body;
@@ -194,11 +212,12 @@ export class PhaseActivityController {
                 data: {
                     title,
                     description,
-                    participants,
-                    //requiredDays,
-                    cost,
-                    startDate,
-                    endDate,
+
+                    cost: cost !== undefined ? Number(cost) : undefined,
+                    detailCost: parseDetailCost(detailCost),
+
+                    startDate: parseDate(startDate),
+                    endDate: parseDate(endDate),
                 },
 
                 userId: req.auth.userId,

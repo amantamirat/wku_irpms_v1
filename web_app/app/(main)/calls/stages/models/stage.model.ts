@@ -1,4 +1,5 @@
 import { Call } from "@/app/(main)/calls/models/call.model";
+import { Constraint } from "@/app/(main)/constraints/models/constraint.model";
 
 import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 import { Template } from "@/app/(main)/templates/models/template.model";
@@ -17,7 +18,7 @@ export type Stage = {
     deadline: Date;
 
     template?: string | Template | null;
-
+    constraint?: string | Constraint | null;
     evaluation?: string | Evaluation;
     minReviewers?: number;
     maxReviewers?: number;

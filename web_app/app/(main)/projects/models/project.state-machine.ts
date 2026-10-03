@@ -70,6 +70,13 @@ export const PROJECT_TRANSITIONS: TransitionMap = {
             icon: "pi pi-undo",
             severity: "warning",
         },
+
+        {
+            next: ProjectStatus.verified,
+            action: "Verify",
+            icon: "pi pi-check",
+            severity: "info",
+        },
     ],
 
     [ProjectStatus.terminated]: [

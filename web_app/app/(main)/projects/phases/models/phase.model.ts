@@ -14,10 +14,9 @@ export type Phase = {
     _id?: string;
     project?: string | Project;
     title: string;
-    order: number;           // Required for sequencing
-    duration: number;        // Total duration
-    budget: number;          // Total budget
-    description?: string;
+    duration: number;           // Total duration
+    budget: number;             // Total budget
+    description?: string;       // Optional
     status?: PhaseStatus;
     statusHistory?: IStatusHistory<PhaseStatus>[];
     createdAt?: Date;
@@ -30,28 +29,21 @@ export interface FilterPhaseOptions {
 
 // --- Validation Logic ---
 export const validatePhase = (phase: Phase): { valid: boolean; message?: string } => {
-    // 1. Basic Metadata
     if (!phase.project) {
         return { valid: false, message: 'Project is required.' };
     }
 
-    if (!phase.title) {
+    if (!phase.title || phase.title.trim() === '') {
         return { valid: false, message: 'Title is required.' };
     }
 
-    if (phase.order === undefined || phase.order < 1) {
-        return { valid: false, message: 'A valid phase order (1 or greater) is required.' };
+    if (!phase.duration || phase.duration <= 0) {
+        return { valid: false, message: 'Total duration must be greater than 0.' };
     }
 
-    if (!phase.description || phase.description.trim() === '') {
-        return { valid: false, message: 'Phase description is required.' };
-    }
-    // 4. Final Totals Check (Safety check)
-    if (!phase.duration || phase.duration <= 0) {
-        return { valid: false, message: 'Total calculated duration must be greater than 0.' };
+    if (phase.budget === undefined || phase.budget < 0) {
+        return { valid: false, message: 'A valid budget is required.' };
     }
 
     return { valid: true };
 };
-
-

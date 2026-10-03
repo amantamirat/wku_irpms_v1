@@ -21,6 +21,7 @@ const SaveEquipment = ({
 }: EntitySaveDialogProps<PhaseEquipment>) => {
     const [localEquipment, setLocalEquipment] = useState<PhaseEquipment>({
         ...item,
+        itemName: item?.itemName ?? '',
         unit: item?.unit ?? EquipmentUnit.number,
         quantity: item?.quantity ?? 1,
         unitPrice: item?.unitPrice ?? 0,
@@ -34,6 +35,7 @@ const SaveEquipment = ({
     useEffect(() => {
         setLocalEquipment({
             ...item,
+            itemName: item?.itemName ?? '',
             unit: item?.unit ?? EquipmentUnit.number,
             quantity: item?.quantity ?? 1,
             unitPrice: item?.unitPrice ?? 0,
@@ -51,6 +53,9 @@ const SaveEquipment = ({
         label: status.charAt(0).toUpperCase() + status.slice(1),
         value: status
     }));
+
+    // Calculate total cost dynamically
+    const totalCost = (localEquipment.quantity || 0) * (localEquipment.unitPrice || 0);
 
     const handleSave = async () => {
         setSubmitted(true);
@@ -127,7 +132,7 @@ const SaveEquipment = ({
                                 {localEquipment._id ? 'Edit Equipment' : 'New Equipment'}
                             </span>
                             <div className="text-sm text-color-secondary font-normal">
-                                Configure description, units, pricing, and status.
+                                Configure item name, description, units, pricing, and status.
                             </div>
                         </div>
                     </div>
@@ -138,6 +143,25 @@ const SaveEquipment = ({
                 contentClassName="p-4 surface-ground"
             >
                 <div className="p-fluid grid formgrid bg-white p-4 border-round shadow-1 surface-border">
+                    {/* Item Name */}
+                    <div className="field col-12 mb-3">
+                        <label htmlFor="itemName" className="font-bold block mb-2">
+                            Item Name <span className="text-red-500">*</span>
+                        </label>
+                        <InputText
+                            id="itemName"
+                            value={localEquipment.itemName || ''}
+                            onChange={(e) =>
+                                setLocalEquipment({ ...localEquipment, itemName: e.target.value })
+                            }
+                            placeholder="e.g., Safety Helmet"
+                            className={classNames({ 'p-invalid': submitted && !localEquipment.itemName })}
+                        />
+                        {submitted && !localEquipment.itemName && (
+                            <small className="p-error">Item name is required.</small>
+                        )}
+                    </div>
+
                     {/* Description */}
                     <div className="field col-12 mb-3">
                         <label htmlFor="description" className="font-bold block mb-2">
@@ -149,7 +173,7 @@ const SaveEquipment = ({
                             onChange={(e) =>
                                 setLocalEquipment({ ...localEquipment, description: e.target.value })
                             }
-                            placeholder="e.g., Safety Helmets"
+                            placeholder="e.g., Heavy-duty yellow safety helmets with adjustable strap"
                             className={classNames({ 'p-invalid': submitted && !localEquipment.description })}
                         />
                         {submitted && !localEquipment.description && (
@@ -187,7 +211,7 @@ const SaveEquipment = ({
                         />
                     </div>
 
-                    {/* Unit Price & Status */}
+                    {/* Unit Price & Total Cost Calculation */}
                     <div className="field col-12 md:col-6 mb-3">
                         <label htmlFor="unitPrice" className="font-bold block mb-2">
                             Unit Price (ETB)
@@ -201,23 +225,15 @@ const SaveEquipment = ({
                             min={0}
                         />
                     </div>
-                    {
-                        /**
-                         * <div className="field col-12 md:col-6 mb-3">
-                                            <label htmlFor="status" className="font-bold block mb-2">
-                                                Status
-                                            </label>
-                                            <Dropdown
-                                                id="status"
-                                                value={localEquipment.status}
-                                                options={statusOptions}
-                                                onChange={(e) => setLocalEquipment({ ...localEquipment, status: e.value })}
-                                                placeholder="Select status"
-                                            />
-                                        </div>
-                         */
-                    }
 
+                    <div className="field col-12 md:col-6 mb-3 flex flex-column justify-content-between">
+                        <label className="font-bold block mb-2">
+                            Total Cost
+                        </label>
+                        <div className="p-3 surface-100 border-round font-semibold text-primary flex align-items-center" style={{ minHeight: '42px' }}>
+                            {new Intl.NumberFormat('en-US', { style: 'currency', currency: 'ETB' }).format(totalCost)}
+                        </div>
+                    </div>
                 </div>
             </Dialog>
         </>

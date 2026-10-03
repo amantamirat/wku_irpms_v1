@@ -24,10 +24,16 @@ export const PROJECT_TRANSITIONS: Partial<
     ],
 
     [ProjectStatus.completed]: [
+        ProjectStatus.verified,
         ProjectStatus.granted, // Rollback
     ],
 
     [ProjectStatus.terminated]: [
         ProjectStatus.granted, // Restore
     ],
+
+    [ProjectStatus.verified]: [
+        ProjectStatus.completed, // Restore
+    ],
+
 };

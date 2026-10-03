@@ -4,6 +4,7 @@ export interface CollaboratorDto {
     member: string; //memeber
     role: string;
     isLeadPI?: boolean;
+    status?: CollaboratorStatus;
 }
 
 // Base fields for creating a collaborator

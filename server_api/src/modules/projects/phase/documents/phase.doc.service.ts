@@ -65,8 +65,23 @@ export class PhaseDocumentService {
     }
 
     async delete(id: string, userId: string) {
-        const phaseDocDoc = await this.repository.delete(id);
-        if (!phaseDocDoc) throw new AppError(ERROR_CODES.PHASE_DOCUMENT_NOT_FOUND);
+        const phaseDocDoc = await this.repository.findById(id);
+
+        if (!phaseDocDoc) {
+            throw new AppError(ERROR_CODES.PHASE_DOCUMENT_NOT_FOUND);
+        }
+
+        const phase = await this.phaseRepo.findById(String(phaseDocDoc.phase));
+        if (!phase) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
+        if (phase.status === PhaseStatus.completed)
+            throw new AppError(ERROR_CODES.PHASE_ALREADY_COMPLETED);
+
+        if (phaseDocDoc.documentPath) {
+            await this.fileStorage.delete(phaseDocDoc.documentPath);
+        }
+
+        await this.repository.delete(id);
+
         return phaseDocDoc;
     }
 }

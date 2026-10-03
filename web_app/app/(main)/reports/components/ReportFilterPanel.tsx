@@ -12,8 +12,9 @@ interface ReportFilterPanelProps {
     setFilterForm: React.Dispatch<React.SetStateAction<IReportFilter>>;
     grants: Grant[];
     calendars?: any[];
-    workspaces?: any[];    // Added workspaces lookup data
-    organizations?: any[]; // Added organizations lookup data
+    workspaces?: any[];
+    organizations?: any[];
+    calls?: any[]; // Added calls lookup data
     onApply: () => void;
     onReset: () => void;
 }
@@ -25,6 +26,7 @@ export const ReportFilterPanel: React.FC<ReportFilterPanelProps> = ({
     calendars = [],
     workspaces = [],
     organizations = [],
+    calls = [],
     onApply,
     onReset,
 }) => {
@@ -50,6 +52,21 @@ export const ReportFilterPanel: React.FC<ReportFilterPanelProps> = ({
                     />
                 </div>
 
+                {/* Call Filter */}
+                <div className="col-12 sm:col-6 lg:col-3">
+                    <label className="text-700 font-medium text-xs block mb-1">Call</label>
+                    <Dropdown
+                        value={filterForm.call || ''}
+                        options={calls}
+                        onChange={(e) => setFilterForm({ ...filterForm, call: e.value })}
+                        optionLabel="title" // Adjust property name based on Call model (e.g., title, name)
+                        optionValue="_id"
+                        placeholder="All Calls"
+                        className="w-full p-inputtext-sm"
+                        showClear
+                    />
+                </div>
+
                 {/* Calendar Filter */}
                 <div className="col-12 sm:col-6 lg:col-3">
                     <label className="text-700 font-medium text-xs block mb-1">Calendar</label>
@@ -57,7 +74,7 @@ export const ReportFilterPanel: React.FC<ReportFilterPanelProps> = ({
                         value={filterForm.calendar || ''}
                         options={calendars}
                         onChange={(e) => setFilterForm({ ...filterForm, calendar: e.value })}
-                        optionLabel="year" // Adjust property if needed (e.g. title)
+                        optionLabel="year"
                         optionValue="_id"
                         placeholder="All Calendars"
                         className="w-full p-inputtext-sm"
@@ -72,7 +89,7 @@ export const ReportFilterPanel: React.FC<ReportFilterPanelProps> = ({
                         value={filterForm.workspace || ''}
                         options={workspaces}
                         onChange={(e) => setFilterForm({ ...filterForm, workspace: e.value })}
-                        optionLabel="name" 
+                        optionLabel="name"
                         optionValue="_id"
                         placeholder="All Workspaces"
                         className="w-full p-inputtext-sm"
@@ -87,7 +104,7 @@ export const ReportFilterPanel: React.FC<ReportFilterPanelProps> = ({
                         value={filterForm.organization || ''}
                         options={organizations}
                         onChange={(e) => setFilterForm({ ...filterForm, organization: e.value })}
-                        optionLabel="name" // Adjust property name based on Organization model (e.g., name, title)
+                        optionLabel="name"
                         optionValue="_id"
                         placeholder="All Organizations"
                         className="w-full p-inputtext-sm"

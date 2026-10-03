@@ -63,7 +63,7 @@ export const CallInfoStep = ({
                         status: CalendarStatus.active
                     }),
                     ConstraintApi.lookup!(),
-                    CompositionApi.getAll()
+                    CompositionApi.lookup!()
                 ]);
 
                 setGrants(availableGrants || []);

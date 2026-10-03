@@ -21,6 +21,10 @@ export const CompositionApi: EntityApi<Composition> = {
         return data as Composition[];
     },
 
+    async lookup(filter) {
+        return ApiClient.get(`${end_point}/lookup`, filter);
+    },
+
     async update(composition: Partial<Composition>): Promise<Composition> {
         if (!composition._id) {
             throw new Error("_id required.");

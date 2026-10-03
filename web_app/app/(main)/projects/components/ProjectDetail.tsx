@@ -14,6 +14,7 @@ import { ProjectApi } from "../api/project.api";
 import { Project } from "../models/project.model";
 import PhaseManager from "../phases/project/Manager";
 import ReviewersManager from "../../reviewers/project/ReviewersManager";
+import { StatusHistoryWidget } from "@/components/StatusHistoryWidget";
 
 interface ProjectDetailProps {
     project: string | Project;
@@ -147,6 +148,13 @@ export default function ProjectDetail({ project, updateProject, enableEditing, s
             content: <ReviewersManager project={projectData._id!} />
         });
     }
+
+    tabs.push({
+        header: "Status History",
+        icon: "pi pi-history",
+        permission: "project:read",
+        content: <StatusHistoryWidget history={projectData.statusHistory} />
+    });
 
     const allowedTabs = tabs.filter(tab => hasPermission([tab.permission]));
 

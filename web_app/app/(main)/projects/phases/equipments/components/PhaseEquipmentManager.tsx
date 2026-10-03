@@ -30,6 +30,16 @@ const PhaseEquipmentManager = ({ phase }: PhaseEquipmentManagerProps) => {
 
             columns: [
                 {
+                    header: "Item Name",
+                    field: "itemName",
+                    sortable: true,
+                    body: (row: PhaseEquipment) => (
+                        <span className="font-semibold text-gray-900">
+                            {row.itemName}
+                        </span>
+                    )
+                },
+                {
                     header: "Description",
                     field: "description",
                     sortable: true
@@ -61,7 +71,7 @@ const PhaseEquipmentManager = ({ phase }: PhaseEquipmentManagerProps) => {
                 },
                 {
                     header: "Total Cost",
-                    field: "totalCost", // Changed from "unitPrice" to be unique
+                    field: "totalCost", // Unique field identifier for cost calculation
                     body: (row: PhaseEquipment) => {
                         const total = (row.unitPrice || 0) * row.quantity;
                         return (
@@ -90,6 +100,7 @@ const PhaseEquipmentManager = ({ phase }: PhaseEquipmentManagerProps) => {
 
             createNew: () => ({
                 phase,
+                itemName: "",
                 description: "",
                 unit: EquipmentUnit.number,
                 quantity: 1,

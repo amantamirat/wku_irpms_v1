@@ -1,6 +1,5 @@
 import { IRange, isValidRange } from "@/types/range";
 
-
 export interface Constraint {
   _id?: string;
 
@@ -18,6 +17,9 @@ export interface Constraint {
 
   budgetPerPhase?: IRange;
   durationPerPhase?: IRange;
+
+  activitiesPerPhase?: IRange;
+  equipmentsPerPhase?: IRange;
 
   themes?: IRange;
   subThemes?: IRange;
@@ -48,6 +50,8 @@ export const validateConstraint = (
     ["Duration", constraint.duration],
     ["Budget per phase", constraint.budgetPerPhase],
     ["Duration per phase", constraint.durationPerPhase],
+    ["Activities per phase", constraint.activitiesPerPhase],
+    ["Equipments per phase", constraint.equipmentsPerPhase],
     ["Themes", constraint.themes],
     ["Sub themes", constraint.subThemes],
     ["Focus areas", constraint.focusAreas],

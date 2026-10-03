@@ -13,7 +13,6 @@ import {
 import { verifyAuthToken } from "../../../auth/auth.middleware";
 
 import { PhaseEquipmentController } from "./phase-equipment.controller";
-import { PhaseEquipmentRepository } from "./phase-equipment.repository";
 import { PhaseEquipmentService } from "./phase-equipment.service";
 
 const controller = new PhaseEquipmentController(
@@ -45,8 +44,9 @@ router.post(
 router.get(
     "/",
     verifyAuthToken,
-    checkPermission(
-        PERMISSIONS.PHASE_EQUIPMENT.READ
+    checkPermission([
+        PERMISSIONS.PHASE_EQUIPMENT.READ,
+        PERMISSIONS.PHASE_EQUIPMENT.LOOKUP]
     ),
     controller.get
 );

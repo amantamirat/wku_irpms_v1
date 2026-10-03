@@ -202,6 +202,7 @@ export class ProjectRepository
                 .populate("organization")
                 .populate("workspace")
                 .populate("calendar")
+                .populate("call")
                 //.populate("themes")
                 //.populate("currentApplication")
                 //.populate("currentPhase")
@@ -219,7 +220,7 @@ export class ProjectRepository
             .exec();
     }
 
-    
+
     async findIdsByFilter(
         filter: Record<string, unknown>
     ): Promise<mongoose.Types.ObjectId[]> {

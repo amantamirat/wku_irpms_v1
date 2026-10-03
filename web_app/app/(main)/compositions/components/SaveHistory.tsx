@@ -15,7 +15,7 @@ import { EntitySaveDialogProps } from '@/components/createEntityManager';
 import { IRange } from '@/types/range';
 import { Dropdown } from 'primereact/dropdown';
 
-type ProjectMetric = 'granted' | 'refused' | 'completed';
+type ProjectMetric = 'granted' | 'refused' | 'completed' | 'verified';
 type ApplicationMetric = 'submitted' | 'accepted' | 'rejected';
 
 // Helper to initialize history rule state with nested structures safely
@@ -286,6 +286,7 @@ const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
                     {renderRange('Granted Projects', 'project', 'granted')}
                     {renderRange('Refused Projects', 'project', 'refused')}
                     {renderRange('Completed Projects', 'project', 'completed')}
+                    {renderRange('Verified Projects', 'project', 'verified')}
                 </div>
 
                 {/* Application History */}

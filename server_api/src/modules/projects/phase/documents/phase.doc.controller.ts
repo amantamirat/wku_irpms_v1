@@ -69,6 +69,7 @@ export class PhaseDocumentController {
 
             // Service deletes the record from the database and returns the deleted document metadata
             const deletedDoc = await this.service.delete(id, userId);
+            /*
 
             // If the document had an associated file, safely delete it from the server
             if (deletedDoc?.documentPath) {
@@ -82,6 +83,7 @@ export class PhaseDocumentController {
                     }
                 });
             }
+                */
 
             successResponse(
                 res,

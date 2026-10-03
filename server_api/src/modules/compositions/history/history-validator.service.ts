@@ -1,9 +1,10 @@
 import { matchesRange } from "../../../common/types/range";
 import { FundingSource } from "../../grants/grant.model";
 import { GrantRepository } from "../../grants/grant.repository";
-import { ApplicationStatus } from "../../projects/applications/application.model";
+import { ApplicationStatus, IApplication } from "../../projects/applications/application.model";
 import { ApplicationRepository } from "../../projects/applications/application.repository";
 import { FilterCollaborators } from "../../projects/collaborators/collaborator.dto";
+import { ICollaborator } from "../../projects/collaborators/collaborator.model";
 import { CollaboratorRepository } from "../../projects/collaborators/collaborator.repository";
 import { FilterProjectsDTO } from "../../projects/project.dto";
 import { IProject, ProjectStatus } from "../../projects/project.model";
@@ -17,6 +18,7 @@ import {
 
 export interface HistoryValidationContext {
     call: string;
+    stage: string;
     organization: string;
     calendar: string;
     source: FundingSource;
@@ -46,10 +48,7 @@ export class HistoryValidatorService {
             validationContext
         );
 
-        //console.log("context", validationContext)
-        //console.log("user", JSON.stringify(user));
-        //console.log("metrics", metrics);
-
+      //  console.log(user.name, "context==>", context, "metrics===>", metrics);
 
         /*
          * Project history
@@ -125,64 +124,12 @@ export class HistoryValidatorService {
         return true;
     }
 
-
     private async getMetrics(
         user: IUser,
         participation: HistoryParticipation,
         context: HistoryContext,
         validationContext: HistoryValidationContext
     ) {
-        const projects = await this.getHistoricalProjects(
-            user,
-            participation,
-            context,
-            validationContext
-        );
-
-        const projectIds = projects.map(
-            project => String(project._id)
-        );
-
-        const applications = projectIds.length
-            ? await this.applicationRepo.find({
-                projectIds
-            })
-            : [];
-
-        return {
-            granted: projects.filter(
-                project => project.status === ProjectStatus.granted
-            ).length,
-
-            refused: projects.filter(
-                project => project.status === ProjectStatus.refused
-            ).length,
-
-            completed: projects.filter(
-                project => project.status === ProjectStatus.completed
-            ).length,
-
-            submitted: applications.length,
-
-            accepted: applications.filter(
-                application =>
-                    application.status === ApplicationStatus.accepted
-            ).length,
-
-            rejected: applications.filter(
-                application =>
-                    application.status === ApplicationStatus.rejected
-            ).length
-        };
-    }
-
-
-    private async getHistoricalProjects(
-        user: IUser,
-        participation: HistoryParticipation,
-        context: HistoryContext,
-        validationContext: HistoryValidationContext
-    ): Promise<Partial<IProject>[]> {
 
         const collabFilter: FilterCollaborators = {
             member: String(user._id),
@@ -197,6 +144,88 @@ export class HistoryValidatorService {
 
         const collaborators = await this.collaboratorRepo.find(collabFilter);
 
+        const projects = await this.getHistoricalProjects(
+            context, validationContext, collaborators);
+
+        const projectIds = projects.map(
+            project => String(project._id)
+        );
+
+        const applications = await this.getHistoricalApplications(
+            context, validationContext, projectIds
+        );
+
+        const applicationMetrics = await this.getApplicationMetrics(
+            applications
+        );
+
+        const projectMetrics = await this.getProjectMetrics(
+            projects
+        );
+
+        return {
+            granted: projectMetrics.granted,
+
+            refused: projectMetrics.refused,
+
+            completed: projectMetrics.completed,
+
+            submitted: applicationMetrics.submitted,
+
+            accepted: applicationMetrics.accepted,
+
+            rejected: applicationMetrics.rejected
+        };
+    }
+
+
+    private async getProjectMetrics(
+        projects: IProject[],
+    ) {
+        return {
+            granted: projects.filter(
+                project => project!.status === ProjectStatus.granted
+            ).length,
+
+            refused: projects.filter(
+                project => project!.status === ProjectStatus.refused
+            ).length,
+
+            completed: projects.filter(
+                project => project!.status === ProjectStatus.completed
+            ).length
+        };
+    }
+
+
+
+    private async getApplicationMetrics(
+        applications: IApplication[],
+    ) {
+        return {
+            submitted: applications.filter(
+                app => app.status === ApplicationStatus.submitted
+            ).length,
+
+            accepted: applications.filter(
+                application =>
+                    application.status === ApplicationStatus.accepted
+            ).length,
+
+            rejected: applications.filter(
+                application =>
+                    application.status === ApplicationStatus.rejected
+            ).length,
+        };
+    }
+
+
+    private async getHistoricalProjects(
+        context: HistoryContext,
+        validationContext: HistoryValidationContext,
+        collaborators: ICollaborator[]
+    ): Promise<IProject[]> {
+
         const projectIds = collaborators.map(
             collaborator => String(collaborator.project)
         );
@@ -205,7 +234,8 @@ export class HistoryValidatorService {
             return [];
         }
 
-        const filters: FilterProjectsDTO = {
+        const filters: FilterProjectsDTO =
+        {
             ids: projectIds
         };
 
@@ -268,6 +298,42 @@ export class HistoryValidatorService {
             }
         }
 
-        return this.projectRepo.find(filters);
+        return this.projectRepo.find(filters, undefined);
     }
+
+
+
+    private async getHistoricalApplications(
+        context: HistoryContext,
+        validationContext: HistoryValidationContext,
+        projectIds: string[],
+    ): Promise<IApplication[]> {
+
+        const filters: any = {
+            projectIds: projectIds
+        };
+
+        switch (context) {
+
+            case HistoryContext.CALL:
+                if (!validationContext.call) {
+                    return [];
+                }
+
+                filters.call = validationContext.call;
+                break;
+
+            case HistoryContext.STAGE:
+                if (!validationContext.stage) {
+                    return [];
+                }
+
+                filters.stage = validationContext.stage;
+                break;
+        }
+
+        return this.applicationRepo.find(filters);
+    }
+
+
 }

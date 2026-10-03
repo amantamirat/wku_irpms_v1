@@ -17,6 +17,7 @@ export type HistoryRule = {
         granted?: IRange;
         refused?: IRange;
         completed?: IRange;
+        verified?: IRange;
     };
 
     application?: {

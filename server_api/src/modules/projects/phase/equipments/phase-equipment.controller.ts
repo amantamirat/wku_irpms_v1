@@ -34,6 +34,7 @@ export class PhaseEquipmentController {
 
             const {
                 phase,
+                itemName,
                 description,
                 unit,
                 unitPrice,
@@ -43,6 +44,7 @@ export class PhaseEquipmentController {
 
             const data: CreatePhaseEquipmentDto = {
                 phase: phase as string,
+                itemName,
                 description,
                 unit,
                 unitPrice:
@@ -169,6 +171,7 @@ export class PhaseEquipmentController {
             const { id } = req.params;
 
             const {
+                itemName,
                 description,
                 unit,
                 unitPrice,
@@ -183,6 +186,7 @@ export class PhaseEquipmentController {
                 id: String(id),
 
                 data: {
+                    itemName,
                     description,
                     unit,
                     unitPrice:

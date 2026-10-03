@@ -4,6 +4,8 @@ import { EquipmentUnit, PhaseEquipmentStatus } from "./phase-equipment.model";
 export interface CreatePhaseEquipmentDto {
     phase: string;
 
+    itemName: string;
+
     description: string;
 
     unit: EquipmentUnit;
@@ -22,6 +24,7 @@ export interface UpdatePhaseEquipmentDto {
     id: string;
 
     data: {
+        itemName?: string;
         description?: string;
         unit?: EquipmentUnit;
         unitPrice?: number;

@@ -5,12 +5,12 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
     "dev": "ts-node src/irpms-api.ts",
-    
     "seed": "ts-node src/scripts/seed.ts",
     "seed:system": "ts-node src/scripts/seed.ts system",
     "seed:demo": "ts-node src/scripts/seed.ts demo",
+    "seed:user": "ts-node src/scripts/seed.ts user",
+    "seed:org": "ts-node src/scripts/seed.ts org",
     "seed:legacy": "ts-node src/scripts/seed.ts legacy",
-    
     "build": "tsc",
     "start": "node dist/irpms-api.js"
   },

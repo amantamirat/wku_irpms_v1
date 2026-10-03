@@ -186,9 +186,12 @@ export class ProjectService {
                     member: collab.member,
                     isLeadPI: collaboratorIsLeadPI,
                     status:
-                        userId === collab.member
-                            ? CollaboratorStatus.verified
-                            : CollaboratorStatus.pending,
+                        collab.status ??
+                        (
+                            userId === collab.member
+                                ? CollaboratorStatus.verified
+                                : CollaboratorStatus.pending
+                        ),
                     role: collaboratorIsLeadPI
                         ? "Principal Investigator"
                         : collab.role,
@@ -356,33 +359,7 @@ export class ProjectService {
                 throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
             }
         }
-        /*
 
-        const nextThemes = data.themes ?? projectDoc.themes.map(String);
-        const themesChanged =
-            JSON.stringify(projectDoc.themes.map(String).sort()) !==
-            JSON.stringify(nextThemes.map(String).sort());
-
-        if (projectDoc.call && themesChanged) {
-            const callDoc = await this.callRepo.findById(String(projectDoc.call));
-            if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
-
-            if (callDoc.constraint) {
-                const constraintId = String(callDoc.constraint);
-                if (constraintId && this.constraintValidator) {
-                    const result = await this.constraintValidator.validateThemes(constraintId, nextThemes);
-                    if (!result.valid) {
-                        throw new AppError(
-                            ERROR_CODES.INVALID_CONSTRAINT,
-                            "Theme validation failed",
-                            400,
-                            result
-                        );
-                    }
-                }
-            }
-        }
-        */
         return this.projectRepo.update(id, data, userId);
     }
 
@@ -496,6 +473,7 @@ export class ProjectService {
         //rollback notification remain
 
         if (to === ProjectStatus.granted) {
+
             if (projectDoc.currentVerification) {
                 const verificationDoc = await this.verificationRepo.findById(
                     String(projectDoc.currentVerification)
@@ -511,12 +489,32 @@ export class ProjectService {
                 }
 
             }
+
         }
 
         if (to === ProjectStatus.completed) {
             const phases = await this.phaseRepo.find({ project: id });
             if (!phases.every(p => p.status === PhaseStatus.completed))
                 throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_COMPLETED);
+        }
+
+
+        if (to === ProjectStatus.verified) {
+            if (!projectDoc.currentVerification) {
+                throw new AppError(ERROR_CODES.VERIFICATION_NOT_FOUND);
+            }
+
+            const verificationDoc = await this.verificationRepo.findById(
+                String(projectDoc.currentVerification)
+            );
+            if (!verificationDoc) {
+                throw new AppError(ERROR_CODES.CURRENT_VERIFICATION_NOT_FOUND);
+            }
+
+            if (verificationDoc.status !== VerificationStatus.verified) {
+                throw new AppError(ERROR_CODES.VERIFICATION_NOT_SUBMITTED);
+            }
+
         }
 
         return await this.projectRepo.updateStatus(id, to, userId);

@@ -1,5 +1,5 @@
 import mongoose from "mongoose";
-import { PhaseActivityStatus } from "./phase-activity.model";
+import { PhaseActivityStatus, IPhaseActivityDetailCost } from "./phase-activity.model";
 
 export interface CreatePhaseActivityDto {
     phase: string;
@@ -7,15 +7,13 @@ export interface CreatePhaseActivityDto {
     title: string;
     description?: string;
 
-    participants?: number;
-    //requiredDays?: number;
-
     cost: number;
+    detailCost?: IPhaseActivityDetailCost;
+
+    startDate: Date;
+    endDate: Date;
 
     status?: PhaseActivityStatus;
-
-    startDate?: Date;
-    endDate?: Date;
 }
 
 export interface UpdatePhaseActivityDto {
@@ -23,10 +21,8 @@ export interface UpdatePhaseActivityDto {
         title?: string;
         description?: string;
 
-        participants?: number;
-        //requiredDays?: number;
-
         cost?: number;
+        detailCost?: IPhaseActivityDetailCost;
 
         startDate?: Date;
         endDate?: Date;

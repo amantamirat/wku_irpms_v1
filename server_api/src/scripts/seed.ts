@@ -3,6 +3,9 @@ import mongoose from "mongoose";
 import { createDemoSeeder } from "../util/seeder/demo.seed";
 import { createLegacySeeder } from "../util/seeder/legacy/legacy.seed";
 import { createSystemSeeder } from "../util/seeder/system.seed";
+import { createNewLegacySeeder } from "../util/seeder/new-legacy/new-legacy.seed";
+import { createUserSeeder } from "../util/seeder/user.seeder";
+import { createOrganizationSeeder } from "../util/seeder/organization.seeder";
 
 dotenv.config();
 
@@ -28,8 +31,21 @@ async function main() {
             await createDemoSeeder().run();
             break;
 
+        case "org":
+            await createOrganizationSeeder().run();
+            break;
+
+        case "user":
+            await createUserSeeder().run();
+            break;
+
+            /*
         case "legacy":
             await createLegacySeeder().run();
+            break;*/
+
+        case "legacy":
+            await createNewLegacySeeder().run();
             break;
 
         case "all":

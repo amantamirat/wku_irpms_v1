@@ -1,12 +1,12 @@
 'use client';
 
-
 import { PhaseDocApi } from "../api/phase.doc.api";
-import { FilterPhaseDocOptions, PhaseDocument } from "../model/phase.doc";
+import { FilterPhaseDocOptions, PhaseDocument, PhaseDocumentTypeLabels } from "../model/phase.doc";
 import { Phase } from '../../models/phase.model';
 import SavePhaseDocument from './SavePhaseDocument';
 import { createEntityManager } from "@/components/data-table/createEntityManager";
 import { BASE_URL } from "@/api/ApiClient";
+import { Tag } from "primereact/tag";
 
 interface PhaseDocumentManagerProps {
     phase: Phase;
@@ -25,6 +25,20 @@ const PhaseDocumentManager = ({ phase }: PhaseDocumentManagerProps) => {
 
         columns: [
             {
+                header: "Type",
+                field: "type",
+                body: (row: PhaseDocument) => {
+                    const info = PhaseDocumentTypeLabels[row.type];
+                    return (
+                        <Tag
+                            value={info?.label || row.type}
+                            severity="info"
+                            style={{ fontWeight: 500 }}
+                        />
+                    );
+                }
+            },
+            {
                 header: "Description",
                 field: "description",
             },
@@ -42,21 +56,24 @@ const PhaseDocumentManager = ({ phase }: PhaseDocumentManagerProps) => {
                             rel="noopener noreferrer"
                             className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline"
                         >
-                            View Document
+                            <i className="pi pi-external-link"></i> View Document
                         </a>
                     ) : (
-                        "No document"
+                        <span className="text-400 text-sm italic">No document</span>
                     ),
             },
         ],
 
         createNew: () => ({
             phase,
+            type: '' as any, // default state if needed
         }),
 
         SaveDialog: SavePhaseDocument,
 
         permissionPrefix: "phaseDocument",
+
+        hideEditAction:true,
 
         query: () => ({
             phase: phase,

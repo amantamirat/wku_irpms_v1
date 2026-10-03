@@ -45,6 +45,8 @@ export interface IPhaseEquipment extends Document {
 
     phase: mongoose.Types.ObjectId;
 
+    itemName: string;
+
     description: string;
 
     unit: EquipmentUnit;
@@ -77,6 +79,12 @@ const PhaseEquipmentSchema = new Schema<IPhaseEquipment>(
             required: true,
             immutable: true,
             index: true,
+        },
+
+        itemName: {
+            type: String,
+            required: true,
+            trim: true,
         },
 
         description: {

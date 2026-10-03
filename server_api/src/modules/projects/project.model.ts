@@ -15,7 +15,8 @@ export enum ProjectStatus {
     refused = "refused",
     granted = "granted",
     completed = "completed",
-    terminated = "terminated"
+    terminated = "terminated",
+    verified = "verified"
 }
 
 export interface IProjectObjectives {

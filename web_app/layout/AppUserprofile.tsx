@@ -1,13 +1,24 @@
-import React, { useState } from "react";
-import { Sidebar } from "primereact/sidebar";
+'use client';
+
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
+import { Sidebar } from "primereact/sidebar";
+import React, { useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 
-import { useAuth } from "@/contexts/auth-context";
-import { User } from "@/app/(main)/users/models/user.model";
 import UserDetailDialog from "@/app/(main)/users/components/dialogs/UserDetailDialog";
-import SaveDialog from "@/app/(main)/accounts/components/SaveAccount";
+import { User } from "@/app/(main)/users/models/user.model";
 import ChangePasswordDialog from "@/components/ChangePasswordDialog";
+import { useAuth } from "@/contexts/auth-context";
+import { PERMISSIONS } from "@/types/permissions";
+
+interface QuickLinkItem {
+    href: string;
+    label: string;
+    description: string;
+    icon: string;
+    permission: string | string[];
+}
 
 interface UserProfileSidebarProps {
     visible: boolean;
@@ -15,7 +26,8 @@ interface UserProfileSidebarProps {
 }
 
 const AppUserProfileSidebar: React.FC<UserProfileSidebarProps> = ({ visible, setVisible }) => {
-    const { logout, getUser } = useAuth();
+    const { logout, getUser, hasPermission } = useAuth();
+    const router = useRouter();
 
     // UI State
     const [showApplicantDetailDialog, setShowApplicantDetailDialog] = useState(false);
@@ -24,9 +36,47 @@ const AppUserProfileSidebar: React.FC<UserProfileSidebarProps> = ({ visible, set
     // Context Data
     const user = getUser() as User | null;
 
+    const quickLinks: QuickLinkItem[] = useMemo(() => [
+        {
+            href: '/dashboard/my-projects/',
+            label: 'My Projects',
+            description: 'Manage your research, project and deliverables',
+            icon: 'pi pi-briefcase',
+            permission: PERMISSIONS.PROJECT.LOOKUP,
+        },
+        {
+            href: '/dashboard/assigned-applications',
+            label: 'Assign Reviewers',
+            description: 'Assign and manage evaluators for submitted applications',
+            icon: 'pi pi-user-plus',
+            permission: 'application:assigned:read',
+        },
+        {
+            href: '/dashboard/my-evaluations',
+            label: 'My Evaluations',
+            description: 'Evaluate submitted proposals and scores',
+            icon: 'pi pi-check-square',
+            permission: PERMISSIONS.REVIEWER.LOOKUP,
+        },
+        {
+            href: '/dashboard/my-memberships',
+            label: 'My Memberships',
+            description: 'View teams and joint project efforts',
+            icon: 'pi pi-users',
+            permission: PERMISSIONS.COLLABORATOR.LOOKUP,
+        }
+    ], []);
+
+    const allowedLinks = quickLinks.filter(link => hasPermission(link.permission));
+
     const handleLogout = () => {
         setVisible(false);
         logout();
+    };
+
+    const handleNavigation = (href: string) => {
+        setVisible(false);
+        router.push(href);
     };
 
     return (
@@ -50,8 +100,8 @@ const AppUserProfileSidebar: React.FC<UserProfileSidebarProps> = ({ visible, set
 
                     <Divider />
 
-                    {/* Navigation Actions */}
-                    <div className="flex flex-column gap-3">
+                    {/* Navigation Actions (Account & Workspace Modules) */}
+                    <div className="flex flex-column gap-3 overflow-y-auto pr-1" style={{ maxHeight: 'calc(100vh - 280px)' }}>
                         {user && (
                             <>
                                 <Button
@@ -71,6 +121,24 @@ const AppUserProfileSidebar: React.FC<UserProfileSidebarProps> = ({ visible, set
                                     className="w-full justify-content-start"
                                     onClick={() => setShowPasswordDialog(true)}
                                 />
+                            </>
+                        )}
+
+                        {allowedLinks.length > 0 && (
+                            <>
+                                <Divider className="my-1" />
+                                <span className="text-xs text-500 font-bold uppercase tracking-wider px-1">Workspace Modules</span>
+                                {allowedLinks.map((link, index) => (
+                                    <Button
+                                        key={index}
+                                        label={link.label}
+                                        icon={link.icon}
+                                        severity="secondary"
+                                        text
+                                        className="w-full justify-content-start align-items-start py-2 px-3 surface-hover border-round"
+                                        onClick={() => handleNavigation(link.href)}
+                                    />
+                                ))}
                             </>
                         )}
                     </div>
@@ -102,7 +170,6 @@ const AppUserProfileSidebar: React.FC<UserProfileSidebarProps> = ({ visible, set
                     <ChangePasswordDialog
                         visible={showPasswordDialog}
                         onHide={() => setShowPasswordDialog(false)}
-                    //toast={toast} // Optional: for success messages
                     />
                 </>
             )}

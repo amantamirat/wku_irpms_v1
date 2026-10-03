@@ -27,6 +27,7 @@ import { Unit } from "../../common/constants/enums";
 import { FilterOptions } from "../../common/dtos/filter.dto";
 import { IUser, UserScope } from "./user.model";
 import { toObjectId } from "../../common/utils/mongoose.utils";
+import { AuthScope } from "../auth/auth.types";
 
 
 export class UserService {
@@ -124,6 +125,7 @@ export class UserService {
 
     async getAll(
         filter: FilterUsersDTO,
+        //scope: AuthScope,
         options?: FilterOptions
     ) {
         return this.repo.find(

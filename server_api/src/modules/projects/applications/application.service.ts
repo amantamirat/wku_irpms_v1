@@ -197,13 +197,14 @@ export class ApplicationService {
                 result =
                     await this.compositionValidator.validateByProjectId(
                         String(callDoc.composition),
-                        String(projectDoc._id)
+                        String(projectDoc._id),
+                        stageDoc
                     );
             }
             if (compositionInput) {
                 result =
                     await this.compositionValidator
-                        .validate(String(callDoc.composition), callDoc, compositionInput);
+                        .validate(String(callDoc.composition), callDoc, compositionInput, stageDoc);
             }
 
             if (!result?.valid) {
@@ -731,12 +732,14 @@ export class ApplicationService {
         // Authorization + project
         // --------------------------------------------------
 
-        const { projectDoc } =
+        const { projectDoc, isLeadPI } =
             await this.projectAuth.auth(
                 projectId,
                 userId,
                 PERMISSIONS.APPLICATION.DELETE
             );
+
+
 
         // --------------------------------------------------
         // Application must be the current application
@@ -829,6 +832,36 @@ export class ApplicationService {
             throw new AppError(
                 ERROR_CODES.APPLICATION_NOT_FOUND
             );
+        }
+
+        // --------------------------------------------------
+        // Delete physical application files
+        // --------------------------------------------------
+
+        if (deleted.documentPath) {
+            try {
+                await this.fileStorage.delete(
+                    deleted.documentPath
+                );
+            } catch (error) {
+                console.error(
+                    `Failed to delete application document: ${deleted.documentPath}`,
+                    error
+                );
+            }
+        }
+
+        if (deleted.anonymizedDocumentPath) {
+            try {
+                await this.fileStorage.delete(
+                    deleted.anonymizedDocumentPath
+                );
+            } catch (error) {
+                console.error(
+                    `Failed to delete anonymized application document: ${deleted.anonymizedDocumentPath}`,
+                    error
+                );
+            }
         }
 
         // --------------------------------------------------

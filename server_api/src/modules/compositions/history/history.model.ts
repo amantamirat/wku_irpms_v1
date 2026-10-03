@@ -5,6 +5,7 @@ import { IRange } from "../../../common/types/range";
 
 export enum HistoryContext {
     CALL = "CALL",
+    STAGE = "STAGE",
     ORGANIZATION = "ORGANIZATION",
     CALENDAR = "CALENDAR",
     SOURCE = "SOURCE"
@@ -31,6 +32,7 @@ export interface IHistoryRule extends Document {
         granted?: IRange;
         refused?: IRange;
         completed?: IRange;
+        verified?: IRange;
     };
 
     application?: {

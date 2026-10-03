@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
+import { Dropdown } from 'primereact/dropdown';
 import { FileUpload, FileUploadSelectEvent } from 'primereact/fileupload';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { ProgressBar } from 'primereact/progressbar';
@@ -11,7 +12,7 @@ import { classNames } from 'primereact/utils';
 
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
 import { PhaseDocApi } from '../api/phase.doc.api';
-import { PhaseDocument, validate } from '../model/phase.doc';
+import { PhaseDocument, PhaseDocumentType, PhaseDocumentTypeLabels, validate } from '../model/phase.doc';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -32,6 +33,22 @@ const SavePhaseDocument = ({
         setLocalPhaseDoc({ ...item });
         setSubmitted(false);
     }, [item]);
+
+    // Prepare dropdown options from the enum and descriptions
+    const typeOptions = Object.values(PhaseDocumentType).map((typeKey) => ({
+        label: PhaseDocumentTypeLabels[typeKey].label,
+        value: typeKey,
+        description: PhaseDocumentTypeLabels[typeKey].description
+    }));
+
+    const optionTemplate = (option: any) => {
+        return (
+            <div className="flex flex-column">
+                <span className="font-medium">{option.label}</span>
+                <span className="text-xs text-500">{option.description}</span>
+            </div>
+        );
+    };
 
     const onFileSelect = (event: FileUploadSelectEvent) => {
         const file = event.files[0];
@@ -133,14 +150,40 @@ const SavePhaseDocument = ({
                 contentClassName="p-4"
             >
                 <div className="p-fluid grid">
+                    {/* Document Type Dropdown */}
+                    <div className="col-12">
+                        <label htmlFor="type" className="font-bold block mb-2">
+                            Document Type <span className="text-red-500">*</span>
+                        </label>
+                        <Dropdown
+                            id="type"
+                            value={localPhaseDoc.type}
+                            options={typeOptions}
+                            onChange={(e) =>
+                                setLocalPhaseDoc({
+                                    ...localPhaseDoc,
+                                    type: e.value
+                                })
+                            }
+                            optionLabel="label"
+                            placeholder="Select a Document Type"
+                            itemTemplate={optionTemplate}
+                            valueTemplate={(option) => option ? option.label : 'Select a Document Type'}
+                            filter
+                            className={classNames({
+                                'p-invalid': submitted && !localPhaseDoc.type
+                            })}
+                        />
+                    </div>
+
                     {/* Description */}
                     <div className="col-12">
                         <label htmlFor="description" className="font-bold block mb-2">
-                            Description
+                            Description <span className="text-red-500">*</span>
                         </label>
                         <InputTextarea
                             id="description"
-                            rows={4}
+                            rows={3}
                             value={localPhaseDoc.description || ''}
                             onChange={(e) =>
                                 setLocalPhaseDoc({
@@ -156,7 +199,9 @@ const SavePhaseDocument = ({
 
                     {/* Drag & Drop File Upload */}
                     <div className="col-12">
-                        <label className="font-bold block mb-2">Upload Document</label>
+                        <label className="font-bold block mb-2">
+                            Upload Document {!localPhaseDoc._id && <span className="text-red-500">*</span>}
+                        </label>
                         <FileUpload
                             name="file"
                             mode="advanced"

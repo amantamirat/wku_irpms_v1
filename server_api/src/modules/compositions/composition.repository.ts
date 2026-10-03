@@ -3,18 +3,26 @@ import { Composition, IComposition } from "./composition.model";
 
 export class CompositionRepository {
 
+  private populateComposition(query: any) {
+    return query
+      .populate("leadProfileRule")
+      .populate("leadHistoryRules.rule")
+      .populate("memberRequirements");
+  }
+
   async create(data: Partial<IComposition> | any) {
-    return Composition.create(data);
+    const composition = await Composition.create(data);
+
+    return this.populateComposition(
+      Composition.findById(composition._id)
+    );
   }
 
   async findAll(options?: FilterOptions) {
     let dbQuery = Composition.find();
 
     if (options?.populate) {
-      dbQuery
-        .populate("leadProfileRule")
-        .populate("leadHistoryRules.rule")
-        .populate("memberRequirements");
+      dbQuery = this.populateComposition(dbQuery);
     }
 
     return dbQuery.sort({ createdAt: -1 });
@@ -22,12 +30,9 @@ export class CompositionRepository {
 
   async findById(id: string, options?: FilterOptions) {
     let query = Composition.findById(id);
-    
+
     if (options?.populate) {
-      query = query
-        .populate("leadProfileRule")
-        .populate("leadHistoryRules.rule")
-        .populate("memberRequirements");
+      query = this.populateComposition(query);
     }
 
     return query;
@@ -35,19 +40,25 @@ export class CompositionRepository {
 
   async update(
     id: string,
-    data: Partial<IComposition> | any
+    data: Partial<IComposition> | any,
+    options?: FilterOptions
   ) {
-    return Composition.findByIdAndUpdate(
+    let query = Composition.findByIdAndUpdate(
       id,
       data,
       {
         new: true
       }
     );
+
+    if (options?.populate) {
+      query = this.populateComposition(query);
+    }
+
+    return query;
   }
 
   async delete(id: string) {
     return Composition.findByIdAndDelete(id);
   }
-
 }

@@ -19,6 +19,7 @@ import { ListDepartmentWidget } from './components/ListDepartmentWidget';
 import { PortfolioWidget } from './components/PortfolioWidget';
 import { ReportFilterPanel } from './components/ReportFilterPanel';
 import { VerificationWidget } from './components/VerificationWidget';
+import { CallApi } from '../calls/api/call.api';
 
 type ReportType = 'departments' | 'directorates' | 'phases' | 'portfolio' | 'applications' | 'evaluations' | 'verifications' | 'financial';
 
@@ -41,6 +42,7 @@ export default function ReportsPage() {
   const [calendars, setCalendars] = useState<any[]>([]); // Added calendar state
   const [workspaces, setWorkpaces] = useState<any[]>([]);
   const [directorates, setDirectorates] = useState<any[]>([]);
+  const [calls, setCalls] = useState<any[]>([]);
 
   const [reportData, setReportData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -49,17 +51,21 @@ export default function ReportsPage() {
   useEffect(() => {
     const fetchLookups = async () => {
       try {
-        const [grantData, calendarData, departmentData, externalData, directorateData] = await Promise.all([
+        const [grantData, calendarData, departmentData, externalData, directorateData,
+          callData
+        ] = await Promise.all([
           GrantApi.lookup ? GrantApi.lookup() : Promise.resolve([]),
           CalendarApi.lookup ? CalendarApi.lookup() : Promise.resolve([]),
           OrganizationApi.lookup!({ type: OrgnUnit.department }),
           OrganizationApi.lookup!({ type: OrgnUnit.external }),
-          OrganizationApi.lookup!({ type: OrgnUnit.directorate })
+          OrganizationApi.lookup!({ type: OrgnUnit.directorate }),
+          CallApi.lookup!({}),
         ]);
         setGrants(grantData || []);
         setCalendars(calendarData || []);
         setWorkpaces([...departmentData, ...externalData]);
         setDirectorates(directorateData)
+        setCalls(callData)
       } catch (err) {
         console.error('Failed to load filter lookups:', err);
       }
@@ -153,6 +159,7 @@ export default function ReportsPage() {
         calendars={calendars}
         workspaces={workspaces}
         organizations={directorates}
+        calls={calls}
         onApply={handleApplyFilter}
         onReset={handleResetFilter}
       />

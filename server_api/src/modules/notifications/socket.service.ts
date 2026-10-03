@@ -39,7 +39,7 @@ export class SocketService {
         notification: any
     ) {
         if (!this.io) {
-            console.warn('SocketService is not initialized');
+            //console.warn('SocketService is not initialized');
             return;
         }
 

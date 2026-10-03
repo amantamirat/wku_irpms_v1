@@ -7278,5 +7278,25 @@
     "Stage": "Granted research",
     "ProStat": "On progress",
     "Status": "Accepted"
+  },
+  {
+    "Title": "Development of Low-Cost Music [CET-18-2022/23]",
+    "GrantType": "Thematic",
+    "Dept": "Music",
+    "College": "CSSH",
+    "Year": "2022/23",
+    "Stage": "Full proposal",
+    "ProStat": "Under review",
+    "Status": "Accepted"
+  },
+  {
+    "Title": "Assessment of Digital Marketing [CSSH-07-2023/24]",
+    "GrantType": "Internal",
+    "Dept": "Marketing Management",
+    "College": "CBE",
+    "Year": "2023/24",
+    "Stage": "Concept note",
+    "ProStat": "Approved",
+    "Status": "Accepted"
   }
 ]

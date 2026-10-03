@@ -4,9 +4,8 @@ import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
 import AvailableStages from "./dashboard/AvailableStages";
 import CallOpportunityGrid from "./dashboard/CallOpportunityGrid";
-import QuickLinks from "./dashboard/QuickLinks";
-import VerificationWindow from "./dashboard/VerificationWindow";
 import { MyPendingWorks } from "./dashboard/MyPendingWorks";
+import VerificationWindow from "./dashboard/VerificationWindow";
 import { ReportDashboard } from "./reports/components/Dashboard";
 
 const Dashboard = () => {
@@ -28,11 +27,6 @@ const Dashboard = () => {
                     <ReportDashboard />
                 </div>
             )}
-
-            {/* 🚀 QUICK ACCESS / NAVIGATION MENU */}
-            <div className="col-12 mb-2">
-                <QuickLinks />
-            </div>
 
             {/* 🔵 LEFT COLUMN: Core Work */}
             <div className="col-12 lg:col-8">

@@ -828,6 +828,14 @@
   },
   {
     "category": "Project Management",
+    "name": "project:transition.completed.verified"
+  },
+  {
+    "category": "Project Management",
+    "name": "project:transition.verified.completed"
+  },
+  {
+    "category": "Project Management",
     "name": "project:apply",
     "description": "Apply for a call by creating a project"
   },
@@ -1210,6 +1218,46 @@
     "category": "Phase Equipment Management",
     "name": "phaseEquipment:delete:own",
     "description": "Delete phase equipment from own projects"
+  },
+  {
+    "category": "Phase Equipment Management",
+    "name": "phaseEquipment:transition.planned.approved",
+    "description": "Approve a planned phase equipment entry"
+  },
+  {
+    "category": "Phase Equipment Management",
+    "name": "phaseEquipment:transition.planned.refused",
+    "description": "Refuse a planned phase equipment entry"
+  },
+  {
+    "category": "Phase Equipment Management",
+    "name": "phaseEquipment:transition.approved.planned",
+    "description": "Return an approved phase equipment entry to planned"
+  },
+  {
+    "category": "Phase Equipment Management",
+    "name": "phaseEquipment:transition.approved.delivered",
+    "description": "Mark an approved phase equipment entry as delivered"
+  },
+  {
+    "category": "Phase Equipment Management",
+    "name": "phaseEquipment:transition.refused.planned",
+    "description": "Return a refused phase equipment entry to planned"
+  },
+  {
+    "category": "Phase Equipment Management",
+    "name": "phaseEquipment:transition.delivered.approved",
+    "description": "Return a delivered phase equipment entry to approved"
+  },
+  {
+    "category": "Phase Equipment Management",
+    "name": "phaseEquipment:transition.delivered.cancelled",
+    "description": "Cancel a delivered phase equipment entry"
+  },
+  {
+    "category": "Phase Equipment Management",
+    "name": "phaseEquipment:transition.cancelled.delivered",
+    "description": "Reactivate a cancelled phase equipment entry"
   },
   {
     "category": "Phase Document Management",

@@ -28,6 +28,21 @@ const ProjectManager = createEntityManager<Project>({
                 );
             }
         },
+
+        {
+            header: "Call",
+            field: "call.title",
+            sortable: true,
+            body: (row: Project) => {
+                const call = typeof row.call === "object" && row.call !== null ? row.call : null;
+                const title = call?.title ?? (typeof row.call === "string" ? row.call : "N/A");
+                return (
+                    <div className="truncate text-sm font-medium text-700" title={title} style={{ maxWidth: "200px" }}>
+                        {title}
+                    </div>
+                );
+            }
+        },
         {
             header: "Calendar",
             field: "calendar.year",
@@ -123,7 +138,7 @@ const ProjectManager = createEntityManager<Project>({
         }
     ],
 
-    defaultHiddenFields: ["grant.title", "calendar.year", "organization.name", "workspace.name"],
+    defaultHiddenFields: ["grant.title", "calendar.year", "organization.name", "workspace.name", "call.title"],
     enableColumnToggle: true,
 
     createNew: () => ({

@@ -113,6 +113,7 @@ export class HistoryService {
             ["Project granted", dto.project?.granted],
             ["Project refused", dto.project?.refused],
             ["Project completed", dto.project?.completed],
+            ["Project verified", dto.project?.verified],
 
             ["Application submitted", dto.application?.submitted],
             ["Application accepted", dto.application?.accepted],

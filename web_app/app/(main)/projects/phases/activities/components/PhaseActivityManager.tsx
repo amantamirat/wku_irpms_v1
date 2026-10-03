@@ -14,21 +14,18 @@ interface PhaseActivityManagerProps {
     phase: Phase;
 }
 
+// Helper exported for reuse in SaveDialog and Manager
+export const computeDurationFromDates = (startDate?: Date | string, endDate?: Date | string): number => {
+    if (!startDate || !endDate) return 0;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = end.getTime() - start.getTime();
+    if (diffTime < 0) return 0;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+};
+
 const PhaseActivityManager = ({ phase }: PhaseActivityManagerProps) => {
 
-    // Helper to calculate days between start and end date (inclusive)
-    const calculateDurationDays = (startDate?: Date | string, endDate?: Date | string) => {
-        if (!startDate || !endDate) return 0;
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-        const diffTime = end.getTime() - start.getTime();
-        if (diffTime < 0) return 0;
-        const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
-        return diffDays;
-    };
-
-    // useMemo ensures that createEntityManager is only instantiated once 
-    // per phase reference, keeping the hook counts stable across re-renders.
     const Manager = useMemo(() => {
         return createEntityManager<
             PhaseActivity,
@@ -46,11 +43,26 @@ const PhaseActivityManager = ({ phase }: PhaseActivityManagerProps) => {
                     sortable: true
                 },
                 {
-                    header: "Duration",
+                    header: "Timeline",
                     field: "startDate",
                     sortable: true,
                     body: (row: PhaseActivity) => {
-                        const days = calculateDurationDays(row.startDate, row.endDate);
+                        if (!row.startDate || !row.endDate) return <span className="text-gray-400">-</span>;
+                        const startStr = new Date(row.startDate).toLocaleDateString();
+                        const endStr = new Date(row.endDate).toLocaleDateString();
+                        return (
+                            <span className="text-gray-700 font-medium">
+                                {startStr} &rarr; {endStr}
+                            </span>
+                        );
+                    }
+                },
+                {
+                    header: "Duration",
+                    field: "endDate",
+                    sortable: true,
+                    body: (row: PhaseActivity) => {
+                        const days = computeDurationFromDates(row.startDate, row.endDate);
                         return days > 0 ? (
                             <span className="inline-flex items-center gap-1.5 text-gray-700 font-medium">
                                 <i className="pi pi-clock text-xs text-gray-400" />
@@ -71,11 +83,16 @@ const PhaseActivityManager = ({ phase }: PhaseActivityManagerProps) => {
                         </span>
                     )
                 },
+                /*
                 {
                     header: "Participants",
-                    field: "participants",
-                    sortable: true
+                    field: "detailCost.participants",
+                    sortable: true,
+                    body: (row: PhaseActivity) => (
+                        <span>{row.detailCost?.participants ?? '-'}</span>
+                    )
                 },
+                */
                 {
                     header: "Status",
                     field: "status",
@@ -97,6 +114,11 @@ const PhaseActivityManager = ({ phase }: PhaseActivityManagerProps) => {
                 phase,
                 title: "",
                 cost: 0,
+                detailCost: {
+                    duration: 1,
+                    participants: 1,
+                    unitPrice: 0
+                },
                 startDate: new Date(),
                 endDate: new Date(),
                 status: PhaseActivityStatus.planned

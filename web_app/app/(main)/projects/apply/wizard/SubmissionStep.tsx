@@ -49,6 +49,15 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
 
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+    // Automatically calculate total budget and total duration from project phases
+    const totalBudget = data.phases && data.phases.length > 0 
+        ? data.phases.reduce((sum, phase) => sum + (Number(phase.budget) || 0), 0)
+        : Number(data.totalBudget) || 0;
+
+    const totalDuration = data.phases && data.phases.length > 0 
+        ? data.phases.reduce((sum, phase) => sum + (Number(phase.duration) || 0), 0)
+        : Number((data as any).totalDuration) || 0;
+
     const clearErrors = () => {
         setError(null);
         setValidationDetails(null);
@@ -75,6 +84,8 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
         try {
             const result = await ProjectApi.apply({
                 ...data,
+                totalBudget,
+                totalDuration,
                 file: selectedFile,
             });
 
@@ -90,30 +101,19 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
             setLoading(false);
             setSuccess(false);
 
-            //console.log("error on submission", err);
-            //console.log("error on submission", err.details);
-            //console.log("error on submission", JSON.stringify(err));
-
             if (err.code === ERROR_CODES.INVALID_CONSTRAINT) {
                 setConstraintDetails(err.details as ValidationResult);
             } else {
-                // 1. Capture Template/PDF Section Validation Errors
                 if (err?.details?.sections) {
                     setValidationDetails(err.details as TemplateValidationResult);
                     setError("Document validation failed. Please address the issues listed below.");
-                }
-                // 2. Capture Grant Constraint Validation Errors
-                else if (err?.details?.errors && Array.isArray(err.details.errors)) {
+                } else if (err?.details?.errors && Array.isArray(err.details.errors)) {
                     setConstraintDetails(err.details as ValidationResult);
                     setError(err?.message || "Grant constraint validation failed.");
-                }
-                // 3. Generic Error Handling
-                else {
+                } else {
                     setError(err?.message || "Submission failed. Please try again later.");
                 }
             }
-
-
 
             console.error("Submission failed", err);
         }
@@ -147,12 +147,10 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                     />
                 )}
 
-                {/* Generic Error Message (Only when detailed UI blocks are absent) */}
                 {error && !validationDetails && !constraintDetails && (
                     <Message severity="error" text={error} className="w-full shadow-2" />
                 )}
 
-                {/* Constraint Validation Failure Display */}
                 {constraintDetails && (
                     <div className="surface-card border-left-3 border-orange-500 shadow-2 p-4 border-round-lg mb-3">
                         <div className="flex align-items-center text-orange-700 font-bold text-lg mb-2">
@@ -172,7 +170,6 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                     </div>
                 )}
 
-                {/* Structured Document Validation Failure Display */}
                 {validationDetails && (
                     <div className="surface-card border-left-3 border-red-500 shadow-2 p-4 border-round-lg">
                         <div className="flex align-items-center text-red-700 font-bold text-lg mb-2">
@@ -183,7 +180,6 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                             Your document does not meet the template requirements (Score: <strong>{validationDetails.score}%</strong>). Please update the PDF and re-upload.
                         </p>
 
-                        {/* Top-Level Document Issues */}
                         {validationDetails.issues?.length > 0 && (
                             <div className="mb-3 bg-red-50 p-3 border-round border-1 border-red-200">
                                 <span className="font-semibold text-red-800 text-xs uppercase block mb-1">General Issues:</span>
@@ -195,7 +191,6 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                             </div>
                         )}
 
-                        {/* Section-by-Section Breakdowns */}
                         <div className="surface-50 p-3 border-round border-1 border-200">
                             <span className="font-semibold text-800 text-xs uppercase block mb-2">Section Breakdown:</span>
                             <div className="flex flex-column gap-2">
@@ -263,13 +258,13 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                             {new Intl.NumberFormat('en-US', {
                                 style: 'currency',
                                 currency: 'ETB'
-                            }).format(Number(data.totalBudget) || 0)}
+                            }).format(totalBudget)}
                         </span>
                     </div>
                     <div className="col-12 md:col-6 py-2">
                         <span className="text-600 block">Project Timeline:</span>
                         <span className="font-bold text-base">
-                            {(data as any).totalDuration || 0} Days
+                            {totalDuration} Days
                         </span>
                     </div>
                     <div className="col-12 py-2">

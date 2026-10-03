@@ -2,6 +2,7 @@ import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { matchesRange } from "../../common/types/range";
 import { ICall } from "../calls/call.model";
+import { IStage } from "../calls/stages/stage.model";
 import { ValidationResult } from "../constraints/services/constraint-validator.service";
 import { GrantRepository } from "../grants/grant.repository";
 import { ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
@@ -48,9 +49,10 @@ export class CompositionValidationService {
     public async validateByProjectId(
         compositionId: string,
         projectId: string,
+        stage: IStage,
     ): Promise<ValidationResult> {
 
-        const composition =
+        const compositionRule =
             await this.getComposition(compositionId);
 
         const projectDoc =
@@ -74,7 +76,8 @@ export class CompositionValidationService {
 
         const validationContext: HistoryValidationContext = {
             call: String(projectDoc.call),
-            organization: String(grant.organization),
+            stage: String(stage._id),
+            organization: String(projectDoc.organization),
             calendar: String(projectDoc.calendar),
             source: grant.fundingSource
         };
@@ -82,14 +85,14 @@ export class CompositionValidationService {
         const errors: string[] = [];
 
         await this.validateLead(
-            composition,
+            compositionRule,
             String(projectDoc.leadPI),
             validationContext,
             errors
         );
 
         await this.validateMembers(
-            composition.memberRequirements?.map(
+            compositionRule.memberRequirements?.map(
                 id => String(id)
             ) ?? [],
             collaborators.map(collab => String(collab.member)) ?? [],
@@ -109,7 +112,9 @@ export class CompositionValidationService {
     public async validate(
         compositionId: string,
         call: ICall,
-        dto: CompositionValidationInput
+        dto: CompositionValidationInput,
+        stage: IStage
+
     ): Promise<ValidationResult> {
 
         const composition =
@@ -127,6 +132,7 @@ export class CompositionValidationService {
 
         const validationContext: HistoryValidationContext = {
             call: String(call._id),
+            stage: String(stage._id),
             organization: String(grant.organization),
             calendar: String(call.calendar),
             source: grant.fundingSource
@@ -313,7 +319,10 @@ export class CompositionValidationService {
 
             let qualifyingCount = 0;
 
+            let localErrors: string[] = [];
+
             for (const member of members) {
+
 
                 const qualifies =
                     await this.validateUser(
@@ -322,7 +331,8 @@ export class CompositionValidationService {
                         {
                             profile: profileDoc ? profileDoc : undefined,
                             historyRuleReferences: historyRuleReferences
-                        }
+                        },
+                        localErrors
                     );
 
                 if (qualifies) {
@@ -352,6 +362,7 @@ export class CompositionValidationService {
                     `Member requirement "${requirement.name}" is not satisfied. ` +
                     `Current value: ${currentValue}. Required range: ${threshold}.`
                 );
+                errors.push(...localErrors);
             }
         }
     }

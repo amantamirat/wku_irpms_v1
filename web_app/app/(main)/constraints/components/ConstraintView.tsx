@@ -4,8 +4,7 @@ import React from 'react';
 import { Divider } from 'primereact/divider';
 
 import { Constraint } from '../models/constraint.model';
-import { IRange } from '@/types/range';
-import { formatRange } from '@/types/range';
+import { IRange, formatRange } from '@/types/range';
 import { etbCurrencyFormatter } from '@/utils/utils';
 
 interface ConstraintViewProps {
@@ -46,7 +45,7 @@ export const ConstraintView: React.FC<ConstraintViewProps> = ({
             formatter: wordFormat
         },
 
-        // Project structure
+        // Project structure & execution
         {
             label: 'Participants',
             icon: 'pi pi-users',
@@ -81,6 +80,18 @@ export const ConstraintView: React.FC<ConstraintViewProps> = ({
             range: constraint.durationPerPhase,
             formatter: (v: any) => `${v} days`
         },
+        {
+            label: 'Activities Per Phase',
+            icon: 'pi pi-check-square',
+            range: constraint.activitiesPerPhase
+        },
+        {
+            label: 'Equipments Per Phase',
+            icon: 'pi pi-box',
+            range: constraint.equipmentsPerPhase
+        },
+
+        // Taxonomy
         {
             label: 'Themes',
             icon: 'pi pi-bookmark',
@@ -128,39 +139,32 @@ export const ConstraintView: React.FC<ConstraintViewProps> = ({
 
             {rules.length > 0 ? (
                 <div className="grid">
-
                     {rules.map((rule, idx) => (
                         <div
                             key={idx}
                             className="col-12 md:col-6 p-2"
                         >
                             <div className="flex align-items-center p-2 border-round surface-50 border-1 border-200 h-full">
-
                                 <i
                                     className={`${rule.icon} mr-3 text-primary text-xl`}
                                 />
-
                                 <div className="flex flex-column">
-
                                     <span
                                         className="text-500 font-bold uppercase"
                                         style={{ fontSize: '10px' }}
                                     >
                                         {rule.label}
                                     </span>
-
                                     <span className="text-900 text-sm font-semibold">
                                         {formatRange(
                                             rule.range,
                                             rule.formatter
                                         )}
                                     </span>
-
                                 </div>
                             </div>
                         </div>
                     ))}
-
                 </div>
             ) : (
                 <div className="p-3 bg-blue-50 text-blue-700 border-round text-xs italic">

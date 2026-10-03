@@ -15,6 +15,9 @@ import { Template } from '@/app/(main)/templates/models/template.model';
 import { EvaluationApi } from '@/app/(main)/evaluations/api/evaluation.api';
 import { EvaluationStatus } from '@/app/(main)/evaluations/models/evaluation.state-machine';
 import { TemplateApi } from '@/app/(main)/templates/api/template.api';
+// Adjust the import path for ConstraintApi/Constraint model as needed in your project structure
+import { ConstraintApi } from '@/app/(main)/constraints/api/constraint.api';
+import { Constraint } from '@/app/(main)/constraints/models/constraint.model';
 
 interface CallStagesStepProps {
     data: Partial<Call>;
@@ -37,12 +40,14 @@ export const CallStagesStep = ({ data, onUpdate, onNext, onBack }: CallStagesSte
     const [submitted, setSubmitted] = useState(false);
     const [evaluations, setEvaluations] = useState<Evaluation[]>([]);
     const [templates, setTemplates] = useState<Template[]>([]);
+    const [constraints, setConstraints] = useState<Constraint[]>([]);
 
     const stages: Partial<Stage>[] = data.stages || [];
 
     useEffect(() => {
         EvaluationApi.getAll({ status: EvaluationStatus.published }).then(setEvaluations).catch(console.error);
         TemplateApi.getAll().then(setTemplates).catch(console.error);
+        ConstraintApi.getAll().then(setConstraints).catch(console.error);
     }, []);
 
     const updateStagesList = (newStages: Partial<Stage>[]) => {
@@ -59,7 +64,9 @@ export const CallStagesStep = ({ data, onUpdate, onNext, onBack }: CallStagesSte
                 minAcceptanceScore: 50, 
                 deadline: undefined, 
                 reviewersDeadline: undefined, 
-                evaluation: undefined 
+                evaluation: undefined,
+                constraint: null,
+                template: null
             }
         ]);
     };
@@ -74,6 +81,8 @@ export const CallStagesStep = ({ data, onUpdate, onNext, onBack }: CallStagesSte
         updated[index] = { ...updated[index], [field]: value };
         updateStagesList(updated);
     };
+
+    const extractId = (val: any) => (typeof val === 'object' && val !== null ? val._id : val);
 
     // Updated validation: Requires name, submission deadline, reviewers deadline, and evaluation form
     const isStageValid = (stage: Partial<Stage>) => {
@@ -180,6 +189,20 @@ export const CallStagesStep = ({ data, onUpdate, onNext, onBack }: CallStagesSte
                                 {submitted && !stage.evaluation && <small className="p-error">Evaluation Form required.</small>}
                             </div>
 
+                            {/* Constraint Profile */}
+                            <div className="field col-12 md:col-4">
+                                <label className="font-semibold text-sm">Constraint Profile</label>
+                                <Dropdown
+                                    value={extractId(stage.constraint)}
+                                    options={constraints}
+                                    optionLabel="name"
+                                    optionValue="_id"
+                                    onChange={(e) => updateStageField(index, 'constraint', e.value ?? null)}
+                                    placeholder="Select Constraint (Optional)"
+                                    showClear
+                                />
+                            </div>
+
                             {/* Min Acceptance Score */}
                             <div className="field col-12 md:col-4">
                                 <label className="font-semibold text-sm">Min Score to Pass</label>
@@ -196,11 +219,11 @@ export const CallStagesStep = ({ data, onUpdate, onNext, onBack }: CallStagesSte
                             <div className="field col-12 md:col-4">
                                 <label className="font-semibold text-sm">Document Template</label>
                                 <Dropdown
-                                    value={stage.template}
+                                    value={stage.template || null}
                                     options={templates}
                                     optionLabel="name"
                                     dataKey="_id"
-                                    onChange={(e) => updateStageField(index, 'template', e.value)}
+                                    onChange={(e) => updateStageField(index, 'template', e.value ?? null)}
                                     placeholder="Select Template (Optional)"
                                     showClear
                                 />

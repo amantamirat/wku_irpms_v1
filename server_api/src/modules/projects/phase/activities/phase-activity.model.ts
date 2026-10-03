@@ -12,6 +12,12 @@ export enum PhaseActivityStatus {
     cancelled = "cancelled",
 }
 
+export interface IPhaseActivityDetailCost {
+    participants: number;
+    duration: number;
+    unitPrice: number;
+}
+
 export interface IPhaseActivity extends Document {
     _id: mongoose.Types.ObjectId;
 
@@ -20,12 +26,12 @@ export interface IPhaseActivity extends Document {
     title: string;
     description?: string;
 
-    participants?: number;
-    //requiredDays?: number;
-    cost?: number;
+    cost: number;
+    detailCost?: IPhaseActivityDetailCost | null;
 
     startDate: Date;
     endDate: Date;
+
 
     status: PhaseActivityStatus;
     statusHistory: IStatusHistory<PhaseActivityStatus>[];
@@ -36,6 +42,32 @@ export interface IPhaseActivity extends Document {
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+const PhaseActivityDetailCostSchema =
+    new Schema<IPhaseActivityDetailCost>(
+        {
+            participants: {
+                type: Number,
+                required: true,
+                min: 1,
+            },
+
+            duration: {
+                type: Number,
+                min: 0,
+                required: true
+            },
+
+            unitPrice: {
+                type: Number,
+                required: true,
+                min: 0,
+            },
+        },
+        {
+            _id: false,
+        }
+    );
 
 const PhaseActivitySchema = new Schema<IPhaseActivity>(
     {
@@ -58,30 +90,27 @@ const PhaseActivitySchema = new Schema<IPhaseActivity>(
             trim: true,
         },
 
-        participants: {
-            type: Number,
-            min: 0,
-        },
-
-        /*
-        requiredDays: {
-            type: Number,
-            min: 0,
-        },*/
-
         cost: {
             type: Number,
             min: 0,
             required: true,
         },
 
+        detailCost: {
+            type: PhaseActivityDetailCostSchema,
+            required: false,
+        },
+
         startDate: {
             type: Date,
+            required: true,
         },
 
         endDate: {
             type: Date,
+            required: true,
         },
+
 
         status: {
             type: String,

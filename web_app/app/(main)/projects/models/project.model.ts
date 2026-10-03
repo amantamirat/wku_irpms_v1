@@ -1,3 +1,4 @@
+import { IStatusHistory } from "@/components/StatusHistoryWidget";
 import { Application } from "../../applications/models/application.model";
 import { Calendar } from "../../calendars/models/calendar.model";
 import { Call } from "../../calls/models/call.model";
@@ -15,7 +16,8 @@ export enum ProjectStatus {
     refused = 'refused',
     granted = 'granted',
     completed = 'completed',
-    terminated = 'terminated'
+    terminated = 'terminated',
+    verified = 'verified'
 }
 
 export type Project = {
@@ -40,6 +42,7 @@ export type Project = {
     collaborators?: Collaborator[];// | string[];
     phases?: Phase[];
     file?: File;
+    statusHistory?: IStatusHistory<ProjectStatus>[];
     currentApplication?: string | Application;
     currentVerification?: string | Verification;
     //just for UI

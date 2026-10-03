@@ -271,7 +271,7 @@ export const PERMISSIONS = {
     CREATE_OWN: "phaseEquipment:create:own",
 
     READ: "phaseEquipment:read",
-    //LOOKUP: "phaseEquipment:lookup",
+    LOOKUP: "phaseEquipment:lookup",
 
     UPDATE: "phaseEquipment:update",
     UPDATE_OWN: "phaseEquipment:update:own",

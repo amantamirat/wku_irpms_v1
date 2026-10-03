@@ -55,6 +55,13 @@ export const HistoryRuleView: React.FC<HistoryRuleViewProps> = ({
             range: historyRule.project?.completed,
             badgeSeverity: 'text-purple-500'
         }
+        ,
+        {
+            label: 'Verified Projects',
+            icon: 'pi pi-flag-fill',
+            range: historyRule.project?.verified,
+            badgeSeverity: 'text-purple-500'
+        }
     ].filter(
         (metric) =>
             metric.range !== undefined &&

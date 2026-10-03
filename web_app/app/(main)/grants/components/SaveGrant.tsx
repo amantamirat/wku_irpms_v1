@@ -73,7 +73,7 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                     const unitType = localGrant.fundingSource === FundingSource.INTERNAL
                         ? OrgnUnit.directorate
                         : OrgnUnit.external;
-                    const orgData = await OrganizationApi.getAll({ type: unitType });
+                    const orgData = await OrganizationApi.lookup!({ type: unitType });
                     setOrganizations(orgData);
                 }
             } catch (err) {

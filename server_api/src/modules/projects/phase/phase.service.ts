@@ -5,6 +5,7 @@ import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
+import { calculateDurationDays } from "../../../common/utils/date.utils";
 import { IGrantRepository } from "../../grants/grant.repository";
 import { ProjectAuth } from "../project.auth";
 import { ProjectStatus } from "../project.model";
@@ -124,27 +125,8 @@ export class PhaseService {
     }
 
 
-    calculateDurationDays = (
-        startDate: Date | string,
-        endDate: Date | string
-    ): number => {
 
-        const start = new Date(startDate);
-        const end = new Date(endDate);
 
-        start.setHours(0, 0, 0, 0);
-        end.setHours(0, 0, 0, 0);
-
-        const diffTime = end.getTime() - start.getTime();
-
-        if (diffTime < 0) {
-            return 0;
-        }
-
-        return Math.ceil(
-            diffTime / (1000 * 60 * 60 * 24)
-        ) + 1;
-    };
 
     // ---------------------------------------------------
     // TRANSITION
@@ -195,11 +177,14 @@ export class PhaseService {
         const nextPhases = phases.filter(
             phase => phase.order > phaseDoc.order
         );
+
         if (to === PhaseStatus.proposed) {
+            /*
             if (projectDoc.status !== ProjectStatus.draft) {
                 throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
-            }
+            }*/
         }
+
         if (to === PhaseStatus.approved) {
 
             const [activities, equipment] = await Promise.all([
@@ -235,9 +220,8 @@ export class PhaseService {
             }
 
             // -----------------------------------------
-            // 3. Calculate total activity duration
-            // -----------------------------------------
-            const MS_PER_DAY = 1000 * 60 * 60 * 24;
+            // 3 Calculate total activity duration
+            // -----------------------------------------            
 
             const activityDuration = activities.reduce(
                 (total, activity) => {
@@ -248,10 +232,12 @@ export class PhaseService {
                         );
                     }
 
-                    const duration = this.calculateDurationDays(
-                        activity.startDate,
-                        activity.endDate
-                    );
+
+                    const duration =
+                        calculateDurationDays(
+                            activity.startDate,
+                            activity.endDate
+                        );
 
                     if (duration <= 0) {
                         throw new AppError(
@@ -424,6 +410,10 @@ export class PhaseService {
         }
 
         if (to === PhaseStatus.completed) {
+
+            // -----------------------------------------
+            // 1. All activities must be completed
+            // -----------------------------------------
             const activities = await this.activityRepo.find({
                 phase: phaseDoc._id,
             });
@@ -440,6 +430,26 @@ export class PhaseService {
                 );
             }
 
+            // -----------------------------------------
+            // 2. If equipment exists, all must be delivered
+            // -----------------------------------------
+            const equipment = await this.equipmentRepo.find({
+                phase: phaseDoc._id,
+            });
+
+            const undeliveredEquipment = equipment.find(
+                item => item.status !== PhaseEquipmentStatus.delivered
+            );
+
+            if (undeliveredEquipment) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_EQUIPMENT_NOT_DELIVERED
+                );
+            }
+
+            // -----------------------------------------
+            // 3. Progress report is required
+            // -----------------------------------------
             const hasProgressReport = await this.phaseDocRepo.exists({
                 phase: String(phaseDoc._id),
                 type: PhaseDocumentType.progressReport,
@@ -449,6 +459,19 @@ export class PhaseService {
                 throw new AppError(
                     ERROR_CODES.PHASE_PROGRESS_REPORT_REQUIRED
                 );
+            }
+
+            if (nextPhases.length === 0) {
+                const hasCompletionReport = await this.phaseDocRepo.exists({
+                    phase: String(phaseDoc._id),
+                    type: PhaseDocumentType.completionReport,
+                });
+
+                if (!hasCompletionReport) {
+                    throw new AppError(
+                        ERROR_CODES.COMPLETION_REPORT_REQUIRED
+                    );
+                }
             }
         }
 
@@ -511,44 +534,14 @@ export class PhaseService {
                 throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
             }
         }
-        /*
-        if (projectDoc.call) {
-            const callDoc = await this.callRepo.findById(String(projectDoc.call));
-            if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
 
-            if (callDoc.constraint) {
-                const existingPhases =
-                    await this.phaseRepo.find({
-                        project: projectId
-                    });
-
-                // Remove the phase that is going to be deleted
-                const remainingPhases = existingPhases.filter(
-                    phase => String(phase._id) !== id
-                );
-
-                const validationResult =
-                    await this.constraintValidator.validatePhases(
-                        String(callDoc.constraint),
-                        remainingPhases
-                    );
-
-                if (!validationResult.valid) {
-                    throw new AppError(
-                        ERROR_CODES.INVALID_CONSTRAINT,
-                        "invalid phases",
-                        400,
-                        validationResult
-                    );
-                }
-            }
-        }
-        */
         // ✅ Decrement totals BEFORE delete
         await this.projectRepo.incrementTotals(projectId, {
             duration: -(phaseDoc.duration ?? 0),
             budget: -(phaseDoc.budget ?? 0)
         });
+        await this.activityRepo.deleteByPhase(id);
+        await this.equipmentRepo.deleteByPhase(id)
         const deleted = await this.phaseRepo.delete(id);
 
         // Re-arrange orders of remaining phases

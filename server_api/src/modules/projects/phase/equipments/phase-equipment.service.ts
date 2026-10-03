@@ -50,10 +50,7 @@ export class PhaseEquipmentService {
         if (!phaseDoc)
             throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
 
-        if (phaseDoc.status !== PhaseStatus.proposed)
-            throw new AppError(
-                ERROR_CODES.PHASE_NOT_PROPOSED
-            );
+
 
         const projectId = String(phaseDoc.project);
 
@@ -65,11 +62,17 @@ export class PhaseEquipmentService {
             );
 
         if (isLeadPI) {
+            
             if (projectDoc.status !== ProjectStatus.draft) {
                 throw new AppError(
                     ERROR_CODES.PROJECT_NOT_DRAFT
                 );
             }
+
+            if (phaseDoc.status !== PhaseStatus.proposed)
+                throw new AppError(
+                    ERROR_CODES.PHASE_NOT_PROPOSED
+                );
         }
 
         try {
@@ -164,13 +167,7 @@ export class PhaseEquipmentService {
                 ERROR_CODES.PHASE_NOT_FOUND
             );
 
-        if (
-            phaseDoc.status !== PhaseStatus.proposed
-        ) {
-            throw new AppError(
-                ERROR_CODES.PHASE_NOT_PROPOSED
-            );
-        }
+
 
         const projectId =
             String(phaseDoc.project);
@@ -188,6 +185,14 @@ export class PhaseEquipmentService {
             if (projectDoc.status !== ProjectStatus.draft) {
                 throw new AppError(
                     ERROR_CODES.PROJECT_NOT_DRAFT
+                );
+            }
+
+            if (
+                phaseDoc.status !== PhaseStatus.proposed
+            ) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_NOT_PROPOSED
                 );
             }
         }
@@ -241,24 +246,7 @@ export class PhaseEquipmentService {
             PHASE_EQUIPMENT_TRANSITIONS
         );
 
-        /**
-         * Decisions that need an explanation.
-         */
-        /*
-        const reasonRequiredStates = [
-            PhaseEquipmentStatus.refused,
-            PhaseEquipmentStatus.cancelled,
-        ];
 
-        if (
-            reasonRequiredStates.includes(to) &&
-            !reason?.trim()
-        ) {
-            throw new AppError(
-                ERROR_CODES.STATUS_REASON_REQUIRED
-            );
-        }
-*/
         const phaseId =
             String(equipment.phase);
 
@@ -270,20 +258,7 @@ export class PhaseEquipmentService {
                 ERROR_CODES.PHASE_NOT_FOUND
             );
 
-        const projectId =
-            String(phaseDoc.project);
 
-        /*
-        await this.projectAuth.auth(
-            projectId,
-            userId,
-            PERMISSIONS.PHASE_EQUIPMENT.UPDATE
-        );*/
-
-        /**
-         * Delivery is only possible (or correctable)
-         * while its phase is active.
-         */
         const involvesDelivery =
             from === PhaseEquipmentStatus.delivered ||
             to === PhaseEquipmentStatus.delivered;
