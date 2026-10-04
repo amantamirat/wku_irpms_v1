@@ -22,57 +22,26 @@ export class VerificationController {
     ) { }
 
 
-    create = async (
-        req: AuthenticatedRequest,
-        res: Response
-    ) => {
+    create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.auth) {
-                throw new AppError(
-                    ERROR_CODES.UNAUTHORIZED
-                );
-            }
+            if (!req.auth) throw new AppError(ERROR_CODES.UNAUTHORIZED);
+            if (!req.file) throw new AppError(ERROR_CODES.FILE_NOT_FOUND);
 
-            const dto =
-                req.body as CreateVerificationDTO;
+            // documentPath is set by the service, never trusted from the client
+            const { documentPath, ...dto } = req.body as CreateVerificationDTO & {
+                documentPath?: string;
+            };
 
-            if (!req.file) {
-                throw new AppError(
-                    ERROR_CODES.FILE_NOT_FOUND
-                );
-            }
-
-            const relativeDocPath = path.relative(process.cwd(), req.file.path).replace(/\\/g, '/');
-
-            const submittedBy =
-                String(req.auth.userId);
-
-            const verification =
-                await this.service.create(
-                    dto,
-                    relativeDocPath,
-                    submittedBy
-                );
-
-            successResponse(
-                res,
-                201,
-                "Verification submitted successfully",
-                verification
+            const verification = await this.service.create(
+                dto,
+                req.auth.userId,
+                req.file
             );
 
+            successResponse(res, 201, "Verification submitted successfully", verification);
         } catch (err: any) {
-            if (req.file && req.file.path) {
-                fs.unlink(req.file.path, (unlinkErr) => {
-                    if (unlinkErr) console.error(`Failed to delete orphaned file at ${req.file?.path}:`, unlinkErr);
-                });
-            }
-            errorResponse(
-                res,
-                400,
-                err.message,
-                err
-            );
+            // Temp file cleanup now lives in the service
+            errorResponse(res, 400, err.message, err);
         }
     };
 

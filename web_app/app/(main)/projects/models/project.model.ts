@@ -20,6 +20,11 @@ export enum ProjectStatus {
     verified = 'verified'
 }
 
+export interface IProjectObjectives {
+    general: string;
+    specific: string[];
+}
+
 export type Project = {
     _id?: string;
     grant?: string | Grant;
@@ -29,23 +34,22 @@ export type Project = {
     workspace?: string | Organization;
     title: string;
     summary?: string;
+    keywords?: string[];
+    objectives?: IProjectObjectives;
     status?: ProjectStatus;
     leadPI?: string | User;
     totalBudget?: number;
     totalDuration?: number;
     totalCollabs?: number;
     themes?: Theme[] | string[];
-    //currentStage?: string;
     createdAt?: Date;
     updatedAt?: Date;
-    //used for apply for call
-    collaborators?: Collaborator[];// | string[];
+    collaborators?: Collaborator[];
     phases?: Phase[];
     file?: File;
     statusHistory?: IStatusHistory<ProjectStatus>[];
     currentApplication?: string | Application;
     currentVerification?: string | Verification;
-    //just for UI
     lockLead?: boolean;
 }
 
@@ -56,7 +60,6 @@ export interface FilterProjects {
     workspace?: string | Organization;
     calendar?: string | Calendar;
     status?: ProjectStatus;
-    //populate?: boolean;
 }
 
 export const validateProject = (project: Project): { valid: boolean; message?: string } => {
@@ -71,52 +74,10 @@ export const validateProject = (project: Project): { valid: boolean; message?: s
 
 export const validateApplyProject = (project: Project): { valid: boolean; message?: string } => {
     const result = validateProject(project);
-    if (!result.valid) return result
-    /*
-    if (!project.collaborators || project.collaborators.length == 0) {
-        return { valid: false, message: 'At least one collaborator is required.' };
-    }
-    if (!project.phases || project.phases.length === 0) {
-        return { valid: false, message: 'At least one phase is required.' };
-    }
-    */
+    if (!result.valid) return result;
+
     if (!project.file) {
         return { valid: false, message: 'Please select a project file.' };
     }
     return { valid: true };
 };
-
-/*
-export const sanitize = (project: Partial<Project>): Partial<Project> => {
-    return {
-        ...project,
-        grant:
-            typeof project.grant === 'object' && project.grant !== null
-                ? (project.grant as any)._id
-                : project.grant,
-        leadPI:
-            typeof project.leadPI === 'object' && project.leadPI !== null
-                ? (project.leadPI as any)._id
-                : project.leadPI,
-        calendar:
-            typeof project.calendar === 'object' && project.calendar !== null
-                ? (project.calendar as any)._id
-                : project.calendar,
-        call:
-            typeof project.call === 'object' && project.call !== null
-                ? (project.call as any)._id
-                : project.call,
-        // --- Fix for Themes Array ---
-        themes: project.themes?.map(t => {
-            // If the theme is an object, take the _id, otherwise return the string/id as is
-            if (typeof t === 'object' && t !== null) {
-                return (t as any)._id;
-            }
-            return t;
-        }).filter(t => !!t),
-        collaborators: project.collaborators?.map(c => sanitizeCollaborator(c)),
-        phases: project.phases?.map(p => sanitizePhase(p)),
-    };
-}
-*/
-

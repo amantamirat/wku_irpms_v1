@@ -9,11 +9,8 @@ import { THEMATIC_STATUS_ORDER, THEMATIC_TRANSITIONS } from "../models/thematic.
 import MyBadge from "@/templates/MyBadge";
 
 
-interface ThematicManagerProps {
-    populate?: boolean;
-}
 
-const ThematicManager = ({ populate }: ThematicManagerProps) => {
+const ThematicManager = () => {
     const Manager = createEntityManager<Thematic, GetThematicsOptions | undefined>({
         title: "Manage Thematics",
         itemName: "Thematic",

@@ -1,5 +1,4 @@
 'use client';
-
 import { BASE_URL } from '@/api/ApiClient';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
 import { Button } from 'primereact/button';
@@ -41,7 +40,7 @@ const SaveApplication = ({ visible, item, onHide, onComplete }: EntitySaveDialog
         }
     };
 
-    const saveStage = async () => {
+    const saveApplication = async () => {
         setSubmitted(true);
 
         if (!isReady) {
@@ -100,7 +99,7 @@ const SaveApplication = ({ visible, item, onHide, onComplete }: EntitySaveDialog
             <Button
                 label={localApplication._id ? "Update Submission" : "Complete Submission"}
                 icon="pi pi-cloud-upload"
-                onClick={saveStage}
+                onClick={saveApplication}
                 severity="success"
                 loading={isUploading}
                 disabled={!isReady}

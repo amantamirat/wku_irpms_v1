@@ -82,6 +82,7 @@ export interface CreateProjectData
 
     organization: string;
     workspace: string;
+    status?: ProjectStatus;
 }
 
 
@@ -93,6 +94,10 @@ export class ProjectRepository
     ): Record<string, unknown> {
 
         const query: Record<string, unknown> = {};
+
+        if (filters.id) {
+            query._id = filters.id
+        }
 
         if (filters.ids?.length) {
             query._id = {
@@ -256,11 +261,14 @@ export class ProjectRepository
 
             summary: data.summary,
 
+            conceptNoteId: data.conceptNoteId,
+
             leadPI: toObjectId(data.leadPI),
 
             themes: data.themes.map(toObjectId),
 
-            createdBy: toObjectId(userId)
+            createdBy: toObjectId(userId),
+            status: data.status
         };
 
         return Project.create(project);

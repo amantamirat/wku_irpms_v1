@@ -8,9 +8,6 @@ const ThematicPage = () => {
 
     return (
         <>
-            {
-                //<DirectorateSelector />
-            }
             <ThematicManager/>
         </>
 

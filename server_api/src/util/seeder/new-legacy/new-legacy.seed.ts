@@ -20,13 +20,19 @@ import { IThemeRepository } from "../../../modules/thematics/themes/theme.reposi
 import { UserService } from '../../../modules/users/user.service';
 import { NewLegacyProjectDTO } from './new-legacy.dto';
 import { CollaboratorStatus } from '../../../modules/projects/collaborators/collaborator.model';
-import { IPhaseActivityDetailCost } from '../../../modules/projects/phase/activities/phase-activity.model';
+import { IPhaseActivityDetailCost, PhaseActivityStatus } from '../../../modules/projects/phase/activities/phase-activity.model';
+import { PhaseStatus } from '../../../modules/projects/phase/phase.model';
+import { PhaseActivityDto } from '../../../modules/projects/phase/activities/phase-activity.dto';
+import { LegacyEquipmentLoader } from './LegacyEquipmentLoader';
+import { ProjectStatus } from '../../../modules/projects/project.model';
 
 export class NewLegacySeeder {
 
     private readonly LEGACY_GRANT = "NEW Legacy Grant";
     private readonly LEGACY_THEMATICS = "NEW Legacy Thematics";
     private readonly RESEARCH_DIRECTORATE = "Research";
+
+    private readonly equipmentLoader = new LegacyEquipmentLoader();
 
     constructor(
         private readonly organizationRepo: IOrganizationRepository,
@@ -42,6 +48,8 @@ export class NewLegacySeeder {
         console.log("🚀 Starting new legacy migration...");
 
         const projects = await this.loadProjects();
+        await this.equipmentLoader.loadFromFile();
+
         await this.seedDirectorates();
         await this.seedLegacyCalendars(projects);
         await this.seedLegacyThemes(projects);
@@ -243,6 +251,125 @@ export class NewLegacySeeder {
     }
 
 
+    private getValidSerialDate(
+        value?: number | null
+    ): number | null {
+        return value !== undefined &&
+            value !== null &&
+            Number.isFinite(value)
+            ? value
+            : null;
+    }
+
+    private excelSerialToDate(serial: number): Date {
+        const excelEpoch = new Date(Date.UTC(1899, 11, 30));
+
+        return new Date(
+            excelEpoch.getTime() +
+            serial * 24 * 60 * 60 * 1000
+        );
+    }
+
+
+    private buildActivityTimeline(
+        activities: {
+            title: string;
+            cost: number;
+            detailCost: IPhaseActivityDetailCost;
+        }[],
+        phaseStatus: PhaseStatus,
+        phaseStartDate?: number | null,
+        grantStartDate?: number | null
+    ): PhaseActivityDto[] {
+
+        const activityStatus =
+            this.getActivityStatusFromPhase(phaseStatus);
+
+        const phaseStart =
+            this.getValidSerialDate(phaseStartDate);
+
+        const grantStart =
+            this.getValidSerialDate(grantStartDate);
+
+        // Prefer phase start, otherwise grant start
+        const startSerial =
+            phaseStart ?? grantStart;
+
+        // --------------------------------------------------
+        // No reliable starting date
+        // --------------------------------------------------
+
+        if (startSerial === null) {
+            return activities.map(activity => ({
+                ...activity,
+                startDate: null,
+                endDate: null,
+                duration: activity.detailCost.duration,
+                status: activityStatus,
+            }));
+        }
+
+        // --------------------------------------------------
+        // Build sequential timeline
+        // --------------------------------------------------
+
+        let currentStart =
+            this.excelSerialToDate(startSerial);
+
+        return activities.map(activity => {
+
+            const duration =
+                activity.detailCost.duration;
+
+            const startDate =
+                new Date(currentStart);
+
+            const endDate =
+                new Date(startDate);
+
+            // Inclusive duration
+            endDate.setDate(
+                endDate.getDate() + duration - 1
+            );
+
+            // Next activity starts the following day
+            currentStart =
+                new Date(endDate);
+
+            currentStart.setDate(
+                currentStart.getDate() + 1
+            );
+
+            return {
+                ...activity,
+                duration,
+                startDate,
+                endDate,
+                status: activityStatus,
+            };
+        });
+    }
+
+    private getActivityStatusFromPhase(
+        phaseStatus: PhaseStatus
+    ): PhaseActivityStatus {
+
+        switch (phaseStatus) {
+
+            case PhaseStatus.completed:
+                return PhaseActivityStatus.completed;
+
+            case PhaseStatus.active:
+                return PhaseActivityStatus.active;
+
+            case PhaseStatus.approved:
+                return PhaseActivityStatus.approved;
+
+            default:
+                return PhaseActivityStatus.planned;
+        }
+    }
+
 
     private buildPhaseActivities(
         researchPlanDetails?: string | null
@@ -320,6 +447,31 @@ export class NewLegacySeeder {
     }
 
 
+    private getPhaseStatus(
+        phaseStatus: number | null | undefined,
+        progressStatus: number | null | undefined,
+        fundStatus: number | null | undefined
+    ): PhaseStatus {
+
+        // All three legacy statuses are explicitly 0
+        if (
+            phaseStatus === 0 &&
+            progressStatus === 0 &&
+            fundStatus === 0
+        ) {
+            return PhaseStatus.completed;
+        }
+
+        // Funding has started
+        if (fundStatus === 0) {
+            return PhaseStatus.active;
+        }
+
+        // Any other value, including undefined/null/NaN
+        return PhaseStatus.approved;
+    }
+
+
     private buildPhases(
         item: NewLegacyProjectDTO
     ): PhaseDto[] {
@@ -332,6 +484,10 @@ export class NewLegacySeeder {
                 endDate: item.Phase1EndDate,
                 activities: item.Phase1Activities,
                 researchPlanDetails: item.Phase1ResearchPlanDetails,
+
+                phaseStatus: item.Phase1Status,
+                progressStatus: item.Phase1ProgressStatus,
+                fundStatus: item.Phase1FundStatus,
             },
             {
                 order: 2,
@@ -340,6 +496,10 @@ export class NewLegacySeeder {
                 endDate: item.Phase2EndDate,
                 activities: item.Phase2Activities,
                 researchPlanDetails: item.Phase2ResearchPlanDetails,
+
+                phaseStatus: item.Phase2Status,
+                progressStatus: item.Phase2ProgressStatus,
+                fundStatus: item.Phase2FundStatus,
             },
             {
                 order: 3,
@@ -348,6 +508,10 @@ export class NewLegacySeeder {
                 endDate: item.Phase3EndDate,
                 activities: item.Phase3Activities,
                 researchPlanDetails: item.Phase3ResearchPlanDetails,
+
+                phaseStatus: item.Phase3Status,
+                progressStatus: item.Phase3ProgressStatus,
+                fundStatus: item.Phase3FundStatus,
             },
             {
                 order: 4,
@@ -356,6 +520,10 @@ export class NewLegacySeeder {
                 endDate: item.Phase4EndDate,
                 activities: item.Phase4Activities,
                 researchPlanDetails: item.Phase4ResearchPlanDetails,
+
+                phaseStatus: item.Phase4Status,
+                progressStatus: item.Phase4ProgressStatus,
+                fundStatus: item.Phase4FundStatus,
             },
             {
                 order: 5,
@@ -364,6 +532,10 @@ export class NewLegacySeeder {
                 endDate: item.Phase5EndDate,
                 activities: item.Phase5Activities,
                 researchPlanDetails: item.Phase5ResearchPlanDetails,
+
+                phaseStatus: item.Phase5Status,
+                progressStatus: item.Phase5ProgressStatus,
+                fundStatus: item.Phase5FundStatus,
             },
         ];
 
@@ -374,26 +546,52 @@ export class NewLegacySeeder {
 
         return phaseData
             .slice(0, numberOfPhases)
-            .map(phase => ({
-                order: phase.order,
-                title: `Phase ${phase.order}`,
+            .map(phase => {
 
-                budget: phase.budget as number,
+                const status = this.getPhaseStatus(
+                    phase.phaseStatus,
+                    phase.progressStatus,
+                    phase.fundStatus
+                );
 
-                duration:
-                    Math.ceil(
-                        (phase.endDate as number) -
-                        (phase.startDate as number)
-                    ) + 1,
+                const activities =
+                    this.buildPhaseActivities(
+                        phase.researchPlanDetails
+                    );
 
-                description:
-                    phase.activities ||
-                    `Research Phase ${phase.order} implementation`,
+                const timeline = this.buildActivityTimeline(
+                    activities,
+                    status,
+                    phase.startDate,
+                    item.GrantStartDate
+                );
 
-                activities: this.buildPhaseActivities(
-                    phase.researchPlanDetails
-                ),
-            }));
+                return {
+                    order: phase.order,
+                    title: `Phase ${phase.order}`,
+                    budget: phase.budget as number,
+
+                    duration:
+                        Math.ceil(
+                            (phase.endDate as number) -
+                            (phase.startDate as number)
+                        ) + 1,
+
+                    description:
+                        phase.activities ||
+                        `Research Phase ${phase.order} implementation`,
+
+                    status: status,
+
+                    activities: timeline,
+
+                    equipments: this.equipmentLoader.getByPhase(
+                        item.ConceptNoteId,
+                        phase.order,
+                        status
+                    ),
+                };
+            });
     }
 
 
@@ -401,7 +599,7 @@ export class NewLegacySeeder {
         item: NewLegacyProjectDTO,
         grantId: string,
         thematicId: string
-    ): Promise<CreateProjectDTO> {
+    ): Promise<CreateProjectDTO & { status: ProjectStatus, usedBudget: number }> {
 
         const year = Number(
             item.AcYear?.substring(0, 4)
@@ -457,16 +655,49 @@ export class NewLegacySeeder {
             );
         }
 
+        const phases = this.buildPhases(item)
+
+        // Used budget = budgets of phases that have started (active) or finished (completed)
+        const usedBudget = phases
+            .filter(phase =>
+                phase.status === PhaseStatus.active ||
+                phase.status === PhaseStatus.completed
+            )
+            .reduce((total, phase) => {
+                const budget = Number(phase.budget);
+                return total + (Number.isFinite(budget) ? budget : 0);
+            }, 0);
+
+        const isValidated =
+            item.Decission?.trim().toLowerCase() === "validated";
+
+        const allPhasesCompleted =
+            phases.length > 0 &&
+            phases.every(phase => phase.status === PhaseStatus.completed);
+
+        let status: ProjectStatus;
+
+        if (isValidated) {
+            status = ProjectStatus.verified;
+        } else if (allPhasesCompleted) {
+            status = ProjectStatus.completed;
+        } else {
+            status = ProjectStatus.granted;
+        }
+
         return {
             grant: grantId,
             calendar: String(calendar._id),
+            conceptNoteId: item.ConceptNoteId,
             title: item.ConceptNoteTitle,
             leadPI: pi.member,
             themes: [
                 String(theme._id)
             ],
             collaborators,
-            phases: this.buildPhases(item)
+            phases: phases,
+            status,
+            usedBudget
         };
     }
 
@@ -487,6 +718,8 @@ export class NewLegacySeeder {
         let skipped = 0;
         let failed = 0;
 
+        let totalUsed = 0;
+
         for (const item of projects) {
             try {
                 const dto = await this.mapToCreateProjectDTO(
@@ -495,6 +728,8 @@ export class NewLegacySeeder {
                     String(grantDoc.thematic)
                 );
 
+
+                /*
                 console.log(
                     "\n+++++++++++++++++++++++++++++++++++++++++++"
                 );
@@ -507,13 +742,19 @@ export class NewLegacySeeder {
                 console.log(
                     "+++++++++++++++++++++++++++++++++++++++++++\n"
                 );
+*/
 
-                /*
 
-                await this.projectService.create(
+                const proj = await this.projectService.create(
                     dto, dto.leadPI, { skipValidation: true }
                 );
-                */
+
+                if (proj) {
+                    await this.grantRepo.consumeBudget(grantId, dto.usedBudget);
+                }
+
+
+                totalUsed = totalUsed + dto.usedBudget;
 
                 created++;
 
@@ -549,6 +790,8 @@ export class NewLegacySeeder {
             }
         }
 
+
+
         console.log(`
 ========================================
        Legacy Project Migration
@@ -557,6 +800,7 @@ Total projects : ${projects.length}
 Created        : ${created}
 Skipped        : ${skipped}
 Failed         : ${failed}
+TotalUsed         : ${totalUsed}
 ========================================
 `);
     }

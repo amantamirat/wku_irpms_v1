@@ -15,6 +15,7 @@ export interface CreatePhaseData {
     duration: number;
     budget: number;
     description?: string;
+    status?: PhaseStatus;
 }
 
 export interface IPhaseRepository {
@@ -43,6 +44,9 @@ export interface IPhaseRepository {
     countByProject(projectId: string): Promise<number>;
 
     updateMany(filter: any, update: any): Promise<any>;
+
+
+    getProjectProgressAggregation(projectId: mongoose.Types.ObjectId): any;
 
     delete(id: string): Promise<IPhase | null>;
     deleteByProject(projectId: string): Promise<any>;
@@ -193,11 +197,55 @@ export class PhaseRepository implements IPhaseRepository {
         }).exec();
     }
 
+    async getProjectProgressAggregation(projectId: mongoose.Types.ObjectId) {
+        return await Phase.aggregate([
+            {
+                $match: {
+                    project: projectId,
+
+                    status: {
+                        $nin: [
+                            PhaseStatus.cancelled,
+                            PhaseStatus.refused,
+                        ],
+                    },
+                },
+            },
+
+            {
+                $group: {
+                    _id: null,
+
+                    total: {
+                        $sum: 1,
+                    },
+
+                    completed: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $eq: [
+                                        '$status',
+                                        PhaseStatus.completed,
+                                    ],
+                                },
+                                1,
+                                0,
+                            ],
+                        },
+                    },
+                },
+            },
+        ]);
+    }
+
     async delete(id: string): Promise<IPhase | null> {
         return Phase.findByIdAndDelete(
             new mongoose.Types.ObjectId(id)
         ).exec();
     }
+
+
 
     async deleteByProject(projectId: string): Promise<any> {
         return Phase.deleteMany({

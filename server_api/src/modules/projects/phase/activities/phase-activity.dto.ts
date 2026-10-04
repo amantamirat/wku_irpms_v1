@@ -1,8 +1,7 @@
 import mongoose from "mongoose";
 import { PhaseActivityStatus, IPhaseActivityDetailCost } from "./phase-activity.model";
 
-export interface CreatePhaseActivityDto {
-    phase: string;
+export interface PhaseActivityDto {
 
     title: string;
     description?: string;
@@ -10,10 +9,14 @@ export interface CreatePhaseActivityDto {
     cost: number;
     detailCost?: IPhaseActivityDetailCost;
 
-    startDate: Date;
-    endDate: Date;
+    startDate: Date | null;
+    endDate: Date | null;
 
     status?: PhaseActivityStatus;
+}
+
+export interface CreatePhaseActivityDto extends PhaseActivityDto {
+    phase: string;
 }
 
 export interface UpdatePhaseActivityDto {

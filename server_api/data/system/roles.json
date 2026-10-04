@@ -70,6 +70,7 @@
             "phaseEquipment:*",
             "user:lookup",
             "reviewer:*",
+            "verification:*",
             "verification-conf:*",
             "report:dashborad"
         ]
@@ -139,9 +140,9 @@
             "phase:delete:own",
             "phaseActivity:create:own",
             "phaseActivity:read:own",
-            "phaseActivity:update:own",
-            "phaseActivity:delete:own",
-            "phaseActivity:transitions:*",
+            "phaseActivity:transition.planned.approved",
+            "phaseActivity:transition.approved.active",
+            "phaseActivity:transition.active.completed",
             "phaseActivity:lookup",
             "phaseActivity:update:own",
             "phaseActivity:delete:own",

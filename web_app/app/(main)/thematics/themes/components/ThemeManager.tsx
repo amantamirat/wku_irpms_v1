@@ -8,7 +8,7 @@ import { Thematic, ThemeLevel } from "../../models/thematic.model";
 
 interface ThemeManagerProps {
     thematic?: Thematic;
-    level?: number;
+    level: number;
     parent?: Theme;
 }
 

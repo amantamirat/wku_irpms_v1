@@ -287,6 +287,12 @@ export class ReviewerService {
 
         if (!reviewerDoc) throw new AppError(ERROR_CODES.REVIEWER_NOT_FOUND);
 
+        /*
+        if (reviewerDoc.status === ReviewerStatus.rejected) {
+            const deleted = await this.reviewerRepo.delete(id);
+            return deleted
+        }*/
+
         // Deny deletion if a result already exists
         const resultExists = await this.resultRepo.exists({
             reviewer: id

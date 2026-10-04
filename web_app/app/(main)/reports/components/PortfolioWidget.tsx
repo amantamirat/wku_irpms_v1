@@ -81,6 +81,12 @@ export const PortfolioWidget = ({ data, loading = false }: PortfolioWidgetProps)
       color: 'purple'
     },
     {
+      title: 'Verified',
+      value: data.verifiedProjects ?? 0,
+      icon: 'pi-check',
+      color: 'blue'
+    },
+    {
       title: 'Terminated',
       value: data.terminatedProjects ?? 0,
       icon: 'pi-ban',

@@ -28,6 +28,8 @@ export interface IProject extends Document {
 
     _id: mongoose.Types.ObjectId;
 
+    conceptNoteId?: string; // the previous system project id
+
     /**
      * Grant under which the project is funded.
      */
@@ -99,6 +101,9 @@ const ProjectStatusHistorySchema =
 
 const ProjectSchema = new Schema<IProject>(
     {
+        conceptNoteId: {
+            type: String
+        },
 
         grant: {
             type: Schema.Types.ObjectId,

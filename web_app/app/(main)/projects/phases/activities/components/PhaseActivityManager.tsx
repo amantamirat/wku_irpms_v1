@@ -34,6 +34,8 @@ const PhaseActivityManager = ({ phase }: PhaseActivityManagerProps) => {
             title: `Activities for ${phase.title}`,
             itemName: "Activity",
 
+
+
             api: PhaseActivityApi,
 
             columns: [
@@ -58,7 +60,7 @@ const PhaseActivityManager = ({ phase }: PhaseActivityManagerProps) => {
                     }
                 },
                 {
-                    header: "Duration",
+                    header: "Span",
                     field: "endDate",
                     sortable: true,
                     body: (row: PhaseActivity) => {
@@ -69,7 +71,7 @@ const PhaseActivityManager = ({ phase }: PhaseActivityManagerProps) => {
                                 {days} {days === 1 ? 'day' : 'days'}
                             </span>
                         ) : (
-                            <span className="text-gray-400">-</span>
+                            <span className="text-blue-400">-</span>
                         );
                     }
                 },
@@ -109,6 +111,8 @@ const PhaseActivityManager = ({ phase }: PhaseActivityManagerProps) => {
                 statusField: "status",
                 transitions: PHASE_ACTIVITY_TRANSITIONS
             },
+
+            useLookup: true,
 
             createNew: () => ({
                 phase,

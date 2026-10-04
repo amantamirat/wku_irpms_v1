@@ -1,9 +1,11 @@
+import mongoose from "mongoose";
 import { CollaboratorDto } from "./collaborators/collaborator.dto";
 import { PhaseDto } from "./phase/phase.dto";
 import { ProjectStatus } from "./project.model";
 
 
 export interface FilterProjectsDTO {
+    id?: mongoose.Types.ObjectId;
     ids?: string[];
 
     grant?: string;
@@ -25,6 +27,8 @@ export interface FilterProjectsDTO {
 
 export interface CreateProjectDTO {
     grant: string;
+
+    conceptNoteId?: string;
 
     title: string;
     summary?: string;

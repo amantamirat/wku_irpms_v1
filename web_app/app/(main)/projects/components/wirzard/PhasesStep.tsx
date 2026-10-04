@@ -193,7 +193,7 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
                                             "e.g., Preliminary Research",
                                             "e.g., Design & Planning",
                                             "e.g., Implementation"
-                                        ][phase.order - 1] || "e.g., Phase Title"
+                                        ][phase.order??1 - 1] || "e.g., Phase Title"
                                     }
                                     className={classNames({ 'p-invalid': submitted && !phase.title?.trim() })}
                                 />

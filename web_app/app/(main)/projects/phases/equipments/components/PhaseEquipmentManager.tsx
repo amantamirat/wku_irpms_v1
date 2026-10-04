@@ -40,17 +40,22 @@ const PhaseEquipmentManager = ({ phase }: PhaseEquipmentManagerProps) => {
                     )
                 },
                 {
-                    header: "Description",
-                    field: "description",
-                    sortable: true
-                },
-                {
                     header: "Unit",
                     field: "unit",
                     sortable: true,
                     body: (row: PhaseEquipment) => (
                         <span className="capitalize text-gray-700">
                             {row.unit}
+                        </span>
+                    )
+                },
+                {
+                    header: "Pack Size",
+                    field: "packSize",
+                    sortable: true,
+                    body: (row: PhaseEquipment) => (
+                        <span className="text-gray-700">
+                            {row.packSize ?? 1}
                         </span>
                     )
                 },
@@ -73,13 +78,18 @@ const PhaseEquipmentManager = ({ phase }: PhaseEquipmentManagerProps) => {
                     header: "Total Cost",
                     field: "totalCost", // Unique field identifier for cost calculation
                     body: (row: PhaseEquipment) => {
-                        const total = (row.unitPrice || 0) * row.quantity;
+                        const total = (row.unitPrice || 0) * row.quantity; //* (row.packSize ?? 1);
                         return (
                             <span className="font-mono font-semibold text-gray-900">
                                 {etbCurrencyFormatter.format(total)}
                             </span>
                         );
                     }
+                },
+                {
+                    header: "Description",
+                    field: "description",
+                    sortable: true
                 },
                 {
                     header: "Status",
@@ -103,6 +113,7 @@ const PhaseEquipmentManager = ({ phase }: PhaseEquipmentManagerProps) => {
                 itemName: "",
                 description: "",
                 unit: EquipmentUnit.number,
+                packSize: 1,
                 quantity: 1,
                 unitPrice: 0,
                 status: PhaseEquipmentStatus.planned

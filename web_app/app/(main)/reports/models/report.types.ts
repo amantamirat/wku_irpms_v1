@@ -33,6 +33,7 @@ export interface IPortfolioReport {
   grantedProjects: number;
   completedProjects: number;
   terminatedProjects: number;
+  verifiedProjects: number;
 }
 
 export interface IApplicationReport {

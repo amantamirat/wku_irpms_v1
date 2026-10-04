@@ -1,0 +1,5902 @@
+[
+  {
+    "conceptNoteId": "F79D3032-B302-ED11-9129-425BFF47FDCF",
+    "conceptNoteCode": "CNCS-53-2021/22",
+    "title": "CHARACTERIZATION OF METHICILLIN RESISTANT STAPHYLOCOCCUS AUREUS (MRSA) ISOLATED FROM RAW MEAT AND MILK SAMPLES IN WOLKITE TOWN",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "46EE04A7-35B1-ED11-921D-425BFF47FDCF",
+            "name": "Agarose",
+            "unit": "Number",
+            "unitCost": 50000,
+            "quantity": 1,
+            "totalCost": 50000
+          },
+          {
+            "equipmentId": "61393820-35B1-ED11-921D-425BFF47FDCF",
+            "name": "Alcohol absolute",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "1EA27049-35B1-ED11-921D-425BFF47FDCF",
+            "name": "Amie’s transport medium",
+            "unit": "Number",
+            "unitCost": 4000,
+            "quantity": 1,
+            "totalCost": 4000
+          },
+          {
+            "equipmentId": "2B2E93C8-35B1-ED11-921D-425BFF47FDCF",
+            "name": "Antibiotic disc",
+            "unit": "Number",
+            "unitCost": 3500,
+            "quantity": 1,
+            "totalCost": 3500
+          },
+          {
+            "equipmentId": "FFE89D68-33B1-ED11-921D-425BFF47FDCF",
+            "name": "Baird-Parker Agar (500gm)",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "B8BAA2F5-32B1-ED11-921D-425BFF47FDCF",
+            "name": "Blood agar (500gm)",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "AC9B9D05-37B1-ED11-921D-425BFF47FDCF",
+            "name": "Consumable Materials",
+            "unit": "Number",
+            "unitCost": 20480,
+            "quantity": 1,
+            "totalCost": 20480
+          },
+          {
+            "equipmentId": "CCCD2302-36B1-ED11-921D-425BFF47FDCF",
+            "name": "DNA Extraction kit",
+            "unit": "Number",
+            "unitCost": 30000,
+            "quantity": 1,
+            "totalCost": 30000
+          },
+          {
+            "equipmentId": "9FD826E6-34B1-ED11-921D-425BFF47FDCF",
+            "name": "DNase agar",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "05F03F85-35B1-ED11-921D-425BFF47FDCF",
+            "name": "EDTA",
+            "unit": "Number",
+            "unitCost": 3300,
+            "quantity": 1,
+            "totalCost": 3300
+          },
+          {
+            "equipmentId": "E2FF7EC6-34B1-ED11-921D-425BFF47FDCF",
+            "name": "Glucose",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "8D6B21E2-35B1-ED11-921D-425BFF47FDCF",
+            "name": "Hydrogen per oxide",
+            "unit": "Number",
+            "unitCost": 1050,
+            "quantity": 1,
+            "totalCost": 1050
+          },
+          {
+            "equipmentId": "69DE0C8D-33B1-ED11-921D-425BFF47FDCF",
+            "name": "Kovacs reagent(of 30ml)",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "41BCD496-34B1-ED11-921D-425BFF47FDCF",
+            "name": "Lactose",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "80D14A18-34B1-ED11-921D-425BFF47FDCF",
+            "name": "Mannitol Salt Agar (MSA)",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "3AA4B83A-33B1-ED11-921D-425BFF47FDCF",
+            "name": "MR-VP Medium(500gm)",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "6B3DE7D3-32B1-ED11-921D-425BFF47FDCF",
+            "name": "Nutrient Agar(500gm)",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "6DE4B81E-36B1-ED11-921D-425BFF47FDCF",
+            "name": "PCR Primer",
+            "unit": "Number",
+            "unitCost": 30000,
+            "quantity": 1,
+            "totalCost": 30000
+          },
+          {
+            "equipmentId": "42A98BE2-33B1-ED11-921D-425BFF47FDCF",
+            "name": "Petri dishes(90mm), Pyrex glass",
+            "unit": "Number",
+            "unitCost": 9000,
+            "quantity": 1,
+            "totalCost": 9000
+          },
+          {
+            "equipmentId": "D9685EE1-36B1-ED11-921D-425BFF47FDCF",
+            "name": "stationary",
+            "unit": "Number",
+            "unitCost": 7620,
+            "quantity": 1,
+            "totalCost": 7620
+          },
+          {
+            "equipmentId": "60DBB239-34B1-ED11-921D-425BFF47FDCF",
+            "name": "Sucrose",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "72F4931B-33B1-ED11-921D-425BFF47FDCF",
+            "name": "Urea agar (500gm)",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "46EE04A7-35B1-ED11-921D-425BFF47FDCF",
+            "name": "Agarose",
+            "unit": "Number",
+            "unitCost": 50000,
+            "quantity": 1,
+            "totalCost": 50000
+          },
+          {
+            "equipmentId": "61393820-35B1-ED11-921D-425BFF47FDCF",
+            "name": "Alcohol absolute",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "1EA27049-35B1-ED11-921D-425BFF47FDCF",
+            "name": "Amie’s transport medium",
+            "unit": "Number",
+            "unitCost": 4000,
+            "quantity": 1,
+            "totalCost": 4000
+          },
+          {
+            "equipmentId": "2B2E93C8-35B1-ED11-921D-425BFF47FDCF",
+            "name": "Antibiotic disc",
+            "unit": "Number",
+            "unitCost": 3500,
+            "quantity": 1,
+            "totalCost": 3500
+          },
+          {
+            "equipmentId": "FFE89D68-33B1-ED11-921D-425BFF47FDCF",
+            "name": "Baird-Parker Agar (500gm)",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "B8BAA2F5-32B1-ED11-921D-425BFF47FDCF",
+            "name": "Blood agar (500gm)",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "AC9B9D05-37B1-ED11-921D-425BFF47FDCF",
+            "name": "Consumable Materials",
+            "unit": "Number",
+            "unitCost": 20480,
+            "quantity": 1,
+            "totalCost": 20480
+          },
+          {
+            "equipmentId": "CCCD2302-36B1-ED11-921D-425BFF47FDCF",
+            "name": "DNA Extraction kit",
+            "unit": "Number",
+            "unitCost": 30000,
+            "quantity": 1,
+            "totalCost": 30000
+          },
+          {
+            "equipmentId": "9FD826E6-34B1-ED11-921D-425BFF47FDCF",
+            "name": "DNase agar",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "05F03F85-35B1-ED11-921D-425BFF47FDCF",
+            "name": "EDTA",
+            "unit": "Number",
+            "unitCost": 3300,
+            "quantity": 1,
+            "totalCost": 3300
+          },
+          {
+            "equipmentId": "E2FF7EC6-34B1-ED11-921D-425BFF47FDCF",
+            "name": "Glucose",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "8D6B21E2-35B1-ED11-921D-425BFF47FDCF",
+            "name": "Hydrogen per oxide",
+            "unit": "Number",
+            "unitCost": 1050,
+            "quantity": 1,
+            "totalCost": 1050
+          },
+          {
+            "equipmentId": "69DE0C8D-33B1-ED11-921D-425BFF47FDCF",
+            "name": "Kovacs reagent(of 30ml)",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "41BCD496-34B1-ED11-921D-425BFF47FDCF",
+            "name": "Lactose",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "80D14A18-34B1-ED11-921D-425BFF47FDCF",
+            "name": "Mannitol Salt Agar (MSA)",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "3AA4B83A-33B1-ED11-921D-425BFF47FDCF",
+            "name": "MR-VP Medium(500gm)",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "6B3DE7D3-32B1-ED11-921D-425BFF47FDCF",
+            "name": "Nutrient Agar(500gm)",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "6DE4B81E-36B1-ED11-921D-425BFF47FDCF",
+            "name": "PCR Primer",
+            "unit": "Number",
+            "unitCost": 30000,
+            "quantity": 1,
+            "totalCost": 30000
+          },
+          {
+            "equipmentId": "42A98BE2-33B1-ED11-921D-425BFF47FDCF",
+            "name": "Petri dishes(90mm), Pyrex glass",
+            "unit": "Number",
+            "unitCost": 9000,
+            "quantity": 1,
+            "totalCost": 9000
+          },
+          {
+            "equipmentId": "D9685EE1-36B1-ED11-921D-425BFF47FDCF",
+            "name": "stationary",
+            "unit": "Number",
+            "unitCost": 7620,
+            "quantity": 1,
+            "totalCost": 7620
+          },
+          {
+            "equipmentId": "60DBB239-34B1-ED11-921D-425BFF47FDCF",
+            "name": "Sucrose",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          },
+          {
+            "equipmentId": "72F4931B-33B1-ED11-921D-425BFF47FDCF",
+            "name": "Urea agar (500gm)",
+            "unit": "Number",
+            "unitCost": 8000,
+            "quantity": 1,
+            "totalCost": 8000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "B33E97FD-7306-ED11-912B-425BFF47FDCF",
+    "conceptNoteCode": "CNCS-63-2021/22",
+    "title": "Preparation, characterization and application of modified kaolinite clay as catalyst for biodiesel production from waste cooking oil (WCO)",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "CD8A77DE-7DB2-ED11-921D-425BFF47FDCF",
+            "name": "Material purchasing",
+            "unit": "Number",
+            "unitCost": 135000,
+            "quantity": 135000,
+            "totalCost": 18225000000,
+            "check": "unusually large total"
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "CD8A77DE-7DB2-ED11-921D-425BFF47FDCF",
+            "name": "Material purchasing",
+            "unit": "Number",
+            "unitCost": 135000,
+            "quantity": 135000,
+            "totalCost": 18225000000,
+            "check": "unusually large total"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "B4F5FC94-8F06-ED11-912B-425BFF47FDCF",
+    "conceptNoteCode": "CNCS-65-2021/22",
+    "title": "Synthesis of eco-friendly liquid nitrogen rich fertilizer by reducing ammonia evaporation from cattle urine using surfactants to increase crop yield",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "137F1F90-86B2-ED11-921D-425BFF47FDCF",
+            "name": "Material purchasing",
+            "unit": "Number",
+            "unitCost": 99584,
+            "quantity": 99584,
+            "totalCost": 9916973056,
+            "check": "unusually large total"
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "137F1F90-86B2-ED11-921D-425BFF47FDCF",
+            "name": "Material purchasing",
+            "unit": "Number",
+            "unitCost": 99584,
+            "quantity": 99584,
+            "totalCost": 9916973056,
+            "check": "unusually large total"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "41763902-F000-ED11-911B-425BFF47FDCF",
+    "conceptNoteCode": "CANR-28-2021/22",
+    "title": "Effect of soil acidity on cropping systems and screening of wheat varieties for adaptation of acidic Ultisols of Gurage Zone",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "52C8CD74-97AE-ED11-921A-425BFF47FDCF",
+            "name": "Materials Purchasing",
+            "unit": "Number",
+            "unitCost": 13688,
+            "quantity": 1,
+            "totalCost": 13688
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "52C8CD74-97AE-ED11-921A-425BFF47FDCF",
+            "name": "Materials Purchasing",
+            "unit": "Number",
+            "unitCost": 13688,
+            "quantity": 1,
+            "totalCost": 13688
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "03CBFD67-7302-ED11-9129-425BFF47FDCF",
+    "conceptNoteCode": "CMHS-103-2021/22",
+    "title": "Associated Factors of Tuberculosis and rifampicin resistance among Household Contacts of Pulmonary Tuberculosis Patients Treated in Public Health Facilities",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "F5EE864F-49B3-ED11-921F-425BFF47FDCF",
+            "name": "Acid alcohol",
+            "unit": "Number",
+            "unitCost": 2000,
+            "quantity": 1,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "1AB2D265-49B3-ED11-921F-425BFF47FDCF",
+            "name": "Applicator stick",
+            "unit": "Number",
+            "unitCost": 2000,
+            "quantity": 1,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "715D7D3F-49B3-ED11-921F-425BFF47FDCF",
+            "name": "Carbolfucsion",
+            "unit": "Number",
+            "unitCost": 2000,
+            "quantity": 1,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "684A828F-49B3-ED11-921F-425BFF47FDCF",
+            "name": "Glove",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "EEFB185A-49B3-ED11-921F-425BFF47FDCF",
+            "name": "Methelene blue",
+            "unit": "Number",
+            "unitCost": 2000,
+            "quantity": 1,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "9FECBF72-49B3-ED11-921F-425BFF47FDCF",
+            "name": "Plastic bag for packaging",
+            "unit": "Number",
+            "unitCost": 1500,
+            "quantity": 1,
+            "totalCost": 1500
+          },
+          {
+            "equipmentId": "349CA19C-49B3-ED11-921F-425BFF47FDCF",
+            "name": "Slide",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "30EFEF7F-49B3-ED11-921F-425BFF47FDCF",
+            "name": "Sputum cup",
+            "unit": "Number",
+            "unitCost": 3500,
+            "quantity": 1,
+            "totalCost": 3500
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "F5EE864F-49B3-ED11-921F-425BFF47FDCF",
+            "name": "Acid alcohol",
+            "unit": "Number",
+            "unitCost": 2000,
+            "quantity": 1,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "1AB2D265-49B3-ED11-921F-425BFF47FDCF",
+            "name": "Applicator stick",
+            "unit": "Number",
+            "unitCost": 2000,
+            "quantity": 1,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "715D7D3F-49B3-ED11-921F-425BFF47FDCF",
+            "name": "Carbolfucsion",
+            "unit": "Number",
+            "unitCost": 2000,
+            "quantity": 1,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "684A828F-49B3-ED11-921F-425BFF47FDCF",
+            "name": "Glove",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "EEFB185A-49B3-ED11-921F-425BFF47FDCF",
+            "name": "Methelene blue",
+            "unit": "Number",
+            "unitCost": 2000,
+            "quantity": 1,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "9FECBF72-49B3-ED11-921F-425BFF47FDCF",
+            "name": "Plastic bag for packaging",
+            "unit": "Number",
+            "unitCost": 1500,
+            "quantity": 1,
+            "totalCost": 1500
+          },
+          {
+            "equipmentId": "349CA19C-49B3-ED11-921F-425BFF47FDCF",
+            "name": "Slide",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "30EFEF7F-49B3-ED11-921F-425BFF47FDCF",
+            "name": "Sputum cup",
+            "unit": "Number",
+            "unitCost": 3500,
+            "quantity": 1,
+            "totalCost": 3500
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "6509A4B4-7C02-ED11-9129-425BFF47FDCF",
+    "conceptNoteCode": "CMHS-106-2021/22",
+    "title": "NEXUS BETWEEN DM AND TB AMONG PATIENTS WHO HAD FOLLOW UP IN PUBLIC HOSPITALS IN GURAGE ZONE: JOINT MODELING",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "F0B36949-97B2-ED11-921D-425BFF47FDCF",
+            "name": "1% Hcl",
+            "unit": "Number",
+            "unitCost": 200,
+            "quantity": 1,
+            "totalCost": 200
+          },
+          {
+            "equipmentId": "B0CB7C51-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Glove",
+            "unit": "Number",
+            "unitCost": 1500,
+            "quantity": 1,
+            "totalCost": 1500
+          },
+          {
+            "equipmentId": "0C6CC030-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Hb A1C test kit",
+            "unit": "Number",
+            "unitCost": 35000,
+            "quantity": 1,
+            "totalCost": 35000
+          },
+          {
+            "equipmentId": "D8445D67-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Syringe(5cc)",
+            "unit": "Number",
+            "unitCost": 2614,
+            "quantity": 1,
+            "totalCost": 2614
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "F0B36949-97B2-ED11-921D-425BFF47FDCF",
+            "name": "1% Hcl",
+            "unit": "Number",
+            "unitCost": 200,
+            "quantity": 1,
+            "totalCost": 200
+          },
+          {
+            "equipmentId": "B0CB7C51-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Glove",
+            "unit": "Number",
+            "unitCost": 1500,
+            "quantity": 1,
+            "totalCost": 1500
+          },
+          {
+            "equipmentId": "0C6CC030-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Hb A1C test kit",
+            "unit": "Number",
+            "unitCost": 35000,
+            "quantity": 1,
+            "totalCost": 35000
+          },
+          {
+            "equipmentId": "D8445D67-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Syringe(5cc)",
+            "unit": "Number",
+            "unitCost": 2614,
+            "quantity": 1,
+            "totalCost": 2614
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "1F5B6217-5203-ED11-9129-425BFF47FDCF",
+    "conceptNoteCode": "CMHS-119-2021/22",
+    "title": "Serum Electrolyte Disorder and its Associated Factors among Children Admitted in Pediatric ICU, at Gurage Zone Selected Hospitals, Southern Ethiopia",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "186F3DF6-A6B2-ED11-921D-425BFF47FDCF",
+            "name": "Chemistry analyzer reagents calcium",
+            "unit": "Number",
+            "unitCost": 12000,
+            "quantity": 1,
+            "totalCost": 12000
+          },
+          {
+            "equipmentId": "8A8DF7CB-A6B2-ED11-921D-425BFF47FDCF",
+            "name": "Chemistry analyzer reagents for sodium",
+            "unit": "Number",
+            "unitCost": 12000,
+            "quantity": 1,
+            "totalCost": 12000
+          },
+          {
+            "equipmentId": "C61189DC-A6B2-ED11-921D-425BFF47FDCF",
+            "name": "Chemistry analyzer reagents potassium",
+            "unit": "Number",
+            "unitCost": 12000,
+            "quantity": 1,
+            "totalCost": 12000
+          },
+          {
+            "equipmentId": "7DB2F1EF-BBB2-ED11-921E-425BFF47FDCF",
+            "name": "Disposable syringes",
+            "unit": "Number",
+            "unitCost": 800,
+            "quantity": 1,
+            "totalCost": 800
+          },
+          {
+            "equipmentId": "A1D9E20D-A7B2-ED11-921D-425BFF47FDCF",
+            "name": "EDTA tubes",
+            "unit": "Number",
+            "unitCost": 1800,
+            "quantity": 1,
+            "totalCost": 1800
+          },
+          {
+            "equipmentId": "D4D7EE25-A7B2-ED11-921D-425BFF47FDCF",
+            "name": "Glove",
+            "unit": "Number",
+            "unitCost": 300,
+            "quantity": 1,
+            "totalCost": 300
+          },
+          {
+            "equipmentId": "4913F20C-BCB2-ED11-921E-425BFF47FDCF",
+            "name": "Slide",
+            "unit": "Number",
+            "unitCost": 320,
+            "quantity": 1,
+            "totalCost": 320
+          },
+          {
+            "equipmentId": "B51CB726-BCB2-ED11-921E-425BFF47FDCF",
+            "name": "Wright stain solution",
+            "unit": "Number",
+            "unitCost": 800,
+            "quantity": 1,
+            "totalCost": 800
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "186F3DF6-A6B2-ED11-921D-425BFF47FDCF",
+            "name": "Chemistry analyzer reagents calcium",
+            "unit": "Number",
+            "unitCost": 12000,
+            "quantity": 1,
+            "totalCost": 12000
+          },
+          {
+            "equipmentId": "8A8DF7CB-A6B2-ED11-921D-425BFF47FDCF",
+            "name": "Chemistry analyzer reagents for sodium",
+            "unit": "Number",
+            "unitCost": 12000,
+            "quantity": 1,
+            "totalCost": 12000
+          },
+          {
+            "equipmentId": "C61189DC-A6B2-ED11-921D-425BFF47FDCF",
+            "name": "Chemistry analyzer reagents potassium",
+            "unit": "Number",
+            "unitCost": 12000,
+            "quantity": 1,
+            "totalCost": 12000
+          },
+          {
+            "equipmentId": "7DB2F1EF-BBB2-ED11-921E-425BFF47FDCF",
+            "name": "Disposable syringes",
+            "unit": "Number",
+            "unitCost": 800,
+            "quantity": 1,
+            "totalCost": 800
+          },
+          {
+            "equipmentId": "A1D9E20D-A7B2-ED11-921D-425BFF47FDCF",
+            "name": "EDTA tubes",
+            "unit": "Number",
+            "unitCost": 1800,
+            "quantity": 1,
+            "totalCost": 1800
+          },
+          {
+            "equipmentId": "D4D7EE25-A7B2-ED11-921D-425BFF47FDCF",
+            "name": "Glove",
+            "unit": "Number",
+            "unitCost": 300,
+            "quantity": 1,
+            "totalCost": 300
+          },
+          {
+            "equipmentId": "4913F20C-BCB2-ED11-921E-425BFF47FDCF",
+            "name": "Slide",
+            "unit": "Number",
+            "unitCost": 320,
+            "quantity": 1,
+            "totalCost": 320
+          },
+          {
+            "equipmentId": "B51CB726-BCB2-ED11-921E-425BFF47FDCF",
+            "name": "Wright stain solution",
+            "unit": "Number",
+            "unitCost": 800,
+            "quantity": 1,
+            "totalCost": 800
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "B496DC36-4A03-ED11-9129-425BFF47FDCF",
+    "conceptNoteCode": "CMHS-112-2021/22",
+    "title": "Optimization and Water purification efficiency of moringa olifera seed as a coagulant for surface water",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "93614CDF-96B2-ED11-921D-425BFF47FDCF",
+            "name": "Agar 15gram",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "B0A808C8-96B2-ED11-921D-425BFF47FDCF",
+            "name": "Aluminum sulphate 200gm",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "0B6CC030-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Bottles 100ml",
+            "unit": "Number",
+            "unitCost": 480,
+            "quantity": 1,
+            "totalCost": 480
+          },
+          {
+            "equipmentId": "EACB175A-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Durham tube 4*30ml",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "DC17BE40-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Filtering flask 1litre",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "FDD2C7EE-98B2-ED11-921D-425BFF47FDCF",
+            "name": "Hexamethylene tetramine 200g",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "3E6A60C9-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Hydrazine sulphate 100g",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "C7B72793-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Lamp for Cu",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "93CE05B9-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Lamp for Ag",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "12E23C7E-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Lamp for Hg",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "D855E488-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Lamp for Pb",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "FE3FF416-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Petridis with 50mm",
+            "unit": "Number",
+            "unitCost": 13000,
+            "quantity": 1,
+            "totalCost": 13000
+          },
+          {
+            "equipmentId": "D9899486-96B2-ED11-921D-425BFF47FDCF",
+            "name": "Portable multi-item water quality meter",
+            "unit": "Number",
+            "unitCost": 40000,
+            "quantity": 1,
+            "totalCost": 40000
+          },
+          {
+            "equipmentId": "15987670-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Potassium dihydrogen phosphate, KH2PO4",
+            "unit": "Number",
+            "unitCost": 400,
+            "quantity": 1,
+            "totalCost": 400
+          },
+          {
+            "equipmentId": "D533E495-96B2-ED11-921D-425BFF47FDCF",
+            "name": "Sieve 2mm2",
+            "unit": "Number",
+            "unitCost": 200,
+            "quantity": 1,
+            "totalCost": 200
+          },
+          {
+            "equipmentId": "C451A9F7-96B2-ED11-921D-425BFF47FDCF",
+            "name": "Tryptose/lactose broth 10g",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "A14AA8B0-96B2-ED11-921D-425BFF47FDCF",
+            "name": "Violet red bile agar",
+            "unit": "Number",
+            "unitCost": 400,
+            "quantity": 1,
+            "totalCost": 400
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "93614CDF-96B2-ED11-921D-425BFF47FDCF",
+            "name": "Agar 15gram",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "B0A808C8-96B2-ED11-921D-425BFF47FDCF",
+            "name": "Aluminum sulphate 200gm",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "0B6CC030-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Bottles 100ml",
+            "unit": "Number",
+            "unitCost": 480,
+            "quantity": 1,
+            "totalCost": 480
+          },
+          {
+            "equipmentId": "EACB175A-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Durham tube 4*30ml",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "DC17BE40-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Filtering flask 1litre",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "FDD2C7EE-98B2-ED11-921D-425BFF47FDCF",
+            "name": "Hexamethylene tetramine 200g",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "3E6A60C9-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Hydrazine sulphate 100g",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "C7B72793-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Lamp for Cu",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "93CE05B9-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Lamp for Ag",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "12E23C7E-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Lamp for Hg",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "D855E488-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Lamp for Pb",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "FE3FF416-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Petridis with 50mm",
+            "unit": "Number",
+            "unitCost": 13000,
+            "quantity": 1,
+            "totalCost": 13000
+          },
+          {
+            "equipmentId": "D9899486-96B2-ED11-921D-425BFF47FDCF",
+            "name": "Portable multi-item water quality meter",
+            "unit": "Number",
+            "unitCost": 40000,
+            "quantity": 1,
+            "totalCost": 40000
+          },
+          {
+            "equipmentId": "15987670-97B2-ED11-921D-425BFF47FDCF",
+            "name": "Potassium dihydrogen phosphate, KH2PO4",
+            "unit": "Number",
+            "unitCost": 400,
+            "quantity": 1,
+            "totalCost": 400
+          },
+          {
+            "equipmentId": "D533E495-96B2-ED11-921D-425BFF47FDCF",
+            "name": "Sieve 2mm2",
+            "unit": "Number",
+            "unitCost": 200,
+            "quantity": 1,
+            "totalCost": 200
+          },
+          {
+            "equipmentId": "C451A9F7-96B2-ED11-921D-425BFF47FDCF",
+            "name": "Tryptose/lactose broth 10g",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "A14AA8B0-96B2-ED11-921D-425BFF47FDCF",
+            "name": "Violet red bile agar",
+            "unit": "Number",
+            "unitCost": 400,
+            "quantity": 1,
+            "totalCost": 400
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "F92EDCEE-9A06-ED11-912B-425BFF47FDCF",
+    "conceptNoteCode": "CET-75-2021/22",
+    "title": "Extraction and Optimization of Adhesive Property of Latex from Pencil Cactus Tree",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "81CE099A-1AB4-ED11-9222-425BFF47FDCF",
+            "name": "buffer solution 2",
+            "unit": "Number",
+            "unitCost": 1500,
+            "quantity": 1,
+            "totalCost": 1500
+          },
+          {
+            "equipmentId": "90F77B8D-1AB4-ED11-9222-425BFF47FDCF",
+            "name": "buffer solution 4",
+            "unit": "Number",
+            "unitCost": 2000,
+            "quantity": 1,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "62320AFE-18B4-ED11-9222-425BFF47FDCF",
+            "name": "Distilled Water",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "A5F1CCEB-16B4-ED11-9222-425BFF47FDCF",
+            "name": "Eye protection google/glass",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "BD2F1DD7-15B4-ED11-9222-425BFF47FDCF",
+            "name": "GLOVE",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "768C9B7A-16B4-ED11-9222-425BFF47FDCF",
+            "name": "Gloves",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "C339FA48-16B4-ED11-9222-425BFF47FDCF",
+            "name": "graduated jars",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "B9781853-18B4-ED11-9222-425BFF47FDCF",
+            "name": "mortar",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "B8A96361-17B4-ED11-9222-425BFF47FDCF",
+            "name": "NH3 Solution",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "38072F66-16B4-ED11-9222-425BFF47FDCF",
+            "name": "Packaging container",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "042EB366-18B4-ED11-9222-425BFF47FDCF",
+            "name": "pestle",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "9088699A-16B4-ED11-9222-425BFF47FDCF",
+            "name": "Protein",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "BC67EE1B-17B4-ED11-9222-425BFF47FDCF",
+            "name": "SILICA",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "A3C0E6A6-16B4-ED11-9222-425BFF47FDCF",
+            "name": "Starch",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "3167507C-17B4-ED11-9222-425BFF47FDCF",
+            "name": "Tolune",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "D4DE2A03-17B4-ED11-9222-425BFF47FDCF",
+            "name": "Zink oxide",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "81CE099A-1AB4-ED11-9222-425BFF47FDCF",
+            "name": "buffer solution 2",
+            "unit": "Number",
+            "unitCost": 1500,
+            "quantity": 1,
+            "totalCost": 1500
+          },
+          {
+            "equipmentId": "90F77B8D-1AB4-ED11-9222-425BFF47FDCF",
+            "name": "buffer solution 4",
+            "unit": "Number",
+            "unitCost": 2000,
+            "quantity": 1,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "62320AFE-18B4-ED11-9222-425BFF47FDCF",
+            "name": "Distilled Water",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "A5F1CCEB-16B4-ED11-9222-425BFF47FDCF",
+            "name": "Eye protection google/glass",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "BD2F1DD7-15B4-ED11-9222-425BFF47FDCF",
+            "name": "GLOVE",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "768C9B7A-16B4-ED11-9222-425BFF47FDCF",
+            "name": "Gloves",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "C339FA48-16B4-ED11-9222-425BFF47FDCF",
+            "name": "graduated jars",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "B9781853-18B4-ED11-9222-425BFF47FDCF",
+            "name": "mortar",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "B8A96361-17B4-ED11-9222-425BFF47FDCF",
+            "name": "NH3 Solution",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "38072F66-16B4-ED11-9222-425BFF47FDCF",
+            "name": "Packaging container",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "042EB366-18B4-ED11-9222-425BFF47FDCF",
+            "name": "pestle",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "9088699A-16B4-ED11-9222-425BFF47FDCF",
+            "name": "Protein",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "BC67EE1B-17B4-ED11-9222-425BFF47FDCF",
+            "name": "SILICA",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "A3C0E6A6-16B4-ED11-9222-425BFF47FDCF",
+            "name": "Starch",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "3167507C-17B4-ED11-9222-425BFF47FDCF",
+            "name": "Tolune",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "D4DE2A03-17B4-ED11-9222-425BFF47FDCF",
+            "name": "Zink oxide",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "82EBEECA-DC04-ED11-912B-425BFF47FDCF",
+    "conceptNoteCode": "CET-60-2021/22",
+    "title": "DESIGNING AND DEVELOPING BULLET PROOF VEST FOR TECHNICAL CLOTHING APPLICATION",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "2E2BAF6F-E3B4-ED11-9226-425BFF47FDCF",
+            "name": "consumable materials and chemicals",
+            "unit": "Number",
+            "unitCost": 52000,
+            "quantity": 1,
+            "totalCost": 52000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "2E2BAF6F-E3B4-ED11-9226-425BFF47FDCF",
+            "name": "consumable materials and chemicals",
+            "unit": "Number",
+            "unitCost": 52000,
+            "quantity": 1,
+            "totalCost": 52000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "DB69F1A6-A406-ED11-912B-425BFF47FDCF",
+    "conceptNoteCode": "CET-77-2021/22",
+    "title": "Development of antimicrobial edible film from fruit waste pectin incorporating with bioactive to improve the physiochemical properties of fermented kocho",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "064A9EBF-34B4-ED11-9223-425BFF47FDCF",
+            "name": "Casting plate",
+            "unit": "Number",
+            "unitCost": 4000,
+            "quantity": 1,
+            "totalCost": 4000
+          },
+          {
+            "equipmentId": "9BFE1DC4-747C-ED11-91CB-425BFF47FDCF",
+            "name": "galacturonic acid",
+            "unit": "Number",
+            "unitCost": 4000,
+            "quantity": 1,
+            "totalCost": 4000
+          },
+          {
+            "equipmentId": "597C8D1A-35B4-ED11-9223-425BFF47FDCF",
+            "name": "Heater",
+            "unit": "Number",
+            "unitCost": 10000,
+            "quantity": 1,
+            "totalCost": 10000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "064A9EBF-34B4-ED11-9223-425BFF47FDCF",
+            "name": "Casting plate",
+            "unit": "Number",
+            "unitCost": 4000,
+            "quantity": 1,
+            "totalCost": 4000
+          },
+          {
+            "equipmentId": "9BFE1DC4-747C-ED11-91CB-425BFF47FDCF",
+            "name": "galacturonic acid",
+            "unit": "Number",
+            "unitCost": 4000,
+            "quantity": 1,
+            "totalCost": 4000
+          },
+          {
+            "equipmentId": "597C8D1A-35B4-ED11-9223-425BFF47FDCF",
+            "name": "Heater",
+            "unit": "Number",
+            "unitCost": 10000,
+            "quantity": 1,
+            "totalCost": 10000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "BCAF9712-0B01-ED11-911B-425BFF47FDCF",
+    "conceptNoteCode": "CET-48-2021/22",
+    "title": "Effect of Fermented Banana Pseudostem Juice Concentration and Enset Variety on the Quality of Kocho Produced in Gurage Zone, Ethiopia",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "C4FD1FE2-20B4-ED11-9222-425BFF47FDCF",
+            "name": "Chemicals for analysis",
+            "unit": "Number",
+            "unitCost": 28342,
+            "quantity": 6,
+            "totalCost": 170052
+          },
+          {
+            "equipmentId": "2DD4EED0-20B4-ED11-9222-425BFF47FDCF",
+            "name": "Enset and other raw material",
+            "unit": "Number",
+            "unitCost": 43344,
+            "quantity": 25,
+            "totalCost": 1083600
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "C4FD1FE2-20B4-ED11-9222-425BFF47FDCF",
+            "name": "Chemicals for analysis",
+            "unit": "Number",
+            "unitCost": 28342,
+            "quantity": 6,
+            "totalCost": 170052
+          },
+          {
+            "equipmentId": "2DD4EED0-20B4-ED11-9222-425BFF47FDCF",
+            "name": "Enset and other raw material",
+            "unit": "Number",
+            "unitCost": 43344,
+            "quantity": 25,
+            "totalCost": 1083600
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "DD1FDAE2-BF01-ED11-9121-425BFF47FDCF",
+    "conceptNoteCode": "CET-42-2021/22",
+    "title": "Flood and Landslide (Multi-Hazard) Vulnerability Assessment and Mapping using GIS and RS for Sodo and Debub Sodo Woredas, Gurage Zone",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "36319402-07B4-ED11-9220-425BFF47FDCF",
+            "name": "1980G.C landuse landcover map",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "1E4F2810-07B4-ED11-9220-425BFF47FDCF",
+            "name": "1990G.C landuse landcover map",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "9EBCD021-07B4-ED11-9220-425BFF47FDCF",
+            "name": "2001G.C landuse landcover map",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "E085892E-07B4-ED11-9220-425BFF47FDCF",
+            "name": "2010G.C landuse landcover map",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "B59A22E9-06B4-ED11-9220-425BFF47FDCF",
+            "name": "Geological map",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "ED097D44-07B4-ED11-9220-425BFF47FDCF",
+            "name": "GPS",
+            "unit": "Number",
+            "unitCost": 9250,
+            "quantity": 1,
+            "totalCost": 9250
+          },
+          {
+            "equipmentId": "CE507D39-07B4-ED11-9220-425BFF47FDCF",
+            "name": "Population density map",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "F1F6ADC5-06B4-ED11-9220-425BFF47FDCF",
+            "name": "Rainfall data",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "CADCD1F5-06B4-ED11-9220-425BFF47FDCF",
+            "name": "Recent landuse landcover map",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "E7CD63D8-06B4-ED11-9220-425BFF47FDCF",
+            "name": "Soil map",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "36319402-07B4-ED11-9220-425BFF47FDCF",
+            "name": "1980G.C landuse landcover map",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "1E4F2810-07B4-ED11-9220-425BFF47FDCF",
+            "name": "1990G.C landuse landcover map",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "9EBCD021-07B4-ED11-9220-425BFF47FDCF",
+            "name": "2001G.C landuse landcover map",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "E085892E-07B4-ED11-9220-425BFF47FDCF",
+            "name": "2010G.C landuse landcover map",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "B59A22E9-06B4-ED11-9220-425BFF47FDCF",
+            "name": "Geological map",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "ED097D44-07B4-ED11-9220-425BFF47FDCF",
+            "name": "GPS",
+            "unit": "Number",
+            "unitCost": 9250,
+            "quantity": 1,
+            "totalCost": 9250
+          },
+          {
+            "equipmentId": "CE507D39-07B4-ED11-9220-425BFF47FDCF",
+            "name": "Population density map",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "F1F6ADC5-06B4-ED11-9220-425BFF47FDCF",
+            "name": "Rainfall data",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "CADCD1F5-06B4-ED11-9220-425BFF47FDCF",
+            "name": "Recent landuse landcover map",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "E7CD63D8-06B4-ED11-9220-425BFF47FDCF",
+            "name": "Soil map",
+            "unit": "Number",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "7C8F8EDD-E101-ED11-9123-425BFF47FDCF",
+    "conceptNoteCode": "CET-45-2021/22",
+    "title": "Production process improvement of small-scale garment enterprises through advanced statistical process control. In case of yejoka garment enterprise.",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "A07F8CE2-76B3-ED11-921F-425BFF47FDCF",
+            "name": "Advanced SPC Software",
+            "unit": "Number",
+            "unitCost": 15392,
+            "quantity": 1,
+            "totalCost": 15392
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "A07F8CE2-76B3-ED11-921F-425BFF47FDCF",
+            "name": "Advanced SPC Software",
+            "unit": "Number",
+            "unitCost": 15392,
+            "quantity": 1,
+            "totalCost": 15392
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "B1FFBF85-3D04-ED11-912B-425BFF47FDCF",
+    "conceptNoteCode": "CET-58-2021/22",
+    "title": "MODELLING AND UTILIZING RAINWATER HARVESTING AS A STRATEGIC TOOL FOR DROUGHT MITIGATION AND IRRIGATION PURPOSES: A CASE STUDY OF MUHAR AKLIL WOREDA GURAGE ZONE, SNNP, ETHIOPIA",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "D8287343-92B6-ED11-922A-425BFF47FDCF",
+            "name": "Weather Data",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "D8287343-92B6-ED11-922A-425BFF47FDCF",
+            "name": "Weather Data",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "B776262D-9674-EE11-A313-7E43FF4F35BF",
+    "conceptNoteCode": "CANR-14-2023/24",
+    "title": "Adaptation Trail of Mung bean (Vigna radiate) varieties at cheha,Abeshge and Ezia Woreda, Southern Ethiopia",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "3EAD4B3E-4AA9-EE11-A34F-7E43FF4F35BF",
+            "name": "Material Purchase",
+            "unit": "Number",
+            "unitCost": 12650,
+            "quantity": 1,
+            "totalCost": 12650
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "3EAD4B3E-4AA9-EE11-A34F-7E43FF4F35BF",
+            "name": "Material Purchase",
+            "unit": "Number",
+            "unitCost": 12650,
+            "quantity": 1,
+            "totalCost": 12650
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "6438F935-8C74-EE11-A313-7E43FF4F35BF",
+    "conceptNoteCode": "CNCS-09-2023/24",
+    "title": "INVESTIGATION OF REGIONAL POTENTIAL AND SYSTEM DESIGN OF HYBRID ENERGY PRODUCTION FOR GURAGE ZONE, SNNPRS, ETHIOPIA",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "0AF23968-E2B5-EE11-A354-7E43FF4F35BF",
+            "name": "Materials",
+            "unit": "number",
+            "unitCost": 65500,
+            "quantity": 4,
+            "totalCost": 262000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "0AF23968-E2B5-EE11-A354-7E43FF4F35BF",
+            "name": "Materials",
+            "unit": "number",
+            "unitCost": 65500,
+            "quantity": 4,
+            "totalCost": 262000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "0595C99E-3573-EE11-A30D-7E43FF4F35BF",
+    "conceptNoteCode": "CANR-04-2023/24",
+    "title": "Prevalence Bovine mastitis in Guraghe zone: evaluation of antibacterial activity ofAlium sativum (Garlic) extract on bacteria isolated from bovine mastitis",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "48A7F9F1-45A9-EE11-A34F-7E43FF4F35BF",
+            "name": "Material Purchase",
+            "unit": "Number",
+            "unitCost": 163400,
+            "quantity": 1,
+            "totalCost": 163400
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "48A7F9F1-45A9-EE11-A34F-7E43FF4F35BF",
+            "name": "Material Purchase",
+            "unit": "Number",
+            "unitCost": 163400,
+            "quantity": 1,
+            "totalCost": 163400
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "D33E0A95-4772-EE11-93BE-425BFF47FDCF",
+    "conceptNoteCode": "CNCS-03-2023/24",
+    "title": "Sustainable Agricultural Crop Production Planning Using Fully Intuitionistic Hesitant Fuzzy Optimization technique: The Case of Abeshge district, Gurage Zone, Ethiopia",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "BD4B1A88-D0B6-EE11-A355-7E43FF4F35BF",
+            "name": "Equipment",
+            "unit": "Number",
+            "unitCost": 95200,
+            "quantity": 1,
+            "totalCost": 95200
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "BD4B1A88-D0B6-EE11-A355-7E43FF4F35BF",
+            "name": "Equipment",
+            "unit": "Number",
+            "unitCost": 95200,
+            "quantity": 1,
+            "totalCost": 95200
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "DCCC59B0-4572-EE11-93BD-425BFF47FDCF",
+    "conceptNoteCode": "CNCS-02-2023/24",
+    "title": "Synthesis and Characterization of Copper Oxide Nanoparticles decorated on Exfoliated B-doped g-C3N4 /Polyaniline for Anti-microbial Activities, Sensor and Photocatalyst applications",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "44A54D82-04B5-EE11-A352-7E43FF4F35BF",
+            "name": "Materials and Chemicals",
+            "unit": "37",
+            "unitCost": 55100,
+            "quantity": 1,
+            "totalCost": 55100
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "44A54D82-04B5-EE11-A352-7E43FF4F35BF",
+            "name": "Materials and Chemicals",
+            "unit": "37",
+            "unitCost": 55100,
+            "quantity": 1,
+            "totalCost": 55100
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "9478512E-3C88-EE11-A329-7E43FF4F35BF",
+    "conceptNoteCode": "CNCS-13-2023/24",
+    "title": "Synthesis of Copper-Silver Nanocomposite Using Xanthium Stramonium Plant Leaf Extract and Evaluating Phytochemical Properties, Antibacterial and Anti-oxidant Activities",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "4E6AC4C1-0AB6-EE11-A354-7E43FF4F35BF",
+            "name": "Materials",
+            "unit": "Number",
+            "unitCost": 85200,
+            "quantity": 1,
+            "totalCost": 85200
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "4E6AC4C1-0AB6-EE11-A354-7E43FF4F35BF",
+            "name": "Materials",
+            "unit": "Number",
+            "unitCost": 85200,
+            "quantity": 1,
+            "totalCost": 85200
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "FF6D7DED-5C72-EE11-93C0-425BFF47FDCF",
+    "conceptNoteCode": "CNCS-04-2023/24",
+    "title": "Determining Sediment Load in Lake Arekit, Ethiopia: The Primary Risk to the Lake Ecosystem—A Need to Develop Mitigation Plans",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "187C8103-DCB6-EE11-A355-7E43FF4F35BF",
+            "name": "Equipment",
+            "unit": "Number",
+            "unitCost": 110900,
+            "quantity": 1,
+            "totalCost": 110900
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "187C8103-DCB6-EE11-A355-7E43FF4F35BF",
+            "name": "Equipment",
+            "unit": "Number",
+            "unitCost": 110900,
+            "quantity": 1,
+            "totalCost": 110900
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "606E7E1E-7871-EE11-93B2-425BFF47FDCF",
+    "conceptNoteCode": "CMHS-01-2023/24",
+    "title": "EFFECT OF DECISION AID IN POSTPARTUM MOTHERS ON CONTRACEPTION AT HEALTH FACILITIES OF GURAGHE ZONES: A QUASI EXPERIMENTAL STUDY",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "3B7231D7-3AAA-EE11-A34F-7E43FF4F35BF",
+            "name": "family planning aids",
+            "unit": "Number",
+            "unitCost": 30000,
+            "quantity": 1,
+            "totalCost": 30000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "3B7231D7-3AAA-EE11-A34F-7E43FF4F35BF",
+            "name": "family planning aids",
+            "unit": "Number",
+            "unitCost": 30000,
+            "quantity": 1,
+            "totalCost": 30000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "A7B6DE24-0973-EE11-A30D-7E43FF4F35BF",
+    "conceptNoteCode": "CMHS-20-2023/24",
+    "title": "Evaluation of the Wound Healing activity of 80% Methanolic Crude Extract and Solvent fractions of Erica arborea Leaves in Mice",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "935FA41B-43AA-EE11-A34F-7E43FF4F35BF",
+            "name": "material purchasing",
+            "unit": "Number",
+            "unitCost": 37615,
+            "quantity": 1,
+            "totalCost": 37615
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "935FA41B-43AA-EE11-A34F-7E43FF4F35BF",
+            "name": "material purchasing",
+            "unit": "Number",
+            "unitCost": 37615,
+            "quantity": 1,
+            "totalCost": 37615
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "7C9A1CAC-0074-EE11-A30F-7E43FF4F35BF",
+    "conceptNoteCode": "CMHS-37-2023/24",
+    "title": "HEMATOLOGICAL PARAMETERS OF TYPE 2 DIABETIS MELLITUS (DM) PATIENTS ATTENDING HOSPITALS IN GURAGE ZONE, CENTRAL ETHIOPIA",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "89E49ED6-B387-EE11-A329-7E43FF4F35BF",
+            "name": "10 cc syringe with needle",
+            "unit": "Number",
+            "unitCost": 7680,
+            "quantity": 1,
+            "totalCost": 7680
+          },
+          {
+            "equipmentId": "B0AA2C46-B487-EE11-A329-7E43FF4F35BF",
+            "name": "Alcohol (70%)",
+            "unit": "Number",
+            "unitCost": 600,
+            "quantity": 1,
+            "totalCost": 600
+          },
+          {
+            "equipmentId": "92DD4FB9-B387-EE11-A329-7E43FF4F35BF",
+            "name": "CBC Reagent",
+            "unit": "Number",
+            "unitCost": 6000,
+            "quantity": 1,
+            "totalCost": 6000
+          },
+          {
+            "equipmentId": "97BE3630-B487-EE11-A329-7E43FF4F35BF",
+            "name": "Cotton swab",
+            "unit": "Number",
+            "unitCost": 5120,
+            "quantity": 1,
+            "totalCost": 5120
+          },
+          {
+            "equipmentId": "C812A6E6-B387-EE11-A329-7E43FF4F35BF",
+            "name": "Disposable glove",
+            "unit": "Number",
+            "unitCost": 7680,
+            "quantity": 1,
+            "totalCost": 7680
+          },
+          {
+            "equipmentId": "4B2940F8-B387-EE11-A329-7E43FF4F35BF",
+            "name": "EDTA coated tube",
+            "unit": "Number",
+            "unitCost": 2100,
+            "quantity": 1,
+            "totalCost": 2100
+          },
+          {
+            "equipmentId": "DD600C12-B487-EE11-A329-7E43FF4F35BF",
+            "name": "Gel separetor",
+            "unit": "Number",
+            "unitCost": 1800,
+            "quantity": 1,
+            "totalCost": 1800
+          },
+          {
+            "equipmentId": "13CAE603-B487-EE11-A329-7E43FF4F35BF",
+            "name": "Glucose regent",
+            "unit": "Number",
+            "unitCost": 2100,
+            "quantity": 1,
+            "totalCost": 2100
+          },
+          {
+            "equipmentId": "5E61D71F-B487-EE11-A329-7E43FF4F35BF",
+            "name": "Serum separator tube (nark tube)",
+            "unit": "Number",
+            "unitCost": 1950,
+            "quantity": 1,
+            "totalCost": 1950
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "89E49ED6-B387-EE11-A329-7E43FF4F35BF",
+            "name": "10 cc syringe with needle",
+            "unit": "Number",
+            "unitCost": 7680,
+            "quantity": 1,
+            "totalCost": 7680
+          },
+          {
+            "equipmentId": "B0AA2C46-B487-EE11-A329-7E43FF4F35BF",
+            "name": "Alcohol (70%)",
+            "unit": "Number",
+            "unitCost": 600,
+            "quantity": 1,
+            "totalCost": 600
+          },
+          {
+            "equipmentId": "92DD4FB9-B387-EE11-A329-7E43FF4F35BF",
+            "name": "CBC Reagent",
+            "unit": "Number",
+            "unitCost": 6000,
+            "quantity": 1,
+            "totalCost": 6000
+          },
+          {
+            "equipmentId": "97BE3630-B487-EE11-A329-7E43FF4F35BF",
+            "name": "Cotton swab",
+            "unit": "Number",
+            "unitCost": 5120,
+            "quantity": 1,
+            "totalCost": 5120
+          },
+          {
+            "equipmentId": "C812A6E6-B387-EE11-A329-7E43FF4F35BF",
+            "name": "Disposable glove",
+            "unit": "Number",
+            "unitCost": 7680,
+            "quantity": 1,
+            "totalCost": 7680
+          },
+          {
+            "equipmentId": "4B2940F8-B387-EE11-A329-7E43FF4F35BF",
+            "name": "EDTA coated tube",
+            "unit": "Number",
+            "unitCost": 2100,
+            "quantity": 1,
+            "totalCost": 2100
+          },
+          {
+            "equipmentId": "DD600C12-B487-EE11-A329-7E43FF4F35BF",
+            "name": "Gel separetor",
+            "unit": "Number",
+            "unitCost": 1800,
+            "quantity": 1,
+            "totalCost": 1800
+          },
+          {
+            "equipmentId": "13CAE603-B487-EE11-A329-7E43FF4F35BF",
+            "name": "Glucose regent",
+            "unit": "Number",
+            "unitCost": 2100,
+            "quantity": 1,
+            "totalCost": 2100
+          },
+          {
+            "equipmentId": "5E61D71F-B487-EE11-A329-7E43FF4F35BF",
+            "name": "Serum separator tube (nark tube)",
+            "unit": "Number",
+            "unitCost": 1950,
+            "quantity": 1,
+            "totalCost": 1950
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "BB17D0BE-A974-EE11-A313-7E43FF4F35BF",
+    "conceptNoteCode": "CET-21-2023/24",
+    "title": "IN VITRO ANTIMICROBIAL ACTIVITIES OF SELECTED MEDICINAL PLANTS FROM GURAGE ZONE THROUGH PHYTOCHEMICAL SCREENING",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "58FD44AE-5788-EE11-A329-7E43FF4F35BF",
+            "name": "Material Purchasing",
+            "unit": "Number",
+            "unitCost": 12300,
+            "quantity": 1,
+            "totalCost": 12300
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "58FD44AE-5788-EE11-A329-7E43FF4F35BF",
+            "name": "Material Purchasing",
+            "unit": "Number",
+            "unitCost": 12300,
+            "quantity": 1,
+            "totalCost": 12300
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "5788A812-0074-EE11-A30F-7E43FF4F35BF",
+    "conceptNoteCode": "CET-12-2023/24",
+    "title": "Production of Activated Carbon from Poultry Feather for Heavy Metal Removals of Industrial Waste Water Treatment;",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "460E439D-DBAA-EE11-A34F-7E43FF4F35BF",
+            "name": "Material Purchasing",
+            "unit": "Number",
+            "unitCost": 20000,
+            "quantity": 1,
+            "totalCost": 20000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "460E439D-DBAA-EE11-A34F-7E43FF4F35BF",
+            "name": "Material Purchasing",
+            "unit": "Number",
+            "unitCost": 20000,
+            "quantity": 1,
+            "totalCost": 20000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "3F464AFF-4F72-EE11-93BF-425BFF47FDCF",
+    "conceptNoteCode": "CET-03-2023/24",
+    "title": "Wound healing textile fabric",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "D99F24A1-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "chloroform",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "9306ED56-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "ethanol",
+            "unit": "Number",
+            "unitCost": 1200,
+            "quantity": 1,
+            "totalCost": 1200
+          },
+          {
+            "equipmentId": "1D1B3B45-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "Fabric",
+            "unit": "Number",
+            "unitCost": 900,
+            "quantity": 1,
+            "totalCost": 900
+          },
+          {
+            "equipmentId": "7FB4F567-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "ferric chloride",
+            "unit": "Number",
+            "unitCost": 700,
+            "quantity": 1,
+            "totalCost": 700
+          },
+          {
+            "equipmentId": "43486294-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "hydrochloric acid",
+            "unit": "Number",
+            "unitCost": 540,
+            "quantity": 1,
+            "totalCost": 540
+          },
+          {
+            "equipmentId": "4D30F44E-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "Methanol",
+            "unit": "Number",
+            "unitCost": 1200,
+            "quantity": 1,
+            "totalCost": 1200
+          },
+          {
+            "equipmentId": "721824C7-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "soap",
+            "unit": "Number",
+            "unitCost": 850,
+            "quantity": 1,
+            "totalCost": 850
+          },
+          {
+            "equipmentId": "7E16EB8B-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "sodium hydroxide",
+            "unit": "Number",
+            "unitCost": 450,
+            "quantity": 1,
+            "totalCost": 450
+          },
+          {
+            "equipmentId": "2A86CD84-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "sulfuric acid",
+            "unit": "Number",
+            "unitCost": 400,
+            "quantity": 1,
+            "totalCost": 400
+          },
+          {
+            "equipmentId": "45DE8975-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "tannic acid",
+            "unit": "Number",
+            "unitCost": 600,
+            "quantity": 1,
+            "totalCost": 600
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "D99F24A1-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "chloroform",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "9306ED56-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "ethanol",
+            "unit": "Number",
+            "unitCost": 1200,
+            "quantity": 1,
+            "totalCost": 1200
+          },
+          {
+            "equipmentId": "1D1B3B45-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "Fabric",
+            "unit": "Number",
+            "unitCost": 900,
+            "quantity": 1,
+            "totalCost": 900
+          },
+          {
+            "equipmentId": "7FB4F567-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "ferric chloride",
+            "unit": "Number",
+            "unitCost": 700,
+            "quantity": 1,
+            "totalCost": 700
+          },
+          {
+            "equipmentId": "43486294-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "hydrochloric acid",
+            "unit": "Number",
+            "unitCost": 540,
+            "quantity": 1,
+            "totalCost": 540
+          },
+          {
+            "equipmentId": "4D30F44E-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "Methanol",
+            "unit": "Number",
+            "unitCost": 1200,
+            "quantity": 1,
+            "totalCost": 1200
+          },
+          {
+            "equipmentId": "721824C7-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "soap",
+            "unit": "Number",
+            "unitCost": 850,
+            "quantity": 1,
+            "totalCost": 850
+          },
+          {
+            "equipmentId": "7E16EB8B-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "sodium hydroxide",
+            "unit": "Number",
+            "unitCost": 450,
+            "quantity": 1,
+            "totalCost": 450
+          },
+          {
+            "equipmentId": "2A86CD84-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "sulfuric acid",
+            "unit": "Number",
+            "unitCost": 400,
+            "quantity": 1,
+            "totalCost": 400
+          },
+          {
+            "equipmentId": "45DE8975-99AF-EE11-A350-7E43FF4F35BF",
+            "name": "tannic acid",
+            "unit": "Number",
+            "unitCost": 600,
+            "quantity": 1,
+            "totalCost": 600
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "FB644DCD-8671-EE11-93B4-425BFF47FDCF",
+    "conceptNoteCode": "CET-01-2023/24",
+    "title": "Development of Flame Retardant Finish for Cotton Fabric Utilizing Waste Animal Bones",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "FE644C3D-AAAB-EE11-A34F-7E43FF4F35BF",
+            "name": "BTCA",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "27D40DC0-A9AB-EE11-A34F-7E43FF4F35BF",
+            "name": "cotton fabric",
+            "unit": "Number",
+            "unitCost": 2000,
+            "quantity": 1,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "4D331226-AAAB-EE11-A34F-7E43FF4F35BF",
+            "name": "EDTA",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "C63A68F3-A9AB-EE11-A34F-7E43FF4F35BF",
+            "name": "ethanol",
+            "unit": "Number",
+            "unitCost": 200,
+            "quantity": 1,
+            "totalCost": 200
+          },
+          {
+            "equipmentId": "779B8B59-AAAB-EE11-A34F-7E43FF4F35BF",
+            "name": "eye googles",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "829E0AD9-A9AB-EE11-A34F-7E43FF4F35BF",
+            "name": "Hand gloves",
+            "unit": "Number",
+            "unitCost": 800,
+            "quantity": 1,
+            "totalCost": 800
+          },
+          {
+            "equipmentId": "034FBA32-AAAB-EE11-A34F-7E43FF4F35BF",
+            "name": "Hcl",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "A04F124E-AAAB-EE11-A34F-7E43FF4F35BF",
+            "name": "Nose mask",
+            "unit": "Number",
+            "unitCost": 200,
+            "quantity": 1,
+            "totalCost": 200
+          },
+          {
+            "equipmentId": "A9C7721A-AAAB-EE11-A34F-7E43FF4F35BF",
+            "name": "phosphorus-based flame retardants",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "B882DC01-AAAB-EE11-A34F-7E43FF4F35BF",
+            "name": "sodium hydroxide",
+            "unit": "Number",
+            "unitCost": 300,
+            "quantity": 1,
+            "totalCost": 300
+          },
+          {
+            "equipmentId": "CF0021E8-A9AB-EE11-A34F-7E43FF4F35BF",
+            "name": "Sulphric acid",
+            "unit": "Number",
+            "unitCost": 600,
+            "quantity": 1,
+            "totalCost": 600
+          },
+          {
+            "equipmentId": "E2058F0D-AAAB-EE11-A34F-7E43FF4F35BF",
+            "name": "urea-formaldehyde",
+            "unit": "Number",
+            "unitCost": 800,
+            "quantity": 1,
+            "totalCost": 800
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "FE644C3D-AAAB-EE11-A34F-7E43FF4F35BF",
+            "name": "BTCA",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "27D40DC0-A9AB-EE11-A34F-7E43FF4F35BF",
+            "name": "cotton fabric",
+            "unit": "Number",
+            "unitCost": 2000,
+            "quantity": 1,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "4D331226-AAAB-EE11-A34F-7E43FF4F35BF",
+            "name": "EDTA",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "C63A68F3-A9AB-EE11-A34F-7E43FF4F35BF",
+            "name": "ethanol",
+            "unit": "Number",
+            "unitCost": 200,
+            "quantity": 1,
+            "totalCost": 200
+          },
+          {
+            "equipmentId": "779B8B59-AAAB-EE11-A34F-7E43FF4F35BF",
+            "name": "eye googles",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "829E0AD9-A9AB-EE11-A34F-7E43FF4F35BF",
+            "name": "Hand gloves",
+            "unit": "Number",
+            "unitCost": 800,
+            "quantity": 1,
+            "totalCost": 800
+          },
+          {
+            "equipmentId": "034FBA32-AAAB-EE11-A34F-7E43FF4F35BF",
+            "name": "Hcl",
+            "unit": "Number",
+            "unitCost": 1000,
+            "quantity": 1,
+            "totalCost": 1000
+          },
+          {
+            "equipmentId": "A04F124E-AAAB-EE11-A34F-7E43FF4F35BF",
+            "name": "Nose mask",
+            "unit": "Number",
+            "unitCost": 200,
+            "quantity": 1,
+            "totalCost": 200
+          },
+          {
+            "equipmentId": "A9C7721A-AAAB-EE11-A34F-7E43FF4F35BF",
+            "name": "phosphorus-based flame retardants",
+            "unit": "Number",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "B882DC01-AAAB-EE11-A34F-7E43FF4F35BF",
+            "name": "sodium hydroxide",
+            "unit": "Number",
+            "unitCost": 300,
+            "quantity": 1,
+            "totalCost": 300
+          },
+          {
+            "equipmentId": "CF0021E8-A9AB-EE11-A34F-7E43FF4F35BF",
+            "name": "Sulphric acid",
+            "unit": "Number",
+            "unitCost": 600,
+            "quantity": 1,
+            "totalCost": 600
+          },
+          {
+            "equipmentId": "E2058F0D-AAAB-EE11-A34F-7E43FF4F35BF",
+            "name": "urea-formaldehyde",
+            "unit": "Number",
+            "unitCost": 800,
+            "quantity": 1,
+            "totalCost": 800
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "C3E8C015-0C74-EE11-A30F-7E43FF4F35BF",
+    "conceptNoteCode": "CET-14-2023/24",
+    "title": "Design and Development of Conical Spouted Bed Multi-Crop Roaster Using an Experimental Method",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "44386943-7E88-EE11-A329-7E43FF4F35BF",
+            "name": "Material Purchasing",
+            "unit": "Number",
+            "unitCost": 79136,
+            "quantity": 1,
+            "totalCost": 79136
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "44386943-7E88-EE11-A329-7E43FF4F35BF",
+            "name": "Material Purchasing",
+            "unit": "Number",
+            "unitCost": 79136,
+            "quantity": 1,
+            "totalCost": 79136
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "1128A54F-7F84-EF11-A41E-7E43FF4F35BF",
+    "conceptNoteCode": "CNCS-01-2024/25",
+    "title": "The Effect of Physical Activity Level and Dietary Habits on Postpartum Women’s Metabolic Biomarkers; Breastfeeding Self-efficacy and its associated factors in Gurage Zone, Central Ethiopia, 2025",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "C4549F2C-EDAB-EF11-A438-7E43FF4F35BF",
+            "name": "Expendable supplies",
+            "unit": "Number",
+            "unitCost": 34680,
+            "quantity": 1,
+            "totalCost": 34680
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "C4549F2C-EDAB-EF11-A438-7E43FF4F35BF",
+            "name": "Expendable supplies",
+            "unit": "Number",
+            "unitCost": 34680,
+            "quantity": 1,
+            "totalCost": 34680
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "E057E413-8A84-EF11-A41F-7E43FF4F35BF",
+    "conceptNoteCode": "CET-10-2024/25",
+    "title": "Extraction and Physio-Chemical Characterizations of Bamboo Fiber in Gurage Zone",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "6EF5FAD0-59EF-EF11-A459-7E43FF4F35BF",
+            "name": "Material Purchasing for component 1",
+            "unit": "Number",
+            "unitCost": 39950,
+            "quantity": 1,
+            "totalCost": 39950
+          },
+          {
+            "equipmentId": "A4CE47BA-5CEF-EF11-A459-7E43FF4F35BF",
+            "name": "Material Purchasing for component 2",
+            "unit": "Number",
+            "unitCost": 115700,
+            "quantity": 1,
+            "totalCost": 115700
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "6EF5FAD0-59EF-EF11-A459-7E43FF4F35BF",
+            "name": "Material Purchasing for component 1",
+            "unit": "Number",
+            "unitCost": 39950,
+            "quantity": 1,
+            "totalCost": 39950
+          },
+          {
+            "equipmentId": "A4CE47BA-5CEF-EF11-A459-7E43FF4F35BF",
+            "name": "Material Purchasing for component 2",
+            "unit": "Number",
+            "unitCost": 115700,
+            "quantity": 1,
+            "totalCost": 115700
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "7B1F1E52-7384-EF11-A41E-7E43FF4F35BF",
+    "conceptNoteCode": "CET-04-2024/25",
+    "title": "Design and Development of a Foot Physiotherapy Assistive Device from Locally Sourced Cotton Fabric for Patients.",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "0E95D7FE-37F3-EF11-A45C-7E43FF4F35BF",
+            "name": "labratory Materials",
+            "unit": "Number",
+            "unitCost": 26000,
+            "quantity": 1,
+            "totalCost": 26000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "0E95D7FE-37F3-EF11-A45C-7E43FF4F35BF",
+            "name": "labratory Materials",
+            "unit": "Number",
+            "unitCost": 26000,
+            "quantity": 1,
+            "totalCost": 26000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "0AAC9D67-B484-EF11-A41F-7E43FF4F35BF",
+    "conceptNoteCode": "CET-17-2024/25",
+    "title": "Enhancing Enset Starch Utilization for Sustainable Food Applications",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "63EB5B59-6BEF-EF11-A459-7E43FF4F35BF",
+            "name": "Material Purchasing for component 1",
+            "unit": "Number",
+            "unitCost": 14919,
+            "quantity": 1,
+            "totalCost": 14919
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "63EB5B59-6BEF-EF11-A459-7E43FF4F35BF",
+            "name": "Material Purchasing for component 1",
+            "unit": "Number",
+            "unitCost": 14919,
+            "quantity": 1,
+            "totalCost": 14919
+          }
+        ]
+      },
+      {
+        "phaseNo": 3,
+        "equipment": [
+          {
+            "equipmentId": "63EB5B59-6BEF-EF11-A459-7E43FF4F35BF",
+            "name": "Material Purchasing for component 1",
+            "unit": "Number",
+            "unitCost": 14919,
+            "quantity": 1,
+            "totalCost": 14919
+          }
+        ]
+      },
+      {
+        "phaseNo": 4,
+        "equipment": [
+          {
+            "equipmentId": "63EB5B59-6BEF-EF11-A459-7E43FF4F35BF",
+            "name": "Material Purchasing for component 1",
+            "unit": "Number",
+            "unitCost": 14919,
+            "quantity": 1,
+            "totalCost": 14919
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "7DAEF77C-9F84-EF11-A41F-7E43FF4F35BF",
+    "conceptNoteCode": "CET-15-2024/25",
+    "title": "Exploring the Chemical Composition & Characterization of Annatto Bixa as a Natural Food Colouring and Antimicrobial Agent for food product development",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "89215394-E8AB-EF11-A438-7E43FF4F35BF",
+            "name": "Material Purchasing for component 1",
+            "unit": "Number",
+            "unitCost": 42540,
+            "quantity": 1,
+            "totalCost": 42540
+          },
+          {
+            "equipmentId": "77DD15CF-B2F2-EF11-A45C-7E43FF4F35BF",
+            "name": "Material Purchasing for component 2",
+            "unit": "Number",
+            "unitCost": 23266,
+            "quantity": 1,
+            "totalCost": 23266
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "89215394-E8AB-EF11-A438-7E43FF4F35BF",
+            "name": "Material Purchasing for component 1",
+            "unit": "Number",
+            "unitCost": 42540,
+            "quantity": 1,
+            "totalCost": 42540
+          },
+          {
+            "equipmentId": "77DD15CF-B2F2-EF11-A45C-7E43FF4F35BF",
+            "name": "Material Purchasing for component 2",
+            "unit": "Number",
+            "unitCost": 23266,
+            "quantity": 1,
+            "totalCost": 23266
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "695FC247-8B84-EF11-A41F-7E43FF4F35BF",
+    "conceptNoteCode": "CET-14-2024/25",
+    "title": "A Comprehensive Study of Sustainability and Operational Efficiency in the Ethiopian Garment Industry by Analyzing Fabric Waste and Inventory Management",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "8A1E53C5-ADF2-EF11-A45C-7E43FF4F35BF",
+            "name": "Material Purchasing for component 1",
+            "unit": "Number",
+            "unitCost": 30000,
+            "quantity": 1,
+            "totalCost": 30000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "8A1E53C5-ADF2-EF11-A45C-7E43FF4F35BF",
+            "name": "Material Purchasing for component 1",
+            "unit": "Number",
+            "unitCost": 30000,
+            "quantity": 1,
+            "totalCost": 30000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "DF7275E6-D092-F011-A549-7E43FF4F35BF",
+    "conceptNoteCode": "CMHS-03-2025/26",
+    "title": "Integrated Evaluation of Malaria Diagnosis, Treatment Efficacy, Case for Malaria Outbreak with its Challenges, and Burden Prevalence, for Raised Malaria in Gurage Zone, Central Ethiopia 2025/27",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "2B02FDA2-C0BF-F011-A58F-7E43FF4F35BF",
+            "name": "giemsa reagent, microscope slide, CBC tube ,cotton, Syringe",
+            "unit": "Number",
+            "unitCost": 90500,
+            "quantity": 1,
+            "totalCost": 90500
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "2B02FDA2-C0BF-F011-A58F-7E43FF4F35BF",
+            "name": "giemsa reagent, microscope slide, CBC tube ,cotton, Syringe",
+            "unit": "Number",
+            "unitCost": 90500,
+            "quantity": 1,
+            "totalCost": 90500
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "479DD47D-4895-F011-A54E-7E43FF4F35BF",
+    "conceptNoteCode": "CET-18-2025/26",
+    "title": "Preparation of Nano-cellulose Crystals from Cordia Africana Branch Coat Waste and its Application in Reinforcement of Biopolymers Food Packaging",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "C672F51E-06BF-F011-A58D-7E43FF4F35BF",
+            "name": "Filter paper",
+            "unit": "Number",
+            "unitCost": 4952,
+            "quantity": 1,
+            "totalCost": 4952
+          },
+          {
+            "equipmentId": "61B628BE-06BF-F011-A58D-7E43FF4F35BF",
+            "name": "Hydrogen per oxide",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "D289DC3E-DC00-F111-A5B3-7E43FF4F35BF",
+            "name": "Material for Laboratory analysis",
+            "unit": "Number",
+            "unitCost": 22166,
+            "quantity": 1,
+            "totalCost": 22166
+          },
+          {
+            "equipmentId": "A93F586E-06BF-F011-A58D-7E43FF4F35BF",
+            "name": "Muslin Clothes",
+            "unit": "Number",
+            "unitCost": 882,
+            "quantity": 1,
+            "totalCost": 882
+          },
+          {
+            "equipmentId": "ACBDDB93-06BF-F011-A58D-7E43FF4F35BF",
+            "name": "NaOH pellet",
+            "unit": "Number",
+            "unitCost": 6000,
+            "quantity": 1,
+            "totalCost": 6000
+          },
+          {
+            "equipmentId": "60F59883-06BF-F011-A58D-7E43FF4F35BF",
+            "name": "Starch",
+            "unit": "Number",
+            "unitCost": 2000,
+            "quantity": 1,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "7A17EDA5-06BF-F011-A58D-7E43FF4F35BF",
+            "name": "Sulpheric acid",
+            "unit": "Number",
+            "unitCost": 6000,
+            "quantity": 1,
+            "totalCost": 6000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "C672F51E-06BF-F011-A58D-7E43FF4F35BF",
+            "name": "Filter paper",
+            "unit": "Number",
+            "unitCost": 4952,
+            "quantity": 1,
+            "totalCost": 4952
+          },
+          {
+            "equipmentId": "61B628BE-06BF-F011-A58D-7E43FF4F35BF",
+            "name": "Hydrogen per oxide",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "D289DC3E-DC00-F111-A5B3-7E43FF4F35BF",
+            "name": "Material for Laboratory analysis",
+            "unit": "Number",
+            "unitCost": 22166,
+            "quantity": 1,
+            "totalCost": 22166
+          },
+          {
+            "equipmentId": "A93F586E-06BF-F011-A58D-7E43FF4F35BF",
+            "name": "Muslin Clothes",
+            "unit": "Number",
+            "unitCost": 882,
+            "quantity": 1,
+            "totalCost": 882
+          },
+          {
+            "equipmentId": "ACBDDB93-06BF-F011-A58D-7E43FF4F35BF",
+            "name": "NaOH pellet",
+            "unit": "Number",
+            "unitCost": 6000,
+            "quantity": 1,
+            "totalCost": 6000
+          },
+          {
+            "equipmentId": "60F59883-06BF-F011-A58D-7E43FF4F35BF",
+            "name": "Starch",
+            "unit": "Number",
+            "unitCost": 2000,
+            "quantity": 1,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "7A17EDA5-06BF-F011-A58D-7E43FF4F35BF",
+            "name": "Sulpheric acid",
+            "unit": "Number",
+            "unitCost": 6000,
+            "quantity": 1,
+            "totalCost": 6000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "702E421F-5595-F011-A54F-7E43FF4F35BF",
+    "conceptNoteCode": "CET-22-2025/26",
+    "title": "The Investigation of Conventional Concrete Block Durability and Cost Improvement by Using Inset Fiber as Filler Materials",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "5820857B-D800-F111-A5B3-7E43FF4F35BF",
+            "name": "Material Purchasing for component 1",
+            "unit": "Number",
+            "unitCost": 42800,
+            "quantity": 1,
+            "totalCost": 42800
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "5820857B-D800-F111-A5B3-7E43FF4F35BF",
+            "name": "Material Purchasing for component 1",
+            "unit": "Number",
+            "unitCost": 42800,
+            "quantity": 1,
+            "totalCost": 42800
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "200918C0-3095-F011-A54E-7E43FF4F35BF",
+    "conceptNoteCode": "CET-12-2025/26",
+    "title": "Thematic Research Concept Note on Agro-Climate Impact on Enset: Effects on Yield and Nutritional Composition",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "952D9B86-C401-F111-A5B4-7E43FF4F35BF",
+            "name": "Required data and material",
+            "unit": "Number",
+            "unitCost": 86172,
+            "quantity": 1,
+            "totalCost": 86172
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "952D9B86-C401-F111-A5B4-7E43FF4F35BF",
+            "name": "Required data and material",
+            "unit": "Number",
+            "unitCost": 86172,
+            "quantity": 1,
+            "totalCost": 86172
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "48A75409-7294-F011-A54D-7E43FF4F35BF",
+    "conceptNoteCode": "CET-03-2025/26",
+    "title": "“Sustainable Irrigation and Water Resource Management for Enhanced Crop Yield, Water Productivity, and Community Livelihoods in the Gurage Zone, Ethiopia”",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "3346A3CC-D300-F111-A5B3-7E43FF4F35BF",
+            "name": "Material Purchase for component 2",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "F5E079BE-E4BA-F011-A58A-7E43FF4F35BF",
+            "name": "Rainfall Soil map Geological Recent Land use/Land cover map GPS Hydrological Data for component 1",
+            "unit": "Number",
+            "unitCost": 20000,
+            "quantity": 1,
+            "totalCost": 20000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "3346A3CC-D300-F111-A5B3-7E43FF4F35BF",
+            "name": "Material Purchase for component 2",
+            "unit": "Number",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "F5E079BE-E4BA-F011-A58A-7E43FF4F35BF",
+            "name": "Rainfall Soil map Geological Recent Land use/Land cover map GPS Hydrological Data for component 1",
+            "unit": "Number",
+            "unitCost": 20000,
+            "quantity": 1,
+            "totalCost": 20000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "9ABBC4B9-A593-F011-A54B-7E43FF4F35BF",
+    "conceptNoteCode": "CMHS-06-2025/26",
+    "title": "Effectiveness of Catchment-Based Clinical Mentorship on Improving Quality of Maternal and Newborn in public health facilities",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "F1719889-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Antibotics",
+            "unit": "Number",
+            "unitCost": 30000,
+            "quantity": 1,
+            "totalCost": 30000
+          },
+          {
+            "equipmentId": "D31107A9-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Antiheypertensive",
+            "unit": "Number",
+            "unitCost": 11000,
+            "quantity": 1,
+            "totalCost": 11000
+          },
+          {
+            "equipmentId": "F681601A-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Glove",
+            "unit": "Number",
+            "unitCost": 25000,
+            "quantity": 1,
+            "totalCost": 25000
+          },
+          {
+            "equipmentId": "E40FA0DE-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Normal Spontaneous Delivery (NSD) Kit",
+            "unit": "Number",
+            "unitCost": 14000,
+            "quantity": 1,
+            "totalCost": 14000
+          },
+          {
+            "equipmentId": "B5D9854B-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Oxytocin",
+            "unit": "Number",
+            "unitCost": 7050,
+            "quantity": 1,
+            "totalCost": 7050
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "F1719889-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Antibotics",
+            "unit": "Number",
+            "unitCost": 30000,
+            "quantity": 1,
+            "totalCost": 30000
+          },
+          {
+            "equipmentId": "D31107A9-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Antiheypertensive",
+            "unit": "Number",
+            "unitCost": 11000,
+            "quantity": 1,
+            "totalCost": 11000
+          },
+          {
+            "equipmentId": "F681601A-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Glove",
+            "unit": "Number",
+            "unitCost": 25000,
+            "quantity": 1,
+            "totalCost": 25000
+          },
+          {
+            "equipmentId": "E40FA0DE-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Normal Spontaneous Delivery (NSD) Kit",
+            "unit": "Number",
+            "unitCost": 14000,
+            "quantity": 1,
+            "totalCost": 14000
+          },
+          {
+            "equipmentId": "B5D9854B-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Oxytocin",
+            "unit": "Number",
+            "unitCost": 7050,
+            "quantity": 1,
+            "totalCost": 7050
+          }
+        ]
+      },
+      {
+        "phaseNo": 3,
+        "equipment": [
+          {
+            "equipmentId": "F1719889-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Antibotics",
+            "unit": "Number",
+            "unitCost": 30000,
+            "quantity": 1,
+            "totalCost": 30000
+          },
+          {
+            "equipmentId": "D31107A9-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Antiheypertensive",
+            "unit": "Number",
+            "unitCost": 11000,
+            "quantity": 1,
+            "totalCost": 11000
+          },
+          {
+            "equipmentId": "F681601A-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Glove",
+            "unit": "Number",
+            "unitCost": 25000,
+            "quantity": 1,
+            "totalCost": 25000
+          },
+          {
+            "equipmentId": "E40FA0DE-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Normal Spontaneous Delivery (NSD) Kit",
+            "unit": "Number",
+            "unitCost": 14000,
+            "quantity": 1,
+            "totalCost": 14000
+          },
+          {
+            "equipmentId": "B5D9854B-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Oxytocin",
+            "unit": "Number",
+            "unitCost": 7050,
+            "quantity": 1,
+            "totalCost": 7050
+          }
+        ]
+      },
+      {
+        "phaseNo": 4,
+        "equipment": [
+          {
+            "equipmentId": "F1719889-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Antibotics",
+            "unit": "Number",
+            "unitCost": 30000,
+            "quantity": 1,
+            "totalCost": 30000
+          },
+          {
+            "equipmentId": "D31107A9-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Antiheypertensive",
+            "unit": "Number",
+            "unitCost": 11000,
+            "quantity": 1,
+            "totalCost": 11000
+          },
+          {
+            "equipmentId": "F681601A-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Glove",
+            "unit": "Number",
+            "unitCost": 25000,
+            "quantity": 1,
+            "totalCost": 25000
+          },
+          {
+            "equipmentId": "E40FA0DE-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Normal Spontaneous Delivery (NSD) Kit",
+            "unit": "Number",
+            "unitCost": 14000,
+            "quantity": 1,
+            "totalCost": 14000
+          },
+          {
+            "equipmentId": "B5D9854B-AC01-F111-A5B4-7E43FF4F35BF",
+            "name": "Oxytocin",
+            "unit": "Number",
+            "unitCost": 7050,
+            "quantity": 1,
+            "totalCost": 7050
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "DFBB479B-1F95-F011-A54D-7E43FF4F35BF",
+    "conceptNoteCode": "CANR-04-2025/26",
+    "title": "Assessment and mapping soil fertility, crop variety adaptation, and site-specific fertilizer optimization in Gurage and Misraq Gurage Zones, Central Ethiopia",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "B889FBF5-6B02-F111-A5B4-7E43FF4F35BF",
+            "name": "Labratory analysis componet 1",
+            "unit": "Number",
+            "unitCost": 420750,
+            "quantity": 1,
+            "totalCost": 420750
+          },
+          {
+            "equipmentId": "33350634-7402-F111-A5B4-7E43FF4F35BF",
+            "name": "Material purchase componet 1",
+            "unit": "Number",
+            "unitCost": 1684,
+            "quantity": 1,
+            "totalCost": 1684
+          },
+          {
+            "equipmentId": "BA703884-7402-F111-A5B4-7E43FF4F35BF",
+            "name": "Material purchase componet 2 year 1",
+            "unit": "Number",
+            "unitCost": 202700,
+            "quantity": 1,
+            "totalCost": 202700
+          },
+          {
+            "equipmentId": "9E9F3F65-7602-F111-A5B4-7E43FF4F35BF",
+            "name": "Material purchase componet 2 year 2",
+            "unit": "Number",
+            "unitCost": 202700,
+            "quantity": 1,
+            "totalCost": 202700
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "B889FBF5-6B02-F111-A5B4-7E43FF4F35BF",
+            "name": "Labratory analysis componet 1",
+            "unit": "Number",
+            "unitCost": 420750,
+            "quantity": 1,
+            "totalCost": 420750
+          },
+          {
+            "equipmentId": "33350634-7402-F111-A5B4-7E43FF4F35BF",
+            "name": "Material purchase componet 1",
+            "unit": "Number",
+            "unitCost": 1684,
+            "quantity": 1,
+            "totalCost": 1684
+          },
+          {
+            "equipmentId": "BA703884-7402-F111-A5B4-7E43FF4F35BF",
+            "name": "Material purchase componet 2 year 1",
+            "unit": "Number",
+            "unitCost": 202700,
+            "quantity": 1,
+            "totalCost": 202700
+          },
+          {
+            "equipmentId": "9E9F3F65-7602-F111-A5B4-7E43FF4F35BF",
+            "name": "Material purchase componet 2 year 2",
+            "unit": "Number",
+            "unitCost": 202700,
+            "quantity": 1,
+            "totalCost": 202700
+          }
+        ]
+      },
+      {
+        "phaseNo": 3,
+        "equipment": [
+          {
+            "equipmentId": "B889FBF5-6B02-F111-A5B4-7E43FF4F35BF",
+            "name": "Labratory analysis componet 1",
+            "unit": "Number",
+            "unitCost": 420750,
+            "quantity": 1,
+            "totalCost": 420750
+          },
+          {
+            "equipmentId": "33350634-7402-F111-A5B4-7E43FF4F35BF",
+            "name": "Material purchase componet 1",
+            "unit": "Number",
+            "unitCost": 1684,
+            "quantity": 1,
+            "totalCost": 1684
+          },
+          {
+            "equipmentId": "BA703884-7402-F111-A5B4-7E43FF4F35BF",
+            "name": "Material purchase componet 2 year 1",
+            "unit": "Number",
+            "unitCost": 202700,
+            "quantity": 1,
+            "totalCost": 202700
+          },
+          {
+            "equipmentId": "9E9F3F65-7602-F111-A5B4-7E43FF4F35BF",
+            "name": "Material purchase componet 2 year 2",
+            "unit": "Number",
+            "unitCost": 202700,
+            "quantity": 1,
+            "totalCost": 202700
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "0AFE547C-AA6E-EC11-B3D4-9E87EE2BF542",
+    "conceptNoteCode": "CNCS-06-2021/22",
+    "title": "In Vitro Anti-Bacterial Activities Of Hydro Alcoholic Millettia ferruginea leaf Crude Extract",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "0B978298-49A4-EC11-B47A-9E87EE2BF542",
+            "name": "Acetone",
+            "unit": "liter",
+            "unitCost": 700,
+            "quantity": 1,
+            "totalCost": 700
+          },
+          {
+            "equipmentId": "93F83D6E-49A4-EC11-B47A-9E87EE2BF542",
+            "name": "Acitic acid",
+            "unit": "liter",
+            "unitCost": 400,
+            "quantity": 1,
+            "totalCost": 400
+          },
+          {
+            "equipmentId": "13F27F55-4AA4-EC11-B47A-9E87EE2BF542",
+            "name": "Aluminum foil",
+            "unit": "rolr",
+            "unitCost": 80,
+            "quantity": 1,
+            "totalCost": 80
+          },
+          {
+            "equipmentId": "6387AAA6-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "Antibiotic disk",
+            "unit": "pack",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "B367373F-49A4-EC11-B47A-9E87EE2BF542",
+            "name": "Chloroform",
+            "unit": "liter",
+            "unitCost": 400,
+            "quantity": 1,
+            "totalCost": 400
+          },
+          {
+            "equipmentId": "6C3179F9-4AA4-EC11-B47A-9E87EE2BF542",
+            "name": "Cork borer",
+            "unit": "pic",
+            "unitCost": 200,
+            "quantity": 1,
+            "totalCost": 200
+          },
+          {
+            "equipmentId": "21C54682-49A4-EC11-B47A-9E87EE2BF542",
+            "name": "Dragendoroff reagent",
+            "unit": "liter",
+            "unitCost": 400,
+            "quantity": 1,
+            "totalCost": 400
+          },
+          {
+            "equipmentId": "6ECCB246-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "eosin methylene blue agar",
+            "unit": "liter",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "CE8C60D2-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "Ethyl acetate",
+            "unit": "liter",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "CFC771E7-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "Ferric chloride",
+            "unit": "gram",
+            "unitCost": 400,
+            "quantity": 1,
+            "totalCost": 400
+          },
+          {
+            "equipmentId": "9F20AA41-4AA4-EC11-B47A-9E87EE2BF542",
+            "name": "Filter paper",
+            "unit": "pack(whitman no1)",
+            "unitCost": 150,
+            "quantity": 1,
+            "totalCost": 150
+          },
+          {
+            "equipmentId": "481295CD-4AA4-EC11-B47A-9E87EE2BF542",
+            "name": "Fine mesh (500μm opening)",
+            "unit": "pic",
+            "unitCost": 150,
+            "quantity": 1,
+            "totalCost": 150
+          },
+          {
+            "equipmentId": "5108A125-4BA4-EC11-B47A-9E87EE2BF542",
+            "name": "Glove",
+            "unit": "pack",
+            "unitCost": 400,
+            "quantity": 1,
+            "totalCost": 400
+          },
+          {
+            "equipmentId": "AD047959-49A4-EC11-B47A-9E87EE2BF542",
+            "name": "H2SO4",
+            "unit": "liter",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "4CDB8E14-49A4-EC11-B47A-9E87EE2BF542",
+            "name": "Hydrochloric acid",
+            "unit": "liter(250ml)",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "A0E4EC25-4FA4-EC11-B47A-9E87EE2BF542",
+            "name": "Laboratory mice",
+            "unit": "pic",
+            "unitCost": 1500,
+            "quantity": 30,
+            "totalCost": 45000
+          },
+          {
+            "equipmentId": "DB06D04C-4FA4-EC11-B47A-9E87EE2BF542",
+            "name": "Laboratory mice food",
+            "unit": "kg",
+            "unitCost": 1400,
+            "quantity": 10,
+            "totalCost": 14000
+          },
+          {
+            "equipmentId": "F3774A29-49A4-EC11-B47A-9E87EE2BF542",
+            "name": "Lead acetate",
+            "unit": "kg(250g)",
+            "unitCost": 600,
+            "quantity": 1,
+            "totalCost": 600
+          },
+          {
+            "equipmentId": "2490B492-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "mannitol salt agar",
+            "unit": "kg(500g)",
+            "unitCost": 3700,
+            "quantity": 1,
+            "totalCost": 3700
+          },
+          {
+            "equipmentId": "C75081BB-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "Methanol",
+            "unit": "liter",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "6B1262DF-A590-EC11-B43F-9E87EE2BF542",
+            "name": "Muller Hinton agar",
+            "unit": "kg(500g)",
+            "unitCost": 3900,
+            "quantity": 1,
+            "totalCost": 3900
+          },
+          {
+            "equipmentId": "D2591337-46A4-EC11-B479-9E87EE2BF542",
+            "name": "Muller Hinton broth",
+            "unit": "kg(500g)",
+            "unitCost": 3900,
+            "quantity": 1,
+            "totalCost": 3900
+          },
+          {
+            "equipmentId": "63C9292F-4AA4-EC11-B47A-9E87EE2BF542",
+            "name": "Muslin cloth",
+            "unit": "pack",
+            "unitCost": 110,
+            "quantity": 1,
+            "totalCost": 110
+          },
+          {
+            "equipmentId": "45C6DFAE-47A4-EC11-B47A-9E87EE2BF542",
+            "name": "Nutrient agar",
+            "unit": "kg(500g)",
+            "unitCost": 3600,
+            "quantity": 1,
+            "totalCost": 3600
+          },
+          {
+            "equipmentId": "E8FF444A-46A4-EC11-B479-9E87EE2BF542",
+            "name": "Nutrient broth",
+            "unit": "kg(500g)",
+            "unitCost": 3600,
+            "quantity": 1,
+            "totalCost": 3600
+          },
+          {
+            "equipmentId": "CA8D827B-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "Pseudomonas agar",
+            "unit": "kg(500g)",
+            "unitCost": 3700,
+            "quantity": 1,
+            "totalCost": 3700
+          },
+          {
+            "equipmentId": "FD58C0CF-4EA4-EC11-B47A-9E87EE2BF542",
+            "name": "PVC (micro hematocrit capillary tube)",
+            "unit": "pack",
+            "unitCost": 340,
+            "quantity": 2,
+            "totalCost": 680
+          },
+          {
+            "equipmentId": "413574E5-4EA4-EC11-B47A-9E87EE2BF542",
+            "name": "Rat cage",
+            "unit": "pic",
+            "unitCost": 600,
+            "quantity": 5,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "53B013BB-4EA4-EC11-B47A-9E87EE2BF542",
+            "name": "Ruler",
+            "unit": "pic",
+            "unitCost": 30,
+            "quantity": 1,
+            "totalCost": 30
+          },
+          {
+            "equipmentId": "84D07CB4-4AA4-EC11-B47A-9E87EE2BF542",
+            "name": "Small electric grinder",
+            "unit": "pic",
+            "unitCost": 250,
+            "quantity": 1,
+            "totalCost": 250
+          },
+          {
+            "equipmentId": "446ADCFC-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "Sodium hydroxide",
+            "unit": "kg(250g)",
+            "unitCost": 300,
+            "quantity": 1,
+            "totalCost": 300
+          },
+          {
+            "equipmentId": "A1547064-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "S-S agar",
+            "unit": "kg(500g)",
+            "unitCost": 3700,
+            "quantity": 1,
+            "totalCost": 3700
+          },
+          {
+            "equipmentId": "7E82810D-4BA4-EC11-B47A-9E87EE2BF542",
+            "name": "Swab",
+            "unit": "pic",
+            "unitCost": 100,
+            "quantity": 2,
+            "totalCost": 200
+          },
+          {
+            "equipmentId": "3A908EE3-4AA4-EC11-B47A-9E87EE2BF542",
+            "name": "Syringe",
+            "unit": "pic",
+            "unitCost": 30,
+            "quantity": 1,
+            "totalCost": 30
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "0B978298-49A4-EC11-B47A-9E87EE2BF542",
+            "name": "Acetone",
+            "unit": "liter",
+            "unitCost": 700,
+            "quantity": 1,
+            "totalCost": 700
+          },
+          {
+            "equipmentId": "93F83D6E-49A4-EC11-B47A-9E87EE2BF542",
+            "name": "Acitic acid",
+            "unit": "liter",
+            "unitCost": 400,
+            "quantity": 1,
+            "totalCost": 400
+          },
+          {
+            "equipmentId": "13F27F55-4AA4-EC11-B47A-9E87EE2BF542",
+            "name": "Aluminum foil",
+            "unit": "rolr",
+            "unitCost": 80,
+            "quantity": 1,
+            "totalCost": 80
+          },
+          {
+            "equipmentId": "6387AAA6-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "Antibiotic disk",
+            "unit": "pack",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "B367373F-49A4-EC11-B47A-9E87EE2BF542",
+            "name": "Chloroform",
+            "unit": "liter",
+            "unitCost": 400,
+            "quantity": 1,
+            "totalCost": 400
+          },
+          {
+            "equipmentId": "6C3179F9-4AA4-EC11-B47A-9E87EE2BF542",
+            "name": "Cork borer",
+            "unit": "pic",
+            "unitCost": 200,
+            "quantity": 1,
+            "totalCost": 200
+          },
+          {
+            "equipmentId": "21C54682-49A4-EC11-B47A-9E87EE2BF542",
+            "name": "Dragendoroff reagent",
+            "unit": "liter",
+            "unitCost": 400,
+            "quantity": 1,
+            "totalCost": 400
+          },
+          {
+            "equipmentId": "6ECCB246-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "eosin methylene blue agar",
+            "unit": "liter",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "CE8C60D2-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "Ethyl acetate",
+            "unit": "liter",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "CFC771E7-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "Ferric chloride",
+            "unit": "gram",
+            "unitCost": 400,
+            "quantity": 1,
+            "totalCost": 400
+          },
+          {
+            "equipmentId": "9F20AA41-4AA4-EC11-B47A-9E87EE2BF542",
+            "name": "Filter paper",
+            "unit": "pack(whitman no1)",
+            "unitCost": 150,
+            "quantity": 1,
+            "totalCost": 150
+          },
+          {
+            "equipmentId": "481295CD-4AA4-EC11-B47A-9E87EE2BF542",
+            "name": "Fine mesh (500μm opening)",
+            "unit": "pic",
+            "unitCost": 150,
+            "quantity": 1,
+            "totalCost": 150
+          },
+          {
+            "equipmentId": "5108A125-4BA4-EC11-B47A-9E87EE2BF542",
+            "name": "Glove",
+            "unit": "pack",
+            "unitCost": 400,
+            "quantity": 1,
+            "totalCost": 400
+          },
+          {
+            "equipmentId": "AD047959-49A4-EC11-B47A-9E87EE2BF542",
+            "name": "H2SO4",
+            "unit": "liter",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "4CDB8E14-49A4-EC11-B47A-9E87EE2BF542",
+            "name": "Hydrochloric acid",
+            "unit": "liter(250ml)",
+            "unitCost": 500,
+            "quantity": 1,
+            "totalCost": 500
+          },
+          {
+            "equipmentId": "A0E4EC25-4FA4-EC11-B47A-9E87EE2BF542",
+            "name": "Laboratory mice",
+            "unit": "pic",
+            "unitCost": 1500,
+            "quantity": 30,
+            "totalCost": 45000
+          },
+          {
+            "equipmentId": "DB06D04C-4FA4-EC11-B47A-9E87EE2BF542",
+            "name": "Laboratory mice food",
+            "unit": "kg",
+            "unitCost": 1400,
+            "quantity": 10,
+            "totalCost": 14000
+          },
+          {
+            "equipmentId": "F3774A29-49A4-EC11-B47A-9E87EE2BF542",
+            "name": "Lead acetate",
+            "unit": "kg(250g)",
+            "unitCost": 600,
+            "quantity": 1,
+            "totalCost": 600
+          },
+          {
+            "equipmentId": "2490B492-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "mannitol salt agar",
+            "unit": "kg(500g)",
+            "unitCost": 3700,
+            "quantity": 1,
+            "totalCost": 3700
+          },
+          {
+            "equipmentId": "C75081BB-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "Methanol",
+            "unit": "liter",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "6B1262DF-A590-EC11-B43F-9E87EE2BF542",
+            "name": "Muller Hinton agar",
+            "unit": "kg(500g)",
+            "unitCost": 3900,
+            "quantity": 1,
+            "totalCost": 3900
+          },
+          {
+            "equipmentId": "D2591337-46A4-EC11-B479-9E87EE2BF542",
+            "name": "Muller Hinton broth",
+            "unit": "kg(500g)",
+            "unitCost": 3900,
+            "quantity": 1,
+            "totalCost": 3900
+          },
+          {
+            "equipmentId": "63C9292F-4AA4-EC11-B47A-9E87EE2BF542",
+            "name": "Muslin cloth",
+            "unit": "pack",
+            "unitCost": 110,
+            "quantity": 1,
+            "totalCost": 110
+          },
+          {
+            "equipmentId": "45C6DFAE-47A4-EC11-B47A-9E87EE2BF542",
+            "name": "Nutrient agar",
+            "unit": "kg(500g)",
+            "unitCost": 3600,
+            "quantity": 1,
+            "totalCost": 3600
+          },
+          {
+            "equipmentId": "E8FF444A-46A4-EC11-B479-9E87EE2BF542",
+            "name": "Nutrient broth",
+            "unit": "kg(500g)",
+            "unitCost": 3600,
+            "quantity": 1,
+            "totalCost": 3600
+          },
+          {
+            "equipmentId": "CA8D827B-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "Pseudomonas agar",
+            "unit": "kg(500g)",
+            "unitCost": 3700,
+            "quantity": 1,
+            "totalCost": 3700
+          },
+          {
+            "equipmentId": "FD58C0CF-4EA4-EC11-B47A-9E87EE2BF542",
+            "name": "PVC (micro hematocrit capillary tube)",
+            "unit": "pack",
+            "unitCost": 340,
+            "quantity": 2,
+            "totalCost": 680
+          },
+          {
+            "equipmentId": "413574E5-4EA4-EC11-B47A-9E87EE2BF542",
+            "name": "Rat cage",
+            "unit": "pic",
+            "unitCost": 600,
+            "quantity": 5,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "53B013BB-4EA4-EC11-B47A-9E87EE2BF542",
+            "name": "Ruler",
+            "unit": "pic",
+            "unitCost": 30,
+            "quantity": 1,
+            "totalCost": 30
+          },
+          {
+            "equipmentId": "84D07CB4-4AA4-EC11-B47A-9E87EE2BF542",
+            "name": "Small electric grinder",
+            "unit": "pic",
+            "unitCost": 250,
+            "quantity": 1,
+            "totalCost": 250
+          },
+          {
+            "equipmentId": "446ADCFC-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "Sodium hydroxide",
+            "unit": "kg(250g)",
+            "unitCost": 300,
+            "quantity": 1,
+            "totalCost": 300
+          },
+          {
+            "equipmentId": "A1547064-48A4-EC11-B47A-9E87EE2BF542",
+            "name": "S-S agar",
+            "unit": "kg(500g)",
+            "unitCost": 3700,
+            "quantity": 1,
+            "totalCost": 3700
+          },
+          {
+            "equipmentId": "7E82810D-4BA4-EC11-B47A-9E87EE2BF542",
+            "name": "Swab",
+            "unit": "pic",
+            "unitCost": 100,
+            "quantity": 2,
+            "totalCost": 200
+          },
+          {
+            "equipmentId": "3A908EE3-4AA4-EC11-B47A-9E87EE2BF542",
+            "name": "Syringe",
+            "unit": "pic",
+            "unitCost": 30,
+            "quantity": 1,
+            "totalCost": 30
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "D2A87088-A273-EC11-B3E4-9E87EE2BF542",
+    "conceptNoteCode": "CNCS-36-2021/22",
+    "title": "In-Vitro Propagation, Protocol Optimization and Plantlets filed adaptation trial for elite Environmental Adapted Banana cultivars in case of Gurage Zone",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "154815D7-5CA4-EC11-B47B-9E87EE2BF542",
+            "name": "Agar media",
+            "unit": null,
+            "unitCost": 3185,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "1A53F0C4-5CA4-EC11-B47B-9E87EE2BF542",
+            "name": "Banana Mother plant",
+            "unit": null,
+            "unitCost": 8250,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "AFC25EB2-5CA4-EC11-B47B-9E87EE2BF542",
+            "name": "Gloves",
+            "unit": null,
+            "unitCost": 1190,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "C3857012-5CA4-EC11-B47B-9E87EE2BF542",
+            "name": "Lebler",
+            "unit": null,
+            "unitCost": 640,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "3956BF86-5CA4-EC11-B47B-9E87EE2BF542",
+            "name": "Parafilm",
+            "unit": null,
+            "unitCost": 2200,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "C2949B41-5CA4-EC11-B47B-9E87EE2BF542",
+            "name": "PH meter",
+            "unit": null,
+            "unitCost": 8000,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "02B93D9E-5CA4-EC11-B47B-9E87EE2BF542",
+            "name": "Scalpels handler",
+            "unit": null,
+            "unitCost": 340,
+            "quantity": 0,
+            "totalCost": 0
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "154815D7-5CA4-EC11-B47B-9E87EE2BF542",
+            "name": "Agar media",
+            "unit": null,
+            "unitCost": 3185,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "1A53F0C4-5CA4-EC11-B47B-9E87EE2BF542",
+            "name": "Banana Mother plant",
+            "unit": null,
+            "unitCost": 8250,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "AFC25EB2-5CA4-EC11-B47B-9E87EE2BF542",
+            "name": "Gloves",
+            "unit": null,
+            "unitCost": 1190,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "C3857012-5CA4-EC11-B47B-9E87EE2BF542",
+            "name": "Lebler",
+            "unit": null,
+            "unitCost": 640,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "3956BF86-5CA4-EC11-B47B-9E87EE2BF542",
+            "name": "Parafilm",
+            "unit": null,
+            "unitCost": 2200,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "C2949B41-5CA4-EC11-B47B-9E87EE2BF542",
+            "name": "PH meter",
+            "unit": null,
+            "unitCost": 8000,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "02B93D9E-5CA4-EC11-B47B-9E87EE2BF542",
+            "name": "Scalpels handler",
+            "unit": null,
+            "unitCost": 340,
+            "quantity": 0,
+            "totalCost": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "D45F3347-1C75-EC11-B3E8-9E87EE2BF542",
+    "conceptNoteCode": "CMHS-75-2021/22",
+    "title": "Effect of hand rubbing solutions distributed in Gurage zone on common pathogenic bacteria: In vitro assessment",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "EB08FF42-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "70% Alcohol",
+            "unit": "Liter",
+            "unitCost": 300,
+            "quantity": 3,
+            "totalCost": 900
+          },
+          {
+            "equipmentId": "A0C11032-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "Distilled water",
+            "unit": "Liter",
+            "unitCost": 2552,
+            "quantity": 20,
+            "totalCost": 51040
+          },
+          {
+            "equipmentId": "36CC1E52-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "Hand rubbing solutions",
+            "unit": "Liter",
+            "unitCost": 3000,
+            "quantity": 20,
+            "totalCost": 60000
+          },
+          {
+            "equipmentId": "12106284-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "MacConkey Agar",
+            "unit": "Bottle",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "132CDB8D-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "Mueller Hinton Agar",
+            "unit": "Bottle",
+            "unitCost": 6000,
+            "quantity": 2,
+            "totalCost": 12000
+          },
+          {
+            "equipmentId": "37950621-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "Normal saline",
+            "unit": "Litre",
+            "unitCost": 950,
+            "quantity": 10,
+            "totalCost": 9500
+          },
+          {
+            "equipmentId": "0EA9686F-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "Nunk Tube",
+            "unit": "Piece",
+            "unitCost": 4000,
+            "quantity": 200,
+            "totalCost": 800000
+          },
+          {
+            "equipmentId": "C20A2F98-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "Nutrient broth",
+            "unit": "Bottle",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "77010B62-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "Sterile Cotton swab",
+            "unit": "Piece",
+            "unitCost": 1000,
+            "quantity": 200,
+            "totalCost": 200000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "EB08FF42-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "70% Alcohol",
+            "unit": "Liter",
+            "unitCost": 300,
+            "quantity": 3,
+            "totalCost": 900
+          },
+          {
+            "equipmentId": "A0C11032-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "Distilled water",
+            "unit": "Liter",
+            "unitCost": 2552,
+            "quantity": 20,
+            "totalCost": 51040
+          },
+          {
+            "equipmentId": "36CC1E52-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "Hand rubbing solutions",
+            "unit": "Liter",
+            "unitCost": 3000,
+            "quantity": 20,
+            "totalCost": 60000
+          },
+          {
+            "equipmentId": "12106284-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "MacConkey Agar",
+            "unit": "Bottle",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "132CDB8D-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "Mueller Hinton Agar",
+            "unit": "Bottle",
+            "unitCost": 6000,
+            "quantity": 2,
+            "totalCost": 12000
+          },
+          {
+            "equipmentId": "37950621-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "Normal saline",
+            "unit": "Litre",
+            "unitCost": 950,
+            "quantity": 10,
+            "totalCost": 9500
+          },
+          {
+            "equipmentId": "0EA9686F-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "Nunk Tube",
+            "unit": "Piece",
+            "unitCost": 4000,
+            "quantity": 200,
+            "totalCost": 800000
+          },
+          {
+            "equipmentId": "C20A2F98-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "Nutrient broth",
+            "unit": "Bottle",
+            "unitCost": 3000,
+            "quantity": 1,
+            "totalCost": 3000
+          },
+          {
+            "equipmentId": "77010B62-B4A5-EC11-B47E-9E87EE2BF542",
+            "name": "Sterile Cotton swab",
+            "unit": "Piece",
+            "unitCost": 1000,
+            "quantity": 200,
+            "totalCost": 200000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "81DAAF3E-476D-EC11-B3C8-9E87EE2BF542",
+    "conceptNoteCode": "CANR-05-2021/22",
+    "title": "Impact of Land Use change and Climate Variability on Soil Carbon Sequestration in Gurage Zone Central Ethiopia",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "F2A505C0-9A90-EC11-B43F-9E87EE2BF542",
+            "name": "Chemicals",
+            "unit": "ሊትር/ኪሎ ግራም",
+            "unitCost": 10000,
+            "quantity": 23,
+            "totalCost": 230000
+          },
+          {
+            "equipmentId": "13E2BB03-EBA4-EC11-B47C-9E87EE2BF542",
+            "name": "Soil sample collection bag",
+            "unit": "እሽግ",
+            "unitCost": 2500,
+            "quantity": 10,
+            "totalCost": 25000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "F2A505C0-9A90-EC11-B43F-9E87EE2BF542",
+            "name": "Chemicals",
+            "unit": "ሊትር/ኪሎ ግራም",
+            "unitCost": 10000,
+            "quantity": 23,
+            "totalCost": 230000
+          },
+          {
+            "equipmentId": "13E2BB03-EBA4-EC11-B47C-9E87EE2BF542",
+            "name": "Soil sample collection bag",
+            "unit": "እሽግ",
+            "unitCost": 2500,
+            "quantity": 10,
+            "totalCost": 25000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "3A4F07F3-046E-EC11-B3D1-9E87EE2BF542",
+    "conceptNoteCode": "CMHS-21-2021/22",
+    "title": "EVALUATION OF HAEMATOLOGICAL DISORDERS AND METABOLIC SYNDROMES AMONG PATIENTS WITH GOUTS IN GURAGE ZONE, SOUTHWEST ETHIOPIA",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "255C3DD0-CFA8-EC11-B48C-9E87EE2BF542",
+            "name": "10% contingency",
+            "unit": null,
+            "unitCost": 2902,
+            "quantity": 1,
+            "totalCost": 2902
+          },
+          {
+            "equipmentId": "303E938F-CEA8-EC11-B48C-9E87EE2BF542",
+            "name": "chemistry analyzer reagent for lipid profile",
+            "unit": "litres",
+            "unitCost": 10000,
+            "quantity": 10,
+            "totalCost": 100000
+          },
+          {
+            "equipmentId": "3B10CB2E-CEA8-EC11-B48C-9E87EE2BF542",
+            "name": "chemistry analyzer reagent for uric acid",
+            "unit": "litres",
+            "unitCost": 10000,
+            "quantity": 10,
+            "totalCost": 100000
+          },
+          {
+            "equipmentId": "E241F512-CFA8-EC11-B48C-9E87EE2BF542",
+            "name": "disposable syringes",
+            "unit": "box",
+            "unitCost": 800,
+            "quantity": 2,
+            "totalCost": 1600
+          },
+          {
+            "equipmentId": "C98B7FE9-CEA8-EC11-B48C-9E87EE2BF542",
+            "name": "EDTA tubes",
+            "unit": "pk",
+            "unitCost": 900,
+            "quantity": 3,
+            "totalCost": 2700
+          },
+          {
+            "equipmentId": "CEC6CDFA-CEA8-EC11-B48C-9E87EE2BF542",
+            "name": "gloves",
+            "unit": "pk",
+            "unitCost": 200,
+            "quantity": 1,
+            "totalCost": 200
+          },
+          {
+            "equipmentId": "09D8544A-CFA8-EC11-B48C-9E87EE2BF542",
+            "name": "hematology analyzer reagent",
+            "unit": "litres",
+            "unitCost": 6000,
+            "quantity": 20,
+            "totalCost": 120000
+          },
+          {
+            "equipmentId": "A096161F-CFA8-EC11-B48C-9E87EE2BF542",
+            "name": "slides",
+            "unit": "box",
+            "unitCost": 320,
+            "quantity": 4,
+            "totalCost": 1280
+          },
+          {
+            "equipmentId": "D784FF30-CFA8-EC11-B48C-9E87EE2BF542",
+            "name": "wright stain solution",
+            "unit": "litres",
+            "unitCost": 800,
+            "quantity": 4,
+            "totalCost": 3200
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "255C3DD0-CFA8-EC11-B48C-9E87EE2BF542",
+            "name": "10% contingency",
+            "unit": null,
+            "unitCost": 2902,
+            "quantity": 1,
+            "totalCost": 2902
+          },
+          {
+            "equipmentId": "303E938F-CEA8-EC11-B48C-9E87EE2BF542",
+            "name": "chemistry analyzer reagent for lipid profile",
+            "unit": "litres",
+            "unitCost": 10000,
+            "quantity": 10,
+            "totalCost": 100000
+          },
+          {
+            "equipmentId": "3B10CB2E-CEA8-EC11-B48C-9E87EE2BF542",
+            "name": "chemistry analyzer reagent for uric acid",
+            "unit": "litres",
+            "unitCost": 10000,
+            "quantity": 10,
+            "totalCost": 100000
+          },
+          {
+            "equipmentId": "E241F512-CFA8-EC11-B48C-9E87EE2BF542",
+            "name": "disposable syringes",
+            "unit": "box",
+            "unitCost": 800,
+            "quantity": 2,
+            "totalCost": 1600
+          },
+          {
+            "equipmentId": "C98B7FE9-CEA8-EC11-B48C-9E87EE2BF542",
+            "name": "EDTA tubes",
+            "unit": "pk",
+            "unitCost": 900,
+            "quantity": 3,
+            "totalCost": 2700
+          },
+          {
+            "equipmentId": "CEC6CDFA-CEA8-EC11-B48C-9E87EE2BF542",
+            "name": "gloves",
+            "unit": "pk",
+            "unitCost": 200,
+            "quantity": 1,
+            "totalCost": 200
+          },
+          {
+            "equipmentId": "09D8544A-CFA8-EC11-B48C-9E87EE2BF542",
+            "name": "hematology analyzer reagent",
+            "unit": "litres",
+            "unitCost": 6000,
+            "quantity": 20,
+            "totalCost": 120000
+          },
+          {
+            "equipmentId": "A096161F-CFA8-EC11-B48C-9E87EE2BF542",
+            "name": "slides",
+            "unit": "box",
+            "unitCost": 320,
+            "quantity": 4,
+            "totalCost": 1280
+          },
+          {
+            "equipmentId": "D784FF30-CFA8-EC11-B48C-9E87EE2BF542",
+            "name": "wright stain solution",
+            "unit": "litres",
+            "unitCost": 800,
+            "quantity": 4,
+            "totalCost": 3200
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "D29DB248-B072-EC11-B3DE-9E87EE2BF542",
+    "conceptNoteCode": "CANR-22-2021/22",
+    "title": "Assessment of coffee berry disease and morphological characterization of Colletotrichum kahawae isolates from major coffee growing areas of Gurague zone",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "C758AFFE-7890-EC11-B43F-9E87EE2BF542",
+            "name": "Materials Purchasing",
+            "unit": "no",
+            "unitCost": 7710,
+            "quantity": 10,
+            "totalCost": 77100
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "C758AFFE-7890-EC11-B43F-9E87EE2BF542",
+            "name": "Materials Purchasing",
+            "unit": "no",
+            "unitCost": 7710,
+            "quantity": 10,
+            "totalCost": 77100
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "65E6844E-9E6E-EC11-B3D4-9E87EE2BF542",
+    "conceptNoteCode": "CET-11-2021/22",
+    "title": "Characterization of Agro processing(fruits & vegetables) by-products as Prebiotic Fiber Potential for Functional Food Production",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "622DB5C7-F1A4-EC11-B47D-9E87EE2BF542",
+            "name": "Different Chemicals for Analysis",
+            "unit": "gram",
+            "unitCost": 21000,
+            "quantity": 2000,
+            "totalCost": 42000000,
+            "check": "unusually large total"
+          },
+          {
+            "equipmentId": "AAF6B832-F2A4-EC11-B47D-9E87EE2BF542",
+            "name": "different consumable materials",
+            "unit": "pack",
+            "unitCost": 10500,
+            "quantity": 1000,
+            "totalCost": 10500000,
+            "check": "unusually large total"
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "622DB5C7-F1A4-EC11-B47D-9E87EE2BF542",
+            "name": "Different Chemicals for Analysis",
+            "unit": "gram",
+            "unitCost": 21000,
+            "quantity": 2000,
+            "totalCost": 42000000,
+            "check": "unusually large total"
+          },
+          {
+            "equipmentId": "AAF6B832-F2A4-EC11-B47D-9E87EE2BF542",
+            "name": "different consumable materials",
+            "unit": "pack",
+            "unitCost": 10500,
+            "quantity": 1000,
+            "totalCost": 10500000,
+            "check": "unusually large total"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "8BC3350F-4F6D-EC11-B3C8-9E87EE2BF542",
+    "conceptNoteCode": "CMHS-10-2021/22",
+    "title": "Determination of uric acid disorder and metabolic syndromes among diabetes mellitus patients in hospitals found in Gurage zone from March to June 2022",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "6B15027E-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "70 % alcohol",
+            "unit": "Litter",
+            "unitCost": 500,
+            "quantity": 5,
+            "totalCost": 2500
+          },
+          {
+            "equipmentId": "5F7852B0-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "Blood glucose reagent",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 5,
+            "totalCost": 10000
+          },
+          {
+            "equipmentId": "4E2FA09F-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "Cotton",
+            "unit": "Roll",
+            "unitCost": 1000,
+            "quantity": 10,
+            "totalCost": 10000
+          },
+          {
+            "equipmentId": "1A383238-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "Disposable glove",
+            "unit": "Box",
+            "unitCost": 500,
+            "quantity": 5,
+            "totalCost": 2500
+          },
+          {
+            "equipmentId": "01B6B659-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "Gel separator Tube",
+            "unit": "Box",
+            "unitCost": 1250,
+            "quantity": 5,
+            "totalCost": 6250
+          },
+          {
+            "equipmentId": "A970B3F2-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "HDL Cholestrol",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 5,
+            "totalCost": 10000
+          },
+          {
+            "equipmentId": "C7CB50E2-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "LDL cholesterol",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 5,
+            "totalCost": 10000
+          },
+          {
+            "equipmentId": "61608096-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "Syringe with needle",
+            "unit": "Box",
+            "unitCost": 750,
+            "quantity": 5,
+            "totalCost": 3750
+          },
+          {
+            "equipmentId": "20FF12D0-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "Total cholesterol reagent",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 5,
+            "totalCost": 10000
+          },
+          {
+            "equipmentId": "463590FD-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "Triglyceride reagent",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 5,
+            "totalCost": 10000
+          },
+          {
+            "equipmentId": "52FB91BF-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "Uric Acid reagent",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 5,
+            "totalCost": 10000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "6B15027E-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "70 % alcohol",
+            "unit": "Litter",
+            "unitCost": 500,
+            "quantity": 5,
+            "totalCost": 2500
+          },
+          {
+            "equipmentId": "5F7852B0-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "Blood glucose reagent",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 5,
+            "totalCost": 10000
+          },
+          {
+            "equipmentId": "4E2FA09F-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "Cotton",
+            "unit": "Roll",
+            "unitCost": 1000,
+            "quantity": 10,
+            "totalCost": 10000
+          },
+          {
+            "equipmentId": "1A383238-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "Disposable glove",
+            "unit": "Box",
+            "unitCost": 500,
+            "quantity": 5,
+            "totalCost": 2500
+          },
+          {
+            "equipmentId": "01B6B659-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "Gel separator Tube",
+            "unit": "Box",
+            "unitCost": 1250,
+            "quantity": 5,
+            "totalCost": 6250
+          },
+          {
+            "equipmentId": "A970B3F2-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "HDL Cholestrol",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 5,
+            "totalCost": 10000
+          },
+          {
+            "equipmentId": "C7CB50E2-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "LDL cholesterol",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 5,
+            "totalCost": 10000
+          },
+          {
+            "equipmentId": "61608096-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "Syringe with needle",
+            "unit": "Box",
+            "unitCost": 750,
+            "quantity": 5,
+            "totalCost": 3750
+          },
+          {
+            "equipmentId": "20FF12D0-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "Total cholesterol reagent",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 5,
+            "totalCost": 10000
+          },
+          {
+            "equipmentId": "463590FD-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "Triglyceride reagent",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 5,
+            "totalCost": 10000
+          },
+          {
+            "equipmentId": "52FB91BF-D0A8-EC11-B48C-9E87EE2BF542",
+            "name": "Uric Acid reagent",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 5,
+            "totalCost": 10000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "EF1B5643-FB6D-EC11-B3D1-9E87EE2BF542",
+    "conceptNoteCode": "CANR-11-2021/22",
+    "title": "EFFECT OF DEFICIT IRRIGATION ON YIELD AND WATER PRODUCTIVITY OF ONION AT JOLLA 3 KEBELA, IN MESKANE WOREDA , ETHIOPIA",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "3F8BF446-9E90-EC11-B43F-9E87EE2BF542",
+            "name": "Laboratory analysis cost",
+            "unit": "No",
+            "unitCost": 9000,
+            "quantity": 9,
+            "totalCost": 81000
+          },
+          {
+            "equipmentId": "C942F42F-9E90-EC11-B43F-9E87EE2BF542",
+            "name": "Land rent cost",
+            "unit": "Area",
+            "unitCost": 12000,
+            "quantity": 1000,
+            "totalCost": 12000000,
+            "check": "unusually large total"
+          },
+          {
+            "equipmentId": "892EE54D-9390-EC11-B43F-9E87EE2BF542",
+            "name": "Onion Seed, Parshall flume, Fertilizer and Crop protection chemical",
+            "unit": "Gross",
+            "unitCost": 20000,
+            "quantity": 5,
+            "totalCost": 100000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "3F8BF446-9E90-EC11-B43F-9E87EE2BF542",
+            "name": "Laboratory analysis cost",
+            "unit": "No",
+            "unitCost": 9000,
+            "quantity": 9,
+            "totalCost": 81000
+          },
+          {
+            "equipmentId": "C942F42F-9E90-EC11-B43F-9E87EE2BF542",
+            "name": "Land rent cost",
+            "unit": "Area",
+            "unitCost": 12000,
+            "quantity": 1000,
+            "totalCost": 12000000,
+            "check": "unusually large total"
+          },
+          {
+            "equipmentId": "892EE54D-9390-EC11-B43F-9E87EE2BF542",
+            "name": "Onion Seed, Parshall flume, Fertilizer and Crop protection chemical",
+            "unit": "Gross",
+            "unitCost": 20000,
+            "quantity": 5,
+            "totalCost": 100000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "631B5783-486D-EC11-B3C8-9E87EE2BF542",
+    "conceptNoteCode": "CET-02-2021/22",
+    "title": "Evaluation and Ergonomically improve Workstation for Sewing Operators in Ethiopian Garment Industry",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "80661A42-C5A8-EC11-B48C-9E87EE2BF542",
+            "name": "Camera renting for video recording in upper extreme bodies",
+            "unit": null,
+            "unitCost": 4000,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "5D9FC485-C5A8-EC11-B48C-9E87EE2BF542",
+            "name": "Paper (A4*2), printing (1*), photocopy (3*), Measuring tape (1*), binding (3*), and mobile card (1*100)",
+            "unit": null,
+            "unitCost": 450,
+            "quantity": 0,
+            "totalCost": 0
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "80661A42-C5A8-EC11-B48C-9E87EE2BF542",
+            "name": "Camera renting for video recording in upper extreme bodies",
+            "unit": null,
+            "unitCost": 4000,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "5D9FC485-C5A8-EC11-B48C-9E87EE2BF542",
+            "name": "Paper (A4*2), printing (1*), photocopy (3*), Measuring tape (1*), binding (3*), and mobile card (1*100)",
+            "unit": null,
+            "unitCost": 450,
+            "quantity": 0,
+            "totalCost": 0
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "43A801C4-A56E-EC11-B3D4-9E87EE2BF542",
+    "conceptNoteCode": "CMHS-20-2021/22",
+    "title": "Phytochemical Screening and Anti-microbial Activity of Polygala sadebekiana Gurke extracts on microbial isolates from Shime Yetere",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "DD501039-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "80% methanol",
+            "unit": "Bottle",
+            "unitCost": 3000,
+            "quantity": 5,
+            "totalCost": 15000
+          },
+          {
+            "equipmentId": "769AC432-D4A8-EC11-B48C-9E87EE2BF542",
+            "name": "Antibiotics",
+            "unit": "number of strip",
+            "unitCost": 7920,
+            "quantity": 10,
+            "totalCost": 79200
+          },
+          {
+            "equipmentId": "A27C347D-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "Chloroform",
+            "unit": "Bottle",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "FECDD42D-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "Distilled water",
+            "unit": "Bottle",
+            "unitCost": 1000,
+            "quantity": 10,
+            "totalCost": 10000
+          },
+          {
+            "equipmentId": "78B7665E-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "Ferric chloride",
+            "unit": "Bottle",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "9EF80DA3-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "Gelatin solution",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 2,
+            "totalCost": 4000
+          },
+          {
+            "equipmentId": "E90895BD-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "Glacial acetic acid",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 2,
+            "totalCost": 4000
+          },
+          {
+            "equipmentId": "913E7647-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "HCl",
+            "unit": "Bottle",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "3000B1FE-D3A8-EC11-B48C-9E87EE2BF542",
+            "name": "Mueller Hinton agar plates and culture media",
+            "unit": "Number",
+            "unitCost": 22000,
+            "quantity": 10,
+            "totalCost": 220000
+          },
+          {
+            "equipmentId": "AEDE2ACC-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "NaCl",
+            "unit": "Bottle",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "DED94F74-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "NaOH",
+            "unit": "Bottle",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "60CD3693-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "Sulfuric acid",
+            "unit": "Bottle",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "2FDD70AE-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "Wagner’s reagents 1%",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 2,
+            "totalCost": 4000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "DD501039-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "80% methanol",
+            "unit": "Bottle",
+            "unitCost": 3000,
+            "quantity": 5,
+            "totalCost": 15000
+          },
+          {
+            "equipmentId": "769AC432-D4A8-EC11-B48C-9E87EE2BF542",
+            "name": "Antibiotics",
+            "unit": "number of strip",
+            "unitCost": 7920,
+            "quantity": 10,
+            "totalCost": 79200
+          },
+          {
+            "equipmentId": "A27C347D-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "Chloroform",
+            "unit": "Bottle",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "FECDD42D-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "Distilled water",
+            "unit": "Bottle",
+            "unitCost": 1000,
+            "quantity": 10,
+            "totalCost": 10000
+          },
+          {
+            "equipmentId": "78B7665E-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "Ferric chloride",
+            "unit": "Bottle",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "9EF80DA3-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "Gelatin solution",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 2,
+            "totalCost": 4000
+          },
+          {
+            "equipmentId": "E90895BD-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "Glacial acetic acid",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 2,
+            "totalCost": 4000
+          },
+          {
+            "equipmentId": "913E7647-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "HCl",
+            "unit": "Bottle",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "3000B1FE-D3A8-EC11-B48C-9E87EE2BF542",
+            "name": "Mueller Hinton agar plates and culture media",
+            "unit": "Number",
+            "unitCost": 22000,
+            "quantity": 10,
+            "totalCost": 220000
+          },
+          {
+            "equipmentId": "AEDE2ACC-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "NaCl",
+            "unit": "Bottle",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "DED94F74-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "NaOH",
+            "unit": "Bottle",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "60CD3693-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "Sulfuric acid",
+            "unit": "Bottle",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "2FDD70AE-D2A8-EC11-B48C-9E87EE2BF542",
+            "name": "Wagner’s reagents 1%",
+            "unit": "Bottle",
+            "unitCost": 2000,
+            "quantity": 2,
+            "totalCost": 4000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "AAB44699-4A6D-EC11-B3C8-9E87EE2BF542",
+    "conceptNoteCode": "CET-03-2021/22",
+    "title": "Preparation of Absorbent Cellulose Nano Crystal (CNC) Core for Hygiene Products from Local Saw Dus",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "4AABC151-F4A4-EC11-B47D-9E87EE2BF542",
+            "name": "Laboratory analysis/test",
+            "unit": "for test",
+            "unitCost": 23045,
+            "quantity": 7,
+            "totalCost": 161315
+          },
+          {
+            "equipmentId": "3E5A8472-F4A4-EC11-B47D-9E87EE2BF542",
+            "name": "Materials Purchasing cost",
+            "unit": "liter",
+            "unitCost": 20700,
+            "quantity": 13,
+            "totalCost": 269100
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "4AABC151-F4A4-EC11-B47D-9E87EE2BF542",
+            "name": "Laboratory analysis/test",
+            "unit": "for test",
+            "unitCost": 23045,
+            "quantity": 7,
+            "totalCost": 161315
+          },
+          {
+            "equipmentId": "3E5A8472-F4A4-EC11-B47D-9E87EE2BF542",
+            "name": "Materials Purchasing cost",
+            "unit": "liter",
+            "unitCost": 20700,
+            "quantity": 13,
+            "totalCost": 269100
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "68A0225D-8A73-EC11-B3E2-9E87EE2BF542",
+    "conceptNoteCode": "CNCS-30-2021/22",
+    "title": "Potential Assessment and Mapping of Hybrid Energy Resources inaround Gurage zone",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "D6A92F02-BFA9-EC11-B490-9E87EE2BF542",
+            "name": "RM Young 05103-Wind monitor rent cost",
+            "unit": "Birr",
+            "unitCost": 49200,
+            "quantity": 49200,
+            "totalCost": 2420640000,
+            "check": "unusually large total"
+          },
+          {
+            "equipmentId": "FC5854EF-BEA9-EC11-B490-9E87EE2BF542",
+            "name": "SR05-D1A3 pyranometer rent cost",
+            "unit": "Birr",
+            "unitCost": 34200,
+            "quantity": 34200,
+            "totalCost": 1169640000,
+            "check": "unusually large total"
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "D6A92F02-BFA9-EC11-B490-9E87EE2BF542",
+            "name": "RM Young 05103-Wind monitor rent cost",
+            "unit": "Birr",
+            "unitCost": 49200,
+            "quantity": 49200,
+            "totalCost": 2420640000,
+            "check": "unusually large total"
+          },
+          {
+            "equipmentId": "FC5854EF-BEA9-EC11-B490-9E87EE2BF542",
+            "name": "SR05-D1A3 pyranometer rent cost",
+            "unit": "Birr",
+            "unitCost": 34200,
+            "quantity": 34200,
+            "totalCost": 1169640000,
+            "check": "unusually large total"
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "82C7529A-8C73-EC11-B3E2-9E87EE2BF542",
+    "conceptNoteCode": "CMHS-57-2021/22",
+    "title": "The effect of orange fleshed sweet potato on serum retinol level among under five children in Gurage zone",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "CF8906A2-97BC-EC11-B4EF-9E87EE2BF542",
+            "name": "70% alcohol",
+            "unit": "Number",
+            "unitCost": 2700,
+            "quantity": 1,
+            "totalCost": 2700
+          },
+          {
+            "equipmentId": "1EE76479-97BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Cotton (roll)",
+            "unit": "Number",
+            "unitCost": 2700,
+            "quantity": 1,
+            "totalCost": 2700
+          },
+          {
+            "equipmentId": "E7E2C397-97BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Disposable Glove",
+            "unit": "Number",
+            "unitCost": 12650,
+            "quantity": 1,
+            "totalCost": 12650
+          },
+          {
+            "equipmentId": "3B355FC5-97BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Ice pack",
+            "unit": "Number",
+            "unitCost": 15120,
+            "quantity": 1,
+            "totalCost": 15120
+          },
+          {
+            "equipmentId": "1E23F933-98BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Orange flesh potato",
+            "unit": "Number",
+            "unitCost": 115000,
+            "quantity": 1,
+            "totalCost": 115000
+          },
+          {
+            "equipmentId": "48B4401B-98BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Retinol level investigation cost",
+            "unit": "Number",
+            "unitCost": 1723500,
+            "quantity": 1,
+            "totalCost": 1723500
+          },
+          {
+            "equipmentId": "3CD8AE55-97BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Serum separator tube(SST) 100 psc",
+            "unit": "Number",
+            "unitCost": 9200,
+            "quantity": 1,
+            "totalCost": 9200
+          },
+          {
+            "equipmentId": "96ECD867-97BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Sirnge 5 ml",
+            "unit": "Number",
+            "unitCost": 8050,
+            "quantity": 1,
+            "totalCost": 8050
+          },
+          {
+            "equipmentId": "2FBA03AE-97BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Test tube tack",
+            "unit": "Number",
+            "unitCost": 80500,
+            "quantity": 1,
+            "totalCost": 80500
+          },
+          {
+            "equipmentId": "2DDDD9BA-97BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Vaccine carrier",
+            "unit": "Number",
+            "unitCost": 31500,
+            "quantity": 1,
+            "totalCost": 31500
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "CF8906A2-97BC-EC11-B4EF-9E87EE2BF542",
+            "name": "70% alcohol",
+            "unit": "Number",
+            "unitCost": 2700,
+            "quantity": 1,
+            "totalCost": 2700
+          },
+          {
+            "equipmentId": "1EE76479-97BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Cotton (roll)",
+            "unit": "Number",
+            "unitCost": 2700,
+            "quantity": 1,
+            "totalCost": 2700
+          },
+          {
+            "equipmentId": "E7E2C397-97BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Disposable Glove",
+            "unit": "Number",
+            "unitCost": 12650,
+            "quantity": 1,
+            "totalCost": 12650
+          },
+          {
+            "equipmentId": "3B355FC5-97BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Ice pack",
+            "unit": "Number",
+            "unitCost": 15120,
+            "quantity": 1,
+            "totalCost": 15120
+          },
+          {
+            "equipmentId": "1E23F933-98BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Orange flesh potato",
+            "unit": "Number",
+            "unitCost": 115000,
+            "quantity": 1,
+            "totalCost": 115000
+          },
+          {
+            "equipmentId": "48B4401B-98BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Retinol level investigation cost",
+            "unit": "Number",
+            "unitCost": 1723500,
+            "quantity": 1,
+            "totalCost": 1723500
+          },
+          {
+            "equipmentId": "3CD8AE55-97BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Serum separator tube(SST) 100 psc",
+            "unit": "Number",
+            "unitCost": 9200,
+            "quantity": 1,
+            "totalCost": 9200
+          },
+          {
+            "equipmentId": "96ECD867-97BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Sirnge 5 ml",
+            "unit": "Number",
+            "unitCost": 8050,
+            "quantity": 1,
+            "totalCost": 8050
+          },
+          {
+            "equipmentId": "2FBA03AE-97BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Test tube tack",
+            "unit": "Number",
+            "unitCost": 80500,
+            "quantity": 1,
+            "totalCost": 80500
+          },
+          {
+            "equipmentId": "2DDDD9BA-97BC-EC11-B4EF-9E87EE2BF542",
+            "name": "Vaccine carrier",
+            "unit": "Number",
+            "unitCost": 31500,
+            "quantity": 1,
+            "totalCost": 31500
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "1AC269C2-AC6E-EC11-B3D4-9E87EE2BF542",
+    "conceptNoteCode": "CET-09-2021/22",
+    "title": "MODELING AND EXPERIMENTAL INVESTIGATION OF AUTOMATED SOLAR MILK COOLER FOR DAIRY FARMERS AROUND GURAGE ZONE",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "518D3A3F-D692-EC11-B44A-9E87EE2BF542",
+            "name": "Aluminium sheet",
+            "unit": "Meter",
+            "unitCost": 5000,
+            "quantity": 15,
+            "totalCost": 75000
+          },
+          {
+            "equipmentId": "0268CEE5-D592-EC11-B44A-9E87EE2BF542",
+            "name": "Battery",
+            "unit": "Pcs",
+            "unitCost": 10000,
+            "quantity": 2,
+            "totalCost": 20000
+          },
+          {
+            "equipmentId": "9B2DD6F3-D592-EC11-B44A-9E87EE2BF542",
+            "name": "Charge Controller",
+            "unit": "Pcs",
+            "unitCost": 10000,
+            "quantity": 2,
+            "totalCost": 20000
+          },
+          {
+            "equipmentId": "DA3C6909-D692-EC11-B44A-9E87EE2BF542",
+            "name": "Compressor",
+            "unit": "Pcs",
+            "unitCost": 60000,
+            "quantity": 2,
+            "totalCost": 120000
+          },
+          {
+            "equipmentId": "DF82417B-D592-EC11-B44A-9E87EE2BF542",
+            "name": "Consumable",
+            "unit": "Pcs",
+            "unitCost": 30000,
+            "quantity": 10,
+            "totalCost": 300000
+          },
+          {
+            "equipmentId": "275AE11F-D692-EC11-B44A-9E87EE2BF542",
+            "name": "Copper Coil",
+            "unit": "Meter",
+            "unitCost": 5000,
+            "quantity": 15,
+            "totalCost": 75000
+          },
+          {
+            "equipmentId": "9CD58B70-D692-EC11-B44A-9E87EE2BF542",
+            "name": "electrodes",
+            "unit": "Pack",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "87D50867-D692-EC11-B44A-9E87EE2BF542",
+            "name": "fiber glass",
+            "unit": "Roll",
+            "unitCost": 10000,
+            "quantity": 5,
+            "totalCost": 50000
+          },
+          {
+            "equipmentId": "751418BE-D592-EC11-B44A-9E87EE2BF542",
+            "name": "Inverter",
+            "unit": "Pcs",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "418C3A9C-D592-EC11-B44A-9E87EE2BF542",
+            "name": "Micro controller development kit",
+            "unit": "Pcs",
+            "unitCost": 20000,
+            "quantity": 5,
+            "totalCost": 100000
+          },
+          {
+            "equipmentId": "E4BF5E85-D592-EC11-B44A-9E87EE2BF542",
+            "name": "Microcontroller",
+            "unit": "Pcs",
+            "unitCost": 20000,
+            "quantity": 5,
+            "totalCost": 100000
+          },
+          {
+            "equipmentId": "37C91FB5-D592-EC11-B44A-9E87EE2BF542",
+            "name": "moter drivers",
+            "unit": "Pcs",
+            "unitCost": 5000,
+            "quantity": 2,
+            "totalCost": 10000
+          },
+          {
+            "equipmentId": "0400B5CA-D592-EC11-B44A-9E87EE2BF542",
+            "name": "PV Pannel",
+            "unit": "Pcs",
+            "unitCost": 30000,
+            "quantity": 4,
+            "totalCost": 120000
+          },
+          {
+            "equipmentId": "D8D8DED1-D692-EC11-B44A-9E87EE2BF542",
+            "name": "Softwares",
+            "unit": "Pcs",
+            "unitCost": 54000,
+            "quantity": 5,
+            "totalCost": 270000
+          },
+          {
+            "equipmentId": "24EF554C-D692-EC11-B44A-9E87EE2BF542",
+            "name": "stainless steel",
+            "unit": "Meter",
+            "unitCost": 10000,
+            "quantity": 20,
+            "totalCost": 200000
+          },
+          {
+            "equipmentId": "7B70C1A4-D592-EC11-B44A-9E87EE2BF542",
+            "name": "Temperature sensor",
+            "unit": "Pcs",
+            "unitCost": 5000,
+            "quantity": 10,
+            "totalCost": 50000
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "518D3A3F-D692-EC11-B44A-9E87EE2BF542",
+            "name": "Aluminium sheet",
+            "unit": "Meter",
+            "unitCost": 5000,
+            "quantity": 15,
+            "totalCost": 75000
+          },
+          {
+            "equipmentId": "0268CEE5-D592-EC11-B44A-9E87EE2BF542",
+            "name": "Battery",
+            "unit": "Pcs",
+            "unitCost": 10000,
+            "quantity": 2,
+            "totalCost": 20000
+          },
+          {
+            "equipmentId": "9B2DD6F3-D592-EC11-B44A-9E87EE2BF542",
+            "name": "Charge Controller",
+            "unit": "Pcs",
+            "unitCost": 10000,
+            "quantity": 2,
+            "totalCost": 20000
+          },
+          {
+            "equipmentId": "DA3C6909-D692-EC11-B44A-9E87EE2BF542",
+            "name": "Compressor",
+            "unit": "Pcs",
+            "unitCost": 60000,
+            "quantity": 2,
+            "totalCost": 120000
+          },
+          {
+            "equipmentId": "DF82417B-D592-EC11-B44A-9E87EE2BF542",
+            "name": "Consumable",
+            "unit": "Pcs",
+            "unitCost": 30000,
+            "quantity": 10,
+            "totalCost": 300000
+          },
+          {
+            "equipmentId": "275AE11F-D692-EC11-B44A-9E87EE2BF542",
+            "name": "Copper Coil",
+            "unit": "Meter",
+            "unitCost": 5000,
+            "quantity": 15,
+            "totalCost": 75000
+          },
+          {
+            "equipmentId": "9CD58B70-D692-EC11-B44A-9E87EE2BF542",
+            "name": "electrodes",
+            "unit": "Pack",
+            "unitCost": 1000,
+            "quantity": 2,
+            "totalCost": 2000
+          },
+          {
+            "equipmentId": "87D50867-D692-EC11-B44A-9E87EE2BF542",
+            "name": "fiber glass",
+            "unit": "Roll",
+            "unitCost": 10000,
+            "quantity": 5,
+            "totalCost": 50000
+          },
+          {
+            "equipmentId": "751418BE-D592-EC11-B44A-9E87EE2BF542",
+            "name": "Inverter",
+            "unit": "Pcs",
+            "unitCost": 5000,
+            "quantity": 1,
+            "totalCost": 5000
+          },
+          {
+            "equipmentId": "418C3A9C-D592-EC11-B44A-9E87EE2BF542",
+            "name": "Micro controller development kit",
+            "unit": "Pcs",
+            "unitCost": 20000,
+            "quantity": 5,
+            "totalCost": 100000
+          },
+          {
+            "equipmentId": "E4BF5E85-D592-EC11-B44A-9E87EE2BF542",
+            "name": "Microcontroller",
+            "unit": "Pcs",
+            "unitCost": 20000,
+            "quantity": 5,
+            "totalCost": 100000
+          },
+          {
+            "equipmentId": "37C91FB5-D592-EC11-B44A-9E87EE2BF542",
+            "name": "moter drivers",
+            "unit": "Pcs",
+            "unitCost": 5000,
+            "quantity": 2,
+            "totalCost": 10000
+          },
+          {
+            "equipmentId": "0400B5CA-D592-EC11-B44A-9E87EE2BF542",
+            "name": "PV Pannel",
+            "unit": "Pcs",
+            "unitCost": 30000,
+            "quantity": 4,
+            "totalCost": 120000
+          },
+          {
+            "equipmentId": "D8D8DED1-D692-EC11-B44A-9E87EE2BF542",
+            "name": "Softwares",
+            "unit": "Pcs",
+            "unitCost": 54000,
+            "quantity": 5,
+            "totalCost": 270000
+          },
+          {
+            "equipmentId": "24EF554C-D692-EC11-B44A-9E87EE2BF542",
+            "name": "stainless steel",
+            "unit": "Meter",
+            "unitCost": 10000,
+            "quantity": 20,
+            "totalCost": 200000
+          },
+          {
+            "equipmentId": "7B70C1A4-D592-EC11-B44A-9E87EE2BF542",
+            "name": "Temperature sensor",
+            "unit": "Pcs",
+            "unitCost": 5000,
+            "quantity": 10,
+            "totalCost": 50000
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "conceptNoteId": "CB80F643-3F6D-EC11-B3C8-9E87EE2BF542",
+    "conceptNoteCode": "CANR-01-2021/22",
+    "title": "Bio-slurry effect of biogas in enset production and its socio-economic impact in Gurage zone, Ethiopia.",
+    "phases": [
+      {
+        "phaseNo": 1,
+        "equipment": [
+          {
+            "equipmentId": "8C34BE82-A090-EC11-B43F-9E87EE2BF542",
+            "name": "Equipment and material types costs",
+            "unit": null,
+            "unitCost": 93500,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "4E72C904-FEB6-EC11-B4CC-9E87EE2BF542",
+            "name": "Laboratory analysis Cost",
+            "unit": "Number",
+            "unitCost": 223200,
+            "quantity": 1,
+            "totalCost": 223200
+          }
+        ]
+      },
+      {
+        "phaseNo": 2,
+        "equipment": [
+          {
+            "equipmentId": "8C34BE82-A090-EC11-B43F-9E87EE2BF542",
+            "name": "Equipment and material types costs",
+            "unit": null,
+            "unitCost": 93500,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "4E72C904-FEB6-EC11-B4CC-9E87EE2BF542",
+            "name": "Laboratory analysis Cost",
+            "unit": "Number",
+            "unitCost": 223200,
+            "quantity": 1,
+            "totalCost": 223200
+          }
+        ]
+      },
+      {
+        "phaseNo": 3,
+        "equipment": [
+          {
+            "equipmentId": "8C34BE82-A090-EC11-B43F-9E87EE2BF542",
+            "name": "Equipment and material types costs",
+            "unit": null,
+            "unitCost": 93500,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "4E72C904-FEB6-EC11-B4CC-9E87EE2BF542",
+            "name": "Laboratory analysis Cost",
+            "unit": "Number",
+            "unitCost": 223200,
+            "quantity": 1,
+            "totalCost": 223200
+          }
+        ]
+      },
+      {
+        "phaseNo": 4,
+        "equipment": [
+          {
+            "equipmentId": "8C34BE82-A090-EC11-B43F-9E87EE2BF542",
+            "name": "Equipment and material types costs",
+            "unit": null,
+            "unitCost": 93500,
+            "quantity": 0,
+            "totalCost": 0
+          },
+          {
+            "equipmentId": "4E72C904-FEB6-EC11-B4CC-9E87EE2BF542",
+            "name": "Laboratory analysis Cost",
+            "unit": "Number",
+            "unitCost": 223200,
+            "quantity": 1,
+            "totalCost": 223200
+          }
+        ]
+      }
+    ]
+  }
+]

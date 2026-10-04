@@ -19,10 +19,13 @@ const SaveEquipment = ({
     onComplete,
     onHide
 }: EntitySaveDialogProps<PhaseEquipment>) => {
+    const initialUnit = item?.unit ?? EquipmentUnit.number;
+
     const [localEquipment, setLocalEquipment] = useState<PhaseEquipment>({
         ...item,
         itemName: item?.itemName ?? '',
-        unit: item?.unit ?? EquipmentUnit.number,
+        unit: initialUnit,
+        packSize: initialUnit === EquipmentUnit.number ? 1 : (item?.packSize ?? 1),
         quantity: item?.quantity ?? 1,
         unitPrice: item?.unitPrice ?? 0,
         status: item?.status ?? PhaseEquipmentStatus.planned
@@ -33,10 +36,12 @@ const SaveEquipment = ({
     const toast = useRef<Toast>(null);
 
     useEffect(() => {
+        const newUnit = item?.unit ?? EquipmentUnit.number;
         setLocalEquipment({
             ...item,
             itemName: item?.itemName ?? '',
-            unit: item?.unit ?? EquipmentUnit.number,
+            unit: newUnit,
+            packSize: newUnit === EquipmentUnit.number ? 1 : (item?.packSize ?? 1),
             quantity: item?.quantity ?? 1,
             unitPrice: item?.unitPrice ?? 0,
             status: item?.status ?? PhaseEquipmentStatus.planned
@@ -55,7 +60,7 @@ const SaveEquipment = ({
     }));
 
     // Calculate total cost dynamically
-    const totalCost = (localEquipment.quantity || 0) * (localEquipment.unitPrice || 0);
+    const totalCost = (localEquipment.quantity || 0) * (localEquipment.unitPrice || 0); // * (localEquipment.packSize ?? 1);
 
     const handleSave = async () => {
         setSubmitted(true);
@@ -132,7 +137,7 @@ const SaveEquipment = ({
                                 {localEquipment._id ? 'Edit Equipment' : 'New Equipment'}
                             </span>
                             <div className="text-sm text-color-secondary font-normal">
-                                Configure item name, description, units, pricing, and status.
+                                Configure item name, description, units, pack size, pricing, and status.
                             </div>
                         </div>
                     </div>
@@ -181,7 +186,7 @@ const SaveEquipment = ({
                         )}
                     </div>
 
-                    {/* Unit & Quantity */}
+                    {/* Unit & Pack Size */}
                     <div className="field col-12 md:col-6 mb-3">
                         <label htmlFor="unit" className="font-bold block mb-2">
                             Unit <span className="text-red-500">*</span>
@@ -190,12 +195,40 @@ const SaveEquipment = ({
                             id="unit"
                             value={localEquipment.unit}
                             options={unitOptions}
-                            onChange={(e) => setLocalEquipment({ ...localEquipment, unit: e.value })}
+                            onChange={(e) => {
+                                const selectedUnit = e.value;
+                                setLocalEquipment({
+                                    ...localEquipment,
+                                    unit: selectedUnit,
+                                    packSize: selectedUnit === EquipmentUnit.number ? 1 : localEquipment.packSize
+                                });
+                            }}
                             placeholder="Select unit"
                             className={classNames({ 'p-invalid': submitted && !localEquipment.unit })}
                         />
                     </div>
 
+                    <div className="field col-12 md:col-6 mb-3">
+                        <label htmlFor="packSize" className="font-bold block mb-2">
+                            Pack Size <span className="text-red-500">*</span>
+                        </label>
+                        <InputNumber
+                            id="packSize"
+                            value={localEquipment.unit === EquipmentUnit.number ? 1 : (localEquipment.packSize ?? 1)}
+                            onValueChange={(e) => setLocalEquipment({ ...localEquipment, packSize: e.value ?? 1 })}
+                            useGrouping={false}
+                            min={0.0001}
+                            maxFractionDigits={4}
+                            disabled={localEquipment.unit === EquipmentUnit.number}
+                            placeholder="e.g., 0.5"
+                            className={classNames({ 'p-invalid': submitted && (localEquipment.packSize === undefined || localEquipment.packSize <= 0) })}
+                        />
+                        {submitted && (localEquipment.packSize === undefined || localEquipment.packSize <= 0) && (
+                            <small className="p-error">Pack size must be greater than zero.</small>
+                        )}
+                    </div>
+
+                    {/* Quantity & Unit Price */}
                     <div className="field col-12 md:col-6 mb-3">
                         <label htmlFor="quantity" className="font-bold block mb-2">
                             Quantity <span className="text-red-500">*</span>
@@ -211,7 +244,6 @@ const SaveEquipment = ({
                         />
                     </div>
 
-                    {/* Unit Price & Total Cost Calculation */}
                     <div className="field col-12 md:col-6 mb-3">
                         <label htmlFor="unitPrice" className="font-bold block mb-2">
                             Unit Price (ETB)
@@ -226,7 +258,8 @@ const SaveEquipment = ({
                         />
                     </div>
 
-                    <div className="field col-12 md:col-6 mb-3 flex flex-column justify-content-between">
+                    {/* Total Cost Calculation */}
+                    <div className="field col-12 mb-3 flex flex-column justify-content-between">
                         <label className="font-bold block mb-2">
                             Total Cost
                         </label>

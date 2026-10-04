@@ -22,6 +22,10 @@ export type PhaseEquipment = {
     description: string;
     unit: EquipmentUnit;
     unitPrice?: number;
+    
+    // Amount of `unit` contained in ONE purchasable pack (e.g. 0.5 for a 500g pack in kg).
+    // Defaults to 1 when the item is sold per unit.
+    packSize: number;
     quantity: number;
     requiredBy?: Date;
     status?: PhaseEquipmentStatus;
@@ -50,6 +54,10 @@ export const validatePhaseEquipment = (equipment: PhaseEquipment): { valid: bool
 
     if (!equipment.unit || !Object.values(EquipmentUnit).includes(equipment.unit)) {
         return { valid: false, message: 'A valid unit is required.' };
+    }
+
+    if (equipment.packSize === undefined || equipment.packSize === null || equipment.packSize <= 0) {
+        return { valid: false, message: 'Pack size must be greater than zero.' };
     }
 
     if (equipment.quantity === undefined || equipment.quantity === null || equipment.quantity <= 0) {

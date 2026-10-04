@@ -29,8 +29,8 @@ export interface IPhaseActivity extends Document {
     cost: number;
     detailCost?: IPhaseActivityDetailCost | null;
 
-    startDate: Date;
-    endDate: Date;
+    startDate: Date | null;
+    endDate: Date | null;
 
 
     status: PhaseActivityStatus;
@@ -104,13 +104,14 @@ const PhaseActivitySchema = new Schema<IPhaseActivity>(
         startDate: {
             type: Date,
             required: true,
+            default: null
         },
 
         endDate: {
             type: Date,
             required: true,
+            default: null
         },
-
 
         status: {
             type: String,

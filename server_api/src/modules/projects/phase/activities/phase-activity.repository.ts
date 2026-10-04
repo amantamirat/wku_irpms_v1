@@ -51,7 +51,7 @@ export interface IPhaseActivityRepository {
         phaseId: string
     ): Promise<number>;
 
-
+    getProjectProgressAggregation(projectId: mongoose.Types.ObjectId): any;
 
     delete(
         id: string
@@ -232,6 +232,85 @@ export class PhaseActivityRepository
         return PhaseActivity.countDocuments({
             phase: new mongoose.Types.ObjectId(phaseId),
         }).exec();
+    }
+
+
+    async getProjectProgressAggregation(projectId: mongoose.Types.ObjectId) {
+        return await PhaseActivity.aggregate([
+            {
+                $lookup: {
+                    from: 'phases',
+                    localField: 'phase',
+                    foreignField: '_id',
+                    as: 'phase',
+                },
+            },
+
+            {
+                $unwind: '$phase',
+            },
+
+            {
+                $match: {
+                    'phase.project': projectId,
+
+                    status: {
+                        $nin: [
+                            PhaseActivityStatus.cancelled,
+                            PhaseActivityStatus.refused,
+                        ],
+                    },
+                },
+            },
+
+            {
+                $group: {
+                    _id: null,
+
+                    total: {
+                        $sum: 1,
+                    },
+
+                    completed: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $eq: [
+                                        '$status',
+                                        PhaseActivityStatus.completed,
+                                    ],
+                                },
+                                1,
+                                0,
+                            ],
+                        },
+                    },
+
+                    totalCost: {
+                        $sum: {
+                            $ifNull: ['$cost', 0],
+                        },
+                    },
+
+                    completedCost: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $eq: [
+                                        '$status',
+                                        PhaseActivityStatus.completed,
+                                    ],
+                                },
+                                {
+                                    $ifNull: ['$cost', 0],
+                                },
+                                0,
+                            ],
+                        },
+                    },
+                },
+            },
+        ]);
     }
 
 

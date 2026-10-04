@@ -1,43 +1,76 @@
 import { Router } from 'express';
-import { PERMISSIONS } from '../../common/constants/permissions';
-import { projectService } from '../../core/container';
-import { verifyAuthToken } from '../auth/auth.middleware';
-import { checkTransitionPermission } from '../../core/container';
-import { checkPermission } from '../../core/container';
-import { ProjectController } from './project.controller';
-import { upload } from '../../common/middleware/fileUpload.middleware';
 
-const controller = new ProjectController(projectService);
+import { PERMISSIONS } from '../../common/constants/permissions';
+
+import {
+    activityRepo,
+    phaseRepo,
+    projectRepo,
+    projectService
+} from '../../core/container';
+
+import {
+    verifyAuthToken,
+} from '../auth/auth.middleware';
+
+import {
+    checkTransitionPermission,
+    checkPermission,
+} from '../../core/container';
+
+import { ProjectController } from './project.controller';
+
+import { upload } from '../../common/middleware/fileUpload.middleware';
+import { ProjectProgressService } from './project-progress-service';
+
+const controller = new ProjectController(
+    projectService,
+    new ProjectProgressService(projectRepo, phaseRepo, activityRepo)
+);
+
 const router: Router = Router();
 
-//create
-router.post('/', verifyAuthToken,
-    checkPermission([PERMISSIONS.PROJECT.CREATE, PERMISSIONS.PROJECT.CREATE_OWN]),
-    controller.create);
-
+// --------------------------------------------------
+// Create
+// --------------------------------------------------
 
 router.post(
-    "/apply",
+    '/',
     verifyAuthToken,
-    checkPermission("project:apply"),
-    upload.single("file", ["application/pdf"]),
+    checkPermission([
+        PERMISSIONS.PROJECT.CREATE,
+        PERMISSIONS.PROJECT.CREATE_OWN,
+    ]),
+    controller.create
+);
+
+router.post(
+    '/apply',
+    verifyAuthToken,
+    checkPermission('project:apply'),
+    upload.single('file', ['application/pdf']),
     controller.apply
 );
 
+// --------------------------------------------------
+// Fetch / Query
+// --------------------------------------------------
 
-router.get('/', verifyAuthToken,
+router.get(
+    '/',
+    verifyAuthToken,
     checkPermission([PERMISSIONS.PROJECT.READ]),
-    controller.get);
+    controller.get
+);
 
-
-//Put the /me route before /:id:
+// Put /me before /:id
 router.get(
     '/me',
     verifyAuthToken,
     controller.getMyProjects
 );
 
-// lookup projects
+// Lookup projects
 router.get(
     '/lookup',
     verifyAuthToken,
@@ -45,24 +78,65 @@ router.get(
     controller.lookup
 );
 
-router.get('/:id', verifyAuthToken,
+// --------------------------------------------------
+// Project Progress
+// --------------------------------------------------
+
+router.get(
+    '/:id/progress',
+    verifyAuthToken,
+    checkPermission([PERMISSIONS.PROJECT.READ]),
+    controller.getProgress
+);
+
+// --------------------------------------------------
+// Get by ID
+// --------------------------------------------------
+
+router.get(
+    '/:id',
+    verifyAuthToken,
     checkPermission([PERMISSIONS.PROJECT.LOOKUP]),
-    controller.getById);
+    controller.getById
+);
 
+// --------------------------------------------------
+// Update
+// --------------------------------------------------
 
-//update    
-router.put('/:id', verifyAuthToken,
-    checkPermission([PERMISSIONS.PROJECT.UPDATE, PERMISSIONS.PROJECT.UPDATE_OWN]),
-    controller.update);
+router.put(
+    '/:id',
+    verifyAuthToken,
+    checkPermission([
+        PERMISSIONS.PROJECT.UPDATE,
+        PERMISSIONS.PROJECT.UPDATE_OWN,
+    ]),
+    controller.update
+);
 
-//update status
-router.patch('/:id', verifyAuthToken,
-    checkTransitionPermission("project"),
-    controller.transitionState);
+// --------------------------------------------------
+// Transition
+// --------------------------------------------------
 
-//delete
-router.delete('/:id', verifyAuthToken,
-    checkPermission([PERMISSIONS.PROJECT.DELETE, PERMISSIONS.PROJECT.DELETE_OWN]),
-    controller.delete);
+router.patch(
+    '/:id',
+    verifyAuthToken,
+    checkTransitionPermission('project'),
+    controller.transitionState
+);
+
+// --------------------------------------------------
+// Delete
+// --------------------------------------------------
+
+router.delete(
+    '/:id',
+    verifyAuthToken,
+    checkPermission([
+        PERMISSIONS.PROJECT.DELETE,
+        PERMISSIONS.PROJECT.DELETE_OWN,
+    ]),
+    controller.delete
+);
 
 export default router;

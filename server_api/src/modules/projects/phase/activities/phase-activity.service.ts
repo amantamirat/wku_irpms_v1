@@ -167,6 +167,13 @@ export class PhaseActivityService {
                 ERROR_CODES.PHASE_NOT_FOUND
             );
 
+        if (
+            phaseDoc.status === PhaseStatus.completed
+        ) {
+            throw new AppError(
+                ERROR_CODES.PHASE_ALREADY_COMPLETED
+            );
+        }
 
 
         const projectId =
@@ -190,7 +197,7 @@ export class PhaseActivityService {
                     ERROR_CODES.PHASE_NOT_PROPOSED
                 );
             }
-            
+
             if (projectDoc.status !== ProjectStatus.draft) {
                 throw new AppError(
                     ERROR_CODES.PROJECT_NOT_DRAFT
@@ -205,34 +212,6 @@ export class PhaseActivityService {
     }
 
 
-    // ---------------------------------------------------
-    // HELPERS
-    // ---------------------------------------------------
-
-    /**
-     * Duration in days, inclusive of both start and end date
-     * (same day => 1 day). Dates are normalised to UTC midnight
-     * so time-of-day and DST don't affect the result.
-     */
-    private calculateDuration(startDate: Date, endDate: Date): number {
-        const start = new Date(startDate);
-        const end = new Date(endDate);
-
-        if (isNaN(start.getTime()) || isNaN(end.getTime()) || end < start) {
-            throw new AppError(ERROR_CODES.PHASE_ACTIVITY_INVALID_DATES);
-        }
-
-        const MS_PER_DAY = 24 * 60 * 60 * 1000;
-
-        const startUtc = Date.UTC(
-            start.getUTCFullYear(), start.getUTCMonth(), start.getUTCDate()
-        );
-        const endUtc = Date.UTC(
-            end.getUTCFullYear(), end.getUTCMonth(), end.getUTCDate()
-        );
-
-        return Math.round((endUtc - startUtc) / MS_PER_DAY) + 1;
-    }
 
     /**
      * If detailCost is provided: participants * unitPrice * duration must equal cost.

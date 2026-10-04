@@ -9,15 +9,18 @@ import { AuthScope } from "../../auth/auth.types";
 import ScopeFilterService from "../../../common/services/scope-filter.service";
 import { NotificationService } from "../../notifications/notification.service";
 import { ProjectAuth } from "../../projects/project.auth";
-import { ProjectStatus } from "../../projects/project.model";
+import { IProject, ProjectStatus } from "../../projects/project.model";
 import { IProjectRepository } from "../../projects/project.repository";
 import { IReviewerRepository } from "../../reviewers/reviewer.repository";
 import { ReviewerStatus } from "../../reviewers/reviewer.state-machine";
-import { VerificationConfigurationStatus } from "../verification-conf/verification-conf.model";
+import { IVerificationConfiguration, VerificationConfigurationStatus } from "../verification-conf/verification-conf.model";
 import { IVerificationConfigurationRepository } from "../verification-conf/verification-conf.repository";
 import { CreateVerificationDTO, FilterVerification } from "./verification.dto";
 import { IVerification, VerificationStatus } from "./verification.model";
 import { IVerificationRepository } from "./verification.repository";
+import { FileStorageService } from "../../../common/services/file-storage.service";
+import path from "path";
+import { randomUUID } from "crypto";
 
 
 export class VerificationService {
@@ -30,161 +33,143 @@ export class VerificationService {
         private readonly projectAuth: ProjectAuth,
         private readonly notificationService: NotificationService,
         private readonly scopeFilterService: ScopeFilterService,
+        private readonly fileStorage: FileStorageService
     ) { }
     // --------------------------------------------------
     // CREATE VERIFICATION
     // --------------------------------------------------
     async create(
         dto: CreateVerificationDTO,
-        documentPath: string,
-        userId: string
+        userId: string,
+        file: Express.Multer.File
     ): Promise<IVerification> {
-        // ----------------------------------------------
-        // 1. Find project
-        // ----------------------------------------------
-        const { project } = dto;
-        const { projectDoc, isLeadPI } = await this.projectAuth.auth(project, userId, PERMISSIONS.VERIFICATION.CREATE);
-
-        // ----------------------------------------------
-        // 2. Project must be completed
-        // ----------------------------------------------
-        if (
-            projectDoc.status !==
-            ProjectStatus.completed
-        ) {
-            throw new AppError(
-                ERROR_CODES.PROJECT_NOT_COMPLETED
+        try {
+            // 1. Find project
+            const { project } = dto;
+            const { projectDoc, isLeadPI } = await this.projectAuth.auth(
+                project,
+                userId,
+                PERMISSIONS.VERIFICATION.CREATE
             );
-        }
-        // ----------------------------------------------
-        // 3. Get verification configuration
-        // ----------------------------------------------
-        const configuration =
-            await this.verificationConfRepo.findOneByGrant(
+
+            // 2. Project must be completed
+            if (projectDoc.status !== ProjectStatus.completed) {
+                throw new AppError(ERROR_CODES.PROJECT_NOT_COMPLETED);
+            }
+
+            // 3. Get verification configuration
+            const configuration = await this.verificationConfRepo.findOneByGrant(
                 String(projectDoc.grant)
             );
-
-        if (!configuration) {
-            throw new AppError(
-                ERROR_CODES.VERIFICATION_CONFIGURATION_NOT_FOUND
-            );
-        }
-
-        if (isLeadPI) {
-            // ----------------------------------------------
-            // 4. Configuration must be active
-            // ----------------------------------------------
-            if (
-                configuration.status !==
-                VerificationConfigurationStatus.active
-            ) {
-                throw new AppError(
-                    ERROR_CODES.VERIFICATION_CONFIGURATION_INACTIVE
-                );
+            if (!configuration) {
+                throw new AppError(ERROR_CODES.VERIFICATION_CONFIGURATION_NOT_FOUND);
             }
-            // ----------------------------------------------
-            // 5. Check deadline
-            // ----------------------------------------------
-            const now = new Date();
-            if (
-                now >
-                new Date(configuration.deadline)
-            ) {
-                throw new AppError(
-                    ERROR_CODES.VERIFICATION_DEADLINE_EXPIRED
-                );
+
+            if (isLeadPI) {
+                // 4. Configuration must be active
+                if (configuration.status !== VerificationConfigurationStatus.active) {
+                    throw new AppError(ERROR_CODES.VERIFICATION_CONFIGURATION_INACTIVE);
+                }
+                // 5. Check deadline
+                if (new Date() > new Date(configuration.deadline)) {
+                    throw new AppError(ERROR_CODES.VERIFICATION_DEADLINE_EXPIRED);
+                }
             }
-        }
 
-        // ----------------------------------------------
-        // 6. Check current verification
-        // ----------------------------------------------
-        let attempt = 1;
+            // 6. Check current verification
+            let attempt = 1;
 
-        if (projectDoc.currentVerification) {
-
-            const currentVerification =
-                await this.repository.findById(
+            if (projectDoc.currentVerification) {
+                const currentVerification = await this.repository.findById(
                     String(projectDoc.currentVerification)
                 );
+                if (!currentVerification) {
+                    throw new AppError(ERROR_CODES.VERIFICATION_NOT_FOUND);
+                }
+                if (currentVerification.status === VerificationStatus.submitted) {
+                    throw new AppError(ERROR_CODES.VERIFICATION_ALREADY_EXISTS);
+                }
+                if (currentVerification.status === VerificationStatus.verified) {
+                    throw new AppError(ERROR_CODES.VERIFICATION_ALREADY_VERIFIED);
+                }
+                if (currentVerification.status === VerificationStatus.rejected) {
+                    attempt = currentVerification.attempt + 1;
+                }
+            }
 
-            if (!currentVerification) {
+            // 7. Check maximum attempts
+            if (attempt > configuration.maxAttempts) {
                 throw new AppError(
-                    ERROR_CODES.VERIFICATION_NOT_FOUND
+                    ERROR_CODES.VERIFICATION_MAX_ATTEMPTS_REACHED,
+                    "Maximum verification attempts reached. No further submissions are allowed."
                 );
             }
-            // ------------------------------------------
-            // Current verification is still active
-            // ------------------------------------------
-            if (
-                currentVerification.status ===
-                VerificationStatus.submitted
-            ) {
-                throw new AppError(
-                    ERROR_CODES.VERIFICATION_ALREADY_EXISTS
-                );
-            }
-            // ------------------------------------------
-            // Already successfully verified
-            // ------------------------------------------
-            if (
-                currentVerification.status ===
-                VerificationStatus.verified
-            ) {
-                throw new AppError(
-                    ERROR_CODES.VERIFICATION_ALREADY_VERIFIED
-                );
-            }
-            // ------------------------------------------
-            // Previous attempt failed
-            // ------------------------------------------
-            if (
-                currentVerification.status ===
-                VerificationStatus.rejected
-            ) {
-                attempt =
-                    currentVerification.attempt + 1;
-            }
-        }
-        // ----------------------------------------------
-        // 7. Check maximum attempts
-        // ----------------------------------------------
-        if (
-            attempt >
-            configuration.maxAttempts
-        ) {
-            throw new AppError(
-                ERROR_CODES.VERIFICATION_MAX_ATTEMPTS_REACHED,
-                "Maximum verification attempts reached. No further submissions are allowed."
+
+            // Validation passed; nothing has been moved yet
+            return await this.internalCreate(
+                dto,
+                userId,
+                projectDoc,
+                configuration,
+                attempt,
+                file
             );
+        } catch (error) {
+            // No-op if internalCreate already moved the file
+            await this.fileStorage.discardTemp(file.path);
+            throw error;
         }
-        // ----------------------------------------------
-        // 8. Create verification
-        // ----------------------------------------------
-        const verification =
-            await this.repository.create({
+    }
+
+    async internalCreate(
+        data: CreateVerificationDTO,
+        userId: string,
+        projectDoc: IProject,
+        configuration: IVerificationConfiguration,
+        attempt: number,
+        file: Express.Multer.File
+    ): Promise<IVerification> {
+        let savedPath: string | null = null;
+        let verification: IVerification;
+
+        try {
+            // 8. Move file from temp into permanent storage
+            const ext = path.extname(file.originalname).toLowerCase();
+            savedPath = await this.fileStorage.move(
+                file.path,
+                `projects/${String(projectDoc._id)}/verifications`,
+                `${randomUUID()}${ext}`
+            );
+
+            // 9. Create verification (path is stored on the verification)
+            verification = await this.repository.create({
                 project: String(projectDoc._id),
                 configuration: configuration._id,
                 attempt,
                 status: VerificationStatus.submitted,
-                documentPath
+                documentPath: savedPath
             });
-        // ----------------------------------------------
-        // 9. Set as current verification
-        // ----------------------------------------------
-        await this.projectRepo.update(
-            String(projectDoc._id), { currentVerification: String(verification._id) }
+
+            // 10. Set as current verification
+            await this.projectRepo.update(String(projectDoc._id), {
+                currentVerification: String(verification._id)
+            });
+        } catch (err: any) {
+            if (savedPath) await this.fileStorage.delete(savedPath);
+            await this.fileStorage.discardTemp(file.path);
+
+            if (err?.code === 11000) {
+                throw new AppError(ERROR_CODES.VERIFICATION_ALREADY_EXISTS);
+            }
+            throw err;
+        }
+
+        // Past the point of no return: the verification exists, so failures
+        // below must not delete the file.
+        await this.notificationService.notifyVerificationSubmitted(
+            String(projectDoc.leadPI),
+            projectDoc.title
         );
-        // ----------------------------------------------
-        // 10. Send notification
-        // ----------------------------------------------
-
-        await this.notificationService
-            .notifyVerificationSubmitted(
-                String(projectDoc.leadPI),
-                projectDoc.title
-            );
-
 
         return verification;
     }

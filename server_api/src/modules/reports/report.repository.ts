@@ -1,11 +1,10 @@
-import { COLLECTIONS } from "../../common/constants/collections.enum";
 import { ScopeFilter } from "../auth/auth.types";
 import { FundingSource, Grant } from "../grants/grant.model";
 import { Verification, VerificationStatus } from "../grants/verifications/verification.model";
 import { Application, ApplicationStatus } from "../projects/applications/application.model";
 import { Phase, PhaseStatus } from "../projects/phase/phase.model";
 import { Project, ProjectStatus } from "../projects/project.model";
-import { Reviewer, ReviewerTargetType } from "../reviewers/reviewer.model";
+import { Reviewer } from "../reviewers/reviewer.model";
 import { ReviewerStatus } from "../reviewers/reviewer.state-machine";
 import { IDashboardReport, IDepartmentReport, IReportFilter, IVerificationReport } from "./report.types";
 
@@ -181,7 +180,16 @@ export class ReportRepository {
                                 0
                             ]
                         }
-                    }
+                    },
+                    verifiedProjects: {
+                        $sum: {
+                            $cond: [
+                                { $eq: ["$status", ProjectStatus.verified] },
+                                1,
+                                0
+                            ]
+                        }
+                    },
                 }
             },
 
@@ -195,6 +203,7 @@ export class ReportRepository {
                     grantedProjects: 1,
                     completedProjects: 1,
                     terminatedProjects: 1,
+                    verifiedProjects: 1,
                 }
             }
         ]);

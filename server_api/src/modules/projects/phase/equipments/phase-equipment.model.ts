@@ -51,9 +51,14 @@ export interface IPhaseEquipment extends Document {
 
     unit: EquipmentUnit;
 
-    // 0 for materials owned by the organization
+    // Amount of `unit` contained in ONE purchasable pack (e.g. 0.5 for a 500g pack in kg).
+    // Defaults to 1 when the item is sold per unit.
+    packSize: number;
+
+    // Price of ONE pack (0 for materials owned by the organization)
     unitPrice: number;
 
+    // Number of packs
     quantity: number;
 
     requiredBy?: Date;
@@ -100,6 +105,16 @@ const PhaseEquipmentSchema = new Schema<IPhaseEquipment>(
             required: true,
         },
 
+        // Amount of `unit` contained in ONE purchasable pack
+        // (e.g. 0.5 for a 500g pack in kg). Defaults to 1 for per-unit items.
+        packSize: {
+            type: Number,
+            min: [0.000001, "packSize must be greater than 0"],
+            default: 1,
+            required: true,
+        },
+
+        // Price of ONE pack (0 for materials owned by the organization)
         unitPrice: {
             type: Number,
             min: 0,
@@ -107,6 +122,7 @@ const PhaseEquipmentSchema = new Schema<IPhaseEquipment>(
             required: true,
         },
 
+        // Number of packs
         quantity: {
             type: Number,
             min: 0,
@@ -148,6 +164,7 @@ const PhaseEquipmentSchema = new Schema<IPhaseEquipment>(
     }
 );
 
+// Total cost = price per pack × number of packs
 PhaseEquipmentSchema.virtual("totalCost").get(function (this: IPhaseEquipment) {
     return (this.unitPrice ?? 0) * (this.quantity ?? 0);
 });

@@ -32,40 +32,109 @@ export class PhaseService {
         private readonly projectAuth: ProjectAuth
     ) { }
 
-    async create(dto: CreatePhaseDto, options?: { skipValidation?: boolean }) {
-        const { project, userId } = dto;
+    async create(
+        dto: CreatePhaseDto,
+        options?: { skipValidation?: boolean }
+    ) {
+        const { project, userId, activities, equipments } = dto;
+
+        // --------------------------------------------------
+        // Authorization / validation
+        // --------------------------------------------------
+
         if (!options?.skipValidation) {
-            if (!userId) { return }
-            const { projectDoc, isLeadPI } = await this.projectAuth.auth(project, userId, PERMISSIONS.PHASE.CREATE);
+            if (!userId) {
+                return;
+            }
+
+            const { projectDoc, isLeadPI } =
+                await this.projectAuth.auth(
+                    project,
+                    userId,
+                    PERMISSIONS.PHASE.CREATE
+                );
+
             if (isLeadPI) {
-                if (
-                    projectDoc.status !== ProjectStatus.draft
-                ) {
-                    throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+                if (projectDoc.status !== ProjectStatus.draft) {
+                    throw new AppError(
+                        ERROR_CODES.PROJECT_NOT_DRAFT
+                    );
                 }
             }
         }
+
         try {
-            const lastPhase = await this.phaseRepo.findLastPhase(project);
+            // --------------------------------------------------
+            // Determine order
+            // --------------------------------------------------
+
+            const lastPhase =
+                await this.phaseRepo.findLastPhase(project);
 
             const order = lastPhase
                 ? lastPhase.order + 1
                 : 1;
 
+            // --------------------------------------------------
+            // Create phase
+            // --------------------------------------------------
+
             const created = await this.phaseRepo.create({
                 ...dto,
                 order
             });
-            if (created) {
-                await this.projectRepo.incrementTotals(project, {
-                    duration: created.duration,
-                    budget: created.budget
-                });
+
+            if (!created) {
+                return;
             }
+
+            // --------------------------------------------------
+            // Create activities
+            // --------------------------------------------------
+
+            if (activities?.length) {
+                await Promise.all(
+                    activities.map(activity =>
+                        this.activityRepo.create({
+                            ...activity,
+                            phase: String(created._id)
+                        })
+                    )
+                );
+            }
+
+
+            // --------------------------------------------------
+            // Create equipments
+            // --------------------------------------------------
+
+            if (equipments?.length) {
+                await Promise.all(
+                    equipments.map(equipment =>
+                        this.equipmentRepo.create({
+                            ...equipment,
+                            phase: String(created._id)
+                        })
+                    )
+                );
+            }
+
+            // --------------------------------------------------
+            // Update project totals
+            // --------------------------------------------------
+
+            await this.projectRepo.incrementTotals(project, {
+                duration: created.duration,
+                budget: created.budget
+            });
+
             return created;
+
         } catch (err: any) {
             if (err?.code === 11000) {
-                throw new AppError(ERROR_CODES.PHASE_ALREADY_EXISTS);
+                throw new AppError(
+                    ERROR_CODES.PHASE_ALREADY_EXISTS
+                );
             }
 
             throw err;
@@ -412,12 +481,20 @@ export class PhaseService {
         if (to === PhaseStatus.completed) {
 
             // -----------------------------------------
+            // Load activities and equipment
+            // -----------------------------------------
+            const [activities, equipment] = await Promise.all([
+                this.activityRepo.find({
+                    phase: phaseDoc._id,
+                }),
+                this.equipmentRepo.find({
+                    phase: phaseDoc._id,
+                }),
+            ]);
+
+            // -----------------------------------------
             // 1. All activities must be completed
             // -----------------------------------------
-            const activities = await this.activityRepo.find({
-                phase: phaseDoc._id,
-            });
-
             if (
                 activities.length === 0 ||
                 activities.some(
@@ -431,14 +508,53 @@ export class PhaseService {
             }
 
             // -----------------------------------------
-            // 2. If equipment exists, all must be delivered
+            // 2. Validate activity duration
             // -----------------------------------------
-            const equipment = await this.equipmentRepo.find({
-                phase: phaseDoc._id,
-            });
+            const activityDuration = activities.reduce(
+                (total, activity) => {
 
+                    if (!activity.startDate || !activity.endDate) {
+                        throw new AppError(
+                            ERROR_CODES.PHASE_ACTIVITY_DATES_REQUIRED
+                        );
+                    }
+
+                    const calculatedDuration =
+                        calculateDurationDays(
+                            activity.startDate,
+                            activity.endDate
+                        );
+
+                    if (calculatedDuration <= 0) {
+                        throw new AppError(
+                            ERROR_CODES.PHASE_ACTIVITY_INVALID_DATES
+                        );
+                    }
+
+                    return total + calculatedDuration;
+                },
+                0
+            );
+
+            // -----------------------------------------
+            // 3. Actual activity duration must equal
+            //    approved phase duration
+            // -----------------------------------------
+            if (
+                activityDuration !==
+                Number(phaseDoc.duration)
+            ) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_DURATION_MISMATCH
+                );
+            }
+
+            // -----------------------------------------
+            // 4. Equipment must be delivered
+            // -----------------------------------------
             const undeliveredEquipment = equipment.find(
-                item => item.status !== PhaseEquipmentStatus.delivered
+                item =>
+                    item.status !== PhaseEquipmentStatus.delivered
             );
 
             if (undeliveredEquipment) {
@@ -448,12 +564,52 @@ export class PhaseService {
             }
 
             // -----------------------------------------
-            // 3. Progress report is required
+            // 5. Calculate activity cost
             // -----------------------------------------
-            const hasProgressReport = await this.phaseDocRepo.exists({
-                phase: String(phaseDoc._id),
-                type: PhaseDocumentType.progressReport,
-            });
+            const activityCost = activities.reduce(
+                (total, activity) =>
+                    total + Number(activity.cost || 0),
+                0
+            );
+
+            // -----------------------------------------
+            // 6. Calculate equipment cost
+            // -----------------------------------------
+            const equipmentCost = equipment.reduce(
+                (total, item) =>
+                    total +
+                    Number(item.unitPrice || 0) *
+                    Number(item.quantity || 0),
+                0
+            );
+
+            // -----------------------------------------
+            // 7. Actual total cost must equal
+            //    approved phase budget
+            // -----------------------------------------
+            const totalCost =
+                activityCost +
+                equipmentCost;
+
+            if (
+                Math.abs(
+                    totalCost -
+                    Number(phaseDoc.budget)
+                ) > 0.01
+            ) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_BUDGET_MISMATCH
+                );
+            }
+
+            // -----------------------------------------
+            // 8. Progress report is required
+            // -----------------------------------------
+            const hasProgressReport =
+                await this.phaseDocRepo.exists({
+                    phase: String(phaseDoc._id),
+                    type: PhaseDocumentType.progressReport,
+                });
 
             if (!hasProgressReport) {
                 throw new AppError(
@@ -461,11 +617,17 @@ export class PhaseService {
                 );
             }
 
+            // -----------------------------------------
+            // 9. Completion report required for
+            //    the final phase
+            // -----------------------------------------
             if (nextPhases.length === 0) {
-                const hasCompletionReport = await this.phaseDocRepo.exists({
-                    phase: String(phaseDoc._id),
-                    type: PhaseDocumentType.completionReport,
-                });
+
+                const hasCompletionReport =
+                    await this.phaseDocRepo.exists({
+                        phase: String(phaseDoc._id),
+                        type: PhaseDocumentType.completionReport,
+                    });
 
                 if (!hasCompletionReport) {
                     throw new AppError(

@@ -15,6 +15,7 @@ import { Project } from "../models/project.model";
 import PhaseManager from "../phases/project/Manager";
 import ReviewersManager from "../../reviewers/project/ReviewersManager";
 import { StatusHistoryWidget } from "@/components/StatusHistoryWidget";
+import ProjectProgress from "./ProjectProgress"; // Import the component
 
 interface ProjectDetailProps {
     project: string | Project;
@@ -97,14 +98,6 @@ export default function ProjectDetail({ project, updateProject, enableEditing, s
         return typeof field === 'object' ? field[labelKey] || field.title : field;
     };
 
-    const getThemeName = (theme: any) => {
-        if (!theme) return '';
-        if (typeof theme === 'object') {
-            return theme.name || theme.title || 'Untitled Theme';
-        }
-        return theme;
-    };
-
     // Tab Configuration
     const tabs = [
         {
@@ -139,7 +132,6 @@ export default function ProjectDetail({ project, updateProject, enableEditing, s
         });
     }
 
-    // Conditionally inject Reviewers Tab if flag is true
     if (showReviewers) {
         tabs.push({
             header: "Reviewers",
@@ -160,7 +152,7 @@ export default function ProjectDetail({ project, updateProject, enableEditing, s
 
     return (
         <div className="surface-card border-round p-3 shadow-1">
-            {/* Header section... (unchanged) */}
+            {/* Header section */}
             <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-center gap-3 pb-3 border-bottom-1 border-200">
                 <div className="flex-1">
                     <h1 className="text-xl md:text-2xl font-bold m-0 mb-2 text-900">
@@ -187,7 +179,7 @@ export default function ProjectDetail({ project, updateProject, enableEditing, s
             </div>
 
             {/* Metrics */}
-            <div className="grid mt-4 mb-4 gap-3 md:gap-0">
+            <div className="grid mt-4 mb-2 gap-3 md:gap-0">
                 <div className="col-12 sm:col-6 md:col-3 p-2">
                     <div className="p-3 surface-100 border-round border-left-3 border-green-500 h-full">
                         <span className="block text-500 text-xs font-bold mb-1 uppercase">Budget Allocation</span>
@@ -217,6 +209,9 @@ export default function ProjectDetail({ project, updateProject, enableEditing, s
                     </div>
                 )}
             </div>
+
+            {/* Modular Project Progress Component */}
+            {projectData?._id && <ProjectProgress projectId={projectData._id} />}
 
             {/* Tabs */}
             <TabView className="mt-2" renderActiveOnly={true}>

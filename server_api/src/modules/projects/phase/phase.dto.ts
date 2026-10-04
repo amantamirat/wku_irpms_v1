@@ -1,3 +1,5 @@
+import { PhaseActivityDto } from "./activities/phase-activity.dto";
+import { PhaseEquipmentDto } from "./equipments/phase-equipment.dto";
 import { PhaseStatus } from "./phase.model";
 
 /*
@@ -11,12 +13,17 @@ export interface PhaseBreakdownDto {
 
 // 2. Base Phase structure
 export interface PhaseDto {
-    title:string;
+    title: string;
     //order: number;           // Added: critical for the unique index {project, order}
     duration: number;        // Total duration of the phase
     budget: number;          // Total budget of the phase
     description: string;
-    //breakdown?: PhaseBreakdownDto[]; // Added: the array of details
+
+    startDate?: Date;
+    endDate?: Date;
+    status?: PhaseStatus;
+    activities?: PhaseActivityDto[]; // Added: the array of details
+    equipments?: PhaseEquipmentDto[];
 }
 
 // ---------- CREATE DTO ----------
@@ -30,12 +37,12 @@ export interface UpdatePhaseDto {
     id: string;              // The Phase ID
     userId: string;
     data: Partial<{
-        title:string;
+        title: string;
         order: number;
         duration: number;
         budget: number;
         description: string;
-       // breakdown: PhaseBreakdownDto[]; // Allows updating the whole array
+        // breakdown: PhaseBreakdownDto[]; // Allows updating the whole array
     }>;
 }
 

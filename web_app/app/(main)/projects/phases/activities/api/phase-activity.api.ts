@@ -13,10 +13,10 @@ export const PhaseActivityApi: EntityApi<PhaseActivity, FilterPhaseActivityOptio
         return data as PhaseActivity[];
     },
 
-    /*
+
     async lookup(options) {
         return ApiClient.get(`${end_point}/lookup`, options);
-    },*/
+    },
 
     async getById(id: string): Promise<PhaseActivity> {
         const url = `${end_point}/${id}`;

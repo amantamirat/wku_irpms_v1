@@ -70,7 +70,7 @@ export class ProjectService {
     ) { }
 
     async create(
-        dto: CreateProjectDTO,
+        dto: CreateProjectDTO & { status?: ProjectStatus },
         userId: string,
         options?: { skipValidation?: boolean }
     ) {
@@ -220,6 +220,9 @@ export class ProjectService {
                         budget: phase.budget,
                         duration: phase.duration,
                         description: phase.description,
+                        activities: phase.activities,
+                        equipments: phase.equipments,
+                        status: phase.status ?? PhaseStatus.proposed,
                         userId
                     },
                     options
@@ -353,6 +356,10 @@ export class ProjectService {
         const { id, data } = dto;
 
         const { projectDoc, isLeadPI } = await this.projectAuth.auth(id, userId, PERMISSIONS.PROJECT.UPDATE);
+
+        if (projectDoc.status === ProjectStatus.completed || projectDoc.status === ProjectStatus.verified) {
+            throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
+        }
 
         if (isLeadPI) {
             if (projectDoc.status !== ProjectStatus.draft) {
@@ -512,7 +519,7 @@ export class ProjectService {
             }
 
             if (verificationDoc.status !== VerificationStatus.verified) {
-                throw new AppError(ERROR_CODES.VERIFICATION_NOT_SUBMITTED);
+                throw new AppError(ERROR_CODES.VERIFICATION_NOT_VERIFIED);
             }
 
         }

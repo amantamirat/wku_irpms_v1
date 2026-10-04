@@ -31,19 +31,19 @@ export default function PhaseDetail({ phase }: PhaseDetailProps) {
         {
             header: "Activities",
             icon: "pi pi-list",
-            permission: ["phaseActivity:read", "phaseActivity:read:own"],
+            permission: ["phaseActivity:read", "phaseActivity:lookup"],
             content: <PhaseActivityManager phase={phase} />
         },
         {
             header: "Equipment",
             icon: "pi pi-box",
-            permission: ["phaseEquipment:read"],
+            permission: ["phaseEquipment:read", "phaseActivity:lookup"],
             content: <PhaseEquipmentManager phase={phase} />
         },
         {
             header: "Documents",
             icon: "pi pi-file",
-            permission: ["phaseDocument:read"],
+            permission: ["phaseDocument:read", "phaseDocument:lookup"],
             content: <PhaseDocManager phase={phase} />
         },
         {

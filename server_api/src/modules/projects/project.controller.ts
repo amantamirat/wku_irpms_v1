@@ -13,6 +13,8 @@ import {
   FilterProjectsDTO,
   UpdateProjectDTO
 } from "./project.dto";
+import { ProjectProgressService } from "./project-progress-service";
+import { toObjectId } from "../../common/utils/mongoose.utils";
 
 
 const buildProjectFilter = (
@@ -39,7 +41,9 @@ const buildProjectFilter = (
 
 export class ProjectController {
 
-  constructor(private readonly service: ProjectService) { }
+  constructor(private readonly service: ProjectService,
+    private readonly progressService: ProjectProgressService
+  ) { }
 
   // -----------------------
   // Create
@@ -190,6 +194,39 @@ export class ProjectController {
         200,
         "My projects fetched successfully",
         projects
+      );
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  };
+
+
+
+  // -----------------------
+  // Progress
+  // -----------------------
+
+  getProgress = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    try {
+      if (!req.auth) {
+        throw new Error(ERROR_CODES.UNAUTHORIZED);
+      }
+
+      const { id } = req.params;
+
+      const progress =
+        await this.progressService.getProjectProgress(
+          toObjectId(id)
+        );
+
+      successResponse(
+        res,
+        200,
+        "Project progress fetched successfully",
+        progress
       );
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);

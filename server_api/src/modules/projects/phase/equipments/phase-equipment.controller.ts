@@ -38,6 +38,7 @@ export class PhaseEquipmentController {
                 description,
                 unit,
                 unitPrice,
+                packSize,
                 quantity,
                 requiredBy,
             } = req.body;
@@ -52,6 +53,7 @@ export class PhaseEquipmentController {
                         ? Number(unitPrice)
                         : undefined,
                 quantity: Number(quantity),
+                packSize: Number(packSize),
                 requiredBy,
                 createdBy: req.auth.userId,
             };
@@ -176,6 +178,7 @@ export class PhaseEquipmentController {
                 unit,
                 unitPrice,
                 quantity,
+                packSize,
                 requiredBy,
             } = req.body;
 
@@ -197,6 +200,8 @@ export class PhaseEquipmentController {
                         quantity !== undefined
                             ? Number(quantity)
                             : undefined,
+                    packSize: packSize !== undefined
+                        ? Number(packSize) : undefined,
                     requiredBy,
                     updatedBy: req.auth.userId,
                 },

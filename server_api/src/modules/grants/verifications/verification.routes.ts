@@ -1,16 +1,14 @@
 import { Router } from "express";
+import { checkPermission, checkTransitionPermission, fileStorageService, filterService, projectAuth } from '../../../core/container';
 import {
     verifyAuthToken
 } from "../../auth/auth.middleware";
-import { checkTransitionPermission, filterService, projectAuth } from '../../../core/container';
-import { checkPermission } from '../../../core/container';
 
+import { PERMISSIONS } from "../../../common/constants/permissions";
+import { upload } from "../../../common/middleware/fileUpload.middleware";
+import { notificationService, projectRepo, reviewerRepo, verificationConfRepo, verificationRepo } from "../../../core/container";
 import { VerificationController } from "./verification.controller";
 import { VerificationService } from "./verification.service";
-import { notificationService, projectRepo, reviewerRepo, verificationConfRepo, verificationRepo } from "../../../core/container";
-import { upload } from "../../../common/middleware/fileUpload.middleware";
-import { PERMISSIONS } from "../../../common/constants/permissions";
-import ScopeFilterService from "../../../common/services/scope-filter.service";
 
 const verificationService =
     new VerificationService(
@@ -20,7 +18,8 @@ const verificationService =
         reviewerRepo,
         projectAuth,
         notificationService,
-        filterService
+        filterService,
+        fileStorageService
     );
 
 const controller =

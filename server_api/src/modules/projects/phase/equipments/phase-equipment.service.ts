@@ -61,8 +61,14 @@ export class PhaseEquipmentService {
                 PERMISSIONS.PHASE_EQUIPMENT.CREATE
             );
 
+        if (projectDoc.status === ProjectStatus.completed || projectDoc.status === ProjectStatus.refused) {
+            throw new AppError(
+                ERROR_CODES.INVALID_PROJECT_STATUS
+            );
+        }
+
         if (isLeadPI) {
-            
+
             if (projectDoc.status !== ProjectStatus.draft) {
                 throw new AppError(
                     ERROR_CODES.PROJECT_NOT_DRAFT
@@ -180,6 +186,12 @@ export class PhaseEquipmentService {
             userId,
             PERMISSIONS.PHASE_EQUIPMENT.UPDATE
         );
+
+         if (projectDoc.status === ProjectStatus.completed || projectDoc.status === ProjectStatus.refused) {
+            throw new AppError(
+                ERROR_CODES.INVALID_PROJECT_STATUS
+            );
+        }
 
         if (isLeadPI) {
             if (projectDoc.status !== ProjectStatus.draft) {

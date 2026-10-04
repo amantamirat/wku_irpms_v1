@@ -1,6 +1,7 @@
 'use client';
 
 import { Button } from 'primereact/button';
+import { Chips } from 'primereact/chips';
 import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
@@ -22,10 +23,9 @@ import {
 } from '@/app/(main)/thematics/models/thematic.node';
 
 import { UserApi } from '@/app/(main)/users/api/user.api';
-
 import { extractId } from "@/utils/utils";
 
-import { Project } from '../../models/project.model';
+import { Project, IProjectObjectives } from '../../models/project.model';
 
 interface BasicInfoStepProps {
     data: Partial<Project>;
@@ -51,39 +51,23 @@ export const BasicInfoStep = ({
     const [users, setUsers] = useState<any[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
 
-    // ----------------------------------------------------------------
-    // Active Call
-    // ----------------------------------------------------------------
+    // --- Temporary state for adding a specific objective ---
+    const [newSpecificObj, setNewSpecificObj] = useState('');
 
     const activeCall = data.call ?? null;
-
-    // ----------------------------------------------------------------
-    // Active Grant & Calendar
-    // ----------------------------------------------------------------
-
     const activeGrant = data.grant ?? null;
     const activeCalendar = data.calendar ?? null;
-
     const hasActiveGrant = Boolean(activeGrant);
-
-    // ----------------------------------------------------------------
-    // Field Locking
-    // ----------------------------------------------------------------
 
     const isGrantLocked = isEditModeOnly || Boolean(activeCall);
     const isCalendarLocked = isEditModeOnly || Boolean(activeCall);
     const isLeadLocked = isEditModeOnly || Boolean(activeCall) || data.lockLead === true;
 
-    // ----------------------------------------------------------------
     // Load Users
-    // ----------------------------------------------------------------
-
     useEffect(() => {
         const fetchUsers = async () => {
             if (isLeadLocked) return;
-
             setLoadingUsers(true);
-
             try {
                 const res = UserApi.lookup ? await UserApi.lookup() : [];
                 setUsers(res || []);
@@ -93,24 +77,17 @@ export const BasicInfoStep = ({
                 setLoadingUsers(false);
             }
         };
-
         fetchUsers();
     }, [isLeadLocked]);
 
-    // ----------------------------------------------------------------
     // Load Grants & Calendars
-    // ----------------------------------------------------------------
-
     useEffect(() => {
         const loadInitialData = async () => {
             try {
                 if (!isGrantLocked && GrantApi.lookup) {
-                    const gData = await GrantApi.lookup({
-                        status: GrantStatus.active
-                    });
+                    const gData = await GrantApi.lookup({ status: GrantStatus.active });
                     setGrants(gData || []);
                 }
-
                 if (!isCalendarLocked && CalendarApi.lookup) {
                     const cData = await CalendarApi.lookup();
                     setCalendars(cData || []);
@@ -119,14 +96,10 @@ export const BasicInfoStep = ({
                 console.error('Failed to load initial form data:', err);
             }
         };
-
         loadInitialData();
     }, [isGrantLocked, isCalendarLocked]);
 
-    // ----------------------------------------------------------------
     // Fetch Themes When Grant Changes
-    // ----------------------------------------------------------------
-
     useEffect(() => {
         if (!activeGrant) {
             setThemeNodes([]);
@@ -136,7 +109,6 @@ export const BasicInfoStep = ({
         const fetchThemes = async () => {
             try {
                 let grant: Grant | null = null;
-
                 if (typeof activeGrant === 'string') {
                     if (GrantApi.getById) {
                         grant = await GrantApi.getById(activeGrant);
@@ -151,16 +123,12 @@ export const BasicInfoStep = ({
                 }
 
                 const thematicId = extractId(grant.thematic);
-
                 if (!thematicId || !ThemeApi.lookup) {
                     setThemeNodes([]);
                     return;
                 }
 
-                const tData = await ThemeApi.lookup({
-                    thematicArea: thematicId
-                });
-
+                const tData = await ThemeApi.lookup({ thematicArea: thematicId });
                 setThemeNodes(buildTree(tData || []));
             } catch (err) {
                 console.error('Failed to fetch themes:', err);
@@ -171,17 +139,13 @@ export const BasicInfoStep = ({
         fetchThemes();
     }, [activeGrant]);
 
-    // ----------------------------------------------------------------
     // Lead Applicant Helpers
-    // ----------------------------------------------------------------
-
     const selectedLeadMember = data.collaborators?.[0]?.member;
     const selectedLeadId = extractId(selectedLeadMember);
 
     const handleLeadChange = (selectedUserId: string) => {
         const selectedUserObj = users.find((u) => u._id === selectedUserId);
         const existingCollaborators = data.collaborators || [];
-
         const currentLead = existingCollaborators[0] || {};
         const nonLeadCollaborators = existingCollaborators.slice(1);
 
@@ -198,53 +162,22 @@ export const BasicInfoStep = ({
         });
     };
 
-    // ----------------------------------------------------------------
-    // Read-Only Label Helpers
-    // ----------------------------------------------------------------
-
-    const getGrantTitle = () => {
-        if (activeGrant && typeof activeGrant === 'object') {
-            return (activeGrant as Grant).title || 'Bound Grant Framework';
-        }
-        return 'Bound Grant Framework';
-    };
-
-    const getCalendarLabel = () => {
-        if (activeCalendar && typeof activeCalendar === 'object') {
-            return String((activeCalendar as Calendar).year || 'Bound Calendar Framework');
-        }
-        return 'Bound Calendar Framework';
-    };
-
+    const getGrantTitle = () => (activeGrant && typeof activeGrant === 'object' ? (activeGrant as Grant).title || 'Bound Grant Framework' : 'Bound Grant Framework');
+    const getCalendarLabel = () => (activeCalendar && typeof activeCalendar === 'object' ? String((activeCalendar as Calendar).year || 'Bound Calendar Framework') : 'Bound Calendar Framework');
     const getLeadName = () => {
-        if (data.leadPI && typeof data.leadPI === 'object') {
-            return (data.leadPI as any).name;
-        }
-
-        if (selectedLeadMember && typeof selectedLeadMember === 'object') {
-            return (selectedLeadMember as any).name;
-        }
-
+        if (data.leadPI && typeof data.leadPI === 'object') return (data.leadPI as any).name;
+        if (selectedLeadMember && typeof selectedLeadMember === 'object') return (selectedLeadMember as any).name;
         return 'Lead PI Profile';
     };
 
-    // ----------------------------------------------------------------
-    // Thematic Tree Select Helpers
-    // ----------------------------------------------------------------
-
     const getThemeSelectionKeys = () => {
         const selection: Record<string, { checked: boolean; partialChecked: boolean }> = {};
-
         data.themes?.forEach((theme: any) => {
             const id = typeof theme === 'object' ? theme._id : theme;
             if (id) {
-                selection[id] = {
-                    checked: true,
-                    partialChecked: false
-                };
+                selection[id] = { checked: true, partialChecked: false };
             }
         });
-
         return selection;
     };
 
@@ -253,219 +186,259 @@ export const BasicInfoStep = ({
             onUpdate({ themes: [] });
             return;
         }
+        const selectedIds = Object.keys(e.value).filter((key) => e.value[key]?.checked);
+        onUpdate({ themes: selectedIds as any });
+    };
 
-        const selectedIds = Object.keys(e.value).filter(
-            (key) => e.value[key]?.checked
-        );
-
+    // Objective Handlers
+    const handleGeneralObjectiveChange = (value: string) => {
+        const currentObjectives: IProjectObjectives = data.objectives || { general: '', specific: [] };
         onUpdate({
-            themes: selectedIds as any
+            objectives: {
+                ...currentObjectives,
+                general: value
+            }
         });
     };
 
-    // ----------------------------------------------------------------
-    // Submit / Forward Handler
-    // ----------------------------------------------------------------
+    const handleAddSpecificObjective = () => {
+        if (!newSpecificObj.trim()) return;
+        const currentObjectives: IProjectObjectives = data.objectives || { general: '', specific: [] };
+        onUpdate({
+            objectives: {
+                ...currentObjectives,
+                specific: [...(currentObjectives.specific || []), newSpecificObj.trim()]
+            }
+        });
+        setNewSpecificObj('');
+    };
+
+    const handleRemoveSpecificObjective = (index: number) => {
+        const currentObjectives: IProjectObjectives = data.objectives || { general: '', specific: [] };
+        const updatedSpecific = [...(currentObjectives.specific || [])];
+        updatedSpecific.splice(index, 1);
+        onUpdate({
+            objectives: {
+                ...currentObjectives,
+                specific: updatedSpecific
+            }
+        });
+    };
 
     const handleForward = () => {
         setSubmitted(true);
+        const hasLead = Boolean(data.collaborators?.[0]?.member || data.leadPI);
 
-        const hasLead = Boolean(
-            data.collaborators?.[0]?.member || data.leadPI
-        );
-
-        if (
-            !hasActiveGrant ||
-            !activeCalendar ||
-            !data.title ||
-            !data.themes ||
-            data.themes.length === 0 ||
-            !hasLead
-        ) {
+        if (!hasActiveGrant || !activeCalendar || !data.title || !data.themes || data.themes.length === 0 || !hasLead) {
             return;
         }
-
         onNext();
     };
 
-    // ----------------------------------------------------------------
-    // Render
-    // ----------------------------------------------------------------
-
     return (
         <div className="p-fluid">
-            {/* Grant & Lead Applicant */}
-            <div className="formgrid grid">
-                {/* Grant Source */}
-                <div className="field col-12 md:col-6">
-                    <label className="font-bold">Grant Source</label>
+            {/* Section 1: Framework & Leadership */}
+            <div className="card surface-card p-4 shadow-1 border-round mb-4">
+                <h5 className="text-900 font-semibold mb-3 flex align-items-center">
+                    <i className="pi pi-id-card mr-2 text-primary" /> Project Setup & Leadership
+                </h5>
+                <div className="formgrid grid">
+                    {/* Grant Source */}
+                    <div className="field col-12 md:col-6">
+                        <label className="font-bold block mb-2">Grant Source</label>
+                        {isGrantLocked ? (
+                            <InputText value={getGrantTitle()} disabled className="surface-100" />
+                        ) : (
+                            <Dropdown
+                                value={data.grant}
+                                options={grants}
+                                dataKey="_id"
+                                optionLabel="title"
+                                onChange={(e) =>
+                                    onUpdate({
+                                        grant: e.value,
+                                        themes: [],
+                                        phases: [],
+                                        collaborators: data.collaborators?.slice(0, 1)
+                                    })
+                                }
+                                placeholder="Select Grant"
+                                className={classNames({ 'p-invalid': submitted && !data.grant })}
+                            />
+                        )}
+                    </div>
 
-                    {isGrantLocked ? (
-                        <InputText
-                            value={getGrantTitle()}
-                            disabled
-                            className="surface-100"
-                        />
+                    {/* Lead Applicant */}
+                    <div className="field col-12 md:col-6">
+                        <label className="font-bold block mb-2">Lead Applicant</label>
+                        {isLeadLocked ? (
+                            <InputText value={getLeadName()} disabled className="surface-100" />
+                        ) : (
+                            <Dropdown
+                                value={selectedLeadId}
+                                options={users}
+                                onChange={(e) => handleLeadChange(e.value)}
+                                optionLabel="name"
+                                optionValue="_id"
+                                filter
+                                disabled={loadingUsers}
+                                emptyMessage={loadingUsers ? 'Loading applicants...' : 'No applicants found'}
+                                placeholder={loadingUsers ? 'Loading applicants...' : 'Select Lead Applicant'}
+                                className={classNames({
+                                    'p-invalid': submitted && !data.collaborators?.[0]?.member
+                                })}
+                            />
+                        )}
+                    </div>
+                </div>
+
+                {/* Calendar */}
+                <div className="field mt-2">
+                    <label htmlFor="calendar" className="font-bold block mb-2">
+                        Project Calendar Framework
+                    </label>
+                    {isCalendarLocked ? (
+                        <InputText id="calendar" value={getCalendarLabel()} disabled className="surface-100" />
                     ) : (
                         <Dropdown
-                            value={data.grant}
-                            options={grants}
+                            id="calendar"
+                            value={data.calendar}
+                            options={calendars}
                             dataKey="_id"
-                            optionLabel="title"
-                            onChange={(e) =>
-                                onUpdate({
-                                    grant: e.value,
-                                    themes: [],
-                                    phases: [],
-                                    collaborators: data.collaborators?.slice(0, 1)
-                                })
-                            }
-                            placeholder="Select Grant"
-                            className={classNames({
-                                'p-invalid': submitted && !data.grant
-                            })}
-                        />
-                    )}
-                </div>
-
-                {/* Lead Applicant */}
-                <div className="field col-12 md:col-6">
-                    <label className="font-bold">Lead Applicant</label>
-
-                    {isLeadLocked ? (
-                        <InputText
-                            value={getLeadName()}
-                            disabled
-                            className="surface-100"
-                        />
-                    ) : (
-                        <Dropdown
-                            value={selectedLeadId}
-                            options={users}
-                            onChange={(e) => handleLeadChange(e.value)}
-                            optionLabel="name"
-                            optionValue="_id"
-                            filter
-                            disabled={loadingUsers}
-                            emptyMessage={
-                                loadingUsers
-                                    ? 'Loading applicants...'
-                                    : 'No applicants found'
-                            }
-
-                            placeholder={
-                                loadingUsers
-                                    ? 'Loading applicants...'
-                                    : 'Select Lead Applicant'
-                            }
-                            className={classNames({
-                                'p-invalid':
-                                    submitted &&
-                                    !data.collaborators?.[0]?.member
-                            })}
+                            optionLabel="year"
+                            onChange={(e) => onUpdate({ calendar: e.value })}
+                            placeholder="Select Calendar Framework"
+                            className={classNames({ 'p-invalid': submitted && !data.calendar })}
                         />
                     )}
                 </div>
             </div>
 
-            {/* Calendar */}
-            <div className="field">
-                <label htmlFor="calendar" className="font-bold">
-                    Project Calendar Framework
-                </label>
+            {/* Section 2: Core Details */}
+            <div className="card surface-card p-4 shadow-1 border-round mb-4">
+                <h5 className="text-900 font-semibold mb-3 flex align-items-center">
+                    <i className="pi pi-file-edit mr-2 text-primary" /> Core Information
+                </h5>
 
-                {isCalendarLocked ? (
+                {/* Project Title */}
+                <div className="field">
+                    <label htmlFor="title" className="font-bold block mb-2">Project Title</label>
                     <InputText
-                        id="calendar"
-                        value={getCalendarLabel()}
-                        disabled
-                        className="surface-100"
+                        id="title"
+                        value={data.title || ''}
+                        onChange={(e) => onUpdate({ title: e.target.value })}
+                        placeholder="Enter concise project title..."
+                        className={classNames({ 'p-invalid': submitted && !data.title })}
                     />
-                ) : (
-                    <Dropdown
-                        id="calendar"
-                        value={data.calendar}
-                        options={calendars}
-                        dataKey="_id"
-                        optionLabel="year"
-                        onChange={(e) =>
-                            onUpdate({
-                                calendar: e.value
-                            })
-                        }
-                        placeholder="Select Calendar Framework"
-                        className={classNames({
-                            'p-invalid': submitted && !data.calendar
+                </div>
+
+                {/* Thematic Focus Area */}
+                <div className="field mt-3">
+                    <label className="font-bold block mb-2">Thematic Focus Area</label>
+                    <TreeSelect
+                        value={getThemeSelectionKeys()}
+                        options={themeNodes}
+                        onChange={onThemeChange}
+                        display="chip"
+                        selectionMode="checkbox"
+                        placeholder={hasActiveGrant ? 'Select one or more structural options' : 'Please select a grant source first'}
+                        disabled={!hasActiveGrant}
+                        className={classNames('w-full', {
+                            'p-invalid': submitted && (!data.themes || data.themes.length === 0)
                         })}
+                        filter
+                        scrollHeight="200px"
                     />
-                )}
+                </div>
+
+                {/* Keywords (Chips) */}
+                <div className="field mt-3">
+                    <label htmlFor="keywords" className="font-bold block mb-2">Keywords / Tags</label>
+                    <Chips
+                        id="keywords"
+                        value={data.keywords || []}
+                        onChange={(e) => onUpdate({ keywords: e.value || [] })}
+                        placeholder="Type keyword and press enter..."
+                        className="w-full"
+                    />
+                    <small className="text-secondary">Helps categorize and tag your project for discovery.</small>
+                </div>
             </div>
 
-            {/* Project Title */}
-            <div className="field">
-                <label htmlFor="title" className="font-bold">
-                    Project Title
-                </label>
+            {/* Section 3: Summary & Objectives */}
+            <div className="card surface-card p-4 shadow-1 border-round mb-4">
+                <h5 className="text-900 font-semibold mb-3 flex align-items-center">
+                    <i className="pi pi-compass mr-2 text-primary" /> Summary & Objectives
+                </h5>
 
-                <InputText
-                    id="title"
-                    value={data.title || ''}
-                    onChange={(e) =>
-                        onUpdate({
-                            title: e.target.value
-                        })
-                    }
-                    className={classNames({
-                        'p-invalid': submitted && !data.title
-                    })}
-                />
-            </div>
+                {/* Summary */}
+                <div className="field">
+                    <label htmlFor="summary" className="font-bold block mb-2">Description Summary Abstract</label>
+                    <InputTextarea
+                        id="summary"
+                        value={data.summary ?? ''}
+                        onChange={(e) => onUpdate({ summary: e.target.value })}
+                        rows={4}
+                        autoResize
+                        placeholder="Provide a brief summary of the project..."
+                    />
+                </div>
 
-            {/* Thematic Focus Area */}
-            <div className="field">
-                <label className="font-bold mb-2 block">
-                    Thematic Focus Area
-                </label>
+                {/* General Objective */}
+                <div className="field mt-3">
+                    <label htmlFor="generalObjective" className="font-bold block mb-2">General Objective</label>
+                    <InputTextarea
+                        id="generalObjective"
+                        value={data.objectives?.general ?? ''}
+                        onChange={(e) => handleGeneralObjectiveChange(e.target.value)}
+                        rows={2}
+                        autoResize
+                        placeholder="State the primary goal of the project..."
+                    />
+                </div>
 
-                <TreeSelect
-                    value={getThemeSelectionKeys()}
-                    options={themeNodes}
-                    onChange={onThemeChange}
-                    display="chip"
-                    selectionMode="checkbox"
-                    placeholder={
-                        hasActiveGrant
-                            ? 'Select one or more structural options'
-                            : 'Please select a grant source first'
-                    }
-                    disabled={!hasActiveGrant}
-                    className={classNames('w-full', {
-                        'p-invalid':
-                            submitted &&
-                            (!data.themes || data.themes.length === 0)
-                    })}
-                    filter
-                    scrollHeight="200px"
-                />
-            </div>
-
-            {/* Summary */}
-            <div className="field">
-                <label htmlFor="summary" className="font-bold">
-                    Description Summary Abstract
-                </label>
-
-                <InputTextarea
-                    id="summary"
-                    value={data.summary ?? ''}
-                    onChange={(e) =>
-                        onUpdate({
-                            summary: e.target.value
-                        })
-                    }
-                    rows={4}
-                    autoResize
-                />
+                {/* Specific Objectives */}
+                <div className="field mt-3">
+                    <label className="font-bold block mb-2">Specific Objectives</label>
+                    <div className="flex gap-2 mb-2">
+                        <InputText
+                            value={newSpecificObj}
+                            onChange={(e) => setNewSpecificObj(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleAddSpecificObjective();
+                                }
+                            }}
+                            placeholder="Add a specific objective..."
+                        />
+                        <Button
+                            type="button"
+                            label="Add"
+                            icon="pi pi-plus"
+                            onClick={handleAddSpecificObjective}
+                            className="p-button-outlined"
+                        />
+                    </div>
+                    {data.objectives?.specific && data.objectives.specific.length > 0 && (
+                        <ul className="list-none p-0 m-0 surface-50 border-round p-2 border-1 surface-border">
+                            {data.objectives.specific.map((obj, index) => (
+                                <li key={index} className="flex align-items-center justify-content-between py-2 px-3 border-bottom-1 surface-border last:border-none">
+                                    <span className="text-800 text-sm">
+                                        <strong className="mr-2 text-primary">{index + 1}.</strong> {obj}
+                                    </span>
+                                    <Button
+                                        icon="pi pi-trash"
+                                        className="p-button-text p-button-danger p-button-sm"
+                                        onClick={() => handleRemoveSpecificObjective(index)}
+                                        tooltip="Remove objective"
+                                        tooltipOptions={{ position: 'top' }}
+                                    />
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
             </div>
 
             {/* Navigation */}
