@@ -1,4 +1,4 @@
-import { matchesRange } from "../../../common/types/range";
+import { IRange, matchesRange } from "../../../common/types/range";
 import { FundingSource } from "../../grants/grant.model";
 import { GrantRepository } from "../../grants/grant.repository";
 import { ApplicationStatus, IApplication } from "../../projects/applications/application.model";
@@ -34,6 +34,7 @@ export class HistoryValidatorService {
     ) { }
 
 
+
     async matches(
         user: IUser,
         context: HistoryContext,
@@ -48,80 +49,99 @@ export class HistoryValidatorService {
             validationContext
         );
 
-        //  console.log(user.name, "context==>", context, "metrics===>", metrics);
+        const projectSum =
+            metrics.granted +
+            metrics.refused +
+            metrics.completed;
+
+        const applicationSum =
+            metrics.submitted +
+            metrics.accepted +
+            metrics.rejected;
+
+        const totalSum = projectSum + applicationSum;
+
+        const ruleSum: IRange = { min: 0, max: 0 };
+
+        const addRange = (range?: IRange) => {
+            if (!range) return;
+
+            ruleSum.min += range.min;
+            ruleSum.max += range.max;
+        };
 
         /*
          * Project history
          */
         if (rule.project) {
-            if (rule.project?.granted) {
-
-                if (!matchesRange(
-                    rule.project.granted,
-                    metrics.granted
-                )) {
-                    return false;
-                }
+            if (
+                rule.project.granted &&
+                !matchesRange(rule.project.granted, metrics.granted)
+            ) {
+                return false;
             }
+            addRange(rule.project.granted);
 
-            if (rule.project?.refused) {
-
-                if (!matchesRange(
-                    rule.project.refused,
-                    metrics.refused
-                )) {
-                    return false;
-                }
+            if (
+                rule.project.refused &&
+                !matchesRange(rule.project.refused, metrics.refused)
+            ) {
+                return false;
             }
+            addRange(rule.project.refused);
 
-            if (rule.project?.completed) {
-
-                if (!matchesRange(
-                    rule.project.completed,
-                    metrics.completed
-                )) {
-                    return false;
-                }
+            if (
+                rule.project.completed &&
+                !matchesRange(rule.project.completed, metrics.completed)
+            ) {
+                return false;
             }
+            addRange(rule.project.completed);
         }
 
         /*
-        * Application history
-        */
+         * Application history
+         */
         if (rule.application) {
-            if (rule.application?.submitted) {
-
-                if (!matchesRange(
+            if (
+                rule.application.submitted &&
+                !matchesRange(
                     rule.application.submitted,
                     metrics.submitted
-                )) {
-                    return false;
-                }
+                )
+            ) {
+                return false;
             }
+            addRange(rule.application.submitted);
 
-            if (rule.application?.accepted) {
-
-                if (!matchesRange(
+            if (
+                rule.application.accepted &&
+                !matchesRange(
                     rule.application.accepted,
                     metrics.accepted
-                )) {
-                    return false;
-                }
+                )
+            ) {
+                return false;
             }
+            addRange(rule.application.accepted);
 
-            if (rule.application?.rejected) {
-
-                if (!matchesRange(
+            if (
+                rule.application.rejected &&
+                !matchesRange(
                     rule.application.rejected,
                     metrics.rejected
-                )) {
-                    return false;
-                }
+                )
+            ) {
+                return false;
             }
-
+            addRange(rule.application.rejected);
         }
 
-        return true;
+        /*
+         * Total history range
+         */
+        return totalSum >= ruleSum.min &&
+            totalSum <= ruleSum.max;
     }
 
     private async getMetrics(
