@@ -48,7 +48,7 @@ export class HistoryValidatorService {
             validationContext
         );
 
-      //  console.log(user.name, "context==>", context, "metrics===>", metrics);
+        //  console.log(user.name, "context==>", context, "metrics===>", metrics);
 
         /*
          * Project history
@@ -133,7 +133,6 @@ export class HistoryValidatorService {
 
         const collabFilter: FilterCollaborators = {
             member: String(user._id),
-            //status: CollaboratorStatus.verified
         };
 
         if (participation === HistoryParticipation.LEAD) {
@@ -145,36 +144,28 @@ export class HistoryValidatorService {
         const collaborators = await this.collaboratorRepo.find(collabFilter);
 
         const projects = await this.getHistoricalProjects(
-            context, validationContext, collaborators);
-
-        const projectIds = projects.map(
-            project => String(project._id)
+            context, validationContext, collaborators
         );
 
-        const applications = await this.getHistoricalApplications(
-            context, validationContext, projectIds
-        );
+        const projectIds = projects.map(project => String(project._id));
 
-        const applicationMetrics = await this.getApplicationMetrics(
-            applications
-        );
+        // Avoid querying with an empty id list (some repos ignore an empty $in)
+        const applications = projectIds.length
+            ? await this.getHistoricalApplications(context, validationContext, projectIds)
+            : [];
 
-        const projectMetrics = await this.getProjectMetrics(
-            projects
-        );
+        const [applicationMetrics, projectMetrics] = await Promise.all([
+            this.getApplicationMetrics(applications),
+            this.getProjectMetrics(projects)
+        ]);
 
         return {
-            granted: projectMetrics.granted,
-
-            refused: projectMetrics.refused,
-
-            completed: projectMetrics.completed,
-
-            submitted: applicationMetrics.submitted,
-
-            accepted: applicationMetrics.accepted,
-
-            rejected: applicationMetrics.rejected
+            granted: projectMetrics.granted ?? 0,
+            refused: projectMetrics.refused ?? 0,
+            completed: projectMetrics.completed ?? 0,
+            submitted: applicationMetrics.submitted ?? 0,
+            accepted: applicationMetrics.accepted ?? 0,
+            rejected: applicationMetrics.rejected ?? 0
         };
     }
 
