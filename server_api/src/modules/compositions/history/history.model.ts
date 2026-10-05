@@ -22,6 +22,26 @@ export enum HistoryParticipation {
     ANY = "ANY"
 }
 
+export enum HistoryMetric {
+    PROJECT_GRANTED = "project.granted",
+    PROJECT_REFUSED = "project.refused",
+    PROJECT_COMPLETED = "project.completed",
+    PROJECT_VERIFIED = "project.verified",
+
+    APPLICATION_SUBMITTED = "application.submitted",
+    APPLICATION_ACCEPTED = "application.accepted",
+    APPLICATION_REJECTED = "application.rejected",
+
+    VERIFICATION_SUBMITTED = "verification.submitted",
+    VERIFICATION_VERIFIED = "verification.verified",
+    VERIFICATION_REJECTED = "verification.rejected"
+}
+
+export interface IHistoryRuleTotal {
+    fields: HistoryMetric[];
+    range: IRange;
+}
+
 export interface IHistoryRule extends Document {
     name: string;
     description?: string;
@@ -47,9 +67,30 @@ export interface IHistoryRule extends Document {
         rejected?: IRange;
     };
 
+    total?: IHistoryRuleTotal;
     createdAt?: Date;
     updatedAt?: Date;
 }
+
+
+const HistoryRuleTotalSchema = new Schema<IHistoryRuleTotal>(
+    {
+        fields: {
+            type: [String],
+            enum: Object.values(HistoryMetric),
+            required: true,
+            default: []
+        },
+
+        range: {
+            type: RangeSchema,
+            required: true
+        }
+    },
+    {
+        _id: false
+    }
+);
 
 const HistoryRuleSchema = new Schema<IHistoryRule>(
     {
@@ -111,7 +152,11 @@ const HistoryRuleSchema = new Schema<IHistoryRule>(
             rejected: {
                 type: RangeSchema
             }
-        }
+        },
+
+        total: {
+            type: HistoryRuleTotalSchema
+        },
     },
     {
         timestamps: true

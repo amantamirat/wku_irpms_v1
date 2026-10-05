@@ -1,17 +1,33 @@
-import { IRange, matchesRange } from "../../../common/types/range";
+import {
+    IRange,
+    matchesRange
+} from "../../../common/types/range";
+
 import { FundingSource } from "../../grants/grant.model";
 import { GrantRepository } from "../../grants/grant.repository";
-import { ApplicationStatus, IApplication } from "../../projects/applications/application.model";
+
+import {
+    ApplicationStatus,
+    IApplication
+} from "../../projects/applications/application.model";
 import { ApplicationRepository } from "../../projects/applications/application.repository";
+
 import { FilterCollaborators } from "../../projects/collaborators/collaborator.dto";
 import { ICollaborator } from "../../projects/collaborators/collaborator.model";
 import { CollaboratorRepository } from "../../projects/collaborators/collaborator.repository";
+
 import { FilterProjectsDTO } from "../../projects/project.dto";
-import { IProject, ProjectStatus } from "../../projects/project.model";
+import {
+    IProject,
+    ProjectStatus
+} from "../../projects/project.model";
 import { ProjectRepository } from "../../projects/project.repository";
+
 import { IUser } from "../../users/user.model";
+
 import {
     HistoryContext,
+    HistoryMetric,
     HistoryParticipation,
     IHistoryRule
 } from "./history.model";
@@ -24,16 +40,28 @@ export interface HistoryValidationContext {
     source: FundingSource;
 }
 
+interface HistoryMetrics {
+    granted: number;
+    refused: number;
+    completed: number;
+
+    submitted: number;
+    accepted: number;
+    rejected: number;
+}
+
 export class HistoryValidatorService {
 
     constructor(
         private readonly applicationRepo: ApplicationRepository,
         private readonly projectRepo: ProjectRepository,
         private readonly collaboratorRepo: CollaboratorRepository,
-        private readonly grantRepo: GrantRepository,
+        private readonly grantRepo: GrantRepository
     ) { }
 
-
+    // ===================================================
+    // MATCH RULE
+    // ===================================================
 
     async matches(
         user: IUser,
@@ -42,6 +70,10 @@ export class HistoryValidatorService {
         validationContext: HistoryValidationContext
     ): Promise<boolean> {
 
+        // ------------------------------------------------
+        // Get user's historical metrics
+        // ------------------------------------------------
+
         const metrics = await this.getMetrics(
             user,
             rule.participation ?? HistoryParticipation.ANY,
@@ -49,62 +81,49 @@ export class HistoryValidatorService {
             validationContext
         );
 
-        const projectSum =
-            metrics.granted +
-            metrics.refused +
-            metrics.completed;
+        // ------------------------------------------------
+        // Individual project rules
+        // ------------------------------------------------
 
-        const applicationSum =
-            metrics.submitted +
-            metrics.accepted +
-            metrics.rejected;
-
-        const totalSum = projectSum + applicationSum;
-
-        const ruleSum: IRange = { min: 0, max: 0 };
-
-        const addRange = (range?: IRange) => {
-            if (!range) return;
-
-            ruleSum.min += range.min;
-            ruleSum.max += range.max;
-        };
-
-        /*
-         * Project history
-         */
-        if (rule.project) {
+        if (rule.project?.granted) {
             if (
-                rule.project.granted &&
-                !matchesRange(rule.project.granted, metrics.granted)
+                !matchesRange(
+                    rule.project.granted,
+                    metrics.granted
+                )
             ) {
                 return false;
             }
-            addRange(rule.project.granted);
-
-            if (
-                rule.project.refused &&
-                !matchesRange(rule.project.refused, metrics.refused)
-            ) {
-                return false;
-            }
-            addRange(rule.project.refused);
-
-            if (
-                rule.project.completed &&
-                !matchesRange(rule.project.completed, metrics.completed)
-            ) {
-                return false;
-            }
-            addRange(rule.project.completed);
         }
 
-        /*
-         * Application history
-         */
-        if (rule.application) {
+        if (rule.project?.refused) {
             if (
-                rule.application.submitted &&
+                !matchesRange(
+                    rule.project.refused,
+                    metrics.refused
+                )
+            ) {
+                return false;
+            }
+        }
+
+        if (rule.project?.completed) {
+            if (
+                !matchesRange(
+                    rule.project.completed,
+                    metrics.completed
+                )
+            ) {
+                return false;
+            }
+        }
+
+        // ------------------------------------------------
+        // Individual application rules
+        // ------------------------------------------------
+
+        if (rule.application?.submitted) {
+            if (
                 !matchesRange(
                     rule.application.submitted,
                     metrics.submitted
@@ -112,10 +131,10 @@ export class HistoryValidatorService {
             ) {
                 return false;
             }
-            addRange(rule.application.submitted);
+        }
 
+        if (rule.application?.accepted) {
             if (
-                rule.application.accepted &&
                 !matchesRange(
                     rule.application.accepted,
                     metrics.accepted
@@ -123,10 +142,10 @@ export class HistoryValidatorService {
             ) {
                 return false;
             }
-            addRange(rule.application.accepted);
+        }
 
+        if (rule.application?.rejected) {
             if (
-                rule.application.rejected &&
                 !matchesRange(
                     rule.application.rejected,
                     metrics.rejected
@@ -134,102 +153,207 @@ export class HistoryValidatorService {
             ) {
                 return false;
             }
-            addRange(rule.application.rejected);
         }
 
-        /*
-         * Total history range
-         */
-        return totalSum >= ruleSum.min &&
-            totalSum <= ruleSum.max;
+        // ------------------------------------------------
+        // Total rule
+        // ------------------------------------------------
+
+        if (rule.total) {
+
+            const metricValues: Record<
+                HistoryMetric,
+                number
+            > = {
+                [HistoryMetric.PROJECT_GRANTED]: metrics.granted,
+
+                [HistoryMetric.PROJECT_REFUSED]: metrics.refused,
+
+                [HistoryMetric.PROJECT_COMPLETED]: metrics.completed,
+
+                [HistoryMetric.APPLICATION_SUBMITTED]: metrics.submitted,
+
+                [HistoryMetric.APPLICATION_ACCEPTED]: metrics.accepted,
+
+                [HistoryMetric.APPLICATION_REJECTED]: metrics.rejected,
+                [HistoryMetric.PROJECT_VERIFIED]: 0,
+                [HistoryMetric.VERIFICATION_SUBMITTED]: 0,
+                [HistoryMetric.VERIFICATION_VERIFIED]: 0,
+                [HistoryMetric.VERIFICATION_REJECTED]: 0
+            };
+
+            const total = rule.total.fields.reduce(
+                (sum, field) => {
+                    return sum + metricValues[field];
+                },
+                0
+            );
+
+            if (
+                !matchesRange(
+                    rule.total.range,
+                    total
+                )
+            ) {
+                return false;
+            }
+        }
+
+        // ------------------------------------------------
+        // All configured conditions passed
+        // ------------------------------------------------
+
+        return true;
     }
+
+    // ===================================================
+    // GET METRICS
+    // ===================================================
 
     private async getMetrics(
         user: IUser,
         participation: HistoryParticipation,
         context: HistoryContext,
         validationContext: HistoryValidationContext
-    ) {
+    ): Promise<HistoryMetrics> {
+
+        // ------------------------------------------------
+        // Collaborator filter
+        // ------------------------------------------------
 
         const collabFilter: FilterCollaborators = {
-            member: String(user._id),
+            member: String(user._id)
         };
 
-        if (participation === HistoryParticipation.LEAD) {
+        if (
+            participation === HistoryParticipation.LEAD
+        ) {
             collabFilter.isLead = true;
-        } else if (participation === HistoryParticipation.MEMBER) {
+        }
+
+        else if (
+            participation === HistoryParticipation.MEMBER
+        ) {
             collabFilter.isLead = false;
         }
 
-        const collaborators = await this.collaboratorRepo.find(collabFilter);
+        // ------------------------------------------------
+        // Find user's project participation
+        // ------------------------------------------------
 
-        const projects = await this.getHistoricalProjects(
-            context, validationContext, collaborators
+        const collaborators =
+            await this.collaboratorRepo.find(
+                collabFilter
+            );
+
+        // ------------------------------------------------
+        // Get historical projects
+        // ------------------------------------------------
+
+        const projects =
+            await this.getHistoricalProjects(
+                context,
+                validationContext,
+                collaborators
+            );
+
+        const projectIds = projects.map(
+            project => String(project._id)
         );
 
-        const projectIds = projects.map(project => String(project._id));
+        // ------------------------------------------------
+        // Get historical applications
+        // ------------------------------------------------
 
-        // Avoid querying with an empty id list (some repos ignore an empty $in)
         const applications = projectIds.length
-            ? await this.getHistoricalApplications(context, validationContext, projectIds)
+            ? await this.getHistoricalApplications(
+                context,
+                validationContext,
+                projectIds
+            )
             : [];
 
-        const [applicationMetrics, projectMetrics] = await Promise.all([
-            this.getApplicationMetrics(applications),
-            this.getProjectMetrics(projects)
+        // ------------------------------------------------
+        // Calculate metrics
+        // ------------------------------------------------
+
+        const [
+            projectMetrics,
+            applicationMetrics
+        ] = await Promise.all([
+            this.getProjectMetrics(projects),
+            this.getApplicationMetrics(applications)
         ]);
 
         return {
-            granted: projectMetrics.granted ?? 0,
-            refused: projectMetrics.refused ?? 0,
-            completed: projectMetrics.completed ?? 0,
-            submitted: applicationMetrics.submitted ?? 0,
-            accepted: applicationMetrics.accepted ?? 0,
-            rejected: applicationMetrics.rejected ?? 0
+            granted: projectMetrics.granted,
+            refused: projectMetrics.refused,
+            completed: projectMetrics.completed,
+
+            submitted: applicationMetrics.submitted,
+            accepted: applicationMetrics.accepted,
+            rejected: applicationMetrics.rejected
         };
     }
 
+    // ===================================================
+    // PROJECT METRICS
+    // ===================================================
 
     private async getProjectMetrics(
-        projects: IProject[],
+        projects: IProject[]
     ) {
+
         return {
             granted: projects.filter(
-                project => project!.status === ProjectStatus.granted
+                project =>
+                    project.status === ProjectStatus.granted
             ).length,
 
             refused: projects.filter(
-                project => project!.status === ProjectStatus.refused
+                project =>
+                    project.status === ProjectStatus.refused
             ).length,
 
             completed: projects.filter(
-                project => project!.status === ProjectStatus.completed
+                project =>
+                    project.status === ProjectStatus.completed
             ).length
         };
     }
 
-
+    // ===================================================
+    // APPLICATION METRICS
+    // ===================================================
 
     private async getApplicationMetrics(
-        applications: IApplication[],
+        applications: IApplication[]
     ) {
+
         return {
             submitted: applications.filter(
-                app => app.status === ApplicationStatus.submitted
+                application =>
+                    application.status ===
+                    ApplicationStatus.submitted
             ).length,
 
             accepted: applications.filter(
                 application =>
-                    application.status === ApplicationStatus.accepted
+                    application.status ===
+                    ApplicationStatus.accepted
             ).length,
 
             rejected: applications.filter(
                 application =>
-                    application.status === ApplicationStatus.rejected
-            ).length,
+                    application.status ===
+                    ApplicationStatus.rejected
+            ).length
         };
     }
 
+    // ===================================================
+    // HISTORICAL PROJECTS
+    // ===================================================
 
     private async getHistoricalProjects(
         context: HistoryContext,
@@ -238,113 +362,177 @@ export class HistoryValidatorService {
     ): Promise<IProject[]> {
 
         const projectIds = collaborators.map(
-            collaborator => String(collaborator.project)
+            collaborator =>
+                String(collaborator.project)
         );
 
         if (!projectIds.length) {
             return [];
         }
 
-        const filters: FilterProjectsDTO =
-        {
+        const filters: FilterProjectsDTO = {
             ids: projectIds
         };
 
         switch (context) {
 
+            // --------------------------------------------
+            // CALL
+            // --------------------------------------------
+
             case HistoryContext.CALL:
+
                 if (!validationContext.call) {
                     return [];
                 }
 
-                filters.call = validationContext.call;
+                filters.call =
+                    validationContext.call;
+
                 break;
 
+            // --------------------------------------------
+            // CALENDAR
+            // --------------------------------------------
+
             case HistoryContext.CALENDAR:
+
                 if (!validationContext.calendar) {
                     return [];
                 }
 
-                filters.calendar = validationContext.calendar;
+                filters.calendar =
+                    validationContext.calendar;
+
                 break;
 
+            // --------------------------------------------
+            // ORGANIZATION
+            // --------------------------------------------
+
             case HistoryContext.ORGANIZATION: {
+
                 if (!validationContext.organization) {
                     return [];
                 }
 
-                const grants = await this.grantRepo.find({
-                    organization: validationContext.organization
-                });
+                const grants =
+                    await this.grantRepo.find({
+                        organization:
+                            validationContext.organization
+                    });
 
                 if (!grants.length) {
                     return [];
                 }
 
-                filters.grantIds = grants.map(
-                    grant => String(grant._id)
-                );
+                filters.grantIds =
+                    grants.map(
+                        grant =>
+                            String(grant._id)
+                    );
 
                 break;
             }
 
+            // --------------------------------------------
+            // SOURCE
+            // --------------------------------------------
+
             case HistoryContext.SOURCE: {
+
                 if (!validationContext.source) {
                     return [];
                 }
 
-                const grants = await this.grantRepo.find({
-                    fundingSource: validationContext.source
-                });
+                const grants =
+                    await this.grantRepo.find({
+                        fundingSource:
+                            validationContext.source
+                    });
 
                 if (!grants.length) {
                     return [];
                 }
 
-                filters.grantIds = grants.map(
-                    grant => String(grant._id)
-                );
+                filters.grantIds =
+                    grants.map(
+                        grant =>
+                            String(grant._id)
+                    );
 
                 break;
             }
+
+            // --------------------------------------------
+            // STAGE
+            // --------------------------------------------
+
+            case HistoryContext.STAGE:
+                // Stage applies to applications,
+                // not projects.
+                break;
         }
 
-        return this.projectRepo.find(filters, undefined);
+        return await this.projectRepo.find(
+            filters,
+            undefined
+        );
     }
 
-
+    // ===================================================
+    // HISTORICAL APPLICATIONS
+    // ===================================================
 
     private async getHistoricalApplications(
         context: HistoryContext,
         validationContext: HistoryValidationContext,
-        projectIds: string[],
+        projectIds: string[]
     ): Promise<IApplication[]> {
 
+        if (!projectIds.length) {
+            return [];
+        }
+
         const filters: any = {
-            projectIds: projectIds
+            projectIds
         };
 
         switch (context) {
 
+            // --------------------------------------------
+            // CALL
+            // --------------------------------------------
+
             case HistoryContext.CALL:
+
                 if (!validationContext.call) {
                     return [];
                 }
 
-                filters.call = validationContext.call;
+                filters.call =
+                    validationContext.call;
+
                 break;
 
+            // --------------------------------------------
+            // STAGE
+            // --------------------------------------------
+
             case HistoryContext.STAGE:
+
                 if (!validationContext.stage) {
                     return [];
                 }
 
-                filters.stage = validationContext.stage;
+                filters.stage =
+                    validationContext.stage;
+
                 break;
         }
 
-        return this.applicationRepo.find(filters);
+        return await this.applicationRepo.find(
+            filters
+        );
     }
-
-
 }

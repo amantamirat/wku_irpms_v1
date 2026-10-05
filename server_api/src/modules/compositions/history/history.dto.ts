@@ -1,5 +1,8 @@
 import { IRange } from "../../../common/types/range";
-import { HistoryParticipation } from "./history.model";
+import {
+    HistoryParticipation,
+    IHistoryRuleTotal
+} from "./history.model";
 
 export interface CreateHistoryDTO {
     name: string;
@@ -20,11 +23,17 @@ export interface CreateHistoryDTO {
         accepted?: IRange;
         rejected?: IRange;
     };
+
+    verification?: {
+        submitted?: IRange;
+        verified?: IRange;
+        rejected?: IRange;
+    };
+
+    total?: IHistoryRuleTotal;
 }
 
 export interface UpdateHistoryDTO {
     id: string;
     data: Partial<CreateHistoryDTO>;
 }
-
-

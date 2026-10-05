@@ -7,16 +7,18 @@ import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { InputNumber } from 'primereact/inputnumber';
 import { Toast } from 'primereact/toast';
+import { Dropdown } from 'primereact/dropdown';
+import { MultiSelect } from 'primereact/multiselect';
 import { classNames } from 'primereact/utils';
 
-import { HistoryParticipation, HistoryRule, validateHistoryRule } from '../models/history.model';
+import { HistoryParticipation, HistoryMetric, HistoryRule, validateHistoryRule } from '../models/history.model';
 import { HistoryApi } from '../api/history.api';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
 import { IRange } from '@/types/range';
-import { Dropdown } from 'primereact/dropdown';
 
 type ProjectMetric = 'granted' | 'refused' | 'completed' | 'verified';
 type ApplicationMetric = 'submitted' | 'accepted' | 'rejected';
+type VerificationMetric = 'submitted' | 'verified' | 'rejected';
 
 // Helper to initialize history rule state with nested structures safely
 const initializeHistory = (
@@ -28,8 +30,10 @@ const initializeHistory = (
     participation: item?.participation ?? HistoryParticipation.ANY,
     project: item?.project ? { ...item.project } : undefined,
     application: item?.application ? { ...item.application } : undefined,
-    createdAt: item?.createdAt,
-    updatedAt: item?.updatedAt,
+    verification: item?.verification ? { ...item.verification } : undefined,
+    total: item?.total ? { ...item.total, fields: [...item.total.fields] } : undefined,
+    //createdAt: item?.createdAt,
+    // UpdatedAt: item?.updatedAt,
 });
 
 const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
@@ -100,8 +104,8 @@ const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
     };
 
     const updateNestedRange = (
-        category: 'project' | 'application',
-        field: ProjectMetric | ApplicationMetric,
+        category: 'project' | 'application' | 'verification',
+        field: ProjectMetric | ApplicationMetric | VerificationMetric,
         bound: 'min' | 'max',
         value: number | null
     ) => {
@@ -142,10 +146,55 @@ const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
         });
     };
 
+    const updateTotalPrice = (bound: 'min' | 'max', value: number | null) => {
+        setLocalHistory((prev) => {
+            const currentTotal = prev.total || { fields: [], range: { min: 0, max: 0 } };
+            const currentRange = currentTotal.range || { min: 0, max: 0 };
+
+            const updatedRange: IRange = {
+                ...currentRange,
+                [bound]: value ?? 0
+            };
+
+            if (updatedRange.min === 0 && updatedRange.max === 0 && (!currentTotal.fields || currentTotal.fields.length === 0)) {
+                const prevCopy = { ...prev };
+                delete prevCopy.total;
+                return prevCopy;
+            }
+
+            return {
+                ...prev,
+                total: {
+                    ...currentTotal,
+                    range: updatedRange
+                }
+            };
+        });
+    };
+
+    const updateTotalFields = (fields: HistoryMetric[]) => {
+        setLocalHistory((prev) => {
+            const currentTotal = prev.total || { fields: [], range: { min: 0, max: 0 } };
+            if (fields.length === 0 && !currentTotal.range?.min && !currentTotal.range?.max) {
+                const prevCopy = { ...prev };
+                delete prevCopy.total;
+                return prevCopy;
+            }
+
+            return {
+                ...prev,
+                total: {
+                    ...currentTotal,
+                    fields
+                }
+            };
+        });
+    };
+
     const renderRange = (
         label: string,
-        category: 'project' | 'application',
-        field: ProjectMetric | ApplicationMetric
+        category: 'project' | 'application' | 'verification',
+        field: ProjectMetric | ApplicationMetric | VerificationMetric
     ) => {
         const range = localHistory[category]?.[field as keyof typeof localHistory[typeof category]] as IRange | undefined;
 
@@ -181,6 +230,11 @@ const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
             </div>
         );
     };
+
+    const metricOptions = Object.values(HistoryMetric).map((m) => ({
+        label: m,
+        value: m
+    }));
 
     const footer = (
         <>
@@ -244,18 +298,9 @@ const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
                         id="participation"
                         value={localHistory.participation}
                         options={[
-                            {
-                                label: 'Lead PI',
-                                value: HistoryParticipation.LEAD
-                            },
-                            {
-                                label: 'Member',
-                                value: HistoryParticipation.MEMBER
-                            },
-                            {
-                                label: 'Any',
-                                value: HistoryParticipation.ANY
-                            }
+                            { label: 'Lead PI', value: HistoryParticipation.LEAD },
+                            { label: 'Member', value: HistoryParticipation.MEMBER },
+                            { label: 'Any', value: HistoryParticipation.ANY }
                         ]}
                         onChange={(e) =>
                             setLocalHistory((prev) => ({
@@ -265,14 +310,12 @@ const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
                         }
                         placeholder="Select participation"
                         className={classNames({
-                            'p-invalid':
-                                submitted && !localHistory.participation
+                            'p-invalid': submitted && !localHistory.participation
                         })}
                     />
 
                     <small className="text-600">
-                        Determines whether the history is counted for projects where
-                        the user was the lead PI, a member, or either.
+                        Determines whether the history is counted for projects where the user was the lead PI, a member, or either.
                     </small>
                 </div>
 
@@ -299,6 +342,59 @@ const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
                     {renderRange('Submitted Applications', 'application', 'submitted')}
                     {renderRange('Accepted Applications', 'application', 'accepted')}
                     {renderRange('Rejected Applications', 'application', 'rejected')}
+                </div>
+
+                {/* Verification History */}
+                <div className="surface-border border-1 border-round p-3 mt-3 surface-card">
+                    <div className="font-semibold text-900 mb-3 flex align-items-center">
+                        <i className="pi pi-check-circle mr-2 text-orange-500" />
+                        Verification History
+                    </div>
+
+                    {renderRange('Submitted Verifications', 'verification', 'submitted')}
+                    {renderRange('Verified Verifications', 'verification', 'verified')}
+                    {renderRange('Rejected Verifications', 'verification', 'rejected')}
+                </div>
+
+                {/* Total Metrics Rule */}
+                <div className="surface-border border-1 border-round p-3 mt-3 surface-card">
+                    <div className="font-semibold text-900 mb-3 flex align-items-center">
+                        <i className="pi pi-chart-bar mr-2 text-purple-500" />
+                        Total Aggregated History Rule
+                    </div>
+
+                    <div className="field mb-3">
+                        <label className="text-xs font-medium">Select Fields to Sum</label>
+                        <MultiSelect
+                            value={localHistory.total?.fields || []}
+                            options={metricOptions}
+                            onChange={(e) => updateTotalFields(e.value)}
+                            placeholder="Select metrics..."
+                            display="chip"
+                        />
+                    </div>
+
+                    <div className="formgrid grid">
+                        <div className="field col-6">
+                            <label className="text-xs">Total Minimum</label>
+                            <InputNumber
+                                value={localHistory.total?.range?.min ?? null}
+                                onValueChange={(e) => updateTotalPrice('min', e.value ?? null)}
+                                min={0}
+                                placeholder="0"
+                            />
+                        </div>
+
+                        <div className="field col-6">
+                            <label className="text-xs">Total Maximum</label>
+                            <InputNumber
+                                value={localHistory.total?.range?.max ?? null}
+                                onValueChange={(e) => updateTotalPrice('max', e.value ?? null)}
+                                min={0}
+                                placeholder="No Limit"
+                            />
+                        </div>
+                    </div>
                 </div>
             </Dialog>
         </>
