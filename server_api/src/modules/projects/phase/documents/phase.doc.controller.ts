@@ -1,12 +1,10 @@
-import fs from "fs";
-import path from "path";
 import { Request, Response } from "express";
+import { AppError } from "../../../../common/errors/app.error";
+import { ERROR_CODES } from "../../../../common/errors/error.codes";
 import { errorResponse, successResponse } from "../../../../common/helpers/response";
 import { AuthenticatedRequest } from "../../../auth/auth.middleware";
 import { CreatePhaseDocDTO, FilterPhaseDocDTO } from "./phase.doc.dto";
 import { PhaseDocumentService } from "./phase.doc.service";
-import { AppError } from "../../../../common/errors/app.error";
-import { ERROR_CODES } from "../../../../common/errors/error.codes";
 
 
 export class PhaseDocumentController {
@@ -65,25 +63,8 @@ export class PhaseDocumentController {
             const { id } = req.params;
             const userId = req.auth.userId;
 
-            const dto = { id };
-
             // Service deletes the record from the database and returns the deleted document metadata
             const deletedDoc = await this.service.delete(id, userId);
-            /*
-
-            // If the document had an associated file, safely delete it from the server
-            if (deletedDoc?.documentPath) {
-                const absolutePath = path.join(process.cwd(), deletedDoc.documentPath);
-
-                fs.unlink(absolutePath, (unlinkErr) => {
-                    if (unlinkErr) {
-                        console.error(`Failed to delete physical file at ${absolutePath}:`, unlinkErr);
-                    } else {
-                        console.log(`Successfully deleted physical file: ${absolutePath}`);
-                    }
-                });
-            }
-                */
 
             successResponse(
                 res,

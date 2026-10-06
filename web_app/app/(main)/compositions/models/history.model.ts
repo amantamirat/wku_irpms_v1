@@ -15,10 +15,10 @@ export enum HistoryMetric {
     APPLICATION_SUBMITTED = "application.submitted",
     APPLICATION_ACCEPTED = "application.accepted",
     APPLICATION_REJECTED = "application.rejected",
-
-    VERIFICATION_SUBMITTED = "verification.submitted",
-    VERIFICATION_VERIFIED = "verification.verified",
-    VERIFICATION_REJECTED = "verification.rejected"
+    /*
+        VERIFICATION_SUBMITTED = "verification.submitted",
+        VERIFICATION_VERIFIED = "verification.verified",
+        VERIFICATION_REJECTED = "verification.rejected"*/
 }
 
 export interface IHistoryRuleTotal {
@@ -33,6 +33,7 @@ export type HistoryRule = {
 
     participation?: HistoryParticipation;
 
+    /*
     project?: {
         granted?: IRange;
         refused?: IRange;
@@ -51,7 +52,7 @@ export type HistoryRule = {
         verified?: IRange;
         rejected?: IRange;
     };
-
+*/
     total?: IHistoryRuleTotal;
 
     createdAt?: string | Date;
@@ -67,30 +68,32 @@ export const validateHistoryRule = (
             message: "Name is required."
         };
     }
-
-    const metrics: { range?: IRange; label: string }[] = [
-        { range: rule.project?.granted, label: "Granted projects" },
-        { range: rule.project?.refused, label: "Refused projects" },
-        { range: rule.project?.completed, label: "Completed projects" },
-        { range: rule.project?.verified, label: "Verified projects" },
-
-        { range: rule.application?.submitted, label: "Submitted applications" },
-        { range: rule.application?.accepted, label: "Accepted applications" },
-        { range: rule.application?.rejected, label: "Rejected applications" },
-
-        { range: rule.verification?.submitted, label: "Submitted verifications" },
-        { range: rule.verification?.verified, label: "Verified verifications" },
-        { range: rule.verification?.rejected, label: "Rejected verifications" }
-    ];
-
-    for (const metric of metrics) {
-        if (metric.range && !isValidRange(metric.range)) {
-            return {
-                valid: false,
-                message: `${metric.label} range is invalid. Ensure values are non-negative and Min is less than or equal to Max.`
-            };
+    /*
+        const metrics: { range?: IRange; label: string }[] = [
+            
+            { range: rule.project?.granted, label: "Granted projects" },
+            { range: rule.project?.refused, label: "Refused projects" },
+            { range: rule.project?.completed, label: "Completed projects" },
+            { range: rule.project?.verified, label: "Verified projects" },
+    
+            { range: rule.application?.submitted, label: "Submitted applications" },
+            { range: rule.application?.accepted, label: "Accepted applications" },
+            { range: rule.application?.rejected, label: "Rejected applications" },
+    
+            { range: rule.verification?.submitted, label: "Submitted verifications" },
+            { range: rule.verification?.verified, label: "Verified verifications" },
+            { range: rule.verification?.rejected, label: "Rejected verifications" }
+        ];
+    
+        for (const metric of metrics) {
+            if (metric.range && !isValidRange(metric.range)) {
+                return {
+                    valid: false,
+                    message: `${metric.label} range is invalid. Ensure values are non-negative and Min is less than or equal to Max.`
+                };
+            }
         }
-    }
+        */
 
     if (rule.total) {
         if (rule.total.range && !isValidRange(rule.total.range)) {

@@ -11,6 +11,8 @@ export interface CreateHistoryDTO {
 
     participation?: HistoryParticipation;
 
+    /*
+
     project?: {
         granted?: IRange;
         refused?: IRange;
@@ -29,7 +31,7 @@ export interface CreateHistoryDTO {
         verified?: IRange;
         rejected?: IRange;
     };
-
+*/
     total?: IHistoryRuleTotal;
 }
 

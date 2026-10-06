@@ -37,7 +37,7 @@ export class CompositionService {
       );
     }
 
-    const updated = await this.repository.update(id, data);
+    const updated = await this.repository.update(id, data, { populate: true });
 
     return updated;
 

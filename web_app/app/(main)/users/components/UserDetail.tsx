@@ -8,6 +8,8 @@ import { User } from "../models/user.model";
 import EnrollmentManager from "../enrollments/components/EnrollmentManager";
 import ExperienceManager from "../experiences/components/ExperienceManager";
 import PublicationManager from "../publications/components/PublicationManager";
+import UserMemberships from "../../collaborators/user/UserMemberships";
+import UserReviewers from "../../reviewers/user/UserReviewers";
 
 interface UserDetailProps {
     user: User;
@@ -39,13 +41,17 @@ const UserDetail = ({ user }: UserDetailProps) => {
             content: <EnrollmentManager student={user} />
         },
 
-        /*
         {
-            header: "Evaluations",
+            header: "Memberships",
+            permission: PERMISSIONS.COLLABORATOR.READ,
+            content: <UserMemberships user={user} />
+        },
+
+        {
+            header: "Reviewes",
             permission: PERMISSIONS.REVIEWER.READ,
-            content: <ReviewerManager applicant={user} />
-        }
-        */
+            content: <UserReviewers user={user} />
+        },
     ], [user]);
 
     /**

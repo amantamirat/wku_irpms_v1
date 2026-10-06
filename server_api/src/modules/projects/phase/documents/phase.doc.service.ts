@@ -14,7 +14,6 @@ export class PhaseDocumentService {
         private readonly repository: IPhaseDocumentRepository,
         private readonly phaseRepo: IPhaseRepository,
         private readonly fileStorage: FileStorageService
-        //projectAuth
     ) { }
 
     async create(

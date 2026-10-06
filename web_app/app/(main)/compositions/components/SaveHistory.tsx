@@ -16,9 +16,11 @@ import { HistoryApi } from '../api/history.api';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
 import { IRange } from '@/types/range';
 
+/*
 type ProjectMetric = 'granted' | 'refused' | 'completed' | 'verified';
 type ApplicationMetric = 'submitted' | 'accepted' | 'rejected';
 type VerificationMetric = 'submitted' | 'verified' | 'rejected';
+*/
 
 // Helper to initialize history rule state with nested structures safely
 const initializeHistory = (
@@ -28,12 +30,14 @@ const initializeHistory = (
     name: item?.name ?? '',
     description: item?.description ?? '',
     participation: item?.participation ?? HistoryParticipation.ANY,
+    /*
     project: item?.project ? { ...item.project } : undefined,
     application: item?.application ? { ...item.application } : undefined,
     verification: item?.verification ? { ...item.verification } : undefined,
+    */
     total: item?.total ? { ...item.total, fields: [...item.total.fields] } : undefined,
-    //createdAt: item?.createdAt,
-    // UpdatedAt: item?.updatedAt,
+    createdAt: item?.createdAt,
+    updatedAt: item?.updatedAt,
 });
 
 const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
@@ -103,48 +107,14 @@ const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
         onHide();
     };
 
+    /*
     const updateNestedRange = (
         category: 'project' | 'application' | 'verification',
         field: ProjectMetric | ApplicationMetric | VerificationMetric,
         bound: 'min' | 'max',
         value: number | null
-    ) => {
-        setLocalHistory((prev) => {
-            const currentCategory = prev[category] ? { ...prev[category] } : {};
-            const currentRange = (currentCategory[field as keyof typeof currentCategory] as IRange | undefined) || { min: 0, max: 0 };
-
-            const updatedRange: Partial<IRange> = {
-                ...currentRange,
-                [bound]: value ?? undefined
-            };
-
-            // If both bounds are cleared, remove the metric field
-            if (updatedRange.min === undefined && updatedRange.max === undefined) {
-                const categoryCopy = { ...currentCategory };
-                delete categoryCopy[field as keyof typeof categoryCopy];
-
-                // If the entire category object is now empty, omit it
-                if (Object.keys(categoryCopy).length === 0) {
-                    const prevCopy = { ...prev };
-                    delete prevCopy[category];
-                    return prevCopy;
-                }
-
-                return {
-                    ...prev,
-                    [category]: categoryCopy
-                };
-            }
-
-            return {
-                ...prev,
-                [category]: {
-                    ...currentCategory,
-                    [field]: updatedRange as IRange
-                }
-            };
-        });
-    };
+    ) => { ... };
+    */
 
     const updateTotalPrice = (bound: 'min' | 'max', value: number | null) => {
         setLocalHistory((prev) => {
@@ -191,45 +161,13 @@ const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
         });
     };
 
+    /*
     const renderRange = (
         label: string,
         category: 'project' | 'application' | 'verification',
         field: ProjectMetric | ApplicationMetric | VerificationMetric
-    ) => {
-        const range = localHistory[category]?.[field as keyof typeof localHistory[typeof category]] as IRange | undefined;
-
-        return (
-            <div className="formgrid grid mb-3" key={field}>
-                <div className="col-12 font-medium text-sm text-700">
-                    {label}
-                </div>
-
-                <div className="field col-6">
-                    <label className="text-xs">Minimum</label>
-                    <InputNumber
-                        value={range?.min ?? null}
-                        onValueChange={(e) =>
-                            updateNestedRange(category, field, 'min', e.value ?? null)
-                        }
-                        min={0}
-                        placeholder="0"
-                    />
-                </div>
-
-                <div className="field col-6">
-                    <label className="text-xs">Maximum</label>
-                    <InputNumber
-                        value={range?.max ?? null}
-                        onValueChange={(e) =>
-                            updateNestedRange(category, field, 'max', e.value ?? null)
-                        }
-                        min={0}
-                        placeholder="No Limit"
-                    />
-                </div>
-            </div>
-        );
-    };
+    ) => { ... };
+    */
 
     const metricOptions = Object.values(HistoryMetric).map((m) => ({
         label: m,
@@ -320,6 +258,7 @@ const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
                 </div>
 
                 {/* Project History */}
+                {/*
                 <div className="surface-border border-1 border-round p-3 mt-3 surface-card">
                     <div className="font-semibold text-900 mb-3 flex align-items-center">
                         <i className="pi pi-folder mr-2 text-green-500" />
@@ -331,8 +270,10 @@ const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
                     {renderRange('Completed Projects', 'project', 'completed')}
                     {renderRange('Verified Projects', 'project', 'verified')}
                 </div>
+                */}
 
                 {/* Application History */}
+                {/*
                 <div className="surface-border border-1 border-round p-3 mt-3 surface-card">
                     <div className="font-semibold text-900 mb-3 flex align-items-center">
                         <i className="pi pi-file mr-2 text-blue-500" />
@@ -343,8 +284,10 @@ const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
                     {renderRange('Accepted Applications', 'application', 'accepted')}
                     {renderRange('Rejected Applications', 'application', 'rejected')}
                 </div>
+                */}
 
                 {/* Verification History */}
+                {/*
                 <div className="surface-border border-1 border-round p-3 mt-3 surface-card">
                     <div className="font-semibold text-900 mb-3 flex align-items-center">
                         <i className="pi pi-check-circle mr-2 text-orange-500" />
@@ -355,6 +298,7 @@ const SaveHistory: React.FC<EntitySaveDialogProps<HistoryRule>> = ({
                     {renderRange('Verified Verifications', 'verification', 'verified')}
                     {renderRange('Rejected Verifications', 'verification', 'rejected')}
                 </div>
+                */}
 
                 {/* Total Metrics Rule */}
                 <div className="surface-border border-1 border-round p-3 mt-3 surface-card">

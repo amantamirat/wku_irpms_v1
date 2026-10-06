@@ -43,7 +43,7 @@ export class RequirementService {
 
 
     async findAll() {
-        return this.requirementRepository.findAll();
+        return this.requirementRepository.findAll({ populate: true });
 
     }
 

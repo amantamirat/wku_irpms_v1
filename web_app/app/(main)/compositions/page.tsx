@@ -15,7 +15,7 @@ import SaveRequirement from "./components/SaveRequirement";
 
 // Models
 import { Composition } from "./models/composition.model";
-import { HistoryRule } from "./models/history.model";
+import { HistoryParticipation, HistoryRule } from "./models/history.model";
 import { EligibilityProfile } from "./models/profile.model";
 import { MemberRequirement } from "./models/requirement.model";
 import { HistoryRuleView } from "./components/HistoryRuleView";
@@ -171,6 +171,8 @@ const ProfilesTab = createEntityManager<EligibilityProfile>({
 });
 
 // 3. History Rules Manager Component
+import { Tag } from 'primereact/tag'; // Optional: for styling participation nicely
+
 const HistoryTab = createEntityManager<HistoryRule>({
     title: "Project History & Performance Rules",
     itemName: "History Rule",
@@ -188,9 +190,51 @@ const HistoryTab = createEntityManager<HistoryRule>({
                     )}
                 </div>
             )
+        },
+        {
+            field: "participation",
+            header: "Participation",
+            sortable: true,
+            body: (rowData: HistoryRule) => {
+                const getSeverity = (part?: string) => {
+                    switch (part) {
+                        case 'LEAD': return 'success';
+                        case 'MEMBER': return 'info';
+                        default: return 'warning';
+                    }
+                };
+                return (
+                    <Tag
+                        value={rowData.participation || 'ANY'}
+                        severity={getSeverity(rowData.participation)}
+                    />
+                );
+            }
+        },
+        {
+            field: "total",
+            header: "Total Aggregated Rule",
+            body: (rowData: HistoryRule) => {
+                if (!rowData.total) return <span className="text-400">No rule set</span>;
+
+                const fieldsList = rowData.total.fields?.join(', ') || 'All metrics';
+                const min = rowData.total.range?.min ?? 0;
+                const max = rowData.total.range?.max ?? '∞';
+
+                return (
+                    <div>
+                        <div className="text-sm font-medium text-900">
+                            Range: <span className="text-primary">{min} - {max}</span>
+                        </div>
+                        <small className="text-color-secondary">
+                            Metrics: {fieldsList}
+                        </small>
+                    </div>
+                );
+            }
         }
     ],
-    createNew: () => ({ name: "", description: "" }),
+    createNew: () => ({ name: "", description: "", participation: HistoryParticipation.ANY }),
     query: () => undefined,
     SaveDialog: SaveHistory,
     expandable: {
@@ -200,7 +244,6 @@ const HistoryTab = createEntityManager<HistoryRule>({
     },
     permissionPrefix: "composition"
 });
-
 // 4. Member Requirements Manager Component
 const RequirementsTab = createEntityManager<MemberRequirement>({
     title: "Member Requirements & Aggregation Rules",

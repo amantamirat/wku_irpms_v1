@@ -44,6 +44,7 @@ interface HistoryMetrics {
     granted: number;
     refused: number;
     completed: number;
+    verified: number;
 
     submitted: number;
     accepted: number;
@@ -84,77 +85,78 @@ export class HistoryValidatorService {
         // ------------------------------------------------
         // Individual project rules
         // ------------------------------------------------
-
-        if (rule.project?.granted) {
-            if (
-                !matchesRange(
-                    rule.project.granted,
-                    metrics.granted
-                )
-            ) {
-                return false;
-            }
-        }
-
-        if (rule.project?.refused) {
-            if (
-                !matchesRange(
-                    rule.project.refused,
-                    metrics.refused
-                )
-            ) {
-                return false;
-            }
-        }
-
-        if (rule.project?.completed) {
-            if (
-                !matchesRange(
-                    rule.project.completed,
-                    metrics.completed
-                )
-            ) {
-                return false;
-            }
-        }
-
-        // ------------------------------------------------
-        // Individual application rules
-        // ------------------------------------------------
-
-        if (rule.application?.submitted) {
-            if (
-                !matchesRange(
-                    rule.application.submitted,
-                    metrics.submitted
-                )
-            ) {
-                return false;
-            }
-        }
-
-        if (rule.application?.accepted) {
-            if (
-                !matchesRange(
-                    rule.application.accepted,
-                    metrics.accepted
-                )
-            ) {
-                return false;
-            }
-        }
-
-        if (rule.application?.rejected) {
-            if (
-                !matchesRange(
-                    rule.application.rejected,
-                    metrics.rejected
-                )
-            ) {
-                return false;
-            }
-        }
-
+        /*
+                if (rule.project?.granted) {
+                    if (
+                        !matchesRange(
+                            rule.project.granted,
+                            metrics.granted
+                        )
+                    ) {
+                        return false;
+                    }
+                }
+        
+                if (rule.project?.refused) {
+                    if (
+                        !matchesRange(
+                            rule.project.refused,
+                            metrics.refused
+                        )
+                    ) {
+                        return false;
+                    }
+                }
+        
+                if (rule.project?.completed) {
+                    if (
+                        !matchesRange(
+                            rule.project.completed,
+                            metrics.completed
+                        )
+                    ) {
+                        return false;
+                    }
+                }
+        
+                // ------------------------------------------------
+                // Individual application rules
+                // ------------------------------------------------
+        
+                if (rule.application?.submitted) {
+                    if (
+                        !matchesRange(
+                            rule.application.submitted,
+                            metrics.submitted
+                        )
+                    ) {
+                        return false;
+                    }
+                }
+        
+                if (rule.application?.accepted) {
+                    if (
+                        !matchesRange(
+                            rule.application.accepted,
+                            metrics.accepted
+                        )
+                    ) {
+                        return false;
+                    }
+                }
+        
+                if (rule.application?.rejected) {
+                    if (
+                        !matchesRange(
+                            rule.application.rejected,
+                            metrics.rejected
+                        )
+                    ) {
+                        return false;
+                    }
+                }
+        
+        */
         // ------------------------------------------------
         // Total rule
         // ------------------------------------------------
@@ -171,15 +173,17 @@ export class HistoryValidatorService {
 
                 [HistoryMetric.PROJECT_COMPLETED]: metrics.completed,
 
+                [HistoryMetric.PROJECT_VERIFIED]: metrics.verified,
+
                 [HistoryMetric.APPLICATION_SUBMITTED]: metrics.submitted,
 
                 [HistoryMetric.APPLICATION_ACCEPTED]: metrics.accepted,
 
                 [HistoryMetric.APPLICATION_REJECTED]: metrics.rejected,
-                [HistoryMetric.PROJECT_VERIFIED]: 0,
-                [HistoryMetric.VERIFICATION_SUBMITTED]: 0,
-                [HistoryMetric.VERIFICATION_VERIFIED]: 0,
-                [HistoryMetric.VERIFICATION_REJECTED]: 0
+                /*
+                                [HistoryMetric.VERIFICATION_SUBMITTED]: 0,
+                                [HistoryMetric.VERIFICATION_VERIFIED]: 0,
+                                [HistoryMetric.VERIFICATION_REJECTED]: 0*/
             };
 
             const total = rule.total.fields.reduce(
@@ -289,6 +293,7 @@ export class HistoryValidatorService {
             granted: projectMetrics.granted,
             refused: projectMetrics.refused,
             completed: projectMetrics.completed,
+            verified: projectMetrics.verified,
 
             submitted: applicationMetrics.submitted,
             accepted: applicationMetrics.accepted,
@@ -318,6 +323,11 @@ export class HistoryValidatorService {
             completed: projects.filter(
                 project =>
                     project.status === ProjectStatus.completed
+            ).length,
+
+            verified: projects.filter(
+                project =>
+                    project.status === ProjectStatus.verified
             ).length
         };
     }

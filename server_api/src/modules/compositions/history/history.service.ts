@@ -14,7 +14,7 @@ import { HistoryRepository } from "./history.repository";
 export class HistoryService {
     constructor(
         private readonly repository: HistoryRepository
-    ) {}
+    ) { }
 
     // ---------------------------------------------------
     // CREATE
@@ -135,6 +135,7 @@ export class HistoryService {
         dto: Partial<CreateHistoryDTO>
     ): void {
         const ranges = [
+            /*
             [
                 "Project granted",
                 dto.project?.granted
@@ -177,7 +178,7 @@ export class HistoryService {
                 "Verification rejected",
                 dto.verification?.rejected
             ],
-
+*/
             [
                 "Total",
                 dto.total?.range

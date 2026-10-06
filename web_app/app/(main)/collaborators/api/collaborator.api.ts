@@ -15,7 +15,7 @@ export const CollaboratorApi: EntityApi<Collaborator, FilterCollaboratorsOptions
 
     } = {
 
-    async getAll(filter?: FilterCollaboratorsOptions, populate?: boolean): Promise<Collaborator[]> {
+    async getAll(filter?: FilterCollaboratorsOptions): Promise<Collaborator[]> {
 
         const data = await ApiClient.get(end_point, filter);
         return data as Collaborator[];
