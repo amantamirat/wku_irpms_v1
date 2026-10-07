@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { callRepo, compositionRepo, grantRepo, organizationRepo, projectRepo, thematicRepo } from '../../core/container';
+import { callRepo, compositionRepo, docTemplateRepo, grantRepo, organizationRepo, projectRepo, thematicRepo } from '../../core/container';
 import { verifyAuthToken } from '../auth/auth.middleware';
 import { checkTransitionPermission } from '../../core/container';
 import { checkPermission } from '../../core/container';
@@ -9,7 +9,7 @@ import { GrantService } from './grant.service';
 
 
 const service = new GrantService(grantRepo, organizationRepo, thematicRepo,
-  compositionRepo, callRepo, projectRepo
+  compositionRepo, callRepo, projectRepo, docTemplateRepo
 );
 const controller = new GrantController(service);
 const router = Router();

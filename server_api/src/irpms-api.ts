@@ -23,6 +23,8 @@ import evaluationRoutes from './modules/evaluations/evaluation.routes';
 import templateRoutes from './modules/templates/template.routes';
 import thematicRoutes from './modules/thematics/thematic.routes';
 import themeRoutes from './modules/thematics/themes/theme.routes';
+import docTemplateRoutes from './modules/document-templates/document-template.routes';
+
 
 import grantRoutes from './modules/grants/grant.routes';
 import verificationConfRoutes from './modules/grants/verification-conf/verification-conf.routes';
@@ -62,6 +64,7 @@ import roleRoutes from './modules/permissions/roles/role.routes';
 import settingRoutes from './modules/settings/setting.routes';
 
 
+
 import { SocketService } from './modules/notifications/socket.service';
 import { errorResponse } from './common/helpers/response';
 
@@ -97,6 +100,8 @@ app.use("/api/evaluations", evaluationRoutes);
 app.use("/api/criteria", criterionRoutes);
 app.use("/api/templates", templateRoutes);
 app.use("/api/constraints", constraintRoutes);
+
+app.use("/api/documentTemplates", docTemplateRoutes);
 
 
 app.use("/api/compositions", compositionRoutes);

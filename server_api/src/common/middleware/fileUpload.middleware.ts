@@ -64,7 +64,6 @@ export const upload = {
                         []
                     );
 
-
                 /*
                  * If the route specifies allowedMimeTypes,
                  * use those types.
@@ -94,6 +93,20 @@ export const upload = {
                      * Validate MIME type.
                      */
                     fileFilter: (_req, file, cb) => {
+                        const extension = path
+                            .extname(file.originalname)
+                            .toLowerCase();
+
+                        // Handlebars templates are often sent by browsers
+                        // as text/plain or application/octet-stream.
+                        if (extension === ".hbs") {
+                            if (
+                                effectiveMimeTypes.includes("text/x-handlebars-template") ||
+                                effectiveMimeTypes.includes(file.mimetype)
+                            ) {
+                                return cb(null, true);
+                            }
+                        }
 
                         if (
                             effectiveMimeTypes.length > 0 &&

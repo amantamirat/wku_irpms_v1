@@ -2,7 +2,7 @@
 
 import React from 'react';
 import { Divider } from 'primereact/divider';
-import { HistoryRule } from '../models/history.model';
+import { HistoryRule, HistoryMetric, HistoryParticipation } from '../models/history.model';
 import { IRange } from '@/types/range';
 
 interface HistoryRuleViewProps {
@@ -16,6 +16,16 @@ interface HistoryMetricConfig {
     range?: IRange;
     badgeSeverity: string;
 }
+
+const metricConfigMap: Record<HistoryMetric, { label: string; icon: string; badgeSeverity: string }> = {
+    [HistoryMetric.PROJECT_GRANTED]: { label: 'Granted Projects', icon: 'pi pi-check-circle', badgeSeverity: 'text-green-500' },
+    [HistoryMetric.PROJECT_REFUSED]: { label: 'Refused Projects', icon: 'pi pi-ban', badgeSeverity: 'text-red-500' },
+    [HistoryMetric.PROJECT_COMPLETED]: { label: 'Completed Projects', icon: 'pi pi-flag-fill', badgeSeverity: 'text-purple-500' },
+    [HistoryMetric.PROJECT_VERIFIED]: { label: 'Verified Projects', icon: 'pi pi-flag-fill', badgeSeverity: 'text-purple-500' },
+    [HistoryMetric.APPLICATION_SUBMITTED]: { label: 'Submitted Applications', icon: 'pi pi-send', badgeSeverity: 'text-blue-500' },
+    [HistoryMetric.APPLICATION_ACCEPTED]: { label: 'Accepted Applications', icon: 'pi pi-check-circle', badgeSeverity: 'text-green-500' },
+    [HistoryMetric.APPLICATION_REJECTED]: { label: 'Rejected Applications', icon: 'pi pi-times-circle', badgeSeverity: 'text-orange-500' },
+};
 
 export const HistoryRuleView: React.FC<HistoryRuleViewProps> = ({
     historyRule,
@@ -36,68 +46,35 @@ export const HistoryRuleView: React.FC<HistoryRuleViewProps> = ({
         return null;
     };
 
-    const projectMetrics: HistoryMetricConfig[] = [
-        {
-            label: 'Granted Projects',
-            icon: 'pi pi-check-circle',
-            range: historyRule.project?.granted,
-            badgeSeverity: 'text-green-500'
-        },
-        {
-            label: 'Refused Projects',
-            icon: 'pi pi-ban',
-            range: historyRule.project?.refused,
-            badgeSeverity: 'text-red-500'
-        },
-        {
-            label: 'Completed Projects',
-            icon: 'pi pi-flag-fill',
-            range: historyRule.project?.completed,
-            badgeSeverity: 'text-purple-500'
-        }
-        ,
-        {
-            label: 'Verified Projects',
-            icon: 'pi pi-flag-fill',
-            range: historyRule.project?.verified,
-            badgeSeverity: 'text-purple-500'
-        }
-    ].filter(
-        (metric) =>
-            metric.range !== undefined &&
-            (metric.range.min !== undefined || metric.range.max !== undefined)
-    );
+    const totalFields = historyRule.total?.fields || [];
+    const totalRange = historyRule.total?.range;
+    const hasValidRange = totalRange && (totalRange.min !== undefined || totalRange.max !== undefined);
 
-    const applicationMetrics: HistoryMetricConfig[] = [
-        {
-            label: 'Submitted Applications',
-            icon: 'pi pi-send',
-            range: historyRule.application?.submitted,
-            badgeSeverity: 'text-blue-500'
-        },
-        {
-            label: 'Accepted Applications',
-            icon: 'pi pi-check-circle',
-            range: historyRule.application?.accepted,
-            badgeSeverity: 'text-green-500'
-        },
-        {
-            label: 'Rejected Applications',
-            icon: 'pi pi-times-circle',
-            range: historyRule.application?.rejected,
-            badgeSeverity: 'text-orange-500'
-        }
-    ].filter(
-        (metric) =>
-            metric.range !== undefined &&
-            (metric.range.min !== undefined || metric.range.max !== undefined)
-    );
+    const projectFields = totalFields.filter((f) => f.startsWith('project.'));
+    const applicationFields = totalFields.filter((f) => f.startsWith('application.'));
+
+    const getMetricConfigs = (fields: HistoryMetric[]): HistoryMetricConfig[] => {
+        return fields.map((field) => {
+            const config = metricConfigMap[field] || {
+                label: field,
+                icon: 'pi pi-info-circle',
+                badgeSeverity: 'text-primary'
+            };
+            return {
+                ...config,
+                range: totalRange
+            };
+        });
+    };
+
+    const projectMetrics = getMetricConfigs(projectFields);
+    const applicationMetrics = getMetricConfigs(applicationFields);
 
     const renderMetrics = (metrics: HistoryMetricConfig[]) => (
         <div className="grid">
-            {metrics.map((metric) => (
+            {metrics.map((metric, index) => (
                 <div
-                    key={metric.label}
+                    key={`${metric.label}-${index}`}
                     className="col-12 md:col-6 p-2"
                 >
                     <div className="flex align-items-center p-2 border-round surface-50 border-1 border-200 h-full">
@@ -123,16 +100,22 @@ export const HistoryRuleView: React.FC<HistoryRuleViewProps> = ({
         </div>
     );
 
-    const hasMetrics =
-        projectMetrics.length > 0 || applicationMetrics.length > 0;
+    const hasMetrics = hasValidRange && totalFields.length > 0;
 
     return (
         <div className="history-rule-view p-3 surface-card border-round shadow-1">
             {/* Header */}
-            <h4 className="mt-0 mb-1 text-primary flex align-items-center">
-                <i className="pi pi-history mr-2 text-xl" />
-                {historyRule.name || title}
-            </h4>
+            <div className="flex justify-content-between align-items-start mb-2">
+                <h4 className="mt-0 mb-1 text-primary flex align-items-center">
+                    <i className="pi pi-history mr-2 text-xl" />
+                    {historyRule.name || title}
+                </h4>
+                {historyRule.participation && (
+                    <span className="text-xs bg-primary-reverse text-primary border-round px-2 py-1 font-bold uppercase border-1 border-primary">
+                        Participation: {historyRule.participation}
+                    </span>
+                )}
+            </div>
 
             {/* Description */}
             <p className="text-sm line-height-3 text-600 mb-3">
@@ -185,4 +168,3 @@ export const HistoryRuleView: React.FC<HistoryRuleViewProps> = ({
         </div>
     );
 };
-

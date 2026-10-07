@@ -16,8 +16,8 @@ export class PhaseDocumentController {
 
     create = async (req: AuthenticatedRequest, res: Response) => {
         try {
-            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
-            if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
+            if (!req.auth) throw new AppError(ERROR_CODES.UNAUTHORIZED);
+            if (!req.file) throw new AppError(ERROR_CODES.FILE_NOT_FOUND);
 
             const phaseDoc = JSON.parse(
                 req.body.phaseDoc

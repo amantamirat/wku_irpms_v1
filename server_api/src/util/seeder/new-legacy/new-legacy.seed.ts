@@ -581,9 +581,19 @@ export class NewLegacySeeder {
                         phase.activities ||
                         `Research Phase ${phase.order} implementation`,
 
+                    startDate: phase.startDate != null
+                        ? this.excelSerialToDate(phase.startDate)
+                        : undefined,
+
+                    endDate: phase.endDate != null
+                        ? this.excelSerialToDate(phase.endDate)
+                        : undefined,
+
                     status: status,
 
                     activities: timeline,
+
+
 
                     equipments: this.equipmentLoader.getByPhase(
                         item.ConceptNoteId,

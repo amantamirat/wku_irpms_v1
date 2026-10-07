@@ -24,16 +24,18 @@ export class PhaseController {
                 budget,
                 description,
                 project,
+                startDate, endDate
                 // breakdown    // Fixed: removed illegal [] syntax
             } = req.body;
 
             const data: CreatePhaseDto = {
                 title,
-               // order: Number(order),
+                // order: Number(order),
                 duration: Number(duration),
                 budget: Number(budget),
                 description,
                 project: project as string,
+                startDate, endDate,
                 //breakdown,    // Passed to service for validation
                 userId: req.auth.userId,
             };
@@ -71,16 +73,16 @@ export class PhaseController {
             if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
-            const { title, order, duration, budget, description, breakdown, status } = req.body;
+            const { title, order, duration, budget, description, startDate, endDate } = req.body;
 
             const dto: UpdatePhaseDto = {
                 id: id as string,
                 data: {
                     title,
-                    order,
                     duration,
                     budget,
-                    description
+                    description,
+                    startDate, endDate
                 },
                 userId: req.auth.userId,
             };

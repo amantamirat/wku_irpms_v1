@@ -57,6 +57,7 @@ import { UserService } from "../modules/users/user.service";
 import { AnonymizerService } from "../util/anonymizer/anonymizer.service";
 import { PhaseEquipmentRepository } from "../modules/projects/phase/equipments/phase-equipment.repository";
 import { PhaseDocumentRepository } from "../modules/projects/phase/documents/phase.doc.repository";
+import { DocumentTemplateRepository } from "../modules/document-templates/document-template.repository";
 
 export const fileStorageService = new FileStorageService();
 
@@ -91,6 +92,7 @@ export const grantRepo = new GrantRepository();
 export const thematicRepo = new ThematicRepository();
 export const themeRepo = new ThemeRepository();
 export const constraintRepo = new ConstraintRepository();
+export const docTemplateRepo = new DocumentTemplateRepository();
 
 export const profileRepo = new ProfileRepository();
 export const historyRepo = new HistoryRepository();

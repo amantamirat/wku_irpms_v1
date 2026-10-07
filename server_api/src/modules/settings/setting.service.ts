@@ -28,6 +28,9 @@ export class SettingService {
         // Text
         "text/plain",
         "text/csv",
+
+        // Handlebars templates
+        "text/x-handlebars-template",
     ]);
 
     constructor(private readonly repository: ISettingRepository) { }

@@ -13,6 +13,7 @@ import { CreateGrantDTO, FilterGrantsDTO, UpdateGrantDTO } from "./grant.dto";
 import { FundingSource, GrantStatus } from "./grant.model";
 import { IGrantRepository } from "./grant.repository";
 import { FilterOptions } from "../../common/dtos/filter.dto";
+import { DocumentTemplateRepository } from "../document-templates/document-template.repository";
 
 
 export class GrantService {
@@ -24,10 +25,11 @@ export class GrantService {
         private readonly compositionRepo: CompositionRepository,
         private readonly callRepo: ICallRepository,
         private readonly projectRepo: IProjectRepository,
+        private readonly docTemplateRepo: DocumentTemplateRepository,
     ) { }
 
     async create(dto: CreateGrantDTO) {
-        const { fundingSource, organization } = dto;
+        const { fundingSource, organization, agreementTemplate } = dto;
 
         const organizationDoc = await this.organizationRepo.findById(organization);
         if (!organizationDoc) throw new AppError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
@@ -44,6 +46,11 @@ export class GrantService {
         const thematicDoc = await this.thematicRepository.findById(dto.thematic);
         if (!thematicDoc) throw new AppError(ERROR_CODES.THEMATIC_NOT_FOUND);
         if (thematicDoc.status !== ThematicStatus.published) throw new AppError(ERROR_CODES.THEMATIC_NOT_PUBLISHED);
+
+        if (agreementTemplate) {
+            const agreementTemplateDoc = await this.docTemplateRepo.findById(agreementTemplate);
+            if (!agreementTemplateDoc) throw new AppError(ERROR_CODES.DOCUMENT_TEMPLATE_NOT_FOUND);
+        }
 
         const created = await this.repository.create(dto);
         return created;
@@ -73,7 +80,7 @@ export class GrantService {
         // If the admin is trying to change the total amount
         if (data.amount !== undefined && data.amount !== grantDoc.amount) {
 
-           // const calls = await this.callRepo.find({ grant: id });
+            // const calls = await this.callRepo.find({ grant: id });
             const totalAllocated = 0//calls.reduce((sum, a) => sum + (a.budget || 0), 0);
 
             const minimumAllowed = Math.max(

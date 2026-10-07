@@ -46,4 +46,5 @@ export enum COLLECTIONS {
   REVIEWER = "reviewers",
   REVIEWER_NEW = "reviewers_news",
   RESULT = "results",
+  DOCUMENT_TEMPLATE="documenttemplates"
 }

@@ -77,14 +77,27 @@ export function sanitizeSetting(setting: Partial<Setting>): Partial<Setting> {
 
 export const FILE_TYPE_OPTIONS = [
     { name: 'PDF Document (.pdf)', value: 'application/pdf' },
+
     { name: 'Word Document (.docx)', value: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document' },
+
     { name: 'Word Old (.doc)', value: 'application/msword' },
+
     { name: 'Excel Sheet (.xlsx)', value: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' },
+
     { name: 'CSV File (.csv)', value: 'text/csv' },
+
     { name: 'JPEG Image (.jpg)', value: 'image/jpeg' },
+
     { name: 'PNG Image (.png)', value: 'image/png' },
+
     { name: 'ZIP Archive (.zip)', value: 'application/zip' },
+
     { name: 'XML File (.xml)', value: 'application/xml' },
+
     { name: 'XML File (.xml)', value: 'text/xml' },
-    { name: 'JSON File (.json)', value: 'application/json' }
+
+    { name: 'JSON File (.json)', value: 'application/json' },
+
+    // Handlebars template
+    { name: 'Handlebars Template (.hbs)', value: 'text/x-handlebars-template' },
 ];

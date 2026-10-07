@@ -22,6 +22,7 @@ export enum ProjectStatus {
 export interface IProjectObjectives {
     general: string;
     specific: string[];
+    expectedOutputs?: string[]
 }
 
 export interface IProject extends Document {
@@ -197,7 +198,12 @@ const ProjectSchema = new Schema<IProject>(
             specific: {
                 type: [String],
                 default: []
+            },
+            expectedOutputs: {
+                type: [String],
+                default: []
             }
+
         },
 
         currentApplication: {

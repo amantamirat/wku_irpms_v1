@@ -312,6 +312,15 @@ export const PERMISSIONS = {
     UPDATE: "position:update",
     DELETE: "position:delete",
   },
+
+  DOC_TEMPLATE: {
+    CREATE: "documentTemplate:create",
+    READ: "documentTemplate:read",
+    LOOKUP: "documentTemplate:lookup",
+    UPDATE: "documentTemplate:update",
+    DELETE: "documentTemplate:delete",
+  },
+
   RESULT: {
     CREATE: "result:create",
     READ: "result:read",

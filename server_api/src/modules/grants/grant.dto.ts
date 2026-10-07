@@ -7,9 +7,8 @@ export interface FilterGrantsDTO {
     organizationIds?: string[];
 
     thematic?: string;
-
+    agreementTemplate?: string;
     fundingSource?: string;
-
     status?: GrantStatus;
 }
 
@@ -18,6 +17,7 @@ export interface CreateGrantDTO {
     organization: string;
     title: string;
     constraint?: string;
+    agreementTemplate?: string | null;
     amount: number;
     thematic: string;
     description?: string;
@@ -30,6 +30,7 @@ export interface UpdateGrantDTO {
         title: string;
         description: string;
         constraint?: string;
+        agreementTemplate: string | null;
         amount: number;
     }>;
     userId?: string;

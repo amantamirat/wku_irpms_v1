@@ -52,6 +52,11 @@ export class ThemeService {
     }
 
     async getThemes(filters: FilterThemeDTO, options?: FilterOptions) {
+        if (filters && filters.level !== undefined && filters.level !== null) {
+            // Decrement level by 1
+            filters.level -= 1;
+        }
+        //console.log(filters);
         return await this.repository.find(filters, options);
     }
 

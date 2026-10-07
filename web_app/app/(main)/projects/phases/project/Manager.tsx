@@ -1,16 +1,17 @@
 'use client';
 
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 import { createEntityManager } from "@/components/data-table/createEntityManager";
 import MyBadge from "@/templates/MyBadge";
 
 import { Project } from "../../models/project.model";
 import { PhaseApi } from "../api/phase.api";
 import SavePhase from "../components/SavePhase";
-import { FilterPhaseOptions, Phase } from "../models/phase.model";
+import { FilterPhaseOptions, Phase, PhaseStatus } from "../models/phase.model";
 import { PHASE_TRANSITIONS } from "../models/phase.state-machine";
 import { etbCurrencyFormatter } from "@/utils/utils";
 import PhaseDetail from "../components/PhaseDetail";
+import { DocumentTemplateApi } from "@/app/(main)/documentTemplates/api/documentTemplate.api";
 
 interface PhaseManagerProps {
     project: Project;
@@ -22,6 +23,8 @@ const PhaseManager = ({
     project,
     enableEditing
 }: PhaseManagerProps) => {
+    // Track loading state per row ID or globally for generation actions
+    const [generatingId, setGeneratingId] = useState<string | null>(null);
 
     const Manager = useMemo(
         () =>
@@ -96,12 +99,42 @@ const PhaseManager = ({
                     )
                 },
 
+                extraRowActions: [
+                    {
+                        icon: "pi pi-file-pdf",
+                        severity: "success",
+                        tooltip: "Generate Agreement PDF",
+                        disabled: (row: Phase) => row.status !== PhaseStatus.approved || generatingId === row._id,
+                        onClick: async (row: Phase) => {
+                            if (!row._id) return;
+
+                            try {
+                                setGeneratingId(row._id);
+
+                                const response = await DocumentTemplateApi.generate(row._id);
+                                const blob = new Blob([response], { type: 'application/pdf' });
+                                const blobUrl = window.URL.createObjectURL(blob);
+                                const newWindow = window.open(blobUrl, '_blank');
+
+                                if (!newWindow) {
+                                    console.error("Popup blocked! Please allow popups for this site.");
+                                }
+                            } catch (error) {
+                                console.error("Failed to generate agreement PDF", error);
+                            } finally {
+                                setGeneratingId(null);
+                            }
+                        }
+                    }
+                ],
+
                 hideSearch: true,
                 hideDefaultActions: !enableEditing
             }),
         [
             project._id,
-            enableEditing
+            enableEditing,
+            generatingId
         ]
     );
 

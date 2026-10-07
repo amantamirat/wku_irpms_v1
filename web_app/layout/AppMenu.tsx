@@ -99,7 +99,14 @@ const AppMenu = () => {
                     icon: 'pi pi-file-pdf',
                     to: '/templates',
                     permission: 'template:read'
-                }
+                },
+                {
+                    label: 'Document Templates',
+                    icon: 'pi pi-file-edit',
+                    to: '/documentTemplates',
+                    permission: 'documentTemplate:read'
+                },
+
             ]
         },
 

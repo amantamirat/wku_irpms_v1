@@ -21,6 +21,7 @@ export interface PhaseDto {
 
     startDate?: Date;
     endDate?: Date;
+    
     status?: PhaseStatus;
     activities?: PhaseActivityDto[]; // Added: the array of details
     equipments?: PhaseEquipmentDto[];
@@ -36,14 +37,7 @@ export interface CreatePhaseDto extends PhaseDto {
 export interface UpdatePhaseDto {
     id: string;              // The Phase ID
     userId: string;
-    data: Partial<{
-        title: string;
-        order: number;
-        duration: number;
-        budget: number;
-        description: string;
-        // breakdown: PhaseBreakdownDto[]; // Allows updating the whole array
-    }>;
+    data: Partial<PhaseDto>;
 }
 
 // ---------- GET_OPTIONS ----------

@@ -95,6 +95,11 @@ export class GrantRepository implements IGrantRepository {
                 new mongoose.Types.ObjectId(filters.thematic);
         }
 
+        if (filters.agreementTemplate) {
+            query.agreementTemplate =
+                new mongoose.Types.ObjectId(filters.agreementTemplate);
+        }
+
         if (filters.fundingSource) {
             query.fundingSource = filters.fundingSource;
         }
@@ -190,6 +195,9 @@ export class GrantRepository implements IGrantRepository {
             constraint: dto.constraint ? new mongoose.Types.ObjectId(
                 dto.constraint
             ) : undefined,
+            agreementTemplate: dto.agreementTemplate ? new mongoose.Types.ObjectId(
+                dto.agreementTemplate
+            ) : undefined,
             thematic: new mongoose.Types.ObjectId(
                 dto.thematic
             ),
@@ -222,6 +230,12 @@ export class GrantRepository implements IGrantRepository {
             updateData.constraint = new mongoose.Types.ObjectId(
                 dtoData.constraint
             );
+        }
+
+        if (dtoData.agreementTemplate !== undefined) {
+            updateData.agreementTemplate = dtoData.agreementTemplate
+                ? new mongoose.Types.ObjectId(dtoData.agreementTemplate)
+                : null;
         }
 
         if (dtoData.amount !== undefined) {

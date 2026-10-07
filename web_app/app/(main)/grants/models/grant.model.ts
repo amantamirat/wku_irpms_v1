@@ -1,4 +1,5 @@
 import { Constraint } from "../../constraints/models/constraint.model";
+import { IDocumentTemplate } from "../../documentTemplates/models/documentTemplate.model";
 import { Organization } from "../../organizations/models/organization.model";
 import { Thematic } from "../../thematics/models/thematic.model";
 import { GrantStatus } from "./grant.state-machine";
@@ -17,6 +18,7 @@ export type Grant = {
     description?: string;
     amount: number;
     constraint?: string | Constraint;
+    agreementTemplate?: string | null | IDocumentTemplate;
     usedBudget?: number;
     status?: GrantStatus;
     createdAt?: Date;

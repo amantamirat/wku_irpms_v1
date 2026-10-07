@@ -21,3 +21,25 @@ export function calculateDurationDays(
         diffTime / MS_PER_DAY
     ) + 1;
 };
+
+
+export function formatDate(
+    value: Date | string | number | undefined | null
+): string {
+
+    if (!value) {
+        return "";
+    }
+
+    const date = new Date(value);
+
+    if (Number.isNaN(date.getTime())) {
+        return "";
+    }
+
+    return new Intl.DateTimeFormat("en-GB", {
+        day: "2-digit",
+        month: "long",
+        year: "numeric",
+    }).format(date);
+}

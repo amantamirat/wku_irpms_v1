@@ -1,10 +1,10 @@
 'use client';
 
-import { createEntityManager } from "@/components/createEntityManager";
 import { Theme, FilterThemesOptions } from "../models/theme.model"; // Ensure ThemeLevel is imported
 import { ThemeApi } from "../api/theme.api";
 import SaveTheme from "./SaveTheme";
 import { Thematic, ThemeLevel } from "../../models/thematic.model";
+import { createEntityManager } from "@/components/data-table/createEntityManager";
 
 interface ThemeManagerProps {
     thematic?: Thematic;
@@ -27,12 +27,13 @@ const ThemeManager = ({ thematic, level = 0, parent }: ThemeManagerProps) => {
                 sortable: true,
                 style: { width: '120px' }
             },
+            /*
             {
                 header: "Level",
                 field: "level",
                 sortable: true,
                 style: { width: '120px' }
-            }
+            }*/
         ],
         query: () => ({
             thematicArea: thematic?._id ?? undefined,

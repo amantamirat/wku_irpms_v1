@@ -96,6 +96,8 @@ export class FileStorageService {
         return fs.readFile(this.resolve(storedPath));
     }
 
+    
+
     /**
  * Absolute path -> stored path (relative to upload root, forward slashes).
  */

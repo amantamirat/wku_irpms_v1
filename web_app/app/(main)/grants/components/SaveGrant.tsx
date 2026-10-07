@@ -21,6 +21,7 @@ import { GrantApi } from '../api/grant.api';
 import { FundingSource, Grant, validateGrant } from '../models/grant.model';
 import { EntitySaveDialogProps } from '@/components/createEntityManager';
 import { extractId } from '@/utils/utils';
+import { DocumentTemplateApi } from '../../documentTemplates/api/documentTemplate.api';
 
 const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<Grant>) => {
     const toast = useRef<Toast>(null);
@@ -28,6 +29,7 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [thematics, setThematics] = useState<Thematic[]>([]);
     const [constraints, setConstraints] = useState<Constraint[]>([]);
+    const [agreementTemplates, setAgreementTemplates] = useState<any[]>([]);
 
     const [localGrant, setLocalGrant] = useState<Grant>({ ...item });
     const [submitted, setSubmitted] = useState(false);
@@ -63,10 +65,11 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                     setThematics(thematicData);
                 }
 
-
                 const constraintData = await ConstraintApi.getAll();
                 setConstraints(constraintData);
 
+                const templateData = await DocumentTemplateApi.getAll();
+                setAgreementTemplates(templateData);
 
                 // Load Organizations if Funding Source is already established
                 if (localGrant.fundingSource && !isOrganizationPredefined) {
@@ -120,7 +123,9 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
             onComplete?.({
                 ...saved,
                 organization: localGrant.organization,
-                thematic: localGrant.thematic
+                thematic: localGrant.thematic,
+                constraint: localGrant.constraint,
+                agreementTemplate: localGrant.agreementTemplate
             });
         } catch (err: any) {
             toast.current?.show({
@@ -142,19 +147,20 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
 
     // Dialog footer actions context setup
     const footerActions = (
-        <div className="flex justify-content-end gap-2">
+        <div className="flex justify-content-end gap-2 pt-2">
             <Button
                 type="button"
                 label="Cancel"
                 icon="pi pi-times"
-                text
+                outlined
+                severity="secondary"
                 onClick={handleHide}
                 disabled={isSaving}
             />
             <Button
                 type="submit"
                 form="grant-form"
-                label="Save"
+                label={isEdit ? "Update Grant" : "Create Grant"}
                 icon="pi pi-check"
                 loading={isSaving}
             />
@@ -167,18 +173,37 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
 
             <Dialog
                 visible={visible}
-                style={{ width: '600px' }}
-                header={localGrant._id ? 'Edit Grant' : 'New Grant'}
+                style={{ width: '680px' }}
+                header={
+                    <div className="flex align-items-center gap-2">
+                        <i className={`pi ${isEdit ? 'pi-file-edit text-primary' : 'pi-plus-circle text-success'} text-xl`} />
+                        <span className="font-bold">{isEdit ? 'Edit Grant Details' : 'Register New Grant'}</span>
+                    </div>
+                }
                 modal
                 className="p-fluid"
                 footer={footerActions}
                 onHide={handleHide}
             >
-                <form id="grant-form" onSubmit={handleSave} className="flex flex-column gap-3 mt-2">
+                <form id="grant-form" onSubmit={handleSave} className="formgrid grid mt-2 gap-y-3">
+
+                    {/* Title Input field setup */}
+                    <div className="field col-12">
+                        <label htmlFor="title" className="font-semibold block mb-2">Grant Title <span className="text-red-500">*</span></label>
+                        <InputText
+                            id="title"
+                            value={localGrant.title || ''}
+                            onChange={(e) => updateField('title', e.target.value)}
+                            placeholder="Enter descriptive grant title"
+                            required
+                            autoFocus
+                            className={classNames({ 'p-invalid': submitted && !localGrant.title })}
+                        />
+                    </div>
 
                     {/* Funding Source Dropdown */}
-                    <div className="field">
-                        <label htmlFor="source" className="font-semibold block mb-2">Source</label>
+                    <div className="field col-12 md:col-6">
+                        <label htmlFor="source" className="font-semibold block mb-2">Funding Source <span className="text-red-500">*</span></label>
                         <Dropdown
                             id="source"
                             value={localGrant.fundingSource}
@@ -200,8 +225,8 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
 
                     {/* Dynamic Organization field rendering context */}
                     {!localGrant._id && (
-                        <div className="field">
-                            <label htmlFor="organization" className="font-semibold block mb-2">Organization (Funder)</label>
+                        <div className="field col-12 md:col-6">
+                            <label htmlFor="organization" className="font-semibold block mb-2">Organization (Funder) <span className="text-red-500">*</span></label>
                             {isOrganizationPredefined ? (
                                 <InputText
                                     value={(localGrant.organization as Organization)?.name || ''}
@@ -210,39 +235,37 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                             ) : (
                                 <Dropdown
                                     id="organization"
-                                    value={localGrant.organization}
+                                    value={extractId(localGrant.organization)}
                                     options={organizations}
                                     optionLabel="name"
+                                    optionValue="_id"
                                     onChange={(e) => updateField('organization', e.value)}
                                     placeholder="Select Organization"
                                     disabled={!localGrant.fundingSource}
+                                    showClear
                                     className={classNames({ 'p-invalid': submitted && !localGrant.organization })}
                                 />
                             )}
                         </div>
                     )}
 
-                    {/* Title Input field setup */}
-                    <div className="field">
-                        <label htmlFor="title" className="font-semibold block mb-2">Title</label>
-                        <InputText
-                            id="title"
-                            value={localGrant.title || ''}
-                            onChange={(e) => updateField('title', e.target.value)}
-                            required
-                            autoFocus
-                            className={classNames({ 'p-invalid': submitted && !localGrant.title })}
+                    {/* Numeric Input Currency context configuration wrapper */}
+                    <div className="field col-12 md:col-6">
+                        <label htmlFor="amount" className="font-semibold block mb-2">Amount (ETB) <span className="text-red-500">*</span></label>
+                        <InputNumber
+                            id="amount"
+                            value={localGrant.amount}
+                            onValueChange={(e) => updateField('amount', e.value ?? 0)}
+                            mode="currency"
+                            currency="ETB"
+                            locale="en-US"
+                            placeholder="0.00"
                         />
                     </div>
 
-                    <div className="field">
-                        <label
-                            htmlFor="constraint"
-                            className="font-semibold block mb-2"
-                        >
-                            Constraint Profile
-                        </label>
-
+                    {/* Constraint Profile */}
+                    <div className="field col-12 md:col-6">
+                        <label htmlFor="constraint" className="font-semibold block mb-2">Constraint Profile</label>
                         <Dropdown
                             id="constraint"
                             value={extractId(localGrant.constraint)}
@@ -255,23 +278,10 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                         />
                     </div>
 
-                    {/* Numeric Input Currency context configuration wrapper */}
-                    <div className="field">
-                        <label htmlFor="amount" className="font-semibold block mb-2">Amount (ETB)</label>
-                        <InputNumber
-                            id="amount"
-                            value={localGrant.amount}
-                            onValueChange={(e) => updateField('amount', e.value ?? 0)}
-                            mode="currency"
-                            currency="ETB"
-                            locale="en-US"
-                        />
-                    </div>
-
                     {/* Dynamic Thematic Context Select Field Setup */}
                     {!localGrant._id && (
-                        <div className="field">
-                            <label htmlFor="thematic" className="font-semibold block mb-2">Thematic</label>
+                        <div className="field col-12 md:col-6">
+                            <label htmlFor="thematic" className="font-semibold block mb-2">Thematic Area</label>
                             {isThematicPredefined ? (
                                 <InputText
                                     value={(localGrant.thematic as Thematic)?.title || ''}
@@ -280,27 +290,42 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                             ) : (
                                 <Dropdown
                                     id="thematic"
-                                    value={localGrant.thematic}
+                                    value={extractId(localGrant.thematic)}
                                     options={thematics}
                                     optionLabel="title"
+                                    optionValue="_id"
                                     onChange={(e) => updateField('thematic', e.value)}
-                                    placeholder="Select Thematic"
+                                    placeholder="Select Thematic (Optional)"
+                                    showClear
                                 />
                             )}
                         </div>
                     )}
 
-
-
+                    {/* Agreement Template Selector */}
+                    <div className="field col-12 md:col-6">
+                        <label htmlFor="agreementTemplate" className="font-semibold block mb-2">Agreement Template</label>
+                        <Dropdown
+                            id="agreementTemplate"
+                            value={extractId(localGrant.agreementTemplate)}
+                            options={agreementTemplates}
+                            optionLabel="name"
+                            optionValue="_id"
+                            onChange={(e) => updateField('agreementTemplate', e.value)}
+                            placeholder="Select Agreement Template (Optional)"
+                            showClear
+                        />
+                    </div>
 
                     {/* Detailed Metadata Input Area Wrapper */}
-                    <div className="field">
+                    <div className="field col-12">
                         <label htmlFor="description" className="font-semibold block mb-2">Description</label>
                         <InputTextarea
                             id="description"
                             value={localGrant.description ?? ''}
                             onChange={(e) => updateField('description', e.target.value)}
-                            rows={4}
+                            rows={3}
+                            placeholder="Enter any additional notes or description..."
                             autoResize
                         />
                     </div>

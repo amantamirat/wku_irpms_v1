@@ -18,6 +18,10 @@ export type Phase = {
     duration: number;           // Total duration
     budget: number;             // Total budget
     description?: string;       // Optional
+
+    startDate?: Date;
+    endDate?: Date;
+
     status?: PhaseStatus;
     statusHistory?: IStatusHistory<PhaseStatus>[];
     createdAt?: Date;

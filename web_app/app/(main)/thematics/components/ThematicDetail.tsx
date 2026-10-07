@@ -23,7 +23,7 @@ const ThematicDetail = ({ thematic }: ThematicDetailProps) => {
         {
             header: "Themes",
             permission: PERMISSIONS.THEME.READ,
-            content: <ThemeManager thematic={thematic} level={0} />
+            content: <ThemeManager thematic={thematic} level={1} />
         },
         {
             header: "Hierarchy Preview", // New Preview Tab

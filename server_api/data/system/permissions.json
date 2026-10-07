@@ -1514,5 +1514,30 @@
     "category": "Verification Configuration Management",
     "name": "verification-conf:transition.closed.active",
     "description": "Reopen verification configuration from closed to active"
+  },
+  {
+    "category": "Document Template Management",
+    "name": "documentTemplate:create",
+    "description": "Create and upload new document templates"
+  },
+  {
+    "category": "Document Template Management",
+    "name": "documentTemplate:read",
+    "description": "View document template details and content"
+  },
+  {
+    "category": "Document Template Management",
+    "name": "documentTemplate:lookup",
+    "description": "Look up document templates for selection and reference"
+  },
+  {
+    "category": "Document Template Management",
+    "name": "documentTemplate:update",
+    "description": "Edit document template details or replace the template file"
+  },
+  {
+    "category": "Document Template Management",
+    "name": "documentTemplate:delete",
+    "description": "Delete document templates"
   }
 ]
