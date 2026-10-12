@@ -154,15 +154,18 @@ class ScopeFilterService {
 
         if (!scope?.length) {
             return {
-                member: { $in: [] }
+                _id: { $in: [] }
             };
         }
 
-        const userIds =
-            await this.getUserIds(scope);
+        const userIds = await this.getUserIds(scope);
+        const projectIds = await this.getProjectIds(scope);
 
         return {
-            member: { $in: userIds }
+            $or: [
+                { member: { $in: userIds } },
+                { project: { $in: projectIds } }
+            ]
         };
     }
 
@@ -174,15 +177,18 @@ class ScopeFilterService {
 
         if (!scope?.length) {
             return {
-                reviewer: { $in: [] }
+                _id: { $in: [] }
             };
         }
 
-        const userIds =
-            await this.getUserIds(scope);
+        const userIds = await this.getUserIds(scope);
+        const projectIds = await this.getProjectIds(scope);
 
         return {
-            reviewer: { $in: userIds }
+            $or: [
+                { reviewer: { $in: userIds } },
+                { project: { $in: projectIds } }
+            ]
         };
     }
 
