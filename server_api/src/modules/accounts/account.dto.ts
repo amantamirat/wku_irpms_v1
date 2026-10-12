@@ -11,6 +11,7 @@ export interface CreateAccountDTO {
 export interface UpdateAccountDTO {
     id: string;
     data: Partial<{
+        email: string;
         password: string;
         lastLogin: Date;
         failedLoginAttempts: number;

@@ -36,12 +36,11 @@ export class AccountController {
   update = async (req: AuthenticatedRequest, res: Response) => {
     try {
       if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
-      const { id } = req.query;
-      const { password } = req.body;
+      const { id } = req.params;
+      const { email, password } = req.body;
       const dto: UpdateAccountDTO = {
         id: id as string,
-        data: { password },
-        userId: req.auth.userId,
+        data: { email, password }
       };
       const updated = await this.service.update(dto);
       successResponse(res, 200, 'User updated successfully', updated);

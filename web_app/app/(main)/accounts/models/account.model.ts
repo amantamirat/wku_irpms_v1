@@ -20,8 +20,12 @@ export type Account = {
     exp?: number;
 };
 
-
-export const validateAccount = (user: Account, currentPassword: boolean = false, regexPasswprd: boolean = true): { valid: boolean; message?: string } => {
+export const validateAccount = (
+    user: Account, 
+    skipPassword: boolean = false, 
+    currentPassword: boolean = false, 
+    regexPassword: boolean = true
+): { valid: boolean; message?: string } => {
     if (!user.email || user.email.trim() === "") {
         return { valid: false, message: "Email is required." };
     }
@@ -32,37 +36,61 @@ export const validateAccount = (user: Account, currentPassword: boolean = false,
     if (!user.user) {
         return { valid: false, message: "User is required." };
     }
+
     if (currentPassword) {
         if (!user.currentPassword || user.currentPassword.trim() === "") {
             return { valid: false, message: "Current Password is required." };
         }
     }
 
-    if (!user.password || user.password.trim() === "") {
-        return { valid: false, message: "Password is required." };
+    // Skip validation if password is optional (e.g. updating an account without changing password)
+    if (!skipPassword) {
+        if (!user.password || user.password.trim() === "") {
+            return { valid: false, message: "Password is required." };
+        }
+
+        if (regexPassword) {
+            const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
+            if (!passwordRegex.test(user.password)) {
+                return {
+                    valid: false,
+                    message:
+                        "Password must be at least 8 characters long, include uppercase, lowercase, number, and symbol."
+                };
+            }
+            if (!user.confirmedPassword) {
+                return { valid: false, message: "Password confirmation required" };
+            }
+            if (user.password !== user.confirmedPassword) {
+                return { valid: false, message: "Password mismatch" };
+            }
+        }
+    } else {
+        // If password is provided, validate it even if skipPassword is true (i.e. user typed a new password)
+        if (user.password && user.password.trim() !== "") {
+            if (regexPassword) {
+                const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
+                if (!passwordRegex.test(user.password)) {
+                    return {
+                        valid: false,
+                        message:
+                            "Password must be at least 8 characters long, include uppercase, lowercase, number, and symbol."
+                    };
+                }
+                if (!user.confirmedPassword) {
+                    return { valid: false, message: "Password confirmation required" };
+                }
+                if (user.password !== user.confirmedPassword) {
+                    return { valid: false, message: "Password mismatch" };
+                }
+            }
+        }
     }
 
-    if (regexPasswprd) {
-        const passwordRegex = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[^\w\s]).{8,}$/;
-        if (!passwordRegex.test(user.password)) {
-            return {
-                valid: false,
-                message:
-                    "Password must be at least 8 characters long, include uppercase, lowercase, number, and symbol."
-            };
-        }
-        if (!user.confirmedPassword) {
-            return { valid: false, message: "Password confirmation required" };
-        }
-        if (user.password !== user.confirmedPassword) {
-            return { valid: false, message: "Password mismatch" };
-        }
-    }
     return { valid: true };
 };
 
-
-
+/*
 export function sanitizeAccount(user: Partial<Account>): Partial<Account> {
     return {
         ...user,
@@ -72,10 +100,7 @@ export function sanitizeAccount(user: Partial<Account>): Partial<Account> {
                 : user.user,
     };
 }
-
+*/
 
 export const createEmptyAccount = (): Account => ({
-})
-
-
-
+});

@@ -51,8 +51,9 @@ export const BasicInfoStep = ({
     const [users, setUsers] = useState<any[]>([]);
     const [loadingUsers, setLoadingUsers] = useState(false);
 
-    // --- Temporary state for adding a specific objective ---
+    // --- Temporary state for inputs ---
     const [newSpecificObj, setNewSpecificObj] = useState('');
+    const [newExpectedOutput, setNewExpectedOutput] = useState('');
 
     const activeCall = data.call ?? null;
     const activeGrant = data.grant ?? null;
@@ -192,7 +193,7 @@ export const BasicInfoStep = ({
 
     // Objective Handlers
     const handleGeneralObjectiveChange = (value: string) => {
-        const currentObjectives: IProjectObjectives = data.objectives || { general: '', specific: [] };
+        const currentObjectives: IProjectObjectives = data.objectives || { general: '', specific: [], expectedOutputs: [] };
         onUpdate({
             objectives: {
                 ...currentObjectives,
@@ -203,7 +204,7 @@ export const BasicInfoStep = ({
 
     const handleAddSpecificObjective = () => {
         if (!newSpecificObj.trim()) return;
-        const currentObjectives: IProjectObjectives = data.objectives || { general: '', specific: [] };
+        const currentObjectives: IProjectObjectives = data.objectives || { general: '', specific: [], expectedOutputs: [] };
         onUpdate({
             objectives: {
                 ...currentObjectives,
@@ -214,13 +215,38 @@ export const BasicInfoStep = ({
     };
 
     const handleRemoveSpecificObjective = (index: number) => {
-        const currentObjectives: IProjectObjectives = data.objectives || { general: '', specific: [] };
+        const currentObjectives: IProjectObjectives = data.objectives || { general: '', specific: [], expectedOutputs: [] };
         const updatedSpecific = [...(currentObjectives.specific || [])];
         updatedSpecific.splice(index, 1);
         onUpdate({
             objectives: {
                 ...currentObjectives,
                 specific: updatedSpecific
+            }
+        });
+    };
+
+    // Expected Output Handlers
+    const handleAddExpectedOutput = () => {
+        if (!newExpectedOutput.trim()) return;
+        const currentObjectives: IProjectObjectives = data.objectives || { general: '', specific: [], expectedOutputs: [] };
+        onUpdate({
+            objectives: {
+                ...currentObjectives,
+                expectedOutputs: [...(currentObjectives.expectedOutputs || []), newExpectedOutput.trim()]
+            }
+        });
+        setNewExpectedOutput('');
+    };
+
+    const handleRemoveExpectedOutput = (index: number) => {
+        const currentObjectives: IProjectObjectives = data.objectives || { general: '', specific: [], expectedOutputs: [] };
+        const updatedOutputs = [...(currentObjectives.expectedOutputs || [])];
+        updatedOutputs.splice(index, 1);
+        onUpdate({
+            objectives: {
+                ...currentObjectives,
+                expectedOutputs: updatedOutputs
             }
         });
     };
@@ -432,6 +458,49 @@ export const BasicInfoStep = ({
                                         className="p-button-text p-button-danger p-button-sm"
                                         onClick={() => handleRemoveSpecificObjective(index)}
                                         tooltip="Remove objective"
+                                        tooltipOptions={{ position: 'top' }}
+                                    />
+                                </li>
+                            ))}
+                        </ul>
+                    )}
+                </div>
+
+                {/* Expected Outputs */}
+                <div className="field mt-3">
+                    <label className="font-bold block mb-2">Expected Outputs</label>
+                    <div className="flex gap-2 mb-2">
+                        <InputText
+                            value={newExpectedOutput}
+                            onChange={(e) => setNewExpectedOutput(e.target.value)}
+                            onKeyDown={(e) => {
+                                if (e.key === 'Enter') {
+                                    e.preventDefault();
+                                    handleAddExpectedOutput();
+                                }
+                            }}
+                            placeholder="Add an expected output..."
+                        />
+                        <Button
+                            type="button"
+                            label="Add"
+                            icon="pi pi-plus"
+                            onClick={handleAddExpectedOutput}
+                            className="p-button-outlined"
+                        />
+                    </div>
+                    {data.objectives?.expectedOutputs && data.objectives.expectedOutputs.length > 0 && (
+                        <ul className="list-none p-0 m-0 surface-50 border-round p-2 border-1 surface-border">
+                            {data.objectives.expectedOutputs.map((output, index) => (
+                                <li key={index} className="flex align-items-center justify-content-between py-2 px-3 border-bottom-1 surface-border last:border-none">
+                                    <span className="text-800 text-sm">
+                                        <strong className="mr-2 text-primary">{index + 1}.</strong> {output}
+                                    </span>
+                                    <Button
+                                        icon="pi pi-trash"
+                                        className="p-button-text p-button-danger p-button-sm"
+                                        onClick={() => handleRemoveExpectedOutput(index)}
+                                        tooltip="Remove expected output"
                                         tooltipOptions={{ position: 'top' }}
                                     />
                                 </li>

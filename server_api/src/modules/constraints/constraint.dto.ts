@@ -1,4 +1,5 @@
 import { IRange } from "../../common/types/range";
+
 /**
  * Create Constraint
  */
@@ -8,6 +9,15 @@ export interface CreateConstraintDTO {
 
     titleWords?: IRange;
     summaryWords?: IRange;
+
+    // Objectives
+    generalObjectiveWords?: IRange;
+    specificObjectiveWords?: IRange;
+    specificObjectives?: IRange;
+
+    // Expected Outputs
+    expectedOutputs?: IRange;
+    expectedOutputWords?: IRange;
 
     participants?: IRange;
     phases?: IRange;
@@ -23,6 +33,7 @@ export interface CreateConstraintDTO {
 
     themes?: IRange;
     subThemes?: IRange;
+
     focusAreas?: IRange;
     indicators?: IRange;
 }

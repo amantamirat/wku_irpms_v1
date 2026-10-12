@@ -241,6 +241,7 @@ export class ProjectRepository
     ): Promise<IProject> {
 
         const project = {
+            ...data,
             grant: toObjectId(data.grant),
 
             organization:
@@ -256,10 +257,6 @@ export class ProjectRepository
             call: data.call
                 ? toObjectId(data.call)
                 : undefined,
-
-            title: data.title,
-
-            summary: data.summary,
 
             conceptNoteId: data.conceptNoteId,
 
@@ -294,6 +291,14 @@ export class ProjectRepository
         if (data.themes !== undefined) {
             updateData.themes =
                 data.themes.map(toObjectId);
+        }
+
+        if (data.objectives !== undefined) {
+            updateData.objectives = {
+                general: data.objectives.general,
+                specific: data.objectives.specific ?? [],
+                expectedOutputs: data.objectives.expectedOutputs ?? []
+            };
         }
 
         if (data.call !== undefined) {

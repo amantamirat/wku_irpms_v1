@@ -34,7 +34,13 @@ const SaveAccount = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
     // Reset and sync state when dialog opens
     useEffect(() => {
         if (visible) {
-            setLocalUser({ ...item });
+            // When editing, initialize password and confirmedPassword as empty strings
+            // so we can explicitly track if the user touched/changed them.
+            setLocalUser({
+                ...item,
+                password: '',
+                confirmedPassword: ''
+            });
             fetchUsers();
         } else {
             setSubmitted(false);
@@ -55,8 +61,6 @@ const SaveAccount = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
         setSubmitted(true);
         setErrorMessage(null);
 
-        // Professional Validation: Only require passwords if NEW account 
-        // or if the user started typing in the password field
         const needsPassword = !isEdit || !!localUser.password;
         const validation = validateAccount(localUser as Account, !needsPassword);
 
@@ -67,9 +71,16 @@ const SaveAccount = ({ visible, item, onHide, onComplete }: EntitySaveDialogProp
 
         setLoading(true);
         try {
+            // Prepare payload: if editing and password was NOT touched/entered, strip it out completely
+            const payload: Partial<Account> = { ...localUser };
+            if (isEdit && !payload.password) {
+                delete payload.password;
+                delete payload.confirmedPassword;
+            }
+
             const saved = isEdit
-                ? await AccountApi.update(localUser as Account)
-                : await AccountApi.create(localUser as Account);
+                ? await AccountApi.update(payload as Account)
+                : await AccountApi.create(payload as Account);
 
             toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Account credentials saved' });
 

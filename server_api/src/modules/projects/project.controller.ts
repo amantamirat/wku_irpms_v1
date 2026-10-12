@@ -62,19 +62,25 @@ export class ProjectController {
         title,
         summary,
         themes,
+        objectives,
         collaborators,
-        phases
+        phases,
+        conceptNoteId,
+        call
       } = req.body;
 
       const dto: CreateProjectDTO = {
         calendar,
         grant,
+        conceptNoteId,
         title,
         summary,
         leadPI,
         themes: themes || [],
+        objectives,
         collaborators: collaborators || [],
-        phases: phases || []
+        phases: phases || [],
+        call
       };
 
       const created = await this.service.create(dto, req.auth.userId);
@@ -93,10 +99,15 @@ export class ProjectController {
 
   apply = async (req: AuthenticatedRequest, res: Response) => {
     try {
-      if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
-      if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
+      if (!req.auth) {
+        throw new Error(ERROR_CODES.UNAUTHORIZED);
+      }
 
-      // documentPath and grant are set server-side, never trusted from the client
+      if (!req.file) {
+        throw new Error(ERROR_CODES.FILE_NOT_FOUND);
+      }
+
+      // documentPath and grant are set server-side.
       const { documentPath, grant, ...project } = JSON.parse(
         req.body.project
       ) as CreateProjectDTO;
@@ -104,6 +115,7 @@ export class ProjectController {
       const submitted = await this.service.apply(
         {
           ...project,
+          objectives: project.objectives,
           collaborators: project.collaborators ?? [],
           themes: project.themes ?? [],
           phases: project.phases ?? [],
@@ -112,7 +124,12 @@ export class ProjectController {
         req.file
       );
 
-      successResponse(res, 201, "Project submitted successfully", submitted);
+      successResponse(
+        res,
+        201,
+        "Project submitted successfully",
+        submitted
+      );
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
     }
@@ -247,18 +264,28 @@ export class ProjectController {
       }
 
       const { id } = req.params;
-      const { title, summary, themes } = req.body;
+
+      const {
+        title,
+        summary,
+        themes,
+        objectives
+      } = req.body;
 
       const dto: UpdateProjectDTO = {
         id,
         data: {
           title,
           summary,
-          themes
+          themes,
+          objectives
         }
       };
 
-      const updated = await this.service.update(dto, req.auth.userId);
+      const updated = await this.service.update(
+        dto,
+        req.auth.userId
+      );
 
       successResponse(
         res,

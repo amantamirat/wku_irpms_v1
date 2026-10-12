@@ -44,6 +44,28 @@ const initializeConstraint = (
         ? { ...item.summaryWords }
         : undefined,
 
+    // Objectives
+    generalObjectiveWords: item?.generalObjectiveWords
+        ? { ...item.generalObjectiveWords }
+        : undefined,
+
+    specificObjectiveWords: item?.specificObjectiveWords
+        ? { ...item.specificObjectiveWords }
+        : undefined,
+
+    specificObjectives: item?.specificObjectives
+        ? { ...item.specificObjectives }
+        : undefined,
+
+    // Expected Outputs
+    expectedOutputs: item?.expectedOutputs
+        ? { ...item.expectedOutputs }
+        : undefined,
+
+    expectedOutputWords: item?.expectedOutputWords
+        ? { ...item.expectedOutputWords }
+        : undefined,
+
     participants: item?.participants
         ? { ...item.participants }
         : undefined,
@@ -666,6 +688,85 @@ const SaveConstraint = ({
                                     {
                                         description:
                                             'Allowed number of words in the project summary.',
+                                        unit: 'words',
+                                    }
+                                )}
+
+                            </div>
+
+                        </AccordionTab>
+
+
+                        {/* OBJECTIVES & OUTPUTS */}
+
+                        <AccordionTab
+                            header={
+                                <div className="flex align-items-center gap-3">
+
+                                    <i className="pi pi-check-circle text-primary" />
+
+                                    <div>
+                                        <div className="font-semibold">
+                                            Objectives & outputs
+                                        </div>
+
+                                        <small className="text-500">
+                                            Configure limits for general/specific objectives and expected outputs.
+                                        </small>
+                                    </div>
+
+                                </div>
+                            }
+                        >
+
+                            <div className="grid pt-2">
+
+                                {renderRangeInputs(
+                                    'General objective words',
+                                    'generalObjectiveWords',
+                                    {
+                                        description:
+                                            'Allowed number of words for general objectives.',
+                                        unit: 'words',
+                                    }
+                                )}
+
+                                {renderRangeInputs(
+                                    'Specific objective words',
+                                    'specificObjectiveWords',
+                                    {
+                                        description:
+                                            'Allowed number of words per specific objective.',
+                                        unit: 'words',
+                                    }
+                                )}
+
+                                {renderRangeInputs(
+                                    'Specific objectives',
+                                    'specificObjectives',
+                                    {
+                                        description:
+                                            'Allowed number of specific objectives.',
+                                        unit: 'objectives',
+                                    }
+                                )}
+
+                                {renderRangeInputs(
+                                    'Expected outputs',
+                                    'expectedOutputs',
+                                    {
+                                        description:
+                                            'Allowed number of expected outputs.',
+                                        unit: 'outputs',
+                                    }
+                                )}
+
+                                {renderRangeInputs(
+                                    'Expected output words',
+                                    'expectedOutputWords',
+                                    {
+                                        description:
+                                            'Allowed number of words per expected output description.',
                                         unit: 'words',
                                     }
                                 )}

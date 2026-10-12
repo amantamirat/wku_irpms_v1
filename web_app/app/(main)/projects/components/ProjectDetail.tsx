@@ -150,6 +150,8 @@ export default function ProjectDetail({ project, updateProject, enableEditing, s
 
     const allowedTabs = tabs.filter(tab => hasPermission([tab.permission]));
 
+    const objectives = projectData.objectives;
+
     return (
         <div className="surface-card border-round p-3 shadow-1">
             {/* Header section */}
@@ -178,8 +180,54 @@ export default function ProjectDetail({ project, updateProject, enableEditing, s
                 </div>
             </div>
 
+            {/* Summary Abstract */}
+            {projectData?.summary && (
+                <div className="mt-3 p-3 surface-50 border-round border-1 border-200">
+                    <span className="block text-500 text-xs font-bold mb-1 uppercase">Abstract / Summary</span>
+                    <p className="m-0 text-700 text-sm line-height-3">{projectData.summary}</p>
+                </div>
+            )}
+
+            {/* Objectives & Expected Outputs Section */}
+            {objectives && (objectives.general || (objectives.specific && objectives.specific.length > 0) || (objectives.expectedOutputs && objectives.expectedOutputs.length > 0)) && (
+                <div className="mt-3 p-3 surface-50 border-round border-1 border-200">
+                    <span className="block text-primary text-xs font-bold mb-2 uppercase flex align-items-center">
+                        <i className="pi pi-compass mr-2"></i> Goals, Objectives & Outputs
+                    </span>
+                    
+                    {objectives.general && (
+                        <div className="mb-2">
+                            <span className="font-semibold text-xs text-900 block">General Objective (GO):</span>
+                            <p className="m-0 text-700 text-sm">{objectives.general}</p>
+                        </div>
+                    )}
+
+                    {objectives.specific && objectives.specific.length > 0 && (
+                        <div className="mb-2">
+                            <span className="font-semibold text-xs text-900 block">Specific Objectives (SOs):</span>
+                            <ul className="m-0 pl-3 text-700 text-sm">
+                                {objectives.specific.map((spec, i) => (
+                                    <li key={i}>{spec}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+
+                    {objectives.expectedOutputs && objectives.expectedOutputs.length > 0 && (
+                        <div>
+                            <span className="font-semibold text-xs text-900 block">Expected Outputs (EOs):</span>
+                            <ul className="m-0 pl-3 text-700 text-sm">
+                                {objectives.expectedOutputs.map((output, i) => (
+                                    <li key={i}>{output}</li>
+                                ))}
+                            </ul>
+                        </div>
+                    )}
+                </div>
+            )}
+
             {/* Metrics */}
-            <div className="grid mt-4 mb-2 gap-3 md:gap-0">
+            <div className="grid mt-3 mb-2 gap-3 md:gap-0">
                 <div className="col-12 sm:col-6 md:col-3 p-2">
                     <div className="p-3 surface-100 border-round border-left-3 border-green-500 h-full">
                         <span className="block text-500 text-xs font-bold mb-1 uppercase">Budget Allocation</span>

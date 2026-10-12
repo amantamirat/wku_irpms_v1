@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { CollaboratorDto } from "./collaborators/collaborator.dto";
 import { PhaseDto } from "./phase/phase.dto";
-import { ProjectStatus } from "./project.model";
+import { IProjectObjectives, ProjectStatus } from "./project.model";
 
 
 export interface FilterProjectsDTO {
@@ -25,6 +25,7 @@ export interface FilterProjectsDTO {
 }
 
 
+
 export interface CreateProjectDTO {
     grant: string;
 
@@ -36,6 +37,8 @@ export interface CreateProjectDTO {
     leadPI: string;
 
     themes: string[];
+
+    objectives?: IProjectObjectives;
 
     collaborators: CollaboratorDto[];
     phases: PhaseDto[];
@@ -58,6 +61,8 @@ export interface UpdateProjectDTO {
 
         call: string | null;
         calendar: string | null;
+
+        objectives?: IProjectObjectives;
 
         currentApplication: string | null;
         currentPhase: string | null;

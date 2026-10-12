@@ -29,7 +29,7 @@ const AccountSchema = new Schema<IAccount>(
       type: String,
       unique: true,
       required: true,
-      immutable: true,
+      //immutable: true,
       match: [
         /^\w+([\.-]?\w+)*@\w+([\.-]?\w+)*(\.\w{2,3})+$/,
         'Please provide a valid email',
@@ -76,5 +76,5 @@ const AccountSchema = new Schema<IAccount>(
   },
   { timestamps: true }
 );
-//UserSchema.index({ email: 1 });
+AccountSchema.index({ email: 1 });
 export const Account: Model<IAccount> = mongoose.model<IAccount>(COLLECTIONS.ACCOUNT, AccountSchema);

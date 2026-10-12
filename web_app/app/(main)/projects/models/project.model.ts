@@ -23,6 +23,7 @@ export enum ProjectStatus {
 export interface IProjectObjectives {
     general: string;
     specific: string[];
+    expectedOutputs?: string[]
 }
 
 export type Project = {

@@ -29,6 +29,13 @@ type PhaseValidationInput = Pick<
 export interface ConstraintValidationInput {
     title: string;
     summary?: string;
+
+    objectives?: {
+        general?: string;
+        specific?: string[];
+        expectedOutputs?: string[];
+    };
+
     collaboratorsCount: number;
     themes: string[];
     phases: PhaseDto[];
@@ -89,6 +96,40 @@ export class ConstraintValidationService {
         this.validateSummaryWords(
             constraint.summaryWords,
             projectDoc.summary,
+            errors
+        );
+
+        //------------------------------------------------------------
+
+        this.validateGeneralObjectiveWords(
+            constraint.generalObjectiveWords,
+            projectDoc.objectives?.general,
+            errors
+        );
+
+        this.validateSpecificObjectiveWords(
+            constraint.specificObjectiveWords,
+            projectDoc.objectives?.specific ?? [],
+            errors
+        );
+
+        this.validateSpecificObjectiveCount(
+            constraint.specificObjectives,
+            projectDoc.objectives?.specific?.length ?? 0,
+            errors
+        );
+
+        //------------------------------------------------------------
+
+        this.validateExpectedOutputWords(
+            constraint.expectedOutputWords,
+            projectDoc.objectives?.expectedOutputs ?? [],
+            errors
+        );
+
+        this.validateExpectedOutputCount(
+            constraint.expectedOutputs,
+            projectDoc.objectives?.expectedOutputs?.length ?? 0,
             errors
         );
 
@@ -157,6 +198,39 @@ export class ConstraintValidationService {
             errors
         );
 
+        //-----------------Objectives-------------------------
+
+        this.validateGeneralObjectiveWords(
+            constraint.generalObjectiveWords,
+            dto.objectives?.general,
+            errors
+        );
+
+        this.validateSpecificObjectiveWords(
+            constraint.specificObjectiveWords,
+            dto.objectives?.specific ?? [],
+            errors
+        );
+
+        this.validateSpecificObjectiveCount(
+            constraint.specificObjectives,
+            dto.objectives?.specific?.length ?? 0,
+            errors
+        );
+
+
+        this.validateExpectedOutputWords(
+            constraint.expectedOutputWords,
+            dto.objectives?.expectedOutputs ?? [],
+            errors
+        );
+
+        this.validateExpectedOutputCount(
+            constraint.expectedOutputs,
+            dto.objectives?.expectedOutputs?.length ?? 0,
+            errors
+        );
+
         // --------------------------------------------------
         // Participants
         // --------------------------------------------------
@@ -197,12 +271,14 @@ export class ConstraintValidationService {
     async validateProjectContent(
         constraintId: string,
         title: string,
-        summary?: string
+        summary?: string,
+        objectives?: {
+            general?: string;
+            specific?: string[];
+            expectedOutputs?: string[];
+        }
     ): Promise<ValidationResult> {
-
-        const constraint =
-            await this.getConstraint(constraintId);
-
+        const constraint = await this.getConstraint(constraintId);
         const errors: string[] = [];
 
         this.validateTitleWords(
@@ -214,6 +290,37 @@ export class ConstraintValidationService {
         this.validateSummaryWords(
             constraint.summaryWords,
             summary,
+            errors
+        );
+
+        this.validateGeneralObjectiveWords(
+            constraint.generalObjectiveWords,
+            objectives?.general,
+            errors
+        );
+
+        this.validateSpecificObjectiveWords(
+            constraint.specificObjectiveWords,
+            objectives?.specific ?? [],
+            errors
+        );
+
+        this.validateSpecificObjectiveCount(
+            constraint.specificObjectives,
+            objectives?.specific?.length ?? 0,
+            errors
+        );
+
+
+        this.validateExpectedOutputWords(
+            constraint.expectedOutputWords,
+            objectives?.expectedOutputs ?? [],
+            errors
+        );
+
+        this.validateExpectedOutputCount(
+            constraint.expectedOutputs,
+            objectives?.expectedOutputs?.length ?? 0,
             errors
         );
 
@@ -337,6 +444,89 @@ export class ConstraintValidationService {
             .split(/\s+/)
             .filter(Boolean)
             .length;
+    }
+
+    private validateGeneralObjectiveWords(
+        range: IRange | undefined,
+        generalObjective: string | undefined,
+        errors: string[]
+    ): void {
+        if (!range) {
+            return;
+        }
+
+        const count = this.countWords(generalObjective ?? "");
+
+        if (!matchesRange(range, count)) {
+            errors.push(
+                `General objective must contain between ${range.min} and ${range.max} words. Current count: ${count}.`
+            );
+        }
+    }
+
+    private validateSpecificObjectiveWords(
+        range: IRange | undefined,
+        specificObjectives: string[],
+        errors: string[]
+    ): void {
+        if (!range) {
+            return;
+        }
+
+        specificObjectives.forEach((objective, index) => {
+            const count = this.countWords(objective ?? "");
+
+            if (!matchesRange(range, count)) {
+                errors.push(
+                    `Specific objective ${index + 1} must contain between ${range.min} and ${range.max} words. Current count: ${count}.`
+                );
+            }
+        });
+    }
+
+    private validateSpecificObjectiveCount(
+        range: IRange | undefined,
+        count: number,
+        errors: string[]
+    ): void {
+        if (range && !matchesRange(range, count)) {
+            errors.push(
+                `Number of specific objectives must be between ${range.min} and ${range.max}. Current count: ${count}.`
+            );
+        }
+    }
+
+
+    private validateExpectedOutputWords(
+        range: IRange | undefined,
+        expectedOutputs: string[],
+        errors: string[]
+    ): void {
+        if (!range) {
+            return;
+        }
+
+        expectedOutputs.forEach((output, index) => {
+            const count = this.countWords(output ?? "");
+
+            if (!matchesRange(range, count)) {
+                errors.push(
+                    `Expected output ${index + 1} must contain between ${range.min} and ${range.max} words. Current count: ${count}.`
+                );
+            }
+        });
+    }
+
+    private validateExpectedOutputCount(
+        range: IRange | undefined,
+        count: number,
+        errors: string[]
+    ): void {
+        if (range && !matchesRange(range, count)) {
+            errors.push(
+                `Number of expected outputs must be between ${range.min} and ${range.max}. Current count: ${count}.`
+            );
+        }
     }
 
     private validateParticipants(

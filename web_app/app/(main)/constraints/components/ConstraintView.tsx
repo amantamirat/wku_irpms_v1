@@ -45,6 +45,38 @@ export const ConstraintView: React.FC<ConstraintViewProps> = ({
             formatter: wordFormat
         },
 
+        // Objectives & Outputs
+        {
+            label: 'General Objective Words',
+            icon: 'pi pi-file',
+            range: constraint.generalObjectiveWords,
+            formatter: wordFormat
+        },
+        {
+            label: 'Specific Objective Words',
+            icon: 'pi pi-file-edit',
+            range: constraint.specificObjectiveWords,
+            formatter: wordFormat
+        },
+        {
+            label: 'Specific Objectives',
+            icon: 'pi pi-list',
+            range: constraint.specificObjectives,
+            formatter: (v: any) => `${v} objectives`
+        },
+        {
+            label: 'Expected Outputs',
+            icon: 'pi pi-check-circle',
+            range: constraint.expectedOutputs,
+            formatter: (v: any) => `${v} outputs`
+        },
+        {
+            label: 'Expected Output Words',
+            icon: 'pi pi-pencil',
+            range: constraint.expectedOutputWords,
+            formatter: wordFormat
+        },
+
         // Project structure & execution
         {
             label: 'Participants',
@@ -83,34 +115,40 @@ export const ConstraintView: React.FC<ConstraintViewProps> = ({
         {
             label: 'Activities Per Phase',
             icon: 'pi pi-check-square',
-            range: constraint.activitiesPerPhase
+            range: constraint.activitiesPerPhase,
+            formatter: (v: any) => `${v} activities`
         },
         {
             label: 'Equipments Per Phase',
             icon: 'pi pi-box',
-            range: constraint.equipmentsPerPhase
+            range: constraint.equipmentsPerPhase,
+            formatter: (v: any) => `${v} items`
         },
 
         // Taxonomy
         {
             label: 'Themes',
             icon: 'pi pi-bookmark',
-            range: constraint.themes
+            range: constraint.themes,
+            formatter: (v: any) => `${v} themes`
         },
         {
             label: 'Sub-Themes',
             icon: 'pi pi-tags',
-            range: constraint.subThemes
+            range: constraint.subThemes,
+            formatter: (v: any) => `${v} sub-themes`
         },
         {
             label: 'Focus Areas',
             icon: 'pi pi-compass',
-            range: constraint.focusAreas
+            range: constraint.focusAreas,
+            formatter: (v: any) => `${v} areas`
         },
         {
             label: 'Indicators',
             icon: 'pi pi-chart-line',
-            range: constraint.indicators
+            range: constraint.indicators,
+            formatter: (v: any) => `${v} indicators`
         }
     ].filter(
         (r) =>

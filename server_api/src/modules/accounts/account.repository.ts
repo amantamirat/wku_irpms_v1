@@ -57,6 +57,9 @@ export class AccountRepository implements IAccountRepository {
     async update(id: string, dtoData: UpdateAccountDTO["data"]) {
         const toUpdate: any = {};
 
+        if (dtoData.email) {
+            toUpdate.email = dtoData.email;
+        }
         if (dtoData.password) {
             toUpdate.password = dtoData.password;
         }

@@ -84,13 +84,20 @@ export class AccountService {
     }
 
     async update(dto: UpdateAccountDTO) {
-        const { id, data, userId } = dto;
+        const { id, data } = dto;
+        const accDoc = await this.accountRepo.findById(id);
+        if (!accDoc) {
+            throw new Error(ERROR_CODES.ACCOUNT_NOT_FOUND);
+        }
+        if (accDoc.status !== AccountStatus.pending) {
+            throw new Error(ERROR_CODES.ACCOUNT_NOT_PENDING);
+        }
         if (data.password) {
             const hashed = await AccountService.prepareHash(data.password);
             data.password = hashed;
         }
         const updated = await this.accountRepo.update(id, data);
-        if (!updated) throw new Error(ERROR_CODES.UNAUTHORIZED);
+        //if (!updated) throw new Error(ERROR_CODES.UNAUTHORIZED);
         return updated;
     }
 

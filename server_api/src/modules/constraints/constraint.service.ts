@@ -81,24 +81,41 @@ export class ConstraintService {
     private validateRange(
         dto: Partial<CreateConstraintDTO>
     ): void {
-
         const ranges = [
             ["Title words", dto.titleWords],
             ["Summary words", dto.summaryWords],
+
+            // Objectives
+            ["General objective words", dto.generalObjectiveWords],
+            ["Specific objective words", dto.specificObjectiveWords],
+            ["Number of specific objectives", dto.specificObjectives],
+
+            // Expected Outputs
+            ["Number of expected outputs", dto.expectedOutputs],
+            ["Expected output words", dto.expectedOutputWords],
+
+            // Participants and project structure
             ["Participants", dto.participants],
             ["Phases", dto.phases],
+
+            // Budget and duration
             ["Budget", dto.budget],
             ["Duration", dto.duration],
             ["Budget per phase", dto.budgetPerPhase],
             ["Duration per phase", dto.durationPerPhase],
+
+            // Research themes
             ["Themes", dto.themes],
             ["Sub themes", dto.subThemes],
             ["Focus areas", dto.focusAreas],
             ["Indicators", dto.indicators],
+
+            // Phase resources
+            ["Activities per phase", dto.activitiesPerPhase],
+            ["Equipments per phase", dto.equipmentsPerPhase],
         ] as const;
 
         for (const [name, range] of ranges) {
-
             if (!range) {
                 continue;
             }

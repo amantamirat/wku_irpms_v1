@@ -9,6 +9,15 @@ export interface Constraint {
   titleWords?: IRange;
   summaryWords?: IRange;
 
+  // Objectives
+  generalObjectiveWords?: IRange;
+  specificObjectiveWords?: IRange;
+  specificObjectives?: IRange;
+
+  // Expected Outputs
+  expectedOutputs?: IRange;
+  expectedOutputWords?: IRange;
+
   participants?: IRange;
   phases?: IRange;
 
@@ -44,6 +53,11 @@ export const validateConstraint = (
   const ranges: [string, IRange | undefined][] = [
     ["Title words", constraint.titleWords],
     ["Summary words", constraint.summaryWords],
+    ["General objective words", constraint.generalObjectiveWords],
+    ["Specific objective words", constraint.specificObjectiveWords],
+    ["Specific objectives", constraint.specificObjectives],
+    ["Expected outputs", constraint.expectedOutputs],
+    ["Expected output words", constraint.expectedOutputWords],
     ["Participants", constraint.participants],
     ["Phases", constraint.phases],
     ["Budget", constraint.budget],

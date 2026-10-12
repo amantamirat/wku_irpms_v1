@@ -10,6 +10,15 @@ export interface IConstraint extends Document {
     titleWords?: IRange;
     summaryWords?: IRange;
 
+    // Objectives
+    generalObjectiveWords?: IRange;
+    specificObjectiveWords?: IRange;
+    specificObjectives?: IRange;
+
+    // Expected Outputs
+    expectedOutputs?: IRange;
+    expectedOutputWords?: IRange;
+
     participants?: IRange;
     phases?: IRange;
 
@@ -51,6 +60,28 @@ const ConstraintSchema = new Schema<IConstraint>(
         },
 
         summaryWords: {
+            type: RangeSchema,
+        },
+
+        // Objectives
+        generalObjectiveWords: {
+            type: RangeSchema,
+        },
+
+        specificObjectiveWords: {
+            type: RangeSchema,
+        },
+
+        specificObjectives: {
+            type: RangeSchema,
+        },
+
+        // Expected Outputs
+        expectedOutputs: {
+            type: RangeSchema,
+        },
+
+        expectedOutputWords: {
             type: RangeSchema,
         },
 
