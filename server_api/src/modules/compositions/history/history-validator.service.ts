@@ -13,7 +13,7 @@ import {
 import { ApplicationRepository } from "../../projects/applications/application.repository";
 
 import { FilterCollaborators } from "../../projects/collaborators/collaborator.dto";
-import { ICollaborator } from "../../projects/collaborators/collaborator.model";
+import { CollaboratorStatus, ICollaborator } from "../../projects/collaborators/collaborator.model";
 import { CollaboratorRepository } from "../../projects/collaborators/collaborator.repository";
 
 import { FilterProjectsDTO } from "../../projects/project.dto";
@@ -226,7 +226,8 @@ export class HistoryValidatorService {
         // ------------------------------------------------
 
         const collabFilter: FilterCollaborators = {
-            member: String(user._id)
+            member: String(user._id),
+            excludeStatus: [CollaboratorStatus.declined]
         };
 
         if (
@@ -242,7 +243,7 @@ export class HistoryValidatorService {
         }
 
         // ------------------------------------------------
-        // Find user's project participation
+        // Find user's project participation, not declined
         // ------------------------------------------------
 
         const collaborators =

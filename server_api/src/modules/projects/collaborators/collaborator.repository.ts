@@ -124,6 +124,12 @@ export class CollaboratorRepository
             query.status = filters.status;
         }
 
+        if (filters.excludeStatus?.length) {
+            query.status = {
+                $nin: filters.excludeStatus
+            };
+        }
+
         return query;
     }
 

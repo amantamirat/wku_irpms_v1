@@ -31,6 +31,7 @@ export interface FilterCollaborators {
     member?: string;
     isLead?: boolean;
     status?: CollaboratorStatus,
+    excludeStatus?: CollaboratorStatus[];
 }
 
 
