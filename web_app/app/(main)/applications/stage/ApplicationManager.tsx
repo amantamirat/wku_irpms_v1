@@ -293,7 +293,7 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
             visible: () => hasPermission("application:anonymize"),
             disabled: (row: Application) =>
                 row.anonymizationStatus !==
-                AnonymizationStatus.failed,
+                AnonymizationStatus.processing,
             onClick: (row: Application) => {
                 confirm.ask({
                     operation: 'anonymize document',
