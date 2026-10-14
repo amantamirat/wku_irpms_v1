@@ -292,7 +292,7 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
             tooltip: 'Anonymize Document',
             visible: () => hasPermission("application:anonymize"),
             disabled: (row: Application) =>
-                row.anonymizationStatus !==
+                row.anonymizationStatus ===
                 AnonymizationStatus.processing,
             onClick: (row: Application) => {
                 confirm.ask({
