@@ -107,17 +107,17 @@ export class CollaboratorController {
             if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
-            const { role } = req.body;
+            const { member, role } = req.body;
 
             const dto: UpdateCollaboratorDto = {
                 id,
                 data: {
+                    member,
                     role
-                },
-                applicantId: req.auth.userId,
+                }
             };
 
-            const updated = await this.service.update(dto);
+            const updated = await this.service.update(dto,  req.auth.userId);
             successResponse(res, 200, 'Collaborator updated successfully', updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

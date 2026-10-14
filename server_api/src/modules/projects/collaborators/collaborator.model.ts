@@ -14,6 +14,9 @@ export interface ICollaborator extends Document {
     role: string;
     isLeadPI?: boolean;
     status: CollaboratorStatus;
+
+    updatedBy?: mongoose.Types.ObjectId;
+
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -28,7 +31,7 @@ const CollaboratorSchema = new Schema<ICollaborator>({
     member: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.USER,
-        immutable: true,
+        //immutable: true,
         required: true
     },
     role: {
@@ -44,6 +47,10 @@ const CollaboratorSchema = new Schema<ICollaborator>({
         default: CollaboratorStatus.pending,
         required: true
     },
+    updatedBy: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.USER
+    }
 }, { timestamps: true });
 
 CollaboratorSchema.index({ project: 1, member: 1 }, { unique: true });

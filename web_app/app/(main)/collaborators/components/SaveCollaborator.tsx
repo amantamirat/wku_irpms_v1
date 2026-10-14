@@ -36,10 +36,10 @@ const SaveCollaborator = ({
         }
     }, [item, visible]);
 
-    // Professional Fetching: Only load users if we are ADDING a new collaborator
+    // Fetch users whenever the dialog is visible (both add and edit modes)
     useEffect(() => {
         const fetchUsers = async () => {
-            if (visible && !isEditMode) {
+            if (visible) {
                 setLoading(true);
                 try {
                     const data = await UserApi.lookup!({});
@@ -52,7 +52,7 @@ const SaveCollaborator = ({
             }
         };
         fetchUsers();
-    }, [visible, isEditMode]);
+    }, [visible]);
 
     const validate = () => {
         if (!localCollaborator.member) return { valid: false, message: "Collaborator is required" };
@@ -77,7 +77,6 @@ const SaveCollaborator = ({
             toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Collaborator saved' });
 
             if (onComplete) {
-                // Pass back the saved object merged with the selected applicant for UI immediate update
                 onComplete({
                     ...saved,
                     member: localCollaborator.member,
@@ -115,17 +114,10 @@ const SaveCollaborator = ({
                         <Dropdown
                             id="applicant"
                             value={localCollaborator.member}
-                            // In edit mode, we just use the current applicant as the only option
-                            options={isEditMode ? [localCollaborator.member as User] : members}
+                            options={members}
                             onChange={(e) => setLocalCollaborator({ ...localCollaborator, member: e.value })}
                             dataKey="_id"
                             optionLabel="name"
-                            //itemTemplate={userTemplate}
-                            /*
-                            valueTemplate={(option) =>
-                                option ? userTemplate(option) : <span className="p-placeholder">Select a Person</span>
-                            }*/
-                            disabled={isEditMode}
                             //loading={loading}
                             placeholder="Search by name..."
                             filter

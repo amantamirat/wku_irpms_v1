@@ -63,7 +63,7 @@ const CollaboratorManager = ({ project, enableEditing = false }: CollaboratorMan
         SaveDialog: SaveCollaborator,
 
         hideSearch: true,
-        hideEditAction: true,
+        //hideEditAction: true,
 
         hideDefaultActions: !enableEditing
     });

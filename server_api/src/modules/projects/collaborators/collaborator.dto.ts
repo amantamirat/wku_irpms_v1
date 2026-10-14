@@ -19,10 +19,10 @@ export interface CreateCollaboratorDto extends CollaboratorDto {
 export interface UpdateCollaboratorDto {
     id: string;
     data: Partial<{
+        member:string;
         role: string;
         isLeadPI: boolean;
     }>;
-    applicantId: string;
 }
 
 // Options for querying collaborators

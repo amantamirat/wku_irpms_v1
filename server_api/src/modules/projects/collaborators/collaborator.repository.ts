@@ -46,7 +46,8 @@ export interface ICollaboratorRepository {
 
     update(
         id: string,
-        data: UpdateCollaboratorDto["data"]
+        data: UpdateCollaboratorDto["data"],
+        userId: string
     ): Promise<ICollaborator | null>;
 
     updateStatus(
@@ -304,14 +305,22 @@ export class CollaboratorRepository
 
 
     /**
-     * Update collaborator.
-     */
+ * Update collaborator.
+ */
     async update(
         id: string,
-        dtoData: UpdateCollaboratorDto["data"]
+        dtoData: UpdateCollaboratorDto["data"],
+        userId: string
     ): Promise<ICollaborator | null> {
 
-        const updateData: Partial<ICollaborator> = {};
+        const updateData: Partial<ICollaborator> = {
+            updatedBy: new mongoose.Types.ObjectId(userId)
+        };
+
+        if (dtoData.member !== undefined) {
+            updateData.member =
+                new mongoose.Types.ObjectId(dtoData.member);
+        }
 
         if (dtoData.isLeadPI !== undefined) {
             updateData.isLeadPI =

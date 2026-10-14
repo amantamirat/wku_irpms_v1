@@ -23,7 +23,7 @@ import { ApplicationStatus } from "../applications/application.model";
 import { IApplicationRepository } from "../applications/application.repository";
 import { ProjectAuth } from "../project.auth";
 import { ProjectStatus } from "../project.model";
-import { CollaboratorStatus } from "./collaborator.model";
+import { CollaboratorStatus, ICollaborator } from "./collaborator.model";
 
 
 export class CollaboratorService {
@@ -133,8 +133,53 @@ export class CollaboratorService {
     };
 
 
-    async update(dto: UpdateCollaboratorDto) {
-        throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
+    /**
+ * Update collaborator.
+ */
+    async update(
+        dto: UpdateCollaboratorDto,
+        userId: string
+    ): Promise<ICollaborator | null> {
+
+        const collaborator = await this.collabRepo.findById(dto.id);
+
+        if (!collaborator) {
+            throw new AppError(ERROR_CODES.COLLABORATOR_NOT_FOUND);
+        }
+
+        if (collaborator.status !== CollaboratorStatus.pending) {
+            throw new AppError(
+                ERROR_CODES.COLLABORATOR_NOT_PENDING
+            );
+        }
+
+        if (collaborator.isLeadPI) {
+            throw new AppError(
+                ERROR_CODES.LEAD_PI_CANNOT_BE_UPDATED
+            );
+        }
+
+        if (dto.data.member !== undefined) {
+            const exists = await this.collabRepo.exists({
+                project: String(collaborator.project),
+                member: dto.data.member
+            });
+
+            if (
+                exists &&
+                dto.data.member !== String(collaborator.member)
+            ) {
+                throw new AppError(
+                    ERROR_CODES.COLLABORATOR_ALREADY_EXISTS
+                );
+            }
+        }
+
+        return this.collabRepo.update(
+            dto.id,
+            dto.data,
+            userId
+        );
     }
 
 
@@ -168,7 +213,7 @@ export class CollaboratorService {
             const projectDoc = await this.projectRepo.findById(String(collabDoc.project));
             if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
             const projectStatus = projectDoc.status;
-            if (projectStatus !== ProjectStatus.draft 
+            if (projectStatus !== ProjectStatus.draft
             ) {
                 throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
             }
