@@ -41,11 +41,13 @@ export class PdfEntityLocationMatcher {
                         type ===
                         AnonymizationEntityType.MEMBER
                     ) {
-                        //return text === target; //was before adding spelling checker
+                        return text === target;
+                        /*
+                        //was before adding spelling checker
                         return this.findMemberLocations(
                             detectedText,
                             items
-                        );
+                        );*/
                     }
 
                     return text.includes(target);
@@ -154,6 +156,7 @@ export class PdfEntityLocationMatcher {
 
     ///Fuzzeir added for spelling error
 
+    /*
 
     private findMemberLocations(
         detectedText: string,
@@ -334,6 +337,6 @@ export class PdfEntityLocationMatcher {
 
         return previous[b.length];
     }
-
+*/
 
 }
