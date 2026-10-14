@@ -184,7 +184,7 @@ export class CallService {
             }
         }
 
-        if (next === CallStatus.active) {
+        if (next === CallStatus.active && from === CallStatus.planned) {
             if (!callDoc.deadline) {
                 throw new AppError(
                     ERROR_CODES.CALL_DEADLINE_NOT_SET

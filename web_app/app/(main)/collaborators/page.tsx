@@ -55,7 +55,7 @@ const CollaboratorsManager = () => {
         },
         {
             header: "Member",
-            field: "user.name",
+            field: "member.name",
             sortable: true,
             body: (collaborator: Collaborator) => {
                 const user =
