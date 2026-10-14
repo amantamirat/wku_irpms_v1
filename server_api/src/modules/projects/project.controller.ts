@@ -108,13 +108,20 @@ export class ProjectController {
       }
 
       // documentPath and grant are set server-side.
-      const { documentPath, grant, ...project } = JSON.parse(
-        req.body.project
-      ) as CreateProjectDTO;
+      const { documentPath, grant,
+        totalCollabs,
+        totalBudget, totalDuration, ...project } = JSON.parse(
+          req.body.project
+        ) as CreateProjectDTO & {
+          totalBudget?: number;
+          totalDuration?: number;
+          totalCollabs?: number;
+        };
 
       const submitted = await this.service.apply(
         {
           ...project,
+          leadPI: req.auth.userId,
           objectives: project.objectives,
           collaborators: project.collaborators ?? [],
           themes: project.themes ?? [],

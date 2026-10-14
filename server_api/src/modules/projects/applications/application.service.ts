@@ -28,7 +28,7 @@ import {
     CreateApplicationDTO,
     FilterApplicationDTO,
 } from "./application.dto";
-import { ApplicationStatus, IApplication } from "./application.model";
+import { AnonymizationStatus, ApplicationStatus, IApplication } from "./application.model";
 import { IApplicationRepository } from "./application.repository";
 
 export class ApplicationService {
@@ -390,10 +390,40 @@ export class ApplicationService {
 
 
     /**
-     * Get by ID
-     */
+ * Start application anonymization without waiting for completion.
+ */
     async anonymizeApplication(id: string) {
-        return await this.anonymizerService.anonymizeApplication(id);
+        const application = await this.applicationRepo.findById(
+            id,
+            { populate: true }
+        );
+
+        if (!application) {
+            throw new AppError(
+                ERROR_CODES.APPLICATION_NOT_FOUND
+            );
+        }
+
+        if (
+            application.anonymizationStatus ===
+            AnonymizationStatus.processing
+        ) {
+            throw new AppError(
+                ERROR_CODES.ANONYMIZATION_IN_PROGRESS
+            );
+        }
+
+        // Start in the background; do not await.
+        void this.anonymizerService
+            .anonymizeApplication(id)
+            .catch(error => {
+                console.error(
+                    `Background anonymization failed for application ${id}:`,
+                    error
+                );
+            });
+
+        return application;
     }
 
     /**
