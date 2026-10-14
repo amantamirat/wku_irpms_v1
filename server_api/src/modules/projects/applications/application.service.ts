@@ -390,40 +390,14 @@ export class ApplicationService {
 
 
     /**
- * Start application anonymization without waiting for completion.
+ * Anonymize application document and return updated application.
  */
     async anonymizeApplication(id: string) {
-        const application = await this.applicationRepo.findById(
-            id,
-            { populate: true }
-        );
+        await this.anonymizerService.anonymizeApplication(id);
 
-        if (!application) {
-            throw new AppError(
-                ERROR_CODES.APPLICATION_NOT_FOUND
-            );
-        }
-
-        if (
-            application.anonymizationStatus ===
-            AnonymizationStatus.processing
-        ) {
-            throw new AppError(
-                ERROR_CODES.ANONYMIZATION_IN_PROGRESS
-            );
-        }
-
-        // Start in the background; do not await.
-        void this.anonymizerService
-            .anonymizeApplication(id)
-            .catch(error => {
-                console.error(
-                    `Background anonymization failed for application ${id}:`,
-                    error
-                );
-            });
-
-        return application;
+        return await this.applicationRepo.findById(id, {
+            populate: true
+        });
     }
 
     /**
