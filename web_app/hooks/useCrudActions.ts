@@ -11,7 +11,7 @@ import {
 interface UseCrudActionsProps<T> {
     resource: string;
 
-    createLabel?:string;
+    createLabel?: string;
 
     itemName?: string;
     /**
@@ -157,7 +157,7 @@ export function useCrudActions<T extends { _id?: string }>({
             !hideDeleteAction &&
             !!onDelete &&
             hasPermission([
-                `${resource}:delete`,
+                `${resource}:delete`, `${resource}:delete:own`,
             ]);
 
         if (canDelete) {

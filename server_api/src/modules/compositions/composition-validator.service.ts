@@ -164,6 +164,64 @@ export class CompositionValidationService {
         };
     }
 
+
+    /**
+ * Validate a user against composition member requirements.
+ * The lead PI rules are intentionally excluded.
+ */
+    public async validateMember(
+        compositionId: string,
+        userId: string,
+        call: ICall,
+        stage: IStage
+    ): Promise<ValidationResult> {
+
+        const composition =
+            await this.getComposition(compositionId);
+
+        const grant = await this.grantRepo.findById(
+            String(call.grant)
+        );
+
+        if (!grant) {
+            throw new AppError(
+                ERROR_CODES.GRANT_NOT_FOUND
+            );
+        }
+
+        const userDoc = await this.userRepo.findById(userId);
+
+        if (!userDoc) {
+            throw new AppError(
+                ERROR_CODES.USER_NOT_FOUND
+            );
+        }
+
+        const validationContext: HistoryValidationContext = {
+            call: String(call._id),
+            stage: String(stage._id),
+            organization: String(grant.organization),
+            calendar: String(call.calendar),
+            source: grant.fundingSource
+        };
+
+        const errors: string[] = [];
+
+        await this.validateMembers(
+            composition.memberRequirements?.map(
+                id => String(id)
+            ) ?? [],
+            [userDoc],
+            validationContext,
+            errors
+        );
+
+        return {
+            valid: errors.length === 0,
+            errors
+        };
+    }
+
     private async getComposition(
         id: string
     ): Promise<IComposition> {

@@ -971,6 +971,11 @@
   },
   {
     "category": "Collaborator Management",
+    "name": "collaborator:update:own",
+    "description": "Edit own collaborator by lead"
+  },
+  {
+    "category": "Collaborator Management",
     "name": "collaborator:transition.*",
     "description": "Perform any valid collaborator membership state transition for any member"
   },

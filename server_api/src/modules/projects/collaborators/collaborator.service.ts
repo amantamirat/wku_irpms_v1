@@ -24,6 +24,8 @@ import { IApplicationRepository } from "../applications/application.repository";
 import { ProjectAuth } from "../project.auth";
 import { ProjectStatus } from "../project.model";
 import { CollaboratorStatus, ICollaborator } from "./collaborator.model";
+import { CompositionValidationService } from "../../compositions/composition-validator.service";
+import { IStageRepository } from "../../calls/stages/stage.repository";
 
 
 export class CollaboratorService {
@@ -32,8 +34,10 @@ export class CollaboratorService {
         private readonly collabRepo: ICollaboratorRepository,
         private readonly projectRepo: IProjectRepository,
         private readonly callRepo: ICallRepository,
+        private readonly stageRepo: IStageRepository,
         private readonly applicationRepo: IApplicationRepository,
         private readonly constraintValidator: ConstraintValidationService,
+        private readonly compositionValidator: CompositionValidationService,
         private readonly projectAuth: ProjectAuth,
         private readonly notificationService: NotificationService,
         private readonly scopeFilterService: ScopeFilterService,
@@ -54,12 +58,13 @@ export class CollaboratorService {
                     throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
                 }
 
+                /*
                 if (projectDoc.currentApplication) {
                     const currentAppDoc = await this.applicationRepo.findById(String(projectDoc.currentApplication));
                     if (currentAppDoc?.status === ApplicationStatus.submitted) {
                         throw new AppError(ERROR_CODES.CURRENT_APPLICATION_IS_PENDING);
                     }
-                }
+                }*/
             }
 
 
@@ -78,12 +83,40 @@ export class CollaboratorService {
                         throw new AppError(ERROR_CODES.INVALID_CONSTRAINT, "participant count", 400, result);
                     }
                 }
-                /*
+
                 if (dto.isLeadPI) {
                     // await this.compositionValidator.validatePI(grantId, applicant);
                 } else {
                     //  await this.compositionValidator.validateCoPI(grantId, applicant);
-                }*/
+                    if (callDoc.composition) {
+                        const stageDoc = await this.stageRepo.getFirstStage(
+                            String(projectDoc.call)
+                        );
+
+                        if (!stageDoc) {
+                            throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+                        }
+
+                        const results =
+                            await this.compositionValidator.validateMember(
+                                String(callDoc.composition),
+                                member,
+                                callDoc,
+                                stageDoc
+                            );
+
+                        if (!results.valid) {
+                            throw new AppError(
+                                ERROR_CODES.INVALID_COMPOSITION,
+                                "The proposed member does not satisfy the composition requirements.",
+                                400,
+                                // results.errors
+                            );
+                        }
+                    }
+                }
+
+
             }
         }
         try {
@@ -136,6 +169,10 @@ export class CollaboratorService {
     /**
  * Update collaborator.
  */
+
+    /**
+     * Update collaborator.
+     */
     async update(
         dto: UpdateCollaboratorDto,
         userId: string
@@ -144,24 +181,54 @@ export class CollaboratorService {
         const collaborator = await this.collabRepo.findById(dto.id);
 
         if (!collaborator) {
-            throw new AppError(ERROR_CODES.COLLABORATOR_NOT_FOUND);
-        }
-
-        if (collaborator.status !== CollaboratorStatus.pending) {
             throw new AppError(
-                ERROR_CODES.COLLABORATOR_NOT_PENDING
+                ERROR_CODES.COLLABORATOR_NOT_FOUND
             );
         }
 
+        // Authorize the user against the collaborator's project.
+        const projectId = String(collaborator.project);
+
+        const { projectDoc, isLeadPI } =
+            await this.projectAuth.auth(
+                projectId,
+                userId,
+                PERMISSIONS.COLLABORATOR.UPDATE
+            );
+
+        // Only pending and declined collaborators can be updated.
+        if (
+            collaborator.status === CollaboratorStatus.verified
+        ) {
+            throw new AppError(
+                ERROR_CODES.COLLABORATOR_ALREADY_VERIFIED
+            );
+        }
+
+        // The lead PI collaborator record cannot be updated.
         if (collaborator.isLeadPI) {
             throw new AppError(
                 ERROR_CODES.LEAD_PI_CANNOT_BE_UPDATED
             );
         }
 
+        // The lead PI can update collaborators only while
+        // the project is in draft status.
+        if (
+            isLeadPI &&
+            projectDoc.status !== ProjectStatus.draft
+        ) {
+            throw new AppError(
+                ERROR_CODES.PROJECT_NOT_DRAFT
+            );
+        }
+
+        // Prevent duplicate membership in the same project.
+
         if (dto.data.member !== undefined) {
+            // Prevent duplicate membership in the same project.
             const exists = await this.collabRepo.exists({
-                project: String(collaborator.project),
+                project: projectId,
                 member: dto.data.member
             });
 
@@ -173,14 +240,54 @@ export class CollaboratorService {
                     ERROR_CODES.COLLABORATOR_ALREADY_EXISTS
                 );
             }
+
+            // Validate the proposed member against the composition.
+            if (projectDoc.call) {
+                const callDoc = await this.callRepo.findById(
+                    String(projectDoc.call)
+                );
+
+                if (!callDoc) {
+                    throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+                }
+
+                if (callDoc.composition) {
+                    const stageDoc = await this.stageRepo.getFirstStage(
+                        String(projectDoc.call)
+                    );
+
+                    if (!stageDoc) {
+                        throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+                    }
+
+                    const results =
+                        await this.compositionValidator.validateMember(
+                            String(callDoc.composition),
+                            dto.data.member,
+                            callDoc,
+                            stageDoc
+                        );
+
+                    if (!results.valid) {
+                        throw new AppError(
+                            ERROR_CODES.INVALID_COMPOSITION,
+                            "The proposed member does not satisfy the composition requirements.",
+                            400,
+                            // results.errors
+                        );
+                    }
+                }
+            }
         }
 
+        // Persist the update after all authorization and validation.
         return this.collabRepo.update(
             dto.id,
             dto.data,
             userId
         );
     }
+
 
 
 

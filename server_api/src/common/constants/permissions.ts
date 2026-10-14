@@ -225,6 +225,7 @@ export const PERMISSIONS = {
     CREATE_OWN: "collaborator:create:own",
     READ: "collaborator:read",
     UPDATE: "collaborator:update",
+    UPDATE_OWN: "collaborator:update:own",
     STATUS: {
       VERIFY: "collaborator:status.verified",
       PEND: "collaborator:status.pending"

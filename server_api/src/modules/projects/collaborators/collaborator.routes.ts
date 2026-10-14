@@ -30,7 +30,7 @@ router.get('/me', verifyAuthToken,
     controller.getMyCollaborations);
 
 router.put('/:id', verifyAuthToken,
-    checkPermission([PERMISSIONS.COLLABORATOR.UPDATE]),
+    checkPermission([PERMISSIONS.COLLABORATOR.UPDATE, PERMISSIONS.COLLABORATOR.UPDATE_OWN]),
     controller.update);
 
 router.patch('/:id', verifyAuthToken,

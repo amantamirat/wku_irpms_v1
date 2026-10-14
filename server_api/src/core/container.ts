@@ -154,8 +154,8 @@ export const stageService = new StageService(stageRepo, callRepo, evaluationRepo
 
 export const projectAuth = new ProjectAuth(projectRepo, authPermissionService);
 
-export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, callRepo,
-    applicationRepo, constraintValidator, projectAuth, notificationService, filterService);
+export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, callRepo, stageRepo,
+    applicationRepo, constraintValidator, compositionValidator, projectAuth, notificationService, filterService);
 
 export const phaseActivityService = new PhaseActivityService(activityRepo, phaseRepo, projectAuth)
 
