@@ -7,15 +7,12 @@ const end_point = "/thematics";
 
 export const ThematicApi: EntityApi<Thematic, GetThematicsOptions | undefined> = {
 
-    async getAll(options) {
-        const query = new URLSearchParams();
-        if (options) {
-            if (options.status) {
-                query.append("status", String(options.status));
-            }
-        }
-        const qs = query.toString();
-        return ApiClient.get(`${end_point}${qs ? `?${qs}` : ""}`);
+    async getAll(filter) {
+        return ApiClient.get(end_point, filter);
+    },
+
+    async lookup(filter) {
+        return ApiClient.get(`${end_point}/lookup`, filter);
     },
 
     async create(thematic) {

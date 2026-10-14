@@ -487,6 +487,11 @@
   },
   {
     "category": "Thematic Management",
+    "name": "thematic:lookup",
+    "description": "Look thematic entries"
+  },
+  {
+    "category": "Thematic Management",
     "name": "thematic:update",
     "description": "Update thematic entries"
   },

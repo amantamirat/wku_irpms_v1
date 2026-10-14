@@ -39,11 +39,20 @@ router.post(
 //----------------------------------------
 
 router.get(
+    "/lookup",
+    verifyAuthToken,
+    checkPermission([PERMISSIONS.DOC_TEMPLATE.LOOKUP]),
+    controller.get
+);
+
+router.get(
     "/",
     verifyAuthToken,
     checkPermission([PERMISSIONS.DOC_TEMPLATE.READ]),
     controller.get
 );
+
+
 
 
 router.get(

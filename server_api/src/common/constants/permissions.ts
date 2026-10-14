@@ -191,6 +191,7 @@ export const PERMISSIONS = {
   THEMATIC: {
     CREATE: "thematic:create",
     READ: "thematic:read",
+    LOOKUP: "thematic:lookup",
     UPDATE: "thematic:update",
     DELETE: "thematic:delete",
   },

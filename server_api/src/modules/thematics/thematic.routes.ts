@@ -25,6 +25,13 @@ router.post(
 );
 
 router.get(
+    '/lookup',
+    verifyAuthToken,
+    checkPermission([PERMISSIONS.THEMATIC.LOOKUP]),
+    controller.get
+);
+
+router.get(
     '/',
     verifyAuthToken,
     checkPermission([PERMISSIONS.THEMATIC.READ]),

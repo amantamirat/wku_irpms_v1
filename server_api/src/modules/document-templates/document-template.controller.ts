@@ -4,15 +4,14 @@ import { Request, Response } from "express";
 
 import {
     CreateDocumentTemplateDTO,
-    FilterDocumentTemplateDTO,
-    UpdateDocumentTemplateDTO,
+    FilterDocumentTemplateDTO
 } from "./document-template.dto";
 
-import { DocumentTemplateService } from "./document-template.service";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { successResponse, errorResponse } from "../../common/helpers/response";
+import { errorResponse, successResponse } from "../../common/helpers/response";
 import { AuthenticatedRequest } from "../auth/auth.middleware";
+import { DocumentTemplateService } from "./document-template.service";
 import { AgreementGeneratorService } from "./services/agreementGeneratorService";
 
 

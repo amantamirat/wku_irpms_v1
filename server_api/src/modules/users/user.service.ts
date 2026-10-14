@@ -28,16 +28,16 @@ import { FilterOptions } from "../../common/dtos/filter.dto";
 import { IUser, UserScope } from "./user.model";
 import { toObjectId } from "../../common/utils/mongoose.utils";
 import { AuthScope } from "../auth/auth.types";
+import { CollaboratorRepository, ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
 
 
 export class UserService {
 
     constructor(
-        private repo: IUserRepository = new UserRepository(),
-        private orgnRepo: IOrganizationRepository =
-            new OrganizationRepository(),
-        private roleRepository: IRoleRepository =
-            new RoleRepository()
+        private userRepo: IUserRepository,
+        private orgnRepo: IOrganizationRepository,
+        private roleRepository: IRoleRepository,
+        private collabRepository: ICollaboratorRepository
     ) { }
 
 
@@ -101,7 +101,7 @@ export class UserService {
             createdBy
         };
 
-        return this.repo.create({
+        return this.userRepo.create({
             ...data,
             workspace: dto.workspace
                 ? toObjectId(dto.workspace)
@@ -128,7 +128,7 @@ export class UserService {
         //scope: AuthScope,
         options?: FilterOptions
     ) {
-        return this.repo.find(
+        return this.userRepo.find(
             filter,
             options
         );
@@ -143,7 +143,7 @@ export class UserService {
         filter: FilterUsersDTO,
         options?: FilterOptions
     ) {
-        return this.repo.findDeleted(
+        return this.userRepo.findDeleted(
             filter,
             options
         );
@@ -158,7 +158,7 @@ export class UserService {
         filter: FilterUsersDTO
     ) {
 
-        const users = await this.repo.find(
+        const users = await this.userRepo.find(
             filter
         );
 
@@ -177,7 +177,7 @@ export class UserService {
     async findOne(
         filter: FilterUsersDTO
     ) {
-        return this.repo.findOne(filter);
+        return this.userRepo.findOne(filter);
     }
 
 
@@ -201,7 +201,7 @@ export class UserService {
             }
         }
 
-        const updated = await this.repo.update(
+        const updated = await this.userRepo.update(
             id,
             data,
             updatedBy
@@ -228,7 +228,7 @@ export class UserService {
     ) {
 
         const updated =
-            await this.repo.updateRoles(
+            await this.userRepo.updateRoles(
                 dto.id,
                 dto,
                 updatedBy
@@ -324,7 +324,7 @@ export class UserService {
             }
         }
 
-        return this.repo.updateScope(
+        return this.userRepo.updateScope(
             userId,
             normalizedScope,
             updatedBy
@@ -341,8 +341,13 @@ export class UserService {
         deletedBy?: string
     ) {
 
+        const exist = await this.collabRepository.exists({ member: id });
+        if (exist) {
+            throw new AppError(ERROR_CODES.USER_IN_USE);
+        }
+
         const deleted =
-            await this.repo.softDelete(
+            await this.userRepo.softDelete(
                 id,
                 deletedBy
             );
@@ -368,7 +373,7 @@ export class UserService {
     ) {
 
         const restored =
-            await this.repo.restore(
+            await this.userRepo.restore(
                 id,
                 restoredBy
             );

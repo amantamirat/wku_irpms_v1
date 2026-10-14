@@ -13,6 +13,10 @@ export const DocumentTemplateApi: EntityApi<IDocumentTemplate> & {
         return ApiClient.get(end_point);
     },
 
+    async lookup() {
+        return ApiClient.get(`${end_point}/lookup`);
+    },
+
     async create(temp: Partial<IDocumentTemplate>): Promise<any> {
         const formData = new FormData();
 

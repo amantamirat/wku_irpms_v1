@@ -57,20 +57,8 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
             return;
         }
 
-        const loadDropdownData = async () => {
+        const loadOrganization = async () => {
             try {
-                // Load Thematics if not predefined
-                if (!isThematicPredefined) {
-                    const thematicData = await ThematicApi.getAll({ status: ThematicStatus.published });
-                    setThematics(thematicData);
-                }
-
-                const constraintData = await ConstraintApi.getAll();
-                setConstraints(constraintData);
-
-                const templateData = await DocumentTemplateApi.getAll();
-                setAgreementTemplates(templateData);
-
                 // Load Organizations if Funding Source is already established
                 if (localGrant.fundingSource && !isOrganizationPredefined) {
                     const unitType = localGrant.fundingSource === FundingSource.INTERNAL
@@ -80,11 +68,50 @@ const SaveGrant = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<
                     setOrganizations(orgData);
                 }
             } catch (err) {
-                console.error('Error bootstrapping dialog metadata:', err);
+                console.error('Error on loading organization', err);
+            }
+        }
+
+        const loadConstraint = async () => {
+            try {
+
+                const constraintData = await ConstraintApi.lookup!();
+                setConstraints(constraintData);
+
+            } catch (err) {
+                console.error('Error on loading constraint', err);
+            }
+        }
+
+
+        const loadTemplate = async () => {
+            try {
+
+                const templateData = await DocumentTemplateApi.lookup!();
+                setAgreementTemplates(templateData);
+
+            } catch (err) {
+                console.error('Error on loading template', err);
+            }
+        }
+
+        const loadThematic = async () => {
+            try {
+                // Load Thematics if not predefined
+                if (!isThematicPredefined) {
+                    const thematicData = await ThematicApi.lookup!({ status: ThematicStatus.published });
+                    setThematics(thematicData);
+                }
+
+            } catch (err) {
+                console.error('Error on thematic loading:', err);
             }
         };
 
-        loadDropdownData();
+        loadOrganization();
+        loadConstraint();
+        loadTemplate();
+        loadThematic();
     }, [visible, localGrant.fundingSource, isOrganizationPredefined, isThematicPredefined]);
 
     // Form execution logic

@@ -177,6 +177,6 @@ export const projectService = new ProjectService(projectRepo, userRepo, collabor
     constraintValidator, compositionValidator, templateValidtor, projectAuth,
     authPermissionService, notificationService, filterService, fileStorageService);
 
-export const userService = new UserService(userRepo, organizationRepo, roleRepo);
+export const userService = new UserService(userRepo, organizationRepo, roleRepo, collaboratorRepo);
 
 
