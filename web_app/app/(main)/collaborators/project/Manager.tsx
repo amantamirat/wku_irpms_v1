@@ -35,6 +35,28 @@ const CollaboratorManager = ({ project, enableEditing = false }: CollaboratorMan
                     (r.member as any)?.name || "N/A"
             },
             {
+                header: "Gender",
+                field: "member.gender",
+                sortable: true,
+                body: (r: Collaborator) => {
+                    const member =
+                        typeof r.member === "object" && r.member !== null
+                            ? r.member
+                            : null;
+
+                    const gender =
+                        member?.gender ??
+                        (typeof r.member === "string" ? r.member : "N/A");
+
+                    return (
+                        <MyBadge
+                            type="gender"
+                            value={gender}
+                        />
+                    );
+                }
+            },
+            {
                 field: "role",
                 header: "Role",
                 sortable: true,
