@@ -113,6 +113,23 @@ const ProjectManager = createEntityManager<Project>({
                 );
             }
         },
+
+        {
+            header: "Gender",
+            field: "leadPI.gender",
+            sortable: true,
+            body: (project: Project) => {
+                const lead = typeof project.leadPI === "object" && project.leadPI !== null ? project.leadPI : null;
+                const gender = lead?.gender ?? (typeof project.leadPI === "string" ? project.leadPI : "N/A");
+                return (
+                    <MyBadge
+                        type="gender"
+                        value={gender ?? "N/A"}
+                    />
+                );
+            }
+        },
+
         {
             header: "Budget",
             field: "totalBudget",
@@ -138,7 +155,7 @@ const ProjectManager = createEntityManager<Project>({
         }
     ],
 
-    defaultHiddenFields: ["grant.title", "calendar.year", "organization.name", "workspace.name", "call.title"],
+    defaultHiddenFields: ["grant.title", "calendar.year", "leadPI.gender", "organization.name", "workspace.name", "call.title"],
     enableColumnToggle: true,
 
     createNew: () => ({

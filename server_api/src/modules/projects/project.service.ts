@@ -497,6 +497,39 @@ export class ProjectService {
 
             }
 
+            if (from === ProjectStatus.approved) {
+                if (projectDoc.call) {
+                    const callDoc = await this.callRepo.findById(
+                        String(projectDoc.call)
+                    );
+
+                    if (!callDoc) {
+                        throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+                    }
+
+                    if (callDoc.composition) {
+                        const lastStageDoc = await this.stageRepo.getLastStage(String(projectDoc.call));
+                        if (!lastStageDoc) {
+                            throw new AppError(ERROR_CODES.LAST_STAGE_NOT_FOUND);
+                        }
+                        const results = await this.compositionValidator.validateByProjectId(
+                            String(callDoc.composition),
+                            id,
+                            lastStageDoc
+                        );
+
+                        if (!results.valid) {
+                            throw new AppError(ERROR_CODES.INVALID_COMPOSITION,
+                                "The proposed member does not satisfy the composition requirements.",
+                                400,
+                                results.errors
+                            );
+                        }
+                    }
+
+                }
+            }
+
         }
 
         if (to === ProjectStatus.completed) {

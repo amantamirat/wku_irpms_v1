@@ -178,16 +178,16 @@ export class CollaboratorService {
         userId: string
     ): Promise<ICollaborator | null> {
 
-        const collaborator = await this.collabRepo.findById(dto.id);
+        const collaboratorDoc = await this.collabRepo.findById(dto.id);
 
-        if (!collaborator) {
+        if (!collaboratorDoc) {
             throw new AppError(
                 ERROR_CODES.COLLABORATOR_NOT_FOUND
             );
         }
 
         // Authorize the user against the collaborator's project.
-        const projectId = String(collaborator.project);
+        const projectId = String(collaboratorDoc.project);
 
         const { projectDoc, isLeadPI } =
             await this.projectAuth.auth(
@@ -198,7 +198,7 @@ export class CollaboratorService {
 
         // Only pending and declined collaborators can be updated.
         if (
-            collaborator.status === CollaboratorStatus.verified
+            collaboratorDoc.status === CollaboratorStatus.verified
         ) {
             throw new AppError(
                 ERROR_CODES.COLLABORATOR_ALREADY_VERIFIED
@@ -206,7 +206,7 @@ export class CollaboratorService {
         }
 
         // The lead PI collaborator record cannot be updated.
-        if (collaborator.isLeadPI) {
+        if (collaboratorDoc.isLeadPI) {
             throw new AppError(
                 ERROR_CODES.LEAD_PI_CANNOT_BE_UPDATED
             );
@@ -234,7 +234,7 @@ export class CollaboratorService {
 
             if (
                 exists &&
-                dto.data.member !== String(collaborator.member)
+                dto.data.member !== String(collaboratorDoc.member)
             ) {
                 throw new AppError(
                     ERROR_CODES.COLLABORATOR_ALREADY_EXISTS
