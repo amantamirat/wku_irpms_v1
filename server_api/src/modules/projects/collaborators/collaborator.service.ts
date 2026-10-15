@@ -122,6 +122,7 @@ export class CollaboratorService {
         try {
             const created = await this.collabRepo.create(dto);
             await this.projectRepo.incrementTotals(project, { collabs: 1 });
+            await this.collabRepo.updateFemaleProportionByProject(project);
             if (dto.status !== CollaboratorStatus.verified) {
                 await this.notificationService.notifyProjectInvitation(
                     member, projectTitle ?? project, dto.role, userId
@@ -281,11 +282,15 @@ export class CollaboratorService {
         }
 
         // Persist the update after all authorization and validation.
-        return this.collabRepo.update(
+        const updated = this.collabRepo.update(
             dto.id,
             dto.data,
             userId
         );
+
+        await this.collabRepo.updateFemaleProportionByProject(projectId);
+
+        return updated;
     }
 
 
@@ -377,6 +382,7 @@ export class CollaboratorService {
                 String(collabDoc.member), projectDoc.title, collabDoc.role
             );
         }
+        await this.collabRepo.updateFemaleProportionByProject(project);
         return deleted;
     }
 }

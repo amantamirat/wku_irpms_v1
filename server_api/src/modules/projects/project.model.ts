@@ -66,6 +66,8 @@ export interface IProject extends Document {
 
     totalCollabs?: number;
 
+    femaleProportion?: number;
+
     leadPI: mongoose.Types.ObjectId;
 
     themes: mongoose.Types.ObjectId[];
@@ -171,6 +173,11 @@ const ProjectSchema = new Schema<IProject>(
         },
 
         totalCollabs: {
+            type: Number,
+            min: 0
+        },
+
+        femaleProportion: {
             type: Number,
             min: 0
         },

@@ -42,6 +42,7 @@ export type Project = {
     totalBudget?: number;
     totalDuration?: number;
     totalCollabs?: number;
+    femaleProportion?: number;
     themes?: Theme[] | string[];
     createdAt?: Date;
     updatedAt?: Date;
