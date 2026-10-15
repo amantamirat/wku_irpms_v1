@@ -244,6 +244,25 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
             )
         },
         {
+            header: 'Submitted At',
+            field: 'createdAt',
+            sortable: true,
+            body: (application: Application) => (
+                <span className="text-sm">
+                    {application.createdAt
+                        ? new Date(application.createdAt).toLocaleString('en-GB', {
+                            day: '2-digit',
+                            month: 'short',
+                            year: 'numeric',
+                            hour: '2-digit',
+                            minute: '2-digit',
+                            hour12: true
+                        })
+                        : '—'}
+                </span>
+            )
+        },
+        {
             header: 'Reviewer Assigner',
             field: "assigner",
             body: (row: Application) => {
