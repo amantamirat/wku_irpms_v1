@@ -68,6 +68,8 @@ export interface IProject extends Document {
 
     femaleProportion?: number;
 
+    verifiedCollaboratorsProportion?: number;
+
     leadPI: mongoose.Types.ObjectId;
 
     themes: mongoose.Types.ObjectId[];
@@ -178,6 +180,11 @@ const ProjectSchema = new Schema<IProject>(
         },
 
         femaleProportion: {
+            type: Number,
+            min: 0
+        },
+
+        verifiedCollaboratorsProportion: {
             type: Number,
             min: 0
         },

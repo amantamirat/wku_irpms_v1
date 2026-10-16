@@ -186,6 +186,48 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
             }
         },
         {
+            header: 'Female Proportion',
+            field: 'project.femaleProportion',
+            sortable: true,
+            body: (row: Application) => {
+                const project =
+                    typeof row.project === 'object' && row.project !== null
+                        ? row.project
+                        : null;
+
+                const proportion = project?.femaleProportion;
+
+                return (
+                    <span className="text-xs text-gray-600">
+                        {typeof proportion === 'number'
+                            ? `${proportion.toFixed(2)}%`
+                            : '—'}
+                    </span>
+                );
+            }
+        },
+        {
+            header: 'Verified Collaborator Proportion',
+            field: 'project.verifiedCollaboratorPropotion',
+            sortable: true,
+            body: (row: Application) => {
+                const project =
+                    typeof row.project === 'object' && row.project !== null
+                        ? row.project
+                        : null;
+
+                const proportion = project?.verifiedCollaboratorsProportion;
+
+                return (
+                    <span className="text-xs text-gray-600">
+                        {typeof proportion === 'number'
+                            ? `${proportion.toFixed(2)}%`
+                            : '—'}
+                    </span>
+                );
+            }
+        },
+        {
             header: 'Orig Doc',
             field: 'origDoc',
             body: (application: Application) =>
@@ -358,7 +400,7 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
                 ]}
                 enableSearch
                 enableColumnToggle
-                defaultHiddenFields={["assigner", "origDoc", "anonDoc"]}
+                defaultHiddenFields={["project.femaleProportion", "project.verifiedCollaboratorPropotion", "assigner", "origDoc", "anonDoc"]}
                 expandable={{
                     template: application => (
                         <ApplicationDetail

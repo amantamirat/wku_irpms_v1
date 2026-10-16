@@ -70,6 +70,10 @@ export interface ICollaboratorRepository {
 
     updateFemaleProportionByProject(project: string): Promise<number>;
 
+    updateVerifiedCollaboratorsProportionByProject(
+        projectId: string
+    ): Promise<number>;
+
     delete(
         id: string
     ): Promise<ICollaborator | null>;
@@ -557,5 +561,73 @@ export class CollaboratorRepository
         ).exec();
 
         return femaleProportion;
+    }
+
+    /**
+ * Calculate and update the proportion of verified collaborators.
+ */
+    async updateVerifiedCollaboratorsProportionByProject(
+        projectId: string
+    ): Promise<number> {
+        const projectObjectId =
+            new mongoose.Types.ObjectId(projectId);
+
+        const [result] = await Collaborator.aggregate([
+            {
+                $match: {
+                    project: projectObjectId
+                }
+            },
+            {
+                $group: {
+                    _id: null,
+                    total: { $sum: 1 },
+                    verified: {
+                        $sum: {
+                            $cond: [
+                                {
+                                    $eq: [
+                                        "$status",
+                                        CollaboratorStatus.verified
+                                    ]
+                                },
+                                1,
+                                0
+                            ]
+                        }
+                    }
+                }
+            },
+            {
+                $project: {
+                    _id: 0,
+                    proportion: {
+                        $cond: [
+                            { $gt: ["$total", 0] },
+                            {
+                                $multiply: [
+                                    { $divide: ["$verified", "$total"] },
+                                    100
+                                ]
+                            },
+                            0
+                        ]
+                    }
+                }
+            }
+        ]);
+
+        const proportion = result?.proportion ?? 0;
+
+        await Project.updateOne(
+            { _id: projectObjectId },
+            {
+                $set: {
+                    verifiedCollaboratorsProportion: proportion
+                }
+            }
+        ).exec();
+
+        return proportion;
     }
 }

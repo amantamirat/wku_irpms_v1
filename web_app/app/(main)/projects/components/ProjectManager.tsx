@@ -144,6 +144,19 @@ const ProjectManager = createEntityManager<Project>({
         },
 
         {
+            header: "Verification Proportion",
+            field: "verifiedCollaboratorsProportion",
+            sortable: true,
+            body: (project: Project) => {
+                const proportion = project.verifiedCollaboratorsProportion;
+
+                return proportion != null
+                    ? `${proportion.toFixed(2)}%`
+                    : "N/A";
+            }
+        },
+
+        {
             header: "Budget",
             field: "totalBudget",
             sortable: true,
@@ -168,7 +181,7 @@ const ProjectManager = createEntityManager<Project>({
         }
     ],
 
-    defaultHiddenFields: ["grant.title", "calendar.year", "leadPI.gender", "femaleProportion", "organization.name", "workspace.name", "call.title"],
+    defaultHiddenFields: ["grant.title", "calendar.year", "leadPI.gender", "femaleProportion", "verifiedCollaboratorsProportion", "organization.name", "workspace.name", "call.title"],
     enableColumnToggle: true,
 
     createNew: () => ({

@@ -331,9 +331,13 @@ export class CollaboratorService {
             }
         }
 
-        return await this.collabRepo.updateStatus(id,
+        const updated = await this.collabRepo.updateStatus(id,
             to
         );
+
+        await this.collabRepo.updateVerifiedCollaboratorsProportionByProject(String(collabDoc.project));
+
+        return updated;
     }
 
 
