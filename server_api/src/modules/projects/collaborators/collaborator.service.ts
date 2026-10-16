@@ -208,7 +208,7 @@ export class CollaboratorService {
 
         if (projectDoc.call) {
             const callId = String(projectDoc.call);
-            const callDoc = await this.validateCall(callId);
+            await this.validateCall(callId);
         }
 
         // Only pending and declined collaborators can be updated.
