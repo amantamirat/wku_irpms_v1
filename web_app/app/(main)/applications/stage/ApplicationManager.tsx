@@ -207,8 +207,8 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
             }
         },
         {
-            header: 'Verified Collaborator Proportion',
-            field: 'project.verifiedCollaboratorPropotion',
+            header: 'Verified Collaborators',
+            field: 'project.verifiedCollaboratorsProportion',
             sortable: true,
             body: (row: Application) => {
                 const project =

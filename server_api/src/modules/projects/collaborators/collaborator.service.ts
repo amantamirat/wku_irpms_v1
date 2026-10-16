@@ -26,6 +26,7 @@ import { ProjectStatus } from "../project.model";
 import { CollaboratorStatus, ICollaborator } from "./collaborator.model";
 import { CompositionValidationService } from "../../compositions/composition-validator.service";
 import { IStageRepository } from "../../calls/stages/stage.repository";
+import { CallStatus } from "../../calls/call.model";
 
 
 export class CollaboratorService {
@@ -42,6 +43,19 @@ export class CollaboratorService {
         private readonly notificationService: NotificationService,
         private readonly scopeFilterService: ScopeFilterService,
     ) {
+    }
+
+    private async validateCall(callId: string) {
+        const callDoc = await this.callRepo.findById(callId);
+        if (!callDoc) {
+            throw new AppError(
+                ERROR_CODES.CALL_NOT_FOUND
+            );
+        }
+        if (callDoc.status !== CallStatus.active) {
+            throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
+        }
+        return callDoc;
     }
 
     async create(dto: CreateCollaboratorDto, options?: { skipValidation?: boolean }) {
@@ -70,12 +84,7 @@ export class CollaboratorService {
 
             if (projectDoc.call) {
                 const callId = String(projectDoc.call);
-                const callDoc = await this.callRepo.findById(callId);
-                if (!callDoc) {
-                    throw new AppError(
-                        ERROR_CODES.CALL_NOT_FOUND
-                    );
-                }
+                const callDoc = await this.validateCall(callId);
                 if (callDoc.constraint) {
                     const constraintId = String(callDoc.constraint);
                     const result = await this.constraintValidator.validateParticipantCount(constraintId, await this.collabRepo.countByProject(project) + 1);
@@ -197,6 +206,11 @@ export class CollaboratorService {
                 PERMISSIONS.COLLABORATOR.UPDATE
             );
 
+        if (projectDoc.call) {
+            const callId = String(projectDoc.call);
+            const callDoc = await this.validateCall(callId);
+        }
+
         // Only pending and declined collaborators can be updated.
         if (
             collaboratorDoc.status === CollaboratorStatus.verified
@@ -302,6 +316,12 @@ export class CollaboratorService {
         const collabDoc = await this.collabRepo.findById(id);
         if (!collabDoc) throw new AppError(ERROR_CODES.COLLABORATOR_NOT_FOUND);
         // if (collabDoc.isLeadPI === true) throw new AppError(ERROR_CODES.USER_LEAD_PI);
+        const projectDoc = await this.projectRepo.findById(String(collabDoc.project));
+        if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
+        if (projectDoc.call) {
+            const callId = String(projectDoc.call);
+            await this.validateCall(callId);
+        }
 
         if (String(collabDoc.member) !== userId) {
             //use permission for the special permission
@@ -322,8 +342,7 @@ export class CollaboratorService {
         );
 
         if (next === CollaboratorStatus.pending) {
-            const projectDoc = await this.projectRepo.findById(String(collabDoc.project));
-            if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
+
             const projectStatus = projectDoc.status;
             if (projectStatus !== ProjectStatus.draft
             ) {
@@ -353,6 +372,11 @@ export class CollaboratorService {
 
         const project = String(collabDoc.project);
         const { projectDoc, isLeadPI } = await this.projectAuth.auth(project, userId, PERMISSIONS.COLLABORATOR.DELETE);
+
+        if (projectDoc.call) {
+            const callId = String(projectDoc.call);
+            await this.validateCall(callId);
+        }
 
         if (isLeadPI) {
             if (
