@@ -109,8 +109,8 @@ export class CallRepository implements ICallRepository {
     }
 
     /**
-     * Find calls using filters.
-     */
+  * Find calls using filters.
+  */
     async find(
         filters: FilterCallDTO = {},
         options?: FilterOptions,
@@ -133,6 +133,7 @@ export class CallRepository implements ICallRepository {
         }
 
         return dbQuery
+            .sort({ createdAt: -1 })
             .lean<ICall[]>()
             .exec();
     }
