@@ -48,6 +48,7 @@ import projectRoutes from './modules/projects/project.routes';
 import phaseDocRoutes from './modules/projects/phase/documents/phase.doc.routes';
 import phaseActivityRoutes from './modules/projects/phase/activities/phase-activity.routes';
 import phaseEquipmentRoutes from './modules/projects/phase/equipments/phase-equipment.routes';
+import phaseComponentRoutes from './modules/projects/phase/components/phase-component.routes';
 import phaseRoutes from './modules/projects/phase/phase.routes';
 
 import applicationRoutes from './modules/projects/applications/application.routes';
@@ -123,6 +124,8 @@ app.use("/api/project/reviewers", reviewerRoutes);
 app.use("/api/project/results", resultRoutes);
 
 app.use("/api/projects", projectRoutes);
+app.use("/api/project/components", phaseComponentRoutes);
+app.use("/api/project/phases/components", phaseComponentRoutes);
 app.use("/api/project/phases", phaseRoutes);
 app.use("/api/project/phases/activities", phaseActivityRoutes);
 app.use("/api/project/phase/documents", phaseDocRoutes);

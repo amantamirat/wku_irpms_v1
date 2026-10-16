@@ -17,6 +17,7 @@ export interface PhaseActivityDto {
 
 export interface CreatePhaseActivityDto extends PhaseActivityDto {
     phase: string;
+    component?: string;
 }
 
 export interface UpdatePhaseActivityDto {
@@ -29,10 +30,13 @@ export interface UpdatePhaseActivityDto {
 
         startDate?: Date;
         endDate?: Date;
+        component?: string | null;
     };
 }
 
 export interface FilterPhaseActivities {
     phase?: string | mongoose.Types.ObjectId;
+    phases?: Array<string | mongoose.Types.ObjectId>;
     status?: PhaseActivityStatus;
+    component?: string | mongoose.Types.ObjectId;
 }

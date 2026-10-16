@@ -95,7 +95,7 @@ export class PhaseActivityRepository
         if (options?.populate) {
             query = query.populate({
                 path: "phase",
-            });
+            }).populate("component");
         }
 
         return query
@@ -116,8 +116,18 @@ export class PhaseActivityRepository
             );
         }
 
+        if (filters.phases?.length) {
+            query.phase = {
+                $in: filters.phases.map(phase => new mongoose.Types.ObjectId(String(phase)))
+            };
+        }
+
         if (filters.status) {
             query.status = filters.status;
+        }
+
+        if (filters.component) {
+            query.component = new mongoose.Types.ObjectId(String(filters.component));
         }
 
         let activityQuery = PhaseActivity.find(query)
@@ -126,7 +136,7 @@ export class PhaseActivityRepository
         if (options?.populate) {
             activityQuery = activityQuery.populate({
                 path: "phase",
-            });
+            }).populate("component");
         }
 
         return activityQuery
@@ -155,6 +165,9 @@ export class PhaseActivityRepository
         const data = {
             ...dto,
             phase: new mongoose.Types.ObjectId(dto.phase),
+            component: dto.component
+                ? new mongoose.Types.ObjectId(dto.component)
+                : undefined,
         };
 
         const created = await PhaseActivity.create(data);
@@ -169,6 +182,9 @@ export class PhaseActivityRepository
         const data = dtos.map(dto => ({
             ...dto,
             phase: new mongoose.Types.ObjectId(dto.phase),
+            component: dto.component
+                ? new mongoose.Types.ObjectId(dto.component)
+                : undefined,
         }));
 
         const results = await PhaseActivity.insertMany(

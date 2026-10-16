@@ -12,6 +12,7 @@ export interface CreateCallData {
     organization: string;
     calendar: string;
     title: string;
+    componentBased?: boolean;
     constraint?: string;
     composition?: string;
     description?: string;
@@ -183,6 +184,10 @@ export class CallRepository implements ICallRepository {
 
         if (dtoData.description !== undefined) {
             updateData.description = dtoData.description;
+        }
+
+        if (dtoData.componentBased !== undefined) {
+            updateData.componentBased = dtoData.componentBased;
         }
 
         if (dtoData.deadline !== undefined) {

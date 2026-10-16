@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { createEntityManager } from "@/components/data-table/createEntityManager";
 import MyBadge from "@/templates/MyBadge";
 import { Phase } from '../../models/phase.model';
@@ -9,6 +9,8 @@ import { FilterPhaseActivityOptions, PhaseActivity, PhaseActivityStatus } from "
 import SavePhaseActivity from './SavePhaseActivity';
 import { etbCurrencyFormatter } from '@/utils/utils';
 import { PHASE_ACTIVITY_TRANSITIONS } from '../models/phase-activity.state-machine';
+import { ProjectComponentApi } from '../../api/phase-component.api';
+import type { ProjectComponent } from '../../models/phase-component.model';
 
 interface PhaseActivityManagerProps {
     phase: Phase;
@@ -25,6 +27,14 @@ export const computeDurationFromDates = (startDate?: Date | string, endDate?: Da
 };
 
 const PhaseActivityManager = ({ phase }: PhaseActivityManagerProps) => {
+    const [components, setComponents] = useState<ProjectComponent[]>([]);
+
+    useEffect(() => {
+        if (!phase._id) return;
+        ProjectComponentApi.getByPhase(phase._id)
+            .then(setComponents)
+            .catch((error) => console.error('Failed to load project components:', error));
+    }, [phase._id]);
 
     const Manager = useMemo(() => {
         return createEntityManager<
@@ -44,6 +54,13 @@ const PhaseActivityManager = ({ phase }: PhaseActivityManagerProps) => {
                     field: "title",
                     sortable: true
                 },
+                    ...(components.length ? [{
+                    header: "Component",
+                    field: "component",
+                    body: (row: PhaseActivity) => (
+                        <span>{typeof row.component === 'object' ? row.component?.title : '-'}</span>
+                    )
+                }] : []),
                 {
                     header: "Timeline",
                     field: "startDate",
@@ -136,10 +153,33 @@ const PhaseActivityManager = ({ phase }: PhaseActivityManagerProps) => {
                 phase: phase._id
             }),
         });
-    }, [phase]);
+    }, [phase, components]);
 
     return (
         <div className="space-y-4">
+            {components.some(component => component.activities?.length) && (
+                <div className="grid mb-3">
+                    {components.filter(component => component.activities?.length).map(component => (
+                        <div key={component._id} className="col-12 md:col-6">
+                            <div className="surface-card border-1 border-200 border-round p-3 h-full">
+                                <div className="flex align-items-start justify-content-between gap-2">
+                                    <div>
+                                        <h5 className="m-0 text-900">{component.title}</h5>
+                                        {component.description && <p className="text-600 text-sm mb-2">{component.description}</p>}
+                                    </div>
+                                    <MyBadge type="status" value={component.status || 'planned'} />
+                                </div>
+                                <small className="text-600">
+                                    Contributors: {(component.contributors || []).map(member =>
+                                        typeof member === 'object' ? member.name : member
+                                    ).join(', ')}
+                                    {component.activities?.length ? ` · ${component.activities.length} activities` : ' · No activities yet'}
+                                </small>
+                            </div>
+                        </div>
+                    ))}
+                </div>
+            )}
             <Manager key={phase._id} />
         </div>
     );

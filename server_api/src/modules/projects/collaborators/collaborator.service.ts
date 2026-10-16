@@ -122,7 +122,6 @@ export class CollaboratorService {
         try {
             const created = await this.collabRepo.create(dto);
             await this.projectRepo.incrementTotals(project, { collabs: 1 });
-            await this.collabRepo.updateFemaleProportionByProject(project);
             if (dto.status !== CollaboratorStatus.verified) {
                 await this.notificationService.notifyProjectInvitation(
                     member, projectTitle ?? project, dto.role, userId
@@ -179,16 +178,16 @@ export class CollaboratorService {
         userId: string
     ): Promise<ICollaborator | null> {
 
-        const collaboratorDoc = await this.collabRepo.findById(dto.id);
+        const collaborator = await this.collabRepo.findById(dto.id);
 
-        if (!collaboratorDoc) {
+        if (!collaborator) {
             throw new AppError(
                 ERROR_CODES.COLLABORATOR_NOT_FOUND
             );
         }
 
         // Authorize the user against the collaborator's project.
-        const projectId = String(collaboratorDoc.project);
+        const projectId = String(collaborator.project);
 
         const { projectDoc, isLeadPI } =
             await this.projectAuth.auth(
@@ -199,7 +198,7 @@ export class CollaboratorService {
 
         // Only pending and declined collaborators can be updated.
         if (
-            collaboratorDoc.status === CollaboratorStatus.verified
+            collaborator.status === CollaboratorStatus.verified
         ) {
             throw new AppError(
                 ERROR_CODES.COLLABORATOR_ALREADY_VERIFIED
@@ -207,7 +206,7 @@ export class CollaboratorService {
         }
 
         // The lead PI collaborator record cannot be updated.
-        if (collaboratorDoc.isLeadPI) {
+        if (collaborator.isLeadPI) {
             throw new AppError(
                 ERROR_CODES.LEAD_PI_CANNOT_BE_UPDATED
             );
@@ -235,7 +234,7 @@ export class CollaboratorService {
 
             if (
                 exists &&
-                dto.data.member !== String(collaboratorDoc.member)
+                dto.data.member !== String(collaborator.member)
             ) {
                 throw new AppError(
                     ERROR_CODES.COLLABORATOR_ALREADY_EXISTS
@@ -282,15 +281,11 @@ export class CollaboratorService {
         }
 
         // Persist the update after all authorization and validation.
-        const updated = this.collabRepo.update(
+        return this.collabRepo.update(
             dto.id,
             dto.data,
             userId
         );
-
-        await this.collabRepo.updateFemaleProportionByProject(projectId);
-
-        return updated;
     }
 
 
@@ -382,7 +377,6 @@ export class CollaboratorService {
                 String(collabDoc.member), projectDoc.title, collabDoc.role
             );
         }
-        await this.collabRepo.updateFemaleProportionByProject(project);
         return deleted;
     }
 }

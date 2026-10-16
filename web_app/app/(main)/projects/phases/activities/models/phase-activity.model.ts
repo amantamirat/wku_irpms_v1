@@ -1,4 +1,5 @@
 import { Phase } from "../../models/phase.model";
+import type { ProjectComponent } from "../../models/phase-component.model";
 
 export enum PhaseActivityStatus {
     planned = "planned",
@@ -19,6 +20,7 @@ export type PhaseActivity = {
     _id?: string;
 
     phase: string | Phase;
+    component?: string | ProjectComponent;
 
     title: string;
     description?: string;

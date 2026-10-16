@@ -18,6 +18,7 @@ export type Call = {
     calendar?: string | Calendar;
     organization?: string | Organization;
     title?: string;
+    componentBased?: boolean;
     constraint?: string | Constraint;
     composition?: string | Composition;
     description?: string | null;
@@ -56,6 +57,7 @@ export const validateCall = (call: Partial<Call>): { valid: boolean; message?: s
 
 export const createEmptyCall = (call?: Partial<Call>): Call => ({
     title: "",
+    componentBased: false,
     status: CallStatus.planned,
     grant: call?.grant ?? '',
     description: ""

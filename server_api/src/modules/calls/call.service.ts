@@ -140,6 +140,17 @@ export class CallService {
             );
         }
 
+        if (
+            data.componentBased !== undefined &&
+            data.componentBased !== callDoc.componentBased &&
+            await this.projectRepo.exists({ call: id })
+        ) {
+            throw new AppError(
+                ERROR_CODES.CALL_COMPONENT_MODE_LOCKED,
+                "Component-based mode cannot be changed after projects have been submitted to this call."
+            );
+        }
+
         return await this.repository.update(id, data, userId);
     }
 

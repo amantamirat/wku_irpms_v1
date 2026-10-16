@@ -9,6 +9,7 @@ import { Theme } from "../../thematics/themes/models/theme.model";
 import { User } from "../../users/models/user.model";
 import { Verification } from "../../verifications/models/verification.model";
 import { Phase } from "../phases/models/phase.model";
+import type { ProjectComponent } from "../phases/models/phase-component.model";
 
 export enum ProjectStatus {
     draft = 'draft',
@@ -42,12 +43,12 @@ export type Project = {
     totalBudget?: number;
     totalDuration?: number;
     totalCollabs?: number;
-    femaleProportion?: number;
     themes?: Theme[] | string[];
     createdAt?: Date;
     updatedAt?: Date;
     collaborators?: Collaborator[];
     phases?: Phase[];
+    components?: ProjectComponent[];
     file?: File;
     statusHistory?: IStatusHistory<ProjectStatus>[];
     currentApplication?: string | Application;

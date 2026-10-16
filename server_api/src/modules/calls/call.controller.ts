@@ -105,6 +105,7 @@ export class CallController {
             const {
                 title,
                 description,
+                componentBased,
                 constraint,
                 composition
             } = req.body;
@@ -114,6 +115,7 @@ export class CallController {
                 data: {
                     title,
                     description,
+                    componentBased,
                     constraint,
                     composition
                 },

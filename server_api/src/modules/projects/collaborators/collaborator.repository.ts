@@ -16,7 +16,6 @@ import {
 
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { ScopeFilter } from "../../auth/auth.types";
-import { Project } from "../project.model";
 
 
 export interface ICollaboratorRepository {
@@ -67,8 +66,6 @@ export interface ICollaboratorRepository {
     countByProject(
         project: string
     ): Promise<number>;
-
-    updateFemaleProportionByProject(project: string): Promise<number>;
 
     delete(
         id: string
@@ -462,100 +459,5 @@ export class CollaboratorRepository
             project:
                 new mongoose.Types.ObjectId(project)
         }).exec();
-    }
-
-    /**
- * Calculate and update female collaborator proportion for a project.
- * Counts all collaborators regardless of status.
- * Returns the calculated percentage.
- */
-    async updateFemaleProportionByProject(
-        projectId: string
-    ): Promise<number> {
-        const projectObjectId =
-            new mongoose.Types.ObjectId(projectId);
-
-        const [result] = await Collaborator.aggregate([
-            {
-                $match: {
-                    project: projectObjectId
-                }
-            },
-            {
-                $lookup: {
-                    from: "users",
-                    localField: "member",
-                    foreignField: "_id",
-                    as: "member"
-                }
-            },
-            {
-                $unwind: {
-                    path: "$member",
-                    preserveNullAndEmptyArrays: true
-                }
-            },
-            {
-                $group: {
-                    _id: null,
-                    total: { $sum: 1 },
-                    female: {
-                        $sum: {
-                            $cond: [
-                                {
-                                    $eq: [
-                                        {
-                                            $toLower: {
-                                                $ifNull: [
-                                                    "$member.gender",
-                                                    ""
-                                                ]
-                                            }
-                                        },
-                                        "female"
-                                    ]
-                                },
-                                1,
-                                0
-                            ]
-                        }
-                    }
-                }
-            },
-            {
-                $project: {
-                    _id: 0,
-                    femaleProportion: {
-                        $cond: [
-                            { $gt: ["$total", 0] },
-                            {
-                                $multiply: [
-                                    {
-                                        $divide: [
-                                            "$female",
-                                            "$total"
-                                        ]
-                                    },
-                                    100
-                                ]
-                            },
-                            0
-                        ]
-                    }
-                }
-            }
-        ]);
-
-        const femaleProportion =
-            result?.femaleProportion ?? 0;
-
-        await Project.updateOne(
-            { _id: projectObjectId },
-            {
-                $set: { femaleProportion }
-            }
-        ).exec();
-
-        return femaleProportion;
     }
 }

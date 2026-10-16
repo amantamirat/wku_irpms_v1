@@ -32,6 +32,12 @@ export const CallReviewStep = ({ callData, stages, onSave, onBack, saving }: Cal
                         <span className="text-500 block text-xs uppercase font-bold">Grant</span>
                         <span className="text-900 font-medium">{(callData.grant as any)?.title || 'Selected'}</span>
                     </div>
+                    <div className="col-12 md:col-6 mb-2">
+                        <span className="text-500 block text-xs uppercase font-bold">Workflow</span>
+                        <span className="text-900 font-medium">
+                            {callData.componentBased ? 'Component-based' : 'Standard'}
+                        </span>
+                    </div>
                     <div className="col-12 col-12 mb-2">
                         <span className="text-500 block text-xs uppercase font-bold">Description</span>
                         <p className="text-800 m-0 text-sm">{callData.description || 'No description provided.'}</p>

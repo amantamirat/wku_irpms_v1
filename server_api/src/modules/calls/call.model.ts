@@ -15,6 +15,7 @@ export interface ICall extends Document {
     grant: mongoose.Types.ObjectId;
     title: string;
     description?: string;
+    componentBased: boolean;
     constraint?: mongoose.Types.ObjectId | null;
     composition?: mongoose.Types.ObjectId | null;
 
@@ -41,6 +42,7 @@ const CallSchema = new Schema<ICall>(
         grant: { type: Schema.Types.ObjectId, ref: COLLECTIONS.GRANT, required: true },
         organization: { type: Schema.Types.ObjectId, ref: COLLECTIONS.ORGANIZATION, required: true },
         title: { type: String, required: true },
+        componentBased: { type: Boolean, default: false, required: true },
         constraint: {
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.CONSTRAINT,

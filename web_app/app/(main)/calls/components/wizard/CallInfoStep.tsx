@@ -6,6 +6,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { classNames } from 'primereact/utils';
+import { Checkbox } from 'primereact/checkbox';
 
 import { Call } from '../../models/call.model';
 
@@ -206,6 +207,22 @@ export const CallInfoStep = ({
                         Title is required.
                     </small>
                 )}
+            </div>
+
+            <div className="field flex align-items-start gap-2 mt-3">
+                <Checkbox
+                    inputId="componentBased"
+                    checked={data.componentBased ?? false}
+                    onChange={(e) => onUpdate({ componentBased: e.checked ?? false })}
+                />
+                <div>
+                    <label htmlFor="componentBased" className="font-semibold cursor-pointer">
+                        Component-based call
+                    </label>
+                    <small className="block text-600 mt-1">
+                        Applicants must define components for every project phase and assign contributors. The PI is not assigned to components.
+                    </small>
+                </div>
             </div>
 
             {/* Constraint & Composition */}

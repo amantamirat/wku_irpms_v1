@@ -40,6 +40,7 @@ export enum COLLECTIONS {
   //BREAKDOWN = "breakdowns",
   PHASE_DOCUMENT = "phasedocuments",
   PHASE_ACTIVITY = "phaseactivities",
+  PROJECT_COMPONENT = "projectcomponents",
   PHASE_EQUIPMENT="phaseequipments",
   //PROJECT_THEMEM = "prothemes",
   COLLABORATOR_ASSIGNMENT = "collaboratorassignments",

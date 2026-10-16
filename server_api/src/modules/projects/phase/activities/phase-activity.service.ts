@@ -23,13 +23,17 @@ import {
     PhaseActivityStatus,
 } from "./phase-activity.model";
 import { ProjectStatus } from "../../project.model";
+import { ICallRepository } from "../../../calls/call.repository";
+import { IProjectComponentRepository } from "../components/phase-component.repository";
 
 export class PhaseActivityService {
 
     constructor(
         private readonly activityRepo: IPhaseActivityRepository,
         private readonly phaseRepo: IPhaseRepository,
-        private readonly projectAuth: ProjectAuth
+        private readonly projectAuth: ProjectAuth,
+        private readonly callRepo: ICallRepository,
+        private readonly componentRepo: IProjectComponentRepository
     ) { }
 
 
@@ -69,6 +73,28 @@ export class PhaseActivityService {
             if (projectDoc.status !== ProjectStatus.draft) {
                 throw new AppError(
                     ERROR_CODES.PROJECT_NOT_DRAFT
+                );
+            }
+        }
+
+        const callDoc = projectDoc?.call
+            ? await this.callRepo.findById(String(projectDoc.call))
+            : null;
+        if (callDoc?.componentBased && !dto.component) {
+            throw new AppError(
+                ERROR_CODES.PHASE_ACTIVITY_COMPONENT_REQUIRED,
+                "Activities for this call must be assigned to a project component."
+            );
+        }
+        if (dto.component) {
+            const component = await this.componentRepo.findById(dto.component);
+            if (!component) {
+                throw new AppError(ERROR_CODES.PHASE_COMPONENT_NOT_FOUND);
+            }
+            if (String(component.project) !== projectId) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_COMPONENT_NOT_FOUND,
+                    "The selected component does not belong to this project."
                 );
             }
         }
@@ -187,6 +213,24 @@ export class PhaseActivityService {
             userId,
             PERMISSIONS.PHASE_ACTIVITY.UPDATE
         );
+
+        if (data.component !== undefined) {
+            const callDoc = projectDoc.call
+                ? await this.callRepo.findById(String(projectDoc.call))
+                : null;
+            if (callDoc?.componentBased && !data.component) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_ACTIVITY_COMPONENT_REQUIRED,
+                    "Activities for this call must be assigned to a project component."
+                );
+            }
+            if (data.component) {
+                const component = await this.componentRepo.findById(data.component);
+                if (!component || String(component.project) !== projectId) {
+                    throw new AppError(ERROR_CODES.PHASE_COMPONENT_NOT_FOUND);
+                }
+            }
+        }
 
         if (isLeadPI) {
 

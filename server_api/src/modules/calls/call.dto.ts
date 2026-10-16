@@ -10,6 +10,7 @@ export interface CreateCallDTO {
     constraint?: string;
     composition?: string;
     description?: string;
+    componentBased?: boolean;
     stages?: CreateStageDTO[];
     status?: CallStatus;
 }
@@ -20,6 +21,7 @@ export interface UpdateCallDTO {
     data: Partial<{
         title: string;
         description: string;
+        componentBased: boolean;
         budget: number;
         constraint: string;
         composition: string;

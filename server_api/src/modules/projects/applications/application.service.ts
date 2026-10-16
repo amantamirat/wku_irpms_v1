@@ -21,6 +21,8 @@ import { IReviewerRepository } from "../../reviewers/reviewer.repository";
 import { TemplateValidationService } from "../../templates/services/template-validation.service";
 import { IUserRepository } from "../../users/user.repository";
 import { ICollaboratorRepository } from "../collaborators/collaborator.repository";
+import { IPhaseRepository } from "../phase/phase.repository";
+import { IProjectComponentRepository } from "../phase/components/phase-component.repository";
 import { ProjectAuth } from "../project.auth";
 import { IProject, ProjectStatus } from "../project.model";
 import { ProjectRepository } from "../project.repository";
@@ -50,7 +52,9 @@ export class ApplicationService {
 
         private readonly collaboratorRepo: ICollaboratorRepository,
         private readonly userRepo: IUserRepository,
-        private readonly fileStorage: FileStorageService
+        private readonly fileStorage: FileStorageService,
+        private readonly phaseRepo: IPhaseRepository,
+        private readonly componentRepo: IProjectComponentRepository
     ) {
     }
 
@@ -104,6 +108,53 @@ export class ApplicationService {
 
         if (!callDoc) {
             throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+        }
+
+        if (callDoc.componentBased && projectDoc?._id) {
+            const collaborators = await this.collaboratorRepo.find({
+                project: String(projectDoc._id)
+            });
+            const components = await this.componentRepo.find({
+                project: String(projectDoc._id)
+            });
+            const collaboratorIds = new Set(
+                collaborators.map(collaborator =>
+                    String((collaborator.member as any)?._id ?? collaborator.member)
+                )
+            );
+
+            if (!components.length) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_COMPONENT_REQUIRED,
+                    "This call requires at least one project component."
+                );
+            }
+
+            for (const component of components) {
+                const contributorIds = (component.contributors || []).map(
+                    contributor => String((contributor as any)?._id ?? contributor)
+                );
+                if (!contributorIds.length) {
+                    throw new AppError(
+                        ERROR_CODES.PHASE_COMPONENT_CONTRIBUTORS_REQUIRED,
+                        `Assign at least one contributor to "${component.title}".`
+                    );
+                }
+                if (contributorIds.includes(
+                    String((projectDoc.leadPI as any)?._id ?? projectDoc.leadPI)
+                )) {
+                    throw new AppError(
+                        ERROR_CODES.PHASE_COMPONENT_PI_NOT_ALLOWED,
+                        "The Principal Investigator cannot be assigned directly to a component."
+                    );
+                }
+                if (contributorIds.some(contributorId => !collaboratorIds.has(contributorId))) {
+                    throw new AppError(
+                        ERROR_CODES.USER_NOT_COLLABORATOR,
+                        "Every component contributor must remain a project collaborator."
+                    );
+                }
+            }
         }
 
         // --------------------------------------------------

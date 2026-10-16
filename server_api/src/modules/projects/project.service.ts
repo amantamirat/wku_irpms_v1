@@ -29,6 +29,7 @@ import { CollaboratorService } from "./collaborators/collaborator.service";
 import { PhaseStatus } from "./phase/phase.model";
 import { IPhaseRepository } from "./phase/phase.repository";
 import { PhaseService } from "./phase/phase.service";
+import { IProjectComponentRepository } from "./phase/components/phase-component.repository";
 import { ProjectAuth } from "./project.auth";
 import {
     CreateProjectDTO,
@@ -48,6 +49,7 @@ export class ProjectService {
         private readonly userRepo: IUserRepository,
         private readonly collabRepo: ICollaboratorRepository,
         private readonly phaseRepo: IPhaseRepository,
+        private readonly projectComponentRepo: IProjectComponentRepository,
         private readonly verificationRepo: IVerificationRepository,
 
         private readonly grantRepo: IGrantRepository,
@@ -79,7 +81,8 @@ export class ProjectService {
             title,
             leadPI,
             collaborators,
-            phases
+            phases,
+            components
         } = dto;
 
         const isLeadPI = leadPI === userId;
@@ -201,6 +204,16 @@ export class ProjectService {
             );
         }
 
+        // Components are project-scoped and can be reused in any phase.
+        if (components?.length) {
+            for (const component of components) {
+                await this.projectComponentRepo.create({
+                    ...component,
+                    project: projectId
+                }, userId);
+            }
+        }
+
         // --------------------------------------------------
         // Phases
         // --------------------------------------------------
@@ -262,6 +275,8 @@ export class ProjectService {
             const callDoc = await this.callRepo.findById(call);
             if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
 
+            this.validateComponentSubmission(dto, callDoc.componentBased);
+
             const firstStageDoc = await this.stageRepo.getFirstStage(call);
             if (!firstStageDoc) throw new AppError(ERROR_CODES.FIRST_STAGE_NOT_FOUND);
 
@@ -302,6 +317,9 @@ export class ProjectService {
                 );
             } catch (err) {
                 // Don't leave a project without its application
+                await this.collabRepo.deleteByProject(String(projectDoc._id));
+                await this.projectComponentRepo.deleteByProject(String(projectDoc._id));
+                await this.phaseRepo.deleteByProject(String(projectDoc._id));
                 await this.projectRepo.delete(String(projectDoc._id)); // adjust to your repo API
                 throw err;
             }
@@ -311,6 +329,53 @@ export class ProjectService {
             // No-op if internalCreate already moved or discarded the file
             await this.fileStorage.discardTemp(file.path);
             throw error;
+        }
+    }
+
+    private validateComponentSubmission(
+        dto: Omit<CreateProjectDTO, "documentPath" | "grant">,
+        componentBased = false
+    ) {
+        if (!componentBased) return;
+
+        if (!dto.components?.length) {
+            throw new AppError(
+                ERROR_CODES.PHASE_COMPONENT_REQUIRED,
+                "A component-based call requires at least one project component."
+            );
+        }
+
+        const collaboratorIds = new Set(
+            (dto.collaborators || []).map(collaborator => String(collaborator.member))
+        );
+
+        for (const component of dto.components) {
+            if (!component.title?.trim()) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_COMPONENT_REQUIRED,
+                    "Every project component needs a title."
+                );
+            }
+            if (!component.contributors?.length) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_COMPONENT_CONTRIBUTORS_REQUIRED,
+                    `Assign at least one contributor to "${component.title}".`
+                );
+            }
+            for (const contributorId of component.contributors) {
+                if (String(contributorId) === String(dto.leadPI)) {
+                    throw new AppError(
+                        ERROR_CODES.PHASE_COMPONENT_PI_NOT_ALLOWED,
+                        "The Principal Investigator cannot be assigned directly to a component."
+                    );
+                }
+                if (!collaboratorIds.has(String(contributorId))) {
+                    throw new AppError(
+                        ERROR_CODES.USER_NOT_COLLABORATOR,
+                        "Every component contributor must be a project collaborator."
+                    );
+                }
+            }
         }
     }
 
@@ -497,39 +562,6 @@ export class ProjectService {
 
             }
 
-            if (from === ProjectStatus.approved) {
-                if (projectDoc.call) {
-                    const callDoc = await this.callRepo.findById(
-                        String(projectDoc.call)
-                    );
-
-                    if (!callDoc) {
-                        throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
-                    }
-
-                    if (callDoc.composition) {
-                        const lastStageDoc = await this.stageRepo.getLastStage(String(projectDoc.call));
-                        if (!lastStageDoc) {
-                            throw new AppError(ERROR_CODES.LAST_STAGE_NOT_FOUND);
-                        }
-                        const results = await this.compositionValidator.validateByProjectId(
-                            String(callDoc.composition),
-                            id,
-                            lastStageDoc
-                        );
-
-                        if (!results.valid) {
-                            throw new AppError(ERROR_CODES.INVALID_COMPOSITION,
-                                "The proposed member does not satisfy the composition requirements.",
-                                400,
-                                results.errors
-                            );
-                        }
-                    }
-
-                }
-            }
-
         }
 
         if (to === ProjectStatus.completed) {
@@ -579,6 +611,7 @@ export class ProjectService {
             throw new AppError(ERROR_CODES.APPLICATION_ALREADY_EXISTS);
         }
         await this.collabRepo.deleteByProject(id);
+        await this.projectComponentRepo.deleteByProject(id);
         await this.phaseRepo.deleteByProject(id);
         return this.projectRepo.delete(id);
     }

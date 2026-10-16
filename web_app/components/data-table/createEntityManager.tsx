@@ -134,11 +134,13 @@ export function createEntityManager<
        * -----------------------------------------
        */
 
-      const canRead = hasPermission([
-        `${config.permissionPrefix}:read`,
-        `${config.permissionPrefix}:read:own`,
-        `${config.permissionPrefix}:lookup`,
-      ]);
+      const canReadAll =
+        hasPermission(`${config.permissionPrefix}:read`) &&
+        typeof config.api.getAll === "function";
+      const canLookup =
+        hasPermission(`${config.permissionPrefix}:lookup`) &&
+        typeof config.api.lookup === "function";
+      const canRead = canReadAll || canLookup;
 
       /*
        * -----------------------------------------
@@ -181,13 +183,25 @@ export function createEntityManager<
             : undefined;
 
           let data: T[];
-          // Use lookup if explicitly requested in config, otherwise fall back to getAll
-          if (config.useLookup && typeof config.api.lookup === "function") {
+          // Call an endpoint only when the user has its matching permission.
+          if (
+            config.useLookup &&
+            canLookup &&
+            typeof config.api.lookup === "function"
+          ) {
             data = await config.api.lookup(query);
-          } else if (typeof config.api.getAll === "function") {
+          } else if (
+            canReadAll &&
+            typeof config.api.getAll === "function"
+          ) {
             data = await config.api.getAll(query);
+          } else if (
+            canLookup &&
+            typeof config.api.lookup === "function"
+          ) {
+            data = await config.api.lookup(query);
           } else {
-            data = [];
+            return;
           }
 
           setAll(Array.isArray(data) ? data : []);

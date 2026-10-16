@@ -19,9 +19,11 @@ interface CollaboratorsStepProps {
     onUpdate: (data: Partial<Project>) => void;
     onNext: () => void;
     onBack: () => void;
+    nextLabel?: string;
+    backLabel?: string;
 }
 
-export const CollaboratorsStep = ({ data, constraint, onUpdate, onNext, onBack }: CollaboratorsStepProps) => {
+export const CollaboratorsStep = ({ data, constraint, onUpdate, onNext, onBack, nextLabel, backLabel }: CollaboratorsStepProps) => {
     const { hasPermission } = useAuth();
     const canLookUsers = hasPermission(["user:lookup"]);
     const [users, setUsers] = useState<User[]>([]);
@@ -194,9 +196,9 @@ export const CollaboratorsStep = ({ data, constraint, onUpdate, onNext, onBack }
 
             {/* Navigation */}
             <div className="flex justify-content-between mt-6 pt-4 border-top-1 surface-border">
-                <Button label="Back to Phases" icon="pi pi-chevron-left" onClick={onBack} className="p-button-text p-button-secondary" />
+                <Button label={backLabel || "Back to Phases"} icon="pi pi-chevron-left" onClick={onBack} className="p-button-text p-button-secondary" />
                 <Button
-                    label="Next: Submission"
+                    label={nextLabel || "Next: Submission"}
                     icon="pi pi-chevron-right"
                     iconPos="right"
                     onClick={validateAndNext}

@@ -36,6 +36,8 @@ import { CollaboratorRepository } from "../modules/projects/collaborators/collab
 import { CollaboratorService } from "../modules/projects/collaborators/collaborator.service";
 import { PhaseActivityRepository } from "../modules/projects/phase/activities/phase-activity.repository";
 import { PhaseActivityService } from "../modules/projects/phase/activities/phase-activity.service";
+import { ProjectComponentRepository } from "../modules/projects/phase/components/phase-component.repository";
+import { ProjectComponentService } from "../modules/projects/phase/components/phase-component.service";
 import { PhaseRepository } from "../modules/projects/phase/phase.repository";
 import { PhaseService } from "../modules/projects/phase/phase.service";
 import { ProjectAuth } from "../modules/projects/project.auth";
@@ -104,6 +106,7 @@ export const collaboratorRepo = new CollaboratorRepository();
 export const phaseRepo = new PhaseRepository();
 export const phaseDocRepo = new PhaseDocumentRepository();
 export const activityRepo = new PhaseActivityRepository();
+export const projectComponentRepo = new ProjectComponentRepository();
 export const equipmentRepo = new PhaseEquipmentRepository();
 //call repos
 export const callRepo = new CallRepository();
@@ -157,10 +160,18 @@ export const projectAuth = new ProjectAuth(projectRepo, authPermissionService);
 export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, callRepo, stageRepo,
     applicationRepo, constraintValidator, compositionValidator, projectAuth, notificationService, filterService);
 
-export const phaseActivityService = new PhaseActivityService(activityRepo, phaseRepo, projectAuth)
+export const phaseActivityService = new PhaseActivityService(
+    activityRepo, phaseRepo, projectAuth, callRepo, projectComponentRepo
+)
 
+export const projectComponentService = new ProjectComponentService(
+    projectComponentRepo, phaseRepo, activityRepo, collaboratorRepo, projectAuth
+);
 
-export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, phaseDocRepo, activityRepo, equipmentRepo, projectAuth);
+export const phaseService = new PhaseService(
+    phaseRepo, projectRepo, grantRepo, phaseDocRepo, activityRepo,
+    equipmentRepo, projectAuth
+);
 
 
 export const applicationService = new ApplicationService(
@@ -168,10 +179,10 @@ export const applicationService = new ApplicationService(
     templateValidtor,
     new AnonymizerService(applicationRepo, collaboratorRepo, fileStorageService), projectAuth,
     notificationService, filterService, constraintValidator, compositionValidator,
-    collaboratorRepo, userRepo, fileStorageService
+    collaboratorRepo, userRepo, fileStorageService, phaseRepo, projectComponentRepo
 );
 
-export const projectService = new ProjectService(projectRepo, userRepo, collaboratorRepo, phaseRepo, verificationRepo,
+export const projectService = new ProjectService(projectRepo, userRepo, collaboratorRepo, phaseRepo, projectComponentRepo, verificationRepo,
     grantRepo, callRepo, stageRepo,
     collabService, phaseService, applicationService,
     constraintValidator, compositionValidator, templateValidtor, projectAuth,

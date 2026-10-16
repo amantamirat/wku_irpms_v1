@@ -15,7 +15,10 @@ import { EntitySaveDialogProps } from '@/components/createEntityManager';
 import { PhaseActivityApi } from '../api/phase-activity.api';
 import { PhaseActivity, validatePhaseActivity } from '../models/phase-activity.model';
 import { computeDurationFromDates } from './PhaseActivityManager';
-import { etbCurrencyFormatter } from '@/utils/utils';
+import { etbCurrencyFormatter, extractId } from '@/utils/utils';
+import { Dropdown } from 'primereact/dropdown';
+import { ProjectComponentApi } from '../../api/phase-component.api';
+import type { ProjectComponent } from '../../models/phase-component.model';
 
 const SavePhaseActivity = ({
     visible,
@@ -35,6 +38,7 @@ const SavePhaseActivity = ({
     const [hasDetailCost, setHasDetailCost] = useState<boolean>(!!item?.detailCost);
     const [submitted, setSubmitted] = useState<boolean>(false);
     const [saving, setSaving] = useState<boolean>(false);
+    const [components, setComponents] = useState<ProjectComponent[]>([]);
 
     const toast = useRef<Toast>(null);
 
@@ -49,6 +53,18 @@ const SavePhaseActivity = ({
         setHasDetailCost(!!item?.detailCost);
         setSubmitted(false);
     }, [item]);
+
+    useEffect(() => {
+        if (!visible) return;
+        const phaseId = extractId(item?.phase ?? localActivity.phase);
+        if (!phaseId) return;
+        ProjectComponentApi.getByPhase(phaseId)
+            .then(setComponents)
+            .catch((error) => {
+                console.error('Failed to load project components:', error);
+                setComponents([]);
+            });
+    }, [visible, item, localActivity.phase]);
 
     // Handle date changes
     const handleDateChange = (field: 'startDate' | 'endDate', value: Date | null) => {
@@ -104,6 +120,15 @@ const SavePhaseActivity = ({
                 severity: 'warn',
                 summary: 'Validation Error',
                 detail: validation.message,
+                life: 3000
+            });
+            return;
+        }
+        if (components.length && !localActivity.component) {
+            toast.current?.show({
+                severity: 'warn',
+                summary: 'Validation Error',
+                detail: 'Select the component this activity belongs to.',
                 life: 3000
             });
             return;
@@ -220,6 +245,26 @@ const SavePhaseActivity = ({
                                     placeholder="Detailed outline of tasks involved..."
                                 />
                             </div>
+                            {components.length > 0 && (
+                                <div className="field col-12 mt-3 mb-0">
+                                    <label htmlFor="activityComponent" className="font-semibold block mb-2">
+                                        Component <span className="text-red-500">*</span>
+                                    </label>
+                                    <Dropdown
+                                        id="activityComponent"
+                                        value={extractId(localActivity.component)}
+                                        options={components}
+                                        optionLabel="title"
+                                        optionValue="_id"
+                                        onChange={event => setLocalActivity({
+                                            ...localActivity,
+                                            component: event.value
+                                        })}
+                                         placeholder="Select a project component"
+                                        className={classNames({ 'p-invalid': submitted && !localActivity.component })}
+                                    />
+                                </div>
+                            )}
                         </div>
                     </div>
 

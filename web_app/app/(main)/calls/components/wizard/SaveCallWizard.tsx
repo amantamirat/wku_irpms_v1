@@ -30,6 +30,7 @@ export const SaveCallWizard = ({
     const [callData, setCallData] = useState<Partial<Call>>({
         title: '',
         description: '',
+        componentBased: false,
         stages: [
             {
                 name: 'Concept Note',
@@ -47,6 +48,7 @@ export const SaveCallWizard = ({
             ...item,
             title: item?.title || '',
             description: item?.description || '',
+            componentBased: item?.componentBased ?? false,
             stages:
                 item?.stages && item.stages.length > 0
                     ? item.stages

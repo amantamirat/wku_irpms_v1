@@ -1,5 +1,5 @@
 'use client';
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
@@ -8,7 +8,10 @@ import { Message } from 'primereact/message';
 import { classNames } from 'primereact/utils';
 import { Project } from '../../models/project.model';
 import { Constraint } from '@/app/(main)/constraints/models/constraint.model';
-import { etbCurrencyFormatter } from "@/utils/utils";
+import { etbCurrencyFormatter, extractId } from "@/utils/utils";
+import { MultiSelect } from 'primereact/multiselect';
+import { UserApi } from '@/app/(main)/users/api/user.api';
+import { User } from '@/app/(main)/users/models/user.model';
 
 interface PhasesStepProps {
     data: Partial<Project>;
@@ -16,16 +19,52 @@ interface PhasesStepProps {
     onUpdate: (data: Partial<Project>) => void;
     onNext: () => void;
     onBack: () => void;
+    nextLabel?: string;
+    backLabel?: string;
 }
 
-export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: PhasesStepProps) => {
+export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack, nextLabel, backLabel }: PhasesStepProps) => {
     const [submitted, setSubmitted] = useState(false);
+    const [users, setUsers] = useState<User[]>([]);
+    const componentBased = typeof data.call === 'object' && !!data.call?.componentBased;
+
+    useEffect(() => {
+        if (!componentBased) return;
+        const loadUsers = async () => {
+            try {
+                const availableUsers = await UserApi.lookup!();
+                setUsers(availableUsers || []);
+            } catch (error) {
+                console.error('Failed to load component contributor choices:', error);
+            }
+        };
+        loadUsers();
+    }, [componentBased]);
 
     // --- Validation Logic ---
     const validation = useMemo(() => {
         const phases = data.phases || [];
+        const leadId = extractId(data.leadPI);
+        const collaboratorIds = new Set(
+            (data.collaborators || [])
+                .filter(collaborator => !collaborator.isLeadPI)
+                .map(collaborator => extractId(collaborator.member))
+                .filter((id): id is string => !!id && id !== leadId)
+        );
         const totalBudget = phases.reduce((acc, curr) => acc + (curr.budget || 0), 0);
         const totalDuration = phases.reduce((acc, curr) => acc + (curr.duration || 0), 0);
+        const projectComponents = data.components || [];
+        const componentsValid = !componentBased || (
+            projectComponents.length > 0 &&
+            projectComponents.every(component =>
+                !!component.title?.trim() &&
+                !!component.contributors?.length &&
+                component.contributors.every(contributor => {
+                    const id = extractId(contributor);
+                    return !!id && collaboratorIds.has(id);
+                })
+            )
+        );
 
         // Check Phase Count
         const isCountValid =
@@ -65,9 +104,10 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
             totalBudget,
             totalDuration,
             allPhasesValid,
-            isValid: isCountValid && isTotalBudgetValid && isTotalTimeValid && allPhasesValid
+            componentsValid,
+            isValid: isCountValid && isTotalBudgetValid && isTotalTimeValid && allPhasesValid && componentsValid
         };
-    }, [data.phases, constraint]);
+    }, [data.phases, data.components, data.collaborators, data.leadPI, constraint, componentBased]);
 
     const maxPhases = constraint?.phases?.max;
     const isMaxReached = !!(maxPhases && validation.currentCount >= maxPhases);
@@ -90,7 +130,13 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
 
     const addPhase = () => {
         const newPhases = [...(data.phases || [])];
-        newPhases.push({ title: '', order: newPhases.length + 1, budget: 0, duration: 0, description: '' });
+        newPhases.push({
+            title: '',
+            order: newPhases.length + 1,
+            budget: 0,
+            duration: 0,
+            description: ''
+        });
         onUpdate({ ...data, phases: newPhases });
     };
 
@@ -98,6 +144,27 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
         const newPhases = data.phases?.filter((_, i) => i !== index).map((p, idx) => ({ ...p, order: idx + 1 }));
         onUpdate({ ...data, phases: newPhases });
     };
+
+    const updateComponents = (components: NonNullable<Project['components']>) => {
+        onUpdate({ ...data, components });
+    };
+
+    const contributorOptions = useMemo(() => {
+        const collaborators = data.collaborators || [];
+        const memberIds = new Set(
+            collaborators
+                .filter(collaborator => !collaborator.isLeadPI)
+                .map(collaborator => extractId(collaborator.member))
+                .filter((id): id is string => !!id)
+        );
+        const leadId = extractId(data.leadPI);
+        return users
+            .filter(
+                (user): user is User & { _id: string } =>
+                    !!user._id && memberIds.has(user._id) && user._id !== leadId
+            )
+            .map(user => ({ label: user.name || user._id, value: user._id }));
+    }, [users, data.collaborators, data.leadPI]);
 
     const validateAndNext = () => {
         setSubmitted(true);
@@ -153,6 +220,93 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
                     text={`Total duration must be between ${constraint?.duration?.min ?? 0} and ${constraint?.duration?.max ?? '∞'} days.`}
                     className="w-full mb-3"
                 />
+            )}
+
+            {componentBased && (
+                <div className="mb-4 p-3 surface-card border-1 border-200 border-round">
+                    <div className="flex align-items-center justify-content-between mb-3">
+                        <div>
+                            <h4 className="m-0 text-900">Project Components *</h4>
+                            <small className="text-600">
+                                Components are created once for the project, can be reused in any phase, and are assigned to non-PI collaborators.
+                            </small>
+                        </div>
+                        <Button
+                            type="button"
+                            label="Add Component"
+                            icon="pi pi-plus"
+                            className="p-button-sm p-button-outlined"
+                            onClick={() => updateComponents([
+                                ...(data.components || []),
+                                { title: "", contributors: [] }
+                            ])}
+                        />
+                    </div>
+                    {(data.components || []).map((component, componentIndex) => (
+                        <div key={componentIndex} className="grid align-items-end mb-2 p-2 surface-50 border-round">
+                            <div className="field col-12 md:col-5 mb-0">
+                                <label className="font-semibold text-sm">Component name *</label>
+                                <InputText
+                                    value={component.title || ""}
+                                    onChange={event => {
+                                        const components = [...(data.components || [])];
+                                        components[componentIndex] = {
+                                            ...components[componentIndex],
+                                            title: event.target.value
+                                        };
+                                        updateComponents(components);
+                                    }}
+                                    placeholder="e.g., Data collection"
+                                    className={classNames({
+                                        "p-invalid": submitted && !component.title?.trim()
+                                    })}
+                                />
+                            </div>
+                            <div className="field col-12 md:col-6 mb-0">
+                                <label className="font-semibold text-sm">Contributors *</label>
+                                <MultiSelect
+                                    value={component.contributors?.map(contributor => extractId(contributor)).filter(Boolean)}
+                                    options={contributorOptions}
+                                    onChange={event => {
+                                        const components = [...(data.components || [])];
+                                        components[componentIndex] = {
+                                            ...components[componentIndex],
+                                            contributors: event.value || []
+                                        };
+                                        updateComponents(components);
+                                    }}
+                                    placeholder="Select project collaborators"
+                                    display="chip"
+                                    className={classNames({
+                                        "p-invalid": submitted && !component.contributors?.length
+                                    })}
+                                />
+                            </div>
+                            <div className="col-12 md:col-1 flex justify-content-end">
+                                <Button
+                                    type="button"
+                                    icon="pi pi-trash"
+                                    className="p-button-rounded p-button-text p-button-danger"
+                                    aria-label="Remove component"
+                                    onClick={() => updateComponents(
+                                        (data.components || []).filter((_, i) => i !== componentIndex)
+                                    )}
+                                />
+                            </div>
+                        </div>
+                    ))}
+                    {submitted && !data.components?.length && (
+                        <small className="p-error">Add at least one project component.</small>
+                    )}
+                    {submitted && !validation.componentsValid && !!data.components?.length && (
+                        <small className="p-error block">
+                            Every component needs a name and at least one current non-PI project collaborator.
+                        </small>
+                    )}
+                    {!contributorOptions.length && (
+                        <small className="p-error block mt-2">Add non-PI collaborators in the team step before assigning components.</small>
+                    )}
+                </div>
             )}
 
             {/* Phase List */}
@@ -259,8 +413,8 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
 
             {/* Navigation */}
             <div className="flex justify-content-between mt-6 pt-4 border-top-1 surface-border">
-                <Button label="Back to Info" icon="pi pi-chevron-left" onClick={onBack} className="p-button-text p-button-secondary" />
-                <Button label="Next: Collaborators" icon="pi pi-chevron-right" iconPos="right" onClick={validateAndNext} className="px-5" />
+                <Button label={backLabel || "Back to Info"} icon="pi pi-chevron-left" onClick={onBack} className="p-button-text p-button-secondary" />
+                <Button label={nextLabel || "Next: Collaborators"} icon="pi pi-chevron-right" iconPos="right" onClick={validateAndNext} className="px-5" />
             </div>
         </div>
     );

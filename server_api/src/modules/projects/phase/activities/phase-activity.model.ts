@@ -22,6 +22,7 @@ export interface IPhaseActivity extends Document {
     _id: mongoose.Types.ObjectId;
 
     phase: mongoose.Types.ObjectId;
+    component?: mongoose.Types.ObjectId | null;
 
     title: string;
     description?: string;
@@ -76,6 +77,14 @@ const PhaseActivitySchema = new Schema<IPhaseActivity>(
             ref: COLLECTIONS.PHASE,
             required: true,
             immutable: true,
+            index: true,
+        },
+
+        component: {
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.PROJECT_COMPONENT,
+            required: false,
+            default: null,
             index: true,
         },
 

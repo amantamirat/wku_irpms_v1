@@ -25,13 +25,22 @@ const ApplyWizard = ({ project, onComplete }: ApplyWizardProps) => {
         themes: [],
         leadPI: appUser ? appUser : "",
         collaborators: [{ member: appUser?._id, role: "Principal Investigator", isLeadPI: true }],
-        phases: [{ title: 'Phase 1', order: 1, budget: 1000, duration: 10, description: '' }]
+        components: typeof project?.call === 'object' && project.call?.componentBased
+            ? [{ title: '', contributors: [] }]
+            : [],
+        phases: [{
+            title: 'Phase 1',
+            order: 1,
+            budget: 1000,
+            duration: 10,
+            description: ''
+        }]
     });
 
     const wizardSteps = [
         { label: 'Basic Information' },
-        { label: 'Budget & Phases' },
         { label: 'Collaborators' },
+        { label: 'Budget & Phases' },
         { label: 'Submission' }
     ];
 
@@ -65,23 +74,24 @@ const ApplyWizard = ({ project, onComplete }: ApplyWizardProps) => {
                 );
             case 1:
                 return (
-                    <PhasesStep
+                    <CollaboratorsStep
                         data={formData}
-                        //constraints={constraints}
                         onUpdate={updateFormData}
                         onNext={handleNext}
                         onBack={handleBack}
+                        nextLabel="Next: Phases"
+                        backLabel="Back to Info"
                     />
                 );
             case 2:
-
                 return (
-                    <CollaboratorsStep
+                    <PhasesStep
                         data={formData}
-                        //constraints={constraints}
                         onUpdate={updateFormData}
                         onNext={handleNext}
                         onBack={handleBack}
+                        nextLabel="Next: Submission"
+                        backLabel="Back to Team"
                     />
                 );
 

@@ -58,6 +58,7 @@ export class PhaseActivityController {
 
             const {
                 phase,
+                component,
                 title,
                 description,
                 cost,
@@ -68,6 +69,7 @@ export class PhaseActivityController {
 
             const data: CreatePhaseActivityDto = {
                 phase: phase as string,
+                component: component ? String(component) : undefined,
                 title,
                 description,
 
@@ -201,6 +203,7 @@ export class PhaseActivityController {
                 detailCost,
                 startDate,
                 endDate,
+                component,
             } = req.body;
 
             const dto: UpdatePhaseActivityDto & {
@@ -218,6 +221,9 @@ export class PhaseActivityController {
 
                     startDate: parseDate(startDate),
                     endDate: parseDate(endDate),
+                    component: component === undefined
+                        ? undefined
+                        : component ? String(component) : null,
                 },
 
                 userId: req.auth.userId,

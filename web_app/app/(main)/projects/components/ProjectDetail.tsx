@@ -16,6 +16,7 @@ import PhaseManager from "../phases/project/Manager";
 import ReviewersManager from "../../reviewers/project/ReviewersManager";
 import { StatusHistoryWidget } from "@/components/StatusHistoryWidget";
 import ProjectProgress from "./ProjectProgress"; // Import the component
+import ProjectComponentManager from "./ProjectComponentManager";
 
 interface ProjectDetailProps {
     project: string | Project;
@@ -105,6 +106,12 @@ export default function ProjectDetail({ project, updateProject, enableEditing, s
             icon: "pi pi-list",
             permission: "phase:lookup",
             content: <PhaseManager project={projectData} updateProject={handleUpdateProject} enableEditing={enableEditing} />
+        },
+        {
+            header: "Components",
+            icon: "pi pi-sitemap",
+            permission: "phaseActivity:lookup",
+            content: <ProjectComponentManager project={projectData} enableEditing={enableEditing} />
         },
         {
             header: "Collaborators",

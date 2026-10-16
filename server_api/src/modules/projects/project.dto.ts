@@ -1,6 +1,7 @@
 import mongoose from "mongoose";
 import { CollaboratorDto } from "./collaborators/collaborator.dto";
 import { PhaseDto } from "./phase/phase.dto";
+import { ProjectComponentDto } from "./phase/components/phase-component.dto";
 import { IProjectObjectives, ProjectStatus } from "./project.model";
 
 
@@ -42,6 +43,7 @@ export interface CreateProjectDTO {
 
     collaborators: CollaboratorDto[];
     phases: PhaseDto[];
+    components?: ProjectComponentDto[];
 
     calendar?: string;
     call?: string;
