@@ -1,9 +1,10 @@
-import { Permission } from "../permissions/models/permission.model";
+import { Permission } from "../../permissions/models/permission.model";
 
 export type Role = {
     _id?: string;
     name: string;
-    permissions: string[]|Permission[];
+    description?: string;
+    permissions: string[] | Permission[];
     isDefault: boolean;
 };
 

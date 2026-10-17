@@ -8,7 +8,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { TabPanel, TabView } from "primereact/tabview";
 import { useEffect, useState } from "react";
 import ApplicationManager from "../../applications/project/Manager";
-import CollaboratorManager from "../../collaborators/project/Manager";
+import CollaboratorManager from "../collaborators/project/Manager";
 import VerificationManager from "../../verifications/project/Manager";
 import { ProjectApi } from "../api/project.api";
 import { Project } from "../models/project.model";

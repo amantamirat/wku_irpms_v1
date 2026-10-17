@@ -10,7 +10,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Message } from 'primereact/message';
 import { classNames } from 'primereact/utils';
 import { useEffect, useMemo, useState } from 'react';
-import { roleOptions } from '../../../collaborators/models/collaborator.model';
+import { roleOptions } from '../../collaborators/models/collaborator.model';
 import { Project } from '../../models/project.model';
 
 interface CollaboratorsStepProps {

@@ -6,7 +6,7 @@ import EmptyState from "@/components/EmptyState";
 import { ItemDataTable } from "@/components/data-table/ItemDataTable";
 import { Collaborator } from "./models/collaborator.model";
 import { CollaboratorApi } from "./api/collaborator.api";
-import ProjectDetail from "../projects/components/ProjectDetail";
+import ProjectDetail from "../components/ProjectDetail";
 import { extractId } from "@/utils/utils";
 
 const CollaboratorsManager = () => {

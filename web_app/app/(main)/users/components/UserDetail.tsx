@@ -8,7 +8,7 @@ import { User } from "../models/user.model";
 import EnrollmentManager from "../enrollments/components/EnrollmentManager";
 import ExperienceManager from "../experiences/components/ExperienceManager";
 import PublicationManager from "../publications/components/PublicationManager";
-import UserMemberships from "../../collaborators/user/UserMemberships";
+import UserMemberships from "../../projects/collaborators/user/UserMemberships";
 import UserReviewers from "../../reviewers/user/UserReviewers";
 
 interface UserDetailProps {

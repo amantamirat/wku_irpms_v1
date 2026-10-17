@@ -2,39 +2,65 @@
 
 import { useEffect, useState } from 'react';
 import MyBadge from '@/templates/MyBadge';
-import ProjectDetail from '../../projects/components/ProjectDetail';
-import { ItemDataTable } from '@/components/data-table/ItemDataTable';
+import EmptyState from '@/components/EmptyState';
+import ProjectDetail from '../../components/ProjectDetail';
+import {
+    ItemDataTable,
+    RowActionButton
+} from '@/components/data-table/ItemDataTable';
+import { useStateTransitionActions } from '@/hooks/useStateTransitionActions';
+import { StateTransition } from '@/api/EntityApi';
 import { CollaboratorApi } from '../api/collaborator.api';
 import { Collaborator } from '../models/collaborator.model';
+import { COLLABORATION_TRANSITIONS } from '../models/collaborator.state-machine';
 
-interface UserMembershipsProps {
-    user: string | { _id?: string; id?: string;[key: string]: any };
-}
-
-const UserMemberships = ({ user }: UserMembershipsProps) => {
+const MyMembershipsManager = () => {
     const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        // Extract ID whether user is a string or an object containing an ID
-        const userId = typeof user === 'string' ? user : (user?._id || user?.id);
-
-        if (!userId) {
-            setCollaborators([]);
-            setLoading(false);
-            return;
-        }
-
-        CollaboratorApi.getAll({ member: userId })
+        CollaboratorApi.me()
             .then(data => {
                 const memberships = Array.isArray(data) ? data : [];
-                setCollaborators(memberships);
+
+                setCollaborators(
+                    memberships.filter(collaborator => !collaborator.isLeadPI)
+                );
             })
             .catch(error =>
-                console.error('Error fetching collaborations for user', error)
+                console.error('Error fetching my collaborations', error)
             )
             .finally(() => setLoading(false));
-    }, [user]);
+
+    }, []);
+
+    const handleTransition = async (
+        id: string,
+        transition: StateTransition
+    ) => {
+        const updated = await CollaboratorApi.transitionState?.(
+            id,
+            transition
+        );
+
+        if (!updated) return;
+
+        setCollaborators(prev =>
+            prev.map(item =>
+                item._id === id
+                    ? { ...item, status: updated.status }
+                    : item
+            )
+        );
+    };
+
+    const stateActions: RowActionButton<Collaborator>[] =
+        useStateTransitionActions({
+            resource: 'collaborator',
+            statusField: 'status',
+            transitions: COLLABORATION_TRANSITIONS,
+            onTransition: handleTransition
+        });
 
     const columns = [
         {
@@ -49,22 +75,12 @@ const UserMemberships = ({ user }: UserMembershipsProps) => {
                 const title = project?.title ?? 'Unknown Project';
 
                 return (
-                    <div className="flex items-center gap-2">
-                        {collaborator.isLeadPI && (
-                            <span
-                                title="Lead PI / User Project"
-                                className="text-amber-500 flex items-center"
-                            >
-                                <i className="pi pi-star-fill text-xs" />
-                            </span>
-                        )}
-                        <div
-                            className="truncate text-sm font-medium"
-                            title={title}
-                            style={{ maxWidth: '350px' }}
-                        >
-                            {title}
-                        </div>
+                    <div
+                        className="truncate text-sm font-medium"
+                        title={title}
+                        style={{ maxWidth: '350px' }}
+                    >
+                        {title}
                     </div>
                 );
             }
@@ -90,7 +106,7 @@ const UserMemberships = ({ user }: UserMembershipsProps) => {
             }
         },
         {
-            header: 'Membership Status',
+            header: 'Status',
             field: 'status',
             sortable: true,
             body: (collaborator: Collaborator) => (
@@ -99,26 +115,9 @@ const UserMemberships = ({ user }: UserMembershipsProps) => {
                     value={collaborator.status ?? 'Unknown'}
                 />
             )
-        },
-        {
-            header: 'Project Status',
-            field: 'project.status',
-            sortable: true,
-            body: (collaborator: Collaborator) => {
-                const project =
-                    typeof collaborator.project === 'object'
-                        ? collaborator.project
-                        : null;
-
-                return (
-                    <MyBadge
-                        type="status"
-                        value={project?.status ?? 'Unknown'}
-                    />
-                );
-            }
         }
     ];
+
 
     if (loading) {
         return (
@@ -128,14 +127,25 @@ const UserMemberships = ({ user }: UserMembershipsProps) => {
         );
     }
 
+    /*
+    if (!collaborators.length) {
+        return (
+            <EmptyState
+                icon="pi pi-users"
+                title="No project memberships"
+                description="You are not listed as a collaborator on any active projects."
+            />
+        );
+    }*/
+
     return (
         <ItemDataTable
             items={collaborators}
             columns={columns}
-            rowActions={[]}
+            rowActions={stateActions}
             enableSearch={false}
             emptyTitle="No project memberships"
-            emptyDescription="This user is not listed as a collaborator on any projects."
+            emptyDescription="You are not listed as a collaborator on any active projects."
             expandable={{
                 template: collaborator => {
                     const projectId =
@@ -156,4 +166,4 @@ const UserMemberships = ({ user }: UserMembershipsProps) => {
     );
 };
 
-export default UserMemberships;
+export default MyMembershipsManager;

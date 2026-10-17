@@ -3,7 +3,7 @@ import { ItemDataTable } from "@/components/data-table/ItemDataTable";
 import MyBadge from "@/templates/MyBadge";
 import Link from "next/link";
 import { Button } from "primereact/button";
-import { Collaborator } from "../../collaborators/models/collaborator.model";
+import { Collaborator } from "../../projects/collaborators/models/collaborator.model";
 
 interface MyPendingInvitationsProps {
     items: Collaborator[];

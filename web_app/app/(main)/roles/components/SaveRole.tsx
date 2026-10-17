@@ -14,12 +14,12 @@ import { classNames } from 'primereact/utils';
 import { useEffect, useRef, useState } from 'react';
 import { RoleApi } from '../api/role.api';
 import { Role, validateRole } from '../models/role.model';
-import { PermissionApi } from '../permissions/api/permission.api';
+import { PermissionApi } from '../../permissions/api/permission.api';
 
 const SaveRole = (props: EntitySaveDialogProps<Role>) => {
     const { visible, item, onComplete, onHide } = props;
     const { hasPermission } = useAuth();
-    const canReadPermissions = hasPermission([PERMISSIONS.PERMISSION.READ]);
+    const canReadPermissions = hasPermission([PERMISSIONS.PERMISSION.READ, PERMISSIONS.PERMISSION.LOOKUP]);
 
     const toast = useRef<Toast>(null);
     const [submitted, setSubmitted] = useState(false);
@@ -41,7 +41,7 @@ const SaveRole = (props: EntitySaveDialogProps<Role>) => {
     // 2. Load Permissions and Build Tree
     useEffect(() => {
         if (visible && canReadPermissions) {
-            PermissionApi.getAll().then(data => {
+            PermissionApi.lookup!().then(data => {
                 const map = new Map<string, TreeNode>();
                 data.forEach((perm) => {
                     if (!map.has(perm.category)) {
@@ -79,7 +79,7 @@ const SaveRole = (props: EntitySaveDialogProps<Role>) => {
     const onPermissionChange = (e: TreeSelectChangeEvent) => {
         const value = e.value as Record<string, any>;
         setSelectedKeys(value);
-        
+
         // Only collect IDs (leaves), ignore category keys
         const selectedIds = Object.keys(value || {}).filter(
             (key) => value[key]?.checked && /^[a-fA-F0-9]{24}$/.test(key)
@@ -94,8 +94,8 @@ const SaveRole = (props: EntitySaveDialogProps<Role>) => {
 
         setLoading(true);
         try {
-            const saved = isEdit 
-                ? await RoleApi.update(localRole) 
+            const saved = isEdit
+                ? await RoleApi.update(localRole)
                 : await RoleApi.create(localRole);
 
             toast.current?.show({ severity: 'success', summary: 'Success', detail: 'Role configuration saved' });
@@ -132,11 +132,12 @@ const SaveRole = (props: EntitySaveDialogProps<Role>) => {
                 footer={footer}
                 onHide={onHide}
                 maximizable
+                maximized
             >
                 {isEdit && (
-                    <Message 
-                        severity="warn" 
-                        className="w-full justify-content-start mb-4" 
+                    <Message
+                        severity="warn"
+                        className="w-full justify-content-start mb-4"
                         content={(
                             <div className="flex align-items-center gap-2">
                                 <i className="pi pi-exclamation-triangle"></i>

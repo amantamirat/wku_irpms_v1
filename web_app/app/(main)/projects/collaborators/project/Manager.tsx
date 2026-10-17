@@ -1,7 +1,7 @@
 'use client';
 
 import MyBadge from "@/templates/MyBadge";
-import { Project } from "../../projects/models/project.model";
+import { Project } from "../../models/project.model";
 import { CollaboratorApi } from "../api/collaborator.api";
 import SaveCollaborator from "../components/SaveCollaborator";
 import {

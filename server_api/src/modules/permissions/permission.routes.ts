@@ -16,6 +16,13 @@ router.get(
   checkPermission("permission:read"),
   controller.getPermissions
 );
+
+router.get(
+  '/lookup',
+  verifyAuthToken,
+  checkPermission(["permission:read", "permission:lookup"]),
+  controller.getPermissions
+);
 /*
 router.put('/:id',
   verifyActiveAccount,

@@ -9,6 +9,10 @@ export const PermissionApi: EntityApi<Permission> = {
         const data = await ApiClient.get(end_point);
         return data as Permission[];
     },
+    async lookup(): Promise<Permission[]> {
+        const data = await ApiClient.get(`${end_point}/lookup`);
+        return data as Permission[];
+    },
     create: function (data: Partial<Permission>): Promise<Permission> {
         throw new Error("Function not implemented.");
     },

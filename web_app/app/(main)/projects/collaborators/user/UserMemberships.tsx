@@ -2,65 +2,39 @@
 
 import { useEffect, useState } from 'react';
 import MyBadge from '@/templates/MyBadge';
-import EmptyState from '@/components/EmptyState';
-import ProjectDetail from '../../projects/components/ProjectDetail';
-import {
-    ItemDataTable,
-    RowActionButton
-} from '@/components/data-table/ItemDataTable';
-import { useStateTransitionActions } from '@/hooks/useStateTransitionActions';
-import { StateTransition } from '@/api/EntityApi';
+import ProjectDetail from '../../components/ProjectDetail';
+import { ItemDataTable } from '@/components/data-table/ItemDataTable';
 import { CollaboratorApi } from '../api/collaborator.api';
 import { Collaborator } from '../models/collaborator.model';
-import { COLLABORATION_TRANSITIONS } from '../models/collaborator.state-machine';
 
-const MyMembershipsManager = () => {
+interface UserMembershipsProps {
+    user: string | { _id?: string; id?: string;[key: string]: any };
+}
+
+const UserMemberships = ({ user }: UserMembershipsProps) => {
     const [collaborators, setCollaborators] = useState<Collaborator[]>([]);
     const [loading, setLoading] = useState(true);
 
     useEffect(() => {
-        CollaboratorApi.me()
+        // Extract ID whether user is a string or an object containing an ID
+        const userId = typeof user === 'string' ? user : (user?._id || user?.id);
+
+        if (!userId) {
+            setCollaborators([]);
+            setLoading(false);
+            return;
+        }
+
+        CollaboratorApi.getAll({ member: userId })
             .then(data => {
                 const memberships = Array.isArray(data) ? data : [];
-
-                setCollaborators(
-                    memberships.filter(collaborator => !collaborator.isLeadPI)
-                );
+                setCollaborators(memberships);
             })
             .catch(error =>
-                console.error('Error fetching my collaborations', error)
+                console.error('Error fetching collaborations for user', error)
             )
             .finally(() => setLoading(false));
-
-    }, []);
-
-    const handleTransition = async (
-        id: string,
-        transition: StateTransition
-    ) => {
-        const updated = await CollaboratorApi.transitionState?.(
-            id,
-            transition
-        );
-
-        if (!updated) return;
-
-        setCollaborators(prev =>
-            prev.map(item =>
-                item._id === id
-                    ? { ...item, status: updated.status }
-                    : item
-            )
-        );
-    };
-
-    const stateActions: RowActionButton<Collaborator>[] =
-        useStateTransitionActions({
-            resource: 'collaborator',
-            statusField: 'status',
-            transitions: COLLABORATION_TRANSITIONS,
-            onTransition: handleTransition
-        });
+    }, [user]);
 
     const columns = [
         {
@@ -75,12 +49,22 @@ const MyMembershipsManager = () => {
                 const title = project?.title ?? 'Unknown Project';
 
                 return (
-                    <div
-                        className="truncate text-sm font-medium"
-                        title={title}
-                        style={{ maxWidth: '350px' }}
-                    >
-                        {title}
+                    <div className="flex items-center gap-2">
+                        {collaborator.isLeadPI && (
+                            <span
+                                title="Lead PI / User Project"
+                                className="text-amber-500 flex items-center"
+                            >
+                                <i className="pi pi-star-fill text-xs" />
+                            </span>
+                        )}
+                        <div
+                            className="truncate text-sm font-medium"
+                            title={title}
+                            style={{ maxWidth: '350px' }}
+                        >
+                            {title}
+                        </div>
                     </div>
                 );
             }
@@ -106,7 +90,7 @@ const MyMembershipsManager = () => {
             }
         },
         {
-            header: 'Status',
+            header: 'Membership Status',
             field: 'status',
             sortable: true,
             body: (collaborator: Collaborator) => (
@@ -115,9 +99,26 @@ const MyMembershipsManager = () => {
                     value={collaborator.status ?? 'Unknown'}
                 />
             )
+        },
+        {
+            header: 'Project Status',
+            field: 'project.status',
+            sortable: true,
+            body: (collaborator: Collaborator) => {
+                const project =
+                    typeof collaborator.project === 'object'
+                        ? collaborator.project
+                        : null;
+
+                return (
+                    <MyBadge
+                        type="status"
+                        value={project?.status ?? 'Unknown'}
+                    />
+                );
+            }
         }
     ];
-
 
     if (loading) {
         return (
@@ -127,25 +128,14 @@ const MyMembershipsManager = () => {
         );
     }
 
-    /*
-    if (!collaborators.length) {
-        return (
-            <EmptyState
-                icon="pi pi-users"
-                title="No project memberships"
-                description="You are not listed as a collaborator on any active projects."
-            />
-        );
-    }*/
-
     return (
         <ItemDataTable
             items={collaborators}
             columns={columns}
-            rowActions={stateActions}
+            rowActions={[]}
             enableSearch={false}
             emptyTitle="No project memberships"
-            emptyDescription="You are not listed as a collaborator on any active projects."
+            emptyDescription="This user is not listed as a collaborator on any projects."
             expandable={{
                 template: collaborator => {
                     const projectId =
@@ -166,4 +156,4 @@ const MyMembershipsManager = () => {
     );
 };
 
-export default MyMembershipsManager;
+export default UserMemberships;

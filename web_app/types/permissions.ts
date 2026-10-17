@@ -1,6 +1,7 @@
 export const PERMISSIONS = {
   PERMISSION: {
     READ: "permission:read",
+    LOOKUP: "permission:lookup",
   },
 
   ROLE: {

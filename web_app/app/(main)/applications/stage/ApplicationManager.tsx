@@ -400,7 +400,7 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
                 ]}
                 enableSearch
                 enableColumnToggle
-                defaultHiddenFields={["project.femaleProportion", "project.verifiedCollaboratorPropotion", "assigner", "origDoc", "anonDoc"]}
+                defaultHiddenFields={["project.femaleProportion", "project.verifiedCollaboratorsProportion", "assigner", "origDoc", "anonDoc"]}
                 expandable={{
                     template: application => (
                         <ApplicationDetail

@@ -2,7 +2,7 @@
 
 import { BreadCrumb } from 'primereact/breadcrumb';
 import { Card } from 'primereact/card';
-import MyMembershipsManager from '../../collaborators/me/MyMembershipsManager';
+import MyMembershipsManager from '../../projects/collaborators/me/MyMembershipsManager';
 
 const BREADCRUMB_ITEMS = [{ label: 'My Memberships' }];
 const BREADCRUMB_HOME = { icon: 'pi pi-home', url: '/' };

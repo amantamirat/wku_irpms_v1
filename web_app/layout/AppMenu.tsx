@@ -50,7 +50,7 @@ const AppMenu = () => {
                 {
                     label: 'Collaborators',
                     icon: 'pi pi-users',
-                    to: '/collaborators',
+                    to: '/projects/collaborators',
                     permission: 'collaborator:read',
                 },
 
@@ -132,11 +132,10 @@ const AppMenu = () => {
             items: [
                 {
                     label: 'Users',
-                    icon: PrimeIcons.USERS,
+                    icon: PrimeIcons.USER,
                     to: '/users',
                     permission: 'user:read'
                 },
-
                 {
                     label: 'Accounts',
                     icon: PrimeIcons.SHIELD,
@@ -144,11 +143,17 @@ const AppMenu = () => {
                     permission: 'account:read'
                 },
                 {
-                    label: 'Roles & Permissions',
-                    icon: PrimeIcons.LOCK,
+                    label: 'Roles',
+                    icon: PrimeIcons.USERS,
                     to: '/roles',
                     permission: 'role:read'
-                }
+                },
+                {
+                    label: 'Permissions',
+                    icon: PrimeIcons.LOCK,
+                    to: '/permissions',
+                    permission: 'permission:read'
+                },
             ]
         },
 

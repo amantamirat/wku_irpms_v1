@@ -1,5 +1,5 @@
 import { User } from "@/app/(main)/users/models/user.model";
-import { Project } from "../../projects/models/project.model";
+import { Project } from "../../models/project.model";
 
 export enum CollaboratorStatus {
     pending = 'pending',

@@ -6,6 +6,11 @@
   },
   {
     "category": "Permission Management",
+    "name": "permission:lookup",
+    "description": "Look permissions"
+  },
+  {
+    "category": "Permission Management",
     "name": "permission:delete",
     "description": "Delete permissions"
   },
