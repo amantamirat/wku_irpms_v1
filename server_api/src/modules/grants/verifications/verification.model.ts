@@ -2,7 +2,7 @@ import mongoose, { model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 import { IStatusHistory } from "../../../common/types/status-history";
 import { createStatusHistorySchema } from "../../../common/schemas/status-history.schema";
-import { AnonymizationStatus } from "../../projects/applications/application.model";
+import { AnonymizationStatus } from "../../applications/application.model";
 
 export enum VerificationStatus {
     submitted = "submitted",

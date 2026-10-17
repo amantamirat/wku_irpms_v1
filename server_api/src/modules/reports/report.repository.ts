@@ -1,7 +1,7 @@
 import { ScopeFilter } from "../auth/auth.types";
 import { FundingSource, Grant } from "../grants/grant.model";
 import { Verification, VerificationStatus } from "../grants/verifications/verification.model";
-import { Application, ApplicationStatus } from "../projects/applications/application.model";
+import { Application, ApplicationStatus } from "../applications/application.model";
 import { Phase, PhaseStatus } from "../projects/phase/phase.model";
 import { Project, ProjectStatus } from "../projects/project.model";
 import { Reviewer } from "../reviewers/reviewer.model";

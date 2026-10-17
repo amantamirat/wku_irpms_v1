@@ -1,4 +1,4 @@
-import { AnonymizationStatus } from "../../projects/applications/application.model";
+import { AnonymizationStatus } from "../../applications/application.model";
 import { VerificationStatus } from "./verification.model";
 
 export interface CreateVerificationDTO {

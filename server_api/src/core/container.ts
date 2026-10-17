@@ -30,8 +30,8 @@ import { SpecializationRepository } from "../modules/organization/specialization
 import { PermissionRepository } from "../modules/permissions/permission.repository";
 import { RoleRepository } from "../modules/permissions/roles/role.repository";
 import { PositionRepository } from "../modules/positions/position.repository";
-import { ApplicationRepository } from "../modules/projects/applications/application.repository";
-import { ApplicationService } from "../modules/projects/applications/application.service";
+import { ApplicationRepository } from "../modules/applications/application.repository";
+import { ApplicationService } from "../modules/applications/application.service";
 import { CollaboratorRepository } from "../modules/projects/collaborators/collaborator.repository";
 import { CollaboratorService } from "../modules/projects/collaborators/collaborator.service";
 import { PhaseActivityRepository } from "../modules/projects/phase/activities/phase-activity.repository";

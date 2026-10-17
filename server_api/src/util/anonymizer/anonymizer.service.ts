@@ -5,8 +5,8 @@ import { AnonymizationEntity, AnonymizationEntityType, AnonymizationResult } fro
 import { PdfLayoutExtractorService } from "./pdf-layout-extractor.service";
 import { PdfEntityLocationMatcher } from "./pdf-location-matcher";
 import { SecurePdfRedactorService } from "./secure-pdf-redactor-service";
-import { IApplication, AnonymizationStatus } from "../../modules/projects/applications/application.model";
-import { ApplicationRepository } from "../../modules/projects/applications/application.repository";
+import { IApplication, AnonymizationStatus } from "../../modules/applications/application.model";
+import { ApplicationRepository } from "../../modules/applications/application.repository";
 import { CollaboratorRepository } from "../../modules/projects/collaborators/collaborator.repository";
 import { PdfExtractorService } from "../../modules/templates/services/pdf-extractor.service";
 import { IUser } from "../../modules/users/user.model";

@@ -1,8 +1,8 @@
 // application.model.ts
 import mongoose, { model, Schema } from "mongoose";
-import { COLLECTIONS } from "../../../common/constants/collections.enum";
-import { IStatusHistory } from "../../../common/types/status-history";
-import { createStatusHistorySchema } from "../../../common/schemas/status-history.schema";
+import { COLLECTIONS } from "../../common/constants/collections.enum";
+import { IStatusHistory } from "../../common/types/status-history";
+import { createStatusHistorySchema } from "../../common/schemas/status-history.schema";
 
 export enum ApplicationStatus {
     submitted = "submitted",

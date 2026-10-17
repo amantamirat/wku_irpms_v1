@@ -50,7 +50,7 @@ import phaseActivityRoutes from './modules/projects/phase/activities/phase-activ
 import phaseEquipmentRoutes from './modules/projects/phase/equipments/phase-equipment.routes';
 import phaseRoutes from './modules/projects/phase/phase.routes';
 
-import applicationRoutes from './modules/projects/applications/application.routes';
+import applicationRoutes from './modules/applications/application.routes';
 import resultRoutes from './modules/reviewers/results/result.routes';
 import reviewerRoutes from './modules/reviewers/reviewer.routes';
 

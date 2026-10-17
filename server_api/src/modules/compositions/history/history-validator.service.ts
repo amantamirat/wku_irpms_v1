@@ -9,8 +9,8 @@ import { GrantRepository } from "../../grants/grant.repository";
 import {
     ApplicationStatus,
     IApplication
-} from "../../projects/applications/application.model";
-import { ApplicationRepository } from "../../projects/applications/application.repository";
+} from "../../applications/application.model";
+import { ApplicationRepository } from "../../applications/application.repository";
 
 import { FilterCollaborators } from "../../projects/collaborators/collaborator.dto";
 import { CollaboratorStatus, ICollaborator } from "../../projects/collaborators/collaborator.model";

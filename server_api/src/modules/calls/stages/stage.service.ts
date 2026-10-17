@@ -8,7 +8,7 @@ import { CallStatus } from "../call.model";
 import { IStageRepository } from "./stage.repository";
 import { IStage, StageStatus } from "./stage.model";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
-import { IApplicationRepository } from "../../projects/applications/application.repository";
+import { IApplicationRepository } from "../../applications/application.repository";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 

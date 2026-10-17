@@ -1,13 +1,13 @@
 import fs from "fs";
 import path from "path";
 import { Request, Response } from "express";
-import { errorResponse, successResponse } from "../../../common/helpers/response";
+import { errorResponse, successResponse } from "../../common/helpers/response";
 import { CreateApplicationDTO, FilterApplicationDTO } from "./application.dto";
-import { DeleteDto } from "../../../common/dtos/delete.dto";
-import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
-import { AppError } from "../../../common/errors/app.error";
-import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { AuthenticatedRequest } from "../../auth/auth.middleware";
+import { DeleteDto } from "../../common/dtos/delete.dto";
+import { TransitionRequestDto } from "../../common/dtos/transition.dto";
+import { AppError } from "../../common/errors/app.error";
+import { ERROR_CODES } from "../../common/errors/error.codes";
+import { AuthenticatedRequest } from "../auth/auth.middleware";
 import { ApplicationService } from "./application.service";
 import { ApplicationStatus } from "./application.model";
 

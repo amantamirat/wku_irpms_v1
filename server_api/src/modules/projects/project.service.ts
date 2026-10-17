@@ -21,8 +21,8 @@ import { IVerificationRepository } from "../grants/verifications/verification.re
 import { NotificationService } from "../notifications/notification.service";
 import { TemplateValidationService } from "../templates/services/template-validation.service";
 import { IUserRepository } from "../users/user.repository";
-import { ApplicationStatus } from "./applications/application.model";
-import { ApplicationService } from "./applications/application.service";
+import { ApplicationStatus } from "../applications/application.model";
+import { ApplicationService } from "../applications/application.service";
 import { CollaboratorStatus } from "./collaborators/collaborator.model";
 import { ICollaboratorRepository } from "./collaborators/collaborator.repository";
 import { CollaboratorService } from "./collaborators/collaborator.service";

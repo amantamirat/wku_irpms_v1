@@ -1,5 +1,5 @@
 // project-stage.dto.ts
-import { CreateProjectDTO } from "../project.dto";
+import { CreateProjectDTO } from "../projects/project.dto";
 import { AnonymizationStatus, ApplicationStatus } from "./application.model";
 
 

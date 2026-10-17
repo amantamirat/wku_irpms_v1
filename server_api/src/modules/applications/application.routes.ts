@@ -1,9 +1,9 @@
 import express from "express";
-import { applicationService, checkPermission, checkTransitionPermission } from "../../../core/container";
-import { upload } from "../../../common/middleware/fileUpload.middleware";
-import { verifyAuthToken } from "../../auth/auth.middleware";
+import { applicationService, checkPermission, checkTransitionPermission } from "../../core/container";
+import { upload } from "../../common/middleware/fileUpload.middleware";
+import { verifyAuthToken } from "../auth/auth.middleware";
 import { ApplicationController } from "./application.controller";
-import { PERMISSIONS } from "../../../common/constants/permissions";
+import { PERMISSIONS } from "../../common/constants/permissions";
 
 const controller = new ApplicationController(applicationService);
 const router = express.Router();

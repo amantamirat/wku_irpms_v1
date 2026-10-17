@@ -12,9 +12,9 @@ import {
     AnonymizationStatus
 } from "./application.model";
 
-import { FilterOptions } from "../../../common/dtos/filter.dto";
-import { ScopeFilter } from "../../auth/auth.types";
-import { toObjectId } from "../../../common/utils/mongoose.utils";
+import { FilterOptions } from "../../common/dtos/filter.dto";
+import { ScopeFilter } from "../auth/auth.types";
+import { toObjectId } from "../../common/utils/mongoose.utils";
 
 
 
