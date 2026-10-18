@@ -6,29 +6,29 @@ import { IUserRepository } from "../user.repository";
 import { IPositionRepository } from "../../positions/position.repository";
 import {
     CreateExperienceDTO,
-    DeleteExperienceDTO,
-    GetExperiencesDTO,
+    FilterExperiencesDTO,
     UpdateExperienceDTO
 } from "./experience.dto";
 import { IExperienceRepository } from "./experience.repository";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
 
 export class ExperienceService {
 
     constructor(
         private readonly repository: IExperienceRepository,
         private readonly userRepo: IUserRepository,
-        private readonly organizationRepository: IOrganizationRepository,
+        private readonly organizationRepo: IOrganizationRepository,
         private readonly posRepository: IPositionRepository
     ) { }
 
-    async getExperiences(options: GetExperiencesDTO) {
-        return this.repository.find({ ...options, populate: true });
+    async getExperiences(filter: FilterExperiencesDTO, options?: FilterOptions) {
+        return this.repository.find(filter, options);
     }
 
     async validate(dto: { organization?: string, position?: string, rank?: string }) {
         const { organization, position } = dto;
         if (organization) {
-            const organDoc = await this.organizationRepository.findById(organization);
+            const organDoc = await this.organizationRepo.findById(organization);
             if (!organDoc)
                 throw new AppError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
 
@@ -37,38 +37,41 @@ export class ExperienceService {
             }
         }
 
-        if(position){
+        if (position) {
             const posDoc = await this.posRepository.findById(position);
-        if (!posDoc)
-            throw new AppError(ERROR_CODES.POSITION_NOT_FOUND);
+            if (!posDoc)
+                throw new AppError(ERROR_CODES.POSITION_NOT_FOUND);
         }
-        
+
 
 
     }
 
     async create(dto: CreateExperienceDTO) {
-        const { user: applicant, organization, position } = dto;
+        const { user, organization, position } = dto;
 
-        const applicantDoc = await this.userRepo.findById(applicant);
-        if (!applicantDoc)
+        const userDoc = await this.userRepo.findById(user);
+        if (!userDoc)
             throw new AppError(ERROR_CODES.USER_NOT_FOUND);
 
         await this.validate(dto);
 
-        return this.repository.create(dto);
+        const created = await this.repository.create(dto);
+
+        return this.repository.findById(String(created._id), { populate: true });
     }
 
     async update(dto: UpdateExperienceDTO) {
         const { id, data } = dto;
         await this.validate(data);
-        const existing = await this.repository.findById(id);
-        if (!existing) throw new AppError(ERROR_CODES.EXPERIENCE_NOT_FOUND);
-        return this.repository.update(id, data);
+        const experienceDoc = await this.repository.findById(id);
+        if (!experienceDoc) throw new AppError(ERROR_CODES.EXPERIENCE_NOT_FOUND);
+        await this.repository.update(id, data);
+        return this.repository.findById(id, { populate: true });
     }
 
-    async delete(dto: DeleteExperienceDTO) {
-        const deleted = await this.repository.delete(dto.id);
+    async delete(id: string) {
+        const deleted = await this.repository.delete(id);
         if (!deleted) throw new AppError(ERROR_CODES.EXPERIENCE_NOT_FOUND);
     }
 }

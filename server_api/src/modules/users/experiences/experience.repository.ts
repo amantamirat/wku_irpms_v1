@@ -1,25 +1,30 @@
 import mongoose from "mongoose";
+import { FilterOptions } from "../../../common/dtos/filter.dto";
+import { CreateExperienceDTO, FilterExperiencesDTO, UpdateExperienceDTO } from "./experience.dto";
 import { Experience, IExperience } from "./experience.model";
-import { CreateExperienceDTO, ExistExperienceDTO, GetExperiencesDTO, UpdateExperienceDTO } from "./experience.dto";
 
 export interface IExperienceRepository {
-    findById(id: string): Promise<IExperience | null>;
-    find(filters: GetExperiencesDTO): Promise<Partial<IExperience>[]>;
+    findById(id: string, options?: FilterOptions): Promise<IExperience | null>;
+    find(filters: FilterExperiencesDTO, options?: FilterOptions): Promise<Partial<IExperience>[]>;
     create(data: CreateExperienceDTO): Promise<IExperience>;
     update(id: string, data: UpdateExperienceDTO["data"]): Promise<IExperience | null>;
-    exists(filters: ExistExperienceDTO): Promise<boolean>;
+    exists(filters: FilterExperiencesDTO): Promise<boolean>;
     delete(id: string): Promise<IExperience | null>;
 }
 
 export class ExperienceRepository implements IExperienceRepository {
 
-    async findById(id: string) {
-        return Experience.findById(new mongoose.Types.ObjectId(id))
+    async findById(id: string, options?: FilterOptions) {
+        let dbQuery = Experience.findById(new mongoose.Types.ObjectId(id));
+        if (options?.populate) {
+            dbQuery = dbQuery.populate("user organization position");
+        }
+        return dbQuery
             .lean<IExperience>()
             .exec();
     }
 
-    async find(filters: GetExperiencesDTO) {
+    async find(filters: FilterExperiencesDTO, options?: FilterOptions) {
         const query: any = {};
 
         if (filters.user) {
@@ -32,7 +37,7 @@ export class ExperienceRepository implements IExperienceRepository {
 
         let dbQuery = Experience.find(query);
 
-        if (filters.populate) {
+        if (options?.populate) {
             dbQuery = dbQuery.populate("user organization position");
         }
 
@@ -88,7 +93,7 @@ export class ExperienceRepository implements IExperienceRepository {
         ).exec();
     }
 
-    async exists(filters: ExistExperienceDTO): Promise<boolean> {
+    async exists(filters: FilterExperiencesDTO): Promise<boolean> {
         const query: any = {};
         if (filters.user) {
             query.user = new mongoose.Types.ObjectId(filters.user);

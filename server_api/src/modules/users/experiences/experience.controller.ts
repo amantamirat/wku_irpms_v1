@@ -3,7 +3,7 @@ import { ExperienceService } from './experience.service';
 import {
     CreateExperienceDTO,
     UpdateExperienceDTO,
-    GetExperiencesDTO,
+    FilterExperiencesDTO,
     DeleteExperienceDTO
 } from './experience.dto';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
@@ -41,7 +41,7 @@ export class ExperienceController {
         try {
             const { user, organization } = req.query;
 
-            const filter: GetExperiencesDTO = {
+            const filter: FilterExperiencesDTO = {
                 user: user ? user as string : undefined
             };
 

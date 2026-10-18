@@ -26,19 +26,12 @@ export interface UpdateExperienceDTO {
     userId?: string;
 }
 
-export interface DeleteExperienceDTO {
-    id: string;
-    userId: string;
-}
 
-export interface GetExperiencesDTO {
+
+export interface FilterExperiencesDTO {
     user?: string;
     organization?: string;
-    populate?: boolean;
-}
-
-export interface ExistExperienceDTO {
-    user?: string;
     position?: string;
-    organization?: string;
 }
+
+
