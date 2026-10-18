@@ -1,24 +1,16 @@
 import { Router } from 'express';
+import { PERMISSIONS } from '../../../common/constants/permissions';
+import { checkPermission, exprienceRepo, organizationRepo, positionRepo, userRepo } from '../../../core/container';
+import { verifyAuthToken } from '../../auth/auth.middleware';
 import { ExperienceController } from './experience.controller';
 import { ExperienceService } from './experience.service';
-import { PERMISSIONS } from '../../../common/constants/permissions';
-import { verifyAuthToken } from '../../auth/auth.middleware';
-import { checkPermission } from '../../../core/container';
-import { ExperienceRepository } from './experience.repository';
-import { UserRepository } from '../user.repository';
-import { OrganizationRepository } from '../../organization/organization.repository';
-import { PositionRepository } from '../../positions/position.repository';
 
 const router: Router = Router();
 
-// Instantiate service & controller
-const experinceRepository = new ExperienceRepository();
-const applicantRepository = new UserRepository();
-const organRepository = new OrganizationRepository();
-const posRepository = new PositionRepository();
+
 
 const experienceService = new ExperienceService(
-    experinceRepository, applicantRepository, organRepository, posRepository
+    exprienceRepo, userRepo, organizationRepo, positionRepo
 );
 
 const controller = new ExperienceController(experienceService);

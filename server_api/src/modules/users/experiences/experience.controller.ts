@@ -3,8 +3,7 @@ import { ExperienceService } from './experience.service';
 import {
     CreateExperienceDTO,
     UpdateExperienceDTO,
-    FilterExperiencesDTO,
-    DeleteExperienceDTO
+    FilterExperiencesDTO
 } from './experience.dto';
 import { successResponse, errorResponse } from '../../../common/helpers/response';
 import { AuthenticatedRequest } from '../../auth/auth.middleware';
@@ -45,7 +44,7 @@ export class ExperienceController {
                 user: user ? user as string : undefined
             };
 
-            const experiences = await this.service.getExperiences(filter);
+            const experiences = await this.service.getExperiences(filter, { populate: true });
             successResponse(res, 200, 'Experiences fetched successfully', experiences);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -90,12 +89,8 @@ export class ExperienceController {
 
             const { id } = req.params;
 
-            const dto: DeleteExperienceDTO = {
-                id,
-                userId: req.auth.userId
-            };
 
-            const deleted = await this.service.delete(dto);
+            const deleted = await this.service.delete(id);
             successResponse(res, 200, 'Experience deleted successfully', deleted);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
