@@ -20,6 +20,7 @@ import { IThemeRepository } from "../../../modules/thematics/themes/theme.reposi
 import { UserService } from '../../../modules/users/user.service';
 import { ExtractedMember, LegacyProjectDTO } from "./legacy.dto";
 import { AccountService } from '../../../modules/accounts/account.service';
+import { SYSTEM } from '../../../common/constants/system.constant';
 
 export class LegacySeeder {
 
@@ -734,7 +735,7 @@ Failed         : ${failed}
             //usedBudget: 0,
             status: GrantStatus.active,
             description: "Grant created during legacy data migration"
-        });
+        }, SYSTEM.SU_USER);
     }
 
 }

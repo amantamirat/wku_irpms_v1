@@ -8,6 +8,7 @@ import {
 import { FilterOptions } from "../../common/dtos/filter.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
+import { SYSTEM } from "../../common/constants/system.constant";
 
 export interface IGrantRepository {
 
@@ -198,7 +199,7 @@ export class GrantRepository implements IGrantRepository {
             thematic: new mongoose.Types.ObjectId(dto.thematic),
             description: dto.description,
             status: dto.status,
-            createdBy: new mongoose.Types.ObjectId(userid)
+            createdBy: userid === SYSTEM.SU_USER ? undefined : new mongoose.Types.ObjectId(userid)
         });
     }
 

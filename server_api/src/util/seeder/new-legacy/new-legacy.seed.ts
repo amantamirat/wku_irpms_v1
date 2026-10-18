@@ -25,6 +25,7 @@ import { PhaseStatus } from '../../../modules/projects/phase/phase.model';
 import { PhaseActivityDto } from '../../../modules/projects/phase/activities/phase-activity.dto';
 import { LegacyEquipmentLoader } from './LegacyEquipmentLoader';
 import { ProjectStatus } from '../../../modules/projects/project.model';
+import { SYSTEM } from '../../../common/constants/system.constant';
 
 export class NewLegacySeeder {
 
@@ -1024,7 +1025,7 @@ TotalUsed         : ${totalUsed}
             //usedBudget: 0,
             status: GrantStatus.active,
             description: "Grant created during legacy data migration"
-        });
+        }, SYSTEM.SU_USER);
     }
 
 }
