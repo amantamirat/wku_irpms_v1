@@ -86,6 +86,7 @@ export const PERMISSIONS = {
   PUBLICATION: {
     CREATE: "publication:create",
     READ: "publication:read",
+    LOOKUP: "publication:lookup",
     UPDATE: "publication:update",
     DELETE: "publication:delete",
   },

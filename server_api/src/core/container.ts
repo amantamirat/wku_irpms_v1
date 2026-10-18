@@ -58,6 +58,7 @@ import { AnonymizerService } from "../util/anonymizer/anonymizer.service";
 import { PhaseEquipmentRepository } from "../modules/projects/phase/equipments/phase-equipment.repository";
 import { PhaseDocumentRepository } from "../modules/projects/phase/documents/phase.doc.repository";
 import { DocumentTemplateRepository } from "../modules/document-templates/document-template.repository";
+import { PublicationRepository } from "../modules/users/publications/publication.repository";
 
 export const fileStorageService = new FileStorageService();
 
@@ -75,6 +76,7 @@ export const exprienceRepo = new ExperienceRepository();
 export const specializationRepo = new SpecializationRepository();
 export const enrollmentRepo = new EnrollmentRepository();
 export const positionRepo = new PositionRepository();
+export const publicationRepo = new PublicationRepository();
 //roles and permissions repos
 export const permissionRepo = new PermissionRepository();
 export const roleRepo = new RoleRepository();

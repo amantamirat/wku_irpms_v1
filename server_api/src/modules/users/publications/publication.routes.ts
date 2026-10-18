@@ -1,19 +1,15 @@
 import { Router } from 'express';
-import { PublicationController } from './publication.controller';
 import { PERMISSIONS } from '../../../common/constants/permissions';
-import { PublicationService } from './publication.service';
-import { PublicationRepository } from './publication.repository';
+import { checkPermission, checkTransitionPermission, publicationRepo, userRepo } from '../../../core/container';
 import { verifyAuthToken } from '../../auth/auth.middleware';
-import { checkTransitionPermission } from '../../../core/container';
-import { checkPermission } from '../../../core/container';
-import { UserRepository } from '../user.repository';
+import { PublicationController } from './publication.controller';
+import { PublicationService } from './publication.service';
 
-const publicationRepository = new PublicationRepository();
-const applicantRepository = new UserRepository();
+
 
 const service = new PublicationService(
-    publicationRepository,
-    applicantRepository
+    publicationRepo,
+    userRepo
 );
 
 const controller = new PublicationController(service);
@@ -28,6 +24,12 @@ router.post('/',
 router.get('/',
     verifyAuthToken,
     checkPermission([PERMISSIONS.PUBLICATION.READ]),
+    controller.get
+);
+
+router.get('/lookup',
+    verifyAuthToken,
+    checkPermission([PERMISSIONS.PUBLICATION.LOOKUP]),
     controller.get
 );
 
