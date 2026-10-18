@@ -28,7 +28,7 @@ export class GrantService {
         private readonly docTemplateRepo: DocumentTemplateRepository,
     ) { }
 
-    async create(dto: CreateGrantDTO) {
+    async create(dto: CreateGrantDTO, userId: string) {
         const { fundingSource, organization, agreementTemplate } = dto;
 
         const organizationDoc = await this.organizationRepo.findById(organization);
@@ -53,7 +53,7 @@ export class GrantService {
             if (!agreementTemplateDoc) throw new AppError(ERROR_CODES.DOCUMENT_TEMPLATE_NOT_FOUND);
         }
 
-        const created = await this.repository.create(dto);
+        const created = await this.repository.create(dto, userId);
         return created;
     }
 
@@ -71,7 +71,7 @@ export class GrantService {
         return grant;
     }
 
-    async update(dto: UpdateGrantDTO) {
+    async update(dto: UpdateGrantDTO, userId: string) {
         const { id, data } = dto;
         const grantDoc = await this.repository.findById(id);
         if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
@@ -97,7 +97,7 @@ export class GrantService {
             }
         }
 
-        return await this.repository.update(id, data);
+        return await this.repository.update(id, data, userId);
     }
 
     async transitionState(dto: TransitionRequestDto) {
@@ -144,7 +144,7 @@ export class GrantService {
             }
         }
         if (next === GrantStatus.active) {
-            
+
         }
         return await this.repository.updateStatus(id, to);
     }

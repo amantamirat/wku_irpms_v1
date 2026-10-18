@@ -19,11 +19,10 @@ export class GrantController {
 
             const userId = req.auth.userId;
             const data: CreateGrantDTO = {
-                ...req.body,
-                userId
+                ...req.body
             };
 
-            const grant = await this.service.create(data);
+            const grant = await this.service.create(data, userId);
             successResponse(res, 201, "Grant created successfully", grant);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -91,6 +90,8 @@ export class GrantController {
         try {
             const { id } = req.params;
 
+            if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
+
             const {
                 title,
                 description,
@@ -112,7 +113,7 @@ export class GrantController {
                 }
             };
 
-            const updated = await this.service.update(dto);
+            const updated = await this.service.update(dto, req.auth.userId);
 
             successResponse(
                 res,

@@ -27,12 +27,14 @@ export interface IGrantRepository {
     ): Promise<IGrant[]>;
 
     create(
-        dto: CreateGrantDTO
+        dto: CreateGrantDTO,
+        userid: string
     ): Promise<IGrant>;
 
     update(
         id: string,
-        data: UpdateGrantDTO["data"]
+        data: UpdateGrantDTO["data"],
+        userid: string
     ): Promise<IGrant | null>;
 
     updateStatus(
@@ -179,72 +181,43 @@ export class GrantRepository implements IGrantRepository {
     }
 
     /**
-     * Create grant.
-     */
-    async create(
-        dto: CreateGrantDTO
-    ): Promise<IGrant> {
-
-        const data: Partial<IGrant> = {
+ * Create grant.
+ */
+    async create(dto: CreateGrantDTO, userid: string): Promise<IGrant> {
+        return Grant.create({
             fundingSource: dto.fundingSource,
-            organization: new mongoose.Types.ObjectId(
-                dto.organization
-            ),
+            organization: new mongoose.Types.ObjectId(dto.organization),
             title: dto.title,
             amount: dto.amount,
-            constraint: dto.constraint ? new mongoose.Types.ObjectId(
-                dto.constraint
-            ) : undefined,
-            agreementTemplate: dto.agreementTemplate ? new mongoose.Types.ObjectId(
-                dto.agreementTemplate
-            ) : undefined,
-            thematic: new mongoose.Types.ObjectId(
-                dto.thematic
-            ),
+            constraint: dto.constraint
+                ? new mongoose.Types.ObjectId(dto.constraint)
+                : undefined,
+            agreementTemplate: dto.agreementTemplate
+                ? new mongoose.Types.ObjectId(dto.agreementTemplate)
+                : undefined,
+            thematic: new mongoose.Types.ObjectId(dto.thematic),
             description: dto.description,
-            status: dto.status
-        };
-
-        return Grant.create(data);
+            status: dto.status,
+            createdBy: new mongoose.Types.ObjectId(userid)
+        });
     }
 
     /**
-     * Update grant.
-     */
+ * Update grant.
+ */
     async update(
         id: string,
-        dtoData: UpdateGrantDTO["data"]
+        dtoData: UpdateGrantDTO["data"],
+        userId: string
     ): Promise<IGrant | null> {
-
-        const updateData: Partial<IGrant> = {};
-
-        if (dtoData.title !== undefined) {
-            updateData.title = dtoData.title;
-        }
-
-        if (dtoData.description !== undefined) {
-            updateData.description = dtoData.description;
-        }
-
-        if (dtoData.constraint !== undefined) {
-            updateData.constraint = new mongoose.Types.ObjectId(
-                dtoData.constraint
-            );
-        }
-
-        if (dtoData.agreementTemplate !== undefined) {
-            updateData.agreementTemplate = dtoData.agreementTemplate
-                ? new mongoose.Types.ObjectId(dtoData.agreementTemplate)
-                : null;
-        }
-
-        if (dtoData.amount !== undefined) {
-            updateData.amount = dtoData.amount;
-        }
-
         return Grant.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
-            { $set: updateData },
+            id,
+            {
+                $set: {
+                    ...dtoData,
+                    updatedBy: new mongoose.Types.ObjectId(userId)
+                }
+            },
             {
                 new: true,
                 runValidators: true

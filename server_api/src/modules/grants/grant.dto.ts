@@ -34,7 +34,6 @@ export interface UpdateGrantDTO {
         amount: number;
         thematic:string;
     }>;
-    userId?: string;
 }
 
 
