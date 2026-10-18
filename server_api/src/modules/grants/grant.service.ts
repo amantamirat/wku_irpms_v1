@@ -43,6 +43,7 @@ export class GrantService {
                 throw new AppError(ERROR_CODES.EXTERNAL_NOT_FOUND);
             }
         }
+
         const thematicDoc = await this.thematicRepository.findById(dto.thematic);
         if (!thematicDoc) throw new AppError(ERROR_CODES.THEMATIC_NOT_FOUND);
         if (thematicDoc.status !== ThematicStatus.published) throw new AppError(ERROR_CODES.THEMATIC_NOT_PUBLISHED);
@@ -75,26 +76,27 @@ export class GrantService {
         const grantDoc = await this.repository.findById(id);
         if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
 
-        if (grantDoc.status === GrantStatus.closed) throw new AppError(ERROR_CODES.GRANT_CLOSED);
+        if (grantDoc.status === GrantStatus.closed)
+            throw new AppError(ERROR_CODES.GRANT_CLOSED);
 
         // If the admin is trying to change the total amount
         if (data.amount !== undefined && data.amount !== grantDoc.amount) {
-
-            // const calls = await this.callRepo.find({ grant: id });
-            const totalAllocated = 0//calls.reduce((sum, a) => sum + (a.budget || 0), 0);
-
-            const minimumAllowed = Math.max(
-                totalAllocated,
-                grantDoc.usedBudget || 0
-            );
-
-            if (data.amount < minimumAllowed) {
+            if (data.amount < grantDoc.usedBudget) {
                 throw new AppError(
                     ERROR_CODES.INVALID_GRANT_REDUCTION,
-                    `Cannot reduce grant below ${minimumAllowed}.`
+                    `Cannot reduce grant below ${grantDoc.usedBudget}.`
                 );
             }
         }
+
+        if (data.thematic) {
+            if (data.thematic !== String(grantDoc.thematic)) {
+                const thematicDoc = await this.thematicRepository.findById(data.thematic);
+                if (!thematicDoc) throw new AppError(ERROR_CODES.THEMATIC_NOT_FOUND);
+                if (thematicDoc.status !== ThematicStatus.published) throw new AppError(ERROR_CODES.THEMATIC_NOT_PUBLISHED);
+            }
+        }
+
         return await this.repository.update(id, data);
     }
 
@@ -142,11 +144,7 @@ export class GrantService {
             }
         }
         if (next === GrantStatus.active) {
-            /*
-            if (!await this.grantStageRepo.exists({ grant: id })) {
-                throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-            }
-            */
+            
         }
         return await this.repository.updateStatus(id, to);
     }
@@ -163,17 +161,6 @@ export class GrantService {
                 'Only grants in planned status can be deleted.'
             );
         }
-        /**
-         * if (await this.compositionRepo.exists({ grant: id })) {
-            throw new AppError(
-                ERROR_CODES.GRANT_IN_USE,
-                'Cannot delete grant because it is used in grant compositions.'
-            );
-        }
-         * 
-         */
-
-
         return await this.repository.delete(id);
     }
 }

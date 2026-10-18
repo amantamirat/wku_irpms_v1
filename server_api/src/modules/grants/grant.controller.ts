@@ -96,7 +96,8 @@ export class GrantController {
                 description,
                 constraint,
                 agreementTemplate,
-                amount
+                amount,
+                thematic
             } = req.body;
 
             const dto: UpdateGrantDTO = {
@@ -106,7 +107,8 @@ export class GrantController {
                     description,
                     constraint,
                     agreementTemplate,
-                    amount
+                    amount,
+                    thematic
                 }
             };
 

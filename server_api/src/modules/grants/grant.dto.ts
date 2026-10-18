@@ -32,6 +32,7 @@ export interface UpdateGrantDTO {
         constraint?: string;
         agreementTemplate: string | null;
         amount: number;
+        thematic:string;
     }>;
     userId?: string;
 }
