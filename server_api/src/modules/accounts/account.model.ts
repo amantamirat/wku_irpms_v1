@@ -76,5 +76,5 @@ const AccountSchema = new Schema<IAccount>(
   },
   { timestamps: true }
 );
-AccountSchema.index({ email: 1 });
+//AccountSchema.index({ email: 1 });
 export const Account: Model<IAccount> = mongoose.model<IAccount>(COLLECTIONS.ACCOUNT, AccountSchema);
