@@ -67,20 +67,9 @@ export class PublicationRepository implements IPublicationRepository {
         dtoData: UpdatePublicationDTO["data"]
     ): Promise<IPublication | null> {
 
-        const toUpdate: Partial<IPublication> = {};
-
-        if (dtoData.title) toUpdate.title = dtoData.title;
-        if (dtoData.abstract) toUpdate.abstract = dtoData.abstract;
-        if (dtoData.publishedDate)
-            toUpdate.publishedDate = new Date(dtoData.publishedDate);
-        if (dtoData.doi) toUpdate.doi = dtoData.doi;
-        if (dtoData.url) toUpdate.url = dtoData.url;
-        if (dtoData.publisher) toUpdate.publisher = dtoData.publisher;
-        if (dtoData.publicationId) toUpdate.publicationId = dtoData.publicationId;
-
         return Publication.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
-            { $set: toUpdate },
+            { $set: dtoData },
             { new: true }
         )
             .lean<IPublication>();

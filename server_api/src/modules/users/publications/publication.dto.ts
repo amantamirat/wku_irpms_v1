@@ -5,7 +5,7 @@ export interface CreatePublicationDTO {
     title: string;
     type: PublicationType;
     abstract?: string;
-    publishedDate?: string; // ISO date string
+    publishedDate: string; // ISO date string
     doi?: string;
     url?: string;
     publisher?: string;
@@ -14,17 +14,7 @@ export interface CreatePublicationDTO {
 
 export interface UpdatePublicationDTO {
     id: string;
-    data: {
-        title?: string;
-        abstract?: string;
-        publishedDate?: string;
-        doi?: string;
-        url?: string;
-        publisher?: string;
-        publicationId?: string;
-        // type is intentionally excluded (immutable)
-        // applicant is excluded (usually not changed)
-    };
+    data: Partial<Omit<CreatePublicationDTO, 'author'>>;
 }
 
 export interface FilterPublicationsOptions {

@@ -52,6 +52,7 @@ export class PublicationController {
 
             const { id } = req.params;
             const {
+                type,
                 title,
                 abstract,
                 publishedDate,
@@ -64,6 +65,7 @@ export class PublicationController {
             const dto: UpdatePublicationDTO = {
                 id,
                 data: {
+                    type,
                     title,
                     abstract,
                     publishedDate,

@@ -27,7 +27,7 @@ export interface IPublication extends Document {
     title: string;
     type: PublicationType;
     abstract?: string;
-    publishedDate?: Date;
+    publishedDate: Date;
     doi?: string;
     url?: string;
     publisher?: string;
@@ -48,6 +48,7 @@ const PublicationSchema = new Schema<IPublication>(
             ref: COLLECTIONS.USER,
             required: true,
             index: true,
+            immutable:true
         },
 
         title: {
@@ -60,7 +61,6 @@ const PublicationSchema = new Schema<IPublication>(
             type: String,
             enum: Object.values(PublicationType),
             required: true,
-            immutable: true,
         },
 
         abstract: {
@@ -70,6 +70,7 @@ const PublicationSchema = new Schema<IPublication>(
 
         publishedDate: {
             type: Date,
+            required:true,
         },
 
         doi: {
