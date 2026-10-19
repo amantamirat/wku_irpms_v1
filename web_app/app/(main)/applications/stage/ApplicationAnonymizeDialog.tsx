@@ -108,7 +108,7 @@ export const ApplicationAnonymizeDialog = ({
                         autoResize
                         className="w-full"
                         placeholder={
-                            'Wolkite University\nDepartment of Computer Science\nOther identifying text'
+                            'Wolkite\nUniversity\nOther identifying text'
                         }
                         disabled={saving}
                     />
