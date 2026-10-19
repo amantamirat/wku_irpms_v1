@@ -101,8 +101,10 @@ export class ConstraintService {
             // Budget and duration
             ["Budget", dto.budget],
             ["Duration", dto.duration],
-            ["Budget per phase", dto.budgetPerPhase],
-            ["Duration per phase", dto.durationPerPhase],
+            ["Phase budget", dto.phaseBudget],           // was budgetPerPhase
+            ["Phase duration", dto.phaseDuration],       // was durationPerPhase
+            ["Activity duration", dto.activityDuration], // added
+            ["Equipment cost", dto.equipmentCost],       // added
 
             // Research themes
             ["Themes", dto.themes],
@@ -110,9 +112,10 @@ export class ConstraintService {
             ["Focus areas", dto.focusAreas],
             ["Indicators", dto.indicators],
 
-            // Phase resources
-            ["Activities per phase", dto.activitiesPerPhase],
-            ["Equipments per phase", dto.equipmentsPerPhase],
+            // Project resources
+            ["Activities", dto.activities],              // was activitiesPerPhase
+            ["Equipments", dto.equipments],              // was equipmentsPerPhase
+            ["Components", dto.components],              // added
         ] as const;
 
         for (const [name, range] of ranges) {
@@ -128,4 +131,5 @@ export class ConstraintService {
             }
         }
     }
+
 }

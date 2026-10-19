@@ -19,17 +19,21 @@ export interface CreateConstraintDTO {
     expectedOutputs?: IRange;
     expectedOutputWords?: IRange;
 
+    // Project structure
     participants?: IRange;
     phases?: IRange;
-
     budget?: IRange;
     duration?: IRange;
 
-    budgetPerPhase?: IRange;
-    durationPerPhase?: IRange;
+    activities?: IRange;
+    equipments?: IRange;
+    components?: IRange;
 
-    activitiesPerPhase?: IRange;
-    equipmentsPerPhase?: IRange;
+    phaseBudget?: IRange;
+    phaseDuration?: IRange;
+
+    activityDuration?: IRange;
+    equipmentCost?: IRange;
 
     themes?: IRange;
     subThemes?: IRange;

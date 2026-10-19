@@ -19,17 +19,23 @@ export interface IConstraint extends Document {
     expectedOutputs?: IRange;
     expectedOutputWords?: IRange;
 
+    //project structure
     participants?: IRange;
     phases?: IRange;
-
     budget?: IRange;
     duration?: IRange;
 
-    budgetPerPhase?: IRange;
-    durationPerPhase?: IRange;
+    activities?: IRange;
+    equipments?: IRange;
+    components?: IRange;
 
-    activitiesPerPhase?: IRange;
-    equipmentsPerPhase?: IRange;
+    phaseBudget?: IRange;
+    phaseDuration?: IRange;
+
+    activityDuration?: IRange;
+    equipmentCost?: IRange;
+
+
 
     themes?: IRange;
     subThemes?: IRange;
@@ -85,6 +91,7 @@ const ConstraintSchema = new Schema<IConstraint>(
             type: RangeSchema,
         },
 
+        // Project structure
         participants: {
             type: RangeSchema,
         },
@@ -101,19 +108,31 @@ const ConstraintSchema = new Schema<IConstraint>(
             type: RangeSchema,
         },
 
-        budgetPerPhase: {
+        activities: {
             type: RangeSchema,
         },
 
-        durationPerPhase: {
+        equipments: {
             type: RangeSchema,
         },
 
-        activitiesPerPhase: {
+        components: {                 // ← added
             type: RangeSchema,
         },
 
-        equipmentsPerPhase: {
+        phaseBudget: {
+            type: RangeSchema,
+        },
+
+        phaseDuration: {
+            type: RangeSchema,
+        },
+
+        activityDuration: {           // ← added
+            type: RangeSchema,
+        },
+
+        equipmentCost: {              // ← added
             type: RangeSchema,
         },
 

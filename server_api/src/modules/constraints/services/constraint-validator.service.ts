@@ -625,14 +625,14 @@ export class ConstraintValidationService {
             // Budget per phase
             // ---------------------------------------------
             if (
-                constraint.budgetPerPhase &&
+                constraint.phaseBudget &&
                 !matchesRange(
-                    constraint.budgetPerPhase,
+                    constraint.phaseBudget,
                     phase.budget
                 )
             ) {
                 errors.push(
-                    `Phase "${phase.title}" budget must be between ${constraint.budgetPerPhase.min} and ${constraint.budgetPerPhase.max}. Current budget: ${phase.budget}.`
+                    `Phase "${phase.title}" budget must be between ${constraint.phaseBudget.min} and ${constraint.phaseBudget.max}. Current budget: ${phase.budget}.`
                 );
             }
 
@@ -640,14 +640,14 @@ export class ConstraintValidationService {
             // Duration per phase
             // ---------------------------------------------
             if (
-                constraint.durationPerPhase &&
+                constraint.phaseDuration &&
                 !matchesRange(
-                    constraint.durationPerPhase,
+                    constraint.phaseDuration,
                     phase.duration
                 )
             ) {
                 errors.push(
-                    `Phase "${phase.title}" duration must be between ${constraint.durationPerPhase.min} and ${constraint.durationPerPhase.max}. Current duration: ${phase.duration}.`
+                    `Phase "${phase.title}" duration must be between ${constraint.phaseDuration.min} and ${constraint.phaseDuration.max}. Current duration: ${phase.duration}.`
                 );
             }
 
@@ -655,7 +655,7 @@ export class ConstraintValidationService {
             // Activities per phase
             // ---------------------------------------------
             if (
-                constraint.activitiesPerPhase &&
+                constraint.activities &&
                 phase._id
             ) {
                 const activityCount =
@@ -665,12 +665,12 @@ export class ConstraintValidationService {
 
                 if (
                     !matchesRange(
-                        constraint.activitiesPerPhase,
+                        constraint.activities,
                         activityCount
                     )
                 ) {
                     errors.push(
-                        `Phase "${phase.title}" must contain between ${constraint.activitiesPerPhase.min} and ${constraint.activitiesPerPhase.max} activities. Current count: ${activityCount}.`
+                        `Phase "${phase.title}" must contain between ${constraint.activities.min} and ${constraint.activities.max} activities. Current count: ${activityCount}.`
                     );
                 }
             }
