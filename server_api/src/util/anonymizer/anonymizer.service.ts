@@ -28,18 +28,18 @@ export class AnonymizerService {
         applicationId: string
     ): Promise<IApplication> {
 
-        const application =
+        const applicationDoc =
             await this.applicationRepo.findById(
                 applicationId
             );
 
-        if (!application) {
+        if (!applicationDoc) {
             throw new AppError(
                 ERROR_CODES.APPLICATION_NOT_FOUND
             );
         }
 
-        if (application.anonymizationStatus === AnonymizationStatus.processing) {
+        if (applicationDoc.anonymizationStatus === AnonymizationStatus.processing) {
             throw new AppError(
                 ERROR_CODES.ANONYMIZATION_IN_PROGRESS
             );
@@ -56,7 +56,7 @@ export class AnonymizerService {
         try {
 
             const collabs = await this.collaboratorRepo.find({
-                project: String(application.project)
+                project: String(applicationDoc.project)
             }, { populate: true });
 
             const memberNames = collabs
@@ -67,10 +67,10 @@ export class AnonymizerService {
                 .map(member => member.name)
                 .filter(Boolean);
 
-            const absoluteInput = this.fileStorage.resolve(application.documentPath);
+            const absoluteInput = this.fileStorage.resolve(applicationDoc.documentPath);
             const result =
                 await this.anonymize(
-                    absoluteInput, memberNames
+                    absoluteInput, memberNames, applicationDoc.manualIdentifiers
                 );
             //console.log(result.outputPath);
 
@@ -112,11 +112,11 @@ export class AnonymizerService {
 
 
     private async anonymize(
-        filePath: string, memberNames: string[]
+        filePath: string, memberNames: string[], manualIdentifiers?: string[]
     ): Promise<AnonymizationResult> {
 
         const result =
-            await this.analyze(filePath, memberNames);
+            await this.analyze(filePath, memberNames, manualIdentifiers);
 
         const parsed =
             path.parse(filePath);
@@ -146,7 +146,7 @@ export class AnonymizerService {
         };
     }
 
-    private async analyze(filePath: string, memberNames: string[]): Promise<AnonymizationResult> {
+    private async analyze(filePath: string, memberNames: string[], manualIdentifiers?: string[]): Promise<AnonymizationResult> {
 
         const pdf = await this.pdfExtractor.extract(filePath);
 
@@ -181,6 +181,31 @@ export class AnonymizerService {
                     locations
                 });
             }
+        }
+
+        // Manually supplied identifiers
+        for (const identifier of new Set(
+            (manualIdentifiers ?? [])
+                .map(identifier => identifier.trim())
+                .filter(Boolean)
+        )) {
+            const locations = this.locationMatcher.findLocations(
+                identifier,
+                pdfItems,
+                AnonymizationEntityType.IDENTIFIER
+            );
+
+            if (locations.length === 0) {
+                continue;
+            }
+
+            entities.push({
+                type: AnonymizationEntityType.IDENTIFIER,
+                original: identifier,
+                replacement: "[IDENTIFIER REDACTED]",
+                confidence: 1,
+                locations
+            });
         }
 
         // emails

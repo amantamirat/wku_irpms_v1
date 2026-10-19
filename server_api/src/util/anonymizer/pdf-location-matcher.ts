@@ -39,15 +39,9 @@ export class PdfEntityLocationMatcher {
 
                     if (
                         type ===
-                        AnonymizationEntityType.MEMBER
+                        AnonymizationEntityType.MEMBER || type === AnonymizationEntityType.IDENTIFIER
                     ) {
                         return text === target;
-                        /*
-                        //was before adding spelling checker
-                        return this.findMemberLocations(
-                            detectedText,
-                            items
-                        );*/
                     }
 
                     return text.includes(target);

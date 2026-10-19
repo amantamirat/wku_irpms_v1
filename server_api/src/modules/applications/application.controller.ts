@@ -155,9 +155,12 @@ export class ApplicationController {
     anonymize = async (req: Request, res: Response) => {
         try {
             const { id } = req.params;
+            const { manualIdentifiers } = req.body;
 
-            const doc =
-                await this.service.anonymizeApplication(id);
+            const doc = await this.service.anonymizeApplication(
+                id,
+                manualIdentifiers
+            );
 
             successResponse(
                 res,

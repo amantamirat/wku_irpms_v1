@@ -25,6 +25,7 @@ export type Application = {
     documentPath?: string;
     file?: File;
     totalScore?: number | null;
+    manualIdentifiers?: string[];
     anonymizationStatus: AnonymizationStatus;
     anonymizedDocumentPath?: string;
     reviewerAssigner?: string | User | null;

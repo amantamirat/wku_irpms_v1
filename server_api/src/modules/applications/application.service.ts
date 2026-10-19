@@ -392,7 +392,10 @@ export class ApplicationService {
     /**
  * Anonymize application document and return updated application.
  */
-    async anonymizeApplication(id: string) {
+    async anonymizeApplication(id: string, manualIdentifiers?: string[],) {
+
+        await this.applicationRepo.update(id, { manualIdentifiers });
+
         await this.anonymizerService.anonymizeApplication(id);
 
         return await this.applicationRepo.findById(id, {

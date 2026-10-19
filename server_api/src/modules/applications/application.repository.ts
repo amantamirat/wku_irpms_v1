@@ -19,11 +19,12 @@ import { toObjectId } from "../../common/utils/mongoose.utils";
 
 
 export interface UpdateApplicationData {
-    status: ApplicationStatus;//ApplicationStatus.shortlisted | ApplicationStatus.accepted | ApplicationStatus.rejected;
+    status: ApplicationStatus;//ApplicationStatus.shortlisted | ApplicationStatus.accepted | ApplicationStatus.rejected;    
     totalScore: number | null;
     anonymizedDocumentPath: string;
     anonymizationStatus: AnonymizationStatus;
     reviewerAssigner: string | null;
+    manualIdentifiers?: string[];
 }
 
 
@@ -261,6 +262,14 @@ export class ApplicationRepository
         ) {
             updateData.anonymizationStatus =
                 dtoData.anonymizationStatus;
+        }
+
+        if (
+            dtoData.manualIdentifiers !==
+            undefined
+        ) {
+            updateData.manualIdentifiers =
+                dtoData.manualIdentifiers;
         }
 
         if (userId) {

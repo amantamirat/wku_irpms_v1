@@ -27,6 +27,7 @@ import {
 import ApplicationDetail from './ApplicationDetail';
 import { UserApi } from '../../users/api/user.api';
 import { ReviewerAssignerDialog } from './ReviewerAssignerDialog';
+import { ApplicationAnonymizeDialog } from './ApplicationAnonymizeDialog';
 
 interface ApplicationManagerProps {
     stage: Stage;
@@ -46,6 +47,13 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
     const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
     const [savingAssigner, setSavingAssigner] = useState(false);
     const [dialogError, setDialogError] = useState<string | null>(null);
+
+
+    const [anonymizeDialogVisible, setAnonymizeDialogVisible] = useState(false);
+    const [anonymizeApplication, setAnonymizeApplication] =
+        useState<Application | null>(null);
+    const [savingAnonymization, setSavingAnonymization] = useState(false);
+    const [anonymizeError, setAnonymizeError] = useState<string | null>(null);
 
     useEffect(() => {
         const fetchApplications = async () => {
@@ -117,6 +125,47 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
             setDialogError(error?.message || "Failed to update reviewer assigner. Please try again.");
         } finally {
             setSavingAssigner(false);
+        }
+    };
+
+
+    const handleOpenAnonymizeDialog = (application: Application) => {
+        setAnonymizeApplication(application);
+        setAnonymizeError(null);
+        setAnonymizeDialogVisible(true);
+    };
+
+    const handleAnonymize = async (manualIdentifiers: string[]) => {
+        if (!anonymizeApplication?._id) return;
+
+        setSavingAnonymization(true);
+        setAnonymizeError(null);
+
+        try {
+            const updated = await ApplicationApi.anonymize(
+                anonymizeApplication._id,
+                manualIdentifiers
+            );
+
+            setApplications(prev =>
+                prev.map(app =>
+                    app._id === anonymizeApplication._id
+                        ? {
+                            ...app,
+                            ...updated
+                        }
+                        : app
+                )
+            );
+
+            setAnonymizeDialogVisible(false);
+            setAnonymizeApplication(null);
+        } catch (error: any) {
+            setAnonymizeError(
+                error?.message || 'Failed to anonymize the application document.'
+            );
+        } finally {
+            setSavingAnonymization(false);
         }
     };
 
@@ -351,33 +400,10 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
             icon: 'pi pi-eye-slash',
             severity: 'warning',
             tooltip: 'Anonymize Document',
-            visible: () => hasPermission("application:anonymize"),
+            visible: () => hasPermission('application:anonymize'),
             disabled: (row: Application) =>
-                row.anonymizationStatus ===
-                AnonymizationStatus.processing,
-            onClick: (row: Application) => {
-                confirm.ask({
-                    operation: 'anonymize document',
-                    onConfirm: async () => {
-                        const updated =
-                            await ApplicationApi.anonymize(row._id!);
-
-                        setApplications(prev =>
-                            prev.map(app =>
-                                app._id === row._id
-                                    ? {
-                                        ...app,
-                                        anonymizationStatus:
-                                            updated.anonymizationStatus,
-                                        anonymizedDocumentPath:
-                                            updated.anonymizedDocumentPath
-                                    }
-                                    : app
-                            )
-                        );
-                    }
-                });
-            }
+                row.anonymizationStatus === AnonymizationStatus.processing,
+            onClick: (row: Application) => handleOpenAnonymizeDialog(row)
         }
     ];
 
@@ -421,6 +447,15 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
                 onSave={handleSaveAssigner}
                 saving={savingAssigner}
                 errorMessage={dialogError}
+            />
+
+            <ApplicationAnonymizeDialog
+                visible={anonymizeDialogVisible}
+                onHide={() => setAnonymizeDialogVisible(false)}
+                identifiers={anonymizeApplication?.manualIdentifiers ?? []}
+                onAnonymize={handleAnonymize}
+                saving={savingAnonymization}
+                errorMessage={anonymizeError}
             />
         </>
     );

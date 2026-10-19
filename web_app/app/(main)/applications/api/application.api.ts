@@ -12,7 +12,7 @@ export const ApplicationApi: EntityApi<
     Application,
     FilterApplicationOptions | undefined
 > & {
-    anonymize: (id: string) => Promise<Application>;
+    anonymize: (id: string, manualIdentifiers?: string[]) => Promise<Application>;
     //withdraw: (id: string) => Promise<boolean>;
     updateReviewerAssigner: (
         id: string,
@@ -111,10 +111,15 @@ export const ApplicationApi: EntityApi<
     // ---------------------------
     // Anonymize
     // ---------------------------
-    async anonymize(id: string): Promise<Application> {
+    async anonymize(
+        id: string,
+        manualIdentifiers?: string[]
+    ): Promise<Application> {
         return ApiClient.post(
             `${end_point}/${id}/anonymize`,
-            {}
+            manualIdentifiers?.length
+                ? { manualIdentifiers }
+                : {}
         );
     },
 

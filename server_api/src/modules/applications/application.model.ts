@@ -31,6 +31,13 @@ export interface IApplication extends Document {
     totalScore: number | null;
 
     anonymizationStatus: AnonymizationStatus;
+    /**
+     * Additional text supplied by the user that must be anonymized.
+     * Examples: institution names, unique phrases, or identifiers
+     * not detected automatically.
+     */
+    manualIdentifiers?: string[];
+
     status: ApplicationStatus;
     statusHistory: IStatusHistory<ApplicationStatus>[];
     /**
@@ -80,6 +87,11 @@ const ApplicationSchema = new Schema<IApplication>(
             type: Number,
             min: 0,
             default: null
+        },
+
+        manualIdentifiers: {
+            type: [String],
+            default: []
         },
 
         anonymizationStatus: {
