@@ -1,3 +1,4 @@
+
 import {
     AnonymizationEntityType
 } from "./anonymizer.types";
@@ -22,103 +23,207 @@ export class PdfEntityLocationMatcher {
         type: AnonymizationEntityType
     ): PdfTextLocation[] {
 
-        const target =
-            this.normalize(detectedText, type);
+        const target = this.normalize(detectedText, type);
 
         if (!target) {
             return [];
         }
 
-        // Normal matching
-        const locations =
-            items
-                .filter(item => {
+        // First, preserve the existing single-item matching behavior.
+        const locations = items
+            .filter(item => {
+                const text = this.normalize(item.text, type);
 
-                    const text =
-                        this.normalize(item.text, type);
+                if (
+                    type === AnonymizationEntityType.MEMBER ||
+                    type === AnonymizationEntityType.IDENTIFIER
+                ) {
+                    return text === target;
+                }
 
-                    if (
-                        type ===
-                        AnonymizationEntityType.MEMBER || type === AnonymizationEntityType.IDENTIFIER
-                    ) {
-                        return text === target;
-                    }
-
-                    return text.includes(target);
-                })
-                .map(item => ({
-                    page: item.page,
-                    x: item.x,
-                    y: item.y,
-                    width: item.width,
-                    height: item.height
-                }));
+                return text.includes(target);
+            })
+            .map(item => this.toLocation(item));
 
         if (locations.length > 0) {
             return locations;
         }
 
-        /*
-         * Phone numbers can be split by PDF.js:
-         *
-         * +251 | 911 | 234 | 567
-         *
-         * Match each piece separately.
-         */
+        // Names and identifiers can be split across PDF.js text items.
         if (
-            type ===
-            AnonymizationEntityType.PHONE
+            type === AnonymizationEntityType.MEMBER ||
+            type === AnonymizationEntityType.IDENTIFIER
         ) {
+            return this.findAcrossItems(target, items, type);
+        }
 
-            const parts =
-                detectedText
-                    .split(/[\s-]+/)
-                    .filter(Boolean);
-
-            const phoneLocations: PdfTextLocation[] = [];
-
-            for (const part of parts) {
-
-                const normalizedPart =
-                    this.normalize(
-                        part,
-                        AnonymizationEntityType.PHONE
-                    );
-
-                if (!normalizedPart) {
-                    continue;
-                }
-
-                for (const item of items) {
-
-                    const itemText =
-                        this.normalize(
-                            item.text,
-                            AnonymizationEntityType.PHONE
-                        );
-
-                    if (
-                        itemText ===
-                        normalizedPart
-                    ) {
-
-                        phoneLocations.push({
-                            page: item.page,
-                            x: item.x,
-                            y: item.y,
-                            width: item.width,
-                            height: item.height
-                        });
-                    }
-                }
-            }
-
-            return phoneLocations;
+        // Phone numbers can be split into separate PDF.js text items.
+        if (type === AnonymizationEntityType.PHONE) {
+            return this.findPhoneLocations(detectedText, items);
         }
 
         return [];
     }
 
+    private findAcrossItems(
+        target: string,
+        items: PdfTextItem[],
+        type: AnonymizationEntityType
+    ): PdfTextLocation[] {
+
+        const results: PdfTextLocation[] = [];
+
+        // Process each page independently.
+        const pages = new Map<number, PdfTextItem[]>();
+
+        for (const item of items) {
+            const pageItems = pages.get(item.page) ?? [];
+            pageItems.push(item);
+            pages.set(item.page, pageItems);
+        }
+
+        for (const [page, pageItems] of pages) {
+
+            // PDF.js generally returns text items in reading order.
+            // Sort spatially to make adjacent-item matching predictable.
+            const sorted = [...pageItems].sort((a, b) => {
+                const verticalDifference = a.y - b.y;
+
+                if (Math.abs(verticalDifference) > 3) {
+                    return verticalDifference;
+                }
+
+                return a.x - b.x;
+            });
+
+            for (let start = 0; start < sorted.length; start++) {
+
+                let combined = "";
+                let selected: PdfTextItem[] = [];
+
+                for (
+                    let end = start;
+                    end < sorted.length && end < start + 8;
+                    end++
+                ) {
+                    const current = sorted[end];
+
+                    if (end > start) {
+                        const previous = sorted[end - 1];
+
+                        // Do not combine text across different lines.
+                        if (
+                            Math.abs(current.y - previous.y) > 3
+                        ) {
+                            break;
+                        }
+
+                        // Avoid matching text across distant columns/areas.
+                        const gap =
+                            current.x -
+                            (previous.x + previous.width);
+
+                        if (gap > 30 || gap < -5) {
+                            break;
+                        }
+                    }
+
+                    selected.push(current);
+                    combined += current.text;
+
+                    const normalized = this.normalize(combined, type);
+
+                    if (normalized === target) {
+                        results.push(
+                            this.combineLocations(selected, page)
+                        );
+                        break;
+                    }
+
+                    // Stop when the combined text has passed the target.
+                    if (
+                        normalized.length >= target.length &&
+                        normalized !== target
+                    ) {
+                        break;
+                    }
+                }
+            }
+        }
+
+        return results;
+    }
+
+    private findPhoneLocations(
+        detectedText: string,
+        items: PdfTextItem[]
+    ): PdfTextLocation[] {
+
+        const parts = detectedText
+            .split(/[\s-]+/)
+            .filter(Boolean);
+
+        const locations: PdfTextLocation[] = [];
+
+        for (const part of parts) {
+            const normalizedPart = this.normalize(
+                part,
+                AnonymizationEntityType.PHONE
+            );
+
+            if (!normalizedPart) {
+                continue;
+            }
+
+            for (const item of items) {
+                const itemText = this.normalize(
+                    item.text,
+                    AnonymizationEntityType.PHONE
+                );
+
+                if (itemText === normalizedPart) {
+                    locations.push(this.toLocation(item));
+                }
+            }
+        }
+
+        return locations;
+    }
+
+    private combineLocations(
+        items: PdfTextItem[],
+        page: number
+    ): PdfTextLocation {
+
+        const x = Math.min(...items.map(item => item.x));
+        const y = Math.min(...items.map(item => item.y));
+
+        const right = Math.max(
+            ...items.map(item => item.x + item.width)
+        );
+
+        const bottom = Math.max(
+            ...items.map(item => item.y + item.height)
+        );
+
+        return {
+            page,
+            x,
+            y,
+            width: right - x,
+            height: bottom - y
+        };
+    }
+
+    private toLocation(item: PdfTextItem): PdfTextLocation {
+        return {
+            page: item.page,
+            x: item.x,
+            y: item.y,
+            width: item.width,
+            height: item.height
+        };
+    }
 
     private normalize(
         text: string,
@@ -128,8 +233,7 @@ export class PdfEntityLocationMatcher {
         switch (type) {
 
             case AnonymizationEntityType.PHONE:
-                return text
-                    .replace(/\D/g, "");
+                return text.replace(/\D/g, "");
 
             case AnonymizationEntityType.EMAIL:
             case AnonymizationEntityType.ORCID:
@@ -139,198 +243,14 @@ export class PdfEntityLocationMatcher {
                     .trim();
 
             case AnonymizationEntityType.MEMBER:
+            case AnonymizationEntityType.IDENTIFIER:
             default:
                 return text
                     .toLowerCase()
                     .replace(/["'“”‘’]/g, "")
                     .replace(/[.,]/g, "")
+                    .replace(/\s+/g, " ")
                     .trim();
         }
     }
-
-    ///Fuzzeir added for spelling error
-
-    /*
-
-    private findMemberLocations(
-        detectedText: string,
-        items: PdfTextItem[]
-    ): PdfTextLocation[] {
-
-        const targetTokens = this.normalize(
-            detectedText,
-            AnonymizationEntityType.MEMBER
-        )
-            .split(/\s+/)
-            .filter(Boolean);
-
-        if (!targetTokens.length) {
-            return [];
-        }
-
-        // Prefer exact matching before allowing spelling variations.
-        const exact = this.findNameSequence(
-            targetTokens,
-            items,
-            false
-        );
-
-        if (exact.length) {
-            return exact;
-        }
-
-        // Fall back to conservative fuzzy matching.
-        return this.findNameSequence(
-            targetTokens,
-            items,
-            true
-        );
-    }
-
-    private findNameSequence(
-        targetTokens: string[],
-        items: PdfTextItem[],
-        allowSpellingErrors: boolean
-    ): PdfTextLocation[] {
-
-        const locations: PdfTextLocation[] = [];
-
-        for (
-            let i = 0;
-            i <= items.length - targetTokens.length;
-            i++
-        ) {
-            const sequence = items.slice(
-                i,
-                i + targetTokens.length
-            );
-
-            // All words must be on the same page.
-            if (
-                sequence.some(
-                    item => item.page !== sequence[0].page
-                )
-            ) {
-                continue;
-            }
-
-            // Avoid combining words from separate lines.
-            const first = sequence[0];
-
-            const sameLine = sequence.every(
-                item =>
-                    Math.abs(item.y - first.y) <=
-                    Math.max(3, first.height * 0.6)
-            );
-
-            if (!sameLine) {
-                continue;
-            }
-
-            const matches = sequence.every(
-                (item, index) => {
-                    const pdfToken = this.normalize(
-                        item.text,
-                        AnonymizationEntityType.MEMBER
-                    );
-
-                    const targetToken = targetTokens[index];
-
-                    if (!allowSpellingErrors) {
-                        return pdfToken === targetToken;
-                    }
-
-                    return this.isSimilarName(
-                        targetToken,
-                        pdfToken
-                    );
-                }
-            );
-
-            if (!matches) {
-                continue;
-            }
-
-            locations.push(
-                ...sequence.map(item => ({
-                    page: item.page,
-                    x: item.x,
-                    y: item.y,
-                    width: item.width,
-                    height: item.height
-                }))
-            );
-
-            // Prevent matching the same sequence repeatedly.
-            i += targetTokens.length - 1;
-        }
-
-        return locations;
-    }
-
-    private isSimilarName(
-        expected: string,
-        actual: string
-    ): boolean {
-
-        if (expected === actual) {
-            return true;
-        }
-
-        // Short names are too ambiguous for fuzzy matching.
-        if (
-            expected.length < 5 ||
-            actual.length < 5
-        ) {
-            return false;
-        }
-
-        const distance = this.levenshteinDistance(
-            expected,
-            actual
-        );
-
-        // Conservative tolerance: one character difference.
-        // Allow two only for longer names.
-        const maxDistance =
-            Math.min(expected.length, actual.length) >= 10
-                ? 2
-                : 1;
-
-        return distance <= maxDistance;
-    }
-
-    private levenshteinDistance(
-        a: string,
-        b: string
-    ): number {
-
-        const previous = Array.from(
-            { length: b.length + 1 },
-            (_, i) => i
-        );
-
-        for (let i = 1; i <= a.length; i++) {
-            const current = [i];
-
-            for (let j = 1; j <= b.length; j++) {
-                const cost =
-                    a[i - 1] === b[j - 1] ? 0 : 1;
-
-                current[j] = Math.min(
-                    current[j - 1] + 1,     // insertion
-                    previous[j] + 1,        // deletion
-                    previous[j - 1] + cost  // substitution
-                );
-            }
-
-            for (let j = 0; j <= b.length; j++) {
-                previous[j] = current[j];
-            }
-        }
-
-        return previous[b.length];
-    }
-*/
-
 }
