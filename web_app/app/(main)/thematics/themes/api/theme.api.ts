@@ -1,17 +1,17 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { FilterThemesOptions, Theme } from "../models/theme.model";
+import { FilterThemes, Theme } from "../models/theme.model";
 import { sanitize } from "@/utils/utils";
 
 const end_point = '/thematics/themes';
 
-export const ThemeApi: EntityApi<Theme, FilterThemesOptions> = {
+export const ThemeApi: EntityApi<Theme, FilterThemes> = {
 
-    async getAll(options?: FilterThemesOptions) {
+    async getAll(options?: FilterThemes) {
         return ApiClient.get(end_point, options);
     },
 
-    async lookup(options?: FilterThemesOptions) {
+    async lookup(options?: FilterThemes) {
         return ApiClient.get(`${end_point}/lookup`, options);
     },
 

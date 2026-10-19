@@ -36,7 +36,7 @@ export type Publication = {
     publisher?: string;
     publicationId?: string;
     document?: File | null;
-    status: PublicationStatus;
+    status?: PublicationStatus;
     createdAt?: Date;
     updatedAt?: Date;
 };
@@ -56,6 +56,11 @@ export const validatePublication = (
         return { valid: false, message: 'Title is required.' };
     }
 
+    if (!publication.publishedDate) {
+        return { valid: false, message: 'Publication Date is required.' };
+    }
+
+
     if (!publication.type) {
         return { valid: false, message: 'Publication type is required.' };
     }
@@ -63,26 +68,12 @@ export const validatePublication = (
     return { valid: true };
 };
 
-/* =======================
-   Sanitization
-======================= */
-export const sanitizePublication = (
-    publication: Partial<Publication>
-): Partial<Publication> => {
-    return {
-        ...publication,
-        author:
-            typeof publication.author === 'object' && publication.author !== null
-                ? (publication.author as any)._id
-                : publication.author,
-    };
-};
+
 
 /* =======================
    Query Options
 ======================= */
-export interface GetPublicationsOptions {
+export interface FilterPublications {
     author?: string | User;
     type?: PublicationType;
-    populate?: boolean;
 }

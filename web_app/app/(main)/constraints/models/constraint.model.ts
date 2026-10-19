@@ -18,17 +18,21 @@ export interface Constraint {
   expectedOutputs?: IRange;
   expectedOutputWords?: IRange;
 
+  // Project structure
   participants?: IRange;
   phases?: IRange;
-
   budget?: IRange;
   duration?: IRange;
 
-  budgetPerPhase?: IRange;
-  durationPerPhase?: IRange;
+  activities?: IRange;
+  equipments?: IRange;
+  components?: IRange;
 
-  activitiesPerPhase?: IRange;
-  equipmentsPerPhase?: IRange;
+  phaseBudget?: IRange;
+  phaseDuration?: IRange;
+
+  activityDuration?: IRange;
+  equipmentCost?: IRange;
 
   themes?: IRange;
   subThemes?: IRange;
@@ -62,10 +66,13 @@ export const validateConstraint = (
     ["Phases", constraint.phases],
     ["Budget", constraint.budget],
     ["Duration", constraint.duration],
-    ["Budget per phase", constraint.budgetPerPhase],
-    ["Duration per phase", constraint.durationPerPhase],
-    ["Activities per phase", constraint.activitiesPerPhase],
-    ["Equipments per phase", constraint.equipmentsPerPhase],
+    ["Phase budget", constraint.phaseBudget],             // was budgetPerPhase
+    ["Phase duration", constraint.phaseDuration],         // was durationPerPhase
+    ["Activity duration", constraint.activityDuration],   // added
+    ["Equipment cost", constraint.equipmentCost],         // added
+    ["Activities", constraint.activities],                // was activitiesPerPhase
+    ["Equipments", constraint.equipments],                // was equipmentsPerPhase
+    ["Components", constraint.components],                // added
     ["Themes", constraint.themes],
     ["Sub themes", constraint.subThemes],
     ["Focus areas", constraint.focusAreas],

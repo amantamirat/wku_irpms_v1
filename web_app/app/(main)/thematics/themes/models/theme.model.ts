@@ -11,7 +11,7 @@ export type Theme = {
     updatedAt?: Date;
 }
 
-export interface FilterThemesOptions {
+export interface FilterThemes {
     parent?: string | Theme;
     thematicArea?: string | Thematic;
     level?: number;

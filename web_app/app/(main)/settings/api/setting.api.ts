@@ -2,8 +2,7 @@ import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
 import { Setting, sanitizeSetting } from "../models/setting.model";
 
-export const SettingApi: Pick<EntityApi<Setting>, 'getAll' | 'update'> = {
-    
+export const SettingApi: EntityApi<Setting> = {
     /**
      * GET /api/settings/
      * Fetches the full list of system configurations.
@@ -21,5 +20,11 @@ export const SettingApi: Pick<EntityApi<Setting>, 'getAll' | 'update'> = {
         const sanitized = sanitizeSetting(setting);
         // Using the key in the URL as per our backend route: router.patch("/:key", ...)
         return ApiClient.patch(`/settings/${setting.key}`, sanitized);
+    },
+    create: function (data: Partial<Setting>): Promise<Setting> {
+        throw new Error("Function not implemented.");
+    },
+    delete: function (item: Partial<Setting>): Promise<boolean> {
+        throw new Error("Function not implemented.");
     }
 };

@@ -10,7 +10,7 @@ import { useEffect, useRef, useState } from 'react';
 
 import { Calendar, validateCalendar } from '../models/calendar.model';
 import { CalendarApi } from '../api/calendar.api';
-import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { EntitySaveDialogProps } from "@/components/data-table/createEntityManager";
 
 const SaveCalendar = ({ visible, item, onComplete, onHide }: EntitySaveDialogProps<Calendar>) => {
 

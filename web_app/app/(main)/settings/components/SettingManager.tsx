@@ -1,9 +1,12 @@
+'use client';
 
-import { Setting, SettingKey } from "../models/setting.model";
-import SaveSetting from "./SaveSetting";
-import { SettingApi } from "../api/setting.api";
-import { Tag } from "primereact/tag";
-import { createEntityManager } from "@/components/data-table/createEntityManager";
+import { ItemManager } from '@/components/ItemManager';
+import { useToast } from '@/contexts/ToastContext';
+import { ColumnProps } from 'primereact/column';
+import { Tag } from 'primereact/tag';
+import { SettingApi } from '../api/setting.api';
+import { Setting } from '../models/setting.model';
+import SettingForm from './SettingForm';
 
 // Helper to format the value column based on the setting type
 const valueTemplate = (s: Setting) => {
@@ -16,30 +19,41 @@ const valueTemplate = (s: Setting) => {
     return <span>{String(s.value)}</span>;
 };
 
-export default createEntityManager<Setting>({
-    title: "System Configurations",
-    itemName: "Setting",
-    api: SettingApi as any, // Cast to any if EntityApi expects 'create'
-    columns: [
-        {
-            header: "Setting Key",
-            field: "key",
-            body: (s: Setting) => <b className="text-uppercase">{s.key.replace(/_/g, ' ')}</b>,
-            sortable: true
-        },
-        {
-            header: "Current Value",
-            body: valueTemplate
-        },
-        {
-            header: "Description",
-            field: "description",
-            style: { fontSize: '0.85rem', color: '#666' },
-            sortable: true
-        }
-    ],
-    disableEditRow: (row) => row.key === SettingKey.MAINTENANCE_MODE,
-    // createNew is omitted because settings are pre-seeded
-    SaveDialog: SaveSetting,
-    permissionPrefix: "setting"
-});
+const columns: ColumnProps[] = [
+    {
+        header: "Setting Key",
+        field: "key",
+        body: (s: Setting) => <b className="text-uppercase">{s.key.replace(/_/g, ' ')}</b>,
+        sortable: true
+    },
+    {
+        header: "Current Value",
+        body: valueTemplate
+    },
+    {
+        header: "Description",
+        field: "description",
+        style: { fontSize: '0.85rem', color: '#666' },
+        sortable: true
+    }
+];
+
+export default function SettingManager() {
+    const toast = useToast();
+
+    return (
+        <ItemManager<Setting>
+            api={SettingApi}
+            resource="setting"
+            itemName="Setting"
+            headerTitle="System Configurations"
+            columns={columns}
+            dialogWidth="450px"
+            // Settings are pre-seeded/updated only, so we disable creation if desired, or omit createNew
+            hideCreateAction
+            renderForm={(props) => <SettingForm {...props} />}
+            onError={(error) => toast.error(error)}
+            onSuccess={() => toast.success("Configuration updated successfully")}
+        />
+    );
+}

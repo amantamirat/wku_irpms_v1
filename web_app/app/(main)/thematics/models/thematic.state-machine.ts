@@ -1,17 +1,45 @@
+import { TransitionMap } from "@/hooks/useStateTransitionActions";
 export enum ThematicStatus {
     draft = 'draft',
     published = 'published',
     archived = 'archived'
 }
 
-export const THEMATIC_STATUS_ORDER: ThematicStatus[] = [
-    ThematicStatus.draft,
-    ThematicStatus.published,
-    ThematicStatus.archived
-];
 
-export const THEMATIC_TRANSITIONS: Record<ThematicStatus, ThematicStatus[]> = {
-    [ThematicStatus.draft]: [ThematicStatus.published],
-    [ThematicStatus.published]: [ThematicStatus.archived, ThematicStatus.draft],
-    [ThematicStatus.archived]: [ThematicStatus.published]
+
+
+export const THEMATIC_TRANSITIONS: TransitionMap = {
+    [ThematicStatus.draft]: [
+        {
+            next: ThematicStatus.published,
+            action: "Publish",
+            icon: "pi pi-check",
+            severity: "success"
+        }
+    ],
+
+    [ThematicStatus.published]: [
+        {
+            next: ThematicStatus.archived,
+            action: "Archive",
+            icon: "pi pi-lock",
+            severity: "danger"
+        },
+        {
+            next: ThematicStatus.draft,
+            action: "Set Draft",
+            icon: "pi pi-undo",
+            severity: "warning",
+            requireReason: true
+        }
+    ],
+
+    [ThematicStatus.archived]: [
+        {
+            next: ThematicStatus.published,
+            action: "Republish",
+            icon: "pi pi-refresh",
+            severity: "success"
+        }
+    ]
 };

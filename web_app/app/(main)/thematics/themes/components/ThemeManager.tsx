@@ -1,95 +1,126 @@
 'use client';
 
-import { Theme, FilterThemesOptions } from "../models/theme.model"; // Ensure ThemeLevel is imported
-import { ThemeApi } from "../api/theme.api";
-import SaveTheme from "./SaveTheme";
-import { Thematic, ThemeLevel } from "../../models/thematic.model";
-import { createEntityManager } from "@/components/data-table/createEntityManager";
+import { ColumnProps } from 'primereact/column';
+import { useMemo } from 'react';
+
+import {
+    ItemManager,
+    ItemManagerProps
+} from '@/components/ItemManager';
+
+import { useToast } from '@/contexts/ToastContext';
+import { Thematic, ThemeLevel } from '../../models/thematic.model';
+import { ThemeApi } from '../api/theme.api';
+import { FilterThemes, Theme } from '../models/theme.model';
+
+import ThemeForm from './ThemeForm';
 
 interface ThemeManagerProps {
     thematic?: Thematic;
-    level: number;
+    level?: number;
     parent?: Theme;
 }
 
-const ThemeManager = ({ thematic, level = 0, parent }: ThemeManagerProps) => {
+// Defined outside the component for a stable reference.
+const columns: ColumnProps[] = [
+    {
+        header: 'Title',
+        field: 'title',
+        sortable: true
+    },
+    {
+        header: 'Priority',
+        field: 'priority',
+        sortable: true,
+        style: { width: '120px' }
+    }
+];
 
-    const Manager = createEntityManager<Theme, FilterThemesOptions | undefined>({
-        title: "Manage Themes",
-        itemName: "Theme",
-        api: ThemeApi,
 
-        columns: [
-            { header: "Title", field: "title", sortable: true },
-            {
-                header: "Priority",
-                field: "priority",
-                sortable: true,
-                style: { width: '120px' }
-            },
-            /*
-            {
-                header: "Level",
-                field: "level",
-                sortable: true,
-                style: { width: '120px' }
-            }*/
-        ],
-        query: () => ({
-            thematicArea: thematic?._id ?? undefined,
-            level,
-            parent
-        }),
-        createNew: () => ({
-            thematicArea: thematic ?? "",
-            title: "",
-            parent
-        }),
-        SaveDialog: SaveTheme,
-        /*
-        importConfig: {
-            enable: !!thematic,
-            importId: thematic?._id ?? undefined
-        },*/
-        permissionPrefix: "theme",
-        expandable: {
-            template: (row) => {
-                const currentLevel = row.level ?? 0;
-                const thematicLevel = thematic?.level;
 
-                // 1. If it's Broad, never allow expansion
-                if (thematicLevel === ThemeLevel.broad) {
-                    return undefined;
+const ThemeManager = ({
+    thematic,
+    level,
+    parent
+}: ThemeManagerProps) => {
+    const toast = useToast();
+
+    const tableProps: ItemManagerProps<
+        Theme,
+        FilterThemes
+    >['tableProps'] = useMemo(
+        () => ({
+            expandable: {
+                template: (row) => {
+                    const currentLevel = row.level ?? 0;
+                    const thematicLevel = thematic?.level;
+
+                    // Broad: no further nesting.
+                    if (thematicLevel === ThemeLevel.broad) {
+                        return undefined;
+                    }
+
+                    // Division: maximum depth is level 1.
+                    if (
+                        thematicLevel === ThemeLevel.divison &&
+                        currentLevel >= 1
+                    ) {
+                        return undefined;
+                    }
+
+                    // Narrow: maximum depth is level 2.
+                    if (
+                        thematicLevel === ThemeLevel.narrow &&
+                        currentLevel >= 2
+                    ) {
+                        return undefined;
+                    }
+
+                    // Deep: maximum depth is level 3.
+                    if (
+                        thematicLevel === ThemeLevel.deep &&
+                        currentLevel >= 3
+                    ) {
+                        return undefined;
+                    }
+
+                    return (
+                        <ThemeManager
+                            thematic={thematic}
+                            parent={row}
+                        //level={level}
+                        />
+                    );
                 }
-
-                // 2. If it's Division, maximum depth is level 1
-                if (thematicLevel === ThemeLevel.divison && currentLevel >= 1) {
-                    return undefined;
-                }
-
-                // 3. If it's Narrow, maximum depth is level 2
-                if (thematicLevel === ThemeLevel.narrow && currentLevel >= 2) {
-                    return undefined;
-                }
-
-                // 4. If it's Deep, maximum depth is level 3
-                if (thematicLevel === ThemeLevel.deep && currentLevel >= 3) {
-                    return undefined;
-                }
-
-                // Render the next nested tier and pass the thematic context along
-                return (
-                    <ThemeManager
-                        thematic={thematic}
-                        parent={row}
-                        level={currentLevel + 1}
-                    />
-                );
             }
-        }
-    });
+        }),
+        [thematic]
+    );
 
-    return <Manager />;
+
+    const filter = useMemo<FilterThemes>(() => ({ level, parent, thematicArea: thematic }), [level, parent, thematic]);
+
+    return (
+        <ItemManager<Theme, FilterThemes>
+            api={ThemeApi}
+            resource="theme"
+            itemName="Theme"
+            headerTitle="Manage Themes"
+            columns={columns}
+            filter={filter}
+            tableProps={tableProps}
+            dialogWidth="500px"
+            renderForm={(props) => <ThemeForm {...props} />}
+            onError={(error) => toast.error(error)}
+            onSuccess={(operation) =>
+                toast.success(
+                    operation === 'create'
+                        ? 'Theme created successfully'
+                        : 'Theme updated successfully'
+                )
+            }
+        />
+    );
 };
 
 export default ThemeManager;

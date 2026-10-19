@@ -44,12 +44,12 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
         // Check Individual Phases (Removed description requirement)
         const phaseErrors = phases.map(p => {
             const budgetErr =
-                p.budget < (constraint?.budgetPerPhase?.min ?? 0) ||
-                p.budget > (constraint?.budgetPerPhase?.max ?? Infinity);
+                p.budget < (constraint?.phaseBudget?.min ?? 0) ||
+                p.budget > (constraint?.phaseBudget?.max ?? Infinity);
 
             const timeErr =
-                p.duration < (constraint?.durationPerPhase?.min ?? 0) ||
-                p.duration > (constraint?.durationPerPhase?.max ?? Infinity);
+                p.duration < (constraint?.phaseDuration?.min ?? 0) ||
+                p.duration > (constraint?.phaseDuration?.max ?? Infinity);
 
             const basicErr = !p.title?.trim(); // Only checking title now
             return !!(budgetErr || timeErr || basicErr);
@@ -159,13 +159,13 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
             {data.phases?.map((phase, index) => {
                 const isPhaseBudgetInvalid =
                     submitted &&
-                    ((constraint?.budgetPerPhase?.min !== undefined && phase.budget < constraint.budgetPerPhase.min) ||
-                        (constraint?.budgetPerPhase?.max !== undefined && phase.budget > constraint.budgetPerPhase.max));
+                    ((constraint?.phaseBudget?.min !== undefined && phase.budget < constraint.phaseBudget.min) ||
+                        (constraint?.phaseBudget?.max !== undefined && phase.budget > constraint.phaseBudget.max));
 
                 const isPhaseDurationInvalid =
                     submitted &&
-                    ((constraint?.durationPerPhase?.min !== undefined && phase.duration < constraint.durationPerPhase.min) ||
-                        (constraint?.durationPerPhase?.max !== undefined && phase.duration > constraint.durationPerPhase.max));
+                    ((constraint?.phaseDuration?.min !== undefined && phase.duration < constraint.phaseDuration.min) ||
+                        (constraint?.phaseDuration?.max !== undefined && phase.duration > constraint.phaseDuration.max));
 
                 return (
                     <div key={index} className="card border-1 border-200 surface-50 mb-4 p-3 relative shadow-1 border-round-lg">
@@ -209,9 +209,9 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
                                     locale="en-US"
                                     className={classNames({ 'p-invalid': isPhaseBudgetInvalid })}
                                 />
-                                {(constraint?.budgetPerPhase?.min !== undefined || constraint?.budgetPerPhase?.max !== undefined) && (
+                                {(constraint?.phaseBudget?.min !== undefined || constraint?.phaseBudget?.max !== undefined) && (
                                     <small className="text-500 block mt-1">
-                                        Limit: {etbCurrencyFormatter.format(constraint?.budgetPerPhase?.min ?? 0)} - {constraint?.budgetPerPhase?.max !== undefined ? etbCurrencyFormatter.format(constraint.budgetPerPhase.max) : '∞'}
+                                        Limit: {etbCurrencyFormatter.format(constraint?.phaseBudget?.min ?? 0)} - {constraint?.phaseBudget?.max !== undefined ? etbCurrencyFormatter.format(constraint.phaseBudget.max) : '∞'}
                                     </small>
                                 )}
                             </div>
@@ -226,9 +226,9 @@ export const PhasesStep = ({ data, constraint, onUpdate, onNext, onBack }: Phase
                                     min={0}
                                     className={classNames({ 'p-invalid': isPhaseDurationInvalid })}
                                 />
-                                {(constraint?.durationPerPhase?.min !== undefined || constraint?.durationPerPhase?.max !== undefined) && (
+                                {(constraint?.phaseDuration?.min !== undefined || constraint?.phaseDuration?.max !== undefined) && (
                                     <small className="text-500 block mt-1">
-                                        Limit: {constraint?.durationPerPhase?.min ?? 0} - {constraint?.durationPerPhase?.max ?? '∞'} days
+                                        Limit: {constraint?.phaseDuration?.min ?? 0} - {constraint?.phaseDuration?.max ?? '∞'} days
                                     </small>
                                 )}
                             </div>

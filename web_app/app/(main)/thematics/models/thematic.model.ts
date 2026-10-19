@@ -1,4 +1,3 @@
-import { Organization } from "../../organizations/models/organization.model";
 import { ThematicStatus } from "./thematic.state-machine";
 
 /*
@@ -15,8 +14,6 @@ export enum ThemeLevel {
     deep = 'Deep',//priority-area
     //crossCutting="Cross Cutting"
 }
-
-
 
 
 export type Thematic = {
@@ -39,7 +36,7 @@ export const themeLevelIndex: Record<ThemeLevel, number> = {
 };
 
 
-export interface GetThematicsOptions {
+export interface FilterThematics {
     //directorate?: string | Organization;
     status?: ThematicStatus;
 }
@@ -64,19 +61,3 @@ export const validateThematic = (thmc: Thematic): { valid: boolean; message?: st
 };
 
 
-export function sanitize(thmc: Partial<Thematic>): Partial<Thematic> {
-    return {
-        ...thmc,
-        /*
-        directorate:
-            typeof thmc.directorate === 'object' && thmc.directorate !== null
-                ? (thmc.directorate as Organization)._id
-                : thmc.directorate*/
-    };
-}
-
-export const createEmptyThematic = (): Thematic => ({
-    //directorate: "",
-    title: "",
-    level: ThemeLevel.broad
-})

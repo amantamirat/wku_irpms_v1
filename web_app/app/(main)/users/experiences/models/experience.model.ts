@@ -82,28 +82,7 @@ export const validateExperience = (
 };
 
 
-export const sanitizeExperience = (exp: Partial<Experience>): Experience => {
-    return {
-        ...exp,
-
-        user:
-            typeof exp.user === "object" && exp.user !== null
-                ? (exp.user as User)._id
-                : exp.user,
-
-        organization:
-            typeof exp.organization === "object" && exp.organization !== null
-                ? (exp.organization as Organization)._id
-                : exp.organization,
-
-        position:
-            typeof exp.position === "object" && exp.position !== null
-                ? (exp.position as any)._id
-                : exp.position,
-    } as Experience;
-};
-
-export interface GetExperiencesOptions {
+export interface FilterExperiences {
     user?: string | User;
 }
 

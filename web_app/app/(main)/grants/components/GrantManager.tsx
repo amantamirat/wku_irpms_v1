@@ -1,107 +1,109 @@
+
 'use client';
 
-import { createEntityManager } from "@/components/createEntityManager";
-import MyBadge from "@/templates/MyBadge";
-import { Organization } from "../../organizations/models/organization.model";
-import { Thematic } from "../../thematics/models/thematic.model";
-import { GrantApi } from "../api/grant.api";
-import { createEmptyGrant, FilterGrantOptions, Grant } from "../models/grant.model";
-import { GRANT_STATUS_ORDER, GRANT_TRANSITIONS } from "../models/grant.state-machine";
-import SaveGrant from "./SaveGrant";
-import { etbCurrencyFormatter } from "@/utils/utils";
+import { ColumnProps } from 'primereact/column';
 
+import { ItemManager } from '@/components/ItemManager';
+import { useToast } from '@/contexts/ToastContext';
+import MyBadge from '@/templates/MyBadge';
+import { etbCurrencyFormatter } from '@/utils/utils';
+
+import { Organization } from '../../organizations/models/organization.model';
+import { Thematic } from '../../thematics/models/thematic.model';
+
+import { GrantApi } from '../api/grant.api';
+import {
+    Grant
+} from '../models/grant.model';
+import { GRANT_TRANSITIONS } from '../models/grant.state-machine';
+
+import GrantForm from './GrantForm';
+import { MENU_ICONS } from '@/utils/menu-icons';
 
 interface GrantManagerProps {
     organization?: Organization;
     thematic?: Thematic;
 }
 
-const GrantManager = ({ organization, thematic }: GrantManagerProps) => {
+const columns: ColumnProps[] = [
+    {
+        header: 'Organization',
+        field: 'organization.name',
+        sortable: true,
+        body: (grant: Grant) =>
+            typeof grant.organization === 'object'
+                ? grant.organization?.name
+                : grant.organization
+    },
+    {
+        header: 'Title',
+        field: 'title',
+        sortable: true
+    },
+    {
+        header: 'Thematic',
+        field: 'thematic.title',
+        sortable: true,
+        body: (grant: Grant) =>
+            typeof grant.thematic === 'object'
+                ? grant.thematic?.title
+                : grant.thematic
+    },
+    {
+        header: 'Amount',
+        field: 'amount',
+        sortable: true,
+        body: (grant: Grant) =>
+            etbCurrencyFormatter.format(grant.amount ?? 0)
+    },
+    {
+        header: 'Used',
+        field: 'usedBudget',
+        sortable: true,
+        body: (grant: Grant) =>
+            etbCurrencyFormatter.format(grant.usedBudget ?? 0)
+    },
+    {
+        field: 'status',
+        header: 'Status',
+        sortable: true,
+        body: (grant: Grant) => (
+            <MyBadge
+                type="status"
+                value={grant.status ?? 'Unknown'}
+            />
+        )
+    }
+];
 
-    const Manager = createEntityManager<Grant, FilterGrantOptions | undefined>({
-        title: "Manage Grants",
-        itemName: "Grant",
-        api: GrantApi,
+const GrantManager = ({
+    organization,
+    thematic
+}: GrantManagerProps) => {
+    const toast = useToast();
 
-        columns: [
-            {
-                header: "Organization",
-                field: "organization.name",
-                body: (r: Grant) =>
-                    typeof r.organization === "object"
-                        ? r.organization?.name
-                        : r.organization,
-                sortable: true
-            },
-            { header: "Title", field: "title" },
-            ...(!thematic ? [{
-                header: "Thematic",
-                field: "thematic.name",
-                body: (g: Grant) =>
-                    typeof g.thematic === "object"
-                        ? g.thematic?.title
-                        : g.thematic,
-                sortable: true
-            }] : []),
-            {
-                header: "Amount",
-                field: "amount",
-                sortable: true,
-                body: (rowData: Grant) =>
-                    etbCurrencyFormatter.format(rowData.amount)
-            },
-            {
-                header: "Used",
-                field: "usedBudget",
-
-                body: (a: Grant) => {
-                    const used = a.usedBudget || 0;
-                    return (
-                        <span>
-                            {etbCurrencyFormatter.format(used)}
-                        </span>
-                    );
-                }
-            },
-            {
-                field: "status",
-                header: "Status",
-                sortable: true,
-                body: (g: Grant) =>
-                    <MyBadge type="status" value={g.status ?? 'Unknown'} />
-            },
-        ],
-
-        createNew: () =>
-            createEmptyGrant({
-                organization,
-                thematic
-            }),
-
-        SaveDialog: SaveGrant,
-        permissionPrefix: "grant",
-
-        query: () => ({
-            organization: organization ?? undefined,
-            thematic: thematic ?? undefined,
-            populate: true,
-        }),
-
-        /*
-        expandable: {
-            template: (grant) => (
-                <GrantDetail grant={grant} />
-            )
-        },*/
-
-        workflow: {
-            statusField: "status",
-            transitions: GRANT_TRANSITIONS,
-            statusOrder: GRANT_STATUS_ORDER
-        }
-    });
-
-    return <Manager />;
+    return (
+        <ItemManager<Grant>
+            api={GrantApi}
+            resource="grant"
+            itemName="Grant"
+            headerTitle="Manage Grants"
+            itemIcon={MENU_ICONS.grants}
+            columns={columns}
+            dialogWidth="800px"
+            statusField="status"
+            transitions={GRANT_TRANSITIONS}
+            renderForm={(props) => <GrantForm {...props} />}
+            onError={(error) => toast.error(error)}
+            onSuccess={(operation) =>
+                toast.success(
+                    operation === 'create'
+                        ? 'Grant created successfully'
+                        : 'Grant updated successfully'
+                )
+            }
+        />
+    );
 };
 
 export default GrantManager;

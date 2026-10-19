@@ -1,17 +1,38 @@
-export enum EvaluationStatus {
-    draft = 'draft',
-    published = 'published',
-    archived = 'archived'
-}
+import { TransitionMap } from "@/hooks/useStateTransitionActions";
+import { EvaluationStatus } from "./evaluation.model";
 
-export const EVAL_STATUS_ORDER: EvaluationStatus[] = [
-    EvaluationStatus.draft,
-    EvaluationStatus.published,
-    EvaluationStatus.archived
-];
+export const EVAL_TRANSITIONS: TransitionMap = {
+    [EvaluationStatus.draft]: [
+        {
+            next: EvaluationStatus.published,
+            action: "Publish",
+            icon: "pi pi-check",
+            severity: "success"
+        }
+    ],
 
-export const EVAL_TRANSITIONS: Record<EvaluationStatus, EvaluationStatus[]> = {
-    [EvaluationStatus.draft]: [EvaluationStatus.published],
-    [EvaluationStatus.published]: [EvaluationStatus.archived, EvaluationStatus.draft],
-    [EvaluationStatus.archived]: [EvaluationStatus.published]
+    [EvaluationStatus.published]: [
+        {
+            next: EvaluationStatus.archived,
+            action: "Archive",
+            icon: "pi pi-lock",
+            severity: "danger"
+        },
+        {
+            next: EvaluationStatus.draft,
+            action: "Set Draft",
+            icon: "pi pi-undo",
+            severity: "warning",
+            requireReason: true,
+        }
+    ],
+
+    [EvaluationStatus.archived]: [
+        {
+            next: EvaluationStatus.published,
+            action: "Republish",
+            icon: "pi pi-refresh",
+            severity: "success"
+        }
+    ]
 };

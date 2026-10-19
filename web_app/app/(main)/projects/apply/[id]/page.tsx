@@ -65,11 +65,8 @@ const ApplyPage = () => {
         initPage();
     }, [callId]);
 
-    const breadcrumbItems = [
-        { label: 'Projects', command: () => router.push('/projects') },
-        { label: 'Application', className: 'font-bold' }
-    ];
-    const home = { icon: 'pi pi-home', command: () => router.push('/') };
+    
+    
 
     if (loading) {
         return (
@@ -139,13 +136,6 @@ const ApplyPage = () => {
                     )}
                 </div>
             </Sidebar>
-
-            {/* Breadcrumb */}
-            <BreadCrumb
-                model={breadcrumbItems}
-                home={home}
-                className="bg-transparent border-none mb-3 p-0"
-            />
 
             {/* Header */}
             <div className="flex flex-column md:flex-row justify-content-between align-items-start md:align-items-center mb-4 card shadow-1 p-3 surface-card border-round-xl">

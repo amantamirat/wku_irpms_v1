@@ -1,6 +1,7 @@
 'use client';
 
-import React, { useCallback, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
+import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
 import { Column, ColumnProps, ColumnBodyOptions } from "primereact/column";
 import { DataTable, DataTableExpandedRows, DataTableFilterMeta, DataTableRowToggleEvent } from "primereact/datatable";
@@ -8,7 +9,7 @@ import { InputText } from "primereact/inputtext";
 import { MultiSelect, MultiSelectChangeEvent } from "primereact/multiselect";
 import { Toolbar } from "primereact/toolbar";
 import EmptyState from "@/components/EmptyState";
-import { ListSkeleton } from "../Skeletons";
+import { classNames } from "primereact/utils";
 
 /* -------------------------------------------------------------------------- */
 /*                                Action Types                                */
@@ -20,7 +21,6 @@ export interface ActionButton {
     severity?: "success" | "danger" | "warning" | "info" | "secondary" | "help";
     size?: "small" | "large";
     text?: boolean;
-    //rounded?: boolean;
     tooltip?: string;
 }
 
@@ -52,11 +52,14 @@ type SelectionChangeEvent<T> = {
 
 export interface ItemDataTableProps<T> {
     headerTitle?: string;
+    headerIcon?: string;
     items: T[];
-    dataKey?: string;
+    dataKey?: keyof T & string;
     columns: ColumnProps[];
     loading?: boolean;
     enableSearch?: boolean;
+    /** Override which fields the global search looks at. Defaults to every column with a `field`. */
+    globalFilterFields?: string[];
     showIndexColumn?: boolean;
     rowActions?: RowActionButton<T>[];
     toolBarActions?: ToolBarActionButton[];
@@ -75,20 +78,26 @@ export interface ItemDataTableProps<T> {
     defaultHiddenFields?: string[];
 }
 
+/* Stable references so omitted props don't create new arrays every render */
+const EMPTY_ARRAY: never[] = [];
+const SEARCH_DEBOUNCE_MS = 250;
+
 /* -------------------------------------------------------------------------- */
 /*                                ItemDataTable                               */
 /* -------------------------------------------------------------------------- */
 
 export function ItemDataTable<T extends Record<string, any>>({
     headerTitle,
-    items = [],
-    dataKey = "_id",
-    columns = [],
+    headerIcon,
+    items = EMPTY_ARRAY,
+    dataKey = "_id" as keyof T & string,
+    columns = EMPTY_ARRAY,
     loading = false,
     enableSearch = true,
+    globalFilterFields,
     showIndexColumn = true,
-    rowActions = [],
-    toolBarActions = [],
+    rowActions = EMPTY_ARRAY,
+    toolBarActions = EMPTY_ARRAY,
     expandable,
     paginator = true,
     rowsPerPage = 10,
@@ -98,66 +107,103 @@ export function ItemDataTable<T extends Record<string, any>>({
     selection = null,
     onSelectionChange,
     enableColumnToggle = false,
-    defaultHiddenFields = [],
+    defaultHiddenFields = EMPTY_ARRAY,
 }: ItemDataTableProps<T>) {
 
-    const [globalFilter, setGlobalFilter] = useState("");
+    /* ------------------------------ Search ------------------------------ */
+
+    // Single source of truth for filtering; the input has its own state so typing
+    // stays instant while the (potentially expensive) filter is debounced.
     const [filters, setFilters] = useState<DataTableFilterMeta>({
-        global: { value: null, matchMode: "contains" },
+        global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     });
-    // Memoized filter handler to prevent re-renders
-    const onGlobalFilterChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
-        const value = e.target.value;
-        setFilters((prev) => ({
-            ...prev,
-            global: { ...prev.global, value },
-        }));
-        setGlobalFilter(value);
-    }, []);
+    const [searchInput, setSearchInput] = useState("");
+
+    useEffect(() => {
+        const id = setTimeout(() => {
+            setFilters((prev) => ({
+                ...prev,
+                global: { value: searchInput || null, matchMode: FilterMatchMode.CONTAINS },
+            }));
+        }, SEARCH_DEBOUNCE_MS);
+        return () => clearTimeout(id);
+    }, [searchInput]);
+
+    const searchFields = useMemo(
+        () =>
+            globalFilterFields ??
+            (columns.map((col) => col.field).filter(Boolean) as string[]),
+        [globalFilterFields, columns]
+    );
+
+    /* ------------------------------ Expansion ----------------------------- */
 
     const [expandedRows, setExpandedRows] = useState<DataTableExpandedRows | any[]>([]);
 
     /* ------------------------- Column Visibility -------------------------- */
-    const [unselectedFields, setUnselectedFields] = useState<string[]>([]);
 
-    const visibleColumns = useMemo(() => {
-        return columns.filter((col) => {
-            const field = col.field as string;
-            if (!field) return true;
+    // Seeded from defaults and the only source of truth afterwards.
+    const [hiddenFields, setHiddenFields] = useState<string[]>(defaultHiddenFields);
 
-            if (enableColumnToggle && unselectedFields.length > 0) {
-                return !unselectedFields.includes(field);
-            }
+    const toggleableColumns = useMemo(() => columns.filter((c) => c.field), [columns]);
 
-            return !defaultHiddenFields.includes(field);
-        });
-    }, [columns, defaultHiddenFields, unselectedFields, enableColumnToggle]);
+    const visibleColumns = useMemo(
+        () => columns.filter((c) => !c.field || !hiddenFields.includes(c.field as string)),
+        [columns, hiddenFields]
+    );
+
+    const selectedToggleColumns = useMemo(
+        () => toggleableColumns.filter((c) => !hiddenFields.includes(c.field as string)),
+        [toggleableColumns, hiddenFields]
+    );
 
     const onColumnToggle = (event: MultiSelectChangeEvent) => {
-        const selectedCols = event.value as ColumnProps[];
-        const selectedFields = selectedCols.map((c) => c.field as string);
-
-        const newUnselected = columns
-            .map((c) => c.field as string)
-            .filter((field) => field && !selectedFields.includes(field));
-
-        setUnselectedFields(newUnselected);
+        const selected = new Set((event.value as ColumnProps[]).map((c) => c.field));
+        setHiddenFields(
+            toggleableColumns.filter((c) => !selected.has(c.field)).map((c) => c.field as string)
+        );
     };
+
+    /* ----------------------- Pending (in-flight) actions ----------------------- */
+
+    const [pending, setPending] = useState<ReadonlySet<string>>(new Set());
+
+    const runAction = useCallback(async (key: string, fn: () => void | Promise<void>) => {
+        let alreadyRunning = false;
+        setPending((prev) => {
+            if (prev.has(key)) {
+                alreadyRunning = true;
+                return prev;
+            }
+            return new Set(prev).add(key);
+        });
+        if (alreadyRunning) return;
+
+        try {
+            await fn();
+        } catch (err) {
+            console.error("ItemDataTable action failed:", err);
+        } finally {
+            setPending((prev) => {
+                const next = new Set(prev);
+                next.delete(key);
+                return next;
+            });
+        }
+    }, []);
 
     /* -------------------------- Top Actions --------------------------- */
 
-    const renderBarActions = () => {
-        if (!toolBarActions || toolBarActions.length === 0) return null;
+    const visibleToolBarActions = useMemo(
+        () => toolBarActions.filter((action) => !action.visible || action.visible()),
+        [toolBarActions]
+    );
 
-        const visibleActions = toolBarActions.filter(
-            (action) => !action.visible || action.visible()
-        );
-
-        if (visibleActions.length === 0) return null;
-
-        return (
-            <div className="flex gap-2 align-items-center">
-                {visibleActions.map((action, idx) => (
+    const renderBarActions = () => (
+        <div className="flex gap-2 align-items-center">
+            {visibleToolBarActions.map((action, idx) => {
+                const key = `toolbar:${idx}`;
+                return (
                     <Button
                         key={`${idx}-${action.label || action.icon}`}
                         icon={action.icon}
@@ -165,36 +211,34 @@ export function ItemDataTable<T extends Record<string, any>>({
                         severity={action.severity}
                         tooltip={action.tooltip}
                         tooltipOptions={{ position: "bottom" }}
-                        //rounded={action.rounded}
+                        aria-label={action.label ?? action.tooltip}
                         text={action.text}
                         size={action.size ?? "small"}
-                        disabled={action.disabled?.()}
-                        onClick={() => action.onClick()}
+                        loading={pending.has(key)}
+                        disabled={action.disabled?.() || pending.has(key)}
+                        onClick={() => runAction(key, action.onClick)}
                     />
-                ))}
-            </div>
-        );
-    };
-
-    const hasToolBarActions = toolBarActions && toolBarActions.length > 0;
+                );
+            })}
+        </div>
+    );
 
     /* ----------------------------- Header ----------------------------- */
 
-    const header = useMemo(() => {
-        const hasControls = enableSearch || (enableColumnToggle && columns.length > 0);
+    const hasControls = enableSearch || (enableColumnToggle && toggleableColumns.length > 0);
 
-        if (!headerTitle && !hasControls) {
-            return null;
-        }
-
-        return (
+    const header =
+        !headerTitle && !hasControls ? null : (
             <div className="flex flex-column gap-3 py-1">
                 <div className="flex flex-wrap align-items-center justify-content-between gap-3">
-                    {/* Left: Title */}
+                    {/* Left: Title & Icon */}
                     {headerTitle ? (
-                        <h5 className="m-0 text-900 font-bold text-xl tracking-tight">
-                            {headerTitle}
-                        </h5>
+                        <div className="flex align-items-center gap-2">
+                            {headerIcon && <i className={classNames(headerIcon, 'text-xl text-primary')} />}
+                            <h5 className="m-0 text-900 font-bold text-xl tracking-tight">
+                                {headerTitle}
+                            </h5>
+                        </div>
                     ) : (
                         <div />
                     )}
@@ -206,19 +250,21 @@ export function ItemDataTable<T extends Record<string, any>>({
                                 <i className="pi pi-search" />
                                 <InputText
                                     type="search"
-                                    value={globalFilter}
-                                    onChange={onGlobalFilterChange}
+                                    value={searchInput}
+                                    onChange={(e) => setSearchInput(e.target.value)}
                                     placeholder="Search..."
+                                    aria-label="Search table"
                                     className="p-inputtext-sm w-12rem md:w-16rem"
                                 />
                             </span>
                         )}
 
-                        {enableColumnToggle && columns.length > 0 && (
+                        {enableColumnToggle && toggleableColumns.length > 0 && (
                             <MultiSelect
-                                value={visibleColumns}
-                                options={columns}
+                                value={selectedToggleColumns}
+                                options={toggleableColumns}
                                 optionLabel="header"
+                                dataKey="field"
                                 onChange={onColumnToggle}
                                 placeholder="Columns"
                                 className="p-multiselect-sm w-10rem"
@@ -230,14 +276,6 @@ export function ItemDataTable<T extends Record<string, any>>({
                 </div>
             </div>
         );
-    }, [
-        enableSearch,
-        enableColumnToggle,
-        headerTitle,
-        filters,
-        visibleColumns,
-        columns
-    ]);
 
     /* -------------------------- Row Actions --------------------------- */
 
@@ -249,27 +287,34 @@ export function ItemDataTable<T extends Record<string, any>>({
 
             if (visibleActions.length === 0) return null;
 
+            const rowId = String(row[dataKey]);
+
             return (
                 <div className="flex gap-1 justify-content-end">
-                    {visibleActions.map((action, idx) => (
-                        <Button
-                            key={`${idx}-${action.icon}`}
-                            icon={action.icon}
-                            label={action.label}
-                            severity={action.severity}
-                            tooltip={action.tooltip}
-                            tooltipOptions={{ position: "bottom" }}
-                            //rounded={action.rounded ?? true}
-                            text={action.text ?? true}
-                            size={action.size ?? "small"}
-                            disabled={action.disabled?.(row)}
-                            onClick={() => action.onClick(row)}
-                        />
-                    ))}
+                    {visibleActions.map((action, idx) => {
+                        const key = `row:${rowId}:${action.icon}:${idx}`;
+                        const isPending = pending.has(key);
+                        return (
+                            <Button
+                                key={key}
+                                icon={action.icon}
+                                label={action.label}
+                                severity={action.severity}
+                                tooltip={action.tooltip}
+                                tooltipOptions={{ position: "bottom" }}
+                                aria-label={action.label ?? action.tooltip}
+                                text={action.text ?? true}
+                                size={action.size ?? "small"}
+                                loading={isPending}
+                                disabled={action.disabled?.(row) || isPending}
+                                onClick={() => runAction(key, () => action.onClick(row))}
+                            />
+                        );
+                    })}
                 </div>
             );
         },
-        [rowActions]
+        [rowActions, dataKey, pending, runAction]
     );
 
     const dtSelectionMode = selectionMode === "checkbox" ? undefined : selectionMode;
@@ -278,92 +323,86 @@ export function ItemDataTable<T extends Record<string, any>>({
 
     return (
         <div className="card border-none">
-            {hasToolBarActions && (
+            {visibleToolBarActions.length > 0 && (
                 <Toolbar className="mb-2" end={renderBarActions()} />
             )}
 
-            {loading ? (
-                <ListSkeleton rows={rowsPerPage} />
-            ) : (
-                <DataTable
-                    value={items}
-                    dataKey={dataKey}
-                    paginator={paginator && items.length > 0}
-                    rows={rowsPerPage}
-                    rowsPerPageOptions={[5, 10, 25, 50]}
-                    header={header}
-                    filters={filters}
-                    globalFilter={globalFilter}
-                    globalFilterFields={
-                        columns.map((col) => col.field).filter(Boolean) as string[]
-                    }
-                    selection={selection as any}
-                    onSelectionChange={(event: SelectionChangeEvent<T>) =>
-                        onSelectionChange?.(event.value)
-                    }
-                    selectionMode={dtSelectionMode as any}
-                    expandedRows={expandedRows}
-                    onRowToggle={(event: DataTableRowToggleEvent) =>
-                        setExpandedRows(event.data)
-                    }
-                    rowExpansionTemplate={(data: T) =>
-                        expandable?.allow?.(data) !== false
-                            ? expandable?.template(data)
-                            : null
-                    }
-                    emptyMessage={
-                        <EmptyState
-                            title={emptyTitle}
-                            description={emptyDescription}
-                        />
-                    }
-                    className="p-datatable-sm"
-                    stripedRows
-                >
-                    {selectionMode === "checkbox" && (
-                        <Column
-                            selectionMode="multiple"
-                            headerStyle={{ width: "3rem" }}
-                            exportable={false}
-                        />
-                    )}
+            <DataTable
+                value={items}
+                dataKey={dataKey}
+                loading={loading}
+                paginator={paginator && items.length > 0}
+                rows={rowsPerPage}
+                rowsPerPageOptions={[5, 10, 25, 50]}
+                header={header}
+                filters={filters}
+                globalFilterFields={searchFields}
+                selection={selection as any}
+                onSelectionChange={(event: SelectionChangeEvent<T>) =>
+                    onSelectionChange?.(event.value)
+                }
+                selectionMode={dtSelectionMode as any}
+                metaKeySelection={false}
+                expandedRows={expandedRows}
+                onRowToggle={(event: DataTableRowToggleEvent) =>
+                    setExpandedRows(event.data)
+                }
+                rowExpansionTemplate={(data: T) => expandable?.template(data)}
+                emptyMessage={
+                    loading ? (
+                        " "
+                    ) : (
+                        <EmptyState title={emptyTitle} description={emptyDescription} />
+                    )
+                }
+                className="p-datatable-sm"
+                stripedRows
+            >
+                {selectionMode === "checkbox" && (
+                    <Column
+                        selectionMode="multiple"
+                        headerStyle={{ width: "3rem" }}
+                        exportable={false}
+                    />
+                )}
 
-                    {expandable && (
-                        <Column
-                            expander
-                            style={{ width: "3rem" }}
-                        />
-                    )}
+                {expandable && (
+                    <Column
+                        expander={
+                            expandable.allow
+                                ? (row: T) => expandable.allow!(row)
+                                : true
+                        }
+                        style={{ width: "3rem" }}
+                    />
+                )}
 
-                    {showIndexColumn && (
-                        <Column
-                            header="#"
-                            body={(_: T, options: ColumnBodyOptions) =>
-                                options.rowIndex + 1
-                            }
-                            style={{ width: "3.5rem" }}
-                        />
-                    )}
+                {showIndexColumn && (
+                    <Column
+                        header="#"
+                        body={(_: T, options: ColumnBodyOptions) => options.rowIndex + 1}
+                        style={{ width: "3.5rem" }}
+                    />
+                )}
 
-                    {visibleColumns.map((col, idx) => (
-                        <Column
-                            key={(col.field as string) || idx}
-                            {...col}
-                            sortable={col.sortable ?? true}
-                        />
-                    ))}
+                {visibleColumns.map((col, idx) => (
+                    <Column
+                        key={(col.field as string) || idx}
+                        {...col}
+                        sortable={col.sortable ?? !!col.field}
+                    />
+                ))}
 
-                    {rowActions.length > 0 && (
-                        <Column
-                            body={actionBody}
-                            header="Actions"
-                            exportable={false}
-                            style={{ minWidth: "6rem" }}
-                            alignHeader="center"
-                        />
-                    )}
-                </DataTable>
-            )}
+                {rowActions.length > 0 && (
+                    <Column
+                        body={actionBody}
+                        header="Actions"
+                        exportable={false}
+                        style={{ minWidth: "6rem" }}
+                        alignHeader="right"
+                    />
+                )}
+            </DataTable>
         </div>
     );
 }

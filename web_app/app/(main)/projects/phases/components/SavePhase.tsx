@@ -9,7 +9,7 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { PhaseApi } from "../api/phase.api";
 import { Phase, validatePhase } from "../models/phase.model";
-import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { EntitySaveDialogProps } from "@/components/data-table/createEntityManager";
 
 const SavePhase = ({ visible, item: phase, onHide, onComplete }: EntitySaveDialogProps<Phase>) => {
     const [localPhase, setLocalPhase] = useState<Phase>({ ...phase });

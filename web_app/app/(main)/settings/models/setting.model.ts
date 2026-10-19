@@ -97,7 +97,6 @@ export const FILE_TYPE_OPTIONS = [
     { name: 'XML File (.xml)', value: 'text/xml' },
 
     { name: 'JSON File (.json)', value: 'application/json' },
-
-    // Handlebars template
+    
     { name: 'Handlebars Template (.hbs)', value: 'text/x-handlebars-template' },
 ];

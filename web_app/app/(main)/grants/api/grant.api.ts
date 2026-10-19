@@ -1,7 +1,8 @@
 import { EntityApi } from "@/api/EntityApi"
-import { FilterGrantOptions, Grant, sanitize } from "../models/grant.model"
+import { FilterGrantOptions, Grant } from "../models/grant.model"
 import { ApiClient } from "@/api/ApiClient"
 import { StateTransition } from "@/api/EntityApi";
+import { sanitize } from "@/utils/utils";
 
 const end_point = "/grants";
 export const GrantApi: EntityApi<Grant, FilterGrantOptions | undefined> = {

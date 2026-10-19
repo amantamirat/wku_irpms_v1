@@ -10,6 +10,7 @@ import { MenuProvider } from './context/menucontext';
 import { useContext, useMemo } from 'react';
 import { filterMenuByPermission } from '@/utils/menu';
 import { LayoutContext } from './context/layoutcontext';
+import { MENU_ICONS } from '@/utils/menu-icons';
 
 const AppMenu = () => {
     const { layoutConfig } = useContext(LayoutContext);
@@ -21,7 +22,7 @@ const AppMenu = () => {
             items: [
                 {
                     label: 'Dashboard',
-                    icon: 'pi pi-fw pi-home',
+                    icon: MENU_ICONS.dashboard,
                     to: '/'
                 }
             ]
@@ -31,32 +32,32 @@ const AppMenu = () => {
             items: [
                 {
                     label: 'Projects',
-                    icon: 'pi pi-folder-open',
+                    icon: MENU_ICONS.projects,
                     to: '/projects',
                     permission: 'project:read'
                 },
                 {
                     label: 'Applications',
-                    icon: 'pi pi-list',
+                    icon: MENU_ICONS.applications,
                     to: '/applications/stage',
                     permission: 'application:read',
                 },
                 {
                     label: 'Verifications',
-                    icon: 'pi pi-fw pi-check-square',
+                    icon: MENU_ICONS.verifications,
                     to: '/verifications',
                     permission: 'verification:read'
                 },
                 {
                     label: 'Collaborators',
-                    icon: 'pi pi-users',
+                    icon: MENU_ICONS.collaborators,
                     to: '/projects/collaborators',
                     permission: 'collaborator:read',
                 },
 
                 {
                     label: 'Reviewers',
-                    icon: 'pi pi-user-edit',
+                    icon: MENU_ICONS.reviewers,
                     to: '/reviewers',
                     permission: 'reviewer:read',
                 },
@@ -67,13 +68,13 @@ const AppMenu = () => {
             items: [
                 {
                     label: 'Calls',
-                    icon: 'pi pi-fw pi-megaphone',
+                    icon: MENU_ICONS.calls,
                     to: '/calls',
                     permission: 'call:read'
                 },
                 {
                     label: 'Grants',
-                    icon: 'pi pi-bitcoin',
+                    icon: MENU_ICONS.grants,
                     to: '/grants',
                     permission: 'grant:read'
                 }
@@ -84,25 +85,25 @@ const AppMenu = () => {
             items: [
                 {
                     label: 'Evaluations',
-                    icon: 'pi pi-chart-bar',
+                    icon: MENU_ICONS.evaluations,
                     to: '/evaluations',
                     permission: 'evaluation:read'
                 },
                 {
                     label: 'Thematics',
-                    icon: 'pi pi-fw pi-tags',
+                    icon: MENU_ICONS.thematics,
                     to: '/thematics',
                     permission: 'thematic:read'
                 },
                 {
                     label: 'Templates',
-                    icon: 'pi pi-file-pdf',
+                    icon: MENU_ICONS.templates,
                     to: '/templates',
                     permission: 'template:read'
                 },
                 {
-                    label: 'Document Templates',
-                    icon: 'pi pi-file-edit',
+                    label: 'Agreements & Certificates',
+                    icon: MENU_ICONS.documentTemplates,
                     to: '/documentTemplates',
                     permission: 'documentTemplate:read'
                 },
@@ -115,13 +116,13 @@ const AppMenu = () => {
             items: [
                 {
                     label: 'Constraints',
-                    icon: 'pi pi-fw pi-sliders-h',
+                    icon: MENU_ICONS.constraints,
                     to: '/constraints',
                     permission: 'constraint:read'
                 },
                 {
                     label: 'Compositions',
-                    icon: 'pi pi-fw pi-user-edit',
+                    icon: MENU_ICONS.compositions,
                     to: '/compositions',
                     permission: 'composition:read'
                 }
@@ -215,13 +216,13 @@ const AppMenu = () => {
                 },
                 {
                     label: 'Positions',
-                    icon: 'pi pi-fw pi-flag',
+                    icon: MENU_ICONS.positions,
                     to: '/positions',
                     permission: PERMISSIONS.POSITION.READ
                 },
                 {
                     label: 'Settings',
-                    icon: PrimeIcons.COG,
+                    icon: MENU_ICONS.settings,
                     to: '/settings',
                     permission: 'setting:read'
                 }
@@ -234,7 +235,7 @@ const AppMenu = () => {
             items: [
                 {
                     label: 'Overview',
-                    icon: 'pi pi-circle-on',
+                    icon: MENU_ICONS.reports,
                     to: '/reports/',
                     permission: PERMISSIONS.REPORT.OVERVIEW
                 }
@@ -263,7 +264,7 @@ const AppMenu = () => {
             items: [
                 {
                     label: 'Documentation',
-                    icon: 'pi pi-fw pi-question',
+                    icon: MENU_ICONS.documentation,
                     to: '/documentation'
                 }
             ]

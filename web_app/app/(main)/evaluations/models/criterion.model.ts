@@ -7,7 +7,6 @@ export enum FormType {
     NUMBER = 'Number'          // Numeric input (Raw score)
 }
 
-// Updated to include all the types we discussed
 export const formTypeOptions = [
     { label: 'Open Ended (No Score)', value: FormType.OPEN },
     { label: 'Single Choice', value: FormType.SINGLE_CHOICE },
@@ -24,12 +23,12 @@ export type CriterionOption = {
 export type Criterion = {
     _id?: string;
     evaluation: string | Evaluation;
-    title: string;
-    weight: number;
-    formType: FormType;
-    options: CriterionOption[]; // ✅ Added embedded options
-    order?: number;             // ✅ Added for UI sequencing
-    isRequired?: boolean;       // ✅ Added for form validation
+    title?: string;
+    weight?: number;
+    formType?: FormType;
+    options?: CriterionOption[];
+    order?: number;             
+    isRequired?: boolean;       
     createdAt?: Date;
     updatedAt?: Date;
 };
@@ -47,9 +46,12 @@ export const validateCriterion = (
     if (!criterion.title || criterion.title.trim().length === 0) {
         return { valid: false, message: "Title is required." };
     }
+    
+    // Explicitly check for undefined and negative values (allows 0 for Open form types)
     if (criterion.weight === undefined || criterion.weight < 0) {
         return { valid: false, message: "Weight must be 0 or greater." };
     }
+    
     if (!criterion.formType) {
         return { valid: false, message: "Form type is required." };
     }
@@ -60,8 +62,9 @@ export const validateCriterion = (
             return { valid: false, message: "Choice-based criteria must have at least two options." };
         }
 
-        // Ensure no option exceeds the total weight of the criterion
-        const invalidOption = criterion.options.find(opt => opt.score > criterion.weight);
+        // Use `?? 0` to safely handle TypeScript's undefined check for `weight`
+        const maxWeight = criterion.weight ?? 0;
+        const invalidOption = criterion.options.find(opt => opt.score > maxWeight);
         if (invalidOption) {
             return { valid: false, message: `Option "${invalidOption.title}" score cannot exceed total weight.` };
         }
@@ -69,15 +72,13 @@ export const validateCriterion = (
 
     return { valid: true };
 };
-
-
-
+/*
 export const createEmptyCriterion = (criterion?: Partial<Criterion>): Criterion => ({
     evaluation: criterion?.evaluation ?? "",
     title: criterion?.title ?? "",
     weight: criterion?.weight ?? 0,
     formType: criterion?.formType ?? FormType.NUMBER,
-    options: criterion?.options ?? [], // ✅ Initialize as empty array
+    options: criterion?.options ?? [],
     order: criterion?.order ?? 0,
     isRequired: criterion?.isRequired ?? true,
-});
+});*/

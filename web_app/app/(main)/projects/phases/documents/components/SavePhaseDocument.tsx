@@ -10,7 +10,7 @@ import { ProgressBar } from 'primereact/progressbar';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 
-import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { EntitySaveDialogProps } from "@/components/data-table/createEntityManager";
 import { PhaseDocApi } from '../api/phase.doc.api';
 import { PhaseDocument, PhaseDocumentType, PhaseDocumentTypeLabels, validate } from '../model/phase.doc';
 

@@ -38,17 +38,7 @@ export const validateGrant = (grant: Grant): { valid: boolean; message?: string 
     return { valid: true };
 };
 
-export function sanitize(grant: Partial<Grant>): Partial<Grant> {
-    return {
-        ...grant,
-        organization:
-            typeof grant.organization === 'object' && grant.organization !== null
-                ? (grant.organization as Organization)._id
-                : grant.organization,
-        thematic: typeof grant.thematic === "object" ? (grant.thematic as Thematic)._id : grant.thematic,
 
-    };
-}
 
 export interface GetGrantsOptions {
     organization?: string | Organization;

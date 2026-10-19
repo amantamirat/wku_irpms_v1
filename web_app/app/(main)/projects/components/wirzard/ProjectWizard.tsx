@@ -6,7 +6,7 @@ import { Steps } from "primereact/steps";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 
-import { EntitySaveDialogProps } from "@/components/createEntityManager";
+import { EntitySaveDialogProps } from "@/components/data-table/createEntityManager";
 import { useAuth } from "@/contexts/auth-context";
 import { ProjectApi } from "../../api/project.api";
 import { Project, validateProject } from "../../models/project.model";

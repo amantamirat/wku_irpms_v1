@@ -1,78 +1,115 @@
 'use client';
 
-import React from 'react';
-import { createEntityManager } from "@/components/createEntityManager";
-import { EnrollmentApi } from "../api/enrollment.api";
-import { GetEnrollmentsOptions, Enrollment } from "../models/enrollment.model";
-import { User } from "../../models/user.model";
-import SaveEnrollmentDialog from "./SaveEnrollment";
-import { Organization } from "@/app/(main)/organizations/models/organization.model";
+import { ColumnProps } from 'primereact/column';
+
+import { ItemManager } from '@/components/ItemManager';
+import { useToast } from '@/contexts/ToastContext';
+import { User } from '../../models/user.model';
+import { EnrollmentApi } from '../api/enrollment.api';
+import {
+    Enrollment,
+    FilterEnrollments
+} from '../models/enrollment.model';
+import EnrollmentForm from './EnrollmentForm';
+import { Organization } from '@/app/(main)/organizations/models/organization.model';
+import { useMemo } from 'react';
 
 interface EnrollmentManagerProps {
     student?: User;
 }
 
-const EnrollmentManager = ({ student: student }: EnrollmentManagerProps) => {
-    /**
-     * Create the manager instance.
-     * We pass User as the Context type to handle the optional applicant filtering.
-     */
-    const Manager = createEntityManager<Enrollment, GetEnrollmentsOptions | undefined>({
-        title: student ? `Enrollments for ${student.name}` : "Manage All Enrollments",
-        itemName: "Enrollments",
-        api: EnrollmentApi,
+const columns: ColumnProps[] = [
+    {
+        header: 'Calendar',
+        field: 'calendar.year',
+        sortable: true,
+        body: (enrollment: Enrollment) =>
+            typeof enrollment.calendar === 'object'
+                ? enrollment.calendar?.year
+                : enrollment.calendar
+    },
+    {
+        header: 'Program',
+        field: 'program.name',
+        sortable: true,
+        body: (enrollment: Enrollment) =>
+            typeof enrollment.program === 'object'
+                ? enrollment.program?.name
+                : enrollment.program
+    },
+    {
+        header: 'Academic Level',
+        field: 'program.academicLevel',
+        sortable: true,
+        body: (enrollment: Enrollment) => {
+            const program =
+                typeof enrollment.program === 'object'
+                    ? (enrollment.program as Organization)
+                    : null;
 
-        /** Columns configuration */
-        columns: [
-            {
-                header: "Calendar",
-                field: "calendar.year",
-                sortable: true
-            },
-            {
-                header: "Program",
-                field: "program.name",
-                sortable: true
-            },
-            {
-                header: "Ac. Level",
-                field: "program.academicLevel",
-                sortable: true,
-                body: (s: Enrollment) => {
-                    const level = (s.program as Organization)?.academicLevel;
-                    return level ? (
-                        <span className={`academic-badge level-${level.toLowerCase()}`}>
-                            {level}
-                        </span>
-                    ) : null;
-                }
-            },
-            // Only show the Student name column if we aren't already filtered by applicant
-            ...(!student ? [{
-                header: "Student",
-                field: "student.name",
-                sortable: true
-            }] : []),
-        ],
+            const level = program?.academicLevel;
 
-        /** Factory for new records */
-        createNew: () => ({
-            student: student, // Pre-link the student to the applicant context
-            calendar: undefined,
-            program: undefined
-        }),
+            return level ? (
+                <span
+                    className={`academic-badge level-${level.toLowerCase()}`}
+                >
+                    {level}
+                </span>
+            ) : null;
+        }
+    },
+    {
+        header: 'Student',
+        field: 'student.name',
+        sortable: true,
+        body: (enrollment: Enrollment) =>
+            typeof enrollment.student === 'object'
+                ? enrollment.student?.name
+                : enrollment.student
+    }
+];
 
-        query: () => ({
-            student: student,
-        }),
 
-        /** Dialog and Permissions */
-        SaveDialog: SaveEnrollmentDialog,
-        permissionPrefix: "enrollment",
-    });
 
-    // We pass the applicant prop as the 'context' to the Manager
-    return <Manager />;
+const EnrollmentManager = ({ student }: EnrollmentManagerProps) => {
+    const toast = useToast();
+
+    const filter = useMemo<FilterEnrollments>(() => ({ student }), [student]);
+
+    return (
+        <ItemManager<Enrollment, FilterEnrollments>
+            api={EnrollmentApi}
+            resource="enrollment"
+            itemName="Enrollment"
+            headerTitle={
+                student
+                    ? `Enrollments for ${student.name}`
+                    : 'Manage Enrollments'
+            }
+            columns={student
+                ? columns.filter((column) => column.field !== 'student.name')
+                : columns}
+            filter={filter}
+            dialogWidth="600px"
+            renderForm={(props) => (
+                <EnrollmentForm
+                    {...props}
+                    item={{
+                        ...props.item,
+                        student: student ?? props.item?.student
+                    }}
+                />
+            )}
+            onError={(error) => toast.error(error)}
+            onSuccess={(operation) =>
+                toast.success(
+                    operation === 'create'
+                        ? 'Enrollment created successfully'
+                        : 'Enrollment updated successfully'
+                )
+            }
+        />
+    );
 };
 
 export default EnrollmentManager;

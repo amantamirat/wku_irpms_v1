@@ -11,7 +11,7 @@ import { Checkbox } from 'primereact/checkbox';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 
-import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { EntitySaveDialogProps } from "@/components/data-table/createEntityManager";
 import { PhaseActivityApi } from '../api/phase-activity.api';
 import { PhaseActivity, validatePhaseActivity } from '../models/phase-activity.model';
 import { computeDurationFromDates } from './PhaseActivityManager';

@@ -9,7 +9,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { Toast } from 'primereact/toast';
 import { classNames } from 'primereact/utils';
 
-import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { EntitySaveDialogProps } from "@/components/data-table/createEntityManager";
 import { PhaseEquipmentApi } from '../api/phase-equipment.api';
 import { PhaseEquipment, EquipmentUnit, PhaseEquipmentStatus, validatePhaseEquipment } from '../models/phase-equipment.model';
 

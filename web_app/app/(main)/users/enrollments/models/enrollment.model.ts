@@ -27,25 +27,6 @@ export const validateEnrollment = (enrol: Enrollment): { valid: boolean; message
     return { valid: true };
 };
 
-export const sanitizeStudent = (enrollment: Partial<Enrollment>): Partial<Enrollment> => {
-    return {
-        ...enrollment,
-        calendar:
-            typeof enrollment.calendar === 'object' && enrollment.calendar !== null
-                ? (enrollment.calendar as any)._id
-                : enrollment.calendar,
-        program:
-            typeof enrollment.program === 'object' && enrollment.program !== null
-                ? (enrollment.program as any)._id
-                : enrollment.program,
-        student:
-            typeof enrollment.student === 'object' && enrollment.student !== null
-                ? (enrollment.student as any)._id
-                : enrollment.student,
-    };
-};
-
-
-export interface GetEnrollmentsOptions {
+export interface FilterEnrollments {
     student?: string | User;
 }

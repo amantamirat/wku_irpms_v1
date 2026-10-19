@@ -80,7 +80,7 @@ export const CriterionCard = ({ criterion, result, onUpdate }: CriterionCardProp
                 )}
 
                 {/* -------- MULTIPLE -------- */}
-                {criterion.formType === FormType.MULTIPLE_CHOICE && (
+                {criterion.formType === FormType.MULTIPLE_CHOICE && criterion.options && (
                     <div className="flex flex-column gap-2">
                         {criterion.options.map((opt) => {
                             const selected = getIds().includes(opt._id);

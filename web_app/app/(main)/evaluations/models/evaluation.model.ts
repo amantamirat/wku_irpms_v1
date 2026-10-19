@@ -1,4 +1,13 @@
-import { EvaluationStatus } from "./evaluation.state-machine";
+
+export enum EvaluationStatus {
+
+    draft = 'draft',
+
+    published = 'published',
+
+    archived = 'archived'
+
+}
 
 export type Evaluation = {
     _id?: string;
@@ -10,7 +19,7 @@ export type Evaluation = {
     updatedAt?: Date;
 };
 
-export interface GetEvaluationsOptions {
+export interface FilterEvaluationsOptions {
     status?: EvaluationStatus;
 }
 
@@ -23,9 +32,3 @@ export const validateEvaluation = (
     return { valid: true };
 };
 
-
-
-export const createEmptyEval = (): Evaluation => ({
-    title: "",
-    weight: 100
-})

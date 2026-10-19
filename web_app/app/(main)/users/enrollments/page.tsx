@@ -2,10 +2,9 @@
 
 import EnrollmentManager from "./components/EnrollmentManager";
 
-const StudentPage = () => {
+const EnrollmentPage = () => {
     return (
         <EnrollmentManager />
     );
 };
-
-export default StudentPage;
+export default EnrollmentPage;

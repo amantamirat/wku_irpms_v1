@@ -1,58 +1,45 @@
 import { ApiClient } from "@/api/ApiClient";
-import {
-    GetPublicationsOptions,
-    Publication,
-    sanitizePublication
-} from "../models/publication.model";
 import { EntityApi } from "@/api/EntityApi";
-import { StateTransition } from "@/api/EntityApi";
+import { sanitize } from "@/utils/utils";
+import { Publication, FilterPublications } from "../models/publication.model";
 
-const endPoint = '/publications';
+const end_point = "/publications";
+export const PublicationApi: EntityApi<Publication, FilterPublications | undefined> = {
 
-export const PublicationApi: EntityApi<Publication, GetPublicationsOptions | undefined> = {
-
-    async getAll(options?: GetPublicationsOptions): Promise<Publication[]> {
-        const query = new URLSearchParams();
-        if (options) {
-            const sanitized = sanitizePublication(options);
-            if (sanitized.author) query.append("author", sanitized.author as string);
-            if (sanitized.type) {
-                query.append("type", sanitized.type as string);
-            }
-            if (options.populate !== undefined) {
-                query.append("populate", String(options.populate));
-            }
-        }
-        const data = await ApiClient.get(`${endPoint}?${query.toString()}`);
-        return data as Publication[];
+    async getAll(options) {
+        return ApiClient.get(end_point, options);
     },
 
-    async create(publication: Partial<Publication>): Promise<Publication> {
-        const sanitized = sanitizePublication(publication);
-        const createdData = await ApiClient.post(endPoint, sanitized);
-        return createdData as Publication;
+    async lookup(options) {
+        return ApiClient.get(`${end_point}/lookup`, options);
     },
 
-    async update(publication: Partial<Publication>): Promise<Publication> {
-        if (!publication._id) throw new Error("_id required.");
-        const url = `${endPoint}/${publication._id}`;
-        const sanitized = sanitizePublication(publication);
-        const updatedPublication = await ApiClient.put(url, sanitized);
-        return updatedPublication as Publication;
+    async getById(id: string) {
+        return ApiClient.get(`${end_point}/${id}`);
     },
 
+
+    async create(publication) {
+        const sanitized = sanitize(publication)
+        return ApiClient.post('/publications/', sanitized)
+    },
+
+    async update(publication) {
+        if (!publication._id) throw new Error("_id required")
+        return ApiClient.put(`/publications/${publication._id}`, sanitize(publication))
+    },
+
+    /*
     async transitionState(id: string, dto: StateTransition): Promise<any> {
         const query = new URLSearchParams();
         query.append("id", id);
-        const url = `${endPoint}/${id}`;
+        const url = `/publications/${id}`;
         const updated = await ApiClient.patch(url, dto);
         return updated;
     },
-
-    async delete(publication: Publication): Promise<boolean> {
-        if (!publication._id) throw new Error("_id required.");
-        const url = `${endPoint}/${publication._id}`;
-        const response = await ApiClient.delete(url);
-        return response;
-    },
-};
+*/
+    async delete(publication) {
+        if (!publication._id) throw new Error("_id required")
+        return ApiClient.delete(`/publications/${publication._id}`)
+    }
+}

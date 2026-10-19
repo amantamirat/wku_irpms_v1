@@ -2,8 +2,8 @@
 
 import { EvaluationApi } from '@/app/(main)/evaluations/api/evaluation.api';
 import { Evaluation } from '@/app/(main)/evaluations/models/evaluation.model';
-import { EvaluationStatus } from '@/app/(main)/evaluations/models/evaluation.state-machine';
-import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { EvaluationStatus } from '@/app/(main)/evaluations/models/evaluation.model';
+import { EntitySaveDialogProps } from "@/components/data-table/createEntityManager";
 import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
 import { Dialog } from 'primereact/dialog';

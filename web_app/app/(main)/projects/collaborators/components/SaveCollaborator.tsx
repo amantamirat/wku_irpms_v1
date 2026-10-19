@@ -9,7 +9,7 @@ import { useEffect, useRef, useState } from "react";
 
 import { UserApi } from "@/app/(main)/users/api/user.api";
 import { User } from "@/app/(main)/users/models/user.model";
-import { EntitySaveDialogProps } from "@/components/createEntityManager";
+import { EntitySaveDialogProps } from "@/components/data-table/createEntityManager";
 import { CollaboratorApi } from "../api/collaborator.api";
 import { Collaborator, roleOptions } from "../models/collaborator.model";
 

@@ -1,65 +1,72 @@
 'use client';
 
-import { createEntityManager } from "@/components/createEntityManager";
-import { Evaluation, GetEvaluationsOptions } from "../models/evaluation.model";
+import { useMemo } from 'react';
+import { ColumnProps } from 'primereact/column';
+import { ItemManager, ItemManagerProps } from "@/components/ItemManager";
+import { useToast } from "@/contexts/ToastContext";
+import { Evaluation, FilterEvaluationsOptions } from "../models/evaluation.model";
 import { EvaluationApi } from "../api/evaluation.api";
-import SaveEvaluation from "./SaveEvaluation";
+import EvaluationForm from "./EvaluationForm";
 import EvaluationDetail from "./EvaluationDetail";
-import { EVAL_STATUS_ORDER, EVAL_TRANSITIONS } from "../models/evaluation.state-machine";
+import { EVAL_TRANSITIONS } from "../models/evaluation.state-machine";
 import MyBadge from "@/templates/MyBadge";
+import { MENU_ICONS } from '@/utils/menu-icons';
 
-const EvaluationManager = () => {
+// Defined outside component for stable reference
+const columns: ColumnProps[] = [
+    { header: "Title", field: "title", sortable: true },
+    { header: "Description", field: "description" },
+    {
+        header: "Weight",
+        field: "weight",
+        sortable: true,
+        body: (e: Evaluation) => (
+            <span className="font-semibold">
+                {e.weight ?? 0}%
+            </span>
+        ),
+        style: { width: '10%' }
+    },
+    {
+        field: "status",
+        header: "Status",
+        sortable: true,
+        body: (e: Evaluation) =>
+            <MyBadge type="status" value={e.status ?? "Unknown"} />
+    }
+];
 
-    const Manager = createEntityManager<Evaluation, GetEvaluationsOptions | undefined>({
-        title: "Manage Evaluations",
-        itemName: "Evaluation",
-        api: EvaluationApi,
+export default function EvaluationManager() {
+    const toast = useToast();
 
-        columns: [
-            { header: "Title", field: "title", sortable: true },
-            { header: "Description", field: "description" },
-            {
-                header: "Weight",
-                field: "weight",
-                sortable: true,
-                body: (e: Evaluation) => (
-                    <span className="font-semibold">
-                        {e.weight ?? 0}%
-                    </span>
-                ),
-                style: { width: '10%' } // Optional: keeps the column compact
-            },
-            {
-                field: "status",
-                header: "Status",
-                sortable: true,
-                body: (e: Evaluation) =>
-                    <MyBadge type="status" value={e.status ?? "Unknown"} />
-            }
-        ],
-
-        createNew: () => ({
-            title: "",
-            weight: 100
-        }),
-
-        SaveDialog: SaveEvaluation,
-        permissionPrefix: "evaluation",
-
-        workflow: {
-            statusField: "status",
-            transitions: EVAL_TRANSITIONS,
-            statusOrder: EVAL_STATUS_ORDER
-        },
-
+    // Memoize tableProps configuration to maintain stable reference
+    const tableProps: ItemManagerProps<Evaluation, FilterEvaluationsOptions>["tableProps"] = useMemo(() => ({
         expandable: {
-            template: (evaluation) => (
-                <EvaluationDetail evaluation={evaluation} />
-            )
+            template: (evaluation) => <EvaluationDetail evaluation={evaluation} />
         }
-    });
+    }), []);
 
-    return <Manager />;
-};
-
-export default EvaluationManager;
+    return (
+        <ItemManager<Evaluation, FilterEvaluationsOptions>
+            api={EvaluationApi}
+            resource="evaluation"
+            itemName="Evaluation"
+            headerTitle="Manage Evaluations"
+            itemIcon={MENU_ICONS.evaluations}
+            columns={columns}
+            tableProps={tableProps}
+            dialogWidth="600px"
+            statusField="status"
+            transitions={EVAL_TRANSITIONS}
+            renderForm={(props) => <EvaluationForm {...props} />}
+            onError={(error) => toast.error(error)}
+            onSuccess={(operation) =>
+                toast.success(
+                    operation === "create"
+                        ? "Evaluation created successfully"
+                        : "Evaluation updated successfully"
+                )
+            }
+        />
+    );
+}

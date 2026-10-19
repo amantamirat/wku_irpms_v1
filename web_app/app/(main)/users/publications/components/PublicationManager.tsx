@@ -1,95 +1,127 @@
 'use client';
 
-import React from 'react';
-import { createEntityManager } from "@/components/createEntityManager";
-import { PublicationApi } from "../api/publication.api";
-import { GetPublicationsOptions, Publication } from "../models/publication.model";
-import { User } from "../../models/user.model";
-import SavePublicationDialog from "./SavePublication";
-import { PUBLICATION_STATUS_ORDER, PUBLICATION_TRANSITIONS, PublicationStatus } from '../models/publication.state-machine';
-import MyBadge from '@/templates/MyBadge';
+import { useMemo } from 'react';
+import { ColumnProps } from 'primereact/column';
+
+import { ItemManager } from '@/components/ItemManager';
+import { useToast } from '@/contexts/ToastContext';
+
+import { User } from '../../models/user.model';
+
+import { PublicationApi } from '../api/publication.api';
+import {
+    Publication,
+    FilterPublications
+} from '../models/publication.model';
+
+import PublicationForm from './PublicationForm';
+import { PUBLICATION_TRANSITIONS } from '../models/publication.state-machine';
 
 interface PublicationManagerProps {
     author?: User;
 }
 
+const columns: ColumnProps[] = [
+    {
+        header: 'Author',
+        field: 'author.name',
+        sortable: true,
+        body: (publication: Publication) =>
+            typeof publication.author === 'object'
+                ? publication.author?.name
+                : publication.author
+    },
+    {
+        header: 'Title',
+        field: 'title',
+        sortable: true
+    },
+    {
+        header: 'Type',
+        field: 'type',
+        sortable: true
+    },
+    {
+        header: 'Date',
+        field: 'publishedDate',
+        sortable: true,
+        body: (publication: Publication) =>
+            publication.publishedDate
+                ? new Date(publication.publishedDate).toLocaleDateString()
+                : ''
+    },
+    {
+        header: 'Publisher / Journal',
+        field: 'publisher',
+        sortable: true,
+        body: (publication: Publication) => publication.publisher || 'N/A'
+    },
+    {
+        header: 'DOI',
+        field: 'doi',
+        sortable: true,
+        body: (publication: Publication) => publication.doi || 'N/A'
+    },
+    {
+        header: 'Publication ID / ISBN',
+        field: 'publicationId',
+        sortable: true,
+        body: (publication: Publication) => publication.publicationId || 'N/A'
+    }
+];
+
+const defaultHiddenColumns = ["publisher", "doi", "publicationId"];
+
 const PublicationManager = ({ author }: PublicationManagerProps) => {
-    /**
-     * Initialize the Entity Manager for Publications.
-     * The manager handles the CRUD lifecycle, permissions, and dialog state.
-     */
-    const Manager = createEntityManager<Publication, GetPublicationsOptions | undefined>({
-        title: author ? `Publications for ${author.name}` : "Manage Publications",
-        itemName: "Publication",
-        api: PublicationApi,
+    const toast = useToast();
 
-        /** Table Columns configuration */
-        columns: [
-            {
-                header: "Title",
-                field: "title",
-                sortable: true
-            },
-            {
-                header: "Type",
-                field: "type",
-                sortable: true,
-                body: (p: Publication) => (
-                    <span>
-                        {p.type?.toUpperCase()}
-                    </span>
-                )
-            },
-            {
-                header: "Publisher",
-                field: "publisher",
-                sortable: true
-            },
-            // Dynamic column: Hide Author name if we are viewing a specific author's list
-            ...(!author ? [{
-                header: "Author",
-                field: "author.name",
-                sortable: true
-            }] : []),
+    const filter = useMemo<FilterPublications>(
+        () => ({ author }),
+        [author]
+    );
 
-            {
-                field: "status",
-                header: "Status",
-                sortable: true,
-                body: (c: Publication) =>
-                    <MyBadge type="status" value={c.status ?? "Unknown"} />
+    return (
+        <ItemManager<Publication, FilterPublications>
+            api={PublicationApi}
+            resource="publication"
+            itemName="Publication"
+            headerTitle={
+                author
+                    ? `Publications by ${author.name}`
+                    : 'Manage Publications'
             }
-        ],
-
-        /** Default values for new records */
-        createNew: () => ({
-            author: author, // Automatically link the publication to the current applicant
-            title: "",
-            type: undefined,
-            abstract: "",
-            status: PublicationStatus.pending
-        }),
-
-        /** Integration with the Save Dialog and Permission system */
-        SaveDialog: SavePublicationDialog,
-        permissionPrefix: "publication",
-        query: () => ({
-            author: author,
-            populate: author ? false : true
-        }),
-
-        workflow: {
-            statusField: "status",
-            transitions: PUBLICATION_TRANSITIONS,
-            statusOrder: PUBLICATION_STATUS_ORDER
-        },
-    });
-
-    /**
-     * Return the Manager component, passing the applicant as context 
-     * to trigger the internal filtering and creation logic.
-     */
-    return <Manager />;
+            columns={
+                author
+                    ? columns.filter(
+                        (column) => column.field !== 'author.name'
+                    )
+                    : columns
+            }
+            enableColumnToggle
+            defaultHiddenFields={defaultHiddenColumns}
+            filter={filter}
+            dialogWidth="650px"
+            statusField="status"
+            transitions={PUBLICATION_TRANSITIONS}
+            renderForm={(props) => (
+                <PublicationForm
+                    {...props}
+                    item={{
+                        ...props.item,
+                        author: author ?? props.item?.author
+                    }}
+                />
+            )}
+            onError={(error) => toast.error(error)}
+            onSuccess={(operation) =>
+                toast.success(
+                    operation === 'create'
+                        ? 'Publication created successfully'
+                        : 'Publication updated successfully'
+                )
+            }
+        />
+    );
 };
 
 export default PublicationManager;

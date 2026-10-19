@@ -30,15 +30,15 @@ export interface ITemplateVariable {
 
 export interface IDocumentTemplate {
     _id?: string;
-    name: string;
+    name?: string; //required
     description?: string;
-    version: number;
-    type: DocumentTemplateType;
-    engine: TemplateEngine;
+    version?: number;
+    type?: DocumentTemplateType; //required
+    engine?: TemplateEngine;
     filePath?: string;
     file?: File;
     status?: DocumentTemplateStatus;
-    variables: Record<string, ITemplateVariable>;
+    variables?: Record<string, ITemplateVariable>;
 }
 
 export const AGREEMENT_VARIABLES: Record<string, ITemplateVariable> = {

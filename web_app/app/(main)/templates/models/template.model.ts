@@ -49,7 +49,7 @@ export const validateTemplate = (
 };
 
 
-
+/*
 export const createEmptyTemplate = (): Template => ({
     name: "",
     description: "",
@@ -66,4 +66,4 @@ export const createEmptyTemplate = (): Template => ({
             order: 1
         }
     ]
-});
+});*/

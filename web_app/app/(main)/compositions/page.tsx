@@ -1,335 +1,369 @@
 'use client';
-import { TabView, TabPanel } from "primereact/tabview";
+
+import { TabView, TabPanel } from 'primereact/tabview';
+import { ColumnProps } from 'primereact/column';
+import { Tag } from 'primereact/tag';
+
+import { ItemManager, ItemManagerProps } from '@/components/ItemManager';
+import { useToast } from '@/contexts/ToastContext';
 
 // APIs
-import { CompositionApi } from "./api/composition.api";
-import { ProfileApi } from "./api/profile.api";
-import { HistoryApi } from "./api/history.api";
-import { MemberRequirementApi } from "./api/requirement.api";
-
-// Save Dialogs
-import SaveComposition from "./components/SaveComposition";
-import SaveProfile from "./components/SaveProfile";
-import SaveHistory from "./components/SaveHistory";
-import SaveRequirement from "./components/SaveRequirement";
+import { CompositionApi } from './api/composition.api';
+import { ProfileApi } from './api/profile.api';
+import { HistoryApi } from './api/history.api';
+import { MemberRequirementApi } from './api/requirement.api';
 
 // Models
-import { Composition } from "./models/composition.model";
-import { HistoryParticipation, HistoryRule } from "./models/history.model";
-import { EligibilityProfile } from "./models/profile.model";
-import { MemberRequirement } from "./models/requirement.model";
-import { HistoryRuleView } from "./components/HistoryRuleView";
-import { EligibilityProfileView } from "./components/EligibilityProfileView";
-import { MemberRequirementView } from "./components/MemberRequirementView";
-import { createEntityManager } from "@/components/data-table/createEntityManager";
+import { Composition } from './models/composition.model';
+import { EligibilityProfile } from './models/profile.model';
+import { HistoryParticipation, HistoryRule } from './models/history.model';
+import { MemberRequirement } from './models/requirement.model';
 
-// --- Helpers for Compositions Tab ---
-const renderEntityName = (
-    entity?: string | EligibilityProfile | HistoryRule,
-    fallback = "None"
-) => {
-    if (!entity) return <span style={{ color: "var(--text-color-secondary)" }}>{fallback}</span>;
-    if (typeof entity === "object" && entity.name) {
-        return <span style={{ fontWeight: 500 }}>{entity.name}</span>;
-    }
-    return <span style={{ fontSize: "0.85rem", opacity: 0.85 }}>{String(entity)}</span>;
+// Forms
+import CompositionForm from './components/CompositionForm';
+import ProfileForm from './components/ProfileForm';
+import HistoryForm from './components/HistoryForm';
+import RequirementForm from './components/RequirementForm';
+
+// Views
+import { EligibilityProfileView } from './components/EligibilityProfileView';
+import { HistoryRuleView } from './components/HistoryRuleView';
+import { MemberRequirementView } from './components/MemberRequirementView';
+
+/* =====================================================================
+   Shared helpers (module level => stable references)
+===================================================================== */
+
+// One place for the create/update toasts used by every tab.
+const useCrudToasts = (label: string) => {
+    const toast = useToast();
+    return {
+        onError: (error: any) => toast.error(error),
+        onSuccess: (operation: string) =>
+            toast.success(
+                `${label} ${operation === 'create' ? 'created' : 'updated'} successfully`
+            )
+    };
 };
 
-const renderMemberRequirements = (requirements?: string[] | MemberRequirement[]) => {
+const nameColumn = (header: string): ColumnProps => ({
+    header,
+    field: 'name',
+    sortable: true,
+    body: (item: { name: string; description?: string }) => (
+        <div>
+            <div className="font-semibold text-900">{item.name}</div>
+            {item.description && (
+                <small className="text-500">{item.description}</small>
+            )}
+        </div>
+    )
+});
+
+// Treats undefined, null and Infinity as "no limit".
+// (Infinity becomes null after JSON serialization.)
+const formatBounds = (range?: { min?: number | null; max?: number | null }) => {
+    const min = range?.min ?? 0;
+    const max = range?.max == null || range.max === Infinity ? '∞' : range.max;
+    return `${min} - ${max}`;
+};
+
+const renderEntityName = (
+    entity?: string | EligibilityProfile | HistoryRule,
+    fallback = 'None'
+) => {
+    if (!entity) return <span className="text-500">{fallback}</span>;
+    if (typeof entity === 'object' && entity.name) {
+        return <span className="font-medium">{entity.name}</span>;
+    }
+    return <span className="text-sm text-600">{String(entity)}</span>;
+};
+
+const renderMemberRequirements = (
+    requirements?: string[] | MemberRequirement[]
+) => {
     if (!requirements || requirements.length === 0) {
-        return <span style={{ color: "var(--text-color-secondary)" }}>No member rules set</span>;
+        return <span className="text-500">No member rules set</span>;
     }
 
     const count = requirements.length;
-    const names = requirements
-        .map((req) => (typeof req === "object" ? req.name : null))
+    const names = (requirements as Array<string | MemberRequirement>)
+        .map((req) => (typeof req === 'object' ? req.name : null))
         .filter(Boolean);
 
     return (
-        <div>
-            <span
-                style={{
-                    fontSize: "0.8rem",
-                    backgroundColor: "var(--primary-color)",
-                    color: "var(--primary-color-text)",
-                    padding: "2px 8px",
-                    borderRadius: "12px",
-                    fontWeight: 600,
-                    marginRight: "6px"
-                }}
-            >
-                {count} Rule{count > 1 ? "s" : ""}
-            </span>
+        <div className="flex align-items-center gap-2 flex-wrap">
+            <Tag value={`${count} ${count === 1 ? 'Rule' : 'Rules'}`} rounded />
             {names.length > 0 && (
-                <span style={{ fontSize: "0.85rem", color: "var(--text-color-secondary)" }}>
-                    ({names.join(", ")})
-                </span>
+                <span className="text-sm text-500">({names.join(', ')})</span>
             )}
         </div>
     );
 };
 
-// --- Sub-Entity Managers ---
+/* =====================================================================
+   1. Compositions
+===================================================================== */
 
-// 1. Compositions Manager Component
-const CompositionsTab = createEntityManager<Composition>({
-    title: "Team Composition Rules",
-    itemName: "Composition Spec",
-    api: CompositionApi,
-    columns: [
-        {
-            field: "name",
-            header: "Composition Name",
-            sortable: true,
-            body: (rowData: Composition) => (
-                <div>
-                    <div style={{ fontWeight: 600 }}>{rowData.name}</div>
-                    {rowData.description && (
-                        <small style={{ color: "var(--text-color-secondary)" }}>{rowData.description}</small>
-                    )}
-                </div>
-            )
-        },
-        {
-            field: "leadProfileRule",
-            header: "Lead Profile Rule",
-            body: (rowData: Composition) => renderEntityName(rowData.leadProfileRule)
-        },
-        {
-            field: "leadHistoryRules",
-            header: "Lead History Rules",
-            body: (rowData: Composition) => {
-                if (!rowData.leadHistoryRules || rowData.leadHistoryRules.length === 0) {
-                    return <span className="text-secondary italic">None</span>;
-                }
-                return (
-                    <div className="flex flex-column gap-1">
-                        {rowData.leadHistoryRules.map((hr, idx) => {
-                            const ruleName = typeof hr.rule === 'object' && hr.rule !== null ? hr.rule.name : hr.rule;
-                            return (
-                                <div key={idx} className="flex align-items-center gap-2 text-xs">
-                                    <span className="p-tag p-tag-warning text-xs py-0 px-1">{hr.context}</span>
-                                    <span className="font-medium text-900">{ruleName || `ID: ${hr.rule}`}</span>
-                                </div>
-                            );
-                        })}
-                    </div>
-                );
+const compositionColumns: ColumnProps[] = [
+    nameColumn('Composition Name'),
+    {
+        header: 'Lead Profile Rule',
+        field: 'leadProfileRule',
+        body: (composition: Composition) =>
+            renderEntityName(composition.leadProfileRule)
+    },
+    {
+        header: 'Lead History Rules',
+        field: 'leadHistoryRules',
+        body: (composition: Composition) => {
+            if (!composition.leadHistoryRules?.length) {
+                return <span className="text-500 italic">None</span>;
             }
-        },
-        {
-            field: "memberRequirements",
-            header: "Member Requirements",
-            body: (rowData: Composition) => renderMemberRequirements(rowData.memberRequirements)
-        }
-    ],
-    createNew: () => ({ name: "", description: "", leadHistoryRules: [], memberRequirements: [] }),
-    query: () => undefined,
-    SaveDialog: SaveComposition,
-    permissionPrefix: "composition"
-});
-
-// 2. Eligibility Profiles Manager Component
-const ProfilesTab = createEntityManager<EligibilityProfile>({
-    title: "Eligibility Demographics Profiles",
-    itemName: "Profile Criteria",
-    api: ProfileApi,
-    columns: [
-        {
-            field: "name",
-            header: "Profile Name",
-            sortable: true,
-            body: (rowData: EligibilityProfile) => (
-                <div>
-                    <div style={{ fontWeight: 600 }}>{rowData.name}</div>
-                    {rowData.description && (
-                        <small style={{ color: "var(--text-color-secondary)" }}>{rowData.description}</small>
-                    )}
+            return (
+                <div className="flex flex-column gap-1">
+                    {composition.leadHistoryRules.map((hr, idx) => {
+                        const ruleName =
+                            typeof hr.rule === 'object' && hr.rule !== null
+                                ? hr.rule.name
+                                : hr.rule;
+                        return (
+                            <div key={idx} className="flex align-items-center gap-2 text-xs">
+                                <Tag value={hr.context} severity="warning" className="text-xs" />
+                                <span className="font-medium text-900">
+                                    {ruleName || `ID: ${String(hr.rule)}`}
+                                </span>
+                            </div>
+                        );
+                    })}
                 </div>
-            )
-        },
-        {
-            field: "gender",
-            header: "Gender Target",
-            body: (rowData: EligibilityProfile) => rowData.gender || "Any"
-        },
-        {
-            field: "academicLevels",
-            header: "Academic Levels",
-            body: (rowData: EligibilityProfile) => rowData.academicLevels?.join(", ") || "Any"
+            );
         }
-    ],
-    createNew: () => ({ name: "", description: "" }),
-    query: () => undefined,
-    SaveDialog: SaveProfile,
+    },
+    {
+        header: 'Member Requirements',
+        field: 'memberRequirements',
+        body: (composition: Composition) =>
+            renderMemberRequirements(composition.memberRequirements)
+    }
+];
+
+const CompositionsTab = () => {
+    const toasts = useCrudToasts('Composition');
+
+    return (
+        <ItemManager<Composition, undefined>
+            api={CompositionApi}
+            resource="composition"
+            itemName="Composition Spec"
+            headerTitle="Team Composition Rules"
+            columns={compositionColumns}
+            dialogWidth="720px"
+            renderForm={(props) => <CompositionForm {...props} />}
+            {...toasts}
+        />
+    );
+};
+
+/* =====================================================================
+   2. Eligibility profiles
+===================================================================== */
+
+const profileColumns: ColumnProps[] = [
+    nameColumn('Profile Name'),
+    {
+        header: 'Gender Target',
+        field: 'gender',
+        body: (profile: EligibilityProfile) => profile.gender || 'Any'
+    },
+    {
+        header: 'Academic Levels',
+        field: 'academicLevels',
+        body: (profile: EligibilityProfile) =>
+            profile.academicLevels?.join(', ') || 'Any'
+    }
+];
+
+const profileTableProps: ItemManagerProps<
+    EligibilityProfile,
+    undefined
+>['tableProps'] = {
     expandable: {
-        template: (profile) => (
-            <EligibilityProfileView profile={profile} />
+        template: (profile) => <EligibilityProfileView profile={profile} />
+    }
+};
+
+const ProfilesTab = () => {
+    const toasts = useCrudToasts('Profile');
+
+    return (
+        <ItemManager<EligibilityProfile, undefined>
+            api={ProfileApi}
+            resource="composition"
+            itemName="Profile Criteria"
+            headerTitle="Eligibility Demographics Profiles"
+            columns={profileColumns}
+            tableProps={profileTableProps}
+            dialogWidth="680px"
+            renderForm={(props) => <ProfileForm {...props} />}
+            {...toasts}
+        />
+    );
+};
+
+/* =====================================================================
+   3. History rules
+===================================================================== */
+
+const PARTICIPATION_SEVERITY: Record<string, 'success' | 'info' | 'warning'> = {
+    [HistoryParticipation.LEAD]: 'success',
+    [HistoryParticipation.MEMBER]: 'info'
+};
+
+const historyColumns: ColumnProps[] = [
+    nameColumn('Rule Name'),
+    {
+        header: 'Participation',
+        field: 'participation',
+        sortable: true,
+        style: { width: '150px' },
+        body: (rule: HistoryRule) => {
+            const value = rule.participation || HistoryParticipation.ANY;
+            return (
+                <Tag value={value} severity={PARTICIPATION_SEVERITY[value] ?? 'warning'} />
+            );
+        }
+    },
+    {
+        header: 'Total Aggregated Rule',
+        field: 'total',
+        body: (rule: HistoryRule) => {
+            if (!rule.total) return <span className="text-400">No rule set</span>;
+
+            const fields = rule.total.fields?.length
+                ? rule.total.fields.join(', ')
+                : 'All metrics';
+
+            return (
+                <div>
+                    <div className="text-sm font-medium text-900">
+                        Range:{' '}
+                        <span className="text-primary">{formatBounds(rule.total.range)}</span>
+                    </div>
+                    <small className="text-500">Metrics: {fields}</small>
+                </div>
+            );
+        }
+    }
+];
+
+const historyTableProps: ItemManagerProps<
+    HistoryRule,
+    undefined
+>['tableProps'] = {
+    expandable: {
+        template: (rule) => <HistoryRuleView historyRule={rule} />
+    }
+};
+
+const HistoryTab = () => {
+    const toasts = useCrudToasts('History rule');
+
+    return (
+        <ItemManager<HistoryRule, undefined>
+            api={HistoryApi}
+            resource="composition"
+            itemName="History Rule"
+            headerTitle="Project History & Performance Rules"
+            columns={historyColumns}
+            tableProps={historyTableProps}
+            dialogWidth="680px"
+            renderForm={(props) => <HistoryForm {...props} />}
+            {...toasts}
+        />
+    );
+};
+
+/* =====================================================================
+   4. Member requirements
+===================================================================== */
+
+const requirementColumns: ColumnProps[] = [
+    nameColumn('Requirement Name'),
+    {
+        header: 'Mode',
+        field: 'mode',
+        sortable: true,
+        style: { width: '150px' },
+        body: (requirement: MemberRequirement) => (
+            <Tag value={requirement.mode} severity="info" />
         )
     },
-    permissionPrefix: "composition"
-});
+    {
+        header: 'Threshold Target',
+        field: 'threshold',
+        body: (requirement: MemberRequirement) =>
+            requirement.threshold ? formatBounds(requirement.threshold) : 'N/A'
+    }
+];
 
-// 3. History Rules Manager Component
-import { Tag } from 'primereact/tag'; // Optional: for styling participation nicely
-
-const HistoryTab = createEntityManager<HistoryRule>({
-    title: "Project History & Performance Rules",
-    itemName: "History Rule",
-    api: HistoryApi,
-    columns: [
-        {
-            field: "name",
-            header: "Rule Name",
-            sortable: true,
-            body: (rowData: HistoryRule) => (
-                <div>
-                    <div style={{ fontWeight: 600 }}>{rowData.name}</div>
-                    {rowData.description && (
-                        <small style={{ color: "var(--text-color-secondary)" }}>{rowData.description}</small>
-                    )}
-                </div>
-            )
-        },
-        {
-            field: "participation",
-            header: "Participation",
-            sortable: true,
-            body: (rowData: HistoryRule) => {
-                const getSeverity = (part?: string) => {
-                    switch (part) {
-                        case 'LEAD': return 'success';
-                        case 'MEMBER': return 'info';
-                        default: return 'warning';
-                    }
-                };
-                return (
-                    <Tag
-                        value={rowData.participation || 'ANY'}
-                        severity={getSeverity(rowData.participation)}
-                    />
-                );
-            }
-        },
-        {
-            field: "total",
-            header: "Total Aggregated Rule",
-            body: (rowData: HistoryRule) => {
-                if (!rowData.total) return <span className="text-400">No rule set</span>;
-
-                const fieldsList = rowData.total.fields?.join(', ') || 'All metrics';
-                const min = rowData.total.range?.min ?? 0;
-                const max = rowData.total.range?.max ?? '∞';
-
-                return (
-                    <div>
-                        <div className="text-sm font-medium text-900">
-                            Range: <span className="text-primary">{min} - {max}</span>
-                        </div>
-                        <small className="text-color-secondary">
-                            Metrics: {fieldsList}
-                        </small>
-                    </div>
-                );
-            }
-        }
-    ],
-    createNew: () => ({ name: "", description: "", participation: HistoryParticipation.ANY }),
-    query: () => undefined,
-    SaveDialog: SaveHistory,
-    expandable: {
-        template: (hist) => (
-            <HistoryRuleView historyRule={hist} />
-        )
-    },
-    permissionPrefix: "composition"
-});
-// 4. Member Requirements Manager Component
-const RequirementsTab = createEntityManager<MemberRequirement>({
-    title: "Member Requirements & Aggregation Rules",
-    itemName: "Member Requirement",
-    api: MemberRequirementApi,
-    columns: [
-        {
-            field: "name",
-            header: "Requirement Name",
-            sortable: true,
-            body: (rowData: MemberRequirement) => (
-                <div>
-                    <div style={{ fontWeight: 600 }}>{rowData.name}</div>
-                    {rowData.description && (
-                        <small style={{ color: "var(--text-color-secondary)" }}>{rowData.description}</small>
-                    )}
-                </div>
-            )
-        },
-        {
-            field: "mode",
-            header: "Mode",
-            sortable: true,
-            body: (rowData: MemberRequirement) => (
-                <span
-                    style={{
-                        fontSize: "0.85rem",
-                        backgroundColor: "var(--surface-b)",
-                        padding: "2px 8px",
-                        borderRadius: "4px"
-                    }}
-                >
-                    {rowData.mode}
-                </span>
-            )
-        },
-        {
-            field: "threshold",
-            header: "Threshold Target",
-            body: (rowData: MemberRequirement) =>
-                rowData.threshold
-                    ? `${rowData.threshold.min} - ${rowData.threshold.max === Infinity ? "∞" : rowData.threshold.max}`
-                    : "N/A"
-        }
-    ],
-    createNew: () => ({
-        name: "",
-        description: "",
-        mode: "COUNT" as any,
-        threshold: { min: 0, max: Infinity }
-    }),
-    query: () => undefined,
-    SaveDialog: SaveRequirement,
+const requirementTableProps: ItemManagerProps<
+    MemberRequirement,
+    undefined
+>['tableProps'] = {
     expandable: {
         template: (requirement) => (
             <MemberRequirementView requirement={requirement} />
         )
-    },
-    permissionPrefix: "composition"
-});
+    }
+};
 
-// --- Master Single Page Hub ---
-const Page = () => {
+const RequirementsTab = () => {
+    const toasts = useCrudToasts('Member requirement');
+
     return (
-        <div className="card p-3">
-            <h3 className="text-xl font-bold mb-4">Team Composition & Evaluation Engine</h3>
-
-            <TabView>
-                <TabPanel header="Compositions" leftIcon="pi pi-sitemap mr-2">
-                    <CompositionsTab />
-                </TabPanel>
-
-                <TabPanel header="Member Requirements" leftIcon="pi pi-users mr-2">
-                    <RequirementsTab />
-                </TabPanel>
-
-                <TabPanel header="Demographic Profiles" leftIcon="pi pi-id-card mr-2">
-                    <ProfilesTab />
-                </TabPanel>
-
-                <TabPanel header="History Rules" leftIcon="pi pi-history mr-2">
-                    <HistoryTab />
-                </TabPanel>
-            </TabView>
-        </div>
+        <ItemManager<MemberRequirement, undefined>
+            api={MemberRequirementApi}
+            resource="composition"
+            itemName="Member Requirement"
+            headerTitle="Member Requirements & Aggregation Rules"
+            columns={requirementColumns}
+            tableProps={requirementTableProps}
+            dialogWidth="680px"
+            renderForm={(props) => <RequirementForm {...props} />}
+            {...toasts}
+        />
     );
 };
+
+/* =====================================================================
+   Page
+===================================================================== */
+
+const Page = () => (
+    <div className="card p-3">
+        <h3 className="text-xl font-bold mb-4">
+            Team Composition & Evaluation Engine
+        </h3>
+
+        <TabView>
+            <TabPanel header="Compositions" leftIcon="pi pi-sitemap mr-2">
+                <CompositionsTab />
+            </TabPanel>
+
+            <TabPanel header="Member Requirements" leftIcon="pi pi-users mr-2">
+                <RequirementsTab />
+            </TabPanel>
+
+            <TabPanel header="Demographic Profiles" leftIcon="pi pi-id-card mr-2">
+                <ProfilesTab />
+            </TabPanel>
+
+            <TabPanel header="History Rules" leftIcon="pi pi-history mr-2">
+                <HistoryTab />
+            </TabPanel>
+        </TabView>
+    </div>
+);
 
 export default Page;

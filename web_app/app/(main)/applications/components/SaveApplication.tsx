@@ -1,6 +1,6 @@
 'use client';
 import { BASE_URL } from '@/api/ApiClient';
-import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { EntitySaveDialogProps } from "@/components/data-table/createEntityManager";
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { FileUpload, FileUploadSelectEvent } from 'primereact/fileupload';

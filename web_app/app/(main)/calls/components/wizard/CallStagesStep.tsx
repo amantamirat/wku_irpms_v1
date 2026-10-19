@@ -13,7 +13,7 @@ import { Call } from '../../models/call.model';
 import { Evaluation } from '@/app/(main)/evaluations/models/evaluation.model';
 import { Template } from '@/app/(main)/templates/models/template.model';
 import { EvaluationApi } from '@/app/(main)/evaluations/api/evaluation.api';
-import { EvaluationStatus } from '@/app/(main)/evaluations/models/evaluation.state-machine';
+import { EvaluationStatus } from '@/app/(main)/evaluations/models/evaluation.model';
 import { TemplateApi } from '@/app/(main)/templates/api/template.api';
 // Adjust the import path for ConstraintApi/Constraint model as needed in your project structure
 import { ConstraintApi } from '@/app/(main)/constraints/api/constraint.api';

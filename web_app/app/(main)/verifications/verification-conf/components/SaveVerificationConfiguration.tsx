@@ -2,10 +2,10 @@
 
 import { EvaluationApi } from '@/app/(main)/evaluations/api/evaluation.api';
 import { Evaluation } from '@/app/(main)/evaluations/models/evaluation.model';
-import { EvaluationStatus } from '@/app/(main)/evaluations/models/evaluation.state-machine';
+import { EvaluationStatus } from '@/app/(main)/evaluations/models/evaluation.model';
 import { TemplateApi } from '@/app/(main)/templates/api/template.api';
 import { Template } from '@/app/(main)/templates/models/template.model';
-import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { EntitySaveDialogProps } from "@/components/data-table/createEntityManager";
 import { Button } from 'primereact/button';
 import { Calendar } from 'primereact/calendar';
 import { Dialog } from 'primereact/dialog';

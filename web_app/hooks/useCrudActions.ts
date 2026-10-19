@@ -2,7 +2,6 @@
 
 import { useMemo } from 'react';
 import { useAuth } from '@/contexts/auth-context';
-import { useConfirmDialog } from '@/contexts/ConfirmDialogContext';
 import {
     RowActionButton,
     ToolBarActionButton,
@@ -47,17 +46,18 @@ interface UseCrudActionsProps<T> {
     /**
      * Create handler.
      */
-    onCreate?: () => void;
+    onCreate?: () => void | Promise<void>;
 
     /**
      * Edit handler.
      */
-    onEdit?: (row: T) => void;
+    onEdit?: (row: T) => void | Promise<void>;
 
     /**
-     * Delete handler.
+     * Delete handler. Runs immediately on click (no confirmation),
+     * so ask for confirmation inside the handler if you need it.
      */
-    onDelete?: (row: T) => Promise<void>;
+    onDelete?: (row: T) => void | Promise<void>;
 }
 
 export interface CrudActions<T> {
@@ -65,7 +65,7 @@ export interface CrudActions<T> {
     rowActions: RowActionButton<T>[];
 }
 
-export function useCrudActions<T extends { _id?: string }>({
+export function useCrudActions<T extends Record<string, any>>({
     resource,
     createLabel,
     itemName = 'Item',
@@ -83,7 +83,6 @@ export function useCrudActions<T extends { _id?: string }>({
     onDelete,
 }: UseCrudActionsProps<T>): CrudActions<T> {
     const { hasPermission } = useAuth();
-    const confirm = useConfirmDialog();
 
     return useMemo(() => {
         const toolbarActions: ToolBarActionButton[] = [];
@@ -102,20 +101,21 @@ export function useCrudActions<T extends { _id?: string }>({
          * -----------------------------------------
          */
 
-        const canCreate =
+        if (
             !hideCreateAction &&
-            !!onCreate &&
+            onCreate &&
             hasPermission([
                 `${resource}:create`,
                 `${resource}:create:own`,
-            ]);
+            ])
+        ) {
+            const create = onCreate;
 
-        if (canCreate) {
             toolbarActions.push({
                 label: createLabel ?? `Add ${itemName}`,
                 icon: 'pi pi-plus',
                 severity: 'success',
-                onClick: onCreate,
+                onClick: () => create(),
             });
         }
 
@@ -125,25 +125,23 @@ export function useCrudActions<T extends { _id?: string }>({
          * -----------------------------------------
          */
 
-        const canEdit =
+        if (
             !hideEditAction &&
-            !!onEdit &&
+            onEdit &&
             hasPermission([
                 `${resource}:update`,
                 `${resource}:update:own`,
-            ]);
+            ])
+        ) {
+            const edit = onEdit;
 
-        if (canEdit) {
             rowActions.push({
                 icon: 'pi pi-pencil',
                 severity: 'success',
                 tooltip: `Edit ${itemName}`,
                 text: true,
                 disabled: disableEditRow,
-
-                onClick: (row) => {
-                    onEdit(row);
-                },
+                onClick: (row) => edit(row),
             });
         }
 
@@ -153,28 +151,24 @@ export function useCrudActions<T extends { _id?: string }>({
          * -----------------------------------------
          */
 
-        const canDelete =
+        if (
             !hideDeleteAction &&
-            !!onDelete &&
+            onDelete &&
             hasPermission([
-                `${resource}:delete`, `${resource}:delete:own`,
-            ]);
+                `${resource}:delete`,
+                `${resource}:delete:own`,
+            ])
+        ) {
+            const del = onDelete;
 
-        if (canDelete) {
             rowActions.push({
                 icon: 'pi pi-trash',
                 severity: 'danger',
                 tooltip: `Delete ${itemName}`,
                 text: true,
-                // rounded: true,
                 disabled: disableDeleteRow,
-
-                onClick: (row) => {
-                    confirm.ask({
-                        item: itemName,
-                        onConfirm: () => onDelete(row),
-                    });
-                },
+                // Returned so ItemDataTable can show its pending state while it runs
+                onClick: (row) => del(row),
             });
         }
 
@@ -184,6 +178,7 @@ export function useCrudActions<T extends { _id?: string }>({
         };
     }, [
         resource,
+        createLabel,
         itemName,
 
         hideDefaultActions,
@@ -199,6 +194,5 @@ export function useCrudActions<T extends { _id?: string }>({
         onDelete,
 
         hasPermission,
-        confirm,
     ]);
 }

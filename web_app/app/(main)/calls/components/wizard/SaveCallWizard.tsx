@@ -1,6 +1,6 @@
 'use client';
 
-import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { EntitySaveDialogProps } from "@/components/data-table/createEntityManager";
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Steps } from 'primereact/steps';

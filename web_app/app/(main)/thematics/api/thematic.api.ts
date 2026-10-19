@@ -1,11 +1,12 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { GetThematicsOptions, Thematic, sanitize } from "../models/thematic.model";
+import { FilterThematics, Thematic } from "../models/thematic.model";
 import { StateTransition } from "@/api/EntityApi";
+import { sanitize } from "@/utils/utils";
 
 const end_point = "/thematics";
 
-export const ThematicApi: EntityApi<Thematic, GetThematicsOptions | undefined> = {
+export const ThematicApi: EntityApi<Thematic, FilterThematics | undefined> = {
 
     async getAll(filter) {
         return ApiClient.get(end_point, filter);

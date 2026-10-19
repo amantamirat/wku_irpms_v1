@@ -4,8 +4,8 @@ export type Role = {
     _id?: string;
     name: string;
     description?: string;
-    permissions: string[] | Permission[];
-    isDefault: boolean;
+    permissions?: string[] | Permission[];
+    isDefault?: boolean;
 };
 
 export const validateRole = (role: Role): { valid: boolean; message?: string } => {
@@ -20,8 +20,3 @@ export const validateRole = (role: Role): { valid: boolean; message?: string } =
 
 
 
-export const createEmptyRole = (): Role => ({
-    name: "",
-    permissions: [],
-    isDefault: false
-})

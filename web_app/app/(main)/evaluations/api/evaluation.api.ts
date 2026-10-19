@@ -1,12 +1,12 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { Evaluation, GetEvaluationsOptions } from "../models/evaluation.model";
+import { Evaluation, FilterEvaluationsOptions } from "../models/evaluation.model";
 import { StateTransition } from "@/api/EntityApi";
 import { sanitize } from "@/utils/utils";
 
 const end_point = "/evaluations";
 
-export const EvaluationApi: EntityApi<Evaluation, GetEvaluationsOptions | undefined> = {
+export const EvaluationApi: EntityApi<Evaluation, FilterEvaluationsOptions | undefined> = {
 
     async getAll(options) {
         return ApiClient.get(end_point, options);

@@ -12,7 +12,7 @@ import { SpecializationApi } from '../api/specialization.api';
 import { InputText } from 'primereact/inputtext';
 import { AcademicLevel } from '../../organizations/models/organization.model';
 import { Dropdown } from 'primereact/dropdown';
-import { EntitySaveDialogProps } from '@/components/createEntityManager';
+import { EntitySaveDialogProps } from "@/components/data-table/createEntityManager";
 
 
 const SaveSpecialization = ({ visible, item: item, onHide, onComplete }: EntitySaveDialogProps<Specialization>) => {
