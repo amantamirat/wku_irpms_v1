@@ -74,12 +74,13 @@ export class ApplicationController {
         try {
             if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
-            const { current, next } = req.body;
+            const { current, next, reason } = req.body;
 
             const dto: TransitionRequestDto = {
                 id: String(id),
-                current: current,
-                next: next,
+                current,
+                next,
+                reason,
                 userId: req.auth.userId,
             };
 

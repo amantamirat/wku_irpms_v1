@@ -16,6 +16,7 @@ import { useCrudList } from "@/hooks/useCrudList";
 import { useCrudActions } from "@/hooks/useCrudActions";
 import { ApiError } from "@/api/ApiError";
 import ErrorState from "../ErrorState";
+import { useToast } from "@/contexts/ToastContext";
 
 export interface EntityManagerRef<T> {
   updateItem: (item: T) => void;
@@ -102,6 +103,8 @@ export function createEntityManager<
     function EntityManager(_, ref) {
 
       const { hasPermission } = useAuth();
+
+      const toast = useToast();
 
       const {
         items,
@@ -258,6 +261,7 @@ export function createEntityManager<
             removeItem(row);
           }
         } catch (err) {
+          toast.error("[EntityManager] Delete failed:");
           console.error(
             "[EntityManager] Delete failed:",
             err
@@ -319,6 +323,7 @@ export function createEntityManager<
           );
 
         } catch (err) {
+          toast.error("Transition failed", String(err));
           console.error(
             "[EntityManager] Transition failed:",
             err

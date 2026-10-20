@@ -6,6 +6,7 @@ import ProjectDetail from "../../projects/components/ProjectDetail";
 import { extractId } from "@/utils/utils";
 import ReviewerManager from "../../reviewers/components/Manager";
 import { ReviewerTargetType } from "../../reviewers/models/reviewer.model";
+import { StatusHistoryWidget } from "@/components/StatusHistoryWidget";
 
 interface ApplicationDetailProps {
     application: Application;
@@ -33,6 +34,12 @@ const ApplicationDetail = ({ application, updateApplication }: ApplicationDetail
             permission: "project:lookup",
             content: projectId ? <ProjectDetail project={projectId} /> : null
         },
+        {
+            header: "Status History",
+            icon: "pi pi-history",
+            permission: "project:read",
+            content: <StatusHistoryWidget history={application.statusHistory} />
+        }
     ], [application, projectId]);
 
     /**

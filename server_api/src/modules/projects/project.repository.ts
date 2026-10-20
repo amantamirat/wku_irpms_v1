@@ -85,6 +85,24 @@ export interface CreateProjectData
     status?: ProjectStatus;
 }
 
+function populate(dbQuery: any) {
+    return dbQuery
+        .populate("leadPI")
+        .populate("grant")
+        .populate("organization")
+        .populate("workspace")
+        .populate("calendar")
+        .populate("themes")
+        .populate("currentApplication")
+        //.populate("currentPhase")
+        .populate("currentVerification")
+        .populate("createdBy")
+        .populate({
+            path: "statusHistory.changedBy",
+            select: "_id name",
+        });
+}
+
 
 export class ProjectRepository
     implements IProjectRepository {
@@ -164,17 +182,7 @@ export class ProjectRepository
         );
 
         if (options?.populate) {
-            dbQuery = dbQuery
-                .populate("leadPI")
-                .populate("grant")
-                .populate("organization")
-                .populate("workspace")
-                .populate("calendar")
-                .populate("themes")
-                .populate("currentApplication")
-                .populate("currentPhase")
-                .populate("currentVerification")
-                .populate("createdBy");
+            dbQuery = populate(dbQuery)
         }
 
         return dbQuery
@@ -201,22 +209,7 @@ export class ProjectRepository
             Project.find(query);
 
         if (options?.populate) {
-            dbQuery = dbQuery
-                .populate("leadPI")
-                .populate("grant")
-                .populate("organization")
-                .populate("workspace")
-                .populate("calendar")
-                .populate("call")
-                //.populate("themes")
-                //.populate("currentApplication")
-                //.populate("currentPhase")
-                //.populate("currentVerification")
-                .populate("createdBy")
-                .populate({
-                    path: "statusHistory.changedBy",
-                    select: "_id name",
-                });
+            dbQuery = populate(dbQuery)
         }
 
         return dbQuery

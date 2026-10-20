@@ -1,462 +1,374 @@
 // ApplicationManager.tsx
 'use client';
 
+import { useCallback, useMemo, useRef, useState } from 'react';
+import { ColumnProps } from 'primereact/column';
 import { BASE_URL } from '@/api/ApiClient';
-import {
-    StateTransition
-} from '@/api/EntityApi';
-import {
-    ItemDataTable,
-    RowActionButton
-} from '@/components/data-table/ItemDataTable';
-import { useConfirmDialog } from '@/contexts/ConfirmDialogContext';
+import { RowActionButton } from '@/components/data-table/ItemDataTable';
+import { ItemManager, ItemManagerHandle } from '@/components/ItemManager';
 import { useAuth } from '@/contexts/auth-context';
-import { useStateTransitionActions } from '@/hooks/useStateTransitionActions';
 import MyBadge from '@/templates/MyBadge';
-import { useEffect, useState } from 'react';
 import { Stage } from '../../calls/stages/models/stage.model';
+import { UserApi } from '../../users/api/user.api';
 import { ApplicationApi } from '../api/application.api';
 import {
     AnonymizationStatus,
     Application,
-    ApplicationStatus
+    ApplicationStatus,
 } from '../models/application.model';
-import {
-    APPLICATION_TRANSITIONS
-} from '../models/application.state-machine';
+import { APPLICATION_TRANSITIONS } from '../models/application.state-machine';
 import ApplicationDetail from './ApplicationDetail';
-import { UserApi } from '../../users/api/user.api';
 import { ReviewerAssignerDialog } from './ReviewerAssignerDialog';
 import { ApplicationAnonymizeDialog } from './ApplicationAnonymizeDialog';
+import { useToast } from '@/contexts/ToastContext';
+
+/* -------------------------------------------------------------------------- */
+/*                         Columns (static, module level)                     */
+/* -------------------------------------------------------------------------- */
+
+const getProject = (row: Application) =>
+    typeof row.project === 'object' && row.project !== null ? row.project : null;
+
+const percentColumn = (
+    header: string,
+    key: 'femaleProportion' | 'verifiedCollaboratorsProportion'
+): ColumnProps => ({
+    header,
+    field: `project.${key}`,
+    sortable: true,
+    body: (row: Application) => {
+        const value = (getProject(row) as any)?.[key];
+        return (
+            <span className="text-xs text-gray-600">
+                {typeof value === 'number' ? `${value.toFixed(2)}%` : '—'}
+            </span>
+        );
+    },
+});
+
+const docColumn = (
+    header: string,
+    field: string,
+    getPath: (row: Application) => string | undefined,
+    linkClass: string,
+    iconClass: string,
+    emptyLabel: string
+): ColumnProps => ({
+    header,
+    field,
+    body: (row: Application) => {
+        const path = getPath(row);
+        return path ? (
+            <a
+                href={`${BASE_URL}/uploads/${path.replace(/^\/+/, '')}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className={`inline-flex items-center gap-1.5 text-xs font-medium hover:underline ${linkClass}`}
+            >
+                <i className={`pi pi-file-pdf text-sm ${iconClass}`} />
+                <span>View PDF</span>
+            </a>
+        ) : (
+            <span className="text-gray-400 text-xs italic">{emptyLabel}</span>
+        );
+    },
+});
+
+const COLUMNS: ColumnProps[] = [
+    {
+        header: 'Project',
+        field: 'project.title',
+        sortable: true,
+        body: (row: Application) => {
+            const title = getProject(row)?.title ?? 'Unknown Project';
+            return (
+                <div
+                    className="truncate text-sm font-medium"
+                    title={title}
+                    style={{ maxWidth: '350px' }}
+                >
+                    {title}
+                </div>
+            );
+        },
+    },
+    percentColumn('Female Proportion', 'femaleProportion'),
+    percentColumn('Verified Collaborators', 'verifiedCollaboratorsProportion'),
+    docColumn('Orig Doc', 'origDoc', (a) => a.documentPath,
+        'text-blue-600 hover:text-blue-800', 'text-red-500', 'No document'),
+    docColumn('Anon Doc', 'anonDoc', (a) => a.anonymizedDocumentPath,
+        'text-emerald-600 hover:text-emerald-800', 'text-emerald-500', 'N/A'),
+    {
+        header: 'Score',
+        field: 'totalScore',
+        sortable: true,
+        body: (a: Application) => (
+            <span className="font-bold text-sm">
+                {typeof a.totalScore === 'number' ? a.totalScore.toFixed(2) : '—'}
+            </span>
+        ),
+    },
+    {
+        header: 'Submitted At',
+        field: 'createdAt',
+        sortable: true,
+        body: (a: Application) => (
+            <span className="text-sm">
+                {a.createdAt
+                    ? new Date(a.createdAt).toLocaleString('en-GB', {
+                        day: '2-digit',
+                        month: 'short',
+                        year: 'numeric',
+                        hour: '2-digit',
+                        minute: '2-digit',
+                        hour12: true,
+                    })
+                    : '—'}
+            </span>
+        ),
+    },
+    {
+        header: 'Reviewer Assigner',
+        field: 'assigner',
+        body: (row: Application) => {
+            const assigner = row.reviewerAssigner;
+            const name =
+                typeof assigner === 'object' && assigner !== null
+                    ? (assigner as any).name
+                    : assigner
+                        ? 'Assigned User'
+                        : null;
+
+            return name ? (
+                <span className="inline-flex align-items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 border-round text-xs font-medium">
+                    <i className="pi pi-user text-xs" />
+                    {name}
+                </span>
+            ) : (
+                <span className="text-gray-400 text-xs italic">Unassigned</span>
+            );
+        },
+    },
+    {
+        header: 'Status',
+        field: 'status',
+        sortable: true,
+        body: (a: Application) => <MyBadge type="status" value={a.status} />,
+    },
+];
+
+const DEFAULT_HIDDEN = [
+    'project.femaleProportion',
+    'project.verifiedCollaboratorsProportion',
+    'assigner',
+    'origDoc',
+    'anonDoc',
+];
+
+/* -------------------------------------------------------------------------- */
+/*                       Local dialog flows (one hook each)                   */
+/* -------------------------------------------------------------------------- */
+
+type Patch = (id: string, patch: Partial<Application>) => void;
+
+function useReviewerAssigner(patch: Patch) {
+    const [visible, setVisible] = useState(false);
+    const [target, setTarget] = useState<Application | null>(null);
+    const [users, setUsers] = useState<any[]>([]);
+    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+    const usersLoaded = useRef(false);
+
+    const open = useCallback(async (application: Application) => {
+        const current = application.reviewerAssigner as any;
+        setTarget(application);
+        setSelectedUserId((typeof current === 'object' ? current?._id : current) || null);
+        setError(null);
+        setVisible(true);
+
+        if (!usersLoaded.current) {
+            try {
+                const data = await UserApi.lookup!();
+                setUsers(Array.isArray(data) ? data : []);
+                usersLoaded.current = true;
+            } catch (err) {
+                console.error('Failed to fetch users list', err);
+                setError('Failed to load user list.');
+            }
+        }
+    }, []);
+
+    const close = useCallback(() => setVisible(false), []);
+
+    const save = useCallback(async () => {
+        if (!target?._id) return;
+        setSaving(true);
+        setError(null);
+        try {
+            const updated = await ApplicationApi.updateReviewerAssigner(target._id, selectedUserId);
+            patch(target._id, { reviewerAssigner: updated.reviewerAssigner });
+            setVisible(false);
+        } catch (err: any) {
+            console.error('Failed to update reviewer assigner', err);
+            setError(err?.message || 'Failed to update reviewer assigner. Please try again.');
+        } finally {
+            setSaving(false);
+        }
+    }, [target, selectedUserId, patch]);
+
+    return {
+        open,
+        dialogProps: {
+            visible,
+            onHide: close,
+            users,
+            selectedUserId,
+            setSelectedUserId,
+            onSave: save,
+            saving,
+            errorMessage: error,
+        },
+    };
+}
+
+function useAnonymize(patch: Patch) {
+    const [visible, setVisible] = useState(false);
+    const [target, setTarget] = useState<Application | null>(null);
+    const [saving, setSaving] = useState(false);
+    const [error, setError] = useState<string | null>(null);
+
+    const open = useCallback((application: Application) => {
+        setTarget(application);
+        setError(null);
+        setVisible(true);
+    }, []);
+
+    const close = useCallback(() => setVisible(false), []);
+
+    const anonymize = useCallback(
+        async (manualIdentifiers: string[]) => {
+            if (!target?._id) return;
+            setSaving(true);
+            setError(null);
+            try {
+                const updated = await ApplicationApi.anonymize(target._id, manualIdentifiers);
+                patch(target._id, updated);
+                setVisible(false);
+                setTarget(null);
+            } catch (err: any) {
+                setError(err?.message || 'Failed to anonymize the application document.');
+            } finally {
+                setSaving(false);
+            }
+        },
+        [target, patch]
+    );
+
+    return {
+        open,
+        dialogProps: {
+            visible,
+            onHide: close,
+            identifiers: target?.manualIdentifiers ?? [],
+            onAnonymize: anonymize,
+            saving,
+            errorMessage: error,
+        },
+    };
+}
+
+/* -------------------------------------------------------------------------- */
+/*                              ApplicationManager                            */
+/* -------------------------------------------------------------------------- */
 
 interface ApplicationManagerProps {
     stage: Stage;
 }
 
 const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
-    const confirm = useConfirmDialog();
     const { hasPermission } = useAuth();
+    const toast = useToast();
+    const manager = useRef<ItemManagerHandle<Application>>(null);
 
-    const [applications, setApplications] = useState<Application[]>([]);
-    const [loading, setLoading] = useState(true);
+    // Stable helpers that talk to the table through the handle
+    const patch = useCallback<Patch>((id, p) => manager.current?.patchItem(id, p), []);
+    const replace = useCallback(
+        (updated: Application) => manager.current?.updateItem(updated),
+        []
+    );
 
-    // Dialog state for Reviewer Assigner
-    const [assignerDialogVisible, setAssignerDialogVisible] = useState(false);
-    const [activeApplication, setActiveApplication] = useState<Application | null>(null);
-    const [users, setUsers] = useState<any[]>([]);
-    const [selectedUserId, setSelectedUserId] = useState<string | null>(null);
-    const [savingAssigner, setSavingAssigner] = useState(false);
-    const [dialogError, setDialogError] = useState<string | null>(null);
+    const assigner = useReviewerAssigner(patch);
+    const anonymizer = useAnonymize(patch);
 
+    const extraRowActions = useMemo<RowActionButton<Application>[]>(
+        () => [
+            {
+                icon: 'pi pi-user-plus',
+                severity: 'info',
+                tooltip: 'Manage Reviewer Assigner',
+                visible: () => hasPermission('application:reviewerAssigner:update'),
+                disabled: (row) => row.status !== ApplicationStatus.shortlisted,
+                onClick: assigner.open,
+            },
+            {
+                icon: 'pi pi-eye-slash',
+                severity: 'warning',
+                tooltip: 'Anonymize Document',
+                visible: () => hasPermission('application:anonymize'),
+                disabled: (row) =>
+                    row.anonymizationStatus === AnonymizationStatus.processing,
+                onClick: anonymizer.open,
+            },
+        ],
+        [hasPermission, assigner.open, anonymizer.open]
+    );
 
-    const [anonymizeDialogVisible, setAnonymizeDialogVisible] = useState(false);
-    const [anonymizeApplication, setAnonymizeApplication] =
-        useState<Application | null>(null);
-    const [savingAnonymization, setSavingAnonymization] = useState(false);
-    const [anonymizeError, setAnonymizeError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchApplications = async () => {
-            if (!stage) return;
-
-            setLoading(true);
-
-            try {
-                const data = await ApplicationApi.getAll({ stage });
-                setApplications(Array.isArray(data) ? data : []);
-            } catch (error) {
-                console.error(
-                    'Error fetching applications for stage:',
-                    error
-                );
-            } finally {
-                setLoading(false);
-            }
-        };
-
-        fetchApplications();
-    }, [stage]);
-
-    // Fetch users when the dialog opens
-    const handleOpenAssignerDialog = async (application: Application) => {
-        setActiveApplication(application);
-        const currentAssignerId = typeof application.reviewerAssigner === 'object'
-            ? (application.reviewerAssigner as any)?._id
-            : application.reviewerAssigner;
-
-        setSelectedUserId(currentAssignerId || null);
-        setDialogError(null);
-        setAssignerDialogVisible(true);
-
-        if (users.length === 0) {
-            try {
-                const userData = await UserApi.lookup!();
-                setUsers(Array.isArray(userData) ? userData : []);
-            } catch (err) {
-                console.error("Failed to fetch users list", err);
-                setDialogError("Failed to load user list.");
-            }
-        }
-    };
-
-    const handleSaveAssigner = async () => {
-        if (!activeApplication?._id) return;
-
-        setSavingAssigner(true);
-        setDialogError(null);
-
-        try {
-            const updated = await ApplicationApi.updateReviewerAssigner(
-                activeApplication._id,
-                selectedUserId
-            );
-
-            setApplications(prev =>
-                prev.map(app =>
-                    app._id === activeApplication._id
-                        ? { ...app, reviewerAssigner: updated.reviewerAssigner }
-                        : app
-                )
-            );
-
-            setAssignerDialogVisible(false);
-        } catch (error: any) {
-            console.error("Failed to update reviewer assigner", error);
-            setDialogError(error?.message || "Failed to update reviewer assigner. Please try again.");
-        } finally {
-            setSavingAssigner(false);
-        }
-    };
-
-
-    const handleOpenAnonymizeDialog = (application: Application) => {
-        setAnonymizeApplication(application);
-        setAnonymizeError(null);
-        setAnonymizeDialogVisible(true);
-    };
-
-    const handleAnonymize = async (manualIdentifiers: string[]) => {
-        if (!anonymizeApplication?._id) return;
-
-        setSavingAnonymization(true);
-        setAnonymizeError(null);
-
-        try {
-            const updated = await ApplicationApi.anonymize(
-                anonymizeApplication._id,
-                manualIdentifiers
-            );
-
-            setApplications(prev =>
-                prev.map(app =>
-                    app._id === anonymizeApplication._id
-                        ? {
-                            ...app,
-                            ...updated
-                        }
-                        : app
-                )
-            );
-
-            setAnonymizeDialogVisible(false);
-            setAnonymizeApplication(null);
-        } catch (error: any) {
-            setAnonymizeError(
-                error?.message || 'Failed to anonymize the application document.'
-            );
-        } finally {
-            setSavingAnonymization(false);
-        }
-    };
-
-    const updateApplication = (updated: Application) => {
-        setApplications(prev =>
-            prev.map(application =>
-                application._id === updated._id
-                    ? updated
-                    : application
-            )
-        );
-    };
-
-    const handleTransition = async (
-        id: string,
-        transition: StateTransition
-    ) => {
-        const updated = await ApplicationApi.transitionState?.(
-            id,
-            transition
-        );
-
-        if (!updated) return;
-
-        setApplications(prev =>
-            prev.map(item =>
-                item._id === id
-                    ? {
-                        ...item,
-                        status: updated.status
-                    }
-                    : item
-            )
-        );
-    };
-
-    const stateActions: RowActionButton<Application>[] =
-        useStateTransitionActions({
-            resource: 'application',
-            statusField: 'status',
-            transitions: APPLICATION_TRANSITIONS,
-            onTransition: handleTransition
-        });
-
-    const columns = [
-        {
-            header: 'Project',
-            field: 'project.title',
-            sortable: true,
-            body: (row: Application) => {
-                const project =
-                    typeof row.project === 'object'
-                        ? row.project
-                        : null;
-
-                const title = project?.title ?? 'Unknown Project';
-
-                return (
-                    <div
-                        className="truncate text-sm font-medium"
-                        title={title}
-                        style={{ maxWidth: '350px' }}
-                    >
-                        {title}
-                    </div>
-                );
-            }
-        },
-        {
-            header: 'Female Proportion',
-            field: 'project.femaleProportion',
-            sortable: true,
-            body: (row: Application) => {
-                const project =
-                    typeof row.project === 'object' && row.project !== null
-                        ? row.project
-                        : null;
-
-                const proportion = project?.femaleProportion;
-
-                return (
-                    <span className="text-xs text-gray-600">
-                        {typeof proportion === 'number'
-                            ? `${proportion.toFixed(2)}%`
-                            : '—'}
-                    </span>
-                );
-            }
-        },
-        {
-            header: 'Verified Collaborators',
-            field: 'project.verifiedCollaboratorsProportion',
-            sortable: true,
-            body: (row: Application) => {
-                const project =
-                    typeof row.project === 'object' && row.project !== null
-                        ? row.project
-                        : null;
-
-                const proportion = project?.verifiedCollaboratorsProportion;
-
-                return (
-                    <span className="text-xs text-gray-600">
-                        {typeof proportion === 'number'
-                            ? `${proportion.toFixed(2)}%`
-                            : '—'}
-                    </span>
-                );
-            }
-        },
-        {
-            header: 'Orig Doc',
-            field: 'origDoc',
-            body: (application: Application) =>
-                application.documentPath ? (
-                    <a
-                        href={`${BASE_URL}/uploads/${application.documentPath.replace(
-                            /^\\/,
-                            ''
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-medium text-blue-600 hover:text-blue-800 hover:underline"
-                    >
-                        <i className="pi pi-file-pdf text-red-500 text-sm" />
-                        <span>View PDF</span>
-                    </a>
-                ) : (
-                    <span className="text-gray-400 text-xs italic">
-                        No document
-                    </span>
-                )
-        },
-        {
-            header: 'Anon Doc',
-            field: 'anonDoc',
-            body: (application: Application) =>
-                application.anonymizedDocumentPath ? (
-                    <a
-                        href={`${BASE_URL}/uploads/${application.anonymizedDocumentPath.replace(
-                            /^\\/,
-                            ''
-                        )}`}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="inline-flex items-center gap-1.5 text-xs font-medium text-emerald-600 hover:text-emerald-800 hover:underline"
-                    >
-                        <i className="pi pi-file-pdf text-emerald-500 text-sm" />
-                        <span>View PDF</span>
-                    </a>
-                ) : (
-                    <span className="text-gray-400 text-xs italic">
-                        N/A
-                    </span>
-                )
-        },
-        {
-            header: 'Score',
-            field: 'totalScore',
-            sortable: true,
-            body: (application: Application) => (
-                <span className="font-bold text-sm">
-                    {typeof application.totalScore === 'number'
-                        ? application.totalScore.toFixed(2)
-                        : '—'}
-                </span>
-            )
-        },
-        {
-            header: 'Submitted At',
-            field: 'createdAt',
-            sortable: true,
-            body: (application: Application) => (
-                <span className="text-sm">
-                    {application.createdAt
-                        ? new Date(application.createdAt).toLocaleString('en-GB', {
-                            day: '2-digit',
-                            month: 'short',
-                            year: 'numeric',
-                            hour: '2-digit',
-                            minute: '2-digit',
-                            hour12: true
-                        })
-                        : '—'}
-                </span>
-            )
-        },
-        {
-            header: 'Reviewer Assigner',
-            field: "assigner",
-            body: (row: Application) => {
-                const assigner = row.reviewerAssigner;
-                const assignerName = typeof assigner === 'object' && assigner !== null
-                    ? (assigner as any).name
-                    : (assigner ? 'Assigned User' : null);
-
-                return assignerName ? (
-                    <span className="inline-flex align-items-center gap-1 px-2 py-1 bg-blue-50 text-blue-700 border-round text-xs font-medium">
-                        <i className="pi pi-user text-xs"></i>
-                        {assignerName}
-                    </span>
-                ) : (
-                    <span className="text-gray-400 text-xs italic">Unassigned</span>
-                );
-            }
-        },
-        {
-            header: 'Status',
-            field: 'status',
-            sortable: true,
-            body: (application: Application) => (
-                <MyBadge
-                    type="status"
-                    value={application.status}
-                />
-            )
-        }
-    ];
-
-    const extraActions: RowActionButton<Application>[] = [
-        {
-            icon: 'pi pi-user-plus',
-            severity: 'info',
-            tooltip: 'Manage Reviewer Assigner',
-            visible: () => hasPermission("application:reviewerAssigner:update"),
-            disabled: (row: Application) =>
-                row.status !==
-                ApplicationStatus.shortlisted,
-            onClick: (row: Application) => handleOpenAssignerDialog(row)
-        },
-        {
-            icon: 'pi pi-eye-slash',
-            severity: 'warning',
-            tooltip: 'Anonymize Document',
-            visible: () => hasPermission('application:anonymize'),
-            disabled: (row: Application) =>
-                row.anonymizationStatus === AnonymizationStatus.processing,
-            onClick: (row: Application) => handleOpenAnonymizeDialog(row)
-        }
-    ];
-
-    if (loading) {
-        return (
-            <div className="p-4 text-center">
-                Loading applications...
-            </div>
-        );
-    }
+    const tableProps = useMemo(
+        () => ({
+            enableSearch: true,
+            expandable: {
+                template: (application: Application) => (
+                    <ApplicationDetail
+                        application={application}
+                        updateApplication={replace}
+                    />
+                ),
+            },
+        }),
+        [replace]
+    );
 
     return (
         <>
-            <ItemDataTable
-                items={applications}
-                columns={columns}
-                rowActions={[
-                    ...stateActions,
-                    ...extraActions
-                ]}
-                enableSearch
+            <ItemManager<Application, { stage: Stage }>
+                managerRef={manager}
+                api={ApplicationApi}
+                resource="application"
+                itemName="Application"
+                filter={{ stage }}
+                enabled={!!stage}
+                columns={COLUMNS}
                 enableColumnToggle
-                defaultHiddenFields={["project.femaleProportion", "project.verifiedCollaboratorsProportion", "assigner", "origDoc", "anonDoc"]}
-                expandable={{
-                    template: application => (
-                        <ApplicationDetail
-                            application={application}
-                            updateApplication={updateApplication}
-                        />
-                    )
-                }}
+                defaultHiddenFields={DEFAULT_HIDDEN}
+                hideCreateAction
+                hideEditAction
+                hideDeleteAction
+                statusField="status"
+                transitions={APPLICATION_TRANSITIONS}
+                // The transition response isn't populated: keep the row, take only the status
+                mapTransitioned={(updated, previous) =>
+                    previous ? { ...previous, status: updated.status } : updated
+                }
+                extraRowActions={extraRowActions}
+                tableProps={tableProps}
+                onError={(error, operation) =>
+                    toast.error(error, operation)
+                }
             />
 
-            {/* Separated Reviewer Assigner Dialog Component */}
-            <ReviewerAssignerDialog
-                visible={assignerDialogVisible}
-                onHide={() => setAssignerDialogVisible(false)}
-                users={users}
-                selectedUserId={selectedUserId}
-                setSelectedUserId={setSelectedUserId}
-                onSave={handleSaveAssigner}
-                saving={savingAssigner}
-                errorMessage={dialogError}
-            />
-
-            <ApplicationAnonymizeDialog
-                visible={anonymizeDialogVisible}
-                onHide={() => setAnonymizeDialogVisible(false)}
-                identifiers={anonymizeApplication?.manualIdentifiers ?? []}
-                onAnonymize={handleAnonymize}
-                saving={savingAnonymization}
-                errorMessage={anonymizeError}
-            />
+            <ReviewerAssignerDialog {...assigner.dialogProps} />
+            <ApplicationAnonymizeDialog {...anonymizer.dialogProps} />
         </>
     );
 };

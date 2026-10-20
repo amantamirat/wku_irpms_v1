@@ -1,4 +1,4 @@
-import { extractId } from "@/utils/utils";
+import { MENU_ICONS } from "@/utils/menu-icons";
 
 // Enum for Organization Types
 export enum OrgnUnit {
@@ -131,12 +131,21 @@ export const validateOrganization = (
 };
 
 
+export const ORGANIZATION_TYPE_ICONS: Record<OrgnUnit, string> = {
+    [OrgnUnit.college]: MENU_ICONS.colleges,
+    [OrgnUnit.department]: MENU_ICONS.departments,
+    [OrgnUnit.program]: MENU_ICONS.programs,
+    [OrgnUnit.directorate]: MENU_ICONS.directorates,
+    [OrgnUnit.center]: MENU_ICONS.centers,
+    [OrgnUnit.external]: MENU_ICONS.externalOrganizations
+};
 
 
+/*
 export const createEmptyOrganization = (org: Organization): Organization => ({
     type: org.type,
     name: "",
-});
+});*/
 
 
 

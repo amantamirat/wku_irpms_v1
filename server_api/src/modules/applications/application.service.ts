@@ -542,7 +542,7 @@ export class ApplicationService {
      * Transition stage status (state machine) use current application
      */
     async transitionState(dto: TransitionRequestDto, userId: string) {
-        const { id, current, next } = dto;
+        const { id, current, next, reason } = dto;
 
         const applicationDoc = await this.applicationRepo.findById(id);
 
@@ -638,7 +638,7 @@ export class ApplicationService {
             }
         }
 
-        const updated = await this.applicationRepo.updateStatus(id, to, userId);
+        const updated = await this.applicationRepo.updateStatus(id, to, userId, reason);
 
 
         if (this.notificationService) {

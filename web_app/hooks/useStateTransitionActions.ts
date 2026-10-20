@@ -7,7 +7,7 @@ export interface TransitionAction {
     next: string;
     action: string;
     icon: string;
-    severity: "success" | "warning" | "danger" | "info" | "secondary";
+    severity: "success" | "warning" | "danger" | "info";
     /** When true, the confirm dialog's reason box must be filled in. */
     requireReason?: boolean;
 }

@@ -13,7 +13,8 @@ export const APPLICATION_TRANSITIONS: TransitionMap = {
             next: ApplicationStatus.notShortlisted,
             action: "Exclude",
             icon: "pi pi-times",
-            severity: "danger"
+            severity: "danger",
+            requireReason: true
         }
     ],
 
@@ -22,7 +23,8 @@ export const APPLICATION_TRANSITIONS: TransitionMap = {
             next: ApplicationStatus.submitted,
             action: "Reopen",
             icon: "pi pi-undo",
-            severity: "warning"
+            severity: "warning",
+            requireReason: true
         },
         {
             next: ApplicationStatus.accepted,
@@ -45,7 +47,8 @@ export const APPLICATION_TRANSITIONS: TransitionMap = {
             next: ApplicationStatus.submitted,
             action: "Reopen",
             icon: "pi pi-undo",
-            severity: "warning"
+            severity: "warning",
+            requireReason: true
         }
     ],
 
@@ -56,7 +59,8 @@ export const APPLICATION_TRANSITIONS: TransitionMap = {
             next: ApplicationStatus.shortlisted,
             action: "Reopen",
             icon: "pi pi-undo",
-            severity: "warning"
+            severity: "warning",
+            requireReason: true
         }
     ],
 
@@ -67,7 +71,8 @@ export const APPLICATION_TRANSITIONS: TransitionMap = {
             next: ApplicationStatus.shortlisted,
             action: "Reopen",
             icon: "pi pi-undo",
-            severity: "warning"
+            severity: "warning",
+            requireReason: true
         }
     ]
 };

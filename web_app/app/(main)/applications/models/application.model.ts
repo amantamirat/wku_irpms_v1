@@ -1,6 +1,7 @@
 import { Stage } from "@/app/(main)/calls/stages/models/stage.model";
 import { Project } from "../../projects/models/project.model";
 import { User } from "../../users/models/user.model";
+import { IStatusHistory } from "@/components/StatusHistoryWidget";
 
 export enum ApplicationStatus {
     submitted = "submitted",
@@ -30,6 +31,7 @@ export type Application = {
     anonymizedDocumentPath?: string;
     reviewerAssigner?: string | User | null;
     status: ApplicationStatus;
+    statusHistory?: IStatusHistory<ApplicationStatus>[];
     createdAt?: Date;
     updatedAt?: Date;
 }

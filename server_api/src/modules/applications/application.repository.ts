@@ -60,7 +60,8 @@ export interface IApplicationRepository {
     updateStatus(
         id: string,
         newStatus: ApplicationStatus,
-        userId: string
+        userId: string,
+        reason?: string,
     ): Promise<IApplication | null>;
 
     exists(
@@ -156,7 +157,11 @@ export class ApplicationRepository
         if (options?.populate) {
             dbQuery
                 .populate("project")
-                .populate("stage");
+                .populate("stage")
+                .populate({
+                    path: "statusHistory.changedBy",
+                    select: "_id name",
+                });
         }
 
         return dbQuery
@@ -187,7 +192,11 @@ export class ApplicationRepository
         if (options?.populate) {
             dbQuery
                 .populate("project")
-                .populate("stage");
+                .populate("stage")
+                .populate({
+                    path: "statusHistory.changedBy",
+                    select: "_id name",
+                });
         }
 
         return dbQuery
@@ -297,7 +306,8 @@ export class ApplicationRepository
     async updateStatus(
         id: string,
         status: ApplicationStatus,
-        userId: string
+        userId: string,
+        reason?: string,
     ): Promise<IApplication | null> {
 
         return Application.findByIdAndUpdate(
@@ -311,7 +321,8 @@ export class ApplicationRepository
                         status,
                         changedBy:
                             toObjectId(userId),
-                        changedAt: new Date()
+                        changedAt: new Date(),
+                        reason
                     }
                 }
             },

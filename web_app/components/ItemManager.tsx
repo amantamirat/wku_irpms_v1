@@ -1,8 +1,17 @@
 'use client';
 
-import React, { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import React, {
+    useCallback,
+    useEffect,
+    useId,
+    useImperativeHandle,
+    useMemo,
+    useRef,
+    useState,
+} from "react";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
+import { PrimeIcons } from "primereact/api";
 import { EntityApi, StateTransition } from "@/api/EntityApi";
 import {
     ItemDataTable,
@@ -18,7 +27,6 @@ import {
     useStateTransitionActions,
 } from "@/hooks/useStateTransitionActions";
 import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
-import { PrimeIcons } from "primereact/api";
 
 /* -------------------------------------------------------------------------- */
 /*                                    Types                                   */
@@ -27,6 +35,16 @@ import { PrimeIcons } from "primereact/api";
 export type ItemManagerOperation = "load" | "create" | "update" | "delete" | "transition";
 
 export type ItemFormMode = "create" | "edit";
+
+/** Imperative handle so the parent can change the list after its own actions. */
+export interface ItemManagerHandle<T> {
+    addItem: (item: T, options?: { prepend?: boolean }) => void;
+    updateItem: (item: T) => void;
+    patchItem: (id: string, patch: Partial<T>) => void;
+    removeItem: (item: T | string) => void;
+    getById: (id: string) => T | undefined;
+    reload: () => void;
+}
 
 export interface ItemFormRenderProps<T> {
     mode: ItemFormMode;
@@ -57,11 +75,16 @@ export interface ItemManagerProps<T, Q = undefined> {
 
     /** Passed to api.getAll. Objects are compared by value, so inline literals are fine. */
     filter?: Q;
+    /** Set to false to postpone loading (e.g. until a required filter exists). Default true. */
+    enabled?: boolean;
+
+    /** Lets the parent add / update / patch / remove rows or trigger a reload. */
+    managerRef?: React.Ref<ItemManagerHandle<T>>;
 
     /** Renders the create/edit form inside the dialog. Omit it to hide Create and Edit. */
     renderForm?: (props: ItemFormRenderProps<T>) => React.ReactNode;
     dialogWidth?: string;
-    dialogMaximazable?: boolean;
+    dialogMaximizable?: boolean;
     dialogMaximized?: boolean;
 
     /* State transitions (needs api.transitionState) */
@@ -105,6 +128,12 @@ export interface ItemManagerProps<T, Q = undefined> {
      * the API doesn't echo back. `submitted` is what the form sent.
      */
     mapSaved?: (saved: T, submitted: Partial<T>) => T;
+
+    /**
+     * Same idea for state transitions. `previous` is the row currently in the list
+     * (e.g. keep populated relations and only take `status` from the response).
+     */
+    mapTransitioned?: (updated: T, previous: T | undefined) => T;
 }
 
 /** Runs a user callback without letting its errors be mistaken for API failures. */
@@ -138,10 +167,12 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
     defaultHiddenFields,
 
     filter,
+    enabled = true,
+    managerRef,
 
     renderForm,
     dialogWidth = "32rem",
-    dialogMaximazable,
+    dialogMaximizable,
     dialogMaximized,
 
     statusField,
@@ -161,11 +192,12 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
     onDeleted,
     onTransitioned,
     mapSaved,
+    mapTransitioned,
 }: ItemManagerProps<T, Q>) {
     const confirm = useConfirmDialog();
     const formId = useId();
 
-    const getId = useCallback((row: T) => row[dataKey] as string, [dataKey]);
+    const getId = useCallback((row: T) => String(row[dataKey]), [dataKey]);
 
     const {
         items,
@@ -178,6 +210,8 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
     } = useCrudList<T>({ getId });
 
     // Latest values without re-triggering effects / callbacks
+    const itemsRef = useRef(items);
+    itemsRef.current = items;
     const onErrorRef = useRef(onError);
     onErrorRef.current = onError;
     const onSuccessRef = useRef(onSuccess);
@@ -188,6 +222,8 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
     onTransitionedRef.current = onTransitioned;
     const mapSavedRef = useRef(mapSaved);
     mapSavedRef.current = mapSaved;
+    const mapTransitionedRef = useRef(mapTransitioned);
+    mapTransitionedRef.current = mapTransitioned;
     const filterRef = useRef(filter);
     filterRef.current = filter;
 
@@ -196,19 +232,27 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
         else console.error(`ItemManager ${operation} failed:`, error);
     }, []);
 
+    const getById = useCallback(
+        (id: string) => itemsRef.current.find((row) => getId(row) === id),
+        [getId]
+    );
+
     /* ------------------------------- Loading ------------------------------- */
 
     const filterKey = JSON.stringify(filter ?? null);
     const requestId = useRef(0);
+    const [reloadTick, setReloadTick] = useState(0);
 
     useEffect(() => {
+        if (!enabled) return;
+
         const id = ++requestId.current;
 
         withLoading(async () => {
             try {
                 const data = await api.getAll(filterRef.current);
                 // Ignore responses from superseded requests
-                if (id === requestId.current) setAll(data);
+                if (id === requestId.current) setAll(Array.isArray(data) ? data : []);
             } catch (error) {
                 if (id === requestId.current) reportError(error, "load");
             }
@@ -218,12 +262,34 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
             // Invalidate in-flight request on change/unmount
             requestId.current++;
         };
-    }, [api, filterKey, withLoading, setAll, reportError]);
+    }, [api, filterKey, enabled, reloadTick, withLoading, setAll, reportError]);
+
+    /* --------------------------- Imperative handle -------------------------- */
+
+    useImperativeHandle(
+        managerRef,
+        (): ItemManagerHandle<T> => ({
+            addItem,
+            updateItem,
+            patchItem: (id, patch) => {
+                const current = getById(id);
+                if (current) updateItem({ ...current, ...patch });
+            },
+            removeItem: (target) => {
+                const row = typeof target === "string" ? getById(target) : target;
+                if (row) removeItem(row);
+            },
+            getById,
+            reload: () => setReloadTick((t) => t + 1),
+        }),
+        [addItem, updateItem, removeItem, getById]
+    );
 
     /* ------------------------------ Form dialog ----------------------------- */
 
     const [form, setForm] = useState<FormState<T>>(null);
     const [saving, setSaving] = useState(false);
+    const savingRef = useRef(false);
 
     const openCreate = useCallback(() => setForm({ mode: "create", item: null }), []);
     const openEdit = useCallback((row: T) => setForm({ mode: "edit", item: row }), []);
@@ -231,30 +297,36 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
 
     const handleSubmit = useCallback(
         async (data: Partial<T>) => {
-            if (!form) return;
+            if (!form || savingRef.current) return;
 
             const finalize = (saved: T) =>
                 mapSavedRef.current ? mapSavedRef.current(saved, data) : saved;
 
+            savingRef.current = true;
             setSaving(true);
             try {
                 if (form.mode === "create") {
                     const created = finalize(await api.create(data));
-                    addItem(created, { prepend: true });
+                    //addItem(created, { prepend: true }); just to use populated
+                    addItem({ ...created, ...data }, { prepend: true });
                     safely(() => onSuccessRef.current?.("create", created));
                 } else {
                     // update(data) currently takes the id inside the payload
-                    const updated = finalize(await api.update({
-                        ...data,
-                        [dataKey]: getId(form.item),
-                    } as Partial<T>));
-                    updateItem(updated);
+                    const updated = finalize(
+                        await api.update({
+                            ...data,
+                            [dataKey]: getId(form.item),
+                        } as Partial<T>)
+                    );
+                    //updateItem(updated); just to use populated
+                    updateItem({ ...updated, ...data });
                     safely(() => onSuccessRef.current?.("update", updated));
                 }
                 setForm(null);
             } catch (error) {
                 reportError(error, form.mode === "create" ? "create" : "update");
             } finally {
+                savingRef.current = false;
                 setSaving(false);
             }
         },
@@ -291,16 +363,20 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
                 item: itemName,
                 reason: meta.requireReason ? { required: meta.requireReason } : undefined,
                 icon: meta.icon,
+                severity:meta.severity,
                 onConfirm: async ({ reason }) => {
                     const payload: StateTransition = { ...transition, reason };
-                    const updated = await api.transitionState!(id, payload);
-                    updateItem(updated);
-                    safely(() => onTransitionedRef.current?.(updated, payload));
+                    const response = await api.transitionState!(id, payload);
+                    const next = mapTransitionedRef.current
+                        ? mapTransitionedRef.current(response, getById(id))
+                        : response;
+                    updateItem(next);
+                    safely(() => onTransitionedRef.current?.(next, payload));
                 },
                 onError: (error) => reportError(error, "transition"),
             });
         };
-    }, [supportsTransitions, confirm, itemName, api, updateItem, reportError]);
+    }, [supportsTransitions, confirm, itemName, api, updateItem, getById, reportError]);
 
     /* -------------------------------- Actions ------------------------------- */
 
@@ -335,9 +411,6 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
         [crud.toolbarActions, extraToolbarActions]
     );
 
-
-
-
     /* -------------------------------- Render -------------------------------- */
 
     return (
@@ -362,72 +435,39 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
                     header={
                         <div className="flex align-items-center gap-3">
                             <div
-                                className="
-                flex
-                align-items-center
-                justify-content-center
-                border-round
-                bg-primary
-                text-white
-            "
-                                style={{
-                                    width: '2.5rem',
-                                    height: '2.5rem',
-                                    flexShrink: 0
-                                }}
+                                className="flex align-items-center justify-content-center border-round bg-primary text-white"
+                                style={{ width: "2rem", height: "2rem", flexShrink: 0 }}
                             >
-                                <i className={
-                                    (form?.mode === 'edit' ? PrimeIcons.PENCIL : PrimeIcons.PLUS)
-                                } />
+                                <i className={form?.mode === "edit" ? PrimeIcons.PENCIL : PrimeIcons.PLUS} />
                             </div>
-
-                            <div>
-                                <div className="text-xl font-semibold text-900">
-                                    {`${form?.mode === 'edit' ? 'Edit' : 'Add'} ${itemName}`}
-                                </div>
+                            <div className="text-xl font-semibold text-900">
+                                {`${form?.mode === "edit" ? "Edit" : "Add"} ${itemName}`}
                             </div>
                         </div>
                     }
                     style={{ width: dialogWidth }}
                     modal
-                    maximizable={dialogMaximazable}
+                    maximizable={dialogMaximizable}
                     maximized={dialogMaximized}
                     draggable={false}
                     closable={!saving}
                     footer={
-                        <div
-                            className="
-                    flex
-                    flex-column
-                    sm:flex-row
-                    justify-content-between
-                    align-items-stretch
-                    sm:align-items-center
-                    gap-2
-                "
-                        >
-
-                            <small className="text-500">
-                                <i className="pi pi-info-circle mr-1" />
-                            </small>
-
-                            <div className="flex justify-content-end gap-2">
-                                <Button
-                                    type="button"
-                                    label="Cancel"
-                                    icon="pi pi-times"
-                                    outlined
-                                    onClick={closeForm}
-                                    disabled={saving}
-                                />
-                                <Button
-                                    type="submit"
-                                    form={formId}
-                                    label="Save"
-                                    icon="pi pi-check"
-                                    loading={saving}
-                                />
-                            </div>
+                        <div className="flex justify-content-end gap-2">
+                            <Button
+                                type="button"
+                                label="Cancel"
+                                icon="pi pi-times"
+                                outlined
+                                onClick={closeForm}
+                                disabled={saving}
+                            />
+                            <Button
+                                type="submit"
+                                form={formId}
+                                label="Save"
+                                icon="pi pi-check"
+                                loading={saving}
+                            />
                         </div>
                     }
                     onHide={() => {

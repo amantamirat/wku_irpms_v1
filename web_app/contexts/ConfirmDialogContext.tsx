@@ -14,7 +14,6 @@ import { InputTextarea } from "primereact/inputtextarea";
 import { capitalize } from "@/utils/utils";
 import { useToast } from "./ToastContext";
 
-
 export interface ConfirmPayload {
     /** Trimmed text from the reason box. Undefined when there is no reason box or it was left empty. */
     reason?: string;
@@ -26,10 +25,14 @@ export interface ReasonOptions {
     required?: boolean;
 }
 
+export type ConfirmSeverity = 'danger' | 'warning' | 'success' | 'info';
+
 export interface ConfirmOptions {
     operation?: string;
     item?: string;
-    /** Custom icon class (e.g. "pi pi-trash", "pi pi-check"). Defaults to "pi pi-exclamation-triangle". */
+    /** Visual variant of the dialog */
+    severity?: ConfirmSeverity;
+    /** Custom icon class (e.g. "pi pi-trash", "pi pi-check"). If omitted, a smart default based on severity is used. */
     icon?: string;
     /** Shows a reason box in the dialog. */
     reason?: ReasonOptions;
@@ -58,8 +61,6 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
     const [reason, setReason] = useState("");
     const toast = useToast();
 
-    // Stable references: consumers put `confirm` in hook deps, so a new object
-    // on every provider render (e.g. when `loading` flips) would rebuild their actions.
     const ask = useCallback((opts: ConfirmOptions) => {
         setOptions(opts);
         setReason("");
@@ -76,8 +77,52 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
         ? `${op} successfully performed on ${item}`
         : `${op} successfully performed`;
 
-    // Fallback to exclamation-triangle if no custom icon is provided
-    const dialogIcon = options?.icon || "pi pi-exclamation-triangle";
+    const severity = options?.severity || 'danger';
+
+    // Smart defaults for icons based on severity
+    const getDefaultIcon = (sev: ConfirmSeverity) => {
+        switch (sev) {
+            case 'danger': return 'pi pi-trash';
+            case 'warning': return 'pi pi-exclamation-triangle';
+            case 'success': return 'pi pi-check-circle';
+            case 'info': default: return 'pi pi-info-circle';
+        }
+    };
+
+    const dialogIcon = options?.icon || getDefaultIcon(severity);
+
+    // Dynamic styling based on severity variant
+    const getSeverityStyles = (sev: ConfirmSeverity) => {
+        switch (sev) {
+            case 'danger':
+                return {
+                    iconColor: 'text-red-500 bg-red-50 border-red-100',
+                    confirmButtonSeverity: 'danger',
+                    headerTitle: 'Are you sure?',
+                };
+            case 'warning':
+                return {
+                    iconColor: 'text-orange-500 bg-orange-50 border-orange-100',
+                    confirmButtonSeverity: 'warning',
+                    headerTitle: 'Warning',
+                };
+            case 'success':
+                return {
+                    iconColor: 'text-green-500 bg-green-50 border-green-100',
+                    confirmButtonSeverity: 'success',
+                    headerTitle: 'Confirm Action',
+                };
+            case 'info':
+            default:
+                return {
+                    iconColor: 'text-blue-500 bg-blue-50 border-blue-100',
+                    confirmButtonSeverity: 'info',
+                    headerTitle: 'Confirm',
+                };
+        }
+    };
+
+    const styleConfig = getSeverityStyles(severity);
 
     const reasonConfig = options?.reason;
     const trimmedReason = reason.trim();
@@ -95,8 +140,6 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
         try {
             await options.onConfirm({ reason: trimmedReason || undefined });
         } catch (err) {
-            // No toast here: the caller decides how to show errors.
-            // Keep the dialog open so the user can retry or cancel.
             setLoading(false);
             if (options.onError) options.onError(err);
             else console.error("Confirm action failed:", err);
@@ -115,7 +158,7 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
 
             <Dialog
                 visible={visible}
-                header="Confirm"
+                header={styleConfig.headerTitle}
                 style={{ width: "450px" }}
                 modal
                 closable={!loading}
@@ -129,7 +172,7 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
                         <Button
                             label="Yes"
                             icon="pi pi-check"
-                            text
+                            severity={styleConfig.confirmButtonSeverity as any}
                             onClick={onOK}
                             loading={loading}
                             disabled={loading || missingReason}
@@ -137,18 +180,20 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
                     </>
                 }
             >
-                <div className="flex align-items-center justify-content-center gap-3">
-                    <i className={`${dialogIcon} mr-3`} style={{ fontSize: "2rem" }} />
+                <div className="flex items-center gap-4">
+                    <div className={`flex h-12 w-12 shrink-0 items-center justify-center rounded-full border shadow-sm ${styleConfig.iconColor}`}>
+                        <i className={dialogIcon} style={{ fontSize: "1.25rem" }} />
+                    </div>
 
-                    <span>
+                    <span className="text-gray-700 text-sm leading-relaxed">
                         Are you sure you want to&nbsp;
-                        <b>{actionText}</b>?
+                        <span className="font-semibold text-gray-900">{actionText}</span>?
                     </span>
                 </div>
 
                 {reasonConfig && (
-                    <div className="flex flex-column gap-2 mt-4">
-                        <label htmlFor="confirm-reason" className="font-medium">
+                    <div className="flex flex-col gap-2 mt-4">
+                        <label htmlFor="confirm-reason" className="font-medium text-xs text-gray-600">
                             {reasonConfig.label ?? "Reason"}
                             {reasonConfig.required ? " *" : " (optional)"}
                         </label>
@@ -161,7 +206,7 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
                             autoResize
                             autoFocus
                             disabled={loading}
-                            className="w-full"
+                            className="w-full text-sm"
                         />
                     </div>
                 )}

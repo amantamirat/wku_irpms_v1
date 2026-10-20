@@ -44,12 +44,13 @@ export const validateCalendar = (
     return { valid: true };
 };
 
+/*
 export const createEmptyCalendar = (): Calendar => ({
     year: new Date().getFullYear(),
     startDate: null,
     endDate: null,
     status: CalendarStatus.planned
-});
+});*/
 
 export interface FilterCalendarOptions {
     status?: CalendarStatus;

@@ -22,7 +22,7 @@ export const STAGE_TRANSITIONS: TransitionMap = {
             next: StageStatus.upcoming,
             action: "Set Upcoming",
             icon: "pi pi-undo",
-            severity: "secondary"
+            severity: "info"
         }
     ],
 

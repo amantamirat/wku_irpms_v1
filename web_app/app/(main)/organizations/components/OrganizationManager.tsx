@@ -5,9 +5,9 @@ import { ColumnProps } from 'primereact/column';
 import { OrganizationApi } from '../api/organization.api';
 import {
     FilterOrganization,
+    ORGANIZATION_TYPE_ICONS,
     Organization,
     OrgnUnit,
-    createEmptyOrganization,
     getParentType
 } from '../models/organization.model';
 import OrganizationForm from './OrganizationForm';
@@ -96,6 +96,7 @@ export default function OrganizationManager({ type }: Props) {
             api={OrganizationApi}
             resource={`organization:${type}`}
             itemName={capitalize(type)}
+            itemIcon={ORGANIZATION_TYPE_ICONS[type]}
             headerTitle={`Manage ${capitalize(type)}s`}
             columns={columns}
             filter={filter}

@@ -1,11 +1,8 @@
 'use client';
-import React from 'react';
-import { useParams, notFound } from 'next/navigation';
-import { BreadCrumb } from 'primereact/breadcrumb';
-import { Tag } from 'primereact/tag';
+import { notFound, useParams } from 'next/navigation';
 
-import { OrgnUnit } from '../models/organization.model';
 import OrganizationManager from '../components/OrganizationManager';
+import { OrgnUnit } from '../models/organization.model';
 /*
 const formatUnitTitle = (unit: string): string => {
     return unit
@@ -27,13 +24,7 @@ const Page = () => {
     }
 
     const type = rawType as OrgnUnit;
-  //  const formattedTitle = formatUnitTitle(type);
-
-    const breadcrumbItems = [
-        { label: 'Organizations' },
-    //    { label: formattedTitle },
-    ];
-    const breadcrumbHome = { icon: 'pi pi-home', url: '/' };
+  
 
     return (
         <OrganizationManager key={type} type={type} />
