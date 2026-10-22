@@ -307,8 +307,7 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
             try {
                 if (form.mode === "create") {
                     const created = finalize(await api.create(data));
-                    //addItem(created, { prepend: true }); just to use populated
-                    addItem({ ...created, ...data }, { prepend: true });
+                    addItem(created, { prepend: true });
                     safely(() => onSuccessRef.current?.("create", created));
                 } else {
                     // update(data) currently takes the id inside the payload
@@ -318,8 +317,7 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
                             [dataKey]: getId(form.item),
                         } as Partial<T>)
                     );
-                    //updateItem(updated); just to use populated
-                    updateItem({ ...updated, ...data });
+                    updateItem(updated);
                     safely(() => onSuccessRef.current?.("update", updated));
                 }
                 setForm(null);
@@ -363,7 +361,7 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
                 item: itemName,
                 reason: meta.requireReason ? { required: meta.requireReason } : undefined,
                 icon: meta.icon,
-                severity:meta.severity,
+                severity: meta.severity,
                 onConfirm: async ({ reason }) => {
                     const payload: StateTransition = { ...transition, reason };
                     const response = await api.transitionState!(id, payload);

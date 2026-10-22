@@ -133,25 +133,25 @@ const AppMenu = () => {
             items: [
                 {
                     label: 'Users',
-                    icon: PrimeIcons.USER,
+                    icon: MENU_ICONS.users,
                     to: '/users',
                     permission: 'user:read'
                 },
                 {
                     label: 'Accounts',
-                    icon: PrimeIcons.SHIELD,
+                    icon: MENU_ICONS.accounts,
                     to: '/accounts',
                     permission: 'account:read'
                 },
                 {
                     label: 'Roles',
-                    icon: PrimeIcons.USERS,
+                    icon: MENU_ICONS.roles,
                     to: '/roles',
                     permission: 'role:read'
                 },
                 {
                     label: 'Permissions',
-                    icon: PrimeIcons.LOCK,
+                    icon: MENU_ICONS.permissions,
                     to: '/permissions',
                     permission: 'permission:read'
                 },
@@ -163,37 +163,37 @@ const AppMenu = () => {
             items: [
                 {
                     label: 'Colleges',
-                    icon: 'pi pi-fw pi-warehouse',
+                    icon: MENU_ICONS.colleges,
                     to: `/organizations/${OrgnUnit.college}`,
                     permission: PERMISSIONS.ORGANIAZTION.COLLEGE.READ
                 },
                 {
                     label: 'Departments',
-                    icon: 'pi pi-fw pi-star',
+                    icon: MENU_ICONS.departments,
                     to: `/organizations/${OrgnUnit.department}`,
                     permission: PERMISSIONS.ORGANIAZTION.DEPARTMENT.READ
                 },
                 {
                     label: 'Programs',
-                    icon: 'pi pi-fw pi-star-half',
+                    icon: MENU_ICONS.programs,
                     to: `/organizations/${OrgnUnit.program}`,
                     permission: PERMISSIONS.ORGANIAZTION.PROGRAM.READ
                 },
                 {
                     label: 'Directorates',
-                    icon: 'pi pi-fw pi-objects-column',
+                    icon: MENU_ICONS.directorates,
                     to: `/organizations/${OrgnUnit.directorate}`,
                     permission: PERMISSIONS.ORGANIAZTION.DIRECTORATE.READ
                 },
                 {
                     label: 'Centers',
-                    icon: 'pi pi-fw pi-circle',
+                    icon: MENU_ICONS.centers,
                     to: `/organizations/${OrgnUnit.center}`,
                     permission: PERMISSIONS.ORGANIAZTION.CENTER.READ
                 },
                 {
                     label: 'External',
-                    icon: 'pi pi-fw pi-mars',
+                    icon: MENU_ICONS.externalOrganizations,
                     to: `/organizations/${OrgnUnit.external}`,
                     permission: PERMISSIONS.ORGANIAZTION.EXTERNAL.READ
                 }
@@ -204,13 +204,13 @@ const AppMenu = () => {
             items: [
                 {
                     label: 'Calendars',
-                    icon: PrimeIcons.CALENDAR,
+                    icon: MENU_ICONS.calendars,
                     to: '/calendars',
                     permission: 'calendar:read'
                 },
                 {
                     label: 'Specializations',
-                    icon: 'pi pi-fw pi-filter-fill',
+                    icon: MENU_ICONS.specializations,
                     to: '/specializations',
                     permission: PERMISSIONS.SPECIALIZATION.READ
                 },

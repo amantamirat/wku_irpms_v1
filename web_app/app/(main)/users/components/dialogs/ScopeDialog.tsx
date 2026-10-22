@@ -1,418 +1,238 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 import { Dialog } from 'primereact/dialog';
 import { Button } from 'primereact/button';
 import { Checkbox } from 'primereact/checkbox';
-import { Toast } from 'primereact/toast';
 import { Tag } from 'primereact/tag';
 import { MultiSelect } from 'primereact/multiselect';
-
-import { UserApi } from '../../api/user.api';
-import { User } from '../../models/user.model';
+import { Message } from 'primereact/message';
 
 import {
-    Organization,
-    OrgnUnit
+    Organization
 } from '@/app/(main)/organizations/models/organization.model';
 
-import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
-
-import { useConfirmDialog } from '@/contexts/ConfirmDialogContext';
+export type Scope = string[] | '*' | null;
 
 interface ScopeDialogProps {
     visible: boolean;
-    item: User;
+    scope: Scope;
+    organizations: Organization[];
     onHide: () => void;
-    onComplete?: (saved: User) => void;
+    onSave: (scope: Scope) => void | Promise<void>;
+    onClearScope: () => void;
+    saving: boolean;
+    loading: boolean;
+    errorMessage: string | null;
 }
-
-type Scope = string[] | '*' | null;
 
 const ScopeDialog = ({
     visible,
-    item,
+    scope,
+    organizations,
     onHide,
-    onComplete
+    onSave,
+    onClearScope,
+    saving,
+    loading,
+    errorMessage
 }: ScopeDialogProps) => {
 
-    const toast = useRef<Toast>(null);
-    const confirm = useConfirmDialog();
+    const [selectedScope, setSelectedScope] =
+        useState<Scope>(scope);
 
-    const [scope, setScope] =
-        useState<Scope>(null);
-
-    const [organizations, setOrganizations] =
-        useState<Organization[]>([]);
-
-    const [loading, setLoading] =
-        useState(false);
-
-    const [saving, setSaving] =
-        useState(false);
-
-
-    /*
-     * Load all organizations that can be used
-     * as authorization scope.
-     */
+    // Load the current scope whenever the dialog opens.
     useEffect(() => {
-
-        if (!visible) {
-            return;
+        if (visible) {
+            setSelectedScope(scope);
         }
+    }, [visible, scope]);
 
-        const loadOrganizations = async () => {
-
-            setLoading(true);
-
-            try {
-
-                const [
-                    departments,
-                    directorates,
-                    externals
-                ] = await Promise.all([
-                    OrganizationApi.lookup!({
-                        type: OrgnUnit.department
-                    }),
-                    OrganizationApi.lookup!({
-                        type: OrgnUnit.directorate
-                    }),
-                    OrganizationApi.lookup!({
-                        type: OrgnUnit.external
-                    })
-                ]);
-
-                setOrganizations([
-                    ...departments,
-                    ...directorates,
-                    ...externals
-                ]);
-
-            } catch (err: any) {
-
-                toast.current?.show({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail:
-                        err.message ||
-                        'Failed to load organizations.'
-                });
-
-            } finally {
-
-                setLoading(false);
-            }
-        };
-
-        loadOrganizations();
-
-    }, [visible]);
-
-
-    /*
-     * Load the user's existing scope.
-     */
-    useEffect(() => {
-
-        if (!visible) {
-            return;
-        }
-
-        setScope(
-            item.scope ?? null
-        );
-
-    }, [visible, item]);
-
-
-    /*
-     * Update selected organizations.
-     */
-    const handleScopeChange = (
-        value: string[]
-    ) => {
-
-        setScope(
-            value.length
-                ? value
-                : null
-        );
-    };
-
-
-    /*
-     * Toggle full access.
-     */
     const handleFullAccessChange = (
         checked: boolean
     ) => {
-
-        if (checked) {
-            setScope('*');
-        } else {
-            setScope(null);
-        }
+        setSelectedScope(checked ? '*' : null);
     };
 
-
-    /*
-     * Clear the current scope.
-     */
-    const handleClearScope = () => {
-
-        confirm.ask({
-            operation: "Clear scope",
-            item: item.name,
-
-            onConfirm: () => {
-                setScope(null);
-            }
-        });
+    const handleOrganizationsChange = (
+        value: string[]
+    ) => {
+        setSelectedScope(value.length ? value : null);
     };
 
-
-    /*
-     * Save scope.
-     */
     const handleSave = async () => {
-
-        if (!item._id) {
-            return;
-        }
-
-        setSaving(true);
-
-        try {
-
-            const saved =
-                await UserApi.updateScope(
-                    item._id,
-                    scope
-                );
-
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Success',
-                detail:
-                    'User scope updated successfully.'
-            });
-
-            onComplete?.({
-                ...saved,
-                workspace: item.workspace
-            });
-
-            onHide();
-
-        } catch (err: any) {
-
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Error',
-                detail:
-                    err.message ||
-                    'Failed to update user scope.'
-            });
-
-        } finally {
-
-            setSaving(false);
-        }
+        await onSave(selectedScope);
     };
 
+    const isFullAccess = selectedScope === '*';
+    const isCleared = selectedScope === null;
 
-    const isFullAccess =
-        scope === '*';
-
-    const isCleared =
-        scope === null;
-
-    const selectedOrganizations =
-        Array.isArray(scope)
-            ? organizations.filter(
-                organization =>
-                    scope.includes(
-                        String(organization._id)
-                    )
-            )
-            : [];
-
+    const selectedOrganizations = Array.isArray(selectedScope)
+        ? organizations.filter(organization =>
+            selectedScope.includes(String(organization._id))
+        )
+        : [];
 
     return (
-        <>
-            <Toast ref={toast} />
+        <Dialog
+            header="Manage User Scope"
+            visible={visible}
+            style={{ width: '40rem', maxWidth: '95vw' }}
+            onHide={() => {
+                if (!saving) onHide();
+            }}
+            closable={!saving}
+            closeOnEscape={!saving}
+            footer={
+                <div className="flex justify-content-end gap-2">
+                    <Button
+                        label="Cancel"
+                        icon="pi pi-times"
+                        className="p-button-text p-button-sm"
+                        onClick={onHide}
+                        disabled={saving}
+                    />
 
-            <Dialog
-                header="Manage User Scope"
-                visible={visible}
-                onHide={onHide}
-                modal
-                style={{
-                    width: '40rem'
-                }}
-                footer={
-                    <div className="flex justify-content-end gap-2">
+                    <Button
+                        label="Save"
+                        icon="pi pi-check"
+                        className="p-button-sm"
+                        onClick={handleSave}
+                        loading={saving}
+                        disabled={loading}
+                    />
+                </div>
+            }
+        >
+            <div className="flex flex-column gap-4 pt-2">
 
-                        <Button
-                            label="Cancel"
-                            icon="pi pi-times"
-                            severity="secondary"
-                            outlined
-                            onClick={onHide}
-                            disabled={saving}
+                <span className="text-sm text-600">
+                    Manage the organizations this user can access.
+                    Select specific organizations, grant full access,
+                    or clear the scope to remove access.
+                </span>
+
+                {errorMessage && (
+                    <Message
+                        severity="error"
+                        text={errorMessage}
+                        className="w-full"
+                    />
+                )}
+
+                {/* Current scope */}
+                <div className="flex flex-column gap-2">
+                    <label className="text-sm font-semibold text-900">
+                        Current Scope
+                    </label>
+
+                    {isFullAccess && (
+                        <Tag
+                            value="Full Access"
+                            severity="success"
+                            icon="pi pi-globe"
                         />
-
-                        <Button
-                            label="Save"
-                            icon="pi pi-check"
-                            onClick={handleSave}
-                            loading={saving}
-                        />
-
-                    </div>
-                }
-            >
-
-                <div className="flex flex-column gap-4">
-
-                    {/* Current scope */}
-                    <div>
-
-                        <label className="block font-medium mb-2">
-                            Current Scope
-                        </label>
-
-                        {isFullAccess && (
-                            <Tag
-                                value="Full Access"
-                                severity="success"
-                                icon="pi pi-globe"
-                            />
-                        )}
-
-                        {!isFullAccess &&
-                            selectedOrganizations.length > 0 && (
-                                <div className="flex flex-wrap gap-2">
-
-                                    {selectedOrganizations.map(
-                                        organization => (
-                                            <Tag
-                                                key={
-                                                    String(
-                                                        organization._id
-                                                    )
-                                                }
-                                                value={
-                                                    organization.name
-                                                }
-                                                severity="info"
-                                            />
-                                        )
-                                    )}
-
-                                </div>
-                            )}
-
-                        {isCleared && (
-                            <Tag
-                                value="No Scope"
-                                severity="warning"
-                                icon="pi pi-ban"
-                            />
-                        )}
-
-                    </div>
-
-
-                    {/* Full access */}
-                    <div className="flex align-items-center gap-2">
-
-                        <Checkbox
-                            inputId="fullAccess"
-                            checked={isFullAccess}
-                            onChange={e =>
-                                handleFullAccessChange(
-                                    e.checked ?? false
-                                )
-                            }
-                        />
-
-                        <label
-                            htmlFor="fullAccess"
-                            className="cursor-pointer"
-                        >
-                            Full Access
-                        </label>
-
-                    </div>
-
-
-                    {/* Organizations */}
-                    {!isFullAccess && (
-                        <div>
-
-                            <label
-                                htmlFor="organizations"
-                                className="block font-medium mb-2"
-                            >
-                                Organizations
-                            </label>
-
-                            <MultiSelect
-                                id="organizations"
-                                value={
-                                    Array.isArray(scope)
-                                        ? scope
-                                        : []
-                                }
-                                options={organizations}
-                                onChange={e =>
-                                    handleScopeChange(
-                                        e.value
-                                    )
-                                }
-                                optionLabel="name"
-                                optionValue="_id"
-                                placeholder={
-                                    loading
-                                        ? 'Loading organizations...'
-                                        : 'Select organizations'
-                                }
-                                className="w-full"
-                                filter
-                                display="chip"
-                                // loading={loading}
-                                disabled={loading}
-                                emptyMessage="No organizations found."
-                            />
-
-                        </div>
                     )}
 
+                    {!isFullAccess &&
+                        selectedOrganizations.length > 0 && (
+                            <div className="flex flex-wrap gap-2">
+                                {selectedOrganizations.map(organization => (
+                                    <Tag
+                                        key={String(organization._id)}
+                                        value={organization.name}
+                                        severity="info"
+                                    />
+                                ))}
+                            </div>
+                        )}
 
-                    {/* Clear scope */}
-                    {!isCleared && (
-                        <div className="flex justify-content-end">
-
-                            <Button
-                                label="Clear Scope"
-                                icon="pi pi-ban"
-                                severity="danger"
-                                text
-                                onClick={handleClearScope}
-                                disabled={saving}
-                            />
-
-                        </div>
+                    {isCleared && (
+                        <Tag
+                            value="No Scope"
+                            severity="warning"
+                            icon="pi pi-ban"
+                        />
                     )}
-
                 </div>
 
-            </Dialog>
-        </>
+                {/* Full access */}
+                <div className="flex align-items-center gap-2">
+                    <Checkbox
+                        inputId="fullAccess"
+                        checked={isFullAccess}
+                        onChange={e =>
+                            handleFullAccessChange(e.checked ?? false)
+                        }
+                        disabled={saving}
+                    />
+
+                    <label
+                        htmlFor="fullAccess"
+                        className="cursor-pointer"
+                    >
+                        Full Access
+                    </label>
+                </div>
+
+                {/* Organizations */}
+                {!isFullAccess && (
+                    <div className="flex flex-column gap-2">
+                        <label
+                            htmlFor="organizations"
+                            className="text-sm font-semibold text-900"
+                        >
+                            Organizations
+                        </label>
+
+                        <MultiSelect
+                            id="organizations"
+                            value={
+                                Array.isArray(selectedScope)
+                                    ? selectedScope
+                                    : []
+                            }
+                            options={organizations}
+                            onChange={e =>
+                                handleOrganizationsChange(e.value)
+                            }
+                            optionLabel="name"
+                            optionValue="_id"
+                            placeholder={
+                                loading
+                                    ? 'Loading organizations...'
+                                    : 'Select organizations'
+                            }
+                            className="w-full"
+                            filter
+                            display="chip"
+                            disabled={loading || saving}
+                            emptyMessage="No organizations found."
+                        />
+
+                        <small className="text-500">
+                            Select one or more departments, directorates,
+                            or external organizations.
+                        </small>
+                    </div>
+                )}
+
+                {/* Clear scope */}
+                {!isCleared && (
+                    <div className="flex justify-content-end">
+                        <Button
+                            label="Clear Scope"
+                            icon="pi pi-ban"
+                            severity="danger"
+                            text
+                            onClick={onClearScope}
+                            disabled={saving}
+                        />
+                    </div>
+                )}
+            </div>
+        </Dialog>
     );
 };
 

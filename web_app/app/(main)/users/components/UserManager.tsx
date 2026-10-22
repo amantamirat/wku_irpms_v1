@@ -1,253 +1,224 @@
 'use client';
 
-import { useMemo, useRef, useState } from "react";
+import { ColumnProps } from 'primereact/column';
+import { useCallback, useMemo, useRef } from 'react';
+
+import {
+    ItemManager,
+    ItemManagerHandle
+} from '@/components/ItemManager';
+
+import { useAuth } from '@/contexts/auth-context';
+import { useToast } from '@/contexts/ToastContext';
 
 import {
     FilterUsersOptions,
     User,
     createEmptyUser
-} from "../models/user.model";
+} from '../models/user.model';
 
-import { UserApi } from "../api/user.api";
-import RoleDialog from "./dialogs/RoleDialog";
-import MyBadge from "@/templates/MyBadge";
-import SaveUser from "./SaveUser";
-import { Badge } from "primereact/badge";
-import UserDetail from "./UserDetail";
+import { UserApi } from '../api/user.api';
 
-import { createEntityManager, EntityManagerRef } from "@/components/data-table/createEntityManager";
-import { useAuth } from "@/contexts/auth-context";
-import ScopeDialog from "./dialogs/ScopeDialog";
+import MyBadge from '@/templates/MyBadge';
+import { Badge } from 'primereact/badge';
+import UserDetail from './UserDetail';
+
+import RoleDialog from './dialogs/RoleDialog';
+import ScopeDialog from './dialogs/ScopeDialog';
+
+import UserForm from './UserForm';
+import { useUserRoleUpdater } from '../hooks/useUserRoleUpdater';
+import { useUserScopeUpdater } from '../hooks/useUserScopeUpdater';
+import { RowActionButton } from '@/components/data-table/ItemDataTable';
+import { MENU_ICONS } from '@/utils/menu-icons';
+
+const columns: ColumnProps[] = [
+    {
+        header: 'Full Name',
+        field: 'name',
+        sortable: true
+    },
+    {
+        header: 'Workspace',
+        field: 'workspace.name'
+    },
+    {
+        header: 'Birth Date',
+        field: 'birthDate',
+        body: (user: User) =>
+            user.birthDate
+                ? new Date(user.birthDate).toLocaleDateString()
+                : '-'
+    },
+    {
+        header: 'Gender',
+        field: 'gender',
+        body: (user: User) => (
+            <MyBadge
+                type="gender"
+                value={user.gender ?? 'N/A'}
+            />
+        )
+    },
+    {
+        header: 'Specs Count',
+        field: 'specializations.length',
+        body: (user: User) => (
+            <div className="flex align-items-center">
+                <Badge
+                    value={user.specializations?.length || 0}
+                    severity={
+                        user.specializations?.length
+                            ? 'info'
+                            : 'warning'
+                    }
+                />
+                <span className="ml-2 text-sm text-500">
+                    Items
+                </span>
+            </div>
+        )
+    },
+    {
+        header: 'Roles',
+        field: 'roles',
+        body: (user: User) => (
+            user.roles?.length ? (
+                <Badge value={`${user.roles.length} Roles`} />
+            ) : (
+                <span className="text-gray-400 text-xs">
+                    No Roles
+                </span>
+            )
+        )
+    },
+    {
+        header: 'Scope',
+        field: 'scope',
+        body: (user: User) => {
+            if (user.scope === '*') {
+                return (
+                    <MyBadge
+                        type="status"
+                        value="Full Access"
+                    />
+                );
+            }
+
+            if (user.scope) {
+                return (
+                    <MyBadge
+                        type="status"
+                        value={user.unitType ?? 'Scoped'}
+                    />
+                );
+            }
+
+            return (
+                <span className="text-gray-400 text-xs">
+                    No Scope
+                </span>
+            );
+        }
+    }
+];
+
+// Keep the permission ids the user picked: the API response may not echo them back
+const mapSaved = (saved: User, submitted: Partial<User>): User => ({
+    ...saved,
+    workspace: submitted.workspace ?? saved.workspace
+});
 
 const ManageUsers = () => {
-
-    const [roleDialogVisible, setRoleDialogVisible] = useState(false);
-    const [scopeDialogVisible, setScopeDialogVisible] = useState(false);
-
-
-    const [selectedUser, setSelectedUser] =
-        useState<User | null>(null);
-
-    const entityManagerRef =
-        useRef<EntityManagerRef<User>>(null);
-
     const { hasPermission } = useAuth();
+    const toast = useToast();
 
-    const EntityManager = useMemo(
-        () =>
-            createEntityManager<User, FilterUsersOptions>({
-                title: "Manage Users",
-                itemName: "User",
+    const manager = useRef<ItemManagerHandle<User>>(null);
 
-                api: UserApi,
+    const patch = useCallback(
+        (id: string, changes: Partial<User>) => {
+            manager.current?.patchItem(id, changes);
+        },
+        []
+    );
 
-                columns: [
-                    {
-                        header: "Full Name",
-                        field: "name",
-                        sortable: true
-                    },
+    const replace = useCallback((user: User) => {
+        manager.current?.updateItem(user);
+    }, []);
 
-                    {
-                        header: "Workspace",
-                        field: "workspace.name"
-                    },
+    const roleUpdater = useUserRoleUpdater(patch, replace);
+    const scopeUpdater = useUserScopeUpdater(replace);
 
-                    {
-                        header: "Birth Date",
-                        field: "birthDate",
-                        body: (u: User) =>
-                            u.birthDate
-                                ? new Date(
-                                    u.birthDate
-                                ).toLocaleDateString()
-                                : '-'
-                    },
+    const extraRowActions = useMemo<RowActionButton<User>[]>(
+        () => [
+            {
+                icon: 'pi pi-shield',
+                severity: 'info',
+                tooltip: 'Manage Roles',
+                visible: () =>
+                    hasPermission('user:role:update'),
+                onClick: roleUpdater.open
+            },
+            {
+                icon: 'pi pi-sitemap',
+                severity: 'warning',
+                tooltip: 'Manage Scope',
+                visible: () =>
+                    hasPermission('user:scope:update'),
+                onClick: scopeUpdater.open
+            }
+        ],
+        [hasPermission, roleUpdater.open, scopeUpdater.open]
+    );
 
-                    {
-                        header: "Gender",
-                        field: "gender",
-                        body: (u: User) => (
-                            <MyBadge
-                                type="gender"
-                                value={u.gender ?? "N/A"}
-                            />
-                        )
-                    },
-
-                    {
-                        header: "Specs Count",
-                        field: "specializations.length",
-                        body: (u: User) => (
-                            <div className="flex align-items-center">
-                                <Badge
-                                    value={
-                                        u.specializations?.length || 0
-                                    }
-                                    severity={
-                                        u.specializations?.length
-                                            ? 'info'
-                                            : 'warning'
-                                    }
-                                />
-
-                                <span className="ml-2 text-sm text-500">
-                                    Items
-                                </span>
-                            </div>
-                        )
-                    },
-
-                    {
-                        header: "Roles",
-                        field: "roles",
-                        body: (u: User) => (
-                            <div className="flex gap-1">
-                                {u.roles?.length ? (
-                                    <Badge
-                                        value={`${u.roles.length} Roles`}
-                                    />
-                                ) : (
-                                    <span className="text-gray-400 text-xs">
-                                        No Roles
-                                    </span>
-                                )}
-                            </div>
-                        )
-                    },
-
-                    {
-                        header: "Scope",
-                        field: "scope",
-                        body: (u: User) => {
-
-                            if (u.scope === "*") {
-                                return (
-                                    <MyBadge
-                                        type="status"
-                                        value="Full Access"
-                                    />
-                                );
-                            }
-
-                            if (u.scope) {
-                                return (
-                                    <div className="flex align-items-center gap-2">
-                                        <MyBadge
-                                            type="status"
-                                            value={
-                                                u.unitType ?? "Scoped"
-                                            }
-                                        />
-                                    </div>
-                                );
-                            }
-
-                            return (
-                                <span className="text-gray-400 text-xs">
-                                    No Scope
-                                </span>
-                            );
-                        }
-                    }
-                ],
-
-                createNew: createEmptyUser,
-
-                SaveDialog: SaveUser,
-
-                permissionPrefix: "user",
-
-                expandable: {
-                    template: (user) => (
-                        <UserDetail user={user} />
-                    )
-                },
-
-                extraRowActions: [
-
-                    /*
-                     * Manage Roles
-                     */
-                    {
-                        icon: "pi pi-shield",
-                        severity: "info",
-                        tooltip: "Manage Roles",
-
-                        visible: () =>
-                            hasPermission(
-                                "user:role:update"
-                            ),
-
-                        onClick: (row: User) => {
-                            setSelectedUser(row);
-                            setRoleDialogVisible(true);
-                        }
-                    },
-
-                    /*
-                     * Manage Organizational Scope
-                     */
-                    {
-                        icon: "pi pi-sitemap",
-                        severity: "warning",
-                        tooltip: "Manage Scope",
-
-                        visible: () =>
-                            hasPermission(
-                                "user:scope:update"
-                            ),
-
-                        onClick: (row: User) => {
-                            setSelectedUser(row);
-                            setScopeDialogVisible(true);
-                        }
-                    }
-                ]
-            })
-        , [hasPermission]);
+    const tableProps = useMemo(
+        () => ({
+            enableSearch: true,
+            expandable: {
+                template: (user: User) => (
+                    <UserDetail user={user} />
+                )
+            }
+        }),
+        []
+    );
 
     return (
         <>
-            <EntityManager ref={entityManagerRef} />
+            <ItemManager<User, FilterUsersOptions>
+                managerRef={manager}
+                api={UserApi}
+                resource="user"
+                itemName="User"
+                headerTitle="Manage Users"
+                dialogWidth="800px"
+                itemIcon={MENU_ICONS.users}
+                columns={columns}
+                mapSaved={mapSaved}
+                renderForm={props => (
+                    <UserForm {...props} />
+                )}
+                extraRowActions={extraRowActions}
+                tableProps={tableProps}
+                onError={error => toast.error(error)}
+                onSuccess={operation =>
+                    toast.success(
+                        operation === 'create'
+                            ? 'User created successfully'
+                            : 'User updated successfully'
+                    )
+                }
+            />
 
-            {selectedUser && roleDialogVisible && (
+            {roleUpdater.dialogProps.item && (
                 <RoleDialog
-                    visible={roleDialogVisible}
-                    item={selectedUser}
-
-                    onHide={() => {
-                        setRoleDialogVisible(false);
-                        setSelectedUser(null);
-                    }}
-
-                    onComplete={(updatedUser) => {
-                        entityManagerRef.current?.updateItem(
-                            updatedUser
-                        );
-                        setRoleDialogVisible(false);
-                        setSelectedUser(null);
-                    }}
+                    {...roleUpdater.dialogProps}
                 />
             )}
 
-            {selectedUser && scopeDialogVisible && (
+            {scopeUpdater.dialogProps.visible && (
                 <ScopeDialog
-                    visible={scopeDialogVisible}
-                    item={selectedUser}
-
-                    onHide={() => {
-                        setScopeDialogVisible(false);
-                        setSelectedUser(null);
-                    }}
-
-                    onComplete={(updatedUser) => {
-                        entityManagerRef.current?.updateItem(
-                            updatedUser
-                        );
-                        setScopeDialogVisible(false);
-                        setSelectedUser(null);
-                    }}
+                    {...scopeUpdater.dialogProps}
                 />
             )}
         </>

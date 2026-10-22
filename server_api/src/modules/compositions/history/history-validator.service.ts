@@ -41,12 +41,16 @@ export interface HistoryValidationContext {
 }
 
 interface HistoryMetrics {
+    draft: number;
+    approved: number;
     granted: number;
     refused: number;
     completed: number;
     verified: number;
 
     submitted: number;
+    shortlisted: number;
+    notShortlisted: number;
     accepted: number;
     rejected: number;
 }
@@ -83,81 +87,6 @@ export class HistoryValidatorService {
         );
 
         // ------------------------------------------------
-        // Individual project rules
-        // ------------------------------------------------
-        /*
-                if (rule.project?.granted) {
-                    if (
-                        !matchesRange(
-                            rule.project.granted,
-                            metrics.granted
-                        )
-                    ) {
-                        return false;
-                    }
-                }
-        
-                if (rule.project?.refused) {
-                    if (
-                        !matchesRange(
-                            rule.project.refused,
-                            metrics.refused
-                        )
-                    ) {
-                        return false;
-                    }
-                }
-        
-                if (rule.project?.completed) {
-                    if (
-                        !matchesRange(
-                            rule.project.completed,
-                            metrics.completed
-                        )
-                    ) {
-                        return false;
-                    }
-                }
-        
-                // ------------------------------------------------
-                // Individual application rules
-                // ------------------------------------------------
-        
-                if (rule.application?.submitted) {
-                    if (
-                        !matchesRange(
-                            rule.application.submitted,
-                            metrics.submitted
-                        )
-                    ) {
-                        return false;
-                    }
-                }
-        
-                if (rule.application?.accepted) {
-                    if (
-                        !matchesRange(
-                            rule.application.accepted,
-                            metrics.accepted
-                        )
-                    ) {
-                        return false;
-                    }
-                }
-        
-                if (rule.application?.rejected) {
-                    if (
-                        !matchesRange(
-                            rule.application.rejected,
-                            metrics.rejected
-                        )
-                    ) {
-                        return false;
-                    }
-                }
-        
-        */
-        // ------------------------------------------------
         // Total rule
         // ------------------------------------------------
 
@@ -167,6 +96,10 @@ export class HistoryValidatorService {
                 HistoryMetric,
                 number
             > = {
+                [HistoryMetric.PROJECT_DRAFT]: metrics.draft,
+
+                [HistoryMetric.PROJECT_APPROVED]: metrics.approved,
+
                 [HistoryMetric.PROJECT_GRANTED]: metrics.granted,
 
                 [HistoryMetric.PROJECT_REFUSED]: metrics.refused,
@@ -176,6 +109,10 @@ export class HistoryValidatorService {
                 [HistoryMetric.PROJECT_VERIFIED]: metrics.verified,
 
                 [HistoryMetric.APPLICATION_SUBMITTED]: metrics.submitted,
+
+                [HistoryMetric.APPLICATION_SHORTLISTED]: metrics.shortlisted,
+
+                [HistoryMetric.APPLICATION_NOT_SHORTLISTED]: metrics.notShortlisted,
 
                 [HistoryMetric.APPLICATION_ACCEPTED]: metrics.accepted,
 
@@ -291,12 +228,16 @@ export class HistoryValidatorService {
         ]);
 
         return {
+            draft: projectMetrics.draft,
+            approved: projectMetrics.approved,
             granted: projectMetrics.granted,
             refused: projectMetrics.refused,
             completed: projectMetrics.completed,
             verified: projectMetrics.verified,
 
             submitted: applicationMetrics.submitted,
+            shortlisted: applicationMetrics.shortlisted,
+            notShortlisted: applicationMetrics.notShortlisted,
             accepted: applicationMetrics.accepted,
             rejected: applicationMetrics.rejected
         };
@@ -311,6 +252,16 @@ export class HistoryValidatorService {
     ) {
 
         return {
+            draft: projects.filter(
+                project =>
+                    project.status === ProjectStatus.draft
+            ).length,
+
+            approved: projects.filter(
+                project =>
+                    project.status === ProjectStatus.approved
+            ).length,
+
             granted: projects.filter(
                 project =>
                     project.status === ProjectStatus.granted
@@ -346,6 +297,18 @@ export class HistoryValidatorService {
                 application =>
                     application.status ===
                     ApplicationStatus.submitted
+            ).length,
+
+            shortlisted: applications.filter(
+                application =>
+                    application.status ===
+                    ApplicationStatus.shortlisted
+            ).length,
+
+            notShortlisted: applications.filter(
+                application =>
+                    application.status ===
+                    ApplicationStatus.notShortlisted
             ).length,
 
             accepted: applications.filter(

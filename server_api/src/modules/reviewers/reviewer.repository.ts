@@ -77,6 +77,9 @@ export class ReviewerRepository implements IReviewerRepository {
             ...(filters.project && {
                 project: toObjectId(filters.project)
             }),
+            ...(filters.evaluation && {
+                evaluation: toObjectId(filters.evaluation)
+            }),
             ...(filters.status && {
                 status: filters.status
             })

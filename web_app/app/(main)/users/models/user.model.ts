@@ -22,7 +22,7 @@ export type User = {
 
     workspace?: string | Organization;
 
-    name: string;
+    name?: string;
     birthDate?: Date;
     gender?: Gender;
 

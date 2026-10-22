@@ -15,6 +15,10 @@ export const SpecializationApi: EntityApi<Specialization> = {
         return data as Specialization[];
     },
 
+    async lookup(options) {
+        return ApiClient.get(`${end_point}/lookup`, options);
+    },
+
     async update(specialization: Partial<Specialization>): Promise<Specialization> {
         if (!specialization._id) {
             throw new Error("_id required.");

@@ -15,7 +15,6 @@ import { capitalize } from "@/utils/utils";
 import { useToast } from "./ToastContext";
 
 export interface ConfirmPayload {
-    /** Trimmed text from the reason box. Undefined when there is no reason box or it was left empty. */
     reason?: string;
 }
 
@@ -30,15 +29,11 @@ export type ConfirmSeverity = 'danger' | 'warning' | 'success' | 'info';
 export interface ConfirmOptions {
     operation?: string;
     item?: string;
-    /** Visual variant of the dialog */
     severity?: ConfirmSeverity;
-    /** Custom icon class (e.g. "pi pi-trash", "pi pi-check"). If omitted, a smart default based on severity is used. */
     icon?: string;
-    /** Shows a reason box in the dialog. */
     reason?: ReasonOptions;
     onConfirm: (payload: ConfirmPayload) => void | Promise<void>;
     onComplete?: () => void;
-    /** Called when onConfirm throws. The dialog stays open so the user can retry. */
     onError?: (error: unknown) => void;
 }
 
@@ -79,7 +74,6 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
 
     const severity = options?.severity || 'danger';
 
-    // Smart defaults for icons based on severity
     const getDefaultIcon = (sev: ConfirmSeverity) => {
         switch (sev) {
             case 'danger': return 'pi pi-trash';
@@ -91,31 +85,30 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
 
     const dialogIcon = options?.icon || getDefaultIcon(severity);
 
-    // Dynamic styling based on severity variant
     const getSeverityStyles = (sev: ConfirmSeverity) => {
         switch (sev) {
             case 'danger':
                 return {
-                    iconColor: 'text-red-500 bg-red-50 border-red-100',
+                    iconColor: 'text-red-500 bg-red-500/10 border-red-500/20',
                     confirmButtonSeverity: 'danger',
                     headerTitle: 'Are you sure?',
                 };
             case 'warning':
                 return {
-                    iconColor: 'text-orange-500 bg-orange-50 border-orange-100',
+                    iconColor: 'text-orange-500 bg-orange-500/10 border-orange-500/20',
                     confirmButtonSeverity: 'warning',
                     headerTitle: 'Warning',
                 };
             case 'success':
                 return {
-                    iconColor: 'text-green-500 bg-green-50 border-green-100',
+                    iconColor: 'text-green-500 bg-green-500/10 border-green-500/20',
                     confirmButtonSeverity: 'success',
                     headerTitle: 'Confirm Action',
                 };
             case 'info':
             default:
                 return {
-                    iconColor: 'text-blue-500 bg-blue-50 border-blue-100',
+                    iconColor: 'text-blue-500 bg-blue-500/10 border-blue-500/20',
                     confirmButtonSeverity: 'info',
                     headerTitle: 'Confirm',
                 };
@@ -123,7 +116,6 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
     };
 
     const styleConfig = getSeverityStyles(severity);
-
     const reasonConfig = options?.reason;
     const trimmedReason = reason.trim();
     const missingReason = !!reasonConfig?.required && !trimmedReason;
@@ -147,7 +139,6 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
         }
 
         toast.success(successDetail, `${capitalize(op)} Successful`);
-
         options.onComplete?.();
         close();
     };
@@ -185,15 +176,25 @@ export const ConfirmDialogProvider = ({ children }: { children: ReactNode }) => 
                         <i className={dialogIcon} style={{ fontSize: "1.25rem" }} />
                     </div>
 
-                    <span className="text-gray-700 text-sm leading-relaxed">
+                    {/* Uses PrimeReact theme text colors or fallback CSS variables */}
+                    <span 
+                        className="text-sm leading-relaxed" 
+                        style={{ color: "var(--text-color, inherit)" }}
+                    >
                         Are you sure you want to&nbsp;
-                        <span className="font-semibold text-gray-900">{actionText}</span>?
+                        <span className="font-semibold" style={{ color: "var(--text-color, currentColor)" }}>
+                            {actionText}
+                        </span>?
                     </span>
                 </div>
 
                 {reasonConfig && (
                     <div className="flex flex-col gap-2 mt-4">
-                        <label htmlFor="confirm-reason" className="font-medium text-xs text-gray-600">
+                        <label 
+                            htmlFor="confirm-reason" 
+                            className="font-medium text-xs opacity-80"
+                            style={{ color: "var(--text-color-secondary, inherit)" }}
+                        >
                             {reasonConfig.label ?? "Reason"}
                             {reasonConfig.required ? " *" : " (optional)"}
                         </label>

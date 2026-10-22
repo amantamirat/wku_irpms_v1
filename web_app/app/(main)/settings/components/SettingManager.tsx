@@ -7,6 +7,7 @@ import { Tag } from 'primereact/tag';
 import { SettingApi } from '../api/setting.api';
 import { Setting } from '../models/setting.model';
 import SettingForm from './SettingForm';
+import { MENU_ICONS } from '@/utils/menu-icons';
 
 // Helper to format the value column based on the setting type
 const valueTemplate = (s: Setting) => {
@@ -47,6 +48,7 @@ export default function SettingManager() {
             resource="setting"
             itemName="Setting"
             headerTitle="System Configurations"
+            itemIcon={MENU_ICONS.settings}
             columns={columns}
             dialogWidth="450px"
             // Settings are pre-seeded/updated only, so we disable creation if desired, or omit createNew

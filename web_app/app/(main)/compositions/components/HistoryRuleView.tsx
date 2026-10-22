@@ -18,11 +18,16 @@ interface HistoryMetricConfig {
 }
 
 const metricConfigMap: Record<HistoryMetric, { label: string; icon: string; badgeSeverity: string }> = {
+    [HistoryMetric.PROJECT_DRAFT]: { label: 'Draft Projects', icon: 'pi pi-file', badgeSeverity: 'text-gray-500' },
+    [HistoryMetric.PROJECT_APPROVED]: { label: 'Approved Projects', icon: 'pi pi-check', badgeSeverity: 'text-blue-500' },
     [HistoryMetric.PROJECT_GRANTED]: { label: 'Granted Projects', icon: 'pi pi-check-circle', badgeSeverity: 'text-green-500' },
     [HistoryMetric.PROJECT_REFUSED]: { label: 'Refused Projects', icon: 'pi pi-ban', badgeSeverity: 'text-red-500' },
     [HistoryMetric.PROJECT_COMPLETED]: { label: 'Completed Projects', icon: 'pi pi-flag-fill', badgeSeverity: 'text-purple-500' },
-    [HistoryMetric.PROJECT_VERIFIED]: { label: 'Verified Projects', icon: 'pi pi-flag-fill', badgeSeverity: 'text-purple-500' },
+    [HistoryMetric.PROJECT_VERIFIED]: { label: 'Verified Projects', icon: 'pi pi-verified', badgeSeverity: 'text-teal-500' },
+
     [HistoryMetric.APPLICATION_SUBMITTED]: { label: 'Submitted Applications', icon: 'pi pi-send', badgeSeverity: 'text-blue-500' },
+    [HistoryMetric.APPLICATION_SHORTLISTED]: { label: 'Shortlisted Applications', icon: 'pi pi-star', badgeSeverity: 'text-amber-500' },
+    [HistoryMetric.APPLICATION_NOT_SHORTLISTED]: { label: 'Not Shortlisted Applications', icon: 'pi pi-star-fill', badgeSeverity: 'text-gray-400' },
     [HistoryMetric.APPLICATION_ACCEPTED]: { label: 'Accepted Applications', icon: 'pi pi-check-circle', badgeSeverity: 'text-green-500' },
     [HistoryMetric.APPLICATION_REJECTED]: { label: 'Rejected Applications', icon: 'pi pi-times-circle', badgeSeverity: 'text-orange-500' },
 };

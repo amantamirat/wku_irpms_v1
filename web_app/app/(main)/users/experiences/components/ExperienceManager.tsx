@@ -92,6 +92,12 @@ const defaultHiddenColumns = [
     'isCurrent'
 ];
 
+// Keep the permission ids the user picked: the API response may not echo them back
+const mapSaved = (saved: Experience, submitted: Partial<Experience>): Experience => ({
+    ...saved,
+    organization: submitted.organization ?? saved.organization
+});
+
 const ExperienceManager = ({ user }: ExperienceManagerProps) => {
     const toast = useToast();
 
@@ -120,6 +126,7 @@ const ExperienceManager = ({ user }: ExperienceManagerProps) => {
             enableColumnToggle
             defaultHiddenFields={defaultHiddenColumns}
             filter={filter}
+            mapSaved={mapSaved}
             dialogWidth="650px"
             renderForm={(props) => (
                 <ExperienceForm

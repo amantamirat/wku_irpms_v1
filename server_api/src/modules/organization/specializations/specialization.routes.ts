@@ -23,6 +23,13 @@ router.get(
   controller.get
 );
 
+router.get(
+  '/lookup',
+  verifyAuthToken,
+  checkPermission([PERMISSIONS.SPECIALIZATION.LOOKUP]),
+  controller.get
+);
+
 router.put(
   '/:id',
   verifyAuthToken,

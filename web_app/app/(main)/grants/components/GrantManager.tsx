@@ -76,6 +76,13 @@ const columns: ColumnProps[] = [
     }
 ];
 
+// Keep the permission ids the user picked: the API response may not echo them back
+const mapSaved = (saved: Grant, submitted: Partial<Grant>): Grant => ({
+    ...saved,
+    organization: submitted.organization ?? saved.organization,
+    thematic: submitted.thematic ?? saved.thematic,
+});
+
 const GrantManager = ({
     organization,
     thematic
@@ -89,6 +96,7 @@ const GrantManager = ({
             itemName="Grant"
             headerTitle="Manage Grants"
             itemIcon={MENU_ICONS.grants}
+            mapSaved={mapSaved}
             columns={columns}
             dialogWidth="800px"
             statusField="status"

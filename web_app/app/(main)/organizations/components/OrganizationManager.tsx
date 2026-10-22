@@ -84,6 +84,12 @@ const getOrganizationColumns = (type: OrgnUnit): ColumnProps[] => {
     ];
 };
 
+// Keep the permission ids the user picked: the API response may not echo them back
+const mapSaved = (saved: Organization, submitted: Partial<Organization>): Organization => ({
+    ...saved,
+    parent: submitted.parent ?? saved.parent,
+});
+
 export default function OrganizationManager({ type }: Props) {
     const toast = useToast();
 
@@ -97,6 +103,7 @@ export default function OrganizationManager({ type }: Props) {
             resource={`organization:${type}`}
             itemName={capitalize(type)}
             itemIcon={ORGANIZATION_TYPE_ICONS[type]}
+            mapSaved={mapSaved}
             headerTitle={`Manage ${capitalize(type)}s`}
             columns={columns}
             filter={filter}

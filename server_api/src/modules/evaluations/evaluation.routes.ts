@@ -2,7 +2,7 @@ import { Router } from "express";
 import { EvaluationController } from "./evaluation.controller";
 import { PERMISSIONS } from "../../common/constants/permissions";
 import { verifyAuthToken } from "../auth/auth.middleware";
-import { checkTransitionPermission } from '../../core/container';
+import { checkTransitionPermission, reviewerRepo } from '../../core/container';
 import { checkPermission } from '../../core/container';
 import { EvaluationRepository } from "./evaluation.repository";
 import { EvaluationService } from "./evaluation.service";
@@ -10,7 +10,7 @@ import { CriterionRepository } from "./criteria/criterion.repository";
 
 const repository = new EvaluationRepository();
 const criterionRepo = new CriterionRepository();
-const service = new EvaluationService(repository, criterionRepo);
+const service = new EvaluationService(repository, criterionRepo, reviewerRepo);
 const controller = new EvaluationController(service);
 const router = Router();
 

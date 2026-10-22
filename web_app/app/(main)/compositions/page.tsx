@@ -148,6 +148,14 @@ const compositionColumns: ColumnProps[] = [
     }
 ];
 
+// Keep the permission ids the user picked: the API response may not echo them back
+const mapSaved = (saved: Composition, submitted: Partial<Composition>): Composition => ({
+    ...saved,
+    leadProfileRule: submitted.leadProfileRule ?? saved.leadProfileRule,
+    leadHistoryRules: submitted.leadHistoryRules ?? saved.leadHistoryRules,
+    memberRequirements: submitted.memberRequirements ?? saved.memberRequirements
+});
+
 const CompositionsTab = () => {
     const toasts = useCrudToasts('Composition');
 
@@ -158,6 +166,7 @@ const CompositionsTab = () => {
             itemName="Composition Spec"
             headerTitle="Team Composition Rules"
             columns={compositionColumns}
+            mapSaved={mapSaved}
             dialogWidth="720px"
             renderForm={(props) => <CompositionForm {...props} />}
             {...toasts}

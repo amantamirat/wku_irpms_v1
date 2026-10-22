@@ -15,6 +15,8 @@ import { IUserRepository } from "../users/user.repository";
 import { IReviewer, ReviewerTargetType } from "./reviewer.model";
 import { CreateReviewerData, IReviewerRepository } from "./reviewer.repository";
 import { ReviewerStatus } from "./reviewer.state-machine";
+import { IEvaluationRepository } from "../evaluations/evaluation.repository";
+import { ResourceStatus } from "../evaluations/evaluation.state-machine";
 
 export interface PreparedReviewer {
     data: CreateReviewerData;
@@ -34,6 +36,7 @@ export class ReviewerPolicy {
         private readonly projectRepo: IProjectRepository,
         private readonly applicationRepo: IApplicationRepository,
         private readonly stageRepo: IStageRepository,
+        private readonly evaluationRepo: IEvaluationRepository,
         private readonly userRepo: IUserRepository,
         private readonly collaboratorRepo: ICollaboratorRepository,
         private readonly verificationConfRepo: IVerificationConfigurationRepository,
@@ -127,6 +130,16 @@ export class ReviewerPolicy {
             throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
         }
 
+        const evaluationDoc = await this.evaluationRepo.findById(String(stageDoc.evaluation));
+
+        if (!evaluationDoc) {
+            throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+        }
+
+        if (evaluationDoc.status !== ResourceStatus.published) {
+            throw new AppError(ERROR_CODES.EVALUATION_NOT_PUBLISHED);
+        }
+
         return {
             data: {
                 reviewer: reviewerId,
@@ -194,6 +207,16 @@ export class ReviewerPolicy {
 
         if (!verificationConf.evaluation) {
             throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+        }
+
+        const evaluationDoc = await this.evaluationRepo.findById(String(verificationConf.evaluation));
+
+        if (!evaluationDoc) {
+            throw new AppError(ERROR_CODES.EVALUATION_NOT_FOUND);
+        }
+
+        if (evaluationDoc.status !== ResourceStatus.published) {
+            throw new AppError(ERROR_CODES.EVALUATION_NOT_PUBLISHED);
         }
 
         return {

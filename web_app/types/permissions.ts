@@ -93,6 +93,7 @@ export const PERMISSIONS = {
   SPECIALIZATION: {
     CREATE: "specialization:create",
     READ: "specialization:read",
+    LOOKUP: "specialization:lookup",
     UPDATE: "specialization:update",
     DELETE: "specialization:delete",
   },

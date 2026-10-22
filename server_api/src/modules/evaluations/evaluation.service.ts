@@ -3,6 +3,7 @@ import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
+import { IReviewerRepository } from "../reviewers/reviewer.repository";
 import { FormType } from "./criteria/criterion.model";
 import { CriterionRepository, ICriterionRepository } from "./criteria/criterion.repository";
 import { CreateEvaluationDTO, FilterEvaluationsDTO, UpdateEvaluationDTO } from "./evaluation.dto";
@@ -13,6 +14,7 @@ export class EvaluationService {
 
     constructor(private readonly repository: IEvaluationRepository,
         private readonly criterionRepo: ICriterionRepository,
+        private readonly reviewerRepo: IReviewerRepository,
     ) {
     }
 
@@ -83,11 +85,11 @@ export class EvaluationService {
         }
 
         if (next === ResourceStatus.draft) {
-            /*
-            if (await this.grantStageRepo.exists({ evaluation: id })) {
-                throw new AppError(ERROR_CODES.STAGE_ALREADY_EXISTS);
+
+            if (await this.reviewerRepo.exists({ evaluation: id })) {
+                throw new AppError(ERROR_CODES.REVIEWER_ALREADY_EXISTS);
             }
-            */
+
         }
 
         return await this.repository.update(id, {

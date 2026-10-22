@@ -1412,6 +1412,11 @@
   },
   {
     "category": "Specialization Management",
+    "name": "specialization:lookup",
+    "description": "View specialization entries"
+  },
+  {
+    "category": "Specialization Management",
     "name": "specialization:update",
     "description": "Update specialization entries"
   },

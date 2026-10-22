@@ -7,19 +7,25 @@ export enum HistoryParticipation {
 }
 
 export enum HistoryMetric {
+    PROJECT_DRAFT = "project.draft",
+    PROJECT_APPROVED = "project.approved",
     PROJECT_GRANTED = "project.granted",
     PROJECT_REFUSED = "project.refused",
     PROJECT_COMPLETED = "project.completed",
     PROJECT_VERIFIED = "project.verified",
 
     APPLICATION_SUBMITTED = "application.submitted",
+    APPLICATION_SHORTLISTED = "application.shortlisted",
+    APPLICATION_NOT_SHORTLISTED = "application.notShortlisted",
     APPLICATION_ACCEPTED = "application.accepted",
     APPLICATION_REJECTED = "application.rejected",
+
     /*
-        VERIFICATION_SUBMITTED = "verification.submitted",
-        VERIFICATION_VERIFIED = "verification.verified",
-        VERIFICATION_REJECTED = "verification.rejected"*/
+    VERIFICATION_SUBMITTED = "verification.submitted",
+    VERIFICATION_VERIFIED = "verification.verified",
+    VERIFICATION_REJECTED = "verification.rejected"*/
 }
+
 
 export interface IHistoryRuleTotal {
     fields: HistoryMetric[];

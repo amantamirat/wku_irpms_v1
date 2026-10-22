@@ -8,6 +8,7 @@ export interface FilterReviewersDto {
     application?: string;
     verification?: string;
     reviewer?: string;
+    evaluation?:string;
     status?: ReviewerStatus | ReviewerStatus[];
 }
 
