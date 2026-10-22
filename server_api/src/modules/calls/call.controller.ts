@@ -61,7 +61,7 @@ export class CallController {
             ]);
 
             const calls = await this.service.lookCalls(
-                filter, {populate:true}
+                filter, { populate: true }
             );
 
             successResponse(
@@ -74,6 +74,22 @@ export class CallController {
             errorResponse(res, 400, err.message, err);
         }
     }
+
+
+    opportunities = async (_req: Request, res: Response) => {
+        try {
+            const opportunities = await this.service.getOpportunities();
+
+            successResponse(
+                res,
+                200,
+                'Opportunities fetched successfully',
+                opportunities
+            );
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
 
     getById = async (req: Request, res: Response) => {
         try {

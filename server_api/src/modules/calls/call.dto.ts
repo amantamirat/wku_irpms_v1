@@ -1,6 +1,10 @@
-import { CallStatus } from "./call.model";
-import { CreateStageDTO } from "./stages/stage.dto";
+import { CallStatus, ICall } from "./call.model";
+import { IStage } from "./stages/stage.model";
 
+export interface CallOpportunityDTO {
+    call: ICall;
+    activeStage: IStage;
+}
 
 export interface CreateCallDTO {
     grant: string;
@@ -10,10 +14,32 @@ export interface CreateCallDTO {
     constraint?: string;
     composition?: string;
     description?: string;
-    stages?: CreateStageDTO[];
-    status?: CallStatus;
+    //stages?: CreateStageDTO[];
+    //status?: CallStatus;
 }
 
+/*
+export interface CreateCallWithStagesDto {
+    call: {
+        calendar: string;
+        grant: string;
+        title: string;
+        constraint?: string | null;
+        composition?: string | null;
+        description?: string;
+    };
+    stages: Array<{
+        name: string;
+        deadline: Date | string;
+        evaluation: string;
+        minAcceptanceScore: number;
+        minReviewers: number;
+        maxReviewers: number;
+        template?: string | null;
+        constraint?: string | null;
+    }>;
+}
+*/
 // Base fields for updating any call
 export interface UpdateCallDTO {
     id: string;
@@ -23,7 +49,7 @@ export interface UpdateCallDTO {
         budget: number;
         constraint: string;
         composition: string;
-        deadline: Date | null;
+       // deadline: Date | null;
     }>;
 }
 

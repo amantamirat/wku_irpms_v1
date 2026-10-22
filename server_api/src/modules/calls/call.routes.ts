@@ -1,13 +1,13 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../common/constants/permissions';
-import { calendarRepo, callRepo, filterService, grantRepo, projectRepo, stageService } from '../../core/container';
+import { calendarRepo, callRepo, filterService, grantRepo, projectRepo, stageRepo, stageService } from '../../core/container';
 import { verifyAuthToken } from '../auth/auth.middleware';
 import { checkTransitionPermission } from '../../core/container';
 import { checkPermission } from '../../core/container';
 import { CallController } from './call.controller';
 import { CallService } from './call.service';
 
-const service = new CallService(callRepo, grantRepo, calendarRepo, projectRepo, stageService, filterService);
+const service = new CallService(callRepo, grantRepo, calendarRepo, projectRepo, stageRepo, filterService);
 const controller = new CallController(service);
 const router = Router();
 
@@ -20,12 +20,19 @@ router.post(
 
 
 router.get(
+    '/opportunities',
+    verifyAuthToken,    
+    controller.opportunities
+);
+
+router.get(
     '/lookup',
     verifyAuthToken,
     checkPermission("call:lookup"),
     controller.look
 );
-// Get
+
+// Get calls
 router.get(
     '/',
     verifyAuthToken,
@@ -33,7 +40,9 @@ router.get(
     controller.get
 );
 
-router.get('/:id', verifyAuthToken,
+router.get(
+    '/:id',
+    verifyAuthToken,
     checkPermission("call:lookup"),
     controller.getById
 );

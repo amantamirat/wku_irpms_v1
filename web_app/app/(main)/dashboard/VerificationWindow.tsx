@@ -1,19 +1,18 @@
 'use client';
 
-import React, { useEffect, useState } from 'react';
-import { Skeleton } from 'primereact/skeleton';
-import { Tag } from 'primereact/tag';
-import { Button } from 'primereact/button';
-import { useRouter } from 'next/navigation';
 import { format } from 'date-fns';
+import { useRouter } from 'next/navigation';
+import { Button } from 'primereact/button';
+import { Tag } from 'primereact/tag';
+import { useEffect, useState } from 'react';
 
+import { useAuth } from '@/contexts/auth-context';
+import { ProgressSpinner } from 'primereact/progressspinner';
 import { VerificationConfigurationApi } from '../verifications/verification-conf/api/verification-conf.api';
 import {
     VerificationConfiguration,
     VerificationConfigurationStatus
 } from '../verifications/verification-conf/models/verification-conf.model';
-import { ProgressSpinner } from 'primereact/progressspinner';
-import { useAuth } from '@/contexts/auth-context';
 
 const VerificationWindow = () => {
     const [configurations, setConfigurations] = useState<

@@ -7,6 +7,7 @@ import {
 import { IStage, Stage, StageStatus } from "./stage.model";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 import mongoose from "mongoose";
+import { toObjectId } from "../../../common/utils/mongoose.utils";
 
 export interface CreateStageData extends CreateStageDTO {
     order: number;
@@ -60,6 +61,30 @@ export interface IStageRepository {
 
 export class StageRepository implements IStageRepository {
 
+    private buildFilter(
+        filters: FilterStageDto = {}
+    ): Record<string, any> {
+        return {
+            ...(filters.call && {
+                call: toObjectId(filters.call)
+            }),
+            ...(filters.callIds?.length && {
+                call: {
+                    $in: filters.callIds.map(id => toObjectId(id))
+                }
+            }),
+            ...(filters.evaluation && {
+                evaluation: toObjectId(filters.evaluation)
+            }),
+            ...(filters.order !== undefined && {
+                order: filters.order
+            }),
+            ...(filters.status && {
+                status: filters.status
+            })
+        };
+    }
+
     async findById(id: string): Promise<IStage | null> {
         return Stage.findById(id)
             .lean<IStage>()
@@ -72,19 +97,7 @@ export class StageRepository implements IStageRepository {
         options?: FilterOptions
     ): Promise<IStage[]> {
 
-        const query: any = {};
-
-        if (filters.call) {
-            query.call = filters.call;
-        }
-
-        if (filters.evaluation) {
-            query.evaluation = filters.evaluation;
-        }
-
-        if (filters.order !== undefined) {
-            query.order = filters.order;
-        }
+        const query = this.buildFilter(filters)
 
         let dbQuery = Stage
             .find(query)
@@ -273,19 +286,7 @@ export class StageRepository implements IStageRepository {
         filters: FilterStageDto
     ): Promise<boolean> {
 
-        const query: any = {};
-
-        if (filters.call) {
-            query.call = filters.call;
-        }
-
-        if (filters.evaluation) {
-            query.evaluation = filters.evaluation;
-        }
-
-        if (filters.order !== undefined) {
-            query.order = filters.order;
-        }
+        const query = this.buildFilter(filters)
 
         return (await Stage.exists(query).exec()) !== null;
     }

@@ -18,7 +18,7 @@ export interface ICall extends Document {
     constraint?: mongoose.Types.ObjectId | null;
     composition?: mongoose.Types.ObjectId | null;
 
-    deadline?: Date | null;
+   // deadline?: Date | null;
 
     status: CallStatus;
     statusHistory: IStatusHistory<CallStatus>[];
@@ -53,7 +53,8 @@ const CallSchema = new Schema<ICall>(
             required: false,
         },
         description: { type: String },
-        deadline: { type: Date },
+        //deadline: { type: Date },
+        
         status: { type: String, enum: Object.values(CallStatus), required: true },
         statusHistory: {
             type: [createStatusHistorySchema(Object.values(CallStatus))],
@@ -71,7 +72,7 @@ const CallSchema = new Schema<ICall>(
     },
     { timestamps: true }
 );
-CallSchema.index({ organization: 1 });
+//CallSchema.index({ organization: 1 });
 CallSchema.index({ calendar: 1 });
 CallSchema.index({ grant: 1 });
 export const Call = model<ICall>(COLLECTIONS.CALL, CallSchema);

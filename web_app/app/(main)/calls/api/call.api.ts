@@ -1,22 +1,29 @@
 import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
 import { StateTransition } from "@/api/EntityApi";
-import { Call, FilterCallsOptions } from "../models/call.model";
+import { Call, CallOpportunityDTO, FilterCallsDTO } from "../models/call.model";
 import { sanitize } from "@/utils/utils";
 
 const end_point = "/calls";
 
-export const CallApi: EntityApi<Call, FilterCallsOptions | undefined>
+export const CallApi: EntityApi<Call, FilterCallsDTO | undefined>
+    & {
+        getOpportunities: () => Promise<CallOpportunityDTO[]>;
+    }
     = {
     // ---------------------------
     // Fetch / Query
     // ---------------------------
-    async getAll(filter: FilterCallsOptions) {
+    async getAll(filter: FilterCallsDTO) {
         return ApiClient.get(end_point, filter);
     },
 
     async lookup(filter) {
         return ApiClient.get(`${end_point}/lookup`, filter);
+    },
+
+    async getOpportunities() {
+        return ApiClient.get(`${end_point}/opportunities`);
     },
 
     // ---------------------------

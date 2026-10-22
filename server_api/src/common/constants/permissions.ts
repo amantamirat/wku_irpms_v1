@@ -103,11 +103,12 @@ export const PERMISSIONS = {
     CREATE: "calendar:create",
     READ: "calendar:read",
     UPDATE: "calendar:update",
+    /*
     STATUS: {
       PLANNED: "calendar:status.planned",
       ACTIVATE: "calendar:status.active",
       CLOSE: "calendar:status.closed",
-    },
+    },*/
     DELETE: "calendar:delete",
   },
 
@@ -146,26 +147,23 @@ export const PERMISSIONS = {
     CREATE: "call:create",
     READ: "call:read",
     UPDATE: "call:update",
-    STATUS: {
-      PLANNED: "call:status.planned",
-      ACTIVATE: "call:status.active",
-      CLOSE: "call:status.closed",
-    },
+    LOOKUP: "call:lookup",
     DELETE: "call:delete",
-    CHANGE_STATUS: "call:change_status", // New permission for status transitions
+    //CHANGE_STATUS: "call:change_status", // New permission for status transitions
   },
 
   STAGE: {
     CREATE: "stage:create",
     READ: "stage:read",
     UPDATE: "stage:update",
+    /*
     STATUS: {
       PLANNED: "stage:status.planned",
       ACTIVATE: "stage:status.active",
       CLOSE: "stage:status.closed",
-    },
+    },*/
     DELETE: "stage:delete",
-    CHANGE_STATUS: "stage:change_status", // New permission for status transitions
+   // CHANGE_STATUS: "stage:change_status", // New permission for status transitions
   },
 
   EVALUATION: {

@@ -11,7 +11,6 @@ export enum CallStatus {
     closed = "closed"
 }
 
-
 export type Call = {
     _id?: string;
     grant?: string | Grant; // The new single source of truth
@@ -21,20 +20,25 @@ export type Call = {
     constraint?: string | Constraint;
     composition?: string | Composition;
     description?: string | null;
-    deadline?: Date;
-    stages?: Stage[];//used for creation
+    //deadline?: Date;
+    //stages?: Stage[];
     status?: CallStatus;
     createdAt?: Date;
     updatedAt?: Date;
 };
 
-export interface FilterCallsOptions {
+export interface CallOpportunityDTO {
+    call: Call;
+    activeStage: Stage;
+}
+
+export interface FilterCallsDTO {
     status?: CallStatus;
     calendar?: string;
     grant?: string;
-    //populate?: boolean;
 }
 
+/*
 export const validateCall = (call: Partial<Call>): { valid: boolean; message?: string } => {
     if (!call.title || call.title.trim().length === 0) {
         return { valid: false, message: "Title is required." };
@@ -50,13 +54,14 @@ export const validateCall = (call: Partial<Call>): { valid: boolean; message?: s
     }
     return { valid: true };
 };
+*/
 
 
-
-
+/*
 export const createEmptyCall = (call?: Partial<Call>): Call => ({
     title: "",
     status: CallStatus.planned,
     grant: call?.grant ?? '',
     description: ""
 });
+*/

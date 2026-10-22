@@ -186,9 +186,10 @@ export class CallRepository implements ICallRepository {
             updateData.description = dtoData.description;
         }
 
+        /*
         if (dtoData.deadline !== undefined) {
             updateData.deadline = dtoData.deadline;
-        }
+        }*/
 
         if (dtoData.constraint !== undefined) {
             updateData.constraint = dtoData.constraint

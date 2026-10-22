@@ -12,6 +12,7 @@ export const MENU_ICONS = {
 
     // Opportunities
     calls: 'pi pi-fw pi-megaphone',
+    stages:'pi pi-forward',
     grants: 'pi pi-bitcoin',
 
     // Resources

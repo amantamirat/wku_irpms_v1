@@ -31,12 +31,13 @@ export class StageService {
         return callDoc;
     }
 
+    /*
     async syncCallDeadline(callId: string, userId: string) {
         const firstStage = await this.repository.getFirstStage(callId);
         return this.callRepository.update(callId, {
             deadline: firstStage?.deadline ?? null,
         }, userId);
-    }
+    }*/
 
 
     async validateCreate(dto: CreateStageDTO): Promise<void> {
@@ -53,8 +54,9 @@ export class StageService {
             throw new AppError(ERROR_CODES.INVALID_REVIEWER_RANGE);
         }
 
+        /*
         if (call !== "validation")
-            await this.validateCall(call);
+            await this.validateCall(call);*/
 
         // Evaluation validation
         const evalDoc = await this.evalRepository.findById(evaluation);
@@ -92,10 +94,10 @@ export class StageService {
                 order
             }, userId);
 
-
-            if (!lastStage) {
-                await this.syncCallDeadline(dto.call, userId);
-            }
+            /*
+                        if (!lastStage) {
+                            await this.syncCallDeadline(dto.call, userId);
+                        }*/
 
             return stage;
 
@@ -242,6 +244,7 @@ async findNextStage(id: string) {
             userId
         );
 
+        /*
         // 6. Sync call deadline for first stage
         if (stageDoc.order === 1) {
             await this.syncCallDeadline(
@@ -249,6 +252,7 @@ async findNextStage(id: string) {
                 userId
             );
         }
+        */
 
         return updated;
     }
@@ -286,14 +290,26 @@ async findNextStage(id: string) {
             STAGE_TRANSITIONS
         );
 
+
+        if (to === StageStatus.active) {
+            const hasActiveStage = await this.repository.exists({
+                call: String(stage.call),
+                status: StageStatus.active,
+            });
+
+            if (hasActiveStage) {
+                throw new AppError(ERROR_CODES.CALL_ALREADY_HAS_ACTIVE_STAGE);
+            }
+        }
+
         // --------------------------------------------------
-        // Active → Upcoming
+        // Active → Pending
         // Only allowed when no applications exist
         // --------------------------------------------------
 
         if (
             from === StageStatus.active &&
-            to === StageStatus.upcoming
+            to === StageStatus.pending
         ) {
             const hasApplications =
                 await this.applicationRepo.exists({
@@ -306,6 +322,8 @@ async findNextStage(id: string) {
                 );
             }
         }
+
+
 
         // --------------------------------------------------
         // Update status
@@ -326,6 +344,10 @@ async findNextStage(id: string) {
 
         if (!stageDoc) {
             throw new Error(ERROR_CODES.STAGE_NOT_FOUND);
+        }
+
+        if (stageDoc.status !== StageStatus.pending) {
+            throw new Error(ERROR_CODES.STAGE_NOT_PENDING);
         }
 
         const { call, order } = stageDoc;
@@ -355,10 +377,12 @@ async findNextStage(id: string) {
             );
         }
 
+        /*
+
         if (order === 1) {
             await this.syncCallDeadline(String(stageDoc.call), userId);
         }
-
+*/
         return deleted;
     }
 }
@@ -367,13 +391,13 @@ export const STAGE_TRANSITIONS: Record<
     StageStatus,
     StageStatus[]
 > = {
-    [StageStatus.upcoming]: [
+    [StageStatus.pending]: [
         StageStatus.active
     ],
 
     [StageStatus.active]: [
         StageStatus.closed,
-        StageStatus.upcoming
+        StageStatus.pending
     ],
 
     [StageStatus.closed]: [

@@ -5,7 +5,7 @@ import { Evaluation } from "@/app/(main)/evaluations/models/evaluation.model";
 import { Template } from "@/app/(main)/templates/models/template.model";
 
 export enum StageStatus {
-    upcoming = 'upcoming',
+    pending = 'pending',
     active = 'active',
     closed = "closed"
 }
@@ -43,6 +43,7 @@ export interface FilterStagesDTO {
 /**
  * Validate call stage fields before submission
  */
+/*
 export const validateCallStage = (
     stage: Stage
 ): { valid: boolean; message?: string } => {
@@ -61,12 +62,13 @@ export const validateCallStage = (
 
     return { valid: true };
 };
-
+*/
 
 
 /**
  * Create empty call stage
  */
+/*
 export const createEmptyCallStage = (
     stage?: Partial<Stage>
 ): Stage => ({
@@ -84,4 +86,4 @@ export const createEmptyCallStage = (
     minAcceptanceScore: stage?.minAcceptanceScore ?? 50,
 });
 
-
+*/

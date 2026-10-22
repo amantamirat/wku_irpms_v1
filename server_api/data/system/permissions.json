@@ -457,18 +457,18 @@
   },
   {
     "category": "Stage Management",
-    "name": "stage:transition.upcoming.active",
-    "description": "Activate an upcoming stage to allow applications for the stage"
+    "name": "stage:transition.pending.active",
+    "description": "Activate a pending stage to allow applications for the stage"
   },
   {
     "category": "Stage Management",
     "name": "stage:transition.active.closed",
-    "description": "Close an active stage to stop accepting applications"
+    "description": "Close an active stage to stop accepting applications and other processes"
   },
   {
     "category": "Stage Management",
-    "name": "stage:transition.active.upcoming",
-    "description": "Revert an active stage to upcoming status for adjustments"
+    "name": "stage:transition.active.pending",
+    "description": "Revert an active stage to pending status for adjustments"
   },
   {
     "category": "Stage Management",

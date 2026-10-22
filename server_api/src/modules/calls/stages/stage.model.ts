@@ -4,7 +4,7 @@ import { IStatusHistory } from "../../../common/types/status-history";
 import { createStatusHistorySchema } from "../../../common/schemas/status-history.schema";
 
 export enum StageStatus {
-    upcoming = 'upcoming',
+    pending = 'pending',
     active = 'active',
     closed = "closed"
 }
@@ -50,8 +50,8 @@ const StageSchema = new Schema<IStage>(
         order: {
             type: Number,
             required: true,
-            min: 0, //verification
-            max: 5,
+            min: 0, 
+            max: 6,
         },
         evaluation: {
             type: Schema.Types.ObjectId,
@@ -88,12 +88,12 @@ const StageSchema = new Schema<IStage>(
             ref: COLLECTIONS.CONSTRAINT,
             // required: false,
         },
-        
+
         template: {
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.TEMPLATE,
         },
-        status: { type: String, enum: Object.values(StageStatus), default: StageStatus.upcoming, required: true },
+        status: { type: String, enum: Object.values(StageStatus), default: StageStatus.pending, required: true },
         statusHistory: {
             type: [createStatusHistorySchema(Object.values(StageStatus))],
             default: []

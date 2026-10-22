@@ -1,3 +1,4 @@
+import { StageStatus } from "./stage.model";
 
 export interface CreateStageDTO {
     call: string;
@@ -37,6 +38,8 @@ export interface UpdateStageDTO {
 
 export interface FilterStageDto {
     call?: string;
+    callIds?: string[];
     evaluation?: string;
     order?: number;
+    status?:StageStatus
 }

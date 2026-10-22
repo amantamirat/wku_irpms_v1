@@ -1,121 +1,134 @@
 'use client';
 
-import { createEntityManager } from "@/components/data-table/createEntityManager";
-import MyBadge from "@/templates/MyBadge";
-import { Calendar } from "../../calendars/models/calendar.model";
-import { Grant } from "../../grants/models/grant.model";
-import { Organization } from "../../organizations/models/organization.model";
-import { CallApi } from "../api/call.api";
-import { Call, createEmptyCall, FilterCallsOptions } from "../models/call.model";
-import { CALL_TRANSITIONS } from "../models/call.state-machine";
-import CallDetail from "./CallDetail";
-import SaveCallWizard from "./wizard/SaveCallWizard";
-//import SaveCall from "./new/SaveCall";
+import { useMemo } from 'react';
+import { ColumnProps } from 'primereact/column';
+
+import { ItemManager, ItemManagerProps } from '@/components/ItemManager';
+import { useToast } from '@/contexts/ToastContext';
+import { MENU_ICONS } from '@/utils/menu-icons';
+import MyBadge from '@/templates/MyBadge';
+
+import { Call, FilterCallsDTO } from '../models/call.model';
+import { CallApi } from '../api/call.api';
+import { CALL_TRANSITIONS } from '../models/call.state-machine';
+import CallForm from './CallForm';
+import CallDetail from './CallDetail';
 
 interface CallManagerProps {
-    calendar?: string | Calendar;
-    grant?: string | Grant;
+    grant?: string;
 }
 
+const DEFAULT_HIDDEN = [
+    'constraint',
+    'composition',
+];
 
+const getCallColumns = (): ColumnProps[] => [
+    {
+        header: 'Title',
+        field: 'title',
+        sortable: true,
+    },
+    {
+        header: 'Operational Year',
+        field: 'calendar',
+        sortable: true,
+        body: (call: Call) =>
+            typeof call.calendar === 'object' && call.calendar !== null
+                ? call.calendar.year
+                : call.calendar ?? '-',
+    },
+    {
+        header: 'Grant',
+        field: 'grant',
+        sortable: true,
+        body: (call: Call) =>
+            typeof call.grant === 'object' && call.grant !== null
+                ? call.grant.title
+                : call.grant ?? '-',
+    },
+    {
+        header: 'Constraint Profile',
+        field: 'constraint',
+        body: (call: Call) =>
+            typeof call.constraint === 'object' && call.constraint !== null
+                ? call.constraint.name
+                : call.constraint ?? '-',
+    },
+    {
+        header: 'Composition Template',
+        field: 'composition',
+        body: (call: Call) =>
+            typeof call.composition === 'object' && call.composition !== null
+                ? call.composition.name
+                : call.composition ?? '-',
+    },
+    {
+        header: 'Status',
+        field: 'status',
+        sortable: true,
+        style: { width: '150px' },
+        body: (call: Call) => (
+            <MyBadge
+                type="status"
+                value={call.status ?? 'Unknown'}
+            />
+        ),
+    },
+];
 
-const CallManager = ({ calendar, grant }: CallManagerProps) => {
+// Keep the relationship references the user picked if the API response doesn't echo them fully populated
+const mapSaved = (saved: Call, submitted: Partial<Call>): Call => ({
+    ...saved,
+    calendar: submitted.calendar ?? saved.calendar,
+    grant: submitted.grant ?? saved.grant,
+    constraint: submitted.constraint ?? saved.constraint,
+    composition: submitted.composition ?? saved.composition,
+});
 
-    const Manager = createEntityManager<Call, FilterCallsOptions | undefined>({
-        title: "Strategic Calls Management",
-        itemName: "Call",
-        api: CallApi,
+export default function CallManager({ grant }: CallManagerProps) {
+    const toast = useToast();
 
-        columns: [
-            { header: "Title", field: "title", sortable: true },
+    const columns = useMemo(() => getCallColumns(), []);
 
-            {
-                header: "Calendar",
-                body: (c: Call) => {
-                    const calendar = c.calendar as Calendar;
-                    if (typeof calendar === "object") {
-                        return calendar.year;
-                    }
-                    return "-";
-                }
-            },
+    const filter = useMemo<FilterCallsDTO | undefined>(
+        () => (grant ? { grant } : undefined),
+        [grant],
+    );
 
-            {
-                header: "Organization",
-                body: (c: Call) => {
-                    const org = c.organization as Organization;
-                    if (typeof org === "object") {
-                        return org.name;
-                    }
-                    return "-";
-                }
-            },
-
-            {
-                header: "Grant Source",
-                body: (c: Call) => {
-                    const grant = c.grant as Grant;
-                    if (typeof grant === "object") {
-                        return grant.title;
-                    }
-                    return "-";
-                }
-            },
-
-            {
-
-                header: "Deadline",
-                body: (c: Call) => {
-                    const firstDeadline = c.deadline;
-                    if (!firstDeadline) return "-";
-                    // Format to a readable style: e.g., MM/DD/YYYY, HH:MM
-                    return new Date(firstDeadline).toLocaleString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric',
-                        hour: '2-digit',
-                        minute: '2-digit',
-                        hour12: false
-                    });
-                }
-            },
-
-            {
-                field: "status",
-                header: "Status",
-                sortable: true,
-                style: { width: '150px' },
-                body: (c: Call) =>
-                    <MyBadge type="status" value={c.status ?? "Unknown"} />
-            }
-        ],
-
-        createNew: () => ({
-            ...createEmptyCall(),
-            //budget: 0, // Fallback initialization value for the form structure
-            grant: grant,
-            calendar: calendar
-        } as any),
-
-        SaveDialog: SaveCallWizard,
-        permissionPrefix: "call",
-
-        workflow: {
-            statusField: "status",
-            transitions: CALL_TRANSITIONS,
-        },
-
+    // Memoize tableProps configuration to maintain stable reference
+    const tableProps: ItemManagerProps<Call, FilterCallsDTO>["tableProps"] = useMemo(() => ({
         expandable: {
-            template: (call) => (
-                <CallDetail call={call} />
-            )
+            template: (call) => <CallDetail call={call} />
         }
+    }), []);
+    
 
-
-
-    });
-
-    return <Manager />;
-};
-
-export default CallManager;
+    return (
+        <ItemManager<Call, FilterCallsDTO>
+            api={CallApi}
+            resource="call"
+            itemName="Call"
+            headerTitle="Manage Calls"
+            itemIcon={MENU_ICONS.calls}
+            mapSaved={mapSaved}
+            columns={columns}
+            enableColumnToggle
+            defaultHiddenFields={DEFAULT_HIDDEN}
+            filter={filter}
+            dialogWidth="800px"
+            statusField="status"
+            transitions={CALL_TRANSITIONS}
+            tableProps={tableProps}
+            renderForm={(props) => <CallForm {...props} />}
+            onError={(error) => toast.error(error)}
+            onSuccess={(operation) =>
+                toast.success(
+                    operation === 'create'
+                        ? 'Call created successfully'
+                        : 'Call updated successfully',
+                )
+            }
+        />
+    );
+}

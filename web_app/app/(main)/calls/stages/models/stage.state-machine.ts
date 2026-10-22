@@ -2,7 +2,7 @@ import { TransitionMap } from "@/hooks/useStateTransitionActions";
 import { StageStatus } from "./stage.model";
 
 export const STAGE_TRANSITIONS: TransitionMap = {
-    [StageStatus.upcoming]: [
+    [StageStatus.pending]: [
         {
             next: StageStatus.active,
             action: "Activate",
@@ -19,8 +19,8 @@ export const STAGE_TRANSITIONS: TransitionMap = {
             severity: "danger"
         },
         {
-            next: StageStatus.upcoming,
-            action: "Set Upcoming",
+            next: StageStatus.pending,
+            action: "Set Pending",
             icon: "pi pi-undo",
             severity: "info"
         }

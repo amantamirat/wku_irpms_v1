@@ -48,6 +48,7 @@ const AppMenu = () => {
                     to: '/verifications',
                     permission: 'verification:read'
                 },
+                /*
                 {
                     label: 'Collaborators',
                     icon: MENU_ICONS.collaborators,
@@ -61,6 +62,7 @@ const AppMenu = () => {
                     to: '/reviewers',
                     permission: 'reviewer:read',
                 },
+                */
             ]
         },
         {

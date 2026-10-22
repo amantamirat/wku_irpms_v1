@@ -11,10 +11,11 @@ import { ICalendarRepository } from "../calendar/calendar.repository";
 import { GrantStatus } from "../grants/grant.model";
 import { IGrantRepository } from "../grants/grant.repository";
 import { IProjectRepository } from "../projects/project.repository";
-import { CreateCallDTO, FilterCallDTO, UpdateCallDTO } from "./call.dto";
+import { CallOpportunityDTO, CreateCallDTO, FilterCallDTO, UpdateCallDTO } from "./call.dto";
 import { CallStatus } from "./call.model";
 import { ICallRepository } from "./call.repository";
-import { StageService } from "./stages/stage.service";
+import { StageStatus } from "./stages/stage.model";
+import { IStageRepository } from "./stages/stage.repository";
 
 export class CallService {
 
@@ -23,7 +24,8 @@ export class CallService {
         private readonly grantRepo: IGrantRepository,
         private readonly calendarRepo: ICalendarRepository,
         private readonly projectRepo: IProjectRepository,
-        private readonly stageService: StageService,
+        private readonly stageRepo: IStageRepository,
+        //private readonly stageService: StageService,
         private readonly scopeFilterService: ScopeFilterService,
     ) {
     }
@@ -31,11 +33,13 @@ export class CallService {
     async create(dto: CreateCallDTO, userId: string, scope: AuthScope) {
 
 
-        const { stages, ...callData } = dto;
+        const { ...callData } = dto;
 
+        /*
         if (!stages?.length) {
             throw new AppError(ERROR_CODES.STAGE_REQUIRED);
         }
+            */
 
         // Validate Grant
         const grantDoc = await this.grantRepo.findById(callData.grant);
@@ -70,12 +74,14 @@ export class CallService {
         // Validate ALL stages BEFORE creating call
         // -----------------------------------------
 
+        /*
         for (const stage of stages) {
             await this.stageService.validateCreate({
                 ...stage,
                 call: "validation"
             });
         }
+        */
 
         // -----------------------------------------
         // Create Call
@@ -90,13 +96,15 @@ export class CallService {
         // -----------------------------------------
         // Create stages
         // -----------------------------------------
+        /*
         for (const stage of stages) {
             await this.stageService.create({
                 ...stage, call: String(call._id)
             }, userId);
         }
-
-        return this.repository.findById(String(call._id), { populate: true });
+            */
+        return call;
+        // return this.repository.findById(String(call._id), { populate: true });
     }
 
     async readCalls(filter: FilterCallDTO, scope: AuthScope, options?: FilterOptions) {
@@ -108,6 +116,37 @@ export class CallService {
 
     async lookCalls(filter: FilterCallDTO, options?: FilterOptions) {
         return await this.repository.find(filter, options);
+    }
+
+    async getOpportunities(): Promise<CallOpportunityDTO[]> {
+        // 1. Find active calls
+        const calls = await this.repository.find({
+            status: CallStatus.active,
+        }, { populate: true });
+
+        if (!calls.length) {
+            return [];
+        }
+
+        // 2. Find active stages belonging to those calls
+        const stages = await this.stageRepo.find({
+            callIds: calls.map(call => call._id.toString()),
+            status: StageStatus.active,
+        });
+
+        // 3. Map each call to its active stage
+        const stageByCall = new Map(
+            stages.map(stage => [stage.call.toString(), stage])
+        );
+
+        // 4. Return opportunities with their active stage and deadline
+        return calls.flatMap(call => {
+            const activeStage = stageByCall.get(call._id.toString());
+
+            return activeStage
+                ? [{ call, activeStage }]
+                : [];
+        });
     }
 
     async getById(id: string, options?: FilterOptions) {
@@ -184,12 +223,20 @@ export class CallService {
             }
         }
 
-        if (next === CallStatus.active && from === CallStatus.planned) {
+        if (next === CallStatus.active) {
+            const hasStages = await this.stageRepo.exists({ call: id });
+            if (!hasStages) {
+                throw new AppError(
+                    ERROR_CODES.STAGE_NOT_FOUND,
+                    "Cannot activate call because it has no stages"
+                );
+            }
+            /*
             if (!callDoc.deadline) {
                 throw new AppError(
                     ERROR_CODES.CALL_DEADLINE_NOT_SET
                 );
-            }
+            }*/
         }
 
         return await this.repository.updateStatus(id, to, userId);
@@ -201,7 +248,7 @@ export class CallService {
         const callDoc = await this.repository.findById(id);
         if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
         if (callDoc.status !== CallStatus.planned) throw new AppError(ERROR_CODES.CALL_NOT_PLANNED);
-        const hasStages = await this.stageService.exists({ call: id });
+        const hasStages = await this.stageRepo.exists({ call: id });
         if (hasStages) {
             throw new AppError(
                 ERROR_CODES.STAGE_ALREADY_EXISTS,
