@@ -15,6 +15,7 @@ export const PROJECT_TRANSITIONS: TransitionMap = {
             action: "Refuse",
             icon: "pi pi-times",
             severity: "danger",
+            requireReason: true
         },
     ],
 

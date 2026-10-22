@@ -58,7 +58,8 @@ export interface IProjectRepository {
     updateStatus(
         id: string,
         status: ProjectStatus,
-        userId: string
+        userId: string,
+        reason?: string,
     ): Promise<IProject | null>;
 
     exists(
@@ -399,7 +400,8 @@ export class ProjectRepository
     async updateStatus(
         id: string,
         status: ProjectStatus,
-        userId: string
+        userId: string,
+        reason?: string,
     ): Promise<IProject | null> {
 
         return Project.findByIdAndUpdate(
@@ -414,7 +416,8 @@ export class ProjectRepository
                         status,
                         changedBy:
                             toObjectId(userId),
-                        changedAt: new Date()
+                        changedAt: new Date(),
+                        reason
                     }
                 }
             },

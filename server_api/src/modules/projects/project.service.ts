@@ -372,7 +372,7 @@ export class ProjectService {
 
 
     async transitionState(dto: TransitionRequestDto, userId: string) {
-        const { id, current, next } = dto;
+        const { id, current, next, reason } = dto;
 
         const projectDoc = await this.getById(id);
 
@@ -557,7 +557,7 @@ export class ProjectService {
 
         }
 
-        return await this.projectRepo.updateStatus(id, to, userId);
+        return await this.projectRepo.updateStatus(id, to, userId, reason);
     }
 
 

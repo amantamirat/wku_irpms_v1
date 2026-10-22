@@ -9,9 +9,10 @@ export enum HistoryParticipation {
 export enum HistoryMetric {
     PROJECT_DRAFT = "project.draft",
     PROJECT_APPROVED = "project.approved",
-    PROJECT_GRANTED = "project.granted",
     PROJECT_REFUSED = "project.refused",
+    PROJECT_GRANTED = "project.granted",
     PROJECT_COMPLETED = "project.completed",
+    PROJECT_TERMINATED = "project.terminated",
     PROJECT_VERIFIED = "project.verified",
 
     APPLICATION_SUBMITTED = "application.submitted",

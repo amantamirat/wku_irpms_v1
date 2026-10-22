@@ -46,6 +46,7 @@ interface HistoryMetrics {
     granted: number;
     refused: number;
     completed: number;
+    terminated: number;
     verified: number;
 
     submitted: number;
@@ -100,9 +101,11 @@ export class HistoryValidatorService {
 
                 [HistoryMetric.PROJECT_APPROVED]: metrics.approved,
 
+                [HistoryMetric.PROJECT_REFUSED]: metrics.refused,
+
                 [HistoryMetric.PROJECT_GRANTED]: metrics.granted,
 
-                [HistoryMetric.PROJECT_REFUSED]: metrics.refused,
+                [HistoryMetric.PROJECT_TERMINATED]: metrics.terminated,
 
                 [HistoryMetric.PROJECT_COMPLETED]: metrics.completed,
 
@@ -230,9 +233,10 @@ export class HistoryValidatorService {
         return {
             draft: projectMetrics.draft,
             approved: projectMetrics.approved,
-            granted: projectMetrics.granted,
             refused: projectMetrics.refused,
+            granted: projectMetrics.granted,
             completed: projectMetrics.completed,
+            terminated: projectMetrics.terminated,
             verified: projectMetrics.verified,
 
             submitted: applicationMetrics.submitted,
@@ -262,14 +266,19 @@ export class HistoryValidatorService {
                     project.status === ProjectStatus.approved
             ).length,
 
+            refused: projects.filter(
+                project =>
+                    project.status === ProjectStatus.refused
+            ).length,
+
             granted: projects.filter(
                 project =>
                     project.status === ProjectStatus.granted
             ).length,
 
-            refused: projects.filter(
+            terminated: projects.filter(
                 project =>
-                    project.status === ProjectStatus.refused
+                    project.status === ProjectStatus.terminated
             ).length,
 
             completed: projects.filter(

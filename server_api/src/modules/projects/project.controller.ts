@@ -319,12 +319,13 @@ export class ProjectController {
       }
 
       const { id } = req.params;
-      const { current, next } = req.body;
+      const { current, next, reason } = req.body;
 
       const dto: TransitionRequestDto = {
         id,
         current,
-        next
+        next,
+        reason
       };
 
       const updated = await this.service.transitionState(dto, req.auth.userId);

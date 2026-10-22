@@ -168,6 +168,26 @@ const ProjectManager = createEntityManager<Project>({
                 </span>
             )
         },
+
+        {
+            header: "Application Status",
+            field: "currentApplication.status",
+            sortable: true,
+            body: (project: Project) => {
+                const application =
+                    typeof project.currentApplication === "object" &&
+                        project.currentApplication !== null
+                        ? project.currentApplication
+                        : null;
+
+                return (
+                    <MyBadge
+                        type="status"
+                        value={application?.status ?? "N/A"}
+                    />
+                );
+            }
+        },
         {
             header: "Status",
             field: "status",
@@ -181,7 +201,7 @@ const ProjectManager = createEntityManager<Project>({
         }
     ],
 
-    defaultHiddenFields: ["grant.title", "calendar.year", "leadPI.gender", "femaleProportion", "verifiedCollaboratorsProportion", "organization.name", "workspace.name", "call.title"],
+    defaultHiddenFields: ["grant.title", "calendar.year", "leadPI.gender", "currentApplication.status", "femaleProportion", "verifiedCollaboratorsProportion", "organization.name", "workspace.name", "call.title"],
     enableColumnToggle: true,
 
     createNew: () => ({

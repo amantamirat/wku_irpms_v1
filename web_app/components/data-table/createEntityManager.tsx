@@ -1,6 +1,6 @@
 'use client';
 
-import React, { forwardRef, useEffect, useImperativeHandle, useState } from "react";
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useState } from "react";
 import { EntityApi, StateTransition } from "@/api/EntityApi";
 import {
   ItemDataTable,
@@ -9,6 +9,7 @@ import {
 } from "@/components/data-table/ItemDataTable";
 import { useAuth } from "@/contexts/auth-context";
 import {
+  TransitionAction,
   TransitionMap,
   useStateTransitionActions,
 } from "@/hooks/useStateTransitionActions";
@@ -17,6 +18,7 @@ import { useCrudActions } from "@/hooks/useCrudActions";
 import { ApiError } from "@/api/ApiError";
 import ErrorState from "../ErrorState";
 import { useToast } from "@/contexts/ToastContext";
+import { useConfirmDialog } from "@/contexts/ConfirmDialogContext";
 
 export interface EntityManagerRef<T> {
   updateItem: (item: T) => void;
@@ -271,67 +273,91 @@ export function createEntityManager<
         }
       };
 
+
+
       /*
-       * -----------------------------------------
-       * TRANSITION
-       * -----------------------------------------
-       */
+ * -----------------------------------------
+ * TRANSITION
+ * -----------------------------------------
+ */
+      const confirm = useConfirmDialog();
 
-      const handleTransition = async (
-        id: string,
-        transition: StateTransition
-      ) => {
-        if (!config.api.transitionState) {
-          return;
-        }
+      const handleTransition = useMemo(() => {
+        if (!config.api.transitionState) return undefined;
 
-        try {
-          const updated =
-            await config.api.transitionState(
-              id,
-              transition
-            );
+        return (
+          id: string,
+          transition: StateTransition,
+          meta: TransitionAction
+        ) => {
+          confirm.ask({
+            operation: meta.action,
+            item: config.itemName,
+            reason: meta.requireReason
+              ? { required: meta.requireReason }
+              : undefined,
+            icon: meta.icon,
+            severity: meta.severity,
 
-          if (!updated) {
-            return;
-          }
+            onConfirm: async ({ reason }) => {
+              const payload: StateTransition = {
+                ...transition,
+                reason,
+              };
 
-          const prev = getById(id);
+              const updated =
+                await config.api.transitionState!(
+                  id,
+                  payload
+                );
 
-          if (!prev) {
-            return;
-          }
+              if (!updated) return;
 
-          const statusField =
-            config.workflow?.statusField;
+              const prev = getById(id);
+              if (!prev) return;
 
-          const updatedItem = statusField
-            ? {
-              ...prev,
-              [statusField]:
-                updated[statusField]
-            }
-            : updated;
+              const statusField =
+                config.workflow?.statusField;
 
-          updateItem(updatedItem);
+              const updatedItem = statusField
+                ? {
+                  ...prev,
+                  [statusField]: updated[statusField],
+                }
+                : updated;
 
-          // AFTER transition has completed
-          await config.workflow?.onTransitionComplete?.(
-            prev,
-            updatedItem,
-            transition
-          );
+              updateItem(updatedItem);
 
-        } catch (err) {
-          toast.error("Transition failed", String(err));
-          console.error(
-            "[EntityManager] Transition failed:",
-            err
-          );
+              // AFTER transition has completed
+              await config.workflow?.onTransitionComplete?.(
+                prev,
+                updatedItem,
+                payload
+              );
+            },
 
-          throw err;
-        }
-      };
+            onError: (error: any) => {
+              toast.error(
+                "Transition failed",
+                String(error)
+              );
+
+              console.error(
+                "[EntityManager] Transition failed:",
+                error
+              );
+            },
+          });
+        };
+      }, [
+        config.api,
+        config.itemName,
+        config.workflow,
+        confirm,
+        getById,
+        updateItem,
+        toast,
+      ]);
 
       /*
        * -----------------------------------------
