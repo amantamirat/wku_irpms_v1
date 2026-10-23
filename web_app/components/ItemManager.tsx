@@ -365,9 +365,20 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
                 onConfirm: async ({ reason }) => {
                     const payload: StateTransition = { ...transition, reason };
                     const response = await api.transitionState!(id, payload);
+                    const previous = getById(id);
+
                     const next = mapTransitionedRef.current
-                        ? mapTransitionedRef.current(response, getById(id))
-                        : response;
+                        ? mapTransitionedRef.current(response, previous)
+                        : previous && statusField
+                            ? {
+                                ...previous, [statusField]: response[statusField]
+                                ,
+                                ...(response.statusHistory !== undefined && {
+                                    statusHistory: response.statusHistory,
+                                }),
+                            }
+                            : response;
+
                     updateItem(next);
                     safely(() => onTransitionedRef.current?.(next, payload));
                 },

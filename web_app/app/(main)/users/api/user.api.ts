@@ -29,6 +29,8 @@ export const UserApi: EntityApi<
     restore: (
         userId: string
     ) => Promise<User>;
+
+    getEligibleApplicationAssignees: () => Promise<User[]>
 } = {
 
     async create(user: Partial<User>): Promise<User> {
@@ -64,6 +66,17 @@ export const UserApi: EntityApi<
             await ApiClient.get(
                 `${end_point}/lookup`,
                 options
+            );
+
+        return response as User[];
+    },
+
+    async getEligibleApplicationAssignees(
+    ): Promise<User[]> {
+
+        const response =
+            await ApiClient.get(
+                `${end_point}/eligible-application-assignees`
             );
 
         return response as User[];

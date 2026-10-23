@@ -170,6 +170,13 @@ export class UserService {
     }
 
 
+    async getEligibleApplicationAssignees() {
+        return this.userRepo.findByPermission(
+            'application:assigned:read'
+        );
+    }
+
+
     // -------------------------
     // FIND ONE
     // -------------------------

@@ -37,7 +37,7 @@ const ApplicationDetail = ({ application, updateApplication }: ApplicationDetail
         {
             header: "Status History",
             icon: "pi pi-history",
-            permission: "project:read",
+            permission: "application:read",
             content: <StatusHistoryWidget history={application.statusHistory} />
         }
     ], [application, projectId]);

@@ -2,32 +2,32 @@ import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
 import { StateTransition } from "@/api/EntityApi";
 import {
-    FilterReviewersOptions,
+    FilterReviewersDTO,
     Reviewer
 } from "../models/reviewer.model";
 import { sanitize } from "@/utils/utils";
 
 const end_point = '/project/reviewers';
 
-export const ReviewerApi: EntityApi<Reviewer, FilterReviewersOptions | undefined>
+export const ReviewerApi: EntityApi<Reviewer, FilterReviewersDTO | undefined>
     & {
 
-        me: (options?: FilterReviewersOptions) => Promise<Reviewer[]>;
+        me: (options?: FilterReviewersDTO) => Promise<Reviewer[]>;
 
     }
     = {
 
-    async getAll(filter?: FilterReviewersOptions): Promise<Reviewer[]> {
+    async getAll(filter?: FilterReviewersDTO): Promise<Reviewer[]> {
         const data = await ApiClient.get(end_point, filter);
         return data as Reviewer[];
     },
 
-    async lookup(filter?: FilterReviewersOptions): Promise<Reviewer[]> {
+    async lookup(filter?: FilterReviewersDTO): Promise<Reviewer[]> {
         return ApiClient.get(`${end_point}/lookup`, filter);
     },
 
     async me(
-        filter?: Omit<FilterReviewersOptions, "reviewer">
+        filter?: Omit<FilterReviewersDTO, "reviewer">
     ): Promise<Reviewer[]> {
         const data = await ApiClient.get(`${end_point}/me`, filter);
         return data as Reviewer[];

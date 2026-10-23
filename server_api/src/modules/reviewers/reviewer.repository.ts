@@ -239,7 +239,7 @@ export class ReviewerRepository implements IReviewerRepository {
             {
                 $set: {
                     status,
-                    updatedBy: toObjectId(changedBy)
+                    //updatedBy: toObjectId(changedBy)
                 },
                 $push: {
                     statusHistory: {

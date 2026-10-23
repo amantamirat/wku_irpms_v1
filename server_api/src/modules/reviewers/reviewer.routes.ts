@@ -7,7 +7,6 @@ import { CriterionRepository } from '../evaluations/criteria/criterion.repositor
 import { ResultRepository } from './results/result.repository';
 import { ReviewerController } from './reviewer.controller';
 import { ReviewerService } from './reviewer.service';
-//import { ReviewerSynchronizer } from './reviewer.synchronizer';
 import { applicationRepo, collaboratorRepo, notificationService, projectRepo, reviewerRepo, stageRepo, userRepo, verificationConfRepo, verificationRepo } from '../../core/container';
 import { ReviewerPolicy } from './reviewer.policy';
 
@@ -33,7 +32,7 @@ router.post('/', verifyAuthToken,
 
 router.get('/', verifyAuthToken,
     checkPermission([PERMISSIONS.REVIEWER.READ,
-        //PERMISSIONS.REVIEWER.READ_OWN
+    PERMISSIONS.REVIEWER.READ_OWN
     ]),
     controller.get);
 
@@ -44,7 +43,6 @@ router.get('/lookup', verifyAuthToken,
 router.get(
     '/me',
     verifyAuthToken,
-    //checkPermission([PERMISSIONS.REVIEWER.READ_OWN]),
     controller.getMyEvaluations
 );
 
@@ -58,7 +56,8 @@ router.patch('/:id', verifyAuthToken,
     controller.transitionState);
 
 router.delete('/:id', verifyAuthToken,
-    checkPermission([PERMISSIONS.REVIEWER.DELETE, PERMISSIONS.REVIEWER.DELETE_OWN]),
+    checkPermission([PERMISSIONS.REVIEWER.DELETE,
+    PERMISSIONS.REVIEWER.DELETE_OWN]),
     controller.delete);
 
 export default router;

@@ -21,6 +21,13 @@ router.post(
 );
 
 router.get(
+    '/eligible-application-assignees',
+    verifyAuthToken,
+    checkPermission('application:reviewerAssigner:update'),
+    controller.getEligibleApplicationAssignees
+);
+
+router.get(
     '/lookup',
     verifyAuthToken,
     checkPermission('user:lookup'),

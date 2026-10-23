@@ -191,7 +191,13 @@ export class ApplicationRepository
 
         if (options?.populate) {
             dbQuery
-                .populate("project")
+                .populate({
+                    path: "project",
+                    populate: {
+                        path: "leadPI",
+                        select: "_id name",
+                    },
+                })
                 .populate("stage")
                 .populate({
                     path: "statusHistory.changedBy",

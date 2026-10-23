@@ -147,6 +147,28 @@ export class UserController {
         }
     };
 
+
+    getEligibleApplicationAssignees = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ) => {
+        try {
+            if (!req.auth?.userId) return;
+
+            const users =
+                await this.service.getEligibleApplicationAssignees();
+
+            successResponse(
+                res,
+                200,
+                'Eligible application assignees fetched successfully',
+                users
+            );
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
     // GET /users/deleted
     getDeleted = async (
         req: AuthenticatedRequest,

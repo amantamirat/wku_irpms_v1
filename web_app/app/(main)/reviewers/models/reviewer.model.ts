@@ -30,11 +30,12 @@ export type Reviewer = {
     weight?: number;
     score?: number;
     status: ReviewerStatus;
+    createdBy?: string | User;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
-export interface FilterReviewersOptions {
+export interface FilterReviewersDTO {
     targetType?: ReviewerTargetType;
     project?: string | Project;
     reviewer?: string | User;

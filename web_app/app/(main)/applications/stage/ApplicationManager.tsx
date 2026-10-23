@@ -92,6 +92,17 @@ const COLUMNS: ColumnProps[] = [
             );
         },
     },
+    {
+        header: 'Lead PI',
+        field: 'project.leadPI.name',
+        sortable: true,
+        body: (row: Application) => {
+            const leadPI = getProject(row)?.leadPI;
+            return typeof leadPI === 'object' && leadPI !== null
+                ? leadPI.name
+                : 'Unknown Lead PI';
+        },
+    },
     percentColumn('Female Proportion', 'femaleProportion'),
     percentColumn('Verified Collaborators', 'verifiedCollaboratorsProportion'),
     docColumn('Orig Doc', 'origDoc', (a) => a.documentPath,
@@ -163,6 +174,7 @@ const DEFAULT_HIDDEN = [
     'assigner',
     'origDoc',
     'anonDoc',
+    'project.leadPI.name'
 ];
 
 /* -------------------------------------------------------------------------- */
@@ -189,7 +201,7 @@ function useReviewerAssigner(patch: Patch) {
 
         if (!usersLoaded.current) {
             try {
-                const data = await UserApi.lookup!();
+                const data = await UserApi.getEligibleApplicationAssignees!();
                 setUsers(Array.isArray(data) ? data : []);
                 usersLoaded.current = true;
             } catch (err) {

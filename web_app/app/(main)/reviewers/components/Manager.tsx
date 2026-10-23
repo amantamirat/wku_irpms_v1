@@ -7,7 +7,7 @@ import { Verification } from "../../verifications/models/verification.model";
 import { ReviewerApi } from "../api/reviewer.api";
 import EvaluationDialog from "../components/EvaluationDialog";
 import SaveReviewerDialog from "../components/SaveReviewerDialog";
-import { FilterReviewersOptions, Reviewer, ReviewerStatus, ReviewerTargetType } from "../models/reviewer.model";
+import { FilterReviewersDTO, Reviewer, ReviewerStatus, ReviewerTargetType } from "../models/reviewer.model";
 import { REVIEWER_ADMIN_TRANSITIONS } from "../models/reviewer.state-machine";
 import { RowActionButton } from "@/components/data-table/ItemDataTable";
 import { useAuth } from "@/contexts/auth-context";
@@ -16,8 +16,8 @@ import { ApplicationApi } from "../../applications/api/application.api";
 interface ReviewerManagerProps {
     targetType: ReviewerTargetType,
     application?: Application;
-    updateApplication?: (application: Application) => void;
     verification?: Verification;
+    updateApplication?: (application: Application) => void;
 }
 
 
@@ -47,7 +47,7 @@ const ReviewerManager = ({ targetType, application, updateApplication, verificat
     ];
 
     const Manager = useMemo(() => {
-        return createEntityManager<Reviewer, FilterReviewersOptions>({
+        return createEntityManager<Reviewer, FilterReviewersDTO>({
             title: "Reviewers",
             createLabel: "Assign Reviewer",
             itemName: "Reviewer",
