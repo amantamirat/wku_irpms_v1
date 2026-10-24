@@ -1,4 +1,3 @@
-
 'use client';
 
 import { FormEvent, useEffect, useState } from 'react';
@@ -24,11 +23,21 @@ import { Specialization } from '@/app/(main)/specializations/models/specializati
 import {
     accessibilityOptions,
     User,
-    genderOptions,
-    validateUser
+    genderOptions
 } from '../models/user.model';
 
 interface UserFormProps extends ItemFormRenderProps<User> { }
+
+const FIN_REGEX = /^\d{12}$/;
+const ORCID_REGEX = /^\d{4}-\d{4}-\d{4}-\d{4}$/;
+
+const isFormValid = (user: User) => {
+    if (!user.workspace) return false;
+    if (!user.name?.trim()) return false;
+    if (user.fin && !FIN_REGEX.test(user.fin)) return false;
+    if (user.orcid && !ORCID_REGEX.test(user.orcid)) return false;
+    return true;
+};
 
 const UserForm = ({
     item,
@@ -46,7 +55,6 @@ const UserForm = ({
     const canlookSpecializations = hasPermission([
         PERMISSIONS.SPECIALIZATION.LOOKUP
     ]);
-
 
     useEffect(() => {
         setLocalUser({ ...item });
@@ -103,17 +111,11 @@ const UserForm = ({
         setSubmitted(true);
 
         if (saving) return;
-
-        const validation = validateUser(localUser);
-
-        if (!validation.valid) return;
+        if (!isFormValid(localUser)) return;
 
         await onSubmit(localUser);
     };
 
-    const validation = submitted
-        ? validateUser(localUser)
-        : undefined;
 
     return (
         <form
@@ -133,21 +135,17 @@ const UserForm = ({
 
                 <Dropdown
                     id="user-workspace"
-                    value={
-                        typeof localUser.workspace === 'object'
-                            ? localUser.workspace?._id
-                            : localUser.workspace
-                    }
+                    value={localUser.workspace}
                     options={workspaces}
                     optionLabel="name"
-                    optionValue="_id"
+                    dataKey="_id"
                     placeholder="Select Workspace"
                     filter
                     showClear
                     onChange={e =>
                         updateField(
                             'workspace',
-                            e.value as User['workspace']
+                            (e.value ?? undefined) as User['workspace']
                         )
                     }
                     className={classNames('w-full', {
@@ -254,13 +252,13 @@ const UserForm = ({
                         'p-invalid':
                             submitted &&
                             !!localUser.fin &&
-                            !/^\d{12}$/.test(localUser.fin)
+                            !FIN_REGEX.test(localUser.fin)
                     })}
                 />
 
                 {submitted &&
                     !!localUser.fin &&
-                    !/^\d{12}$/.test(localUser.fin) && (
+                    !FIN_REGEX.test(localUser.fin) && (
                         <small className="p-error block mt-1">
                             FIN must contain exactly 12 digits.
                         </small>
@@ -285,13 +283,13 @@ const UserForm = ({
                         'p-invalid':
                             submitted &&
                             !!localUser.orcid &&
-                            !/^\d{4}-\d{4}-\d{4}-\d{4}$/.test(localUser.orcid)
+                            !ORCID_REGEX.test(localUser.orcid)
                     })}
                 />
 
                 {submitted &&
                     !!localUser.orcid &&
-                    !/^\d{4}-\d{4}-\d{4}-\d{4}$/.test(localUser.orcid) && (
+                    !ORCID_REGEX.test(localUser.orcid) && (
                         <small className="p-error block mt-1">
                             Enter a valid ORCID format.
                         </small>
@@ -350,15 +348,6 @@ const UserForm = ({
                         }
                         className="w-full"
                     />
-                </div>
-            )}
-
-            {/* Model validation */}
-            {validation && !validation.valid && (
-                <div className="col-12">
-                    <small className="p-error block">
-                        {validation.message}
-                    </small>
                 </div>
             )}
         </form>

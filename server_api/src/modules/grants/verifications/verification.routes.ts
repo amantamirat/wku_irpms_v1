@@ -34,11 +34,7 @@ router.post(
     "/",
     verifyAuthToken,
     checkPermission([PERMISSIONS.VERIFICATION.CREATE, PERMISSIONS.VERIFICATION.SUBMIT]),
-    (req, res, next) => {
-        req.headers["x-upload-folder"] = "verifications";
-        next();
-    },
-    upload.single("document"),
+    upload.single("file", ["application/pdf"]),
     controller.create
 );
 

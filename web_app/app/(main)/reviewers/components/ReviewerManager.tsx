@@ -12,6 +12,8 @@ import { Reviewer, FilterReviewersDTO, ReviewerTargetType } from '../models/revi
 import ReviewerForm from './ReviewerForm';
 import { Application } from '../../applications/models/application.model';
 import { Verification } from '../../verifications/models/verification.model';
+import MyBadge from '@/templates/MyBadge';
+import { REVIEWER_ADMIN_TRANSITIONS } from '../models/reviewer.state-machine';
 
 interface ReviewerManagerProps {
     targetType: ReviewerTargetType,
@@ -52,6 +54,14 @@ const getReviewerColumns = (): ColumnProps[] => [
                 ? (rowData.createdBy as any).name || (rowData.createdBy as any).email
                 : rowData.createdBy ?? '-',
     },
+    {
+        header: "Status",
+        field: "status",
+        sortable: true,
+        body: (r: Reviewer) => (
+            <MyBadge type="status" value={r.status ?? "Unknown"} />
+        )
+    }
 ];
 
 const mapSaved = (saved: Reviewer, submitted: Partial<Reviewer>): Reviewer => ({
@@ -63,6 +73,11 @@ export default function ReviewerManager({ targetType, application, verification 
     const toast = useToast();
 
     const columns = useMemo(() => getReviewerColumns(), []);
+
+    const hideCreateButton =
+        targetType === ReviewerTargetType.APPLICATION
+            ? application?.status !== 'shortlisted'
+            : verification?.status !== 'submitted';
 
     const filter = useMemo<FilterReviewersDTO | undefined>(() => {
         const filters: FilterReviewersDTO = {
@@ -86,6 +101,7 @@ export default function ReviewerManager({ targetType, application, verification 
             defaultHiddenFields={DEFAULT_HIDDEN}
             filter={filter}
             dialogWidth="500px"
+            hideCreateAction={hideCreateButton}
             renderForm={(props) => (
                 <ReviewerForm
                     {...props}
@@ -97,6 +113,8 @@ export default function ReviewerManager({ targetType, application, verification 
                     }
                 />
             )}
+            statusField='status'
+            transitions={REVIEWER_ADMIN_TRANSITIONS}
             onError={(error) => toast.error(error)}
             onSuccess={(operation) =>
                 toast.success(

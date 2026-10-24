@@ -45,32 +45,14 @@ export class ReviewerPolicy {
         private readonly applicationService: ApplicationService
     ) { }
 
-    async validateReviewer(projectId: string, reviewerId: string) {
 
-        const reviewer = await this.userRepo.findById(reviewerId);
-        if (!reviewer) {
-            throw new AppError(
-                ERROR_CODES.USER_NOT_FOUND
-            );
-        }
-
-        const isCollaborator = await this.collaboratorRepo.exists({
-            project: projectId, member: reviewerId
-        });
-
-        if (isCollaborator) {
-            throw new AppError(
-                ERROR_CODES.INVALID_REVIEWER,
-                `Reviewer ${reviewer.name} is already a member in the project.`
-            );
-        }
-
-        return reviewer;
-    }
 
     async validateApplication(application: string) {
         const applicationDoc = await this.applicationRepo.findById(application);
         if (!applicationDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
+
+        if (applicationDoc.status !== ApplicationStatus.shortlisted)
+            throw new AppError(ERROR_CODES.INVALID_APPLICATION_STATUS, "Application is not shortlisted");
 
         const projectDoc = await this.projectRepo.findById(
             String(applicationDoc.project)
@@ -83,6 +65,52 @@ export class ReviewerPolicy {
         if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
 
         return { applicationDoc: applicationDoc, projectDoc: projectDoc, stageDoc: stageDoc };
+    }
+
+    async validateReviewer(
+        projectId: string,
+        reviewerId: string,
+        context: { application?: string; verification?: string }
+    ) {
+        const reviewerDoc = await this.userRepo.findById(reviewerId);
+
+        if (!reviewerDoc) {
+            throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+        }
+
+        const isCollaborator = await this.collaboratorRepo.exists({
+            project: projectId,
+            member: reviewerId,
+        });
+
+        if (isCollaborator) {
+            throw new AppError(
+                ERROR_CODES.INVALID_REVIEWER,
+                `Reviewer ${reviewerDoc.name} is already a member in the project.`
+            );
+        }
+
+        const isExist = await this.repository.exists({
+            ...(context.application && { application: context.application }),
+            ...(context.verification && { verification: context.verification }),
+            reviewer: reviewerId,
+        });
+
+        if (isExist) {
+            throw new AppError(
+                ERROR_CODES.REVIEWER_ALREADY_EXISTS,
+                `Reviewer ${reviewerDoc.name} is already assigned to this ${context.application ? 'application' : 'verification'
+                }.`
+            );
+        }
+
+
+        const countReviewers = await this.repository.count({
+            ...(context.application && { application: context.application }),
+            ...(context.verification && { verification: context.verification }),
+        });
+
+        return { reviewerDoc, countReviewers };
     }
 
     async prepareApplicationReviewer(applicationId: string, reviewerId: string, userId: string): Promise<PreparedReviewer> {
@@ -102,28 +130,12 @@ export class ReviewerPolicy {
                 ERROR_CODES.UNAUTHORIZED
             );
         }
+        const { reviewerDoc, countReviewers } = await this.validateReviewer(String(applicationDoc.project), reviewerId, { application: applicationId });
 
-        if (applicationDoc.status !== ApplicationStatus.shortlisted)
-            throw new AppError(ERROR_CODES.INVALID_APPLICATION_STATUS, "Application is not shortlisted");
 
-        const countReviewers = await this.repository.count({ application: applicationId });
         const maxReviewers = stageDoc.maxReviewers;
         if (maxReviewers !== undefined && countReviewers >= maxReviewers) {
             throw new AppError(ERROR_CODES.REVIEWER_LIMIT_REACHED, `Reviewer limit reached. Maximum allowed is ${maxReviewers}.`);
-        }
-
-        const reviewerDoc = await this.validateReviewer(String(applicationDoc.project), reviewerId);
-
-        const isExist = await this.repository.exists({
-            application: applicationId,
-            reviewer: reviewerId
-        });
-
-        if (isExist) {
-            throw new AppError(
-                ERROR_CODES.REVIEWER_ALREADY_EXISTS,
-                `Reviewer ${reviewerDoc.name} is already assigned to this application.`
-            );
         }
 
         if (!stageDoc.evaluation) {
@@ -161,6 +173,9 @@ export class ReviewerPolicy {
         const verificationDoc = await this.verificationRepo.findById(verificationId);
         if (!verificationDoc) throw new AppError(ERROR_CODES.VERIFICATION_NOT_FOUND);
 
+        if (verificationDoc.status !== VerificationStatus.submitted)
+            throw new AppError(ERROR_CODES.INVALID_VERIFICATION_STATUS);
+
         const projectDoc = await this.projectRepo.findById(
             String(verificationDoc.project)
         );
@@ -171,7 +186,6 @@ export class ReviewerPolicy {
         const verificationConf = await this.verificationConfRepo.findById(String(verificationDoc.configuration));
         if (!verificationConf) throw new AppError(ERROR_CODES.VERIFICATION_CONFIGURATION_NOT_FOUND);
 
-
         return {
             verificationDoc: verificationDoc, projectDoc: projectDoc,
             verificationConf: verificationConf
@@ -181,28 +195,11 @@ export class ReviewerPolicy {
     async prepareVerificationReviewer(verificationId: string, reviewerId: string, userId: string): Promise<PreparedReviewer> {
         const { verificationDoc, projectDoc, verificationConf } = await this.validateVerification(verificationId);
 
-        if (verificationDoc.status !== VerificationStatus.submitted)
-            throw new AppError(ERROR_CODES.INVALID_VERIFICATION_STATUS);
-
-        const countReviewers = await this.repository.count({ verification: verificationId });
+        const { reviewerDoc, countReviewers } = await this.validateReviewer(String(verificationDoc.project), reviewerId, { verification: verificationId });
 
         const maxReviewers = verificationConf.maxReviewers;
         if (maxReviewers !== undefined && countReviewers >= maxReviewers) {
             throw new AppError(ERROR_CODES.REVIEWER_LIMIT_REACHED, `Reviewer limit reached. Maximum allowed is ${maxReviewers}.`);
-        }
-
-        const reviewerDoc = await this.validateReviewer(String(verificationDoc.project), reviewerId);
-
-        const isExist = await this.repository.exists({
-            verification: verificationId,
-            reviewer: reviewerId
-        });
-
-        if (isExist) {
-            throw new AppError(
-                ERROR_CODES.REVIEWER_ALREADY_EXISTS,
-                `Reviewer ${reviewerDoc.name} is already assigned to this verification.`
-            );
         }
 
         if (!verificationConf.evaluation) {

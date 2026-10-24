@@ -13,8 +13,7 @@ import { useToast } from '@/contexts/ToastContext';
 
 import {
     FilterUsersOptions,
-    User,
-    createEmptyUser
+    User
 } from '../models/user.model';
 
 import { UserApi } from '../api/user.api';

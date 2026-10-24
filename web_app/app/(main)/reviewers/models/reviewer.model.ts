@@ -44,6 +44,7 @@ export interface FilterReviewersDTO {
     status?: ReviewerStatus;
 }
 
+
 export const validateReviewer = (reviewer: Reviewer): { valid: boolean; message?: string } => {
     if (!reviewer.targetType) {
         return { valid: false, message: 'Target type is required.' };

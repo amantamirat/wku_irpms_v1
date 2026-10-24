@@ -14,7 +14,8 @@ export const VERIFICATION_TRANSITIONS: TransitionMap = {
             next: VerificationStatus.rejected,
             action: "Reject",
             icon: "pi pi-times",
-            severity: "danger"
+            severity: "danger",
+            requireReason: true
         }
     ],
 

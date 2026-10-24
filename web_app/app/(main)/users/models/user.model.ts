@@ -79,6 +79,8 @@ export const genderOptions = Object.values(Gender).map(
     })
 );
 
+/*
+
 export const validateUser = (
     user: User
 ): { valid: boolean; message?: string } => {
@@ -149,3 +151,5 @@ export const createEmptyUser = (): User => ({
     scope: null,
     //unitType: null
 });
+
+*/

@@ -12,6 +12,7 @@ import { ActionToolbar } from "./ActionToolbar";
 import { CriterionCard } from "./CriterionCard";
 import { EvaluationSummary } from "./EvaluationSummary";
 import { EvaluatorHeader } from "./EvaluatorHeader";
+import { useToast } from "@/contexts/ToastContext";
 
 interface EvaluatorManagerProps {
     reviewerId: string;
@@ -35,7 +36,7 @@ const EvaluatorManager = ({
     onSubmitEvaluation,
 }: EvaluatorManagerProps) => {
 
-    const toast = useRef<Toast>(null);
+    const toast = useToast();
     const [lastResults, setLastResults] = useState<Result[]>([]);
     const [criteria, setCriteria] = useState<Criterion[]>([]);
     const [results, setResults] = useState<Result[]>([]);
@@ -50,8 +51,7 @@ const EvaluatorManager = ({
             try {
                 setLoading(true);
                 const res = await ResultApi.getAll({
-                    reviewer: reviewerId,
-                    populate: true,
+                    reviewer: reviewerId
                 });
                 const fetchedCriteria = res.map((r: any) => r.criterion);
                 setCriteria(fetchedCriteria);
@@ -59,11 +59,7 @@ const EvaluatorManager = ({
                 setResults(res);
             } catch (err) {
                 console.error("Failed to fetch results", err);
-                toast.current?.show({
-                    severity: 'error',
-                    summary: 'Error',
-                    detail: 'Failed to load evaluation data.'
-                });
+                toast.error("Failed to load evaluation data.");
             } finally {
                 setLoading(false);
             }
@@ -177,18 +173,10 @@ const EvaluatorManager = ({
 
             setLastResults([...results]);
 
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Saved',
-                detail: `${dirtyResults.length} item(s) updated successfully`
-            });
+            toast.success("Results Saved!");
         } catch (err) {
             console.error("Failed to save results", err);
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to save changes.'
-            });
+            toast.error(err, "Failed To Save Results");
         } finally {
             setLoading(false);
         }
@@ -203,20 +191,12 @@ const EvaluatorManager = ({
                 await onSubmitEvaluation();
             }
 
-            toast.current?.show({
-                severity: 'success',
-                summary: 'Submitted',
-                detail: 'Evaluation submitted successfully.'
-            });
+            toast.success('Evaluation submitted successfully.');
 
             if (onClose) onClose();
         } catch (err) {
             console.error("Failed to submit evaluation", err);
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Error',
-                detail: 'Failed to submit the evaluation.'
-            });
+            toast.error(err, "Failed to submit evaluation");
         } finally {
             setLoading(false);
         }
@@ -226,9 +206,7 @@ const EvaluatorManager = ({
     const isDisabled = !editMode;
 
     return (
-        <div className="layout-evaluator pb-8">
-            <Toast ref={toast} />
-
+        <div className="layout-evaluator pb-8">           
             {/* Top Progress & Info Header */}
             <EvaluatorHeader
                 name={"Application Review"}

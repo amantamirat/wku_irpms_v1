@@ -1,11 +1,11 @@
 'use client';
 
-import Manager from "./components/Manager";
+import VerificationConfigurationManager from "./components/VerificationConfigurationManager";
 
 const Page = () => {
 
     return (
-        <Manager />
+        <VerificationConfigurationManager />
     );
 };
 

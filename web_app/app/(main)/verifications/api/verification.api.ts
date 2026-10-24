@@ -2,6 +2,7 @@ import { ApiClient } from "@/api/ApiClient";
 import { EntityApi } from "@/api/EntityApi";
 import { StateTransition } from "@/api/EntityApi";
 import { FilterVerification, sanitizeVerification, Verification } from "../models/verification.model";
+import { sanitize } from "@/utils/utils";
 
 const ENDPOINT = "/verifications";
 
@@ -49,31 +50,22 @@ export const VerificationApi: EntityApi<
     // Create / Submit Verification (Multipart Form Data)
     // POST /verifications
     // ---------------------------
-    async create(dto: Verification): Promise<Verification> {
-        // Clean and extract all IDs in a single step
-        const sanitized = sanitizeVerification(dto);
+    async create(verification: Partial<Verification>): Promise<Verification> {
         const formData = new FormData();
 
-        if (sanitized.file) {
-            formData.append("document", sanitized.file);
+        // 1. Separate the file if it exists
+        if (verification.file) {
+            formData.append("file", verification.file);
         }
 
-        // Since sanitizeVerification ran extractId, project & configuration are strings
-        if (sanitized.project) {
-            formData.append("project", sanitized.project as string);
-        }
+        // 2. Remove the file before sanitizing metadata
+        const { file, ...verificationWithoutFile } = verification;
+        const sanitized = sanitize(verificationWithoutFile);
 
-        if (sanitized.configuration) {
-            formData.append("configuration", sanitized.configuration as string);
-        }
+        // 3. Append the verification metadata as a JSON string
+        formData.append("verification", JSON.stringify(sanitized));
 
-        /*
-        if (sanitized.remarks) {
-            formData.append("remarks", sanitized.remarks);
-        }
-*/
-        const created = await ApiClient.post(`${ENDPOINT}`, formData);
-        return created as Verification;
+        return ApiClient.post(`${ENDPOINT}`, formData);
     },
 
     // ---------------------------

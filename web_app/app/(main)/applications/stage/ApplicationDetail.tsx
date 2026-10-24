@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { Application } from "../models/application.model";
 import ProjectDetail from "../../projects/components/ProjectDetail";
 import { extractId } from "@/utils/utils";
-import ReviewerManager from "../../reviewers/components/Manager";
+import ReviewerManager from "../../reviewers/components/ReviewerManager";
 import { ReviewerTargetType } from "../../reviewers/models/reviewer.model";
 import { StatusHistoryWidget } from "@/components/StatusHistoryWidget";
 
@@ -24,15 +24,15 @@ const ApplicationDetail = ({ application, updateApplication }: ApplicationDetail
      */
     const tabs = useMemo(() => [
         {
+            header: "Project",
+            permission: "project:lookup",
+            content: projectId ? <ProjectDetail project={projectId} /> : null
+        },
+        {
             header: "Reviewers",
             permission: "reviewer:lookup",
             content: <ReviewerManager targetType={ReviewerTargetType.APPLICATION} application={application}
                 updateApplication={updateApplication} />
-        },
-        {
-            header: "Project",
-            permission: "project:lookup",
-            content: projectId ? <ProjectDetail project={projectId} /> : null
         },
         {
             header: "Status History",

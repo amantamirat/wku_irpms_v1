@@ -462,6 +462,12 @@ export class VerificationService {
             );
         }
 
+
+        // ----------------------------------------------
+        // Delete verification
+        // ----------------------------------------------
+        const deleted = await this.repository.delete(id);
+
         // ----------------------------------------------
         // Determine the new current verification
         // ----------------------------------------------
@@ -482,10 +488,21 @@ export class VerificationService {
             }
             );
         }
-        // ----------------------------------------------
-        // Delete verification
-        // ----------------------------------------------
-        return this.repository.delete(id);
+
+        if (deleted?.documentPath) {
+            try {
+                await this.fileStorage.delete(
+                    deleted.documentPath
+                );
+            } catch (error) {
+                console.error(
+                    `Failed to delete application document: ${deleted.documentPath}`,
+                    error
+                );
+            }
+        }
+
+        return deleted;
     }
 
 }

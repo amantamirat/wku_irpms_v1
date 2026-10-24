@@ -59,6 +59,7 @@ import { PhaseEquipmentRepository } from "../modules/projects/phase/equipments/p
 import { PhaseDocumentRepository } from "../modules/projects/phase/documents/phase.doc.repository";
 import { DocumentTemplateRepository } from "../modules/document-templates/document-template.repository";
 import { PublicationRepository } from "../modules/users/publications/publication.repository";
+import { ResultRepository } from "../modules/reviewers/results/result.repository";
 
 export const fileStorageService = new FileStorageService();
 
@@ -114,6 +115,7 @@ export const evaluationRepo = new EvaluationRepository();
 export const criterionRepo = new CriterionRepository();
 export const applicationRepo = new ApplicationRepository();
 export const reviewerRepo = new ReviewerRepository();
+export const resultRepo = new ResultRepository();
 
 export const verificationConfRepo = new VerificationConfigurationRepository();
 export const verificationRepo = new VerificationRepository();

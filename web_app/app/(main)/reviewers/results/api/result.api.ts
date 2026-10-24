@@ -1,38 +1,26 @@
 import { ApiClient } from "@/api/ApiClient";
-import { GetResultsOptions, Result, sanitizeResult } from "../models/result.model";
+import { FilterResultsOptions, Result } from "../models/result.model";
 import { EntityApi } from "@/api/EntityApi";
+import { sanitize } from "@/utils/utils";
 
 const end_point = '/project/results';
 
-export const ResultApi: EntityApi<Result, GetResultsOptions | undefined> = {
+export const ResultApi: EntityApi<Result, FilterResultsOptions | undefined> = {
 
-    async getAll(options?: GetResultsOptions): Promise<Result[]> {
-        const query = new URLSearchParams();
-        if (options) {
-            const sanitized = sanitizeResult(options);
-            query.append("reviewer", sanitized.reviewer as string);
-            if (options.populate !== undefined) {
-                query.append("populate", String(options.populate));
-            }
-        }
-
-        const url = query.toString()
-            ? `${end_point}?${query.toString()}`
-            : end_point;
-
-        const data = await ApiClient.get(url);
+    async getAll(filter?: FilterResultsOptions): Promise<Result[]> {
+        const data = await ApiClient.get(end_point, filter);
         return data as Result[];
     },
 
     async create(result: Partial<Result>): Promise<Result> {
-        const created = await ApiClient.post(end_point, sanitizeResult(result));
+        const created = await ApiClient.post(end_point, sanitize(result));
         return created as Result;
     },
 
     async update(result: Partial<Result>): Promise<Result> {
-        //if (!result._id) throw new Error("_id required.");        
+        if (!result._id) throw new Error("_id required.");        
         const url = `${end_point}/${result._id}`;
-        const updated = await ApiClient.put(url, sanitizeResult(result));
+        const updated = await ApiClient.put(url, sanitize(result));
         return updated as Result;
     },
 

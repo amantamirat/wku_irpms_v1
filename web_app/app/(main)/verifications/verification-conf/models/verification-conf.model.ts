@@ -23,10 +23,12 @@ export type VerificationConfiguration = {
 };
 
 export interface FilterConfigurationDTO {
-    //grant?: string | Grant;
     deadline?: Date;
     status?: VerificationConfigurationStatus;
 }
+
+
+/*
 
 export const validateVerificationConfiguration = (
     config: Partial<VerificationConfiguration>
@@ -88,7 +90,7 @@ export const validateVerificationConfiguration = (
 
     return { valid: true };
 };
-
+*/
 /*
 export function sanitizeVerificationConfiguration(
     config: Partial<VerificationConfiguration>

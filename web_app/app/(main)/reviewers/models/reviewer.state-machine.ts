@@ -144,13 +144,15 @@ export const REVIEWER_ADMIN_TRANSITIONS: TransitionMap = {
             next: ReviewerStatus.rejected,
             action: "Reject",
             icon: "pi pi-times-circle",
-            severity: "danger"
+            severity: "danger",
+            requireReason: true,
         },
         {
             next: ReviewerStatus.verified,
             action: "Set Verified",
             icon: "pi pi-undo",
-            severity: "warning"
+            severity: "warning",
+            requireReason: true,
         }
     ],
 
@@ -159,7 +161,8 @@ export const REVIEWER_ADMIN_TRANSITIONS: TransitionMap = {
             next: ReviewerStatus.submitted,
             action: "Set Submitted",
             icon: "pi pi-undo",
-            severity: "warning"
+            severity: "warning",
+            requireReason: true,
         }
     ],
 
@@ -168,7 +171,8 @@ export const REVIEWER_ADMIN_TRANSITIONS: TransitionMap = {
             next: ReviewerStatus.submitted,
             action: "Set Submitted",
             icon: "pi pi-undo",
-            severity: "warning"
+            severity: "warning",
+            requireReason: true,
         }
     ]
 };

@@ -22,7 +22,6 @@ export class ReviewerService {
         private readonly reviewerRepo: IReviewerRepository,
         private readonly resultRepo: IResultRepository,
         private readonly criterionRepo: ICriterionRepository,
-        //private readonly stageRepo: IStageRepository,
         private readonly policy: ReviewerPolicy,
         private readonly notificationService: NotificationService,
         private readonly scopeFilterService: ScopeFilterService

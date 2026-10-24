@@ -368,10 +368,6 @@ const ApplicationManager = ({ stage }: ApplicationManagerProps) => {
                 hideDeleteAction
                 statusField="status"
                 transitions={APPLICATION_TRANSITIONS}
-                // The transition response isn't populated: keep the row, take only the status
-                mapTransitioned={(updated, previous) =>
-                    previous ? { ...previous, status: updated.status } : updated
-                }
                 extraRowActions={extraRowActions}
                 tableProps={tableProps}
                 onError={(error, operation) =>

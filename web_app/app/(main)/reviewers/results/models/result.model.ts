@@ -14,9 +14,8 @@ export type Result = {
     comment?: string;
 };
 
-export interface GetResultsOptions {
+export interface FilterResultsOptions {
     reviewer: Reviewer | string;
-    populate?: boolean;
 }
 
 
@@ -65,29 +64,4 @@ export const validateResult = (
     }
 
     return { valid: true };
-};
-
-
-export const sanitizeResult = (result: Partial<Result>): Result => {
-    return {
-        ...result,
-
-        criterion:
-            typeof result.criterion === "object" && result.criterion !== null
-                ? (result.criterion as any)._id
-                : result.criterion,
-
-        reviewer:
-            typeof result.reviewer === "object" && result.reviewer !== null
-                ? (result.reviewer as any)._id
-                : result.reviewer,
-
-        // ✅ FIXED: array handling
-        selectedOptions:
-            result.selectedOptions?.map((opt) =>
-                typeof opt === "object" && opt !== null
-                    ? (opt as any)._id
-                    : opt
-            ) || [],
-    } as Result;
 };

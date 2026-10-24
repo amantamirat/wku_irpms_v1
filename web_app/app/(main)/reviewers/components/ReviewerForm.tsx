@@ -11,13 +11,31 @@ import { User } from '@/app/(main)/users/models/user.model';
 import {
     Reviewer,
     ReviewerTargetType,
-    validateReviewer,
 } from '../models/reviewer.model';
 import { extractId } from '@/utils/utils';
 
 type ReviewerFormProps = ItemFormRenderProps<Reviewer> & {
     targetType: ReviewerTargetType;
     targetId?: string;
+};
+
+const getValidationError = (payload: Reviewer): string | null => {
+    if (!payload.reviewer) {
+        return 'Reviewer is required.';
+    }
+    if (
+        payload.targetType === ReviewerTargetType.APPLICATION &&
+        !payload.application
+    ) {
+        return 'Application is required.';
+    }
+    if (
+        payload.targetType === ReviewerTargetType.VERIFICATION &&
+        !payload.verification
+    ) {
+        return 'Verification is required.';
+    }
+    return null;
 };
 
 const ReviewerForm = ({
@@ -35,16 +53,13 @@ const ReviewerForm = ({
 
     const isEditMode = !!item?._id;
 
-    // Normalize the reviewer to an ID string when initializing the form.
+    // Initialize the form, keeping the reviewer as-is (object or id).
     useEffect(() => {
         setSubmitted(false);
         setErrorMessage(null);
 
         setLocalReviewer({
             ...item,
-            reviewer: item?.reviewer
-                ? extractId(item.reviewer)
-                : undefined,
             weight: item?.weight ?? 1,
         });
     }, [item]);
@@ -75,23 +90,32 @@ const ReviewerForm = ({
         }));
     };
 
-    const getReviewerName = () => {
-        const reviewer = item?.reviewer;
-        if (typeof reviewer === 'object' && reviewer !== null) {
-            return reviewer.name || '-';
-        }
-
-        // Otherwise, resolve the reviewer ID from the loaded users.
-        const reviewerId = extractId(reviewer);
+    // Always resolve the reviewer to a full user object when possible.
+    const resolveReviewer = (
+        value: Reviewer['reviewer'] | undefined
+    ): Reviewer['reviewer'] | undefined => {
+        if (!value) return undefined;
+        if (typeof value === 'object') return value;
 
         return (
-            users.find((user) => user._id === reviewerId)?.name || '-'
+            (users.find((user) => user._id === value) as Reviewer['reviewer']) ??
+            value
         );
+    };
+
+    const selectedReviewer = resolveReviewer(localReviewer.reviewer);
+
+    const getReviewerName = () => {
+        if (typeof selectedReviewer === 'object' && selectedReviewer !== null) {
+            return (selectedReviewer as User).name || '-';
+        }
+        return '-';
     };
 
     const buildPayload = (): Reviewer => {
         const payload = {
             ...localReviewer,
+            reviewer: resolveReviewer(localReviewer.reviewer),
             targetType,
             application: undefined,
             verification: undefined,
@@ -116,11 +140,13 @@ const ReviewerForm = ({
         event.preventDefault();
         setSubmitted(true);
 
-        const payload = buildPayload();
-        const validation = validateReviewer(payload);
+        if (saving) return;
 
-        if (!validation.valid) {
-            setErrorMessage(validation.message ?? 'Please check the form.');
+        const payload = buildPayload();
+        const error = getValidationError(payload);
+
+        if (error) {
+            setErrorMessage(error);
             return;
         }
 
@@ -129,7 +155,7 @@ const ReviewerForm = ({
     };
 
     return (
-        <form id={formId} onSubmit={handleSubmit} className="p-fluid">
+        <form id={formId} onSubmit={handleSubmit} className="p-fluid" noValidate>
             <div className="card p-4 surface-card border-round shadow-1">
                 {errorMessage && (
                     <div className="p-error mb-3">
@@ -156,16 +182,17 @@ const ReviewerForm = ({
                         <>
                             <Dropdown
                                 inputId="reviewer-user"
-                                value={extractId(localReviewer.reviewer) ?? null}
+                                value={selectedReviewer ?? null}
                                 options={users}
                                 optionLabel="name"
-                                optionValue="_id"
+                                dataKey="_id"
                                 placeholder="Choose a user from the system..."
                                 filter
                                 showClear
                                 onChange={(event) =>
                                     updateReviewer({
-                                        reviewer: event.value ?? undefined,
+                                        reviewer: (event.value ??
+                                            undefined) as Reviewer['reviewer'],
                                     })
                                 }
                                 className={classNames({

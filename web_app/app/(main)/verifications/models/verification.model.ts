@@ -4,7 +4,6 @@ import { VerificationConfiguration } from "../verification-conf/models/verificat
 
 export enum VerificationStatus {
     submitted = "submitted",
-    //under_review = "under_review",
     verified = "verified",
     rejected = "rejected"
 }
@@ -16,12 +15,8 @@ export interface Verification {
     configuration: string | VerificationConfiguration;
     attempt: number;
     totalScore?: number;
-    //submittedBy: string;
     file?: File;
     documentPath: string;
-    //submittedAt?: string;
-    //reviewedAt?: string;
-    //remarks?: string;
     status: VerificationStatus;
     createdAt?: string;
     updatedAt?: string;
@@ -29,7 +24,7 @@ export interface Verification {
 
 export interface FilterVerification {
     project?: string | Project;
-    configuration?: string;
+    configuration?: string | VerificationConfiguration;
     attempt?: number;
     status?: VerificationStatus;
 }

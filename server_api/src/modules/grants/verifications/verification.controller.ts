@@ -28,17 +28,17 @@ export class VerificationController {
             if (!req.file) throw new AppError(ERROR_CODES.FILE_NOT_FOUND);
 
             // documentPath is set by the service, never trusted from the client
-            const { documentPath, ...dto } = req.body as CreateVerificationDTO & {
-                documentPath?: string;
-            };
+            const { ...verification } = JSON.parse(
+                req.body.verification
+            ) as CreateVerificationDTO;
 
-            const verification = await this.service.create(
-                dto,
+            const verificationDoc = await this.service.create(
+                verification,
                 req.auth.userId,
                 req.file
             );
 
-            successResponse(res, 201, "Verification submitted successfully", verification);
+            successResponse(res, 201, "Verification submitted successfully", verificationDoc);
         } catch (err: any) {
             // Temp file cleanup now lives in the service
             errorResponse(res, 400, err.message, err);
@@ -233,19 +233,6 @@ export class VerificationController {
 
             // Your service deletes the record and returns the deleted document metadata
             const deletedDoc = await this.service.delete(dto);
-
-            if (deletedDoc?.documentPath) {
-                // ✅ CRITICAL FIX: Joins project root with the stored "uploads/projects/filename.pdf"
-                const absolutePath = path.join(process.cwd(), deletedDoc.documentPath);
-
-                fs.unlink(absolutePath, (unlinkErr) => {
-                    if (unlinkErr) {
-                        console.error(`Failed to delete physical file at ${absolutePath}:`, unlinkErr);
-                    } else {
-                        console.log(`Successfully deleted physical file: ${absolutePath}`);
-                    }
-                });
-            }
 
             successResponse(
                 res,

@@ -1,23 +1,13 @@
 import { Router } from 'express';
-import { ResultController } from './result.controller';
 import { PERMISSIONS } from '../../../common/constants/permissions';
+import { checkPermission, criterionRepo, resultRepo, reviewerRepo } from '../../../core/container';
 import { verifyAuthToken } from '../../auth/auth.middleware';
-import { checkPermission } from '../../../core/container';
+import { ResultController } from './result.controller';
 
 import { ResultService } from './result.service';
-import { ResultRepository } from './result.repository';
-import { CriterionRepository } from '../../evaluations/criteria/criterion.repository';
-import { ReviewerRepository } from '../reviewer.repository';
 
 
 const router: Router = Router();
-
-// -----------------------
-// DEPENDENCIES
-// -----------------------
-const resultRepo = new ResultRepository();
-const reviewerRepo = new ReviewerRepository();
-const criterionRepo = new CriterionRepository();
 
 // -----------------------
 // SERVICE

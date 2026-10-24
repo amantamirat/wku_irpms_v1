@@ -2,8 +2,8 @@ import mongoose from "mongoose";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 import {
     CreateVerificationConfigurationDTO,
-    UpdateVerificationConfigurationDTO,
-    FilterConfigurationDTO
+    FilterConfigurationDTO,
+    UpdateVerificationConfigurationDTO
 } from "./verification-conf.dto";
 
 import {
@@ -11,7 +11,6 @@ import {
     VerificationConfiguration,
     VerificationConfigurationStatus
 } from "./verification-conf.model";
-import { verificationConfRepo } from "../../../core/container";
 
 
 export interface IVerificationConfigurationRepository {
@@ -107,6 +106,7 @@ export class VerificationConfigurationRepository
         if (options?.populate) {
             query = query
                 //.populate("grant")
+                .populate("evaluation")
                 .populate("template");
         }
         return query;
@@ -143,6 +143,7 @@ export class VerificationConfigurationRepository
                         path: "organization"
                     }
                 })
+                .populate("evaluation")
                 .populate("template");
         }
 
