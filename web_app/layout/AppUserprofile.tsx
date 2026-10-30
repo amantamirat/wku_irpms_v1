@@ -11,6 +11,8 @@ import { User } from "@/app/(main)/users/models/user.model";
 import ChangePasswordDialog from "@/components/ChangePasswordDialog";
 import { useAuth } from "@/contexts/auth-context";
 import { PERMISSIONS } from "@/types/permissions";
+import { MY_COLLABORATIONS_PAGE_LINK } from "@/app/(main)/dashboard/my-collaborations/page";
+import { MENU_ICONS } from "@/utils/menu-icons";
 
 interface QuickLinkItem {
     href: string;
@@ -38,18 +40,11 @@ const AppUserProfileSidebar: React.FC<UserProfileSidebarProps> = ({ visible, set
 
     const quickLinks: QuickLinkItem[] = useMemo(() => [
         {
-            href: '/dashboard/my-projects/',
-            label: 'My Projects',
-            description: 'Manage your research, project and deliverables',
-            icon: 'pi pi-briefcase',
-            permission: PERMISSIONS.PROJECT.LOOKUP,
-        },
-        {
-            href: '/dashboard/assigned-applications',
-            label: 'Assign Reviewers',
-            description: 'Assign and manage evaluators for submitted applications',
-            icon: 'pi pi-user-plus',
-            permission: 'application:assigned:read',
+            href: MY_COLLABORATIONS_PAGE_LINK,
+            label: 'My Collaborations',
+            description: "Manage your project deliverables and collaborative efforts.",
+            icon: MENU_ICONS.projects,
+            permission: PERMISSIONS.COLLABORATOR.LOOKUP,
         },
         {
             href: '/dashboard/my-evaluations',
@@ -58,13 +53,16 @@ const AppUserProfileSidebar: React.FC<UserProfileSidebarProps> = ({ visible, set
             icon: 'pi pi-check-square',
             permission: PERMISSIONS.REVIEWER.LOOKUP,
         },
+
         {
-            href: '/dashboard/my-memberships',
-            label: 'My Memberships',
-            description: 'View teams and joint project efforts',
-            icon: 'pi pi-users',
-            permission: PERMISSIONS.COLLABORATOR.LOOKUP,
-        }
+            href: '/dashboard/assigned-applications',
+            label: 'Assign Reviewers',
+            description: 'Assign and manage evaluators for submitted applications',
+            icon: 'pi pi-user-plus',
+            permission: 'application:assigned:read',
+        },
+
+
     ], []);
 
     const allowedLinks = quickLinks.filter(link => hasPermission(link.permission));

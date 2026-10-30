@@ -21,20 +21,28 @@ export const ApplicationWidget = ({ data, loading }: Props) => {
     const documentStyle = getComputedStyle(document.documentElement);
     const textColor = documentStyle.getPropertyValue('--text-color') || '#495057';
 
-    // Doughnut chart mapping the core progression stages
+    // Doughnut chart mapping the core progression stages including Not Shortlisted
     setChartData({
-      labels: ['Submitted', 'Shortlisted', 'Accepted', 'Rejected'],
+      labels: ['Submitted', 'Not Shortlisted', 'Shortlisted', 'Accepted', 'Rejected'],
       datasets: [
         {
-          data: [data.submitted, data.shortlisted, data.accepted, data.rejected],
+          data: [
+            data.submitted,
+            data.notShortlisted,
+            data.shortlisted,
+            data.accepted,
+            data.rejected,
+          ],
           backgroundColor: [
             '#3B82F6', // Blue (Submitted)
+            '#F97316', // Orange (Not Shortlisted)
             '#6366F1', // Indigo (Shortlisted)
             '#22C55E', // Green (Accepted)
             '#EF4444', // Red (Rejected)
           ],
           hoverBackgroundColor: [
             '#60A5FA',
+            '#FB923C',
             '#818CF8',
             '#4ADE80',
             '#F87171',
@@ -56,7 +64,7 @@ export const ApplicationWidget = ({ data, loading }: Props) => {
             usePointStyle: true,
             pointStyle: 'circle',
             padding: 12,
-            font: { size: 10, weight: '500' }
+            font: { size: 10, weight: '500' },
           },
         },
       },
@@ -137,7 +145,7 @@ export const ApplicationWidget = ({ data, loading }: Props) => {
           </div>
         </div>
 
-        {/* Status Count Breakdown (Focused core stages) */}
+        {/* Status Count Breakdown */}
         <div className="col-12 lg:col-6 flex flex-column gap-2">
 
           <div className="flex align-items-center justify-content-between px-3 py-2 surface-0 border-round-lg border-left-3 border-blue-500 shadow-1">
@@ -145,6 +153,13 @@ export const ApplicationWidget = ({ data, loading }: Props) => {
               <i className="pi pi-send text-blue-500" /> Submitted
             </span>
             <span className="font-bold text-blue-600 text-sm">{data.submitted}</span>
+          </div>
+
+          <div className="flex align-items-center justify-content-between px-3 py-2 surface-0 border-round-lg border-left-3 border-orange-500 shadow-1">
+            <span className="text-xs text-700 font-medium flex align-items-center gap-2">
+              <i className="pi pi-ban text-orange-500" /> Not Shortlisted
+            </span>
+            <span className="font-bold text-orange-600 text-sm">{data.notShortlisted}</span>
           </div>
 
           <div className="flex align-items-center justify-content-between px-3 py-2 surface-0 border-round-lg border-left-3 border-indigo-500 shadow-1">

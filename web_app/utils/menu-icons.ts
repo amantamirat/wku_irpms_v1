@@ -4,15 +4,20 @@ export const MENU_ICONS = {
     dashboard: 'pi pi-fw pi-home',
 
     // Project
-    projects: 'pi pi-folder-open',
-    applications: 'pi pi-list',
+    projects: 'pi pi-briefcase',
+    applications: 'pi pi-inbox',
     verifications: 'pi pi-fw pi-check-square',
     collaborators: 'pi pi-users',
     reviewers: 'pi pi-user-edit',
+    phases: 'pi pi-list',
+    activities: 'pi pi-list-check',
+    equipments: 'pi pi-box',
+    documents: 'pi pi-file',
+    components: 'pi pi-th-large',
 
     // Opportunities
     calls: 'pi pi-fw pi-megaphone',
-    stages:'pi pi-forward',
+    stages: 'pi pi-forward',
     grants: 'pi pi-bitcoin',
 
     // Resources

@@ -1,3 +1,4 @@
+// reports/components/ConstraintView.tsx
 'use client';
 
 import React, { useMemo } from 'react';
@@ -50,7 +51,8 @@ export const ConstraintView: React.FC<ConstraintViewProps> = ({
                 title: 'Project Content',
                 rules: [
                     { label: 'Title Words', icon: 'pi pi-align-left', range: constraint.titleWords, formatter: words },
-                    { label: 'Summary Words', icon: 'pi pi-align-justify', range: constraint.summaryWords, formatter: words }
+                    { label: 'Summary Words', icon: 'pi pi-align-justify', range: constraint.summaryWords, formatter: words },
+                    { label: 'Keywords', icon: 'pi pi-key', range: constraint.keyWords, formatter: unit('keyword') }
                 ]
             },
             {
@@ -80,6 +82,7 @@ export const ConstraintView: React.FC<ConstraintViewProps> = ({
                     { label: 'Duration', icon: 'pi pi-clock', range: constraint.duration, formatter: days },
                     { label: 'Phase Budget', icon: 'pi pi-wallet', range: constraint.phaseBudget, formatter: currencyFormat },
                     { label: 'Phase Duration', icon: 'pi pi-hourglass', range: constraint.phaseDuration, formatter: days },
+                    { label: 'Activity Cost', icon: 'pi pi-tags', range: constraint.activityCost, formatter: currencyFormat },
                     { label: 'Activity Duration', icon: 'pi pi-stopwatch', range: constraint.activityDuration, formatter: days },
                     { label: 'Equipment Cost', icon: 'pi pi-money-bill', range: constraint.equipmentCost, formatter: currencyFormat }
                 ]
@@ -104,9 +107,9 @@ export const ConstraintView: React.FC<ConstraintViewProps> = ({
     const totalRules = sections.reduce((n, s) => n + s.rules.length, 0);
 
     return (
-        <div className="constraint-view p-3 surface-card border-round shadow-1">
-            <h4 className="mt-0 mb-1 text-primary flex align-items-center">
-                <i className="pi pi-sliders-h mr-2"></i>
+        <div className="constraint-view p-4 surface-card border-round-xl shadow-2">
+            <h4 className="mt-0 mb-1 text-primary flex align-items-center gap-2 text-xl font-bold">
+                <i className="pi pi-sliders-h text-xl"></i>
                 {constraint.name || title}
             </h4>
 
@@ -115,17 +118,17 @@ export const ConstraintView: React.FC<ConstraintViewProps> = ({
                     'No specific description provided for this constraint set.'}
             </p>
 
-            <Divider align="left">
-                <span className="p-tag p-tag-info text-xs uppercase">
+            <Divider align="left" className="my-3">
+                <span className="p-tag p-tag-info text-xs uppercase font-bold px-3 py-1 border-round-pill">
                     Configured Rules ({totalRules})
                 </span>
             </Divider>
 
             {sections.length > 0 ? (
                 sections.map((section) => (
-                    <div key={section.title} className="mb-3">
+                    <div key={section.title} className="mb-4">
                         <div
-                            className="text-500 font-bold uppercase px-2 mb-1"
+                            className="text-500 font-bold uppercase px-2 mb-2"
                             style={{ fontSize: '11px', letterSpacing: '0.05em' }}
                         >
                             {section.title}
@@ -134,16 +137,18 @@ export const ConstraintView: React.FC<ConstraintViewProps> = ({
                         <div className="grid">
                             {section.rules.map((rule) => (
                                 <div key={rule.label} className="col-12 md:col-6 p-2">
-                                    <div className="flex align-items-center p-2 border-round surface-50 border-1 border-200 h-full">
-                                        <i className={`${rule.icon} mr-3 text-primary text-xl`} />
-                                        <div className="flex flex-column">
+                                    <div className="flex align-items-center p-3 border-round-xl surface-50 border-1 surface-border h-xl shadow-sm hover:shadow-2 transition-all transition-duration-200">
+                                        <div className="w-2.5rem h-2.5rem border-round-circle surface-primary flex align-items-center justify-content-center mr-3 shadow-sm shrink-0">
+                                            <i className={`${rule.icon} text-primary text-base`} />
+                                        </div>
+                                        <div className="flex flex-column overflow-hidden">
                                             <span
-                                                className="text-500 font-bold uppercase"
-                                                style={{ fontSize: '10px' }}
+                                                className="text-500 font-bold uppercase text-overflow-ellipsis white-space-nowrap"
+                                                style={{ fontSize: '10px', letterSpacing: '0.03em' }}
                                             >
                                                 {rule.label}
                                             </span>
-                                            <span className="text-900 text-sm font-semibold">
+                                            <span className="text-900 text-sm font-semibold mt-1">
                                                 {formatRange(rule.range, rule.formatter)}
                                             </span>
                                         </div>
@@ -154,8 +159,9 @@ export const ConstraintView: React.FC<ConstraintViewProps> = ({
                     </div>
                 ))
             ) : (
-                <div className="p-3 bg-blue-50 text-blue-700 border-round text-xs italic">
-                    No active limits or parameters defined for this constraint model.
+                <div className="p-3 surface-50 text-600 border-round-xl text-xs italic border-1 surface-border flex align-items-center gap-2">
+                    <i className="pi pi-info-circle text-primary" />
+                    <span>No active limits or parameters defined for this constraint model.</span>
                 </div>
             )}
         </div>

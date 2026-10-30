@@ -23,8 +23,8 @@ export type Application = {
     _id?: string;
     project: string | Project;
     stage?: string | Stage;
-    documentPath?: string;
     file?: File;
+    documentPath?: string;
     totalScore?: number | null;
     manualIdentifiers?: string[];
     anonymizationStatus: AnonymizationStatus;
@@ -43,7 +43,6 @@ export interface FilterApplicationOptions {
     project?: string | Project;
     stage?: string | Stage;
     status?: ApplicationStatus;
-    //populate?: boolean;
 }
 
 export const validateApplication = (ps: Partial<Application>): { valid: boolean; message?: string } => {

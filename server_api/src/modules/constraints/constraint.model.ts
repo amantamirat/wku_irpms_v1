@@ -9,6 +9,7 @@ export interface IConstraint extends Document {
 
     titleWords?: IRange;
     summaryWords?: IRange;
+    keyWords?: IRange;
 
     // Objectives
     generalObjectiveWords?: IRange;
@@ -19,7 +20,7 @@ export interface IConstraint extends Document {
     expectedOutputs?: IRange;
     expectedOutputWords?: IRange;
 
-    //project structure
+    // Project structure
     participants?: IRange;
     phases?: IRange;
     budget?: IRange;
@@ -32,10 +33,9 @@ export interface IConstraint extends Document {
     phaseBudget?: IRange;
     phaseDuration?: IRange;
 
+    activityCost?: IRange;
     activityDuration?: IRange;
     equipmentCost?: IRange;
-
-
 
     themes?: IRange;
     subThemes?: IRange;
@@ -66,6 +66,10 @@ const ConstraintSchema = new Schema<IConstraint>(
         },
 
         summaryWords: {
+            type: RangeSchema,
+        },
+
+        keyWords: {
             type: RangeSchema,
         },
 
@@ -116,7 +120,7 @@ const ConstraintSchema = new Schema<IConstraint>(
             type: RangeSchema,
         },
 
-        components: {                 // ← added
+        components: {
             type: RangeSchema,
         },
 
@@ -128,11 +132,15 @@ const ConstraintSchema = new Schema<IConstraint>(
             type: RangeSchema,
         },
 
-        activityDuration: {           // ← added
+        activityCost: {
             type: RangeSchema,
         },
 
-        equipmentCost: {              // ← added
+        activityDuration: {
+            type: RangeSchema,
+        },
+
+        equipmentCost: {
             type: RangeSchema,
         },
 

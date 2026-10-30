@@ -1,7 +1,7 @@
 import { toWords } from "number-to-words";
 import { formatDate } from "../../../common/utils/date.utils";
 import { ICollaborator } from "../../projects/collaborators/collaborator.model";
-import { IPhaseActivity } from "../../projects/phase/activities/phase-activity.model";
+import { IPhaseActivity } from "../../projects/activities/phase-activity.model";
 import { IPhase } from "../../projects/phase/phase.model";
 import { IProject } from "../../projects/project.model";
 

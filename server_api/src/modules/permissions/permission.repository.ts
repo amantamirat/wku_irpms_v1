@@ -17,7 +17,7 @@ export class PermissionRepository implements IPermissionRepository {
         return Permission.findOne({ name: name });
     }
 
-    async create(data: any): Promise<IPermission> {
+    async create(data: IPermission): Promise<IPermission> {
         return Permission.create(data);
     }
 

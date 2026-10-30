@@ -10,7 +10,7 @@ export enum CollaboratorStatus {
 export type Collaborator = {
     _id?: string;
     project?: string | Project;
-    member?: string | User;
+    member?: string | User | null;
     role?: string;
     isLeadPI?: boolean;
     status?: CollaboratorStatus;

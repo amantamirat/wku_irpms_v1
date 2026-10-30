@@ -5,6 +5,7 @@ import { errorResponse, successResponse } from "../../../../common/helpers/respo
 import { AuthenticatedRequest } from "../../../auth/auth.middleware";
 import { CreatePhaseDocDTO, FilterPhaseDocDTO } from "./phase.doc.dto";
 import { PhaseDocumentService } from "./phase.doc.service";
+import { buildTransitionRequestDto } from "../../../../common/dtos/transition.dto";
 
 
 export class PhaseDocumentController {
@@ -25,7 +26,8 @@ export class PhaseDocumentController {
 
             const created = await this.service.create(
                 phaseDoc,
-                req.file
+                req.file,
+                req.auth.userId
             );
 
             successResponse(
@@ -42,9 +44,10 @@ export class PhaseDocumentController {
 
     get = async (req: Request, res: Response) => {
         try {
-            const { phase } = req.query;
+            const { project, phase } = req.query;
 
             const filter: FilterPhaseDocDTO = {
+                project: project as string,
                 phase: phase as string,
             };
 
@@ -52,6 +55,50 @@ export class PhaseDocumentController {
             successResponse(res, 200, "Phase documents fetched successfully", docs);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
+        }
+    };
+
+
+    // -----------------------
+    // Transition State
+    // -----------------------
+    transitionState = async (
+        req: AuthenticatedRequest,
+        res: Response
+    ) => {
+        try {
+            if (!req.auth)
+                throw new Error(ERROR_CODES.UNAUTHORIZED);
+
+            const { id } = req.params;
+            const { current, next, reason } = req.body;
+
+            const dto = buildTransitionRequestDto(
+                id,
+                { current, next, reason },
+                req.auth.userId
+            );
+
+            const updated =
+                await this.service.transitionState(
+                    dto,
+                    req.auth.userId
+                );
+
+            successResponse(
+                res,
+                200,
+                "Phase document status updated successfully",
+                updated
+            );
+
+        } catch (err: any) {
+            errorResponse(
+                res,
+                400,
+                err.message,
+                err
+            );
         }
     };
 

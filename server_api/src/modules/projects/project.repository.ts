@@ -90,6 +90,7 @@ function populate(dbQuery: any) {
     return dbQuery
         .populate("leadPI")
         .populate("grant")
+        .populate("call")
         .populate("organization")
         .populate("workspace")
         .populate("calendar")

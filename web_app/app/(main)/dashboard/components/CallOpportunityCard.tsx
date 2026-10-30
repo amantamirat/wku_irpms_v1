@@ -43,7 +43,7 @@ export const CallOpportunityCard = ({
         if (activeStage.order === 1) {
             router.push(`/projects/apply/${call._id}`);
         } else {
-            router.push(`/applications/stage/submit/${activeStage._id}`);
+            router.push(`/applications/submit/${activeStage._id}`);
         }
     };
 

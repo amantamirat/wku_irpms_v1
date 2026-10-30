@@ -10,15 +10,15 @@ import { IGrantRepository } from "../../grants/grant.repository";
 import { ProjectAuth } from "../project.auth";
 import { ProjectStatus } from "../project.model";
 import { IProjectRepository } from "../project.repository";
-import { PhaseActivityStatus } from "./activities/phase-activity.model";
-import { IPhaseActivityRepository } from "./activities/phase-activity.repository";
-import { PhaseDocumentType } from "./documents/phase.doc.model";
+import { PhaseActivityStatus, PhaseActivityType } from "../activities/phase-activity.model";
+import { IPhaseActivityRepository } from "../activities/phase-activity.repository";
+import { PhaseDocumentType, ProjectDocumentStatus } from "./documents/phase.doc.model";
 import { IPhaseDocumentRepository } from "./documents/phase.doc.repository";
-import { PhaseEquipmentStatus } from "./equipments/phase-equipment.model";
-import { IPhaseEquipmentRepository } from "./equipments/phase-equipment.repository";
 import { CreatePhaseDto, FilterPhases, UpdatePhaseDto } from "./phase.dto";
 import { PhaseStatus } from "./phase.model";
 import { IPhaseRepository } from "./phase.repository";
+import { IPhaseEquipmentRepository } from "../equipments/phase-equipment.repository";
+import { PhaseEquipmentStatus } from "../equipments/phase-equipment.model";
 
 export class PhaseService {
 
@@ -96,8 +96,11 @@ export class PhaseService {
                 await Promise.all(
                     activities.map(activity =>
                         this.activityRepo.create({
+                            kind: PhaseActivityType.OTHER,
                             ...activity,
-                            phase: String(created._id)
+                            phase: String(created._id),
+                            project,
+                            details: {}
                         })
                     )
                 );
@@ -113,7 +116,8 @@ export class PhaseService {
                     equipments.map(equipment =>
                         this.equipmentRepo.create({
                             ...equipment,
-                            phase: String(created._id)
+                            phase: String(created._id),
+                            project
                         })
                     )
                 );
@@ -310,7 +314,7 @@ export class PhaseService {
 
                     if (duration <= 0) {
                         throw new AppError(
-                            ERROR_CODES.PHASE_ACTIVITY_INVALID_DATES
+                            ERROR_CODES.PHASE_ACTIVITY_INVALID_DATES,
                         );
                     }
 
@@ -324,7 +328,8 @@ export class PhaseService {
             // -----------------------------------------
             if (activityDuration !== Number(phaseDoc.duration)) {
                 throw new AppError(
-                    ERROR_CODES.PHASE_DURATION_MISMATCH
+                    ERROR_CODES.PHASE_DURATION_MISMATCH,
+                    `Total activity duration (${activityDuration} days) must equal the phase duration (${phaseDoc.duration} days).`
                 );
             }
 
@@ -373,9 +378,11 @@ export class PhaseService {
                 ) > 0.01
             ) {
                 throw new AppError(
-                    ERROR_CODES.PHASE_BUDGET_MISMATCH
+                    ERROR_CODES.PHASE_BUDGET_MISMATCH,
+                    `Total activity and equipment cost (${totalCost.toFixed(2)}) must equal the phase budget (${Number(phaseDoc.budget).toFixed(2)}).`
                 );
             }
+
         }
 
         /**
@@ -609,6 +616,7 @@ export class PhaseService {
                 await this.phaseDocRepo.exists({
                     phase: String(phaseDoc._id),
                     type: PhaseDocumentType.progressReport,
+                    status: ProjectDocumentStatus.approved
                 });
 
             if (!hasProgressReport) {
@@ -625,8 +633,9 @@ export class PhaseService {
 
                 const hasCompletionReport =
                     await this.phaseDocRepo.exists({
-                        phase: String(phaseDoc._id),
+                        project: projectId,
                         type: PhaseDocumentType.completionReport,
+                        status: ProjectDocumentStatus.approved
                     });
 
                 if (!hasCompletionReport) {

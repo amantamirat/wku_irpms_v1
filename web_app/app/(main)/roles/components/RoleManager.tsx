@@ -40,6 +40,7 @@ export default function RoleManager() {
             columns={columns}
             tableProps={tableProps}
             dialogWidth="40rem"
+            dialogMaximized
             renderForm={(props) => <RoleForm {...props} />}
             mapSaved={mapSaved}
             onError={(error) => toast.error(error)}

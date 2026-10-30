@@ -51,21 +51,9 @@ export class NotificationRepository implements INotificationRepository {
             .exec();
     }
 
-    async create(dto: CreateNotificationDTO) {
-        const data: Partial<INotification> = {
-            recipient: new mongoose.Types.ObjectId(dto.recipient),
-            title: dto.title,
-            message: dto.message,
-            type: dto.type,
-            link: dto.link,
-            expiresAt: dto.expiresAt
-        };
+    async create(dto: CreateNotificationDTO) {      
 
-        if (dto.sender) {
-            data.sender = new mongoose.Types.ObjectId(dto.sender);
-        }
-
-        return Notification.create(data);
+        return Notification.create(dto);
     }
     async update(id: string, dtoData: UpdateNotificationDTO["data"]): Promise<INotification | null> {
         const updateData: Partial<INotification> = {};

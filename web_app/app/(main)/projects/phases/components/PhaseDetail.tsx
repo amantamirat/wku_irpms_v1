@@ -1,50 +1,52 @@
 'use client';
 
+import { StatusHistoryWidget } from "@/components/StatusHistoryWidget";
 import { useAuth } from "@/contexts/auth-context";
 import MyBadge from "@/templates/MyBadge";
+import { MENU_ICONS } from "@/utils/menu-icons";
 import { etbCurrencyFormatter } from "@/utils/utils";
 import { format } from "date-fns";
 import { TabPanel, TabView } from "primereact/tabview";
-import PhaseDocManager from "../documents/components/PhaseDocumentManager";
-import PhaseActivityManager from "../activities/components/PhaseActivityManager";
+import ActivityManager from "../../activities/components/ActivityManager";
+import EquipmentManager from "../../equipments/components/EquipmentManager";
 import { Phase } from "../models/phase.model";
-import { StatusHistoryWidget } from "@/components/StatusHistoryWidget";
-import PhaseEquipmentManager from "../equipments/components/PhaseEquipmentManager";
+import { Project } from "../../models/project.model";
+import PhaseDocumentManager from "../documents/components/PhaseDocumentManager";
 
 interface PhaseDetailProps {
+    project: Project;
     phase: Phase;
 }
 
-export default function PhaseDetail({ phase }: PhaseDetailProps) {
+export default function PhaseDetail({ project, phase }: PhaseDetailProps) {
     const { hasPermission } = useAuth();
 
     /**
      * Safely extract project title whether it's populated or an ObjectId string
      */
     const projectTitle =
-        typeof phase.project === 'object' && phase.project !== null && 'title' in phase.project
-            ? (phase.project as any).title
-            : 'N/A';
+        project.title
+        ;
 
     // Tab Configuration including Equipment tab with 'phaseEquipment:read' permission
     const tabs = [
         {
             header: "Activities",
-            icon: "pi pi-list",
-            permission: ["phaseActivity:read", "phaseActivity:lookup"],
-            content: <PhaseActivityManager phase={phase} />
+            icon: MENU_ICONS.activities,
+            permission: ["phaseActivity:read"],
+            content: <ActivityManager project={project} phase={phase} />
         },
         {
             header: "Equipment",
-            icon: "pi pi-box",
-            permission: ["phaseEquipment:read", "phaseActivity:lookup"],
-            content: <PhaseEquipmentManager phase={phase} />
+            icon: MENU_ICONS.equipments,
+            permission: ["phaseEquipment:read"],
+            content: <EquipmentManager project={project} phase={phase} />
         },
         {
             header: "Documents",
-            icon: "pi pi-file",
-            permission: ["phaseDocument:read", "phaseDocument:lookup"],
-            content: <PhaseDocManager phase={phase} />
+            icon: MENU_ICONS.documents,
+            permission: ["phaseDocument:read"],
+            content: <PhaseDocumentManager phase={phase} project={project} />
         },
         {
             header: "Status History",

@@ -1,3 +1,4 @@
+// reports/components/ConstraintForm.tsx (or your component path)
 'use client';
 
 import { FormEvent, useState } from 'react';
@@ -5,12 +6,11 @@ import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
 import { InputNumber } from 'primereact/inputnumber';
 import { Accordion, AccordionTab } from 'primereact/accordion';
-import { Message } from 'primereact/message';
 import { classNames } from 'primereact/utils';
 
 import { ItemFormRenderProps } from '@/components/ItemManager';
 import { IRange } from '@/types/range';
-import { Constraint, validateConstraint } from '../models/constraint.model';
+import { Constraint } from '../models/constraint.model';
 
 /* ---------- Types & config ---------- */
 
@@ -36,11 +36,12 @@ interface SectionConfig {
 const SECTIONS: SectionConfig[] = [
     {
         title: 'Content limits',
-        subtitle: 'Control the size of project titles and summaries.',
+        subtitle: 'Control the size of project titles, summaries, and keywords.',
         icon: 'pi pi-file-edit',
         fields: [
             { key: 'titleWords', label: 'Title words', description: 'Allowed number of words in the project title.', unit: 'words' },
-            { key: 'summaryWords', label: 'Summary words', description: 'Allowed number of words in the project summary.', unit: 'words' }
+            { key: 'summaryWords', label: 'Summary words', description: 'Allowed number of words in the project summary.', unit: 'words' },
+            { key: 'keyWords', label: 'Keywords', description: 'Allowed number of keywords for the project.', unit: 'keywords' }
         ]
     },
     {
@@ -76,6 +77,7 @@ const SECTIONS: SectionConfig[] = [
         fields: [
             { key: 'phaseBudget', label: 'Phase budget', description: 'Allowed budget for each phase.', unit: 'ETB', currency: true },
             { key: 'phaseDuration', label: 'Phase duration', description: 'Allowed duration for each phase.', unit: 'days' },
+            { key: 'activityCost', label: 'Activity cost', description: 'Allowed cost for each activity.', unit: 'ETB', currency: true },
             { key: 'activityDuration', label: 'Activity duration', description: 'Allowed duration for each activity.', unit: 'days' },
             { key: 'equipmentCost', label: 'Equipment cost', description: 'Allowed cost for each equipment item.', unit: 'ETB', currency: true }
         ]
@@ -103,20 +105,16 @@ const ConstraintForm = ({
     formId,
     onSubmit
 }: ItemFormRenderProps<Constraint>) => {
-    // The form is mounted when the dialog opens, so state starts fresh each time.
-    // Deep-copy ranges so editing never mutates the original item.
     const [localItem, setLocalItem] = useState<Constraint>(() =>
         item ? structuredClone(item) : emptyConstraint()
     );
     const [submitted, setSubmitted] = useState(false);
-    const [formError, setFormError] = useState<string | null>(null);
     const [activeIndex, setActiveIndex] = useState<number | number[]>([0]);
 
     const nameMissing = !localItem.name?.trim();
 
     const updateField = <K extends keyof Constraint>(field: K, value: Constraint[K]) => {
         setLocalItem((prev) => ({ ...prev, [field]: value }));
-        setFormError(null);
     };
 
     const updateRange = (
@@ -132,7 +130,6 @@ const ConstraintForm = ({
 
             const next = { ...prev };
 
-            // Both bounds empty -> remove the range so it isn't enforced
             if (updated.min === undefined && updated.max === undefined) {
                 delete next[key];
             } else {
@@ -140,7 +137,6 @@ const ConstraintForm = ({
             }
             return next;
         });
-        setFormError(null);
     };
 
     const handleSubmit = async (e: FormEvent) => {
@@ -149,12 +145,6 @@ const ConstraintForm = ({
 
         if (saving) return;
         if (nameMissing) return;
-
-        const validation = validateConstraint(localItem);
-        if (!validation.valid) {
-            setFormError(validation.message ?? 'Constraint is invalid.');
-            return;
-        }
 
         await onSubmit({
             ...localItem,
@@ -181,22 +171,22 @@ const ConstraintForm = ({
 
         return (
             <div key={field.key} className="col-12 md:col-6">
-                <div className="p-3 border-1 surface-border border-round h-full surface-card">
+                <div className="p-3 border-1 surface-border border-round-xl h-full surface-card shadow-sm hover:shadow-2 transition-all transition-duration-200">
                     <div className="flex align-items-start justify-content-between mb-3">
                         <div>
-                            <div className="font-semibold text-900">{field.label}</div>
+                            <div className="font-semibold text-900 text-base">{field.label}</div>
                             <small className="text-500 block mt-1 line-height-3">
                                 {field.description}
                             </small>
                         </div>
-                        <span className="text-xs px-2 py-1 border-round surface-100 text-600 white-space-nowrap">
+                        <span className="text-xs px-2.5 py-1 border-round-pill surface-100 text-700 font-medium white-space-nowrap">
                             {field.unit}
                         </span>
                     </div>
 
-                    <div className="grid">
+                    <div className="grid formgroup-inline">
                         <div className="col-12 sm:col-6">
-                            <label htmlFor={`${id}-min`} className="block text-sm text-600 mb-2">
+                            <label htmlFor={`${id}-min`} className="block text-xs font-semibold text-600 mb-1 uppercase tracking-wider">
                                 Minimum
                             </label>
                             <InputNumber
@@ -209,7 +199,7 @@ const ConstraintForm = ({
                         </div>
 
                         <div className="col-12 sm:col-6">
-                            <label htmlFor={`${id}-max`} className="block text-sm text-600 mb-2">
+                            <label htmlFor={`${id}-max`} className="block text-xs font-semibold text-600 mb-1 uppercase tracking-wider">
                                 Maximum
                             </label>
                             <InputNumber
@@ -223,9 +213,9 @@ const ConstraintForm = ({
                     </div>
 
                     {!range && (
-                        <div className="flex align-items-center gap-2 mt-2 text-sm text-500">
-                            <i className="pi pi-info-circle" />
-                            <span>Leave both fields empty to skip this constraint.</span>
+                        <div className="flex align-items-center gap-2 mt-3 text-xs text-400 font-italic">
+                            <i className="pi pi-info-circle text-primary" />
+                            <span>Leave empty to skip enforcing this constraint.</span>
                         </div>
                     )}
                 </div>
@@ -237,7 +227,7 @@ const ConstraintForm = ({
         <form id={formId} onSubmit={handleSubmit} className="p-fluid" noValidate>
             {/* Name */}
             <div className="field mb-4">
-                <label htmlFor="name" className="font-bold text-sm block mb-2">
+                <label htmlFor="name" className="font-bold text-sm block mb-2 text-900">
                     Constraint name <span className="text-red-500">*</span>
                 </label>
 
@@ -249,17 +239,17 @@ const ConstraintForm = ({
                     required
                     autoFocus
                     placeholder="e.g. Standard Research Grant Limits"
-                    className={classNames({ 'p-invalid': submitted && nameMissing })}
+                    className={classNames({ 'p-invalid': submitted && nameMissing }, 'w-full')}
                 />
 
                 {submitted && nameMissing && (
-                    <small className="p-error">Constraint name is required.</small>
+                    <small className="p-error block mt-1">Constraint name is required.</small>
                 )}
             </div>
 
             {/* Description */}
-            <div className="field mb-4">
-                <label htmlFor="description" className="font-bold text-sm block mb-2">
+            <div className="field mb-5">
+                <label htmlFor="description" className="font-bold text-sm block mb-2 text-900">
                     Description
                 </label>
 
@@ -271,14 +261,15 @@ const ConstraintForm = ({
                     rows={3}
                     autoResize
                     placeholder="Describe when this constraint profile should be used (optional)"
+                    className="w-full"
                 />
             </div>
 
             {/* Range groups */}
-            <div className="mb-2">
-                <div className="font-bold text-sm mb-1">Limits</div>
+            <div className="mb-3">
+                <div className="font-bold text-base text-900 mb-1">Constraint Limits</div>
                 <small className="text-500">
-                    Only configured limits will be enforced.
+                    Configure thresholds for project parameters. Only specified limits are enforced.
                 </small>
             </div>
 
@@ -286,17 +277,19 @@ const ConstraintForm = ({
                 multiple
                 activeIndex={activeIndex}
                 onTabChange={(e) => setActiveIndex(e.index)}
-                className="mt-2"
+                className="mt-2 border-round-xl overflow-hidden surface-border"
             >
                 {SECTIONS.map((section) => (
                     <AccordionTab
                         key={section.title}
                         header={
-                            <div className="flex align-items-center gap-3">
-                                <i className={`${section.icon} text-primary`} />
+                            <div className="flex align-items-center gap-3 py-1">
+                                <div className="w-2.5rem h-2.5rem border-round-circle surface-primary flex align-items-center justify-content-center shadow-sm">
+                                    <i className={`${section.icon} text-primary text-base`} />
+                                </div>
                                 <div>
-                                    <div className="font-semibold">{section.title}</div>
-                                    <small className="text-500">{section.subtitle}</small>
+                                    <div className="font-bold text-900 text-base">{section.title}</div>
+                                    <small className="text-500 font-normal">{section.subtitle}</small>
                                 </div>
                             </div>
                         }
@@ -307,11 +300,6 @@ const ConstraintForm = ({
                     </AccordionTab>
                 ))}
             </Accordion>
-
-            {/* Validation error from validateConstraint */}
-            {formError && (
-                <Message severity="error" text={formError} className="w-full mt-3 justify-content-start" />
-            )}
         </form>
     );
 };

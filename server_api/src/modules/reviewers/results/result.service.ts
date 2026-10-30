@@ -2,8 +2,11 @@
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
+import { IApplicationRepository } from "../../applications/application.repository";
+import { IStage } from "../../calls/stages/stage.model";
 import { FormType } from "../../evaluations/criteria/criterion.model";
 import { ICriterionRepository } from "../../evaluations/criteria/criterion.repository";
+import { IReviewer, ReviewerTargetType } from "../reviewer.model";
 import { IReviewerRepository } from "../reviewer.repository";
 import { ReviewerStatus } from "../reviewer.state-machine";
 import { CreateResultDTO, FilterResultsDTO, UpdateResultDTO } from "./result.dto";
@@ -16,6 +19,7 @@ export class ResultService {
         private readonly repository: IResultRepository,
         private readonly reviewerRepo: IReviewerRepository,
         private readonly criterionRepository: ICriterionRepository,
+        private readonly applicationRepo: IApplicationRepository,
     ) { }
 
 
@@ -111,6 +115,17 @@ export class ResultService {
         return { dto };
     }
 
+    async validateStageReveiwerDeadline(reviewerDoc: IReviewer) {
+        if (reviewerDoc.targetType === ReviewerTargetType.APPLICATION && reviewerDoc.application) {
+            const applicationDoc = await this.applicationRepo.findById(reviewerDoc.application.toString(), { populate: true });
+            if (!applicationDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
+            const stageDoc = applicationDoc.stage as unknown as IStage;
+            if (new Date(stageDoc.deadline) < new Date()) {
+                throw new AppError(ERROR_CODES.REVIEWER_DEADLINE_PASSED);
+            }
+        }
+    }
+
     async update(dto: UpdateResultDTO, userId: string) {
         const { id } = dto;
         const resultDoc = await this.repository.findById(id);
@@ -124,6 +139,8 @@ export class ResultService {
 
         if (reviewerDoc.status !== ReviewerStatus.verified)
             throw new AppError(ERROR_CODES.REVIEWER_NOT_ACCEPTED);
+
+        await this.validateStageReveiwerDeadline(reviewerDoc);
 
         await this.validateResult(String(resultDoc.criterion), dto.data);
         return this.repository.update(dto.id, dto.data);

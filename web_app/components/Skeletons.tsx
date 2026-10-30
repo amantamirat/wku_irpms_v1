@@ -1,6 +1,7 @@
 'use client';
 
 import { Skeleton } from 'primereact/skeleton';
+import { ProgressSpinner } from 'primereact/progressspinner';
 
 interface GridSkeletonProps {
   count?: number;
@@ -75,6 +76,27 @@ export function ListSkeleton({ rows = 10 }: ListSkeletonProps) {
           <Skeleton width="120px" height="2rem" />
         </div>
       ))}
+    </div>
+  );
+}
+
+interface SpinnerSkeletonProps {
+  width?: string;
+  height?: string;
+  text?: string;
+}
+/**
+ * Customizable Spinner loader component
+ */
+export function SpinnerSkeleton({
+  width = '50px',
+  height = '50px',
+  text = 'Loading project details...'
+}: SpinnerSkeletonProps) {
+  return (
+    <div className="surface-card border-round p-5 flex flex-column align-items-center justify-content-center shadow-1">
+      <ProgressSpinner style={{ width, height }} strokeWidth="4" />
+      <span className="text-500 font-medium mt-3">{text}</span>
     </div>
   );
 }

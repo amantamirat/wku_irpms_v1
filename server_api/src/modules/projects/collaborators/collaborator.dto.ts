@@ -12,7 +12,6 @@ export interface CreateCollaboratorDto extends CollaboratorDto {
     project: string;
     projectTitle?: string;
     status?: CollaboratorStatus;
-    userId?: string;
 }
 
 // Base fields for updating a collaborator

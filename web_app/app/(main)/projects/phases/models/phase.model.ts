@@ -13,14 +13,14 @@ export enum PhaseStatus {
 export type Phase = {
     _id?: string;
     project?: string | Project;
-    title: string;
+    title?: string;
     order?: number;//optional
     duration: number;           // Total duration
     budget: number;             // Total budget
     description?: string;       // Optional
 
-    startDate?: Date;
-    endDate?: Date;
+    startDate?: Date | null;
+    endDate?: Date | null;
 
     status?: PhaseStatus;
     statusHistory?: IStatusHistory<PhaseStatus>[];
@@ -28,7 +28,7 @@ export type Phase = {
     updatedAt?: Date;
 };
 
-export interface FilterPhaseOptions {
+export interface FilterPhasesOptions {
     project?: string | Project;
 }
 

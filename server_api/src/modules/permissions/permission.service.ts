@@ -12,6 +12,13 @@ export class PermissionService {
         this.repository = repository;
     }
 
+    async create(dto: { category: string, name: string, description: string }) {
+        const permDoc = await this.repository.create(dto);
+        if (!permDoc)
+            throw new AppError(ERROR_CODES.PERMISSION_NOT_FOUND);
+        return permDoc;
+    }
+
     async getPermissions() {
         return await this.repository.findAll();
     }

@@ -5,7 +5,7 @@ import {
     IRange,
     matchesRange
 } from "../../../common/types/range";
-import { PhaseActivityRepository } from "../../projects/phase/activities/phase-activity.repository";
+import { PhaseActivityRepository } from "../../projects/activities/phase-activity.repository";
 import { CreatePhaseDto, PhaseDto } from "../../projects/phase/phase.dto";
 import { PhaseRepository } from "../../projects/phase/phase.repository";
 import { ProjectRepository } from "../../projects/project.repository";

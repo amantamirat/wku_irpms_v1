@@ -14,10 +14,14 @@ export const PermissionApi: EntityApi<Permission> = {
         return data as Permission[];
     },
     create: function (data: Partial<Permission>): Promise<Permission> {
-        throw new Error("Function not implemented.");
+        return ApiClient.post(end_point, data);
     },
     update: function (data: Partial<Permission>): Promise<Permission> {
-        throw new Error("Function not implemented.");
+        if (!data._id) throw new Error("_id required");
+        return ApiClient.put(
+            `${end_point}/${data._id}`,
+            data
+        );
     },
     delete: function (item: Permission): Promise<boolean> {
         if (!item._id) throw new Error("_id required")

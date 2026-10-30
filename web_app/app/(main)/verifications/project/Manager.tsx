@@ -10,12 +10,12 @@ import { Project } from "../../projects/models/project.model";
 
 interface VerificationManagerProps {
     project: string | Project;
-    enableEditing?: boolean;
+    useLookup?: boolean;
 }
 
 const VerificationManager = ({
     project,
-    enableEditing
+    useLookup
 }: VerificationManagerProps) => {
     const projectId = extractId(project);
 
@@ -70,7 +70,7 @@ const VerificationManager = ({
         permissionPrefix: "verification",
         hideSearch: true,
         hideEditAction: true,
-        hideDeleteAction: !enableEditing
+        hideDeleteAction: !useLookup
     });
 
     return <Manager key={projectId} />;

@@ -8,8 +8,8 @@ import { User } from "../models/user.model";
 import EnrollmentManager from "../enrollments/components/EnrollmentManager";
 import ExperienceManager from "../experiences/components/ExperienceManager";
 import PublicationManager from "../publications/components/PublicationManager";
-import UserMemberships from "../../projects/collaborators/user/UserMemberships";
 import UserReviewers from "../../reviewers/user/UserReviewers";
+import CollaboratorManager from "../../projects/collaborators/components/CollaboratorManager";
 
 interface UserDetailProps {
     user: User;
@@ -44,7 +44,7 @@ const UserDetail = ({ user }: UserDetailProps) => {
         {
             header: "Memberships",
             permission: PERMISSIONS.COLLABORATOR.READ,
-            content: <UserMemberships user={user} />
+            content: <CollaboratorManager member={user} disableCrud={true} />
         },
 
         {

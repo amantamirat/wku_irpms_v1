@@ -12,6 +12,20 @@ export class PermissionController {
     this.service = service;
   }
 
+  create = async (req: AuthenticatedRequest, res: Response) => {
+    try {
+      const { category, name, description } = req.body;
+      const dto = {
+        category, name, description
+      };
+      const created = await this.service.create(dto);
+      successResponse(res, 200, "Permission created", created);
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  };
+
+
   getPermissions = async (req: Request, res: Response) => {
     try {
       const permissions = await this.service.getPermissions();

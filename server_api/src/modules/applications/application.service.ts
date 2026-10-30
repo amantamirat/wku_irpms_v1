@@ -12,7 +12,7 @@ import ScopeFilterService from "../../common/services/scope-filter.service";
 import { AnonymizerService } from "../../util/anonymizer/anonymizer.service";
 import { AuthScope } from "../auth/auth.types";
 import { ICallRepository } from "../calls/call.repository";
-import { IStage } from "../calls/stages/stage.model";
+import { IStage, StageStatus } from "../calls/stages/stage.model";
 import { IStageRepository } from "../calls/stages/stage.repository";
 import { CompositionValidationInput, CompositionValidationService } from "../compositions/composition-validator.service";
 import { ConstraintValidationInput, ConstraintValidationService } from "../constraints/services/constraint-validator.service";
@@ -71,6 +71,12 @@ export class ApplicationService {
         if (!stageDoc) {
             throw new AppError(
                 ERROR_CODES.STAGE_NOT_FOUND
+            );
+        }
+
+        if (stageDoc.status !== StageStatus.active) {
+            throw new AppError(
+                ERROR_CODES.STAGE_NOT_ACTIVE
             );
         }
 

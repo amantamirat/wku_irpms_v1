@@ -1,17 +1,21 @@
-import { EntityApi } from "@/api/EntityApi";
+import { EntityApi, StateTransition } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
 import { sanitize } from "@/utils/utils";
-import { FilterPhaseDocOptions, PhaseDocument } from "../model/phase.doc";
+import { FilterPhaseDocumentOptions, ProjectDocument } from "../model/phase.doc";
 
 const end_point = "/project/phase/documents";
 
-export const PhaseDocApi: EntityApi<PhaseDocument, FilterPhaseDocOptions> = {
+export const PhaseDocumentApi: EntityApi<ProjectDocument, FilterPhaseDocumentOptions> = {
 
-    async getAll(options) {
-        return ApiClient.get(end_point, options);
+    async getAll(filter) {
+        return ApiClient.get(end_point, filter);
     },
 
-    async create(phaseDoc: Partial<PhaseDocument>): Promise<any> {
+    async lookup(filter) {
+        return ApiClient.get(`${end_point}/lookup`, filter);
+    },
+
+    async create(phaseDoc: Partial<ProjectDocument>): Promise<any> {
         const formData = new FormData();
 
         // 1. Append the real file directly from phaseDoc if it exists
@@ -39,6 +43,12 @@ export const PhaseDocApi: EntityApi<PhaseDocument, FilterPhaseDocOptions> = {
             `${end_point}/${phaseDoc._id}`,
             sanitize(phaseDoc)
         );
+    },
+
+    async transitionState(id: string, dto: StateTransition) {
+        const url = `${end_point}/${id}`;
+        const updated = await ApiClient.patch(url, dto);
+        return updated;
     },
 
     async delete(phaseDoc) {

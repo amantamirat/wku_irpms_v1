@@ -156,95 +156,94 @@ const ReviewerForm = ({
 
     return (
         <form id={formId} onSubmit={handleSubmit} className="p-fluid" noValidate>
-            <div className="card p-4 surface-card border-round shadow-1">
-                {errorMessage && (
-                    <div className="p-error mb-3">
-                        <i className="pi pi-exclamation-circle mr-1" />
-                        {errorMessage}
+            {errorMessage && (
+                <div className="p-error mb-3">
+                    <i className="pi pi-exclamation-circle mr-1" />
+                    {errorMessage}
+                </div>
+            )}
+
+            {/* Reviewer */}
+            <div className="field col-12 mb-3">
+                <label
+                    htmlFor="reviewer-user"
+                    className="font-bold block mb-2"
+                >
+                    <i className="pi pi-user mr-2 text-primary" />
+                    Reviewer <span className="p-error">*</span>
+                </label>
+
+                {isEditMode ? (
+                    <div className="p-inputtext p-component surface-100">
+                        {getReviewerName()}
                     </div>
+                ) : (
+                    <>
+                        <Dropdown
+                            inputId="reviewer-user"
+                            value={selectedReviewer ?? null}
+                            options={users}
+                            optionLabel="name"
+                            dataKey="_id"
+                            placeholder="Choose a user from the system..."
+                            filter
+                            showClear
+                            onChange={(event) =>
+                                updateReviewer({
+                                    reviewer: (event.value ??
+                                        undefined) as Reviewer['reviewer'],
+                                })
+                            }
+                            className={classNames({
+                                'p-invalid': submitted && !localReviewer.reviewer,
+                            })}
+                        />
+
+                        {submitted && !localReviewer.reviewer && (
+                            <small className="p-error block mt-1">
+                                <i className="pi pi-exclamation-circle mr-1" />
+                                Reviewer is required.
+                            </small>
+                        )}
+                    </>
                 )}
-
-                {/* Reviewer */}
-                <div className="field col-12 mb-3">
-                    <label
-                        htmlFor="reviewer-user"
-                        className="font-bold block mb-2"
-                    >
-                        <i className="pi pi-user mr-2 text-primary" />
-                        Reviewer <span className="p-error">*</span>
-                    </label>
-
-                    {isEditMode ? (
-                        <div className="p-inputtext p-component surface-100">
-                            {getReviewerName()}
-                        </div>
-                    ) : (
-                        <>
-                            <Dropdown
-                                inputId="reviewer-user"
-                                value={selectedReviewer ?? null}
-                                options={users}
-                                optionLabel="name"
-                                dataKey="_id"
-                                placeholder="Choose a user from the system..."
-                                filter
-                                showClear
-                                onChange={(event) =>
-                                    updateReviewer({
-                                        reviewer: (event.value ??
-                                            undefined) as Reviewer['reviewer'],
-                                    })
-                                }
-                                className={classNames({
-                                    'p-invalid': submitted && !localReviewer.reviewer,
-                                })}
-                            />
-
-                            {submitted && !localReviewer.reviewer && (
-                                <small className="p-error block mt-1">
-                                    <i className="pi pi-exclamation-circle mr-1" />
-                                    Reviewer is required.
-                                </small>
-                            )}
-                        </>
-                    )}
-                </div>
-
-                {/* Weight */}
-                <div className="field col-12">
-                    <label
-                        htmlFor="reviewer-weight"
-                        className="font-bold block mb-2"
-                    >
-                        <i className="pi pi-sliders-h mr-2 text-primary" />
-                        Weight Assignment <span className="p-error">*</span>
-                    </label>
-
-                    <InputNumber
-                        inputId="reviewer-weight"
-                        value={localReviewer.weight ?? 1}
-                        min={0}
-                        mode="decimal"
-                        showButtons
-                        placeholder="Enter weight value"
-                        onValueChange={(event) =>
-                            updateReviewer({
-                                weight: event.value ?? 1,
-                            })
-                        }
-                        className={classNames({
-                            'p-invalid':
-                                submitted &&
-                                (localReviewer.weight === null ||
-                                    localReviewer.weight === undefined),
-                        })}
-                    />
-
-                    <small className="text-color-secondary block mt-1">
-                        Defines the distribution weight for this reviewer.
-                    </small>
-                </div>
             </div>
+
+            {/* Weight */}
+            <div className="field col-12">
+                <label
+                    htmlFor="reviewer-weight"
+                    className="font-bold block mb-2"
+                >
+                    <i className="pi pi-sliders-h mr-2 text-primary" />
+                    Weight Assignment <span className="p-error">*</span>
+                </label>
+
+                <InputNumber
+                    inputId="reviewer-weight"
+                    value={localReviewer.weight ?? 1}
+                    min={0}
+                    mode="decimal"
+                    showButtons
+                    placeholder="Enter weight value"
+                    onValueChange={(event) =>
+                        updateReviewer({
+                            weight: event.value ?? 1,
+                        })
+                    }
+                    className={classNames({
+                        'p-invalid':
+                            submitted &&
+                            (localReviewer.weight === null ||
+                                localReviewer.weight === undefined),
+                    })}
+                />
+
+                <small className="text-color-secondary block mt-1">
+                    Defines the distribution weight for this reviewer.
+                </small>
+            </div>
+
 
             {/* Submitted by the ItemManager dialog footer */}
             <button type="submit" hidden disabled={saving} />

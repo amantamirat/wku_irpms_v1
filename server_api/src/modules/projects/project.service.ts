@@ -195,8 +195,8 @@ export class ProjectService {
                     role: collaboratorIsLeadPI
                         ? "Principal Investigator"
                         : collab.role,
-                    userId
                 },
+                userId,
                 options
             );
         }

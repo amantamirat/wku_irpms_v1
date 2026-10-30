@@ -1,5 +1,5 @@
-import { PhaseActivityDto } from "./activities/phase-activity.dto";
-import { PhaseEquipmentDto } from "./equipments/phase-equipment.dto";
+import { PhaseActivityDto } from "../activities/phase-activity.dto";
+import { PhaseEquipmentDto } from "../equipments/phase-equipment.dto";
 import { PhaseStatus } from "./phase.model";
 
 /*

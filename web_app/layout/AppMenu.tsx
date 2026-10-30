@@ -39,7 +39,7 @@ const AppMenu = () => {
                 {
                     label: 'Applications',
                     icon: MENU_ICONS.applications,
-                    to: '/applications/stage',
+                    to: '/applications',
                     permission: 'application:read',
                 },
                 {

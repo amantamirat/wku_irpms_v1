@@ -8,12 +8,13 @@ import { useToast } from '@/contexts/ToastContext';
 import { MENU_ICONS } from '@/utils/menu-icons';
 
 import { ReviewerApi } from '../api/reviewer.api';
-import { Reviewer, FilterReviewersDTO, ReviewerTargetType } from '../models/reviewer.model';
+import { Reviewer, FilterReviewersDTO, ReviewerTargetType, ReviewerStatus } from '../models/reviewer.model';
 import ReviewerForm from './ReviewerForm';
 import { Application } from '../../applications/models/application.model';
 import { Verification } from '../../verifications/models/verification.model';
 import MyBadge from '@/templates/MyBadge';
 import { REVIEWER_ADMIN_TRANSITIONS } from '../models/reviewer.state-machine';
+import { ApplicationApi } from '../../applications/api/application.api';
 
 interface ReviewerManagerProps {
     targetType: ReviewerTargetType,
@@ -23,7 +24,8 @@ interface ReviewerManagerProps {
 }
 
 const DEFAULT_HIDDEN = [
-    "createdBy.name"
+    "createdBy.name",
+    "weight"
 ];
 
 const getReviewerColumns = (): ColumnProps[] => [
@@ -44,6 +46,11 @@ const getReviewerColumns = (): ColumnProps[] => [
         body: (rowData: Reviewer) => (
             <span className="font-bold text-primary">{rowData.weight ?? 1}</span>
         ),
+    },
+    {
+        header: "Score",
+        field: "reviewer.score",
+        body: (r: Reviewer) => r.score || "N/A"
     },
     {
         header: "Assigned By",
@@ -69,7 +76,7 @@ const mapSaved = (saved: Reviewer, submitted: Partial<Reviewer>): Reviewer => ({
     reviewer: submitted.reviewer,
 });
 
-export default function ReviewerManager({ targetType, application, verification }: ReviewerManagerProps) {
+export default function ReviewerManager({ targetType, application, verification, updateApplication }: ReviewerManagerProps) {
     const toast = useToast();
 
     const columns = useMemo(() => getReviewerColumns(), []);
@@ -115,6 +122,25 @@ export default function ReviewerManager({ targetType, application, verification 
             )}
             statusField='status'
             transitions={REVIEWER_ADMIN_TRANSITIONS}
+            onTransitioned={async (item, transition) => {
+                if (
+                    targetType === ReviewerTargetType.APPLICATION &&
+                    application &&
+                    updateApplication
+                ) {
+                    if (transition.next === ReviewerStatus.accepted ||
+                        transition.current === ReviewerStatus.accepted) {
+                        const appDoc = await ApplicationApi.getById!(application?._id!);
+                        if (appDoc) {
+                            updateApplication({
+                                ...appDoc,
+                                project: application.project,
+                                stage: application.stage
+                            });
+                        }
+                    }
+                }
+            }}
             onError={(error) => toast.error(error)}
             onSuccess={(operation) =>
                 toast.success(

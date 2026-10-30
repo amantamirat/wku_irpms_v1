@@ -1,12 +1,17 @@
-import { PhaseDocumentType } from "./phase.doc.model";
+import { PhaseDocumentType, ProjectDocumentStatus } from "./phase.doc.model";
 
 export interface CreatePhaseDocDTO {
-    phase: string;
+    project: string;
+    phase?: string;
+    activity?: string;
     type: PhaseDocumentType;
     description: string;
 }
 
 export interface FilterPhaseDocDTO {
+    project?: string;
     phase?: string;
+    activity?: string;
     type?: PhaseDocumentType;
+    status?: ProjectDocumentStatus
 }

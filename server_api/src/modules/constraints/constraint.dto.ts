@@ -9,6 +9,7 @@ export interface CreateConstraintDTO {
 
     titleWords?: IRange;
     summaryWords?: IRange;
+    keyWords?: IRange;
 
     // Objectives
     generalObjectiveWords?: IRange;
@@ -32,6 +33,7 @@ export interface CreateConstraintDTO {
     phaseBudget?: IRange;
     phaseDuration?: IRange;
 
+    activityCost?: IRange;
     activityDuration?: IRange;
     equipmentCost?: IRange;
 

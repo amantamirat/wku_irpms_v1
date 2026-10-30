@@ -11,13 +11,14 @@ export enum NotificationType {
     ERROR = 'error'
 }
 
-export interface NotificationDTO {
+export interface Notification {
     recipient: string;
     sender?: string;
     title: string;
     message: string;
     type?: NotificationType;
     link?: string;
+    isRead?: boolean;
     expiresAt?: Date;
 }
 
@@ -34,9 +35,9 @@ export const useNotifications = () => {
         try {
             const data = await ApiClient.get('/notifications');
 
-            setNotifications(data);
+            setNotifications(data as Notification[]);
             setUnreadCount(
-                data.filter((n: any) => !n.isRead).length
+                data.filter((n: Notification) => !n.isRead).length
             );
         } catch (error) {
             console.error(

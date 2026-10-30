@@ -30,10 +30,9 @@ export class CollaboratorController {
                 project: project as string,
                 //isLeadPI: isLeadPI ? true : undefined,
                 role,
-                userId: req.auth.userId,
             };
 
-            const created = await this.service.create(dto);
+            const created = await this.service.create(dto, req.auth.userId);
             successResponse(res, 201, 'Collaborator created successfully', created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

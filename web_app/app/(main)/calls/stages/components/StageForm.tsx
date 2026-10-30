@@ -24,6 +24,7 @@ import { ConstraintApi } from '@/app/(main)/constraints/api/constraint.api';
 import { Constraint } from '@/app/(main)/constraints/models/constraint.model';
 
 import { Stage } from '../models/stage.model';
+import { extractId } from '@/utils/utils';
 
 const stageOptions = [
     { label: 'Concept Note', value: 'Concept Note' },
@@ -35,20 +36,7 @@ const stageOptions = [
     { label: 'Final Selection', value: 'Final Selection' },
 ];
 
-const extractId = (value: unknown): string | undefined => {
-    if (typeof value === 'string') return value;
 
-    if (
-        typeof value === 'object' &&
-        value !== null &&
-        '_id' in value &&
-        typeof value._id === 'string'
-    ) {
-        return value._id;
-    }
-
-    return undefined;
-};
 
 const toDate = (value?: Date | string | null): Date | undefined => {
     if (!value) return undefined;
@@ -220,7 +208,7 @@ const StageForm = ({
 
                 {/* TOP SECTION: Deadline */}
                 <div className="formgrid grid mt-2">
-                    <div className="field col-12">
+                    <div className="field col-12 md:col-6">
                         <label htmlFor="stage-deadline" className="font-bold block mb-2">
                             Deadline <span className="p-error">*</span>
                         </label>
@@ -246,6 +234,26 @@ const StageForm = ({
                                 Deadline is required.
                             </small>
                         )}
+                    </div>
+
+                    <div className="field col-12 md:col-6">
+                        <label htmlFor="reviewer-deadline" className="font-bold block mb-2">
+                            Reviewer Deadline
+                        </label>
+                        <Calendar
+                            inputId="reviewer-deadline"
+                            value={toDate(localStage.reviewersDeadline)}
+                            onChange={(event) =>
+                                updateStage({
+                                    reviewersDeadline: event.value as Date | undefined,
+                                })
+                            }
+                            showIcon
+                            showTime
+                            stepMinute={5}
+                            hourFormat="12"
+                            placeholder="Select Reviewer Deadline"                            
+                        />
                     </div>
                 </div>
 

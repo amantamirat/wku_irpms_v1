@@ -155,7 +155,7 @@ export class ReviewerService {
 
         switch (transition) {
             case `${ReviewerStatus.pending}->${ReviewerStatus.verified}`:
-                await this.acceptReviewer(reviewerDoc, userId);
+                await this.verifyReviewer(reviewerDoc, userId);
                 break;
 
             case `${ReviewerStatus.verified}->${ReviewerStatus.pending}`:
@@ -189,7 +189,7 @@ export class ReviewerService {
         // return { reviewerDoc: updated, targetDoc: targetDoc };
     }
 
-    private async acceptReviewer(
+    private async verifyReviewer(
         reviewerDoc: IReviewer,
         userId: string
     ): Promise<void> {
@@ -272,8 +272,12 @@ export class ReviewerService {
         switch (reviewerDoc.targetType) {
             case ReviewerTargetType.APPLICATION:
                 return await this.policy.calculateApplicationScore(
-                    String(reviewerDoc.application), userId
+                    String(reviewerDoc.application)
                 );
+            /*
+            return await this.policy.calculateApplicationScorewithApplicationDescision(
+                String(reviewerDoc.application), userId
+            );*/
             case ReviewerTargetType.VERIFICATION:
                 return await this.policy.calculateVerificationScore(
                     String(reviewerDoc.verification)

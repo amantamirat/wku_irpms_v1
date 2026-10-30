@@ -72,3 +72,14 @@ export const etbCurrencyFormatter = new Intl.NumberFormat(
 
 export const capitalize = (value: string) =>
     value.charAt(0).toUpperCase() + value.slice(1);
+
+
+// Helper exported for reuse in SaveDialog and Manager
+export const computeDurationFromDates = (startDate?: Date | string, endDate?: Date | string): number => {
+    if (!startDate || !endDate) return 0;
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const diffTime = end.getTime() - start.getTime();
+    if (diffTime < 0) return 0;
+    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+};

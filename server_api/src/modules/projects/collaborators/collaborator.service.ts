@@ -27,6 +27,8 @@ import { CollaboratorStatus, ICollaborator } from "./collaborator.model";
 import { CompositionValidationService } from "../../compositions/composition-validator.service";
 import { IStageRepository } from "../../calls/stages/stage.repository";
 import { CallStatus } from "../../calls/call.model";
+import { StageStatus } from "../../calls/stages/stage.model";
+import { SYSTEM } from "../../../common/constants/system.constant";
 
 
 export class CollaboratorService {
@@ -58,11 +60,11 @@ export class CollaboratorService {
         return callDoc;
     }
 
-    async create(dto: CreateCollaboratorDto, options?: { skipValidation?: boolean }) {
-        const { member, project, userId } = dto;
+    async create(dto: CreateCollaboratorDto, userId: string, options?: { skipValidation?: boolean }) {
+        const { member, project } = dto;
         let projectTitle = dto.projectTitle;
-        if (!options?.skipValidation) {
-            if (!userId) return;
+        if (!options?.skipValidation && userId !== SYSTEM.SU_USER) {
+
             const { projectDoc, isLeadPI } = await this.projectAuth.auth(project, userId, PERMISSIONS.COLLABORATOR.CREATE);
             projectTitle = projectDoc.title;
             if (isLeadPI) {
@@ -72,13 +74,19 @@ export class CollaboratorService {
                     throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
                 }
 
-                /*
                 if (projectDoc.currentApplication) {
                     const currentAppDoc = await this.applicationRepo.findById(String(projectDoc.currentApplication));
-                    if (currentAppDoc?.status === ApplicationStatus.submitted) {
-                        throw new AppError(ERROR_CODES.CURRENT_APPLICATION_IS_PENDING);
+                    if (!currentAppDoc) {
+                        throw new AppError(ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND);
                     }
-                }*/
+                    const stageDoc = await this.stageRepo.findById(currentAppDoc.stage.toString());
+                    if (!stageDoc) {
+                        throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+                    }
+                    if (stageDoc.status !== StageStatus.active) {
+                        throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
+                    }
+                }
             }
 
 

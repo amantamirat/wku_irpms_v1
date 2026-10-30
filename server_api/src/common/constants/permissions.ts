@@ -163,7 +163,7 @@ export const PERMISSIONS = {
       CLOSE: "stage:status.closed",
     },*/
     DELETE: "stage:delete",
-   // CHANGE_STATUS: "stage:change_status", // New permission for status transitions
+    // CHANGE_STATUS: "stage:change_status", // New permission for status transitions
   },
 
   EVALUATION: {
@@ -250,7 +250,7 @@ export const PERMISSIONS = {
     CREATE: "phaseDocument:create",
     CREATE_OWN: "phaseDocument:create:own",
     READ: "phaseDocument:read",
-    READ_OWN: "phaseDocument:read:own",
+    LOOKUP: "phaseDocument:lookup",
     UPDATE: "phaseDocument:update",
     DELETE: "phaseDocument:delete",
     DELETE_OWN: "phaseDocument:delete:own",
@@ -281,15 +281,30 @@ export const PERMISSIONS = {
     DELETE: "phaseEquipment:delete",
     DELETE_OWN: "phaseEquipment:delete:own",
   },
+  PROJECT_COMPONENT: {
+    CREATE: "projectComponent:create",
+    CREATE_OWN: "projectComponent:create:own",
+
+    READ: "projectComponent:read",
+    LOOKUP: "projectComponent:lookup",
+
+    UPDATE: "projectComponent:update",
+    UPDATE_OWN: "projectComponent:update:own",
+
+    DELETE: "projectComponent:delete",
+    DELETE_OWN: "projectComponent:delete:own",
+  },
+  /*
   PROJECT_THEME: {
     CREATE: "project_theme:create",
     READ: "project_theme:read",
     UPDATE: "project_theme:update",
     DELETE: "project_theme:delete",
-  },
+  },*/
   APPLICATION: {
     CREATE: "application:create",
     SUBMIT: "application:submit",
+    CREATE_OWN: "application:create:own",
     READ: "application:read",
     UPDATE: "application:update",
     DELETE: "application:delete",

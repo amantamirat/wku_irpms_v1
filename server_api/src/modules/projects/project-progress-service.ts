@@ -2,10 +2,10 @@ import mongoose from 'mongoose';
 
 import { Phase, PhaseStatus } from './phase/phase.model';
 import { Project } from './project.model';
-import { PhaseActivity, PhaseActivityStatus } from './phase/activities/phase-activity.model';
+import { PhaseActivity, PhaseActivityStatus } from './activities/phase-activity.model';
 import { IPhaseRepository } from './phase/phase.repository';
 import { IProjectRepository } from './project.repository';
-import { IPhaseActivityRepository } from './phase/activities/phase-activity.repository';
+import { IPhaseActivityRepository } from './activities/phase-activity.repository';
 /*
 export interface IPhaseProgress {
     phaseId: mongoose.Types.ObjectId;

@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../../common/constants/permissions';
-import { checkPermission, criterionRepo, resultRepo, reviewerRepo } from '../../../core/container';
+import { applicationRepo, checkPermission, criterionRepo, resultRepo, reviewerRepo } from '../../../core/container';
 import { verifyAuthToken } from '../../auth/auth.middleware';
 import { ResultController } from './result.controller';
 
@@ -15,7 +15,8 @@ const router: Router = Router();
 const service = new ResultService(
     resultRepo,
     reviewerRepo,
-    criterionRepo
+    criterionRepo,
+    applicationRepo
 );
 
 // -----------------------

@@ -6,7 +6,7 @@ import { PhaseStatus } from "../../projects/phase/phase.model";
 import { DocumentTemplateStatus, IDocumentTemplate } from "../document-template.model";
 import { GrantRepository } from "../../grants/grant.repository";
 import { CollaboratorRepository } from "../../projects/collaborators/collaborator.repository";
-import { PhaseActivityRepository } from "../../projects/phase/activities/phase-activity.repository";
+import { PhaseActivityRepository } from "../../projects/activities/phase-activity.repository";
 import { PhaseRepository } from "../../projects/phase/phase.repository";
 import { ProjectRepository } from "../../projects/project.repository";
 import { DocumentTemplateRepository } from "../document-template.repository";

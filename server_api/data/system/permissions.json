@@ -6,6 +6,11 @@
   },
   {
     "category": "Permission Management",
+    "name": "permission:create",
+    "description": "Create missing system permissions"
+  },
+  {
+    "category": "Permission Management",
     "name": "permission:lookup",
     "description": "Look permissions"
   },
@@ -867,7 +872,12 @@
   {
     "category": "Application Management",
     "name": "application:submit",
-    "description": "Submit applications for own projects"
+    "description": "Submit applications"
+  },
+  {
+    "category": "Application Management",
+    "name": "application:create:own",
+    "description": "Create applications for own projects"
   },
   {
     "category": "Application Management",
@@ -1291,8 +1301,8 @@
   },
   {
     "category": "Phase Document Management",
-    "name": "phaseDocument:read:own",
-    "description": "Read phase documents from own projects"
+    "name": "phaseDocument:lookup",
+    "description": "Look project documents"
   },
   {
     "category": "Phase Document Management",
@@ -1306,8 +1316,68 @@
   },
   {
     "category": "Phase Document Management",
+    "name": "phaseDocument:transition.pending.approved",
+    "description": "Approve a pending project document"
+  },
+  {
+    "category": "Phase Document Management",
+    "name": "phaseDocument:transition.pending.refused",
+    "description": "Refuse a pending project document"
+  },
+  {
+    "category": "Phase Document Management",
+    "name": "phaseDocument:transition.approved.pending",
+    "description": "Return an approved project document to pending"
+  },
+  {
+    "category": "Phase Document Management",
+    "name": "phaseDocument:transition.refused.pending",
+    "description": "Return a refused project document to pending"
+  },
+  {
+    "category": "Phase Document Management",
     "name": "phaseDocument:delete:own",
     "description": "Delete phase documents from own projects"
+  },
+  {
+    "category": "Project Component Management",
+    "name": "projectComponent:create",
+    "description": "Create project component entries"
+  },
+  {
+    "category": "Project Component Management",
+    "name": "projectComponent:create:own",
+    "description": "Create project components for own projects"
+  },
+  {
+    "category": "Project Component Management",
+    "name": "projectComponent:read",
+    "description": "Read project component entries"
+  },
+  {
+    "category": "Project Component Management",
+    "name": "projectComponent:lookup",
+    "description": "Lookup project component entries"
+  },
+  {
+    "category": "Project Component Management",
+    "name": "projectComponent:update",
+    "description": "Update project component entries"
+  },
+  {
+    "category": "Project Component Management",
+    "name": "projectComponent:update:own",
+    "description": "Update project components for own projects"
+  },
+  {
+    "category": "Project Component Management",
+    "name": "projectComponent:delete",
+    "description": "Delete project component entries"
+  },
+  {
+    "category": "Project Component Management",
+    "name": "projectComponent:delete:own",
+    "description": "Delete project components from own projects"
   },
   {
     "category": "Report Management",

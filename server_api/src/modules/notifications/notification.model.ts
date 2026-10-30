@@ -9,9 +9,15 @@ export enum NotificationType {
     ERROR = 'error'
 }
 
+export enum MessgaeType {
+    INVITATION,
+
+}
+
 export interface INotification extends Document {
     recipient: mongoose.Types.ObjectId; // Links to IApplicant
     sender?: mongoose.Types.ObjectId;    // Optional: who triggered it
+    messageType?: MessgaeType;
     title: string;
     message: string;
     type: NotificationType;
@@ -33,6 +39,10 @@ const NotificationSchema: Schema = new Schema(
         sender: {
             type: mongoose.Schema.Types.ObjectId,
             ref: COLLECTIONS.USER,
+        },
+        messageType: {
+            type: String,
+            enum: Object.values(MessgaeType)
         },
         title: { type: String, required: true },
         message: { type: String, required: true },

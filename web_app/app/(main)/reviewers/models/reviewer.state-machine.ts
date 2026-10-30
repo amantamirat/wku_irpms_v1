@@ -2,6 +2,7 @@
 import { TransitionMap } from "@/hooks/useStateTransitionActions";
 import { ReviewerStatus } from "./reviewer.model";
 
+/*
 export const REVIEWER_TRANSITIONS: TransitionMap = {
     [ReviewerStatus.pending]: [
         {
@@ -81,6 +82,8 @@ export const REVIEWER_TRANSITIONS: TransitionMap = {
         }
     ]
 };
+
+*/
 
 export const REVIEWER_USER_TRANSITIONS: TransitionMap = {
     [ReviewerStatus.pending]: [

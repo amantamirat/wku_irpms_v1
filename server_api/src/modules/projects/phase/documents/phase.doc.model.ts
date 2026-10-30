@@ -1,9 +1,10 @@
 import mongoose, { Schema } from "mongoose";
 import { COLLECTIONS } from "../../../../common/constants/collections.enum";
+import { IStatusHistory } from "../../../../common/types/status-history";
+import { createStatusHistorySchema } from "../../../../common/schemas/status-history.schema";
 
 export enum PhaseDocumentType {
-    plan = "plan",
-    progressReport = "progressReport",
+    progressReport = "progressReport",//phase
     technicalReport = "technicalReport",
     financialReport = "financialReport",
     activityEvidence = "activityEvidence",
@@ -16,11 +17,23 @@ export enum PhaseDocumentType {
     other = "other"
 }
 
-export interface IPhaseDocument extends Document {
-    phase: mongoose.Types.ObjectId;
+export enum ProjectDocumentStatus {
+    pending = 'pending',
+    approved = 'approved',
+    refused = 'refused'
+}
+
+export interface IProjectDocument extends mongoose.Document {
+    project: mongoose.Types.ObjectId;
+    phase?: mongoose.Types.ObjectId;
+    activity?: mongoose.Types.ObjectId;
+
     type: PhaseDocumentType;
     description: string;
     documentPath: string;
+
+    status: ProjectDocumentStatus;
+    statusHistory: IStatusHistory<ProjectDocumentStatus>[];
 
     createdBy?: mongoose.Types.ObjectId;
     updatedBy?: mongoose.Types.ObjectId;
@@ -29,12 +42,25 @@ export interface IPhaseDocument extends Document {
     updatedAt?: Date;
 }
 
-const PhaseDocSchema = new mongoose.Schema<IPhaseDocument>({
-    phase: {
-        type: mongoose.Schema.Types.ObjectId,
-        ref: COLLECTIONS.PHASE,
+const ProjectDocSchema = new Schema<IProjectDocument>({
+    project: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.PROJECT,
         required: true,
-        immutable: true
+        immutable: true,
+        index: true
+    },
+
+    phase: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.PHASE,
+        index: true
+    },
+
+    activity: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.ACTIVITY,
+        index: true
     },
 
     type: {
@@ -54,6 +80,20 @@ const PhaseDocSchema = new mongoose.Schema<IPhaseDocument>({
         required: true
     },
 
+    status: {
+        type: String,
+        enum: Object.values(ProjectDocumentStatus),
+        default: ProjectDocumentStatus.pending,
+        required: true,
+    },
+
+    statusHistory: {
+        type: [createStatusHistorySchema(
+            Object.values(ProjectDocumentStatus)
+        )],
+        default: []
+    },
+
     createdBy: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.USER
@@ -63,7 +103,9 @@ const PhaseDocSchema = new mongoose.Schema<IPhaseDocument>({
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.USER
     }
-
 }, { timestamps: true });
 
-export const PhaseDocument = mongoose.model<IPhaseDocument>(COLLECTIONS.PHASE_DOCUMENT, PhaseDocSchema);
+export const ProjectDocument = mongoose.model<IProjectDocument>(
+    COLLECTIONS.PHASE_DOCUMENT,
+    ProjectDocSchema
+);

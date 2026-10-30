@@ -1,35 +1,17 @@
 'use client';
-import { ERROR_CODES } from '@/api/error.codes';
+
 import { ProjectApi } from '@/app/(main)/projects/api/project.api';
+
+import { useValidationErrors } from '@/hooks/useValidationErrors';
 import { useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { FileUpload, FileUploadSelectEvent } from 'primereact/fileupload';
 import { Message } from 'primereact/message';
 import { useState } from 'react';
 import { Project } from '../../models/project.model';
+import { ValidationReport } from '@/components/ValidationErrorReport';
 
-// Document/Template Validation Interfaces
-export interface SectionValidationResult {
-    name: string;
-    found: boolean;
-    passed: boolean;
-    wordCount: number;
-    issues: string[];
-}
 
-export interface TemplateValidationResult {
-    valid: boolean;
-    score: number;
-    pages: number;
-    issues: string[];
-    sections: SectionValidationResult[];
-}
-
-// Backend Grant Constraint Validation Interface
-export interface ValidationResult {
-    valid: boolean;
-    errors: string[];
-}
 
 interface SubmissionStepProps {
     data: Partial<Project>;
@@ -41,32 +23,24 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
     const router = useRouter();
     const [loading, setLoading] = useState(false);
     const [success, setSuccess] = useState(false);
-
-    // Error States
-    const [error, setError] = useState<string | null>(null);
-    const [validationDetails, setValidationDetails] = useState<TemplateValidationResult | null>(null);
-    const [constraintDetails, setConstraintDetails] = useState<ValidationResult | null>(null);
-
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
+    const { error, templateValidation, constraintValidation, handleError, clearErrors } =
+        useValidationErrors();
+
     // Automatically calculate total budget and total duration from project phases
-    const totalBudget = data.phases && data.phases.length > 0 
-        ? data.phases.reduce((sum, phase) => sum + (Number(phase.budget) || 0), 0)
-        : Number(data.totalBudget) || 0;
+    const totalBudget =
+        data.phases && data.phases.length > 0
+            ? data.phases.reduce((sum, phase) => sum + (Number(phase.budget) || 0), 0)
+            : Number(data.totalBudget) || 0;
 
-    const totalDuration = data.phases && data.phases.length > 0 
-        ? data.phases.reduce((sum, phase) => sum + (Number(phase.duration) || 0), 0)
-        : Number((data as any).totalDuration) || 0;
-
-    const clearErrors = () => {
-        setError(null);
-        setValidationDetails(null);
-        setConstraintDetails(null);
-    };
+    const totalDuration =
+        data.phases && data.phases.length > 0
+            ? data.phases.reduce((sum, phase) => sum + (Number(phase.duration) || 0), 0)
+            : Number((data as any).totalDuration) || 0;
 
     const onFileSelect = (e: FileUploadSelectEvent) => {
-        const file = e.files[0];
-        setSelectedFile(file);
+        setSelectedFile(e.files[0]);
         clearErrors();
     };
 
@@ -86,7 +60,7 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                 ...data,
                 totalBudget,
                 totalDuration,
-                file: selectedFile,
+                file: selectedFile
             });
 
             setLoading(false);
@@ -96,130 +70,56 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                 onComplete(result);
                 router.push('/');
             }, 2000);
-
         } catch (err: any) {
             setLoading(false);
             setSuccess(false);
-
-            if (err.code === ERROR_CODES.INVALID_CONSTRAINT) {
-                setConstraintDetails(err.details as ValidationResult);
-            } else {
-                if (err?.details?.sections) {
-                    setValidationDetails(err.details as TemplateValidationResult);
-                    setError("Document validation failed. Please address the issues listed below.");
-                } else if (err?.details?.errors && Array.isArray(err.details.errors)) {
-                    setConstraintDetails(err.details as ValidationResult);
-                    setError(err?.message || "Grant constraint validation failed.");
-                } else {
-                    setError(err?.message || "Submission failed. Please try again later.");
-                }
-            }
-
-            console.error("Submission failed", err);
+            handleError(err);
+            console.error('Submission failed', err);
         }
     };
 
     return (
         <div className="mt-4">
             <div className="text-center mb-5">
-                <i className={`pi ${success ? 'pi-check-circle text-green-500' : 'pi-file-pdf text-primary'} text-6xl mb-3 transition-all duration-500`}></i>
+                <i
+                    className={`pi ${success ? 'pi-check-circle text-green-500' : 'pi-file-pdf text-primary'
+                        } text-6xl mb-3 transition-all duration-500`}
+                ></i>
                 <h3 className="m-0 text-900">{success ? 'All Set!' : 'Finalize & Submit'}</h3>
                 <p className="text-600">
-                    {success ? 'Your application has been received.' : 'Please upload your technical proposal (Single PDF).'}
+                    {success
+                        ? 'Your application has been received.'
+                        : 'Please upload your technical proposal (Single PDF).'}
                 </p>
             </div>
 
             {/* FEEDBACK MESSAGES & VALIDATION REPORT */}
-            <div className="mb-4">
-                {success && (
-                    <Message
-                        severity="success"
-                        className="w-full shadow-2"
-                        content={(
-                            <div className="flex align-items-center p-2">
-                                <i className="pi pi-verified mr-3 text-2xl"></i>
-                                <div>
-                                    <div className="font-bold">Project Submitted Successfully</div>
-                                    <small>Redirecting to your dashboard in a moment...</small>
-                                </div>
-                            </div>
-                        )}
-                    />
-                )}
-
-                {error && !validationDetails && !constraintDetails && (
-                    <Message severity="error" text={error} className="w-full shadow-2" />
-                )}
-
-                {constraintDetails && (
-                    <div className="surface-card border-left-3 border-orange-500 shadow-2 p-4 border-round-lg mb-3">
-                        <div className="flex align-items-center text-orange-700 font-bold text-lg mb-2">
-                            <i className="pi pi-shield mr-2 text-xl"></i>
-                            Call Requirement Check Failed
-                        </div>
-                        <p className="text-700 text-sm mt-0 mb-3">
-                            Your application submission does not satisfy all call guidelines/constraints:
-                        </p>
-                        <div className="bg-orange-50 p-3 border-round border-1 border-orange-200">
-                            <ul className="m-0 pl-3 text-sm text-orange-900">
-                                {constraintDetails.errors.map((errItem, idx) => (
-                                    <li key={idx} className="mb-1 font-medium">{errItem}</li>
-                                ))}
-                            </ul>
-                        </div>
-                    </div>
-                )}
-
-                {validationDetails && (
-                    <div className="surface-card border-left-3 border-red-500 shadow-2 p-4 border-round-lg">
-                        <div className="flex align-items-center text-red-700 font-bold text-lg mb-2">
-                            <i className="pi pi-exclamation-triangle mr-2 text-xl"></i>
-                            Document Validation Failed
-                        </div>
-                        <p className="text-700 text-sm mt-0 mb-3">
-                            Your document does not meet the template requirements (Score: <strong>{validationDetails.score}%</strong>). Please update the PDF and re-upload.
-                        </p>
-
-                        {validationDetails.issues?.length > 0 && (
-                            <div className="mb-3 bg-red-50 p-3 border-round border-1 border-red-200">
-                                <span className="font-semibold text-red-800 text-xs uppercase block mb-1">General Issues:</span>
-                                <ul className="m-0 pl-3 text-sm text-red-700">
-                                    {validationDetails.issues.map((issue, idx) => (
-                                        <li key={idx} className="mb-1">{issue}</li>
-                                    ))}
-                                </ul>
-                            </div>
-                        )}
-
-                        <div className="surface-50 p-3 border-round border-1 border-200">
-                            <span className="font-semibold text-800 text-xs uppercase block mb-2">Section Breakdown:</span>
-                            <div className="flex flex-column gap-2">
-                                {validationDetails.sections.map((section, idx) => (
-                                    <div key={idx} className="bg-white p-2 border-round border-1 border-300">
-                                        <div className="flex align-items-center justify-content-between">
-                                            <div className="flex align-items-center">
-                                                <i className={`pi ${section.passed ? 'pi-check-circle text-green-500' : 'pi-times-circle text-red-500'} mr-2`}></i>
-                                                <span className="font-medium text-sm text-900">{section.name}</span>
-                                            </div>
-                                            <span className="text-xs text-500">{section.wordCount} words</span>
-                                        </div>
-
-                                        {section.issues.length > 0 && (
-                                            <ul className="m-0 pt-2 pl-4 text-xs text-red-600">
-                                                {section.issues.map((issue, iIdx) => (
-                                                    <li key={iIdx}>{issue}</li>
-                                                ))}
-                                            </ul>
-                                        )}
-                                    </div>
-                                ))}
+            {success && (
+                <Message
+                    severity="success"
+                    className="w-full shadow-2 mb-4"
+                    content={
+                        <div className="flex align-items-center p-2">
+                            <i className="pi pi-verified mr-3 text-2xl"></i>
+                            <div>
+                                <div className="font-bold">Project Submitted Successfully</div>
+                                <small>Redirecting to your dashboard in a moment...</small>
                             </div>
                         </div>
-                    </div>
-                )}
-            </div>
+                    }
+                />
+            )}
 
-            <div className={`card shadow-1 border-round-lg p-4 bg-gray-50 mb-4 transition-all ${success ? 'opacity-50 pointer-events-none' : ''}`}>
+            <ValidationReport
+                error={error}
+                templateValidation={templateValidation}
+                constraintValidation={constraintValidation}
+            />
+
+            <div
+                className={`card shadow-1 border-round-lg p-4 bg-gray-50 mb-4 transition-all ${success ? 'opacity-50 pointer-events-none' : ''
+                    }`}
+            >
                 <label className="block font-bold mb-3 italic text-primary">
                     <i className="pi pi-info-circle mr-2"></i>
                     Technical Document (Required)
@@ -236,13 +136,15 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                     onSelect={onFileSelect}
                     onRemove={onFileRemove}
                     onClear={onFileRemove}
-                    chooseLabel={selectedFile ? "Change PDF" : "Select PDF"}
+                    chooseLabel={selectedFile ? 'Change PDF' : 'Select PDF'}
                     uploadOptions={{ style: { display: 'none' } }}
                     disabled={loading || success}
                     emptyTemplate={
                         <div className="flex flex-column align-items-center">
                             <i className="pi pi-upload mt-3 p-5 border-2 border-dashed border-300 border-circle text-400"></i>
-                            <span className="my-3 text-600">Drag and drop the application document PDF here.</span>
+                            <span className="my-3 text-600">
+                                Drag and drop the application document PDF here.
+                            </span>
                         </div>
                     }
                 />
@@ -263,13 +165,14 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                     </div>
                     <div className="col-12 md:col-6 py-2">
                         <span className="text-600 block">Project Timeline:</span>
-                        <span className="font-bold text-base">
-                            {totalDuration} Days
-                        </span>
+                        <span className="font-bold text-base">{totalDuration} Days</span>
                     </div>
                     <div className="col-12 py-2">
                         <span className="text-600 block">Attached File:</span>
-                        <span className={`font-medium ${selectedFile ? 'text-green-600' : 'text-red-500'}`}>
+                        <span
+                            className={`font-medium ${selectedFile ? 'text-green-600' : 'text-red-500'
+                                }`}
+                        >
                             {selectedFile ? `✓ ${selectedFile.name}` : '❌ No file selected'}
                         </span>
                     </div>
@@ -293,12 +196,16 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
                     disabled={loading || success}
                 />
                 <Button
-                    label={success ? 'Finalizing...' : loading ? 'Uploading Proposal...' : 'Submit Final Application'}
-                    icon={(loading || success) ? 'pi pi-spin pi-spinner' : 'pi pi-check-circle'}
+                    label={
+                        success
+                            ? 'Finalizing...'
+                            : loading
+                                ? 'Uploading Proposal...'
+                                : 'Submit Final Application'
+                    }
+                    icon={loading || success ? 'pi pi-spin pi-spinner' : 'pi pi-check-circle'}
                     onClick={submitFinalApplication}
-                    className={`px-6 shadow-3 transition-all duration-500 ${success
-                        ? 'p-button-info opacity-100'
-                        : 'p-button-success'
+                    className={`px-6 shadow-3 transition-all duration-500 ${success ? 'p-button-info opacity-100' : 'p-button-success'
                         }`}
                     disabled={!selectedFile || loading || success}
                 />

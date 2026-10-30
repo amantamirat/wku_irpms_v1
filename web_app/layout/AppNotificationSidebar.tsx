@@ -1,9 +1,9 @@
 'use client';
-import React from 'react';
 import { Sidebar } from 'primereact/sidebar';
 import { classNames } from 'primereact/utils';
 import { useRouter } from 'next/navigation';
 import { NotificationType } from '@/hooks/useNotifications';
+import { MY_COLLABORATIONS_PAGE_LINK } from '@/app/(main)/dashboard/my-collaborations/page';
 
 interface Props {
     visible: boolean;
@@ -157,7 +157,13 @@ const AppNotificationSidebar = ({
                                         className="mt-2 text-xs font-medium cursor-pointer text-primary flex align-items-center gap-1"
                                         onClick={(e) => {
                                             e.stopPropagation();
-                                            router.push(n.link);
+                                            let link = n.link;
+                                            if (n.link === "/dashboard/my-memberships" ||
+                                                n.link === "/dashboard/my-projects"
+                                            ) {
+                                                link = MY_COLLABORATIONS_PAGE_LINK
+                                            }
+                                            router.push(link);
                                             setVisible(false);
                                         }}
                                     >

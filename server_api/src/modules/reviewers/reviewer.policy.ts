@@ -3,7 +3,7 @@ import { ERROR_CODES } from "../../common/errors/error.codes";
 import { AuthPermissionService } from "../auth/auth.permission-service";
 import { IStageRepository } from "../calls/stages/stage.repository";
 import { IVerificationConfigurationRepository } from "../grants/verification-conf/verification-conf.repository";
-import { VerificationStatus } from "../grants/verifications/verification.model";
+import { IVerification, VerificationStatus } from "../grants/verifications/verification.model";
 import { IVerificationRepository } from "../grants/verifications/verification.repository";
 import { ApplicationStatus } from "../applications/application.model";
 import { IApplicationRepository } from "../applications/application.repository";
@@ -232,13 +232,7 @@ export class ReviewerPolicy {
     }
 
 
-
-
-    public async calculateApplicationScore(
-        applicationId: string,
-        userId: string,
-        opts: { finalize?: boolean } = {}
-    ) {
+    public async calculateApplicationScore(applicationId: string) {
         const applicationDoc = await this.applicationRepo.findById(applicationId);
         if (!applicationDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
 
@@ -247,56 +241,84 @@ export class ReviewerPolicy {
 
         const minReviewers = stageDoc.minReviewers ?? 0;
 
-        const all = await this.repository.find({ application: applicationId });
-        const accepted = all.filter(r => r.status === ReviewerStatus.accepted);
-        const stillOpen = all.filter(r => OPEN_STATUSES.includes(r.status)).length;
+        const reviewers = await this.repository.find({ application: applicationId });
+        const accepted = reviewers.filter(r => r.status === ReviewerStatus.accepted);
 
-        const totalScore = this.calculateWeightedScore(accepted, minReviewers); // may be null
+        // null when fewer than minReviewers have accepted
+        const totalScore = this.calculateWeightedScore(accepted, minReviewers);
 
-        const isDecided =
-            applicationDoc.status === ApplicationStatus.accepted ||
-            applicationDoc.status === ApplicationStatus.rejected;
+        // Nothing changed, skip the write
+        if (applicationDoc.totalScore === totalScore) return applicationDoc;
 
-        // 1. Decided, but a review is open again -> roll back to shortlisted
-        if (isDecided) {
-            if (stillOpen === 0) return applicationDoc;
-
-            await this.applicationService.transitionState(
-                { id: applicationId, current: applicationDoc.status, next: ApplicationStatus.shortlisted },
-                userId
-            );
-
-            // score is provisional again (null if below minReviewers)
-            return await this.applicationRepo.update(applicationId, { totalScore });
-        }
-
-        // 2. Not enough accepted reviews yet: no score, no decision
-        if (totalScore === null) return applicationDoc;
-
-        // 3. Provisional score
-        const updated = await this.applicationRepo.update(applicationId, { totalScore });
-
-        const roundClosed = stillOpen === 0 || opts.finalize === true;
-
-        if (!roundClosed || applicationDoc.status !== ApplicationStatus.shortlisted) {
-            return updated;
-        }
-
-        // 4. Decide
-        const next = totalScore >= (stageDoc.minAcceptanceScore ?? 0)
-            ? ApplicationStatus.accepted
-            : ApplicationStatus.rejected;
-
-        return await this.applicationService.transitionState(
-            { id: applicationId, current: applicationDoc.status, next },
-            userId
-        );
+        return await this.applicationRepo.update(applicationId, { totalScore });
     }
 
 
+    /*
+    
+        public async calculateApplicationScorewithApplicationDescision(
+            applicationId: string,
+            userId: string,
+            opts: { finalize?: boolean } = {}
+        ) {
+            const applicationDoc = await this.applicationRepo.findById(applicationId);
+            if (!applicationDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
+    
+            const stageDoc = await this.stageRepo.findById(String(applicationDoc.stage));
+            if (!stageDoc) throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+    
+            const minReviewers = stageDoc.minReviewers ?? 0;
+    
+            const all = await this.repository.find({ application: applicationId });
+            const accepted = all.filter(r => r.status === ReviewerStatus.accepted);
+            const stillOpen = all.filter(r => OPEN_STATUSES.includes(r.status)).length;
+    
+            const totalScore = this.calculateWeightedScore(accepted, minReviewers); // may be null
+    
+            const isDecided =
+                applicationDoc.status === ApplicationStatus.accepted ||
+                applicationDoc.status === ApplicationStatus.rejected;
+    
+            // 1. Decided, but a review is open again -> roll back to shortlisted
+            if (isDecided) {
+                if (stillOpen === 0) return applicationDoc;
+    
+                await this.applicationService.transitionState(
+                    { id: applicationId, current: applicationDoc.status, next: ApplicationStatus.shortlisted },
+                    userId
+                );
+    
+                // score is provisional again (null if below minReviewers)
+                return await this.applicationRepo.update(applicationId, { totalScore });
+            }
+    
+            // 2. Not enough accepted reviews yet: no score, no decision
+            if (totalScore === null) return applicationDoc;
+    
+            // 3. Provisional score
+            const updated = await this.applicationRepo.update(applicationId, { totalScore });
+    
+            const roundClosed = stillOpen === 0 || opts.finalize === true;
+    
+            if (!roundClosed || applicationDoc.status !== ApplicationStatus.shortlisted) {
+                return updated;
+            }
+    
+            // 4. Decide
+            const next = totalScore >= (stageDoc.minAcceptanceScore ?? 0)
+                ? ApplicationStatus.accepted
+                : ApplicationStatus.rejected;
+    
+            return await this.applicationService.transitionState(
+                { id: applicationId, current: applicationDoc.status, next },
+                userId
+            );
+        }
+    */
+
     public async calculateVerificationScore(
         verificationId: string
-    ): Promise<number | null> {
+    ): Promise<IVerification | null> {
 
         const verificationDoc =
             await this.verificationRepo.findById(verificationId);
@@ -328,7 +350,11 @@ export class ReviewerPolicy {
             configuration.minReviewers ?? 0
         );
 
-        return verificationScore;
+        if (verificationDoc.totalScore === verificationScore) return verificationDoc;
+
+        return await this.verificationRepo.update(verificationId, { totalScore: verificationScore });
+
+
     }
 
     private calculateWeightedScore(

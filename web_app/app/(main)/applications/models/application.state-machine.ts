@@ -36,7 +36,8 @@ export const APPLICATION_TRANSITIONS: TransitionMap = {
             next: ApplicationStatus.rejected,
             action: "Reject",
             icon: "pi pi-times",
-            severity: "danger"
+            severity: "danger",
+            requireReason: true
         }
     ],
 

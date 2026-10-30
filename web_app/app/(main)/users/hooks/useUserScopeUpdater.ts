@@ -13,7 +13,7 @@ import {
 import { OrganizationApi } from '@/app/(main)/organizations/api/organization.api';
 import { useToast } from '@/contexts/ToastContext';
 import { useConfirmDialog } from '@/contexts/ConfirmDialogContext';
-import { Scope } from '../components/dialogs/ScopeDialog';
+import { Scope } from '../components/dialogs/UserScopeDialog';
 
 
 

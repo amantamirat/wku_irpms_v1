@@ -1,229 +1,276 @@
+
 'use client';
-import { createEntityManager } from "@/components/data-table/createEntityManager";
-import MyBadge from "@/templates/MyBadge";
-import { etbCurrencyFormatter } from "@/utils/utils";
-import ProjectWizard from "../components/wirzard/ProjectWizard";
-import { ProjectApi } from "../api/project.api";
-import { Project } from "../models/project.model";
-import { PROJECT_TRANSITIONS } from "../models/project.state-machine";
-import ProjectDetail from "../../projects/components/ProjectDetail";
 
-const ProjectManager = createEntityManager<Project>({
-    title: "Manage Projects",
-    itemName: "Project",
-    api: ProjectApi,
+import { useMemo } from 'react';
+import { ColumnProps } from 'primereact/column';
 
-    columns: [
-        {
-            header: "Grant",
-            field: "grant.title",
-            sortable: true,
-            body: (row: Project) => {
-                const grant = typeof row.grant === "object" && row.grant !== null ? row.grant : null;
-                const title = grant?.title ?? (typeof row.grant === "string" ? row.grant : "N/A");
-                return (
-                    <div className="truncate text-sm font-medium text-700" title={title} style={{ maxWidth: "200px" }}>
-                        {title}
-                    </div>
-                );
-            }
-        },
+import { ItemManager } from '@/components/ItemManager';
+import MyBadge from '@/templates/MyBadge';
+import { etbCurrencyFormatter } from '@/utils/utils';
 
-        {
-            header: "Call",
-            field: "call.title",
-            sortable: true,
-            body: (row: Project) => {
-                const call = typeof row.call === "object" && row.call !== null ? row.call : null;
-                const title = call?.title ?? (typeof row.call === "string" ? row.call : "N/A");
-                return (
-                    <div className="truncate text-sm font-medium text-700" title={title} style={{ maxWidth: "200px" }}>
-                        {title}
-                    </div>
-                );
-            }
-        },
-        {
-            header: "Calendar",
-            field: "calendar.year",
-            sortable: true,
-            body: (row: Project) => {
-                const calendar = typeof row.calendar === "object" && row.calendar !== null ? row.calendar : null;
-                const year = calendar?.year ?? (typeof row.calendar === "string" || typeof row.calendar === "number" ? String(row.calendar) : "N/A");
-                return (
-                    <span className="text-600 font-medium">
-                        {year}
-                    </span>
-                );
-            }
-        },
-        {
-            header: "Organization",
-            field: "organization.name",
-            sortable: true,
-            body: (row: Project) => {
-                const org = typeof row.organization === "object" && row.organization !== null ? row.organization : null;
-                const name = org?.name ?? (typeof row.organization === "string" ? row.organization : "N/A");
-                return (
-                    <span className="text-600">
-                        {name}
-                    </span>
-                );
-            }
-        },
-        {
-            header: "Workspace",
-            field: "workspace.name",
-            sortable: true,
-            body: (row: Project) => {
-                const ws = typeof row.workspace === "object" && row.workspace !== null ? row.workspace : null;
-                const name = ws?.name ?? (typeof row.workspace === "string" ? row.workspace : "N/A");
-                return (
-                    <span className="text-600">
-                        {name}
-                    </span>
-                );
-            }
-        },
-        {
-            header: "Title",
-            field: "title",
-            sortable: true,
-            body: (row: Project) => (
+import { ProjectApi } from '../api/project.api';
+import { FilterProjects, Project, ProjectStatus } from '../models/project.model';
+import { PROJECT_TRANSITIONS } from '../models/project.state-machine';
+import ProjectDetail from './ProjectDetail';
+import ProjectForm from './ProjectForm';
+import { MENU_ICONS } from '@/utils/menu-icons';
+import { useToast } from '@/contexts/ToastContext';
+
+const getReference = (
+    value: unknown
+): Record<string, unknown> | null =>
+    value && typeof value === 'object'
+        ? (value as Record<string, unknown>)
+        : null;
+
+const getReferenceLabel = (
+    value: unknown,
+    field: string,
+    fallback = 'N/A'
+): string => {
+    const reference = getReference(value);
+
+    if (reference?.[field] != null) {
+        return String(reference[field]);
+    }
+
+    return typeof value === 'string' || typeof value === 'number'
+        ? String(value)
+        : fallback;
+};
+
+const truncateStyle = {
+    maxWidth: '220px'
+} as const;
+
+const columns: ColumnProps[] = [
+    {
+        header: 'Grant',
+        field: 'grant.title',
+        sortable: true,
+        body: (row: Project) => {
+            const title = getReferenceLabel(row.grant, 'title');
+
+            return (
                 <div
-                    className="font-medium text-900 truncate text-sm"
-                    style={{ maxWidth: "250px" }}
-                    title={row.title}
+                    className="truncate text-sm font-medium text-700"
+                    title={title}
+                    style={truncateStyle}
                 >
-                    {row.title || "Untitled Project"}
+                    {title}
                 </div>
-            )
-        },
-        {
-            header: "Lead",
-            field: "leadPI.name",
-            sortable: true,
-            body: (project: Project) => {
-                const lead = typeof project.leadPI === "object" && project.leadPI !== null ? project.leadPI : null;
-                const name = lead?.name ?? (typeof project.leadPI === "string" ? project.leadPI : "N/A");
-                return (
-                    <span className="text-700 font-medium">
-                        {name}
-                    </span>
-                );
-            }
-        },
+            );
+        }
+    },
+    {
+        header: 'Call',
+        field: 'call.title',
+        sortable: true,
+        body: (row: Project) => {
+            const title = getReferenceLabel(row.call, 'title');
 
-        {
-            header: "Gender",
-            field: "leadPI.gender",
-            sortable: true,
-            body: (project: Project) => {
-                const lead = typeof project.leadPI === "object" && project.leadPI !== null ? project.leadPI : null;
-                const gender = lead?.gender ?? (typeof project.leadPI === "string" ? project.leadPI : "N/A");
-                return (
-                    <MyBadge
-                        type="gender"
-                        value={gender ?? "N/A"}
-                    />
-                );
-            }
-        },
+            return (
+                <div
+                    className="truncate text-sm font-medium text-700"
+                    title={title}
+                    style={truncateStyle}
+                >
+                    {title}
+                </div>
+            );
+        }
+    },
+    {
+        header: 'Calendar',
+        field: 'calendar.year',
+        sortable: true,
+        body: (row: Project) => (
+            <span className="text-600 font-medium">
+                {getReferenceLabel(row.calendar, 'year')}
+            </span>
+        )
+    },
+    {
+        header: 'Organization',
+        field: 'organization.name',
+        sortable: true,
+        body: (row: Project) => (
+            <span className="text-600">
+                {getReferenceLabel(row.organization, 'name')}
+            </span>
+        )
+    },
+    {
+        header: 'Workspace',
+        field: 'workspace.name',
+        sortable: true,
+        body: (row: Project) => (
+            <span className="text-600">
+                {getReferenceLabel(row.workspace, 'name')}
+            </span>
+        )
+    },
+    {
+        header: 'Title',
+        field: 'title',
+        sortable: true,
+        body: (row: Project) => (
+            <div
+                className="font-medium text-900 truncate text-sm"
+                style={{ maxWidth: '250px' }}
+                title={row.title}
+            >
+                {row.title || 'Untitled Project'}
+            </div>
+        )
+    },
+    {
+        header: 'Lead',
+        field: 'leadPI.name',
+        sortable: true,
+        body: (row: Project) => (
+            <span className="text-700 font-medium">
+                {getReferenceLabel(row.leadPI, 'name')}
+            </span>
+        )
+    },
+    {
+        header: 'Gender',
+        field: 'leadPI.gender',
+        sortable: true,
+        body: (row: Project) => (
+            <MyBadge
+                type="gender"
+                value={getReferenceLabel(row.leadPI, 'gender')}
+            />
+        )
+    },
+    {
+        header: 'Female Proportion',
+        field: 'femaleProportion',
+        sortable: true,
+        body: (row: Project) =>
+            typeof row.femaleProportion === 'number'
+                ? `${row.femaleProportion.toFixed(2)}%`
+                : 'N/A'
+    },
+    {
+        header: 'Verification Proportion',
+        field: 'verifiedCollaboratorsProportion',
+        sortable: true,
+        body: (row: Project) =>
+            typeof row.verifiedCollaboratorsProportion === 'number'
+                ? `${row.verifiedCollaboratorsProportion.toFixed(2)}%`
+                : 'N/A'
+    },
+    {
+        header: 'Budget',
+        field: 'totalBudget',
+        sortable: true,
+        body: (row: Project) => (
+            <span className="font-semibold text-900">
+                {typeof row.totalBudget === 'number'
+                    ? etbCurrencyFormatter.format(row.totalBudget)
+                    : 'N/A'}
+            </span>
+        )
+    },
+    {
+        header: 'Application Status',
+        field: 'currentApplication.status',
+        sortable: true,
+        body: (row: Project) => {
+            const application = getReference(row.currentApplication);
 
-        {
-            header: "Female Proportion",
-            field: "femaleProportion",
-            sortable: true,
-            body: (project: Project) => {
-                const proportion = project.femaleProportion;
-
-                return proportion != null
-                    ? `${proportion.toFixed(2)}%`
-                    : "N/A";
-            }
-        },
-
-        {
-            header: "Verification Proportion",
-            field: "verifiedCollaboratorsProportion",
-            sortable: true,
-            body: (project: Project) => {
-                const proportion = project.verifiedCollaboratorsProportion;
-
-                return proportion != null
-                    ? `${proportion.toFixed(2)}%`
-                    : "N/A";
-            }
-        },
-
-        {
-            header: "Budget",
-            field: "totalBudget",
-            sortable: true,
-            body: (project: Project) => (
-                <span className="font-semibold text-900">
-                    {typeof project.totalBudget === "number"
-                        ? etbCurrencyFormatter.format(project.totalBudget)
-                        : "N/A"}
-                </span>
-            )
-        },
-
-        {
-            header: "Application Status",
-            field: "currentApplication.status",
-            sortable: true,
-            body: (project: Project) => {
-                const application =
-                    typeof project.currentApplication === "object" &&
-                        project.currentApplication !== null
-                        ? project.currentApplication
-                        : null;
-
-                return (
-                    <MyBadge
-                        type="status"
-                        value={application?.status ?? "N/A"}
-                    />
-                );
-            }
-        },
-        {
-            header: "Status",
-            field: "status",
-            sortable: true,
-            body: (project: Project) => (
+            return (
                 <MyBadge
                     type="status"
-                    value={project.status ?? "Unknown"}
+                    value={String(application?.status ?? 'N/A')}
                 />
-            )
+            );
         }
-    ],
-
-    defaultHiddenFields: ["grant.title", "calendar.year", "leadPI.gender", "currentApplication.status", "femaleProportion", "verifiedCollaboratorsProportion", "organization.name", "workspace.name", "call.title"],
-    enableColumnToggle: true,
-
-    createNew: () => ({
-        title: "",
-        summary: "",
-        themes: []
-    }),
-
-    SaveDialog: ProjectWizard,
-
-    permissionPrefix: "project",
-
-    workflow: {
-        statusField: "status",
-        transitions: PROJECT_TRANSITIONS
     },
-
-    expandable: {
-        template: (project) => (
-            <ProjectDetail project={project} enableEditing={true} showReviewers={true} />
+    {
+        header: 'Status',
+        field: 'status',
+        sortable: true,
+        body: (row: Project) => (
+            <MyBadge
+                type="status"
+                value={row.status ?? 'Unknown'}
+            />
         )
     }
-});
+];
+
+const defaultHiddenFields = [
+    'grant.title',
+    'calendar.year',
+    'leadPI.gender',
+    'currentApplication.status',
+    'femaleProportion',
+    'verifiedCollaboratorsProportion',
+    'organization.name',
+    'workspace.name',
+    'call.title',
+    'totalBudget',
+    'status'
+];
+
+interface ProjectManagerProps {
+    status?: ProjectStatus;
+}
+
+const ProjectManager = ({
+    status
+}: ProjectManagerProps) => {
+    const toast = useToast();
+
+    const tableProps = useMemo(
+        () => ({
+            expandable: {
+                template: (project: Project) => (
+                    <ProjectDetail
+                        project={project}
+                    />
+                )
+            }
+        }),
+        []
+    );
+
+    const filter = useMemo<FilterProjects>(() => ({
+        status
+    }), [status]);
+
+    return (
+        <ItemManager<Project, FilterProjects>
+            api={ProjectApi}
+            filter={filter}
+            resource="project"
+            itemName="Project"
+            headerTitle="Manage Projects"
+            itemIcon={MENU_ICONS.projects}
+            columns={columns}
+            renderForm={(props) => (
+                <ProjectForm {...props} />
+            )}
+            dialogWidth="900px"
+            enableColumnToggle={true}
+            defaultHiddenFields={defaultHiddenFields}
+            statusField="status"
+            transitions={PROJECT_TRANSITIONS}
+            tableProps={tableProps}
+            onError={(error) => toast.error(error)}
+            onSuccess={(operation) =>
+                toast.success(
+                    operation === 'create'
+                        ? 'Project created successfully'
+                        : 'Project updated successfully'
+                )
+            }
+        />
+    );
+};
 
 export default ProjectManager;

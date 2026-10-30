@@ -24,7 +24,8 @@ export const COLLABORATION_TRANSITIONS: TransitionMap = {
             next: CollaboratorStatus.declined,
             action: "Decline",
             icon: "pi pi-times",
-            severity: "danger"
+            severity: "danger",
+            requireReason: true,
         }
     ],
 
@@ -33,7 +34,8 @@ export const COLLABORATION_TRANSITIONS: TransitionMap = {
             next: CollaboratorStatus.pending,
             action: "Set Pending",
             icon: "pi pi-undo",
-            severity: "warning"
+            severity: "warning",
+            requireReason: true,
         }
     ],
 
@@ -42,7 +44,8 @@ export const COLLABORATION_TRANSITIONS: TransitionMap = {
             next: CollaboratorStatus.pending,
             action: "Set Pending",
             icon: "pi pi-undo",
-            severity: "warning"
+            severity: "warning",
+            requireReason: true,
         }
     ]
 };

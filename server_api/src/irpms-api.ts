@@ -46,9 +46,10 @@ import collaboratorRoutes from './modules/projects/collaborators/collaborator.ro
 import projectRoutes from './modules/projects/project.routes';
 
 import phaseDocRoutes from './modules/projects/phase/documents/phase.doc.routes';
-import phaseActivityRoutes from './modules/projects/phase/activities/phase-activity.routes';
-import phaseEquipmentRoutes from './modules/projects/phase/equipments/phase-equipment.routes';
+import phaseActivityRoutes from './modules/projects/activities/phase-activity.routes';
+import phaseEquipmentRoutes from './modules/projects/equipments/phase-equipment.routes';
 import phaseRoutes from './modules/projects/phase/phase.routes';
+import componentRoutes from './modules/projects/components/component.routes';
 
 import applicationRoutes from './modules/applications/application.routes';
 import resultRoutes from './modules/reviewers/results/result.routes';
@@ -128,7 +129,7 @@ app.use("/api/project/phases/activities", phaseActivityRoutes);
 app.use("/api/project/phase/documents", phaseDocRoutes);
 app.use("/api/project/phases/equipments", phaseEquipmentRoutes);
 app.use("/api/project/collaborators", collaboratorRoutes);
-//app.use("/api/collaborator/assignments", assignmentRoutes);
+app.use("/api/project/components", componentRoutes);
 app.use("/api/project/applications", applicationRoutes);
 
 app.use("/api/reports", reportRoutes);

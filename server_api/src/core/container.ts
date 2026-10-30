@@ -34,8 +34,8 @@ import { ApplicationRepository } from "../modules/applications/application.repos
 import { ApplicationService } from "../modules/applications/application.service";
 import { CollaboratorRepository } from "../modules/projects/collaborators/collaborator.repository";
 import { CollaboratorService } from "../modules/projects/collaborators/collaborator.service";
-import { PhaseActivityRepository } from "../modules/projects/phase/activities/phase-activity.repository";
-import { PhaseActivityService } from "../modules/projects/phase/activities/phase-activity.service";
+import { PhaseActivityRepository } from "../modules/projects/activities/phase-activity.repository";
+import { PhaseActivityService } from "../modules/projects/activities/phase-activity.service";
 import { PhaseRepository } from "../modules/projects/phase/phase.repository";
 import { PhaseService } from "../modules/projects/phase/phase.service";
 import { ProjectAuth } from "../modules/projects/project.auth";
@@ -55,11 +55,12 @@ import { ExperienceRepository } from "../modules/users/experiences/experience.re
 import { UserRepository } from "../modules/users/user.repository";
 import { UserService } from "../modules/users/user.service";
 import { AnonymizerService } from "../util/anonymizer/anonymizer.service";
-import { PhaseEquipmentRepository } from "../modules/projects/phase/equipments/phase-equipment.repository";
+import { PhaseEquipmentRepository } from "../modules/projects/equipments/phase-equipment.repository";
 import { PhaseDocumentRepository } from "../modules/projects/phase/documents/phase.doc.repository";
 import { DocumentTemplateRepository } from "../modules/document-templates/document-template.repository";
 import { PublicationRepository } from "../modules/users/publications/publication.repository";
 import { ResultRepository } from "../modules/reviewers/results/result.repository";
+import { ProjectComponentRepository } from "../modules/projects/components/component.repository";
 
 export const fileStorageService = new FileStorageService();
 
@@ -108,6 +109,7 @@ export const phaseRepo = new PhaseRepository();
 export const phaseDocRepo = new PhaseDocumentRepository();
 export const activityRepo = new PhaseActivityRepository();
 export const equipmentRepo = new PhaseEquipmentRepository();
+export const componentRepo = new ProjectComponentRepository();
 //call repos
 export const callRepo = new CallRepository();
 export const stageRepo = new StageRepository();
@@ -161,7 +163,7 @@ export const projectAuth = new ProjectAuth(projectRepo, authPermissionService);
 export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, callRepo, stageRepo,
     applicationRepo, constraintValidator, compositionValidator, projectAuth, notificationService, filterService);
 
-export const phaseActivityService = new PhaseActivityService(activityRepo, phaseRepo, projectAuth)
+export const phaseActivityService = new PhaseActivityService(activityRepo, projectRepo, phaseRepo, projectAuth)
 
 
 export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, phaseDocRepo, activityRepo, equipmentRepo, projectAuth);

@@ -1,8 +1,9 @@
 import path from "path";
 import fs from 'fs/promises';
-import { PhaseEquipmentDto } from "../../../modules/projects/phase/equipments/phase-equipment.dto";
-import { EquipmentUnit, PhaseEquipmentStatus } from "../../../modules/projects/phase/equipments/phase-equipment.model";
-import { Phase, PhaseStatus } from "../../../modules/projects/phase/phase.model";
+
+import {  PhaseStatus } from "../../../modules/projects/phase/phase.model";
+import { PhaseEquipmentDto } from "../../../modules/projects/equipments/phase-equipment.dto";
+import { PhaseEquipmentStatus, EquipmentUnit } from "../../../modules/projects/equipments/phase-equipment.model";
 
 interface LegacyEquipment {
     equipmentId: string;

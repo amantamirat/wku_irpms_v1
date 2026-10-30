@@ -22,8 +22,8 @@ import MyBadge from '@/templates/MyBadge';
 import { Badge } from 'primereact/badge';
 import UserDetail from './UserDetail';
 
-import RoleDialog from './dialogs/RoleDialog';
-import ScopeDialog from './dialogs/ScopeDialog';
+import UserRoleDialog from './dialogs/UserRoleDialog';
+import UserScopeDialog from './dialogs/UserScopeDialog';
 
 import UserForm from './UserForm';
 import { useUserRoleUpdater } from '../hooks/useUserRoleUpdater';
@@ -210,13 +210,13 @@ const ManageUsers = () => {
             />
 
             {roleUpdater.dialogProps.item && (
-                <RoleDialog
+                <UserRoleDialog
                     {...roleUpdater.dialogProps}
                 />
             )}
 
             {scopeUpdater.dialogProps.visible && (
-                <ScopeDialog
+                <UserScopeDialog
                     {...scopeUpdater.dialogProps}
                 />
             )}

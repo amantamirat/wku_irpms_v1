@@ -23,6 +23,7 @@ const DEFAULT_HIDDEN = [
     'evaluation',
     'template',
     'constraint',
+    'reviewersDeadline'
 ];
 
 const getStageColumns = (): ColumnProps[] => [
@@ -90,10 +91,24 @@ const getStageColumns = (): ColumnProps[] => [
         body: (stage: Stage) =>
             stage.deadline
                 ? new Date(stage.deadline).toLocaleString([], {
-                      dateStyle: 'short',
-                      timeStyle: 'short',
-                  })
+                    dateStyle: 'short',
+                    timeStyle: 'short',
+                })
                 : '-',
+    },
+
+    {
+        header: 'Reviewers Deadline',
+        field: 'reviewersDeadline',
+        sortable: true,
+        style: { width: '12rem' },
+        body: (stage: Stage) =>
+            stage.reviewersDeadline
+                ? new Date(stage.reviewersDeadline).toLocaleString([], {
+                    dateStyle: 'short',
+                    timeStyle: 'short',
+                })
+                : 'N/A',
     },
     {
         header: 'Status',

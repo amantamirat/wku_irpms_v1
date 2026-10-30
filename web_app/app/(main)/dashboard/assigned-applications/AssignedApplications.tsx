@@ -6,7 +6,7 @@ import MyBadge from "@/templates/MyBadge";
 import { useEffect, useState } from "react";
 import { ApplicationApi } from "../../applications/api/application.api";
 import { Application } from "../../applications/models/application.model";
-import ApplicationDetail from "../../applications/stage/ApplicationDetail";
+import ApplicationDetail from "../../applications/components/ApplicationDetail";
 
 const AssignedApplications = () => {
     const [applications, setApplications] = useState<Application[]>([]);

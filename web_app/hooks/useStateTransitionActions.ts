@@ -17,24 +17,22 @@ export type TransitionMap = Record<string, TransitionAction[]>;
 const NO_ACTIONS: never[] = [];
 
 interface UseStateTransitionActionsProps<T> {
-    /** Required: used to build the permission key. */
     resource?: string;
     statusField?: keyof T;
-    /** Keep this object stable (module-level const or useMemo) or the actions rebuild every render. */
     transitions?: TransitionMap;
-    /**
-     * Runs when a transition button is clicked. Add a confirmation here if you
-     * want one; `meta.action` is the button label (e.g. "Approve").
-     * Return the promise so the table can show a pending state.
-     */
+
     onTransition?: (
         id: string,
         transition: StateTransition,
         meta: TransitionAction
     ) => void | Promise<unknown>;
-    /** How to read a row's id. Defaults to `row._id`. */
+
     getId?: (row: T) => string;
+
+    /** Hide transition buttons based on the current row. */
+    hideTransition?: (row: T, transition: TransitionAction) => boolean;
 }
+
 
 export function useStateTransitionActions<T extends Record<string, any>>({
     resource,
@@ -42,12 +40,11 @@ export function useStateTransitionActions<T extends Record<string, any>>({
     transitions,
     onTransition,
     getId = (row) => row._id,
+    hideTransition,
 }: UseStateTransitionActionsProps<T>): RowActionButton<T>[] {
-
     const { hasPermission } = useAuth();
 
     return useMemo(() => {
-
         if (!resource || !statusField || !transitions || !onTransition) {
             return NO_ACTIONS;
         }
@@ -56,7 +53,6 @@ export function useStateTransitionActions<T extends Record<string, any>>({
 
         for (const [current, transitionList] of Object.entries(transitions)) {
             for (const transition of transitionList) {
-
                 const permission =
                     `${resource}:transition.${current}.${transition.next}`;
 
@@ -69,7 +65,11 @@ export function useStateTransitionActions<T extends Record<string, any>>({
                     severity: transition.severity,
                     tooltip: transition.action,
                     text: false,
-                    visible: (row: T) => row[statusField] === current,
+
+                    visible: (row: T) =>
+                        row[statusField] === current &&
+                        !(hideTransition?.(row, transition) ?? false),
+
                     onClick: async (row: T) => {
                         await onTransition(
                             getId(row),
@@ -82,7 +82,6 @@ export function useStateTransitionActions<T extends Record<string, any>>({
         }
 
         return actions;
-
     }, [
         resource,
         statusField,
@@ -90,5 +89,7 @@ export function useStateTransitionActions<T extends Record<string, any>>({
         onTransition,
         getId,
         hasPermission,
+        hideTransition,
     ]);
 }
+

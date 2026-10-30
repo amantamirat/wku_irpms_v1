@@ -20,9 +20,9 @@ import { IThemeRepository } from "../../../modules/thematics/themes/theme.reposi
 import { UserService } from '../../../modules/users/user.service';
 import { NewLegacyProjectDTO } from './new-legacy.dto';
 import { CollaboratorStatus } from '../../../modules/projects/collaborators/collaborator.model';
-import { IPhaseActivityDetailCost, PhaseActivityStatus } from '../../../modules/projects/phase/activities/phase-activity.model';
+import { IPhaseActivityDetailCost, PhaseActivityStatus } from '../../../modules/projects/activities/phase-activity.model';
 import { PhaseStatus } from '../../../modules/projects/phase/phase.model';
-import { PhaseActivityDto } from '../../../modules/projects/phase/activities/phase-activity.dto';
+import { PhaseActivityDto } from '../../../modules/projects/activities/phase-activity.dto';
 import { LegacyEquipmentLoader } from './LegacyEquipmentLoader';
 import { ProjectStatus } from '../../../modules/projects/project.model';
 import { SYSTEM } from '../../../common/constants/system.constant';

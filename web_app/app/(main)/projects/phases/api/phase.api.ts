@@ -1,14 +1,14 @@
 import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { FilterPhaseOptions, Phase } from "../models/phase.model";
+import { FilterPhasesOptions, Phase } from "../models/phase.model";
 import { StateTransition } from "@/api/EntityApi";
 import { sanitize } from "@/utils/utils";
 
 const end_point = "/project/phases";
 
-export const PhaseApi: EntityApi<Phase, FilterPhaseOptions | undefined> = {
+export const PhaseApi: EntityApi<Phase, FilterPhasesOptions | undefined> = {
 
-    async getAll(options?: FilterPhaseOptions): Promise<Phase[]> {
+    async getAll(options?: FilterPhasesOptions): Promise<Phase[]> {
         const data = await ApiClient.get(end_point, options);
         return data as Phase[];
     },

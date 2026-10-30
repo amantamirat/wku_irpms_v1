@@ -78,6 +78,15 @@ export interface ItemManagerProps<T, Q = undefined> {
     /** Set to false to postpone loading (e.g. until a required filter exists). Default true. */
     enabled?: boolean;
 
+    /** Choose lookup instead of getAll when loading from the API. */
+    useLookup?: boolean;
+
+    /**
+     * Use provided data instead of loading from the API.
+     * Even [] disables API loading.
+     */
+    initialData?: T[];
+
     /** Lets the parent add / update / patch / remove rows or trigger a reload. */
     managerRef?: React.Ref<ItemManagerHandle<T>>;
 
@@ -90,6 +99,7 @@ export interface ItemManagerProps<T, Q = undefined> {
     /* State transitions (needs api.transitionState) */
     statusField?: keyof T;
     transitions?: TransitionMap;
+    hideTransition?: (row: T, transition: TransitionAction) => boolean;
 
     /* CRUD action tweaks */
     hideCreateAction?: boolean;
@@ -168,6 +178,8 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
 
     filter,
     enabled = true,
+    useLookup = false,
+    initialData,
     managerRef,
 
     renderForm,
@@ -177,6 +189,7 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
 
     statusField,
     transitions,
+    hideTransition,
 
     hideCreateAction,
     hideEditAction,
@@ -243,26 +256,62 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
     const requestId = useRef(0);
     const [reloadTick, setReloadTick] = useState(0);
 
+
     useEffect(() => {
+        // Explicit initialData takes priority over API loading.
+        // This includes initialData = [].
+        if (initialData !== undefined) {
+            setAll(initialData);
+            return;
+        }
+
         if (!enabled) return;
 
         const id = ++requestId.current;
 
         withLoading(async () => {
             try {
-                const data = await api.getAll(filterRef.current);
-                // Ignore responses from superseded requests
-                if (id === requestId.current) setAll(Array.isArray(data) ? data : []);
+
+                let data: T[];
+
+                if (useLookup) {
+                    if (!api.lookup) {
+                        throw new Error(
+                            "ItemManager: useLookup is enabled, but api.lookup is not implemented."
+                        );
+                    }
+
+                    data = await api.lookup(filterRef.current);
+                } else {
+                    data = await api.getAll(filterRef.current);
+                }
+
+                // Ignore responses from superseded requests.
+                if (id === requestId.current) {
+                    setAll(Array.isArray(data) ? data : []);
+                }
             } catch (error) {
-                if (id === requestId.current) reportError(error, "load");
+                if (id === requestId.current) {
+                    reportError(error, "load");
+                }
             }
         });
 
         return () => {
-            // Invalidate in-flight request on change/unmount
+            // Invalidate in-flight requests on change/unmount.
             requestId.current++;
         };
-    }, [api, filterKey, enabled, reloadTick, withLoading, setAll, reportError]);
+    }, [
+        api,
+        filterKey,
+        enabled,
+        useLookup,
+        initialData,
+        reloadTick,
+        withLoading,
+        setAll,
+        reportError,
+    ]);
 
     /* --------------------------- Imperative handle -------------------------- */
 
@@ -408,6 +457,7 @@ export function ItemManager<T extends Record<string, any>, Q = undefined>({
         transitions,
         onTransition: handleTransition,
         getId,
+        hideTransition
     });
 
     const rowActions = useMemo(

@@ -10,6 +10,12 @@ const router: Router = Router();
 const service = new PermissionService(permissionRepo);
 const controller = new PermissionController(service);
 
+router.post('/',
+  verifyAuthToken,
+  checkPermission("permission:create"),
+  controller.create
+);
+
 router.get(
   '/',
   verifyAuthToken,
@@ -23,13 +29,13 @@ router.get(
   checkPermission(["permission:read", "permission:lookup"]),
   controller.getPermissions
 );
-/*
+
 router.put('/:id',
-  verifyActiveAccount,
+  verifyAuthToken,
   checkPermission("permission:update"),
   controller.update
 );
-*/
+
 router.delete('/:id',
   verifyAuthToken,
   checkPermission("permission:delete"),

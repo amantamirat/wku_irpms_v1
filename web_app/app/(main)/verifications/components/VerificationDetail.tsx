@@ -5,6 +5,7 @@ import ProjectDetail from "../../projects/components/ProjectDetail";
 import ReviewerManager from "../../reviewers/components/ReviewerManager";
 import { ReviewerTargetType } from "../../reviewers/models/reviewer.model";
 import { Verification } from "../models/verification.model";
+import { Project } from "../../projects/models/project.model";
 
 interface VerificationDetailProps {
     verification: Verification;
@@ -14,10 +15,7 @@ const VrificationDetail = ({ verification: verfication }: VerificationDetailProp
 
     const { hasPermission } = useAuth();
 
-    // Safely extract project ID whether application.project is an object or string ID
-    const projectId = typeof verfication?.project === "object" && verfication.project !== null
-        ? verfication.project._id
-        : (verfication?.project as string);
+    
 
     /**
      * Define tabs in a scalable configuration array
@@ -25,15 +23,15 @@ const VrificationDetail = ({ verification: verfication }: VerificationDetailProp
     const tabs = useMemo(() => [
         {
             header: "Project",
-            permission: "project:lookup",
-            content: projectId ? <ProjectDetail project={projectId} /> : null
+            permission: "project:read",
+            content:  <ProjectDetail project={verfication?.project as Project} />
         },
         {
             header: "Reviewers",
             permission: "reviewer:read",
             content: <ReviewerManager targetType={ReviewerTargetType.VERIFICATION} verification={verfication} />
         },
-    ], [verfication, projectId]);
+    ], [verfication, verfication?.project]);
 
     /**
      * Filter tabs based on permissions

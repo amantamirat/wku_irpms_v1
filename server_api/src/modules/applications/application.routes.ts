@@ -11,7 +11,7 @@ const router = express.Router();
 router.post(
     "/",
     verifyAuthToken,
-    checkPermission([PERMISSIONS.APPLICATION.CREATE, PERMISSIONS.APPLICATION.SUBMIT]),
+    checkPermission([PERMISSIONS.APPLICATION.CREATE, PERMISSIONS.APPLICATION.CREATE_OWN, PERMISSIONS.APPLICATION.SUBMIT]),
     upload.single("file", ["application/pdf"]),
     controller.create
 );

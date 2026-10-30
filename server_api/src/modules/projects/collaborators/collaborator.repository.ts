@@ -252,6 +252,7 @@ export class CollaboratorRepository
         }
 
         return dbQuery
+            .sort({ isLeadPI: -1 })
             .lean<ICollaborator[]>()
             .exec();
     }

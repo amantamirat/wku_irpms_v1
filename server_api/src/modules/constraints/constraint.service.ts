@@ -84,6 +84,7 @@ export class ConstraintService {
         const ranges = [
             ["Title words", dto.titleWords],
             ["Summary words", dto.summaryWords],
+            ["Keywords", dto.keyWords], // Added
 
             // Objectives
             ["General objective words", dto.generalObjectiveWords],
@@ -101,8 +102,9 @@ export class ConstraintService {
             // Budget and duration
             ["Budget", dto.budget],
             ["Duration", dto.duration],
-            ["Phase budget", dto.phaseBudget],           // was budgetPerPhase
+            ["Phase budget", dto.phaseBudget],         // was budgetPerPhase
             ["Phase duration", dto.phaseDuration],       // was durationPerPhase
+            ["Activity cost", dto.activityCost],         // Added
             ["Activity duration", dto.activityDuration], // added
             ["Equipment cost", dto.equipmentCost],       // added
 

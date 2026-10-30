@@ -116,6 +116,8 @@ export function ItemDataTable<T extends Record<string, any>>({
     // stays instant while the (potentially expensive) filter is debounced.
     const [filters, setFilters] = useState<DataTableFilterMeta>({
         global: { value: null, matchMode: FilterMatchMode.CONTAINS },
+        status: { value: null, matchMode: FilterMatchMode.EQUALS },
+
     });
     const [searchInput, setSearchInput] = useState("");
 
@@ -336,6 +338,8 @@ export function ItemDataTable<T extends Record<string, any>>({
                 rowsPerPageOptions={[5, 10, 25, 50]}
                 header={header}
                 filters={filters}
+                onFilter={(e) => setFilters(e.filters)} // <-- Add this to sync table filter state
+                filterDisplay="menu"
                 globalFilterFields={searchFields}
                 selection={selection as any}
                 onSelectionChange={(event: SelectionChangeEvent<T>) =>
