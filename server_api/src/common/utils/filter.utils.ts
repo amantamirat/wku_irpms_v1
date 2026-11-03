@@ -1,5 +1,3 @@
-// common/helpers/filter.ts
-
 import mongoose from "mongoose";
 
 export type FilterValue =
@@ -9,17 +7,17 @@ export type FilterValue =
     | Date
     | mongoose.Types.ObjectId;
 
-export type MongoFilter = Record<string, any>;
+export type filteredData = Record<string, any>;
 
 export function buildFilter(
-    query: Record<string, any>,
+    data: Record<string, any>,
     allowedFields: string[]
-): MongoFilter {
+): filteredData {
 
-    const filter: MongoFilter = {};
+    const filter: filteredData = {};
 
     for (const field of allowedFields) {
-        const value = query[field];
+        const value = data[field];
 
         if (
             value === undefined ||

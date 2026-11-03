@@ -1,12 +1,13 @@
 import mongoose from "mongoose";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { CreateExperienceDTO, FilterExperiencesDTO, UpdateExperienceDTO } from "./experience.dto";
-import { Experience, IExperience } from "./experience.model";
+import { Experience, ExperienceStatus, IExperience } from "./experience.model";
+import { toObjectId } from "../../../common/utils/mongoose.utils";
 
 export interface IExperienceRepository {
     findById(id: string, options?: FilterOptions): Promise<IExperience | null>;
     find(filters: FilterExperiencesDTO, options?: FilterOptions): Promise<Partial<IExperience>[]>;
-    create(data: CreateExperienceDTO): Promise<IExperience>;
+    create(data: CreateExperienceDTO, userId: string): Promise<IExperience>;
     update(id: string, data: UpdateExperienceDTO["data"]): Promise<IExperience | null>;
     exists(filters: FilterExperiencesDTO): Promise<boolean>;
     delete(id: string): Promise<IExperience | null>;
@@ -25,7 +26,7 @@ export class ExperienceRepository implements IExperienceRepository {
     }
 
     async find(filters: FilterExperiencesDTO, options?: FilterOptions) {
-        const query: any = {};
+        const query: any = { ...filters };
 
         if (filters.user) {
             query.user = new mongoose.Types.ObjectId(filters.user);
@@ -44,7 +45,7 @@ export class ExperienceRepository implements IExperienceRepository {
         return dbQuery.lean<IExperience[]>().exec();
     }
 
-    async create(dto: CreateExperienceDTO) {
+    async create(dto: CreateExperienceDTO, userId: string) {
         const data: Partial<IExperience> = {
             user: new mongoose.Types.ObjectId(dto.user),
             position: new mongoose.Types.ObjectId(dto.position),
@@ -52,7 +53,8 @@ export class ExperienceRepository implements IExperienceRepository {
             startDate: dto.startDate,
             endDate: dto.endDate ?? null,
             isCurrent: dto.isCurrent,
-            employmentType: dto.employmentType
+            employmentType: dto.employmentType,
+            createdBy: new mongoose.Types.ObjectId(userId)
         };
 
         return Experience.create(data);
@@ -93,8 +95,43 @@ export class ExperienceRepository implements IExperienceRepository {
         ).exec();
     }
 
+    /**
+     * Update status and status history.
+     */
+    async updateStatus(
+        id: string,
+        status: ExperienceStatus,
+        userId: string,
+        reason?: string,
+    ): Promise<IExperience | null> {
+
+        return Experience.findByIdAndUpdate(
+            new mongoose.Types.ObjectId(id),
+            {
+                $set: {
+                    status
+                },
+                $push: {
+                    statusHistory: {
+                        status,
+                        changedBy:
+                            toObjectId(userId),
+                        changedAt: new Date(),
+                        reason
+                    }
+                }
+            },
+            {
+                new: true,
+                runValidators: true
+            }
+        )
+            .lean<IExperience>()
+            .exec();
+    }
+
     async exists(filters: FilterExperiencesDTO): Promise<boolean> {
-        const query: any = {};
+        const query: any = {...filters};
         if (filters.user) {
             query.user = new mongoose.Types.ObjectId(filters.user);
         }

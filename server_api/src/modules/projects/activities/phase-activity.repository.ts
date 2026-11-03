@@ -145,36 +145,36 @@ export class PhaseActivityRepository
     }
 
     async create(
-    dto: CreatePhaseActivityData
-): Promise<IPhaseActivity> {
+        dto: CreatePhaseActivityData
+    ): Promise<IPhaseActivity> {
 
-    const { phase, ...rest } = dto as any;
-
-    const data = {
-        ...rest,
-        ...(phase ? { phase: new mongoose.Types.ObjectId(phase) } : {}),
-    };
-
-    return PhaseActivity.create(data);
-}
-
-async createMany(
-    dtos: CreatePhaseActivityData[]
-): Promise<IPhaseActivity[]> {
-
-    const data = dtos.map(dto => {
         const { phase, ...rest } = dto as any;
 
-        return {
+        const data = {
             ...rest,
             ...(phase ? { phase: new mongoose.Types.ObjectId(phase) } : {}),
         };
-    });
 
-    const results = await PhaseActivity.create(data, { ordered: true });
+        return PhaseActivity.create(data);
+    }
 
-    return results as unknown as IPhaseActivity[];
-}
+    async createMany(
+        dtos: CreatePhaseActivityData[]
+    ): Promise<IPhaseActivity[]> {
+
+        const data = dtos.map(dto => {
+            const { phase, ...rest } = dto as any;
+
+            return {
+                ...rest,
+                ...(phase ? { phase: new mongoose.Types.ObjectId(phase) } : {}),
+            };
+        });
+
+        const results = await PhaseActivity.create(data, { ordered: true });
+
+        return results as unknown as IPhaseActivity[];
+    }
 
     async update(
         id: string,
@@ -250,19 +250,8 @@ async createMany(
     async getProjectProgressAggregation(projectId: mongoose.Types.ObjectId) {
         return await PhaseActivity.aggregate([
             {
-                $lookup: {
-                    from: "phases",
-                    localField: "phase",
-                    foreignField: "_id",
-                    as: "phase",
-                },
-            },
-            {
-                $unwind: "$phase",
-            },
-            {
                 $match: {
-                    "phase.project": projectId,
+                    project: projectId,
                     status: {
                         $nin: [
                             PhaseActivityStatus.cancelled,

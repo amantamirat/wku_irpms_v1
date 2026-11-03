@@ -10,6 +10,8 @@ import { classNames } from 'primereact/utils';
 import { ItemFormRenderProps } from '@/components/ItemManager';
 import { extractId } from '@/utils/utils';
 
+import { CompositionApi } from '../../compositions/api/composition.api';
+import { Composition } from '../../compositions/models/composition.model';
 import { ConstraintApi } from '../../constraints/api/constraint.api';
 import { Constraint } from '../../constraints/models/constraint.model';
 import { OrganizationApi } from '../../organizations/api/organization.api';
@@ -41,6 +43,7 @@ const GrantForm = ({
     const [organizations, setOrganizations] = useState<Organization[]>([]);
     const [thematics, setThematics] = useState<Thematic[]>([]);
     const [constraints, setConstraints] = useState<Constraint[]>([]);
+    const [compositions, setCompositions] = useState<Composition[]>([]);
     const [agreementTemplates, setAgreementTemplates] = useState<any[]>([]);
 
     useEffect(() => {
@@ -59,13 +62,15 @@ const GrantForm = ({
                 const [
                     constraintData,
                     thematicData,
-                    templateData
+                    templateData,
+                    compositionData
                 ] = await Promise.all([
                     ConstraintApi.lookup!(),
                     ThematicApi.lookup!({
                         status: ThematicStatus.published
                     }),
-                    DocumentTemplateApi.lookup!()
+                    DocumentTemplateApi.lookup!(),
+                    CompositionApi.lookup!()
                 ]);
 
                 if (cancelled) return;
@@ -73,6 +78,7 @@ const GrantForm = ({
                 setConstraints(constraintData);
                 setThematics(thematicData);
                 setAgreementTemplates(templateData);
+                setCompositions(compositionData);
             } catch (error) {
                 if (!cancelled) {
                     console.error(
@@ -167,20 +173,23 @@ const GrantForm = ({
 
         if (saving) return;
 
+        /*
         const normalizedGrant: Grant = {
             ...localGrant,
             title: localGrant.title?.trim() ?? '',
             description: localGrant.description?.trim() || undefined,
-            //constraint: extractId(localGrant.constraint) || null,
+            constraint: extractId(localGrant.constraint) || null,
+            composition: extractId(localGrant.composition) || null,
             agreementTemplate:
                 extractId(localGrant.agreementTemplate) || null
         };
+        */
 
-        const result = validateGrant(normalizedGrant);
+        const result = validateGrant(localGrant);
 
         if (!result.valid) return;
 
-        await onSubmit(normalizedGrant);
+        await onSubmit(localGrant);
     };
 
     const validation = submitted
@@ -242,7 +251,7 @@ const GrantForm = ({
                     Funding Source <span className="text-red-500">*</span>
                 </label>
                 <Dropdown
-                    id="grant-funding-source"
+                    inputId="grant-funding-source"
                     value={localGrant.fundingSource}
                     options={Object.values(FundingSource).map((source) => ({
                         label: source,
@@ -264,7 +273,7 @@ const GrantForm = ({
                     Organization (Funder) <span className="text-red-500">*</span>
                 </label>
                 <Dropdown
-                    id="grant-organization"
+                    inputId="grant-organization"
                     value={extractId(localGrant.organization)}
                     options={organizations}
                     optionLabel="name"
@@ -290,7 +299,7 @@ const GrantForm = ({
                     Amount (ETB) <span className="text-red-500">*</span>
                 </label>
                 <InputNumber
-                    id="grant-amount"
+                    inputId="grant-amount"
                     value={localGrant.amount ?? 0}
                     onValueChange={(e) => updateField('amount', e.value ?? 0)}
                     mode="currency"
@@ -314,7 +323,7 @@ const GrantForm = ({
                     Thematic Area <span className="text-red-500">*</span>
                 </label>
                 <Dropdown
-                    id="grant-thematic"
+                    inputId="grant-thematic"
                     value={extractId(localGrant.thematic)}
                     options={thematics}
                     optionLabel="title"
@@ -334,13 +343,13 @@ const GrantForm = ({
                 )}
             </div>
 
-            {/* Constraint Profile & Agreement Template */}
+            {/* Constraint Profile & Composition */}
             <div className="field col-12 md:col-6">
                 <label htmlFor="grant-constraint" className="font-medium text-900 block mb-2">
                     Constraint Profile
                 </label>
                 <Dropdown
-                    id="grant-constraint"
+                    inputId="grant-constraint"
                     value={extractId(localGrant.constraint)}
                     options={constraints}
                     optionLabel="name"
@@ -359,6 +368,30 @@ const GrantForm = ({
             </div>
 
             <div className="field col-12 md:col-6">
+                <label htmlFor="grant-composition" className="font-medium text-900 block mb-2">
+                    Composition
+                </label>
+                <Dropdown
+                    inputId="grant-composition"
+                    value={extractId(localGrant.composition) ?? null}
+                    options={compositions}
+                    optionLabel="name"
+                    optionValue="_id"
+                    onChange={(e) =>
+                        updateField(
+                            'composition',
+                            (e.value ?? null) as Grant['composition']
+                        )
+                    }
+                    placeholder="Select Composition (Optional)"
+                    showClear
+                    filter
+                    className="w-full"
+                />
+            </div>
+
+            {/* Agreement Template */}
+            <div className="field col-12">
                 <label
                     htmlFor="grant-agreement-template"
                     className="font-medium text-900 block mb-2"
@@ -366,7 +399,7 @@ const GrantForm = ({
                     Agreement Template
                 </label>
                 <Dropdown
-                    id="grant-agreement-template"
+                    inputId="grant-agreement-template"
                     value={extractId(localGrant.agreementTemplate)}
                     options={agreementTemplates}
                     optionLabel="name"

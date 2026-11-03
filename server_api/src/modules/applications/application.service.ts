@@ -14,21 +14,21 @@ import { AuthScope } from "../auth/auth.types";
 import { ICallRepository } from "../calls/call.repository";
 import { IStage, StageStatus } from "../calls/stages/stage.model";
 import { IStageRepository } from "../calls/stages/stage.repository";
-import { CompositionValidationInput, CompositionValidationService } from "../compositions/composition-validator.service";
+import { CompositionValidationInput, CompositionValidationService } from "../compositions/composition-validation-service";
 import { ConstraintValidationInput, ConstraintValidationService } from "../constraints/services/constraint-validator.service";
 import { NotificationService } from "../notifications/notification.service";
-import { IReviewerRepository } from "../reviewers/reviewer.repository";
-import { TemplateValidationService } from "../templates/services/template-validation.service";
-import { IUserRepository } from "../users/user.repository";
 import { ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
 import { ProjectAuth } from "../projects/project.auth";
 import { IProject, ProjectStatus } from "../projects/project.model";
 import { ProjectRepository } from "../projects/project.repository";
+import { IReviewerRepository } from "../reviewers/reviewer.repository";
+import { TemplateValidationService } from "../templates/services/template-validation.service";
+import { IUserRepository } from "../users/user.repository";
 import {
     CreateApplicationDTO,
     FilterApplicationDTO,
 } from "./application.dto";
-import { AnonymizationStatus, ApplicationStatus, IApplication } from "./application.model";
+import { ApplicationStatus, IApplication } from "./application.model";
 import { IApplicationRepository } from "./application.repository";
 
 export class ApplicationService {
@@ -54,13 +54,16 @@ export class ApplicationService {
     ) {
     }
 
-    async validateCallStage(
+    async validateStage(
+        projectDoc: IProject,
         stageId: string,
-        documentPath: string,
-        projectDoc?: IProject,
-        constraintInput?: ConstraintValidationInput,
-        compositionInput?: CompositionValidationInput
+        documentPath: string
     ) {
+        if (!projectDoc.call) {
+            throw new AppError(
+                ERROR_CODES.CALL_NOT_FOUND, "Project Does Not Have Call"
+            );
+        }
         // --------------------------------------------------
         // Get requested stage
         // --------------------------------------------------
@@ -81,20 +84,6 @@ export class ApplicationService {
         }
 
         // --------------------------------------------------
-        // Validate project's call
-        // --------------------------------------------------
-
-        if (
-            projectDoc?.call &&
-            String(projectDoc.call) !==
-            String(stageDoc.call)
-        ) {
-            throw new AppError(
-                ERROR_CODES.INVALID_STAGE,
-                "The application stage does not belong to the project's call."
-            );
-        }
-        // --------------------------------------------------
         // Stage deadline
         // --------------------------------------------------
         if (
@@ -105,11 +94,18 @@ export class ApplicationService {
             );
         }
 
+        // --------------------------------------------------
+        // Validate project's call
+        // --------------------------------------------------
 
-        const callDoc = await this.callRepo.findById(String(stageDoc.call));
-
-        if (!callDoc) {
-            throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+        if (
+            String(projectDoc.call) !==
+            String(stageDoc.call)
+        ) {
+            throw new AppError(
+                ERROR_CODES.INVALID_STAGE,
+                "The application stage does not belong to the project's call."
+            );
         }
 
         // --------------------------------------------------
@@ -125,7 +121,7 @@ export class ApplicationService {
             // --------------------------------------------------
             // Project must have a current application
             // --------------------------------------------------
-            if (!projectDoc?.currentApplication) {
+            if (!projectDoc.currentApplication) {
                 throw new AppError(
                     ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND,
                     "Project does not have a current application."
@@ -170,66 +166,11 @@ export class ApplicationService {
             }
         }
 
-
-        if (callDoc.constraint) {
-            let result;
-            if (projectDoc?._id) {
-                result =
-                    await this.constraintValidator.
-                        validateProjectById(String(callDoc.constraint), String(projectDoc._id));
-            }
-            if (constraintInput) {
-                result =
-                    await this.constraintValidator
-                        .validateProject(String(callDoc.constraint), constraintInput);
-            }
-
-            if (!result?.valid) {
-                throw new AppError(
-                    ERROR_CODES.INVALID_CONSTRAINT,
-                    "Constraint validation failed",
-                    400,
-                    result
-                );
-            }
-
-        }
-
-
-        if (callDoc.composition) {
-
-            let result;
-            if (projectDoc?._id) {
-                result =
-                    await this.compositionValidator.validateByProjectId(
-                        String(callDoc.composition),
-                        String(projectDoc._id),
-                        stageDoc
-                    );
-            }
-            if (compositionInput) {
-                result =
-                    await this.compositionValidator
-                        .validate(String(callDoc.composition), callDoc, compositionInput, stageDoc);
-            }
-
-            if (!result?.valid) {
-                throw new AppError(
-                    ERROR_CODES.INVALID_COMPOSITION,
-                    "Document validation failed",
-                    400,
-                    result
-                );
-            }
-        }
-        // --------------------------------------------------
-        // Validate document against stage template
-        // --------------------------------------------------
-
-        if (stageDoc.constraint && projectDoc?._id) {
+        if (stageDoc.constraint) {
+            const stageConstraint = await this.constraintValidator.getConstraint(stageDoc.constraint.toString());
             const result =
                 await this.constraintValidator.
-                    validateProjectById(String(stageDoc.constraint), String(projectDoc._id));
+                    validateProjectById(stageConstraint, String(projectDoc._id));
 
             if (!result?.valid) {
                 throw new AppError(
@@ -240,6 +181,10 @@ export class ApplicationService {
                 );
             }
         }
+
+        // --------------------------------------------------
+        // Validate document against stage template
+        // --------------------------------------------------
 
         if (stageDoc.template) {
             const result =
@@ -265,7 +210,7 @@ export class ApplicationService {
  * Create a new application for a project stage.
  */
     async create(
-        data: Omit<CreateApplicationDTO, "documentPath">,
+        data: CreateApplicationDTO,
         userId: string,
         file: Express.Multer.File
     ) {
@@ -277,10 +222,10 @@ export class ApplicationService {
             );
 
             // Validate against the temp file; nothing is moved yet
-            const { stageDoc } = await this.validateCallStage(
+            const { stageDoc } = await this.validateStage(
+                projectDoc,
                 data.stage,
-                file.path,
-                projectDoc
+                file.path
             );
 
             return await this.internalCreate(data, userId, projectDoc, stageDoc, file);

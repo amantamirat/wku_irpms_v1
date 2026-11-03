@@ -5,7 +5,7 @@ import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { TabPanel, TabView } from 'primereact/tabview';
 import { classNames } from 'primereact/utils';
-import { ReactNode, useEffect, useState } from 'react';
+import { ReactNode, useEffect, useId, useState } from 'react';
 
 import { StatusHistoryWidget } from '@/components/StatusHistoryWidget';
 import { useAuth } from '@/contexts/auth-context';
@@ -126,25 +126,46 @@ const StatTile = ({
     </div>
 );
 
-const InfoCard = ({
+const CollapsibleCard = ({
     icon,
     title,
-    children,
-    className
+    defaultOpen = true,
+    meta,
+    children
 }: {
     icon: string;
     title: string;
+    defaultOpen?: boolean;
+    /** Small text shown on the right of the header, useful when collapsed */
+    meta?: string;
     children: ReactNode;
-    className?: string;
-}) => (
-    <div className={classNames('surface-card border-1 surface-border border-round-xl p-4 h-full', className)}>
-        <div className="flex align-items-center gap-2 mb-3">
-            <i className={classNames('pi text-primary', icon)} />
-            <span className="text-xs font-bold text-600 uppercase">{title}</span>
+}) => {
+    const [open, setOpen] = useState(defaultOpen);
+    const contentId = useId();
+
+    return (
+        <div className="surface-card border-1 surface-border border-round-xl overflow-hidden">
+            <button
+                type="button"
+                className="w-full flex align-items-center gap-2 p-4 border-none bg-transparent cursor-pointer text-left"
+                aria-expanded={open}
+                aria-controls={contentId}
+                onClick={() => setOpen((o) => !o)}
+            >
+                <i className={classNames('pi text-primary', icon)} />
+                <span className="text-xs font-bold text-600 uppercase flex-1">{title}</span>
+                {meta && <span className="text-xs text-500">{meta}</span>}
+                <i className={classNames('pi text-500 text-sm', open ? 'pi-chevron-up' : 'pi-chevron-down')} />
+            </button>
+
+            {open && (
+                <div id={contentId} className="px-4 pb-4">
+                    {children}
+                </div>
+            )}
         </div>
-        {children}
-    </div>
-);
+    );
+};
 
 const NumberedList = ({ items }: { items: string[] }) => (
     <ul className="list-none p-0 m-0 flex flex-column gap-2">
@@ -200,12 +221,10 @@ export default function ProjectDetail({
 
             handleUpdateProject(mergeProject(projectData, data, saved as Partial<Project>));
             setEditing(false);
-            toast.success("'Your changes have been saved.'");
-
-
+            toast.success('Your changes have been saved.');
         } catch (err: any) {
             console.error('Failed to update project:', err);
-            toast.error(err?.message || 'Could not save the project. Please try again.',);
+            toast.error(err?.message || 'Could not save the project. Please try again.');
         } finally {
             setSaving(false);
         }
@@ -217,6 +236,8 @@ export default function ProjectDetail({
     const callLabel = refLabel(projectData.call, ['title', 'name']);
     const leadLabel = hideCollaborators ? null : refLabel(projectData.leadPI, ['name']);
 
+    const keywords = (projectData.keywords ?? []).map((k) => k.trim()).filter(Boolean);
+
     const objectives = projectData.objectives;
     const hasObjectives =
         !!objectives &&
@@ -224,7 +245,18 @@ export default function ProjectDetail({
             (objectives.specific?.length ?? 0) > 0 ||
             (objectives.expectedOutputs?.length ?? 0) > 0);
 
-    const canEdit = !disableCrud && !!projectData._id && projectData.status === ProjectStatus.draft && hasPermission(['project:update:own']);
+    const objectivesMeta = [
+        (objectives?.specific?.length ?? 0) > 0 && `${objectives!.specific!.length} specific`,
+        (objectives?.expectedOutputs?.length ?? 0) > 0 && `${objectives!.expectedOutputs!.length} outputs`
+    ]
+        .filter(Boolean)
+        .join(' · ');
+
+    const canEdit =
+        !disableCrud &&
+        !!projectData._id &&
+        projectData.status === ProjectStatus.draft &&
+        hasPermission(['project:update:own']);
 
     const getPermission = (resource: string) => `${resource}:${useLookup ? 'lookup' : 'read'}`;
 
@@ -346,6 +378,19 @@ export default function ProjectDetail({
                                     )}
                                 </div>
                             )}
+
+                            {keywords.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-3">
+                                    {keywords.map((keyword) => (
+                                        <span
+                                            key={keyword}
+                                            className="inline-flex align-items-center px-2 py-1 border-round-2xl bg-primary-50 text-primary text-xs font-medium"
+                                        >
+                                            # {keyword}
+                                        </span>
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {canEdit && (
@@ -394,20 +439,27 @@ export default function ProjectDetail({
 
             {/* SUMMARY & OBJECTIVES */}
             {(projectData.summary || hasObjectives) && (
-                <div className="grid m-0" style={{ margin: '-0.5rem' }}>
+                <div className="grid m-0 align-items-start" style={{ margin: '-0.5rem' }}>
                     {projectData.summary && (
                         <div className={classNames('col-12 p-2', { 'lg:col-5': hasObjectives })}>
-                            <InfoCard icon="pi-align-left" title="Abstract / Summary">
+                            {/* expanded by default */}
+                            <CollapsibleCard icon="pi-align-left" title="Abstract / Summary" defaultOpen>
                                 <p className="m-0 text-700 text-sm line-height-3 white-space-pre-line">
                                     {projectData.summary}
                                 </p>
-                            </InfoCard>
+                            </CollapsibleCard>
                         </div>
                     )}
 
                     {hasObjectives && (
                         <div className={classNames('col-12 p-2', { 'lg:col-7': !!projectData.summary })}>
-                            <InfoCard icon="pi-compass" title="Goals, Objectives & Outputs">
+                            {/* collapsed by default */}
+                            <CollapsibleCard
+                                icon="pi-compass"
+                                title="Goals, Objectives & Outputs"
+                                defaultOpen={false}
+                                meta={objectivesMeta}
+                            >
                                 <div className="flex flex-column gap-4">
                                     {objectives?.general && (
                                         <div className="p-3 border-round-lg bg-primary-50 border-left-3 border-primary">
@@ -436,7 +488,7 @@ export default function ProjectDetail({
                                         </div>
                                     )}
                                 </div>
-                            </InfoCard>
+                            </CollapsibleCard>
                         </div>
                     )}
                 </div>

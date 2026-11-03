@@ -181,14 +181,14 @@ export class LegacySeeder {
                 title: "Research Phase I",
                 budget: half,
                 duration: 60,
-                description: "Initial project implementation"
+                //description: "Initial project implementation"
             },
             {
                 // order: 2,
                 title: "Research Phase II",
                 budget: half,
                 duration: 60,
-                description: "Final implementation and reporting"
+                //description: "Final implementation and reporting"
             }
         ];
     }
@@ -295,9 +295,11 @@ export class LegacySeeder {
                     String(grantDoc.thematic)
                 );
 
-                await this.projectService.create(
+                /*
+                await this.projectService.createOLD(
                     dto, dto.leadPI, { skipValidation: true }
                 );
+                */
 
                 created++;
 

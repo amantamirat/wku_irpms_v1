@@ -43,8 +43,8 @@ export class PublicationService {
         return await this.repository.find(options);
     }
 
-    async transitionState(dto: TransitionRequestDto) {
-        const { id, current, next } = dto;
+    async transitionState(dto: TransitionRequestDto, userId: string) {
+        const { id, current, next, reason } = dto;
 
         const pubDoc = await this.repository.findById(id);
         if (!pubDoc) {
@@ -63,7 +63,7 @@ export class PublicationService {
             PUBLICATION_TRANSITIONS
         );
         return await this.repository.updateStatus(id,
-            to);
+            to, userId, reason);
     }
 
     async validatePublication(id: string) {

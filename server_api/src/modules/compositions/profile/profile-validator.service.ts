@@ -1,5 +1,6 @@
-import { matchesRange } from "../../../common/types/range";
+import { checkRange } from "../../../common/types/range";
 import { SpecializationRepository } from "../../organization/specializations/specialization.repository";
+import { ExperienceStatus } from "../../users/experiences/experience.model";
 import { ExperienceRepository } from "../../users/experiences/experience.repository";
 import { IUser } from "../../users/user.model";
 import { IEligibilityProfile } from "./profile.model";
@@ -33,7 +34,7 @@ export class ProfileValidatorService {
             if (user.birthDate) {
                 const age = this.calculateAge(user.birthDate);
 
-                if (!matchesRange(profile.age, age)) {
+                if (!checkRange(profile.age, age)) {
                     return false;
                 }
             }
@@ -43,11 +44,11 @@ export class ProfileValidatorService {
         // Experience
         if (profile.experienceYears) {
 
-            const experiences = await this.experienceRepo.find({ user: String(user._id) });
+            const experiences = await this.experienceRepo.find({ user: String(user._id), status: ExperienceStatus.VERIFIED });
 
             const experienceYears = this.calculateTotalExperienceYears(experiences);
 
-            if (!matchesRange(profile.experienceYears, experienceYears)
+            if (!checkRange(profile.experienceYears, experienceYears)
             ) {
                 return false;
             }

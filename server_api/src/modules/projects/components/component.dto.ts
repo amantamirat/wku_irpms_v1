@@ -1,30 +1,26 @@
 
-import mongoose from "mongoose";
 
-export type ObjectIdInput = string | mongoose.Types.ObjectId;
-
-export interface ProjectComponentDTO {
+export interface ProjectComponentDto {
     title: string;
     description?: string;
-    contributors: ObjectIdInput[];
-    investigator: ObjectIdInput;
+    contributors: string[];
 }
 
-export interface CreateProjectComponentDTO extends ProjectComponentDTO {
-    project: ObjectIdInput;
+export interface CreateProjectComponentDTO extends ProjectComponentDto {
+    project: string;
 }
 
 export interface UpdateProjectComponentDTO {
     title?: string;
     description?: string;
-    contributors?: ObjectIdInput[];
-    investigator?: ObjectIdInput;
+    contributors?: string[];
+    //investigator?: ObjectIdInput;
 }
 
 export interface FilterProjectComponents {
-    project?: ObjectIdInput;
+    project?: string;
     title?: string;
     description?: string;
-    contributors?: ObjectIdInput[];
-    investigator?: ObjectIdInput;
+    contributors?: string[];
+    //investigator?: ObjectIdInput;
 }

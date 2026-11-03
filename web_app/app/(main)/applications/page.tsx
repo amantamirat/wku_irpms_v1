@@ -182,7 +182,7 @@ const Page = () => {
                     <i className="pi pi-inbox text-white text-2xl" />
                 </span>
                 <div className="flex flex-column gap-1">
-                    <h1 className="m-0 text-900 font-bold text-2xl md:text-3xl line-height-1">Applications</h1>
+                    <h3 className="m-0 text-900 font-bold text-2xl md:text-3xl line-height-1">Applications</h3>
                     <p className="m-0 text-600 text-sm md:text-base">
                         Review, evaluate and manage applications stage by stage.
                     </p>

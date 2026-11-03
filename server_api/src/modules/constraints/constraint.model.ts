@@ -28,7 +28,9 @@ export interface IConstraint extends Document {
 
     activities?: IRange;
     equipments?: IRange;
+
     components?: IRange;
+    componentCollaborators?: IRange;
 
     phaseBudget?: IRange;
     phaseDuration?: IRange;
@@ -121,6 +123,10 @@ const ConstraintSchema = new Schema<IConstraint>(
         },
 
         components: {
+            type: RangeSchema,
+        },
+
+        componentCollaborators: {
             type: RangeSchema,
         },
 

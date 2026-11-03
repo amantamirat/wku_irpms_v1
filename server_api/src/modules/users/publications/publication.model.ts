@@ -1,5 +1,7 @@
 import mongoose, { Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
+import { IStatusHistory } from "../../../common/types/status-history";
+import { createStatusHistorySchema } from "../../../common/schemas/status-history.schema";
 
 export enum PublicationStatus {
     pending = 'pending',
@@ -38,7 +40,8 @@ export interface IPublication extends Document {
         mimetype: string;
         size: number;
     };
-    status: PublicationStatus
+    status: PublicationStatus,
+    statusHistory: IStatusHistory<PublicationStatus>[];
 }
 
 const PublicationSchema = new Schema<IPublication>(
@@ -48,7 +51,7 @@ const PublicationSchema = new Schema<IPublication>(
             ref: COLLECTIONS.USER,
             required: true,
             index: true,
-            immutable:true
+            immutable: true
         },
 
         title: {
@@ -70,7 +73,7 @@ const PublicationSchema = new Schema<IPublication>(
 
         publishedDate: {
             type: Date,
-            required:true,
+            required: true,
         },
 
         doi: {
@@ -106,6 +109,21 @@ const PublicationSchema = new Schema<IPublication>(
             default: PublicationStatus.pending,
             required: true
         },
+        statusHistory: {
+            type: [createStatusHistorySchema(Object.values(PublicationStatus))],
+            default: []
+        },
+        /*
+                createdBy: {
+                    type: Schema.Types.ObjectId,
+                    ref: COLLECTIONS.USER,
+                },
+        
+                updatedBy: {
+                    type: Schema.Types.ObjectId,
+                    ref: COLLECTIONS.USER,
+                },*/
+
     },
     {
         timestamps: true,

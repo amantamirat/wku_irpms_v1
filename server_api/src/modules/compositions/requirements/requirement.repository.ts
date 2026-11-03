@@ -16,7 +16,7 @@ export class RequirementRepository {
         if (options?.populate) {
             dbQuery
                 .populate("profile")
-                .populate("historyRules.rule");
+                .populate("historyRules");
         }
 
         return dbQuery.sort({
@@ -34,7 +34,7 @@ export class RequirementRepository {
         if (options?.populate) {
             dbQuery
                 .populate("profile")
-                .populate("historyRules.rule");
+                .populate("historyRules");
         }
 
         return dbQuery;

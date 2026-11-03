@@ -47,6 +47,7 @@ const getCallColumns = (): ColumnProps[] => [
                 ? call.grant.title
                 : call.grant ?? '-',
     },
+    /*
     {
         header: 'Constraint Profile',
         field: 'constraint',
@@ -63,6 +64,7 @@ const getCallColumns = (): ColumnProps[] => [
                 ? call.composition.name
                 : call.composition ?? '-',
     },
+    */
     {
         header: 'Status',
         field: 'status',
@@ -113,8 +115,6 @@ export default function CallManager({ grant }: CallManagerProps) {
             itemIcon={MENU_ICONS.calls}
             mapSaved={mapSaved}
             columns={columns}
-            enableColumnToggle
-            defaultHiddenFields={DEFAULT_HIDDEN}
             filter={filter}
             dialogWidth="800px"
             statusField="status"

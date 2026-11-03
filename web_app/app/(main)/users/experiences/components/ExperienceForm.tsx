@@ -131,30 +131,11 @@ const ExperienceForm = ({
 
         if (saving) return;
 
-        const normalizedExperience: Experience = {
-            ...localExperience,
-            user: extractId(
-                localExperience.user
-            ) as Experience['user'],
-
-            organization: extractId(
-                localExperience.organization
-            ) as Experience['organization'],
-
-            position: extractId(
-                localExperience.position
-            ) as Experience['position'],
-
-            endDate: localExperience.isCurrent
-                ? null
-                : localExperience.endDate
-        };
-
-        const result = validateExperience(normalizedExperience);
+        const result = validateExperience(localExperience);
 
         if (!result.valid) return;
 
-        await onSubmit(normalizedExperience);
+        await onSubmit(localExperience);
     };
 
     const validation = submitted

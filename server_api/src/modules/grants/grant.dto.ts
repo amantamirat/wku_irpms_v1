@@ -17,6 +17,7 @@ export interface CreateGrantDTO {
     organization: string;
     title: string;
     constraint?: string;
+    composition?: string;
     agreementTemplate?: string | null;
     amount: number;
     thematic: string;
@@ -30,9 +31,10 @@ export interface UpdateGrantDTO {
         title: string;
         description: string;
         constraint?: string;
+        composition?: string;
         agreementTemplate: string | null;
         amount: number;
-        thematic:string;
+        thematic: string;
     }>;
 }
 

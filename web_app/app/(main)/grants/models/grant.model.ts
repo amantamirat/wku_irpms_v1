@@ -1,3 +1,4 @@
+import { Composition } from "../../compositions/models/composition.model";
 import { Constraint } from "../../constraints/models/constraint.model";
 import { IDocumentTemplate } from "../../documentTemplates/models/documentTemplate.model";
 import { Organization } from "../../organizations/models/organization.model";
@@ -17,7 +18,8 @@ export type Grant = {
     thematic?: string | Thematic;
     description?: string;
     amount: number;
-    constraint?: string | Constraint;
+    constraint?: string | Constraint | null;
+    composition?: string | Composition | null;
     agreementTemplate?: string | null | IDocumentTemplate;
     usedBudget?: number;
     status?: GrantStatus;

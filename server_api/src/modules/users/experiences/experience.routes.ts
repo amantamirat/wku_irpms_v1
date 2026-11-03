@@ -1,6 +1,6 @@
 import { Router } from 'express';
 import { PERMISSIONS } from '../../../common/constants/permissions';
-import { checkPermission, exprienceRepo, organizationRepo, positionRepo, userRepo } from '../../../core/container';
+import { checkPermission, checkTransitionPermission, exprienceRepo, organizationRepo, positionRepo, userRepo } from '../../../core/container';
 import { verifyAuthToken } from '../../auth/auth.middleware';
 import { ExperienceController } from './experience.controller';
 import { ExperienceService } from './experience.service';
@@ -34,6 +34,17 @@ router.put(
     verifyAuthToken,
     checkPermission([PERMISSIONS.EXPERIENCE.UPDATE]),
     controller.update
+);
+
+// --------------------------------------------------
+// Transition
+// --------------------------------------------------
+
+router.patch(
+    '/:id',
+    verifyAuthToken,
+    checkTransitionPermission('experience'),
+    controller.transitionState
 );
 
 router.delete(

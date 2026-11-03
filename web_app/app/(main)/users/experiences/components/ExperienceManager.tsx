@@ -16,6 +16,8 @@ import {
 
 
 import ExperienceForm from './ExperienceForm';
+import { EXPERIENCE_TRANSITIONS } from '../models/experience.state-machine';
+import MyBadge from '@/templates/MyBadge';
 
 interface ExperienceManagerProps {
     user?: User;
@@ -82,6 +84,17 @@ const columns: ColumnProps[] = [
         sortable: true,
         body: (experience: Experience) =>
             experience.isCurrent ? 'Yes' : 'No'
+    },
+    {
+        field: 'status',
+        header: 'Status',
+        sortable: true,
+        body: (exp: Experience) => (
+            <MyBadge
+                type="status"
+                value={exp.status ?? 'Unknown'}
+            />
+        )
     }
 ];
 
@@ -89,7 +102,8 @@ const defaultHiddenColumns = [
     'employmentType',
     'startDate',
     'endDate',
-    'isCurrent'
+    'isCurrent',
+    'status'
 ];
 
 // Keep the permission ids the user picked: the API response may not echo them back
@@ -128,6 +142,8 @@ const ExperienceManager = ({ user }: ExperienceManagerProps) => {
             filter={filter}
             mapSaved={mapSaved}
             dialogWidth="650px"
+            statusField="status"
+            transitions={EXPERIENCE_TRANSITIONS}
             renderForm={(props) => (
                 <ExperienceForm
                     {...props}

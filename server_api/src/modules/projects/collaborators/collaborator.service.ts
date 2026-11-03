@@ -11,31 +11,54 @@ import {
 import { ICollaboratorRepository } from "./collaborator.repository";
 
 import { PERMISSIONS } from "../../../common/constants/permissions";
+import { SYSTEM } from "../../../common/constants/system.constant";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
-import { AuthScope } from "../../auth/auth.types";
 import ScopeFilterService from "../../../common/services/scope-filter.service";
-import { ICallRepository } from "../../calls/call.repository";
-import { ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
-import { NotificationService } from "../../notifications/notification.service";
-import { ApplicationStatus } from "../../applications/application.model";
 import { IApplicationRepository } from "../../applications/application.repository";
-import { ProjectAuth } from "../project.auth";
-import { ProjectStatus } from "../project.model";
-import { CollaboratorStatus, ICollaborator } from "./collaborator.model";
-import { CompositionValidationService } from "../../compositions/composition-validator.service";
-import { IStageRepository } from "../../calls/stages/stage.repository";
+import { AuthScope } from "../../auth/auth.types";
 import { CallStatus } from "../../calls/call.model";
+import { ICallRepository } from "../../calls/call.repository";
 import { StageStatus } from "../../calls/stages/stage.model";
-import { SYSTEM } from "../../../common/constants/system.constant";
+import { IStageRepository } from "../../calls/stages/stage.repository";
+import { CollaboratorValidationInput, ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
+import { NotificationService } from "../../notifications/notification.service";
+import { ProjectAuth } from "../project.auth";
+import { IProject, ProjectStatus } from "../project.model";
+import { CollaboratorStatus, ICollaborator } from "./collaborator.model";
+import { CompositionValidationInput, CompositionValidationService } from "../../compositions/composition-validation-service";
+import { GrantRepository } from "../../grants/grant.repository";
+import { ApplicationStatus } from "../../applications/application.model";
+import { HistoryContextInput } from "../../compositions/history/history-validation-service";
 
+/**
+ * Describes how the project's membership changes:
+ *  - create: { add }
+ *  - update: { remove: oldMember, add: newMember }
+ *  - delete: { remove }
+ */
+interface MembershipChange {
+    add?: string;
+    remove?: string;
+}
+
+interface ValidateMembershipParams {
+    projectDoc: IProject;
+    projectId: string;
+    change: MembershipChange;
+    /** Wording used in error messages, e.g. "proposed" or "remaining". */
+    label: "proposed" | "remaining";
+    /** Pass when the caller has already loaded it, to avoid a second fetch. */
+    currentInput?: CompositionValidationInput;
+}
 
 export class CollaboratorService {
 
     constructor(
         private readonly collabRepo: ICollaboratorRepository,
         private readonly projectRepo: IProjectRepository,
+        private readonly grantRepo: GrantRepository,
         private readonly callRepo: ICallRepository,
         private readonly stageRepo: IStageRepository,
         private readonly applicationRepo: IApplicationRepository,
@@ -47,98 +70,187 @@ export class CollaboratorService {
     ) {
     }
 
-    private async validateCall(callId: string) {
-        const callDoc = await this.callRepo.findById(callId);
-        if (!callDoc) {
-            throw new AppError(
-                ERROR_CODES.CALL_NOT_FOUND
-            );
+    // ---------------------------------------------------------------------
+    // Shared validation helpers
+    // ---------------------------------------------------------------------
+
+    private async validateCall(projectDoc: IProject) {
+        if (projectDoc.call) {
+            const callDoc = await this.callRepo.findById(projectDoc.call.toString());
+            if (!callDoc) {
+                throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+            }
+            if (callDoc.status !== CallStatus.active) {
+                throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
+            }
+
+            if (!projectDoc.currentApplication) {
+                throw new AppError(ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND);
+            }
+            const currentAppDoc = await this.applicationRepo.findById(String(projectDoc.currentApplication));
+            if (!currentAppDoc) {
+                throw new AppError(ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND);
+            }
+
+            if (currentAppDoc.status !== ApplicationStatus.submitted) {
+                throw new AppError(ERROR_CODES.APPLICATION_NOT_IN_SUBMITTED_STATE);
+            }
+
+            const stageDoc = await this.stageRepo.findById(currentAppDoc.stage.toString());
+            if (!stageDoc) {
+                throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
+            }
+            if (stageDoc.status !== StageStatus.active) {
+                throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
+            }
+            return callDoc;
         }
-        if (callDoc.status !== CallStatus.active) {
-            throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
-        }
-        return callDoc;
     }
+
+    /**
+     * Loads the project's current composition input (lead + members).
+     * Throws INVALID_COMPOSITION if it cannot be resolved.
+     */
+    private async getCompositionInput(projectId: string): Promise<CompositionValidationInput> {
+        const result = await this.compositionValidator.getCompositionInputByProjectId(projectId);
+        if (!result.ok) {
+            throw new AppError(ERROR_CODES.INVALID_COMPOSITION, "", 404, result.errors);
+        }
+        return result.input;
+    }
+
+    /**
+     * Returns the composition input as it would look after applying `change`.
+     */
+    private applyMembershipChange(
+        input: CompositionValidationInput,
+        change: MembershipChange
+    ): CompositionValidationInput {
+        const members = input.members.filter(m => m !== change.remove);
+        if (change.add !== undefined) {
+            members.push(change.add);
+        }
+        return { lead: input.lead, members };
+    }
+
+    /**
+     * Validates that the project's grant constraint and composition rules
+     * still hold after applying `change`. Used by create, update and delete.
+     */
+    private async validateMembershipChange(params: ValidateMembershipParams): Promise<void> {
+        const { projectDoc, projectId, change, label } = params;
+
+        const currentInput = params.currentInput ?? await this.getCompositionInput(projectId);
+        const proposed = this.applyMembershipChange(currentInput, change);
+
+        const grantDoc = await this.grantRepo.findById(String(projectDoc.grant));
+        if (!grantDoc) {
+            throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+        }
+
+        // Constraint validation
+        if (grantDoc.constraint) {
+            const constraintDoc = await this.constraintValidator.getConstraint(
+                String(grantDoc.constraint)
+            );
+            const collaborators: CollaboratorValidationInput[] = [
+                proposed.lead,
+                ...proposed.members,
+            ].map(member => ({
+                member,
+            }));
+            const constraintResult = this.constraintValidator.validateCollaborators(
+                constraintDoc,
+                collaborators
+            );
+            if (!constraintResult.valid) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_CONSTRAINT,
+                    `The ${label} members do not satisfy the constraint requirements.`,
+                    400,
+                    constraintResult.errors
+                );
+            }
+        }
+
+        // Composition validation
+        if (grantDoc.composition) {
+            const compositionDoc = await this.compositionValidator.getComposition(
+                String(grantDoc.composition)
+            );
+            const context: HistoryContextInput = {
+                organization: grantDoc.organization.toString(),
+                source: grantDoc.fundingSource,
+                calendar: projectDoc.calendar?.toString(),
+                call: projectDoc.call?.toString(),
+            };
+            const compositionResult = await this.compositionValidator.validate(
+                compositionDoc,
+                context,
+                proposed,
+                projectId
+            );
+            if (!compositionResult.valid) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_COMPOSITION,
+                    `The ${label} members do not satisfy the composition requirements.`,
+                    400,
+                    compositionResult.errors
+                );
+            }
+        }
+    }
+
+    // ---------------------------------------------------------------------
+    // Create
+    // ---------------------------------------------------------------------
 
     async create(dto: CreateCollaboratorDto, userId: string, options?: { skipValidation?: boolean }) {
         const { member, project } = dto;
-        let projectTitle = dto.projectTitle;
-        if (!options?.skipValidation && userId !== SYSTEM.SU_USER) {
 
-            const { projectDoc, isLeadPI } = await this.projectAuth.auth(project, userId, PERMISSIONS.COLLABORATOR.CREATE);
+
+
+        let projectTitle = dto.projectTitle;
+        if (!options?.skipValidation) {
+
+            const currentInput = await this.getCompositionInput(project);
+
+            const memberExists =
+                currentInput.lead === member ||
+                currentInput.members.includes(member);
+
+            if (memberExists) {
+                throw new AppError(
+                    ERROR_CODES.COLLABORATOR_ALREADY_EXISTS,
+                    'This member is already a collaborator on the project.',
+                );
+            }
+
+            const { projectDoc, isLeadPI } = await this.projectAuth.auth(
+                project,
+                userId,
+                PERMISSIONS.COLLABORATOR.CREATE
+            );
             projectTitle = projectDoc.title;
+
             if (isLeadPI) {
-                if (
-                    projectDoc.status !== ProjectStatus.draft
-                ) {
+                if (projectDoc.status !== ProjectStatus.draft) {
                     throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
                 }
-
-                if (projectDoc.currentApplication) {
-                    const currentAppDoc = await this.applicationRepo.findById(String(projectDoc.currentApplication));
-                    if (!currentAppDoc) {
-                        throw new AppError(ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND);
-                    }
-                    const stageDoc = await this.stageRepo.findById(currentAppDoc.stage.toString());
-                    if (!stageDoc) {
-                        throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-                    }
-                    if (stageDoc.status !== StageStatus.active) {
-                        throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
-                    }
-                }
+                await this.validateCall(projectDoc);
             }
 
-
-            if (projectDoc.call) {
-                const callId = String(projectDoc.call);
-                const callDoc = await this.validateCall(callId);
-                if (callDoc.constraint) {
-                    const constraintId = String(callDoc.constraint);
-                    const result = await this.constraintValidator.validateParticipantCount(constraintId, await this.collabRepo.countByProject(project) + 1);
-                    if (!result.valid) {
-                        throw new AppError(ERROR_CODES.INVALID_CONSTRAINT, "participant count", 400, result);
-                    }
-                }
-
-                if (dto.isLeadPI) {
-                    // await this.compositionValidator.validatePI(grantId, applicant);
-                } else {
-                    //  await this.compositionValidator.validateCoPI(grantId, applicant);
-                    if (callDoc.composition) {
-                        const stageDoc = await this.stageRepo.getFirstStage(
-                            String(projectDoc.call)
-                        );
-
-                        if (!stageDoc) {
-                            throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-                        }
-
-                        const results =
-                            await this.compositionValidator.validateMember(
-                                String(callDoc.composition),
-                                member,
-                                callDoc,
-                                stageDoc
-                            );
-
-                        if (!results.valid) {
-                            throw new AppError(
-                                ERROR_CODES.INVALID_COMPOSITION,
-                                "The proposed member does not satisfy the composition requirements.",
-                                400,
-                                // results.errors
-                            );
-                        }
-                    }
-                }
-
-
-            }
+            await this.validateMembershipChange({
+                projectDoc,
+                projectId: project,
+                change: { add: member },
+                label: "proposed",
+                currentInput,
+            });
         }
+
         try {
             const created = await this.collabRepo.create(dto);
-            await this.projectRepo.incrementTotals(project, { collabs: 1 });
             await this.collabRepo.updateFemaleProportionByProject(project);
             if (dto.status !== CollaboratorStatus.verified) {
                 await this.notificationService.notifyProjectInvitation(
@@ -154,16 +266,18 @@ export class CollaboratorService {
         }
     }
 
+    // ---------------------------------------------------------------------
+    // Read
+    // ---------------------------------------------------------------------
+
     async read(filter: FilterCollaborators, scope: AuthScope, options?: FilterOptions) {
         const scopeFilter =
             await this.scopeFilterService.getCollaboratorFilter(scope);
-        const collaborators = await this.collabRepo.find(filter, options, scopeFilter);
-        return collaborators;
+        return this.collabRepo.find(filter, options, scopeFilter);
     }
 
     async look(filter: FilterCollaborators, options?: FilterOptions) {
-        const collaborators = await this.collabRepo.find(filter, options);
-        return collaborators;
+        return this.collabRepo.find(filter, options);
     }
 
     getMyCollaborations = async (
@@ -183,14 +297,10 @@ export class CollaboratorService {
         );
     };
 
+    // ---------------------------------------------------------------------
+    // Update
+    // ---------------------------------------------------------------------
 
-    /**
- * Update collaborator.
- */
-
-    /**
-     * Update collaborator.
-     */
     async update(
         dto: UpdateCollaboratorDto,
         userId: string
@@ -199,142 +309,83 @@ export class CollaboratorService {
         const collaboratorDoc = await this.collabRepo.findById(dto.id);
 
         if (!collaboratorDoc) {
-            throw new AppError(
-                ERROR_CODES.COLLABORATOR_NOT_FOUND
-            );
+            throw new AppError(ERROR_CODES.COLLABORATOR_NOT_FOUND);
         }
 
-        // Authorize the user against the collaborator's project.
         const projectId = String(collaboratorDoc.project);
 
-        const { projectDoc, isLeadPI } =
-            await this.projectAuth.auth(
-                projectId,
-                userId,
-                PERMISSIONS.COLLABORATOR.UPDATE
-            );
-
-        if (projectDoc.call) {
-            const callId = String(projectDoc.call);
-            await this.validateCall(callId);
-        }
-
-        // Only pending and declined collaborators can be updated.
-        if (
-            collaboratorDoc.status === CollaboratorStatus.verified
-        ) {
-            throw new AppError(
-                ERROR_CODES.COLLABORATOR_ALREADY_VERIFIED
-            );
-        }
+        const { projectDoc, isLeadPI } = await this.projectAuth.auth(
+            projectId,
+            userId,
+            PERMISSIONS.COLLABORATOR.UPDATE
+        );
 
         // The lead PI collaborator record cannot be updated.
         if (collaboratorDoc.isLeadPI) {
-            throw new AppError(
-                ERROR_CODES.LEAD_PI_CANNOT_BE_UPDATED
-            );
+            throw new AppError(ERROR_CODES.LEAD_PI_CANNOT_BE_UPDATED);
         }
 
-        // The lead PI can update collaborators only while
-        // the project is in draft status.
-        if (
-            isLeadPI &&
-            projectDoc.status !== ProjectStatus.draft
-        ) {
-            throw new AppError(
-                ERROR_CODES.PROJECT_NOT_DRAFT
-            );
+        // Only pending and declined collaborators can be updated.
+        if (collaboratorDoc.status === CollaboratorStatus.verified) {
+            throw new AppError(ERROR_CODES.COLLABORATOR_ALREADY_VERIFIED);
         }
 
-        // Prevent duplicate membership in the same project.
+        // The lead PI can update collaborators only while the project is in draft.
+        if (isLeadPI) {
+            if (projectDoc.status !== ProjectStatus.draft) {
+                throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+            }
+            await this.validateCall(projectDoc);
+        }
 
         if (dto.data.member !== undefined) {
-            // Prevent duplicate membership in the same project.
-            const exists = await this.collabRepo.exists({
-                project: projectId,
-                member: dto.data.member
-            });
+            const newMember = dto.data.member;
+            const oldMember = String(collaboratorDoc.member);
 
-            if (
-                exists &&
-                dto.data.member !== String(collaboratorDoc.member)
-            ) {
-                throw new AppError(
-                    ERROR_CODES.COLLABORATOR_ALREADY_EXISTS
-                );
-            }
-
-            // Validate the proposed member against the composition.
-            if (projectDoc.call) {
-                const callDoc = await this.callRepo.findById(
-                    String(projectDoc.call)
-                );
-
-                if (!callDoc) {
-                    throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+            if (newMember !== oldMember) {
+                // Prevent duplicate membership in the same project.
+                const exists = await this.collabRepo.exists({
+                    project: projectId,
+                    member: newMember
+                });
+                if (exists) {
+                    throw new AppError(ERROR_CODES.COLLABORATOR_ALREADY_EXISTS);
                 }
 
-                if (callDoc.composition) {
-                    const stageDoc = await this.stageRepo.getFirstStage(
-                        String(projectDoc.call)
-                    );
-
-                    if (!stageDoc) {
-                        throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-                    }
-
-                    const results =
-                        await this.compositionValidator.validateMember(
-                            String(callDoc.composition),
-                            dto.data.member,
-                            callDoc,
-                            stageDoc
-                        );
-
-                    if (!results.valid) {
-                        throw new AppError(
-                            ERROR_CODES.INVALID_COMPOSITION,
-                            "The proposed member does not satisfy the composition requirements.",
-                            400,
-                            // results.errors
-                        );
-                    }
-                }
+                await this.validateMembershipChange({
+                    projectDoc,
+                    projectId,
+                    change: { remove: oldMember, add: newMember },
+                    label: "proposed",
+                });
             }
         }
 
         // Persist the update after all authorization and validation.
-        const updated = this.collabRepo.update(
-            dto.id,
-            dto.data,
-            userId
-        );
+        const updated = await this.collabRepo.update(dto.id, dto.data, userId);
 
         await this.collabRepo.updateFemaleProportionByProject(projectId);
 
         return updated;
     }
 
-
-
+    // ---------------------------------------------------------------------
+    // Transition
+    // ---------------------------------------------------------------------
 
     async transitionState(dto: TransitionRequestDto, userId: string) {
-        const { id, current, next } = dto;
+        const { id, current, next, reason } = dto;
 
         const collabDoc = await this.collabRepo.findById(id);
         if (!collabDoc) throw new AppError(ERROR_CODES.COLLABORATOR_NOT_FOUND);
-        // if (collabDoc.isLeadPI === true) throw new AppError(ERROR_CODES.USER_LEAD_PI);
-        const projectDoc = await this.projectRepo.findById(String(collabDoc.project));
-        if (!projectDoc) throw new Error(ERROR_CODES.PROJECT_NOT_FOUND);
-        if (projectDoc.call) {
-            const callId = String(projectDoc.call);
-            await this.validateCall(callId);
-        }
 
         if (String(collabDoc.member) !== userId) {
-            //use permission for the special permission
+            // use permission for the special permission
             throw new AppError(ERROR_CODES.UNAUTHORIZED);
         }
+        const projectDoc = await this.projectRepo.findById(String(collabDoc.project));
+        if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
+        await this.validateCall(projectDoc);
 
         const from = collabDoc.status as CollaboratorStatus;
         const to = next as CollaboratorStatus;
@@ -343,82 +394,74 @@ export class CollaboratorService {
             throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
         }
 
-        TransitionHelper.validateTransition(
-            from,
-            to,
-            COLLAB_TRANSITIONS
-        );
+        TransitionHelper.validateTransition(from, to, COLLAB_TRANSITIONS);
 
         if (next === CollaboratorStatus.pending) {
-
-            const projectStatus = projectDoc.status;
-            if (projectStatus !== ProjectStatus.draft
-            ) {
+            if (projectDoc.status !== ProjectStatus.draft) {
                 throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
             }
         }
 
-        const updated = await this.collabRepo.updateStatus(id,
-            to
-        );
-
-        await this.collabRepo.updateVerifiedCollaboratorsProportionByProject(String(collabDoc.project));
-
-        return updated;
+        return this.collabRepo.updateStatus(id, to, userId, reason);
     }
 
+    // ---------------------------------------------------------------------
+    // Delete
+    // ---------------------------------------------------------------------
 
     async delete(dto: DeleteDto, userId: string) {
         const { id } = dto;
 
         const collabDoc = await this.collabRepo.findById(id);
-        if (!collabDoc) throw new Error(ERROR_CODES.COLLABORATOR_NOT_FOUND);
+
+        if (!collabDoc) {
+            throw new AppError(ERROR_CODES.COLLABORATOR_NOT_FOUND);
+        }
+
         if (collabDoc.isLeadPI) {
             throw new AppError(ERROR_CODES.COLLABORATOR_LEAD_PI_CANNOT_DELETE);
         }
-        if (collabDoc.status === CollaboratorStatus.verified) throw new AppError(ERROR_CODES.COLLABORATOR_ALREADY_VERIFIED);
 
-        const project = String(collabDoc.project);
-        const { projectDoc, isLeadPI } = await this.projectAuth.auth(project, userId, PERMISSIONS.COLLABORATOR.DELETE);
-
-        if (projectDoc.call) {
-            const callId = String(projectDoc.call);
-            await this.validateCall(callId);
+        if (collabDoc.status === CollaboratorStatus.verified) {
+            throw new AppError(ERROR_CODES.COLLABORATOR_ALREADY_VERIFIED);
         }
+
+        const projectId = String(collabDoc.project);
+
+        const { projectDoc, isLeadPI } = await this.projectAuth.auth(
+            projectId,
+            userId,
+            PERMISSIONS.COLLABORATOR.DELETE
+        );
+
+
 
         if (isLeadPI) {
-            if (
-                projectDoc.status !== ProjectStatus.draft
-            ) {
+            if (projectDoc.status !== ProjectStatus.draft)
                 throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
-            }
+            await this.validateCall(projectDoc);
         }
 
+        const memberToRemove = String(collabDoc.member);
 
-        if (projectDoc.call) {
-            const callDoc = await this.callRepo.findById(String(projectDoc.call));
-            if (!callDoc) {
-                throw new AppError(
-                    ERROR_CODES.CALL_NOT_FOUND
-                );
-            }
-            if (callDoc.constraint) {
-                const countCollabs = projectDoc.totalCollabs ?? 0;
-                const validationResult = await this.constraintValidator.validateParticipantCount(String(callDoc.constraint), countCollabs - 1);
-                if (!validationResult.valid) {
-                    throw new AppError(ERROR_CODES.INVALID_CONSTRAINT, "participant count", 400, validationResult);
-                }
-            }
-        }
+        await this.validateMembershipChange({
+            projectDoc,
+            projectId,
+            change: { remove: memberToRemove },
+            label: "remaining",
+        });
 
-        const deleted = this.collabRepo.delete(id);
-        await this.projectRepo.incrementTotals(project, { collabs: -1 });
-        if (!collabDoc.isLeadPI) {
-            await this.notificationService.notifyProjectRemoval(
-                String(collabDoc.member), projectDoc.title, collabDoc.role
-            );
-        }
-        await this.collabRepo.updateFemaleProportionByProject(project);
+        // Delete only after all validations pass.
+        const deleted = await this.collabRepo.delete(id);
+
+        await this.notificationService.notifyProjectRemoval(
+            memberToRemove,
+            projectDoc.title,
+            collabDoc.role
+        );
+
+        await this.collabRepo.updateFemaleProportionByProject(projectId);
+
         return deleted;
     }
 }

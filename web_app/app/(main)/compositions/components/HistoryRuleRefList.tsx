@@ -4,9 +4,9 @@ import { Button } from 'primereact/button';
 import { Dropdown } from 'primereact/dropdown';
 
 import {
-    HistoryContext,
     HistoryRuleReference
 } from '../models/history-rule-reference.model';
+import { HistoryContext } from '../models/history.model';
 
 export interface LookupOption {
     label: string;

@@ -6,6 +6,7 @@ import {
 } from "./publication.dto";
 import { IPublication, Publication, PublicationStatus } from "./publication.model";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
+import { toObjectId } from "../../../common/utils/mongoose.utils";
 
 
 export interface IPublicationRepository {
@@ -13,7 +14,7 @@ export interface IPublicationRepository {
     find(filters: FilterPublicationsOptions): Promise<Partial<IPublication>[]>;
     create(data: CreatePublicationDTO): Promise<IPublication>;
     update(id: string, data: UpdatePublicationDTO["data"]): Promise<IPublication | null>;
-    updateStatus(id: string, newStatus: PublicationStatus): Promise<IPublication | null>;
+    updateStatus(id: string, newStatus: PublicationStatus, userId: string, reason?: string): Promise<IPublication | null>;
     delete(id: string): Promise<IPublication | null>;
 }
 
@@ -25,7 +26,7 @@ export class PublicationRepository implements IPublicationRepository {
             .exec();
     }
 
-    async find(filters: FilterPublicationsOptions, options?:FilterOptions): Promise<Partial<IPublication>[]> {
+    async find(filters: FilterPublicationsOptions, options?: FilterOptions): Promise<Partial<IPublication>[]> {
         const query: any = {};
 
         // Filter by applicant if provided
@@ -75,12 +76,39 @@ export class PublicationRepository implements IPublicationRepository {
             .lean<IPublication>();
     }
 
-    async updateStatus(id: string, newStatus: PublicationStatus) {
+    /**
+        * Update status and status history.
+        */
+    async updateStatus(
+        id: string,
+        status: PublicationStatus,
+        userId: string,
+        reason?: string,
+    ): Promise<IPublication | null> {
+
         return Publication.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
-            { $set: { status: newStatus } },
-            { new: true }
-        ).exec();
+            {
+                $set: {
+                    status
+                },
+                $push: {
+                    statusHistory: {
+                        status,
+                        changedBy:
+                            toObjectId(userId),
+                        changedAt: new Date(),
+                        reason
+                    }
+                }
+            },
+            {
+                new: true,
+                runValidators: true
+            }
+        )
+            .lean<IPublication>()
+            .exec();
     }
 
     async exists(filters: FilterPublicationsOptions): Promise<boolean> {

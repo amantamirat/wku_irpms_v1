@@ -756,13 +756,15 @@ export class NewLegacySeeder {
 */
 
 
-                const proj = await this.projectService.create(
-                    dto, dto.leadPI, { skipValidation: true }
-                );
-
-                if (proj) {
-                    await this.grantRepo.consumeBudget(grantId, dto.usedBudget);
-                }
+                /*
+                                const proj = await this.projectService.internalCreate({
+                                    ...dto, leadPI: dto.leadPI, totalBudget: dto.usedBudget, totalDuration: 1
+                                }, { skipValidation: true }
+                                );
+                
+                                if (proj) {
+                                    await this.grantRepo.consumeBudget(grantId, dto.usedBudget);
+                                }*/
 
 
                 totalUsed = totalUsed + dto.usedBudget;

@@ -2,11 +2,12 @@
 
 import React from 'react';
 import { Divider } from 'primereact/divider';
-import { HistoryRule, HistoryMetric, HistoryParticipation } from '../models/history.model';
+import { IHistoryRule, HistoryParticipation } from '../models/history.model';
 import { IRange } from '@/types/range';
+import { ProjectStatus } from '../../projects/models/project.model';
 
 interface HistoryRuleViewProps {
-    historyRule: HistoryRule;
+    historyRule: IHistoryRule;
     title?: string;
 }
 
@@ -17,20 +18,14 @@ interface HistoryMetricConfig {
     badgeSeverity: string;
 }
 
-const metricConfigMap: Record<HistoryMetric, { label: string; icon: string; badgeSeverity: string }> = {
-    [HistoryMetric.PROJECT_DRAFT]: { label: 'Draft Projects', icon: 'pi pi-file', badgeSeverity: 'text-gray-500' },
-    [HistoryMetric.PROJECT_APPROVED]: { label: 'Approved Projects', icon: 'pi pi-check', badgeSeverity: 'text-blue-500' },
-    [HistoryMetric.PROJECT_REFUSED]: { label: 'Refused Projects', icon: 'pi pi-ban', badgeSeverity: 'text-red-500' },
-    [HistoryMetric.PROJECT_GRANTED]: { label: 'Granted Projects', icon: 'pi pi-check-circle', badgeSeverity: 'text-green-500' },
-    [HistoryMetric.PROJECT_COMPLETED]: { label: 'Completed Projects', icon: 'pi pi-flag-fill', badgeSeverity: 'text-purple-500' },
-    [HistoryMetric.PROJECT_TERMINATED]: { label: 'Terminated Projects', icon: 'pi pi-ban', badgeSeverity: 'text-red-500' },
-    [HistoryMetric.PROJECT_VERIFIED]: { label: 'Verified Projects', icon: 'pi pi-verified', badgeSeverity: 'text-teal-500' },
-
-    [HistoryMetric.APPLICATION_SUBMITTED]: { label: 'Submitted Applications', icon: 'pi pi-send', badgeSeverity: 'text-blue-500' },
-    [HistoryMetric.APPLICATION_SHORTLISTED]: { label: 'Shortlisted Applications', icon: 'pi pi-star', badgeSeverity: 'text-amber-500' },
-    [HistoryMetric.APPLICATION_NOT_SHORTLISTED]: { label: 'Not Shortlisted Applications', icon: 'pi pi-star-fill', badgeSeverity: 'text-gray-400' },
-    [HistoryMetric.APPLICATION_ACCEPTED]: { label: 'Accepted Applications', icon: 'pi pi-check-circle', badgeSeverity: 'text-green-500' },
-    [HistoryMetric.APPLICATION_REJECTED]: { label: 'Rejected Applications', icon: 'pi pi-times-circle', badgeSeverity: 'text-orange-500' },
+const metricConfigMap: Record<ProjectStatus, { label: string; icon: string; badgeSeverity: string }> = {
+    [ProjectStatus.draft]: { label: 'Draft Projects', icon: 'pi pi-file', badgeSeverity: 'text-gray-500' },
+    [ProjectStatus.approved]: { label: 'Approved Projects', icon: 'pi pi-check', badgeSeverity: 'text-blue-500' },
+    [ProjectStatus.refused]: { label: 'Refused Projects', icon: 'pi pi-ban', badgeSeverity: 'text-red-500' },
+    [ProjectStatus.granted]: { label: 'Granted Projects', icon: 'pi pi-check-circle', badgeSeverity: 'text-green-500' },
+    [ProjectStatus.completed]: { label: 'Completed Projects', icon: 'pi pi-flag-fill', badgeSeverity: 'text-purple-500' },
+    [ProjectStatus.terminated]: { label: 'Terminated Projects', icon: 'pi pi-ban', badgeSeverity: 'text-red-500' },
+    [ProjectStatus.verified]: { label: 'Verified Projects', icon: 'pi pi-verified', badgeSeverity: 'text-teal-500' },
 };
 
 export const HistoryRuleView: React.FC<HistoryRuleViewProps> = ({
@@ -52,14 +47,14 @@ export const HistoryRuleView: React.FC<HistoryRuleViewProps> = ({
         return null;
     };
 
-    const totalFields = historyRule.total?.fields || [];
-    const totalRange = historyRule.total?.range;
-    const hasValidRange = totalRange && (totalRange.min !== undefined || totalRange.max !== undefined);
+    const metricsFields = historyRule.metrics || [];
+    const sumRange = historyRule.sumRange;
+    const hasValidRange = sumRange && (sumRange.min !== undefined || sumRange.max !== undefined);
 
-    const projectFields = totalFields.filter((f) => f.startsWith('project.'));
-    const applicationFields = totalFields.filter((f) => f.startsWith('application.'));
+    const projectFields = metricsFields.filter((f) => f.startsWith('project.'));
+    const applicationFields = metricsFields.filter((f) => f.startsWith('application.'));
 
-    const getMetricConfigs = (fields: HistoryMetric[]): HistoryMetricConfig[] => {
+    const getMetricConfigs = (fields: ProjectStatus[]): HistoryMetricConfig[] => {
         return fields.map((field) => {
             const config = metricConfigMap[field] || {
                 label: field,
@@ -68,7 +63,7 @@ export const HistoryRuleView: React.FC<HistoryRuleViewProps> = ({
             };
             return {
                 ...config,
-                range: totalRange
+                range: sumRange
             };
         });
     };
@@ -106,7 +101,7 @@ export const HistoryRuleView: React.FC<HistoryRuleViewProps> = ({
         </div>
     );
 
-    const hasMetrics = hasValidRange && totalFields.length > 0;
+    const hasMetrics = hasValidRange && metricsFields.length > 0;
 
     return (
         <div className="history-rule-view p-3 surface-card border-round shadow-1">
@@ -123,7 +118,14 @@ export const HistoryRuleView: React.FC<HistoryRuleViewProps> = ({
                 )}
             </div>
 
-            {/* Description */}
+            {/* Context & Description */}
+            {historyRule.context && (
+                <div className="mb-2">
+                    <span className="text-xs font-semibold text-600 bg-surface-200 px-2 py-0.5 border-round">
+                        Context: {historyRule.context}
+                    </span>
+                </div>
+            )}
             <p className="text-sm line-height-3 text-600 mb-3">
                 {historyRule.description ||
                     'No specific description provided for this history rule.'}

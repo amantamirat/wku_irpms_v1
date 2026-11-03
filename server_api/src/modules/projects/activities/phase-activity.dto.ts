@@ -9,6 +9,7 @@ import {
 export interface PhaseActivityDto {
     title: string;
     description?: string;
+   
 
     cost: number;
     detailCost?: IPhaseActivityDetailCost;

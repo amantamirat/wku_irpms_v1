@@ -5,10 +5,8 @@ import {
     CreateHistoryDTO,
     UpdateHistoryDTO
 } from "./history.dto";
-import {
-    HistoryMetric,
-    IHistoryRule
-} from "./history.model";
+import { IHistoryRule } from "./history.model";
+
 import { HistoryRepository } from "./history.repository";
 
 export class HistoryService {
@@ -20,7 +18,7 @@ export class HistoryService {
     // CREATE
     // ---------------------------------------------------
 
-    async create(dto: CreateHistoryDTO): Promise<IHistoryRule> {
+    async create(dto: CreateHistoryDTO): Promise<any> {
         const exists = await this.repository.findByName(dto.name);
 
         if (exists) {
@@ -124,7 +122,7 @@ export class HistoryService {
         dto: Partial<CreateHistoryDTO>
     ): void {
         this.validateRanges(dto);
-        this.validateTotal(dto);
+        //this.validateTotal(dto);
     }
 
     // ---------------------------------------------------
@@ -135,53 +133,10 @@ export class HistoryService {
         dto: Partial<CreateHistoryDTO>
     ): void {
         const ranges = [
-            /*
-            [
-                "Project granted",
-                dto.project?.granted
-            ],
-            [
-                "Project refused",
-                dto.project?.refused
-            ],
-            [
-                "Project completed",
-                dto.project?.completed
-            ],
-            [
-                "Project verified",
-                dto.project?.verified
-            ],
 
-            [
-                "Application submitted",
-                dto.application?.submitted
-            ],
-            [
-                "Application accepted",
-                dto.application?.accepted
-            ],
-            [
-                "Application rejected",
-                dto.application?.rejected
-            ],
-
-            [
-                "Verification submitted",
-                dto.verification?.submitted
-            ],
-            [
-                "Verification verified",
-                dto.verification?.verified
-            ],
-            [
-                "Verification rejected",
-                dto.verification?.rejected
-            ],
-*/
             [
                 "Total",
-                dto.total?.range
+                dto.sumRange
             ]
         ] as const;
 
@@ -199,61 +154,5 @@ export class HistoryService {
         }
     }
 
-    // ---------------------------------------------------
-    // TOTAL VALIDATION
-    // ---------------------------------------------------
 
-    private validateTotal(
-        dto: Partial<CreateHistoryDTO>
-    ): void {
-        const total = dto.total;
-
-        if (!total) {
-            return;
-        }
-
-        // -----------------------------------------------
-        // At least one metric must be selected
-        // -----------------------------------------------
-
-        if (
-            !Array.isArray(total.fields) ||
-            total.fields.length === 0
-        ) {
-            throw new AppError(
-                ERROR_CODES.INVALID_INPUT,
-                "Total must contain at least one metric field."
-            );
-        }
-
-        // -----------------------------------------------
-        // Validate metric values
-        // -----------------------------------------------
-
-        const validMetrics = new Set(
-            Object.values(HistoryMetric)
-        );
-
-        for (const field of total.fields) {
-            if (!validMetrics.has(field)) {
-                throw new AppError(
-                    ERROR_CODES.INVALID_INPUT,
-                    `Invalid history metric: ${field}`
-                );
-            }
-        }
-
-        // -----------------------------------------------
-        // Remove duplicate fields
-        // -----------------------------------------------
-
-        const uniqueFields = new Set(total.fields);
-
-        if (uniqueFields.size !== total.fields.length) {
-            throw new AppError(
-                ERROR_CODES.INVALID_INPUT,
-                "Total metric fields cannot contain duplicates."
-            );
-        }
-    }
 }

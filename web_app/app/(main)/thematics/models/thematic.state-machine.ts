@@ -5,9 +5,6 @@ export enum ThematicStatus {
     archived = 'archived'
 }
 
-
-
-
 export const THEMATIC_TRANSITIONS: TransitionMap = {
     [ThematicStatus.draft]: [
         {

@@ -10,6 +10,7 @@ import { Message } from 'primereact/message';
 import { useState } from 'react';
 import { Project } from '../../models/project.model';
 import { ValidationReport } from '@/components/ValidationErrorReport';
+import { extractId } from '@/utils/utils';
 
 
 
@@ -56,10 +57,12 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
         clearErrors();
 
         try {
-            const result = await ProjectApi.apply({
+            const callid = extractId(data.call);
+            if (!callid) {
+                return;
+            }
+            const result = await ProjectApi.apply(callid, {
                 ...data,
-                totalBudget,
-                totalDuration,
                 file: selectedFile
             });
 

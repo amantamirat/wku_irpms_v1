@@ -1,5 +1,5 @@
 //experience.dto.ts
-import { EmploymentType } from "./experience.model";
+import { EmploymentType, ExperienceStatus } from "./experience.model";
 
 
 export interface CreateExperienceDTO {
@@ -10,7 +10,6 @@ export interface CreateExperienceDTO {
     endDate?: Date | null;
     isCurrent: boolean;
     employmentType: EmploymentType;
-    userId: string;
 }
 
 export interface UpdateExperienceDTO {
@@ -32,6 +31,7 @@ export interface FilterExperiencesDTO {
     user?: string;
     organization?: string;
     position?: string;
+    status?: ExperienceStatus
 }
 
 

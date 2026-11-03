@@ -29,13 +29,13 @@ export class ProjectComponentService {
     private async validateUsers(
         dto: {
             contributors: (string | any)[];
-            investigator: string | any;
+            //investigator: string | any;
         }
     ) {
 
         const userIds = [
             ...dto.contributors.map(String),
-            String(dto.investigator),
+            // String(dto.investigator),
         ];
 
         const uniqueUserIds = [...new Set(userIds)];
@@ -89,55 +89,7 @@ export class ProjectComponentService {
     }
 
 
-    // ---------------------------------------------------
-    // CREATE MANY
-    // ---------------------------------------------------
 
-    async createMany(
-        dtos: CreateProjectComponentDTO[],
-        userId: string
-    ) {
-
-        if (!dtos.length) return [];
-
-        const projectId = String(dtos[0].project);
-
-        // All components must belong to the same project.
-        const hasDifferentProject = dtos.some(
-            item => String(item.project) !== projectId
-        );
-
-        if (hasDifferentProject) {
-            throw new AppError(
-                ERROR_CODES.INVALID_INPUT
-            );
-        }
-
-        const {
-            projectDoc,
-            isLeadPI,
-        } = await this.projectAuth.auth(
-            projectId,
-            userId,
-            PERMISSIONS.PROJECT_COMPONENT.CREATE
-        );
-
-        if (
-            isLeadPI &&
-            projectDoc.status !== ProjectStatus.draft
-        ) {
-            throw new AppError(
-                ERROR_CODES.PROJECT_NOT_DRAFT
-            );
-        }
-
-        // Validate all investigators and contributors.
-        for (const dto of dtos) {
-            await this.validateUsers(dto);
-        }
-
-        return await this.componentRepo.createMany(dtos);
-    }
 
 
     // ---------------------------------------------------
@@ -229,14 +181,14 @@ export class ProjectComponentService {
 
         // Validate users only if user fields are being updated.
         if (
-            data.contributors !== undefined ||
-            data.investigator !== undefined
+            data.contributors !== undefined //||
+            //data.investigator !== undefined
         ) {
             await this.validateUsers({
                 contributors:
-                    data.contributors ?? component.contributors.map(String),
-                investigator:
-                    data.investigator ?? String(component.investigator),
+                    data.contributors ?? component.contributors.map(String)
+                /*investigator:
+                    data.investigator ?? String(component.investigator),*/
             });
         }
 

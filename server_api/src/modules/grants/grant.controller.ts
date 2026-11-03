@@ -96,6 +96,7 @@ export class GrantController {
                 title,
                 description,
                 constraint,
+                composition,
                 agreementTemplate,
                 amount,
                 thematic
@@ -107,6 +108,7 @@ export class GrantController {
                     title,
                     description,
                     constraint,
+                    composition,
                     agreementTemplate,
                     amount,
                     thematic

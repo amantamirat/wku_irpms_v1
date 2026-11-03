@@ -3,39 +3,34 @@ import { ERROR_CODES } from "../../common/errors/error.codes";
 
 import {
     CreateUserDTO,
-    UpdateUserDTO,
     FilterUsersDTO,
-    UpdateRolesDTO
+    UpdateRolesDTO,
+    UpdateUserDTO
 } from "./user.dto";
 
 import {
-    IUserRepository,
-    UserRepository
+    IUserRepository
 } from "./user.repository";
 
 import {
-    IOrganizationRepository,
-    OrganizationRepository
+    IOrganizationRepository
 } from "../organization/organization.repository";
 
 import {
-    IRoleRepository,
-    RoleRepository
+    IRoleRepository
 } from "../permissions/roles/role.repository";
 
 import { Unit } from "../../common/constants/enums";
 import { FilterOptions } from "../../common/dtos/filter.dto";
-import { IUser, UserScope } from "./user.model";
 import { toObjectId } from "../../common/utils/mongoose.utils";
-import { AuthScope } from "../auth/auth.types";
-import { CollaboratorRepository, ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
+import { ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
 
 
 export class UserService {
 
     constructor(
         private userRepo: IUserRepository,
-        private orgnRepo: IOrganizationRepository,
+        private orgnizationRepo: IOrganizationRepository,
         private roleRepository: IRoleRepository,
         private collabRepository: ICollaboratorRepository
     ) { }
@@ -48,7 +43,7 @@ export class UserService {
     async validateWorkspace(workspace: string) {
 
         const organization =
-            await this.orgnRepo.findById(workspace);
+            await this.orgnizationRepo.findById(workspace);
 
         if (!organization) {
             throw new AppError(
@@ -291,7 +286,7 @@ export class UserService {
             } else {
 
                 const organizations =
-                    await this.orgnRepo.find({
+                    await this.orgnizationRepo.find({
                         ids: organizationIds
                     });
 

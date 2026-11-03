@@ -17,6 +17,7 @@ import {
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { ScopeFilter } from "../../auth/auth.types";
 import { Project } from "../project.model";
+import { toObjectId } from "../../../common/utils/mongoose.utils";
 
 
 export interface ICollaboratorRepository {
@@ -53,7 +54,9 @@ export interface ICollaboratorRepository {
 
     updateStatus(
         id: string,
-        newStatus: CollaboratorStatus
+        newStatus: CollaboratorStatus,
+        userId: string,
+        reason?: string,
     ): Promise<ICollaborator | null>;
 
     exists(
@@ -360,7 +363,9 @@ export class CollaboratorRepository
      */
     async updateStatus(
         id: string,
-        newStatus: CollaboratorStatus
+        newStatus: CollaboratorStatus,
+        userId: string,
+        reason?: string,
     ): Promise<ICollaborator | null> {
 
         return Collaborator.findByIdAndUpdate(
@@ -368,6 +373,15 @@ export class CollaboratorRepository
             {
                 $set: {
                     status: newStatus
+                },
+                $push: {
+                    statusHistory: {
+                        newStatus,
+                        changedBy:
+                            toObjectId(userId),
+                        changedAt: new Date(),
+                        reason
+                    }
                 }
             },
             {

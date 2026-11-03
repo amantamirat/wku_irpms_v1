@@ -10,15 +10,21 @@ import { Message } from 'primereact/message';
 import { classNames } from 'primereact/utils';
 
 import { ItemFormRenderProps } from '@/components/ItemManager';
-import { IRange } from '@/types/range';
 import {
-    HistoryRule,
-    HistoryMetric,
+    IHistoryRule,
+    HistoryContext,
     HistoryParticipation,
     validateHistoryRule
 } from '../models/history.model';
+import { ProjectStatus } from '../../projects/models/project.model';
+import { IRange } from '@/types/range';
 
-/* ---------- Config (stable references) ---------- */
+/* ---------- Config ---------- */
+
+const CONTEXT_OPTIONS = Object.values(HistoryContext).map((c) => ({
+    label: c.charAt(0) + c.slice(1).toLowerCase(),
+    value: c
+}));
 
 const PARTICIPATION_OPTIONS = [
     { label: 'Lead PI', value: HistoryParticipation.LEAD },
@@ -26,50 +32,27 @@ const PARTICIPATION_OPTIONS = [
     { label: 'Any', value: HistoryParticipation.ANY }
 ];
 
-const METRIC_OPTIONS = Object.values(HistoryMetric).map((m) => ({
+const METRIC_OPTIONS = Object.values(ProjectStatus).map((m) => ({
     label: m,
     value: m
 }));
 
-type Draft = Partial<HistoryRule>;
+type Draft = Partial<IHistoryRule>;
 
 const emptyRule = (): Draft => ({
     name: '',
     description: '',
-    participation: HistoryParticipation.ANY
+    context: HistoryContext.CALL,
+    participation: HistoryParticipation.ANY,
+    metrics: [],
+    sumRange: { min: 0, max: undefined } as unknown as IRange // or cast appropriately depending on IRange definition
 });
 
-// Deep-copy so editing never mutates the original item.
 const cloneRule = (item: Draft): Draft => ({
     ...item,
-    total: item.total
-        ? { ...item.total, fields: [...item.total.fields], range: item.total.range && { ...item.total.range } }
-        : undefined
+    metrics: item.metrics ? [...item.metrics] : [],
+    sumRange: item.sumRange ? { ...item.sumRange } : ({ min: undefined, max: undefined } as unknown as IRange)
 });
-
-/**
- * Sets or clears `total`. When there are no fields and no bounds,
- * the total rule is removed so it isn't enforced.
- */
-const applyTotal = (
-    prev: Draft,
-    fields: HistoryMetric[],
-    range: Partial<IRange>
-): Draft => {
-    const next = { ...prev };
-    const isEmpty =
-        fields.length === 0 &&
-        range.min === undefined &&
-        range.max === undefined;
-
-    if (isEmpty) {
-        delete next.total;
-    } else {
-        next.total = { fields, range: range as IRange };
-    }
-    return next;
-};
-
 /* ---------- Form ---------- */
 
 const HistoryForm = ({
@@ -77,8 +60,7 @@ const HistoryForm = ({
     saving,
     formId,
     onSubmit
-}: ItemFormRenderProps<HistoryRule>) => {
-    // The form is mounted when the dialog opens, so state starts fresh each time.
+}: ItemFormRenderProps<IHistoryRule>) => {
     const [localItem, setLocalItem] = useState<Draft>(() =>
         item ? cloneRule(item) : emptyRule()
     );
@@ -86,33 +68,26 @@ const HistoryForm = ({
     const [formError, setFormError] = useState<string | null>(null);
 
     const nameMissing = !localItem.name?.trim();
+    const contextMissing = !localItem.context;
     const participationMissing = !localItem.participation;
+    const metricsMissing = !localItem.metrics || localItem.metrics.length === 0;
 
-    const total = localItem.total;
-    const selectedFields = total?.fields ?? [];
-
-    const updateField = <K extends keyof HistoryRule>(
+    const updateField = <K extends keyof IHistoryRule>(
         field: K,
-        value: HistoryRule[K]
+        value: IHistoryRule[K]
     ) => {
         setLocalItem((prev) => ({ ...prev, [field]: value }));
         setFormError(null);
     };
 
-    const updateFields = (fields: HistoryMetric[]) => {
-        setLocalItem((prev) =>
-            applyTotal(prev, fields, prev.total?.range ?? {})
-        );
-        setFormError(null);
-    };
-
     const updateBound = (bound: 'min' | 'max', value: number | null) => {
-        setLocalItem((prev) =>
-            applyTotal(prev, prev.total?.fields ?? [], {
-                ...(prev.total?.range ?? {}),
+        setLocalItem((prev) => ({
+            ...prev,
+            sumRange: {
+                ...(prev.sumRange ?? {}),
                 [bound]: value ?? undefined
-            })
-        );
+            } as any
+        }));
         setFormError(null);
     };
 
@@ -121,13 +96,13 @@ const HistoryForm = ({
         setSubmitted(true);
 
         if (saving) return;
-        if (nameMissing || participationMissing) return;
+        if (nameMissing || contextMissing || participationMissing || metricsMissing) return;
 
         const payload = {
             ...localItem,
             name: localItem.name!.trim(),
             description: localItem.description?.trim() || undefined
-        } as HistoryRule;
+        } as IHistoryRule;
 
         const validation = validateHistoryRule(payload);
         if (!validation.valid) {
@@ -138,16 +113,17 @@ const HistoryForm = ({
         await onSubmit(payload);
     };
 
-    // Plain-language preview of what the rule means
+    // Plain-language summary
     const summary = (() => {
-        if (!total || selectedFields.length === 0) return null;
-        const { min, max } = total.range ?? {};
+        const metrics = localItem.metrics ?? [];
+        if (metrics.length === 0) return null;
+        const { min, max } = localItem.sumRange ?? {};
         const bounds =
             min != null && max != null ? `between ${min} and ${max}`
-            : min != null ? `at least ${min}`
-            : max != null ? `at most ${max}`
-            : 'any amount';
-        return `Counts ${selectedFields.join(' + ')} — total must be ${bounds}.`;
+                : min != null ? `at least ${min}`
+                    : max != null ? `at most ${max}`
+                        : 'any amount';
+        return `Sums [${metrics.join(' + ')}] — total must be ${bounds}.`;
     })();
 
     return (
@@ -157,7 +133,6 @@ const HistoryForm = ({
                 <label htmlFor="name" className="font-bold text-sm block mb-2">
                     Rule name <span className="text-red-500">*</span>
                 </label>
-
                 <InputText
                     id="name"
                     value={localItem.name ?? ''}
@@ -165,10 +140,9 @@ const HistoryForm = ({
                     onChange={(e) => updateField('name', e.target.value)}
                     required
                     autoFocus
-                    placeholder="e.g. Experienced Lead Researcher"
+                    placeholder="e.g. Minimum Completed Projects"
                     className={classNames({ 'p-invalid': submitted && nameMissing })}
                 />
-
                 {submitted && nameMissing && (
                     <small className="p-error">Rule name is required.</small>
                 )}
@@ -179,7 +153,6 @@ const HistoryForm = ({
                 <label htmlFor="description" className="font-bold text-sm block mb-2">
                     Description
                 </label>
-
                 <InputTextarea
                     id="description"
                     value={localItem.description ?? ''}
@@ -187,69 +160,87 @@ const HistoryForm = ({
                     onChange={(e) => updateField('description', e.target.value)}
                     rows={2}
                     autoResize
-                    placeholder="Describe the historical requirements for this rule (optional)"
+                    placeholder="Describe the rule requirements (optional)"
                 />
             </div>
 
-            {/* Participation */}
-            <div className="field mb-4">
-                <label htmlFor="participation" className="font-bold text-sm block mb-2">
-                    Participation <span className="text-red-500">*</span>
-                </label>
+            <div className="formgrid grid">
+                {/* Context */}
+                <div className="field col-12 md:col-6 mb-4">
+                    <label htmlFor="context" className="font-bold text-sm block mb-2">
+                        Context <span className="text-red-500">*</span>
+                    </label>
+                    <Dropdown
+                        inputId="context"
+                        value={localItem.context}
+                        options={CONTEXT_OPTIONS}
+                        disabled={saving}
+                        onChange={(e) => updateField('context', e.value)}
+                        placeholder="Select context"
+                        className={classNames({ 'p-invalid': submitted && contextMissing })}
+                    />
+                    {submitted && contextMissing && (
+                        <small className="p-error">Context is required.</small>
+                    )}
+                </div>
 
-                <Dropdown
-                    inputId="participation"
-                    value={localItem.participation}
-                    options={PARTICIPATION_OPTIONS}
-                    disabled={saving}
-                    onChange={(e) => updateField('participation', e.value)}
-                    placeholder="Select participation"
-                    className={classNames({ 'p-invalid': submitted && participationMissing })}
-                />
-
-                {submitted && participationMissing ? (
-                    <small className="p-error">Please select a participation type.</small>
-                ) : (
-                    <small className="text-500 block mt-1">
-                        Whether history counts for projects where the user was the lead PI, a member, or either.
-                    </small>
-                )}
+                {/* Participation */}
+                <div className="field col-12 md:col-6 mb-4">
+                    <label htmlFor="participation" className="font-bold text-sm block mb-2">
+                        Participation <span className="text-red-500">*</span>
+                    </label>
+                    <Dropdown
+                        inputId="participation"
+                        value={localItem.participation}
+                        options={PARTICIPATION_OPTIONS}
+                        disabled={saving}
+                        onChange={(e) => updateField('participation', e.value)}
+                        placeholder="Select participation"
+                        className={classNames({ 'p-invalid': submitted && participationMissing })}
+                    />
+                    {submitted && participationMissing && (
+                        <small className="p-error">Participation is required.</small>
+                    )}
+                </div>
             </div>
 
-            {/* Total aggregated rule */}
-            <div className="p-3 border-1 surface-border border-round surface-card">
+            {/* Aggregated Rule Box */}
+            <div className="p-3 border-1 surface-border border-round surface-card mb-4">
                 <div className="flex align-items-center gap-2 mb-1">
                     <i className="pi pi-chart-bar text-primary" />
-                    <span className="font-semibold text-900">Aggregated history</span>
+                    <span className="font-semibold text-900">Metrics & Sum Range <span className="text-red-500">*</span></span>
                 </div>
                 <small className="text-500 block mb-3">
-                    Sum the selected metrics and require the total to fall within a range.
-                    Leave everything empty to skip this rule.
+                    Select the statuses to track and specify the acceptable aggregate range.
                 </small>
 
                 <div className="field mb-3">
-                    <label htmlFor="total-fields" className="block text-sm text-600 mb-2">
-                        Metrics to sum
+                    <label htmlFor="metrics" className="block text-sm text-600 mb-2">
+                        Metrics to sum <span className="text-red-500">*</span>
                     </label>
                     <MultiSelect
-                        inputId="total-fields"
-                        value={selectedFields}
+                        inputId="metrics"
+                        value={localItem.metrics ?? []}
                         options={METRIC_OPTIONS}
                         disabled={saving}
-                        onChange={(e) => updateFields(e.value)}
+                        onChange={(e) => updateField('metrics', e.value)}
                         placeholder="Select metrics..."
                         display="chip"
+                        className={classNames({ 'p-invalid': submitted && metricsMissing })}
                     />
+                    {submitted && metricsMissing && (
+                        <small className="p-error block mt-1">At least one metric is required.</small>
+                    )}
                 </div>
 
                 <div className="grid">
                     <div className="col-12 sm:col-6">
-                        <label htmlFor="total-min" className="block text-sm text-600 mb-2">
-                            Total minimum
+                        <label htmlFor="sumRange-min" className="block text-sm text-600 mb-2">
+                            Sum Minimum
                         </label>
                         <InputNumber
-                            inputId="total-min"
-                            value={total?.range?.min ?? null}
+                            inputId="sumRange-min"
+                            value={localItem.sumRange?.min ?? null}
                             disabled={saving}
                             onValueChange={(e) => updateBound('min', e.value ?? null)}
                             min={0}
@@ -259,12 +250,12 @@ const HistoryForm = ({
                     </div>
 
                     <div className="col-12 sm:col-6">
-                        <label htmlFor="total-max" className="block text-sm text-600 mb-2">
-                            Total maximum
+                        <label htmlFor="sumRange-max" className="block text-sm text-600 mb-2">
+                            Sum Maximum
                         </label>
                         <InputNumber
-                            inputId="total-max"
-                            value={total?.range?.max ?? null}
+                            inputId="sumRange-max"
+                            value={localItem.sumRange?.max ?? null}
                             disabled={saving}
                             onValueChange={(e) => updateBound('max', e.value ?? null)}
                             min={0}
@@ -276,7 +267,7 @@ const HistoryForm = ({
 
                 {summary && (
                     <div className="flex align-items-center gap-2 mt-3 text-sm text-600">
-                        <i className="pi pi-info-circle" />
+                        <i className="pi pi-info-circle text-primary" />
                         <span>{summary}</span>
                     </div>
                 )}

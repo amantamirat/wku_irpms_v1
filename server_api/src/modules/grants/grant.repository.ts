@@ -173,6 +173,8 @@ export class GrantRepository implements IGrantRepository {
         if (options?.populate) {
             dbQuery
                 .populate("organization")
+                .populate("constraint")
+                .populate("composition")
                 .populate("thematic");
         }
 
@@ -192,6 +194,9 @@ export class GrantRepository implements IGrantRepository {
             amount: dto.amount,
             constraint: dto.constraint
                 ? new mongoose.Types.ObjectId(dto.constraint)
+                : undefined,
+            composition: dto.composition
+                ? new mongoose.Types.ObjectId(dto.composition)
                 : undefined,
             agreementTemplate: dto.agreementTemplate
                 ? new mongoose.Types.ObjectId(dto.agreementTemplate)

@@ -128,12 +128,12 @@ export class CollaboratorController {
         try {
             if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
-            const { current, next } = req.body;
+            const { current, next,reason } = req.body;
             const dto: TransitionRequestDto = {
                 id: String(id),
                 current: current,
                 next: next,
-                userId: req.auth.userId,
+                reason:reason
             };
             const updated = await this.service.transitionState(dto, req.auth.userId);
             successResponse(res, 200, "Collaborator status updated successfully", updated);

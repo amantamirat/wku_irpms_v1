@@ -19,6 +19,7 @@ export interface IGrant extends Document {
     title: string;
     amount: number;
     constraint?: mongoose.Types.ObjectId | null;
+    composition?: mongoose.Types.ObjectId | null;
     thematic: mongoose.Types.ObjectId;
     description?: string;
     usedBudget: number;   // global used amount
@@ -53,6 +54,11 @@ const GrantSchema = new Schema<IGrant>({
     constraint: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.CONSTRAINT,
+        required: false,
+    },
+    composition: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.COMPOSITION,
         required: false,
     },
     amount:

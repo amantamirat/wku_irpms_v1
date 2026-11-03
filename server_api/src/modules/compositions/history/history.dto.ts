@@ -1,38 +1,17 @@
 import { IRange } from "../../../common/types/range";
+import { ProjectStatus } from "../../projects/project.model";
 import {
+    HistoryContext,
     HistoryParticipation,
-    IHistoryRuleTotal
 } from "./history.model";
 
 export interface CreateHistoryDTO {
     name: string;
-
     description?: string;
-
-    participation?: HistoryParticipation;
-
-    /*
-
-    project?: {
-        granted?: IRange;
-        refused?: IRange;
-        completed?: IRange;
-        verified?: IRange;
-    };
-
-    application?: {
-        submitted?: IRange;
-        accepted?: IRange;
-        rejected?: IRange;
-    };
-
-    verification?: {
-        submitted?: IRange;
-        verified?: IRange;
-        rejected?: IRange;
-    };
-*/
-    total?: IHistoryRuleTotal;
+    context: HistoryContext;
+    participation: HistoryParticipation;
+    metrics?: ProjectStatus[];
+    sumRange?: IRange;
 }
 
 export interface UpdateHistoryDTO {

@@ -45,7 +45,7 @@ router.post(
 );
 
 router.post(
-    '/apply',
+    '/apply/:id',
     verifyAuthToken,
     checkPermission('project:apply'),
     upload.single('file', ['application/pdf']),

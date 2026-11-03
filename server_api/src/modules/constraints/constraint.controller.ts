@@ -1,10 +1,9 @@
 import { Request, Response } from "express";
+import { errorResponse, successResponse } from "../../common/helpers/response";
 import {
-    CreateConstraintDTO,
-    UpdateConstraintDTO,
+    CreateConstraintDTO
 } from "./constraint.dto";
 import { ConstraintService } from "./constraint.service";
-import { successResponse, errorResponse } from "../../common/helpers/response";
 
 
 export class ConstraintController {

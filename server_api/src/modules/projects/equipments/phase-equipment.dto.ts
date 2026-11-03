@@ -1,7 +1,7 @@
 import mongoose from "mongoose";
 import { EquipmentUnit, PhaseEquipmentStatus } from "./phase-equipment.model";
 
-export interface PhaseEquipmentDto {
+export interface EquipmentDto {
     itemName: string;
 
     description: string;
@@ -14,7 +14,7 @@ export interface PhaseEquipmentDto {
     packSize?: number;
 
     // optional: price of ONE pack. Defaults to 0 (organization-owned materials)
-    unitPrice?: number;
+    unitPrice: number;
 
     // number of packs
     quantity: number;
@@ -26,7 +26,7 @@ export interface PhaseEquipmentDto {
     status?: PhaseEquipmentStatus;
 }
 
-export interface CreatePhaseEquipmentDto extends PhaseEquipmentDto {
+export interface CreatePhaseEquipmentDto extends EquipmentDto {
     project: string;
     phase?: string;
 }

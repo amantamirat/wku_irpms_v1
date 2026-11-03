@@ -11,8 +11,8 @@ export interface CreateCallDTO {
     organization?: string;
     calendar: string;
     title: string;
-    constraint?: string;
-    composition?: string;
+    //constraint?: string;
+    //composition?: string;
     description?: string;
     //stages?: CreateStageDTO[];
     //status?: CallStatus;
@@ -47,8 +47,8 @@ export interface UpdateCallDTO {
         title: string;
         description: string;
         budget: number;
-        constraint: string;
-        composition: string;
+        //constraint: string;
+        //composition: string;
        // deadline: Date | null;
     }>;
 }

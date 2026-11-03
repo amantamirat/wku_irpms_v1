@@ -22,7 +22,7 @@ export class PhaseController {
                 order,       // Added: required for unique sequence
                 duration,
                 budget,
-                description,
+                //description,
                 project,
                 startDate, endDate
                 // breakdown    // Fixed: removed illegal [] syntax
@@ -33,14 +33,14 @@ export class PhaseController {
                 // order: Number(order),
                 duration: Number(duration),
                 budget: Number(budget),
-                description,
+                //description,
                 project: project as string,
                 startDate, endDate,
                 //breakdown,    // Passed to service for validation
                 userId: req.auth.userId,
             };
 
-            const created = await this.service.create(data);
+            const created = await this.service.create(data, req.auth.userId);
             successResponse(res, 201, "Phase created successfully", created);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -81,7 +81,7 @@ export class PhaseController {
                     title,
                     duration,
                     budget,
-                    description,
+                    //description,
                     startDate, endDate
                 },
                 userId: req.auth.userId,
@@ -101,7 +101,7 @@ export class PhaseController {
         try {
             if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
-            const { current, next } = req.body;
+            const { current, next, reason } = req.body;
 
             const dto: TransitionRequestDto = {
                 id: String(id),

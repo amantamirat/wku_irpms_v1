@@ -9,9 +9,8 @@ import { CalendarRepository } from "../modules/calendar/calendar.repository";
 import { CallRepository } from "../modules/calls/call.repository";
 import { StageRepository } from "../modules/calls/stages/stage.repository";
 import { StageService } from "../modules/calls/stages/stage.service";
-import { CompositionValidationService } from "../modules/compositions/composition-validator.service";
 import { CompositionRepository } from "../modules/compositions/composition.repository";
-import { HistoryValidatorService } from "../modules/compositions/history/history-validator.service";
+
 import { HistoryRepository } from "../modules/compositions/history/history.repository";
 import { ProfileValidatorService } from "../modules/compositions/profile/profile-validator.service";
 import { ProfileRepository } from "../modules/compositions/profile/profile.repository";
@@ -61,6 +60,9 @@ import { DocumentTemplateRepository } from "../modules/document-templates/docume
 import { PublicationRepository } from "../modules/users/publications/publication.repository";
 import { ResultRepository } from "../modules/reviewers/results/result.repository";
 import { ProjectComponentRepository } from "../modules/projects/components/component.repository";
+import { HistoryValidationService } from "../modules/compositions/history/history-validation-service";
+import { RequirementValidationService } from "../modules/compositions/requirements/requirement.validation-service";
+import { CompositionValidationService } from "../modules/compositions/composition-validation-service";
 
 export const fileStorageService = new FileStorageService();
 
@@ -130,28 +132,19 @@ export const templateValidtor = new TemplateValidationService(
 );
 //validator services 
 export const constraintValidator = new ConstraintValidationService(
-    constraintRepo, themeRepo, projectRepo, phaseRepo, activityRepo);
+    constraintRepo, projectRepo, themeRepo, collaboratorRepo, phaseRepo, activityRepo, equipmentRepo, componentRepo);
 
 export const profileValidator = new ProfileValidatorService(
     exprienceRepo, specializationRepo
 );
 
-export const historyValidator = new HistoryValidatorService(
-    applicationRepo, projectRepo, collaboratorRepo, grantRepo
-);
+export const historyValidator = new HistoryValidationService();
+export const memeberValidator = new RequirementValidationService(profileRepo, historyRepo, profileValidator, historyValidator);
 
 //validator services 
-export const compositionValidator = new CompositionValidationService(
-    compositionRepo,
-    grantRepo,
-    projectRepo,
-    userRepo,
-    collaboratorRepo,
-    new ProfileRepository(),
-    new HistoryRepository(),
-    new RequirementRepository(),
-    profileValidator, historyValidator);
-
+export const compositionValidator = new CompositionValidationService(compositionRepo, memeberValidator,
+    requirementRepo, collaboratorRepo, projectRepo, grantRepo, userRepo
+);
 
 export const filterService = new ScopeFilterService(projectRepo, userRepo);
 
@@ -160,13 +153,13 @@ export const stageService = new StageService(stageRepo, callRepo, evaluationRepo
 
 export const projectAuth = new ProjectAuth(projectRepo, authPermissionService);
 
-export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, callRepo, stageRepo,
+export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, grantRepo, callRepo, stageRepo,
     applicationRepo, constraintValidator, compositionValidator, projectAuth, notificationService, filterService);
 
 export const phaseActivityService = new PhaseActivityService(activityRepo, projectRepo, phaseRepo, projectAuth)
 
 
-export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, phaseDocRepo, activityRepo, equipmentRepo, projectAuth);
+export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, constraintValidator, phaseDocRepo, activityRepo, equipmentRepo, projectAuth);
 
 
 export const applicationService = new ApplicationService(
@@ -177,8 +170,9 @@ export const applicationService = new ApplicationService(
     collaboratorRepo, userRepo, fileStorageService
 );
 
-export const projectService = new ProjectService(projectRepo, userRepo, collaboratorRepo, phaseRepo, verificationRepo,
-    grantRepo, callRepo, stageRepo,
+export const projectService = new ProjectService(projectRepo, collaboratorRepo, phaseRepo, componentRepo, activityRepo, equipmentRepo,
+    userRepo, verificationRepo,
+    grantRepo, callRepo, calendarRepo, stageRepo,
     collabService, phaseService, applicationService,
     constraintValidator, compositionValidator, templateValidtor, projectAuth,
     authPermissionService, notificationService, filterService, fileStorageService);

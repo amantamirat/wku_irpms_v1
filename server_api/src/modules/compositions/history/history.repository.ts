@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { HistoryRule, IHistoryRule } from "./history.model";
 
 
@@ -26,6 +27,10 @@ export class HistoryRepository {
     ): Promise<IHistoryRule | null> {
 
         return HistoryRule.findById(id);
+    }
+
+    async findByIds(ids: (string | mongoose.Types.ObjectId)[]): Promise<IHistoryRule[]> {
+        return HistoryRule.find({ _id: { $in: ids } }).exec();
     }
 
 

@@ -118,6 +118,7 @@ export class ConstraintService {
             ["Activities", dto.activities],              // was activitiesPerPhase
             ["Equipments", dto.equipments],              // was equipmentsPerPhase
             ["Components", dto.components],              // added
+            ["Component Collaborators", dto.componentCollaborators],    
         ] as const;
 
         for (const [name, range] of ranges) {

@@ -1,4 +1,3 @@
-// reports/components/ConstraintForm.tsx (or your component path)
 'use client';
 
 import { FormEvent, useState } from 'react';
@@ -18,7 +17,7 @@ type RangeKey = {
     [K in keyof Constraint]-?: NonNullable<Constraint[K]> extends IRange ? K : never;
 }[keyof Constraint];
 
-interface RangeFieldConfig {
+export interface RangeFieldConfig {
     key: RangeKey;
     label: string;
     description: string;
@@ -33,7 +32,7 @@ interface SectionConfig {
     fields: RangeFieldConfig[];
 }
 
-const SECTIONS: SectionConfig[] = [
+export const SECTIONS: SectionConfig[] = [
     {
         title: 'Content limits',
         subtitle: 'Control the size of project titles, summaries, and keywords.',
@@ -57,34 +56,42 @@ const SECTIONS: SectionConfig[] = [
         ]
     },
     {
-        title: 'Project structure',
-        subtitle: 'Project size, participants, phases and resources.',
+        title: 'Project budget & duration',
+        subtitle: 'Overall financial ceiling and timeline boundaries for the project.',
+        icon: 'pi pi-wallet',
+        fields: [
+            { key: 'budget', label: 'Project budget', description: 'Total overall project budget range.', unit: 'ETB', currency: true },
+            { key: 'duration', label: 'Project duration', description: 'Total allowed project timeline duration.', unit: 'days' }
+        ]
+    },
+    {
+        title: 'Project structure & resources',
+        subtitle: 'Participant limits, component breakdown, and overall item counts.',
         icon: 'pi pi-sitemap',
         fields: [
             { key: 'participants', label: 'Participants', description: 'Number of participants allowed in a project.', unit: 'people' },
             { key: 'phases', label: 'Number of phases', description: 'Allowed number of project phases.', unit: 'phases' },
-            { key: 'budget', label: 'Project budget', description: 'Total project budget range.', unit: 'ETB', currency: true },
-            { key: 'duration', label: 'Project duration', description: 'Allowed project duration.', unit: 'days' },
             { key: 'activities', label: 'Activities', description: 'Allowed number of activities.', unit: 'activities' },
             { key: 'equipments', label: 'Equipments', description: 'Allowed number of equipment items.', unit: 'items' },
-            { key: 'components', label: 'Components', description: 'Allowed number of project components.', unit: 'components' }
+            { key: 'components', label: 'Components', description: 'Allowed number of project components.', unit: 'components' },
+            { key: 'componentCollaborators', label: 'Component collaborators', description: 'Allowed number of contributors in a component.', unit: 'contributors' }
         ]
     },
     {
-        title: 'Phase, activity & equipment limits',
-        subtitle: 'Limits for individual phases, activities and equipment.',
-        icon: 'pi pi-calendar',
+        title: 'Item-level financial & timeline limits',
+        subtitle: 'Granular budget, cost, and duration constraints for phases, activities, and equipment.',
+        icon: 'pi pi-sliders-h',
         fields: [
-            { key: 'phaseBudget', label: 'Phase budget', description: 'Allowed budget for each phase.', unit: 'ETB', currency: true },
-            { key: 'phaseDuration', label: 'Phase duration', description: 'Allowed duration for each phase.', unit: 'days' },
-            { key: 'activityCost', label: 'Activity cost', description: 'Allowed cost for each activity.', unit: 'ETB', currency: true },
-            { key: 'activityDuration', label: 'Activity duration', description: 'Allowed duration for each activity.', unit: 'days' },
+            { key: 'phaseBudget', label: 'Phase budget', description: 'Allowed budget for each individual phase.', unit: 'ETB', currency: true },
+            { key: 'phaseDuration', label: 'Phase duration', description: 'Allowed duration for each individual phase.', unit: 'days' },
+            { key: 'activityCost', label: 'Activity cost', description: 'Allowed cost for each individual activity.', unit: 'ETB', currency: true },
+            { key: 'activityDuration', label: 'Activity duration', description: 'Allowed duration for each individual activity.', unit: 'days' },
             { key: 'equipmentCost', label: 'Equipment cost', description: 'Allowed cost for each equipment item.', unit: 'ETB', currency: true }
         ]
     },
     {
         title: 'Taxonomy & indicators',
-        subtitle: 'Number of themes, focus areas and indicators.',
+        subtitle: 'Number of themes, sub-themes, focus areas and indicators.',
         icon: 'pi pi-tags',
         fields: [
             { key: 'themes', label: 'Themes', description: 'Allowed number of themes.', unit: 'themes' },
@@ -109,7 +116,7 @@ const ConstraintForm = ({
         item ? structuredClone(item) : emptyConstraint()
     );
     const [submitted, setSubmitted] = useState(false);
-    const [activeIndex, setActiveIndex] = useState<number | number[]>([0]);
+    const [activeIndex, setActiveIndex] = useState<number | number[]>([0, 2]);
 
     const nameMissing = !localItem.name?.trim();
 

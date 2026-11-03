@@ -7,7 +7,7 @@ export interface IProjectComponent extends Document {
     project: mongoose.Types.ObjectId;
     title: string;
     description?: string;
-    investigator: mongoose.Types.ObjectId;
+    //investigator: mongoose.Types.ObjectId;
     contributors: mongoose.Types.ObjectId[];
     createdBy?: mongoose.Types.ObjectId;
     updatedBy?: mongoose.Types.ObjectId;
@@ -33,10 +33,11 @@ const ProjectComponentSchema = new Schema<IProjectComponent>(
             type: String,
             trim: true,
         },
+        /*
         investigator: {
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.USER,
-        },
+        },*/
         contributors: [{
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.USER,

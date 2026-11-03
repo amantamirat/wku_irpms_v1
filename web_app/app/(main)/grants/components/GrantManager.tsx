@@ -25,6 +25,11 @@ interface GrantManagerProps {
     thematic?: Thematic;
 }
 
+const DEFAULT_HIDDEN = [
+    'constraint',
+    'composition',
+];
+
 const columns: ColumnProps[] = [
     {
         header: 'Organization',
@@ -50,6 +55,22 @@ const columns: ColumnProps[] = [
                 : grant.thematic
     },
     {
+        header: 'Constraint Profile',
+        field: 'constraint',
+        body: (grant: Grant) =>
+            typeof grant.constraint === 'object' && grant.constraint !== null
+                ? grant.constraint.name
+                : grant.constraint ?? '-',
+    },
+    {
+        header: 'Composition Template',
+        field: 'composition',
+        body: (grant: Grant) =>
+            typeof grant.composition === 'object' && grant.composition !== null
+                ? grant.composition.name
+                : grant.composition ?? '-',
+    },
+    {
         header: 'Amount',
         field: 'amount',
         sortable: true,
@@ -63,6 +84,7 @@ const columns: ColumnProps[] = [
         body: (grant: Grant) =>
             etbCurrencyFormatter.format(grant.usedBudget ?? 0)
     },
+
     {
         field: 'status',
         header: 'Status',
@@ -81,6 +103,8 @@ const mapSaved = (saved: Grant, submitted: Partial<Grant>): Grant => ({
     ...saved,
     organization: submitted.organization ?? saved.organization,
     thematic: submitted.thematic ?? saved.thematic,
+    composition: submitted.composition ?? saved.composition,
+    constraint: submitted.constraint ?? saved.constraint,
 });
 
 const GrantManager = ({
@@ -98,6 +122,8 @@ const GrantManager = ({
             itemIcon={MENU_ICONS.grants}
             mapSaved={mapSaved}
             columns={columns}
+            enableColumnToggle
+            defaultHiddenFields={DEFAULT_HIDDEN}
             dialogWidth="800px"
             statusField="status"
             transitions={GRANT_TRANSITIONS}

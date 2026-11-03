@@ -1,35 +1,20 @@
-import { EligibilityProfile } from "./profile.model";
-import { HistoryRuleReference } from "./history-rule-reference.model";
-import { IRange, isValidRange } from "@/types/range";
 
-export enum AggregationMode {
-    COUNT = "COUNT",
-    RATIO = "RATIO"
+
+import { IHistoryRule } from "./history.model";     // adjust path as needed
+import { EligibilityProfile } from './profile.model';
+
+export interface IMemberRequirement {
+    _id?: string;
+    name: string;
+    description?: string;
+    profile?: string | EligibilityProfile;
+    historyRules: (string | IHistoryRule)[];
+    createdAt?: string | Date;
+    updatedAt?: string | Date;
 }
 
-export type MemberRequirement = {
-    _id?: string;
-
-    name: string;
-
-    description?: string;
-
-    profile?: string | EligibilityProfile;
-
-    historyRules?: HistoryRuleReference[];
-
-    mode: AggregationMode;
-
-    threshold: IRange;
-
-    createdAt?: string | Date;
-
-    updatedAt?: string | Date;
-};
-
-
 export const validateMemberRequirement = (
-    requirement: MemberRequirement
+    requirement: Partial<IMemberRequirement>
 ): { valid: boolean; message?: string } => {
 
     if (!requirement.name || requirement.name.trim().length === 0) {
@@ -39,25 +24,10 @@ export const validateMemberRequirement = (
         };
     }
 
-    if (!requirement.mode) {
+    if (!requirement.historyRules || requirement.historyRules.length === 0) {
         return {
             valid: false,
-            message: "Aggregation mode is required.",
-        };
-    }
-
-    if (!requirement.threshold) {
-        return {
-            valid: false,
-            message: "Threshold is required.",
-        };
-    }
-
-    if (!isValidRange(requirement.threshold)) {
-        return {
-            valid: false,
-            message:
-                "Threshold range is invalid. Ensure values are non-negative and Min is less than or equal to Max.",
+            message: "At least one history rule is required.",
         };
     }
 

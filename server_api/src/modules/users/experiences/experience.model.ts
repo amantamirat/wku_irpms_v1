@@ -1,6 +1,13 @@
 //experience.model.ts
 import mongoose, { model, Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
+import { IStatusHistory } from "../../../common/types/status-history";
+import { createStatusHistorySchema } from "../../../common/schemas/status-history.schema";
+
+export enum ExperienceStatus {
+    PENDING = 'pending',
+    VERIFIED = 'verified'
+}
 
 export enum EmploymentType {
     FullTime = "Full-Time",
@@ -20,6 +27,12 @@ export interface IExperience extends Document {
     endDate: Date | null;
     isCurrent?: boolean;
     employmentType: EmploymentType;
+
+    status: ExperienceStatus;
+    statusHistory: IStatusHistory<ExperienceStatus>[];
+
+    createdBy?: mongoose.Types.ObjectId;
+    updatedBy?: mongoose.Types.ObjectId;
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -58,6 +71,27 @@ const ExperienceSchema = new Schema<IExperience>({
         type: String,
         enum: Object.values(EmploymentType),
         required: true
+    },
+
+    status: {
+        type: String,
+        enum: Object.values(ExperienceStatus),
+        default: ExperienceStatus.PENDING,
+    },
+
+    statusHistory: {
+        type: [createStatusHistorySchema(Object.values(ExperienceStatus))],
+        default: []
+    },
+
+    createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.USER,
+    },
+
+    updatedBy: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.USER,
     },
 }, { timestamps: true });
 

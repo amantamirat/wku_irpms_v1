@@ -121,8 +121,8 @@ export class CallController {
             const {
                 title,
                 description,
-                constraint,
-                composition
+                //constraint,
+                //composition
             } = req.body;
 
             const dto: UpdateCallDTO = {
@@ -130,8 +130,8 @@ export class CallController {
                 data: {
                     title,
                     description,
-                    constraint,
-                    composition
+                    //constraint,
+                    //composition
                 },
             };
 

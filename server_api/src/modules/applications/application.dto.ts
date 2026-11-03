@@ -1,13 +1,11 @@
 // project-stage.dto.ts
-import { CreateProjectDTO } from "../projects/project.dto";
-import { AnonymizationStatus, ApplicationStatus } from "./application.model";
+import { ApplicationStatus } from "./application.model";
 
 
 
 export interface CreateApplicationDTO {
     project: string;
     stage: string;
-    documentPath: string;
 }
 
 

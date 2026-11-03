@@ -17,12 +17,12 @@ export interface IPhase extends Document {
     _id: mongoose.Types.ObjectId;
     project: mongoose.Types.ObjectId;
     order: number;
-    title: string;
+    title?: string;
     duration: number;
-    
+
     startDate?: Date;
     endDate?: Date;
-    
+
     budget: number;
     description?: string;
     status: PhaseStatus;

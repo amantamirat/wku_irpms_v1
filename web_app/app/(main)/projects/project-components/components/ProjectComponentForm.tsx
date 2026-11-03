@@ -18,6 +18,7 @@ import { UserApi } from '@/app/(main)/users/api/user.api';
 
 import { extractId } from '@/utils/utils';
 import { ProjectComponentDTO } from '../models/component.model';
+import { CollaboratorApi } from '../../collaborators/api/collaborator.api';
 
 interface ProjectComponentFormProps
     extends ItemFormRenderProps<ProjectComponentDTO> {
@@ -38,7 +39,7 @@ const ProjectComponentForm = ({
         title: item?.title ?? '',
         description: item?.description ?? '',
         contributors: item?.contributors ?? [],
-        investigator: item?.investigator ?? '',
+        //investigator: item?.investigator ?? '',
     } as ProjectComponentDTO);
 
     const [users, setUsers] = useState<User[]>([]);
@@ -55,7 +56,7 @@ const ProjectComponentForm = ({
             title: item?.title ?? '',
             description: item?.description ?? '',
             contributors: item?.contributors ?? [],
-            investigator: item?.investigator ?? '',
+            // investigator: item?.investigator ?? '',
         } as ProjectComponentDTO);
 
         setSubmitted(false);
@@ -69,10 +70,13 @@ const ProjectComponentForm = ({
             setLoadingUsers(true);
 
             try {
-                const data = await UserApi.lookup!({});
+                const data = await CollaboratorApi.lookup!({ project: projectId });
+
+                const users = data
+                    .map(c => c.member) as User[];
 
                 if (!cancelled) {
-                    setUsers(Array.isArray(data) ? data : []);
+                    setUsers(users);
                 }
             } catch (error) {
                 console.error('Failed to load users:', error);
@@ -92,20 +96,21 @@ const ProjectComponentForm = ({
         return () => {
             cancelled = true;
         };
-    }, []);
+    }, [projectId]);
 
     // Convert populated users or IDs to IDs for form controls.
     const contributorIds = (localItem.contributors ?? []).map(
-        (user:any) => extractId(user)
+        (user: any) => extractId(user)
     );
 
+    /*
     const investigatorId = localItem.investigator
         ? extractId(localItem.investigator)
         : null;
-
+        */
     const titleMissing = !localItem.title?.trim();
     const descriptionMissing = !localItem.description?.trim();
-    const investigatorMissing = !investigatorId;
+    //const investigatorMissing = !investigatorId;
     const projectMissing = !projectId;
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
@@ -116,8 +121,8 @@ const ProjectComponentForm = ({
             saving ||
             projectMissing ||
             titleMissing ||
-            descriptionMissing ||
-            investigatorMissing
+            descriptionMissing //||
+            //investigatorMissing
         ) {
             return;
         }
@@ -159,11 +164,11 @@ const ProjectComponentForm = ({
                         )}
                     >
                         {typeof localItem.project === 'object' &&
-                        localItem.project
+                            localItem.project
                             ? localItem.project.title
                             : projectId
-                            ? `Project ID: ${projectId}`
-                            : 'No project selected'}
+                                ? `Project ID: ${projectId}`
+                                : 'No project selected'}
                     </div>
 
                     {submitted && projectMissing && (
@@ -188,7 +193,7 @@ const ProjectComponentForm = ({
                         id="title"
                         value={localItem.title}
                         onChange={(e) =>
-                            setLocalItem((prev:any) => ({
+                            setLocalItem((prev: any) => ({
                                 ...prev,
                                 title: e.target.value
                             }))
@@ -221,7 +226,7 @@ const ProjectComponentForm = ({
                         id="description"
                         value={localItem.description ?? ''}
                         onChange={(e) =>
-                            setLocalItem((prev:any) => ({
+                            setLocalItem((prev: any) => ({
                                 ...prev,
                                 description: e.target.value
                             }))
@@ -245,7 +250,10 @@ const ProjectComponentForm = ({
 
 
                 {/* Investigator */}
-                <div className="field col-12">
+                {
+                    /**
+                     * 
+                     * <div className="field col-12">
                     <label
                         htmlFor="investigator"
                         className="font-bold text-sm block mb-2"
@@ -293,7 +301,9 @@ const ProjectComponentForm = ({
                         </small>
                     )}
                 </div>
-
+                     * 
+                     */
+                }
 
                 {/* Contributors */}
                 <div className="field col-12">

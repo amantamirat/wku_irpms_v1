@@ -174,11 +174,13 @@ const StatCard = ({
     icon,
     label,
     color,
+    required,
     children
 }: {
     icon: string;
     label: string;
     color: 'green' | 'blue';
+    required?: boolean;
     children: ReactNode;
 }) => (
     <div
@@ -201,7 +203,7 @@ const StatCard = ({
                     color === 'green' ? 'text-green-700' : 'text-blue-700'
                 )}
             >
-                {label}
+                {label} {required && <span className="text-red-500">*</span>}
             </span>
         </div>
         {children}
@@ -399,12 +401,18 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
 
     const hasLead = Boolean(project.collaborators?.[0]?.member || project.leadPI);
 
+    // Required by ProjectDto: totalBudget >= 0, totalDuration > 0
+    const hasBudget = project.totalBudget != null && project.totalBudget >= 0;
+    const hasDuration = project.totalDuration != null && project.totalDuration > 0;
+
     const requiredChecks = [
         { label: 'Grant', done: Boolean(grantId) },
         { label: 'Lead PI', done: hasLead },
         { label: 'Calendar', done: Boolean(calendarId) },
         { label: 'Title', done: Boolean(project.title?.trim()) },
-        { label: 'Themes', done: Boolean(project.themes?.length) }
+        { label: 'Themes', done: Boolean(project.themes?.length) },
+        { label: 'Budget', done: hasBudget },
+        { label: 'Duration', done: hasDuration }
     ];
     const completed = requiredChecks.filter((c) => c.done).length;
     const percent = Math.round((completed / requiredChecks.length) * 100);
@@ -501,15 +509,22 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
             Boolean(grantId) &&
             Boolean(calendarId) &&
             Boolean(project.themes?.length) &&
-            hasLead;
+            hasLead &&
+            hasBudget &&
+            hasDuration;
 
         if (!isValid) return;
 
         await onSubmit({
             ...project,
             title: project.title.trim(),
-            totalBudget: project.totalBudget ?? undefined,
-            totalDuration: project.totalDuration ?? undefined,
+            // DTO expects plain string ids, not populated objects
+            grant: grantId as Project['grant'],
+            calendar: calendarId as Project['calendar'],
+            leadPI: selectedLeadId as Project['leadPI'],
+            themes: (project.themes ?? []).map((t) => extractId(t)) as Project['themes'],
+            totalBudget: project.totalBudget as number,
+            totalDuration: project.totalDuration as number,
             objectives: {
                 general: objectives.general ?? '',
                 specific: objectives.specific ?? [],
@@ -825,12 +840,15 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
             >
                 <div className="grid">
                     <div className="col-12 md:col-6">
-                        <StatCard icon="pi-money-bill" label="Total Budget" color="green">
+                        <StatCard icon="pi-money-bill" label="Total Budget" color="green" required>
                             <InputNumber
                                 inputId="project-total-budget"
                                 value={project.totalBudget ?? null}
                                 onValueChange={(e) =>
-                                    updateField('totalBudget', (e.value ?? undefined) as Project['totalBudget'])
+                                    updateField(
+                                        'totalBudget',
+                                        (e.value ?? undefined) as Project['totalBudget']
+                                    )
                                 }
                                 mode="currency"
                                 currency="ETB"
@@ -839,8 +857,13 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
                                 maxFractionDigits={2}
                                 disabled={saving}
                                 placeholder="0.00"
-                                inputClassName="font-bold text-lg"
+                                inputClassName={classNames('font-bold text-lg', {
+                                    'p-invalid': submitted && !hasBudget
+                                })}
                             />
+                            <FieldError show={submitted && !hasBudget}>
+                                Enter the total budget.
+                            </FieldError>
                             <small className="text-green-700 block mt-2">
                                 {project.totalBudget
                                     ? `≈ ${formatCurrency(project.totalBudget)}`
@@ -850,7 +873,12 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
                     </div>
 
                     <div className="col-12 md:col-6">
-                        <StatCard icon="pi-calendar-clock" label="Total Duration" color="blue">
+                        <StatCard
+                            icon="pi-calendar-clock"
+                            label="Total Duration"
+                            color="blue"
+                            required
+                        >
                             <InputNumber
                                 inputId="project-total-duration"
                                 value={project.totalDuration ?? null}
@@ -865,8 +893,13 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
                                 suffix=" days"
                                 disabled={saving}
                                 placeholder="0 days"
-                                inputClassName="font-bold text-lg"
+                                inputClassName={classNames('font-bold text-lg', {
+                                    'p-invalid': submitted && !hasDuration
+                                })}
                             />
+                            <FieldError show={submitted && !hasDuration}>
+                                Duration must be greater than 0 days.
+                            </FieldError>
                             <small className="text-blue-700 block mt-2">
                                 {project.totalDuration
                                     ? `≈ ${(project.totalDuration / 30).toFixed(1)} months`

@@ -1,4 +1,3 @@
-
 'use client';
 
 import { ColumnProps } from 'primereact/column';
@@ -49,6 +48,7 @@ const columns: ColumnProps[] = [
             </span>
         )
     },
+    /*
     {
         header: 'Investigator',
         field: 'investigator',
@@ -59,6 +59,7 @@ const columns: ColumnProps[] = [
             </span>
         )
     },
+    */
     {
         header: 'Contributors',
         field: 'contributors',

@@ -10,7 +10,7 @@ import { toObjectId } from "../../../common/utils/mongoose.utils";
 
 export interface CreatePhaseData {
     project: string;
-    title: string;
+    //title: string;
     order: number;
     duration: number;
     budget: number;
@@ -28,7 +28,6 @@ export interface IPhaseRepository {
 
 
     create(data: CreatePhaseData): Promise<IPhase>;
-    createMany(dtos: CreatePhaseDto[]): Promise<IPhase[]>;
 
     update(
         id: string,
@@ -38,7 +37,8 @@ export interface IPhaseRepository {
     updateStatus(
         id: string,
         newStatus: PhaseStatus,
-        userId: string
+        userId: string,
+        reason?: string,
     ): Promise<IPhase | null>;
 
     countByProject(projectId: string): Promise<number>;
@@ -126,21 +126,6 @@ export class PhaseRepository implements IPhaseRepository {
         return created;
     }
 
-    async createMany(
-        dtos: CreatePhaseDto[]
-    ): Promise<IPhase[]> {
-        const data = dtos.map(dto => ({
-            ...dto,
-            project: new mongoose.Types.ObjectId(dto.project),
-        }));
-
-        const results = await Phase.insertMany(data, {
-            ordered: true,
-        });
-
-        return results as unknown as IPhase[];
-    }
-
     async update(
         id: string,
         dtoData: UpdatePhaseDto["data"]
@@ -158,7 +143,8 @@ export class PhaseRepository implements IPhaseRepository {
     async updateStatus(
         id: string,
         status: PhaseStatus,
-        userId: string
+        userId: string,
+        reason?: string,
     ): Promise<IPhase | null> {
 
         return Phase.findByIdAndUpdate(
@@ -171,7 +157,8 @@ export class PhaseRepository implements IPhaseRepository {
                     statusHistory: {
                         status,
                         changedBy: new mongoose.Types.ObjectId(userId),
-                        changedAt: new Date()
+                        changedAt: new Date(),
+                        reason
                     }
                 }
             },

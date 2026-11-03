@@ -16,7 +16,9 @@ import { FilterOptions } from "../../common/dtos/filter.dto";
 import { ScopeFilter } from "../auth/auth.types";
 import { toObjectId } from "../../common/utils/mongoose.utils";
 
-
+interface CreateApplicationData extends CreateApplicationDTO {
+    documentPath: string;
+}
 
 export interface UpdateApplicationData {
     status: ApplicationStatus;//ApplicationStatus.shortlisted | ApplicationStatus.accepted | ApplicationStatus.rejected;    
@@ -47,7 +49,7 @@ export interface IApplicationRepository {
     ): Promise<IApplication[]>;
 
     create(
-        dto: CreateApplicationDTO,
+        dto: CreateApplicationData,
         userId: string
     ): Promise<IApplication>;
 
@@ -215,7 +217,7 @@ export class ApplicationRepository
      * Create application.
      */
     async create(
-        dto: CreateApplicationDTO,
+        dto: CreateApplicationData,
         userId: string
     ): Promise<IApplication> {
 

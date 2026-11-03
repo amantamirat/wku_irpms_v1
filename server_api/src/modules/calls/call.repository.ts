@@ -12,8 +12,8 @@ export interface CreateCallData {
     organization: string;
     calendar: string;
     title: string;
-    constraint?: string;
-    composition?: string;
+    //constraint?: string;
+    //composition?: string;
     description?: string;
     status: CallStatus;
 }
@@ -155,6 +155,7 @@ export class CallRepository implements ICallRepository {
 
             organization: new mongoose.Types.ObjectId(data.organization),
 
+            /*
             constraint: data.constraint
                 ? new mongoose.Types.ObjectId(data.constraint)
                 : undefined,
@@ -162,6 +163,7 @@ export class CallRepository implements ICallRepository {
             composition: data.composition
                 ? new mongoose.Types.ObjectId(data.composition)
                 : undefined,
+                */
 
             createdBy: new mongoose.Types.ObjectId(userId)
         });
@@ -189,9 +191,9 @@ export class CallRepository implements ICallRepository {
         /*
         if (dtoData.deadline !== undefined) {
             updateData.deadline = dtoData.deadline;
-        }*/
+        }
 
-        if (dtoData.constraint !== undefined) {
+         if (dtoData.constraint !== undefined) {
             updateData.constraint = dtoData.constraint
                 ? new mongoose.Types.ObjectId(dtoData.constraint)
                 : undefined;
@@ -202,6 +204,10 @@ export class CallRepository implements ICallRepository {
                 ? new mongoose.Types.ObjectId(dtoData.composition)
                 : undefined;
         }
+            
+        */       
+
+        
 
         updateData.updatedBy = new mongoose.Types.ObjectId(userId);
 

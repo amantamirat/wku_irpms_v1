@@ -1,6 +1,8 @@
 import mongoose, { model, Schema, Document } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
 import { IUser } from "../../users/user.model";
+import { IStatusHistory } from "../../../common/types/status-history";
+import { createStatusHistorySchema } from "../../../common/schemas/status-history.schema";
 
 export enum CollaboratorStatus {
     pending = 'pending',
@@ -14,6 +16,7 @@ export interface ICollaborator extends Document {
     role: string;
     isLeadPI?: boolean;
     status: CollaboratorStatus;
+    statusHistory: IStatusHistory<CollaboratorStatus>[];
 
     updatedBy?: mongoose.Types.ObjectId;
 
@@ -46,6 +49,12 @@ const CollaboratorSchema = new Schema<ICollaborator>({
         enum: Object.values(CollaboratorStatus),
         default: CollaboratorStatus.pending,
         required: true
+    },
+    statusHistory: {
+        type: [createStatusHistorySchema(
+            Object.values(CollaboratorStatus)
+        )],
+        default: []
     },
     updatedBy: {
         type: Schema.Types.ObjectId,

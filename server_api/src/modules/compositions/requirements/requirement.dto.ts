@@ -1,5 +1,3 @@
-import { IRange } from "../../../common/types/range";
-import { AggregationMode } from "./requirement.model";
 import { HistoryContext } from "../history/history.model";
 
 /**
@@ -21,11 +19,12 @@ export interface CreateRequirementDTO {
 
     profile?: string;
 
-    historyRules?: HistoryRuleReferenceDTO[];
+    historyRules?: string[];
 
+    /*
     mode: AggregationMode;
 
-    threshold: IRange;
+    threshold: IRange;*/
 }
 
 

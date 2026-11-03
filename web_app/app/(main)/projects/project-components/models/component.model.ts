@@ -7,12 +7,12 @@ export interface ProjectComponentDTO {
     title: string;
     description?: string;
     contributors?: string[] | User[];
-    investigator: string | User;
+    //investigator: string | User;
     createdAt?: Date;
     updatedAt?: Date;
 }
 
 export interface FilterProjectComponents {
     project?: string | Project;
-    investigator?: string;
+    //investigator?: string;
 }

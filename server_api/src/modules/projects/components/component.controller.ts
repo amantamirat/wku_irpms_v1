@@ -38,7 +38,7 @@ export class ProjectComponentController {
                 title,
                 description,
                 contributors,
-                investigator,
+                //investigator,
             } = req.body;
 
             const data: CreateProjectComponentDTO = {
@@ -46,7 +46,7 @@ export class ProjectComponentController {
                 title,
                 description,
                 contributors: contributors ?? [],
-                investigator,
+                //investigator,
             };
 
             const created =
@@ -85,13 +85,13 @@ export class ProjectComponentController {
             const {
                 project,
                 title,
-                investigator,
+                //investigator,
             } = req.query;
 
             const filter: FilterProjectComponents = {
                 project: project as string,
                 title: title as string,
-                investigator: investigator as string,
+                //investigator: investigator as string,
             };
 
             const components =
@@ -175,7 +175,7 @@ export class ProjectComponentController {
                 title,
                 description,
                 contributors,
-                investigator,
+                //investigator,
             } = req.body;
 
             const dto = {
@@ -185,7 +185,7 @@ export class ProjectComponentController {
                     title,
                     description,
                     contributors,
-                    investigator,
+                    //investigator,
                     updatedBy: req.auth.userId,
                 } as UpdateProjectComponentDTO,
 

@@ -1,37 +1,36 @@
-import { HistoryContext } from "./history/history.model";
+import { AggregationMode } from "./composition.model";
 
 /**
- * History rule reference used by a composition.
+ * Member rule reference used by a composition.
  */
-export interface HistoryRuleReferenceDTO {
-    context: HistoryContext;
-    rule: string;
+export interface MemberRuleDTO {
+    requirement: string;
+    mode: AggregationMode;
+    threshold: {
+        min?: number;
+        max?: number;
+    };
 }
 
 /**
  * Create Composition
  */
 export interface CreateCompositionDTO {
-
     name: string;
 
     description?: string;
 
-    leadProfileRule?: string;
+    leadRule?: string;
 
-    leadHistoryRules?: HistoryRuleReferenceDTO[];
-
-    memberRequirements?: string[];
+    memberRules?: MemberRuleDTO[];
 
     userId?: string;
 }
-
 
 /**
  * Update Composition
  */
 export interface UpdateCompositionDTO {
-
     id: string;
 
     data: Partial<CreateCompositionDTO>;

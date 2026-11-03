@@ -4,18 +4,18 @@ import { FilterOptions } from "../../common/dtos/filter.dto";
 
 
 import {
-    CreateProjectDTO,
     FilterProjectsDTO,
     UpdateProjectDTO
 } from "./project.dto";
 
+import { toObjectId } from "../../common/utils/mongoose.utils";
+import { ScopeFilter } from "../auth/auth.types";
 import {
     IProject,
+    IProjectObjectives,
     Project,
     ProjectStatus
 } from "./project.model";
-import { toObjectId } from "../../common/utils/mongoose.utils";
-import { ScopeFilter } from "../auth/auth.types";
 
 
 export interface IProjectRepository {
@@ -42,18 +42,18 @@ export interface IProjectRepository {
 
     update(
         id: string,
-        data: UpdateProjectDTO["data"],
+        data: Partial<UpdateProjectData>,
         userId?: string
     ): Promise<IProject | null>;
-
-    incrementTotals(
-        projectId: string,
-        delta: {
-            duration?: number;
-            budget?: number;
-            collabs?: number;
-        }
-    ): Promise<IProject | null>;
+    /*
+        incrementTotals(
+            projectId: string,
+            delta: {
+                duration?: number;
+                budget?: number;
+                collabs?: number;
+            }
+        ): Promise<IProject | null>;*/
 
     updateStatus(
         id: string,
@@ -72,6 +72,25 @@ export interface IProjectRepository {
 }
 
 
+export interface ProjectDto {
+    grant: string;
+    calendar: string;
+    leadPI: string;
+
+    call?: string;
+
+    title: string;
+    objectives?: IProjectObjectives;
+    summary?: string;
+
+    themes: string[];
+    keywords?: string[];
+
+    totalBudget: number;
+    totalDuration: number;
+}
+
+
 /**
  * Data required by the repository to persist a project.
  *
@@ -79,11 +98,18 @@ export interface IProjectRepository {
  * not supplied directly by the client.
  */
 export interface CreateProjectData
-    extends CreateProjectDTO {
+    extends ProjectDto {
 
     organization: string;
     workspace: string;
+    conceptNoteId?: string;
     status?: ProjectStatus;
+}
+
+export interface UpdateProjectData extends UpdateProjectDTO {
+    currentApplication: string | null;
+    currentPhase: string | null;
+    currentVerification: string | null;
 }
 
 function populate(dbQuery: any) {
@@ -245,22 +271,17 @@ export class ProjectRepository
             workspace:
                 toObjectId(data.workspace),
 
-            calendar: data.calendar
-                ? toObjectId(data.calendar)
-                : undefined,
+            calendar: toObjectId(data.calendar),
 
             call: data.call
                 ? toObjectId(data.call)
                 : undefined,
-
-            conceptNoteId: data.conceptNoteId,
 
             leadPI: toObjectId(data.leadPI),
 
             themes: data.themes.map(toObjectId),
 
             createdBy: toObjectId(userId),
-            status: data.status
         };
 
         return Project.create(project);
@@ -269,24 +290,20 @@ export class ProjectRepository
 
     async update(
         id: string,
-        data: UpdateProjectDTO["data"],
+        data: Partial<UpdateProjectData>,
         userId?: string
     ): Promise<IProject | null> {
 
         const updateData: Partial<IProject> = {};
 
-        if (data.title !== undefined) {
+        if (data.title !== undefined)
             updateData.title = data.title;
-        }
 
-        if (data.summary !== undefined) {
+        if (data.summary !== undefined)
             updateData.summary = data.summary;
-        }
 
-        if (data.themes !== undefined) {
-            updateData.themes =
-                data.themes.map(toObjectId);
-        }
+        if (data.themes !== undefined)
+            updateData.themes = data.themes.map(toObjectId);
 
         if (data.objectives !== undefined) {
             updateData.objectives = {
@@ -296,55 +313,36 @@ export class ProjectRepository
             };
         }
 
-        if (data.call !== undefined) {
-            updateData.call = data.call
-                ? toObjectId(data.call)
-                : null;
-        }
+        if (data.totalBudget !== undefined)
+            updateData.totalBudget = data.totalBudget;
 
-        if (data.calendar !== undefined) {
-            updateData.calendar = data.calendar
-                ? toObjectId(data.calendar)
-                : null;
-        }
+        if (data.totalDuration !== undefined)
+            updateData.totalDuration = data.totalDuration;
 
         if (data.currentApplication !== undefined) {
-            updateData.currentApplication =
-                data.currentApplication
-                    ? toObjectId(
-                        data.currentApplication
-                    )
-                    : null;
+            updateData.currentApplication = data.currentApplication
+                ? toObjectId(data.currentApplication)
+                : null;
         }
 
         if (data.currentPhase !== undefined) {
-            updateData.currentPhase =
-                data.currentPhase
-                    ? toObjectId(
-                        data.currentPhase
-                    )
-                    : null;
+            updateData.currentPhase = data.currentPhase
+                ? toObjectId(data.currentPhase)
+                : null;
         }
 
         if (data.currentVerification !== undefined) {
-            updateData.currentVerification =
-                data.currentVerification
-                    ? toObjectId(
-                        data.currentVerification
-                    )
-                    : null;
+            updateData.currentVerification = data.currentVerification
+                ? toObjectId(data.currentVerification)
+                : null;
         }
 
-        if (userId) {
-            updateData.updatedBy =
-                toObjectId(userId);
-        }
+        if (userId)
+            updateData.updatedBy = toObjectId(userId);
 
         return Project.findByIdAndUpdate(
             toObjectId(id),
-            {
-                $set: updateData
-            },
+            { $set: updateData },
             {
                 new: true,
                 runValidators: true
@@ -352,50 +350,51 @@ export class ProjectRepository
         ).exec();
     }
 
-
-    async incrementTotals(
-        projectId: string,
-        delta: {
-            duration?: number;
-            budget?: number;
-            collabs?: number;
-        }
-    ): Promise<IProject | null> {
-
-        const increment: Record<string, number> = {};
-
-        if (delta.duration !== undefined) {
-            increment.totalDuration =
-                delta.duration;
-        }
-
-        if (delta.budget !== undefined) {
-            increment.totalBudget =
-                delta.budget;
-        }
-
-        if (delta.collabs !== undefined) {
-            increment.totalCollabs =
-                delta.collabs;
-        }
-
-        if (!Object.keys(increment).length) {
-            return Project.findById(
-                toObjectId(projectId)
+    /*
+        async incrementTotals(
+            projectId: string,
+            delta: {
+                duration?: number;
+                budget?: number;
+                collabs?: number;
+            }
+        ): Promise<IProject | null> {
+    
+            const increment: Record<string, number> = {};
+    
+            if (delta.duration !== undefined) {
+                increment.totalDuration =
+                    delta.duration;
+            }
+    
+            if (delta.budget !== undefined) {
+                increment.totalBudget =
+                    delta.budget;
+            }
+    
+            if (delta.collabs !== undefined) {
+                increment.totalCollabs =
+                    delta.collabs;
+            }
+    
+            if (!Object.keys(increment).length) {
+                return Project.findById(
+                    toObjectId(projectId)
+                ).exec();
+            }
+    
+            return Project.findByIdAndUpdate(
+                toObjectId(projectId),
+                {
+                    $inc: increment
+                },
+                {
+                    new: true,
+                    runValidators: true
+                }
             ).exec();
         }
-
-        return Project.findByIdAndUpdate(
-            toObjectId(projectId),
-            {
-                $inc: increment
-            },
-            {
-                new: true,
-                runValidators: true
-            }
-        ).exec();
-    }
+        */
 
 
     async updateStatus(

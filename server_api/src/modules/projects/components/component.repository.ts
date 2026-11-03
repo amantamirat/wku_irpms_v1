@@ -1,6 +1,6 @@
 
 import { FilterQuery } from "mongoose";
-import { CreateProjectComponentDTO, FilterProjectComponents, ProjectComponentDTO, UpdateProjectComponentDTO } from "./component.dto";
+import { CreateProjectComponentDTO, FilterProjectComponents, ProjectComponentDto, UpdateProjectComponentDTO } from "./component.dto";
 import { IProjectComponent, ProjectComponent } from "./component.model";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 
@@ -13,13 +13,7 @@ export class ProjectComponentRepository {
         dto: CreateProjectComponentDTO
     ): Promise<IProjectComponent> {
         return await ProjectComponent.create(dto);
-    }
-
-    async createMany(
-        dtos: CreateProjectComponentDTO[]
-    ): Promise<IProjectComponent[]> {
-        return await ProjectComponent.insertMany(dtos) as IProjectComponent[];
-    }
+    }    
 
     async findById(
         id: string,
@@ -31,7 +25,7 @@ export class ProjectComponentRepository {
             query = query
                 .populate("project")
                 .populate("contributors")
-                .populate("investigator");
+            //.populate("investigator");
         }
 
         return await query;
@@ -50,7 +44,7 @@ export class ProjectComponentRepository {
             query = query
                 .populate("project")
                 .populate("contributors")
-                .populate("investigator");
+            //.populate("investigator");
         }
 
         return await query.sort({ title: 1 });
@@ -67,7 +61,7 @@ export class ProjectComponentRepository {
             query = query
                 .populate("project")
                 .populate("contributors")
-                .populate("investigator");
+            //.populate("investigator");
         }
 
         return await query;

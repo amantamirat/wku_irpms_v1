@@ -1437,6 +1437,16 @@
   },
   {
     "category": "Experience Management",
+    "name": "experience:transition.pending.verified",
+    "description": "Verify a submitted experience after confirming that the employment information is correct."
+  },
+  {
+    "category": "Experience Management",
+    "name": "experience:transition.verified.pending",
+    "description": "Return a verified experience to pending status for re-evaluation or correction of its employment information."
+  },  
+  {
+    "category": "Experience Management",
     "name": "experience:delete",
     "description": "Delete experience records"
   },

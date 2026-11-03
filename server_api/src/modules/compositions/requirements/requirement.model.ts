@@ -1,22 +1,13 @@
 import mongoose, { Schema } from "mongoose";
 
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
-import { IRange } from "../../../common/types/range";
-import { RangeSchema } from "../../../common/schemas/range.schema";
-import { HistoryContext, IHistoryRuleReference } from "../history/history.model";
 
-export enum AggregationMode {
-    COUNT = "COUNT",
-    RATIO = "RATIO"
-}
 
 export interface IMemberRequirement extends Document {
     name: string;
     description?: string;
     profile?: mongoose.Types.ObjectId;
-    historyRules?: IHistoryRuleReference[];
-    mode: AggregationMode;
-    threshold: IRange;
+    historyRules: mongoose.Types.ObjectId[];
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -40,32 +31,12 @@ const MemberRequirementSchema =
                 type: Schema.Types.ObjectId,
                 ref: COLLECTIONS.ELIGIBILITY_PROFILE
             },
-            historyRules: {
-                type: [
-                    {
-                        context: {
-                            type: String,
-                            enum: Object.values(HistoryContext),
-                            required: true
-                        },
-                        rule: {
-                            type: Schema.Types.ObjectId,
-                            ref: COLLECTIONS.HISTORY_RULE,
-                            required: true
-                        }
-                    }
-                ],
-                default: []
-            },
-            mode: {
-                type: String,
-                enum: Object.values(AggregationMode),
-                required: true
-            },
-            threshold: {
-                type: RangeSchema,
-                required: true
-            }
+            historyRules: [{
+                type: Schema.Types.ObjectId,
+                ref: COLLECTIONS.HISTORY_RULE,
+                required: true,
+                default:[]
+            }],          
 
         },
         {
@@ -74,6 +45,6 @@ const MemberRequirementSchema =
 
 export const MemberRequirement =
     mongoose.model<IMemberRequirement>(
-        COLLECTIONS.MEMBER_REQUIREMENT,
+        COLLECTIONS.REQUIREMENT,
         MemberRequirementSchema
     );

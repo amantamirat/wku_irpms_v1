@@ -15,8 +15,8 @@ export interface ICall extends Document {
     grant: mongoose.Types.ObjectId;
     title: string;
     description?: string;
-    constraint?: mongoose.Types.ObjectId | null;
-    composition?: mongoose.Types.ObjectId | null;
+    //constraint?: mongoose.Types.ObjectId | null;
+    //composition?: mongoose.Types.ObjectId | null;
 
    // deadline?: Date | null;
 
@@ -41,17 +41,19 @@ const CallSchema = new Schema<ICall>(
         grant: { type: Schema.Types.ObjectId, ref: COLLECTIONS.GRANT, required: true },
         organization: { type: Schema.Types.ObjectId, ref: COLLECTIONS.ORGANIZATION, required: true },
         title: { type: String, required: true },
+        /*
         constraint: {
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.CONSTRAINT,
             required: false,
-        },
+        },*/
 
+        /*
         composition: {
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.COMPOSITION,
             required: false,
-        },
+        },*/
         description: { type: String },
         //deadline: { type: Date },
         

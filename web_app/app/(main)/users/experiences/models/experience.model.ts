@@ -1,6 +1,7 @@
 import { User } from "@/app/(main)/users/models/user.model";
 import { Organization } from "@/app/(main)/organizations/models/organization.model";
 import { Position } from "../../../positions/models/position.model";
+import { ExperienceStatus } from "./experience.state-machine";
 
 export enum EmploymentType {
     FullTime = "Full-Time",
@@ -19,6 +20,7 @@ export type Experience = {
     endDate?: Date | null;
     isCurrent?: boolean;
     employmentType?: EmploymentType;
+    status?: ExperienceStatus;
     createdAt?: Date;
     updatedAt?: Date;
 };

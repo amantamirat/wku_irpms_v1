@@ -9,12 +9,15 @@ import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { ProjectStatus } from "./project.model";
 import {
+  ApplyProjectDto,
   CreateProjectDTO,
   FilterProjectsDTO,
   UpdateProjectDTO
 } from "./project.dto";
 import { ProjectProgressService } from "./project-progress-service";
 import { toObjectId } from "../../common/utils/mongoose.utils";
+import { ProjectDto } from "./project.repository";
+import { AppError } from "../../common/errors/app.error";
 
 
 const buildProjectFilter = (
@@ -56,31 +59,31 @@ export class ProjectController {
       }
 
       const {
-        calendar,
         grant,
+        calendar,
         leadPI,
+        call,
         title,
+        objectives,
         summary,
         themes,
-        objectives,
-        collaborators,
-        phases,
-        conceptNoteId,
-        call
+        keywords,
+        totalBudget,
+        totalDuration
       } = req.body;
 
-      const dto: CreateProjectDTO = {
-        calendar,
+      const dto: ProjectDto = {
         grant,
-        conceptNoteId,
-        title,
-        summary,
+        calendar,
         leadPI,
-        themes: themes || [],
+        call,
+        title,
         objectives,
-        collaborators: collaborators || [],
-        phases: phases || [],
-        call
+        summary,
+        themes: themes || [],
+        keywords: keywords || [],
+        totalBudget: Number(totalBudget),
+        totalDuration: Number(totalDuration)
       };
 
       const created = await this.service.create(dto, req.auth.userId);
@@ -97,45 +100,55 @@ export class ProjectController {
   };
 
 
+
+
   apply = async (req: AuthenticatedRequest, res: Response) => {
     try {
       if (!req.auth) {
-        throw new Error(ERROR_CODES.UNAUTHORIZED);
+        throw new AppError(ERROR_CODES.UNAUTHORIZED);
       }
 
       if (!req.file) {
-        throw new Error(ERROR_CODES.FILE_NOT_FOUND);
+        throw new AppError(ERROR_CODES.FILE_NOT_FOUND);
       }
 
-      // documentPath and grant are set server-side.
-      const { documentPath, grant,
-        totalCollabs,
-        totalBudget, totalDuration, ...project } = JSON.parse(
-          req.body.project
-        ) as CreateProjectDTO & {
-          totalBudget?: number;
-          totalDuration?: number;
-          totalCollabs?: number;
-        };
+      const { id } = req.params;
+
+      // Parse application project data
+      const parsedProject = JSON.parse(
+        req.body.project,
+      ) as ApplyProjectDto;
+
+      const dto: ApplyProjectDto = {
+        title: parsedProject.title,
+        objectives: parsedProject.objectives,
+        summary: parsedProject.summary,
+
+        themes: parsedProject.themes ?? [],
+        keywords: parsedProject.keywords ?? [],
+
+        totalBudget: parsedProject.totalBudget ?? 0,
+        totalDuration: parsedProject.totalDuration ?? 0,
+
+        collaborators: parsedProject.collaborators ?? [],
+        phases: parsedProject.phases ?? [],
+        components: parsedProject.components ?? [],
+        activities: parsedProject.activities ?? [],
+        equipments: parsedProject.equipments ?? [],
+      };
 
       const submitted = await this.service.apply(
-        {
-          ...project,
-          leadPI: req.auth.userId,
-          objectives: project.objectives,
-          collaborators: project.collaborators ?? [],
-          themes: project.themes ?? [],
-          phases: project.phases ?? [],
-        },
+        id,
+        dto,
         req.auth.userId,
-        req.file
+        req.file,
       );
 
       successResponse(
         res,
         201,
         "Project submitted successfully",
-        submitted
+        submitted,
       );
     } catch (err: any) {
       errorResponse(res, 400, err.message, err);
@@ -276,20 +289,22 @@ export class ProjectController {
         title,
         summary,
         themes,
-        objectives
+        objectives,
+        totalBudget,
+        totalDuration
       } = req.body;
 
       const dto: UpdateProjectDTO = {
-        id,
-        data: {
-          title,
-          summary,
-          themes,
-          objectives
-        }
+        title,
+        summary,
+        themes,
+        objectives,
+        totalBudget,
+        totalDuration
       };
 
       const updated = await this.service.update(
+        id,
         dto,
         req.auth.userId
       );

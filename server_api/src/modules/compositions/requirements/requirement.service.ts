@@ -1,8 +1,6 @@
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
-import { isValid } from "../../../common/types/range";
 import { CreateRequirementDTO, UpdateRequirementDTO } from "./requirement.dto";
-import { AggregationMode } from "./requirement.model";
 import { RequirementRepository } from "./requirement.repository";
 
 
@@ -13,6 +11,7 @@ export class RequirementService {
 
     async create(data: CreateRequirementDTO) {
 
+        /*
 
         if (!isValid(data.threshold)) {
             throw new AppError(
@@ -34,7 +33,7 @@ export class RequirementService {
                     'Threshold range must be between 0 and 1 for aggregation mode RATIO.'
                 );
             }
-        }
+        }*/
 
         return this.requirementRepository.create(data);
 

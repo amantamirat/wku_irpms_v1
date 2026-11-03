@@ -87,13 +87,14 @@ export class PublicationController {
         try {
             if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
-            const { current, next } = req.body;
+            const { current, next, reason } = req.body;
             const dto: TransitionRequestDto = {
                 id: String(id),
                 current: current,
-                next: next
+                next: next,
+                reason: reason
             };
-            const updated = await this.service.transitionState(dto);
+            const updated = await this.service.transitionState(dto, req.auth.userId);
             successResponse(res, 200, "Publication status updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

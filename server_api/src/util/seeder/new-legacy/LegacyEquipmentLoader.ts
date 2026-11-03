@@ -2,7 +2,7 @@ import path from "path";
 import fs from 'fs/promises';
 
 import {  PhaseStatus } from "../../../modules/projects/phase/phase.model";
-import { PhaseEquipmentDto } from "../../../modules/projects/equipments/phase-equipment.dto";
+import { EquipmentDto } from "../../../modules/projects/equipments/phase-equipment.dto";
 import { PhaseEquipmentStatus, EquipmentUnit } from "../../../modules/projects/equipments/phase-equipment.model";
 
 interface LegacyEquipment {
@@ -53,7 +53,7 @@ export class LegacyEquipmentLoader {
         return PhaseEquipmentStatus.approved;
     }
 
-    getByPhase(conceptNoteId: string, phaseNo: number, phaseStatus: PhaseStatus): PhaseEquipmentDto[] {
+    getByPhase(conceptNoteId: string, phaseNo: number, phaseStatus: PhaseStatus): EquipmentDto[] {
         const project = this.index.get(
             String(conceptNoteId).trim().toUpperCase()
         );

@@ -12,3 +12,10 @@ export function toObjectId(id: string): mongoose.Types.ObjectId {
 
     return new mongoose.Types.ObjectId(id);
 }
+
+export function sameId(
+    a: string | mongoose.Types.ObjectId,
+    b: string | mongoose.Types.ObjectId
+): boolean {
+    return String(a) === String(b);
+}

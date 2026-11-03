@@ -7,21 +7,22 @@ import { Divider } from 'primereact/divider';
 import { Constraint } from '../models/constraint.model';
 import { IRange, formatRange } from '@/types/range';
 import { etbCurrencyFormatter } from '@/utils/utils';
+import { SECTIONS, RangeFieldConfig } from './ConstraintForm';
 
 interface ConstraintViewProps {
     constraint: Constraint;
     title?: string;
 }
 
-interface RuleConfig {
-    label: string;
-    icon: string;
+interface RuleConfig extends RangeFieldConfig {
     range?: IRange;
     formatter?: (val: number) => string;
 }
 
 interface RuleSection {
     title: string;
+    subtitle: string;
+    icon: string;
     rules: RuleConfig[];
 }
 
@@ -38,6 +39,27 @@ const unit =
 const words = unit('word');
 const days = unit('day');
 
+// Helper to determine appropriate default formatters based on field units/types
+const getFormatter = (key: string, currency?: boolean) => {
+    if (currency) return currencyFormat;
+    if (key.includes('Duration') || key === 'duration') return days;
+    if (key.includes('Words') || key === 'titleWords' || key === 'summaryWords' || key === 'generalObjectiveWords' || key === 'specificObjectiveWords' || key === 'expectedOutputWords') return words;
+    if (key === 'keyWords') return unit('keyword');
+    if (key === 'participants') return unit('person', 'people');
+    if (key === 'phases') return unit('phase');
+    if (key === 'activities') return unit('activity', 'activities');
+    if (key === 'equipments') return unit('item');
+    if (key === 'components') return unit('component');
+    if (key === 'componentCollaborators') return unit('contributor');
+    if (key === 'specificObjectives') return unit('objective');
+    if (key === 'expectedOutputs') return unit('output');
+    if (key === 'themes') return unit('theme');
+    if (key === 'subThemes') return unit('sub-theme');
+    if (key === 'focusAreas') return unit('area');
+    if (key === 'indicators') return unit('indicator');
+    return undefined;
+};
+
 const hasRange = (r: RuleConfig): r is RuleConfig & { range: IRange } =>
     !!r.range && (r.range.min != null || r.range.max != null);
 
@@ -46,60 +68,20 @@ export const ConstraintView: React.FC<ConstraintViewProps> = ({
     title = 'Constraint Details'
 }) => {
     const sections = useMemo<RuleSection[]>(() => {
-        const all: RuleSection[] = [
-            {
-                title: 'Project Content',
-                rules: [
-                    { label: 'Title Words', icon: 'pi pi-align-left', range: constraint.titleWords, formatter: words },
-                    { label: 'Summary Words', icon: 'pi pi-align-justify', range: constraint.summaryWords, formatter: words },
-                    { label: 'Keywords', icon: 'pi pi-key', range: constraint.keyWords, formatter: unit('keyword') }
-                ]
-            },
-            {
-                title: 'Objectives & Outputs',
-                rules: [
-                    { label: 'General Objective Words', icon: 'pi pi-file', range: constraint.generalObjectiveWords, formatter: words },
-                    { label: 'Specific Objective Words', icon: 'pi pi-file-edit', range: constraint.specificObjectiveWords, formatter: words },
-                    { label: 'Specific Objectives', icon: 'pi pi-list', range: constraint.specificObjectives, formatter: unit('objective') },
-                    { label: 'Expected Outputs', icon: 'pi pi-check-circle', range: constraint.expectedOutputs, formatter: unit('output') },
-                    { label: 'Expected Output Words', icon: 'pi pi-pencil', range: constraint.expectedOutputWords, formatter: words }
-                ]
-            },
-            {
-                title: 'Project Structure',
-                rules: [
-                    { label: 'Participants', icon: 'pi pi-users', range: constraint.participants },
-                    { label: 'Phases', icon: 'pi pi-list-check', range: constraint.phases },
-                    { label: 'Activities', icon: 'pi pi-check-square', range: constraint.activities, formatter: unit('activity', 'activities') },
-                    { label: 'Equipments', icon: 'pi pi-box', range: constraint.equipments, formatter: unit('item') },
-                    { label: 'Components', icon: 'pi pi-th-large', range: constraint.components, formatter: unit('component') }
-                ]
-            },
-            {
-                title: 'Budget & Duration',
-                rules: [
-                    { label: 'Budget', icon: 'pi pi-dollar', range: constraint.budget, formatter: currencyFormat },
-                    { label: 'Duration', icon: 'pi pi-clock', range: constraint.duration, formatter: days },
-                    { label: 'Phase Budget', icon: 'pi pi-wallet', range: constraint.phaseBudget, formatter: currencyFormat },
-                    { label: 'Phase Duration', icon: 'pi pi-hourglass', range: constraint.phaseDuration, formatter: days },
-                    { label: 'Activity Cost', icon: 'pi pi-tags', range: constraint.activityCost, formatter: currencyFormat },
-                    { label: 'Activity Duration', icon: 'pi pi-stopwatch', range: constraint.activityDuration, formatter: days },
-                    { label: 'Equipment Cost', icon: 'pi pi-money-bill', range: constraint.equipmentCost, formatter: currencyFormat }
-                ]
-            },
-            {
-                title: 'Taxonomy',
-                rules: [
-                    { label: 'Themes', icon: 'pi pi-bookmark', range: constraint.themes, formatter: unit('theme') },
-                    { label: 'Sub-Themes', icon: 'pi pi-tags', range: constraint.subThemes, formatter: unit('sub-theme') },
-                    { label: 'Focus Areas', icon: 'pi pi-compass', range: constraint.focusAreas, formatter: unit('area') },
-                    { label: 'Indicators', icon: 'pi pi-chart-line', range: constraint.indicators, formatter: unit('indicator') }
-                ]
-            }
-        ];
+        // Map over the shared SECTIONS array from ConstraintForm
+        const mappedSections: RuleSection[] = SECTIONS.map((section) => ({
+            title: section.title,
+            subtitle: section.subtitle,
+            icon: section.icon,
+            rules: section.fields.map((field) => ({
+                ...field,
+                range: constraint[field.key as keyof Constraint] as IRange | undefined,
+                formatter: getFormatter(field.key, field.currency)
+            }))
+        }));
 
         // Keep only configured rules, and drop sections that end up empty
-        return all
+        return mappedSections
             .map((s) => ({ ...s, rules: s.rules.filter(hasRange) }))
             .filter((s) => s.rules.length > 0);
     }, [constraint]);
@@ -136,10 +118,10 @@ export const ConstraintView: React.FC<ConstraintViewProps> = ({
 
                         <div className="grid">
                             {section.rules.map((rule) => (
-                                <div key={rule.label} className="col-12 md:col-6 p-2">
-                                    <div className="flex align-items-center p-3 border-round-xl surface-50 border-1 surface-border h-xl shadow-sm hover:shadow-2 transition-all transition-duration-200">
+                                <div key={rule.key} className="col-12 md:col-6 p-2">
+                                    <div className="flex align-items-center p-3 border-round-xl surface-50 border-1 surface-border h-full shadow-sm hover:shadow-2 transition-all transition-duration-200">
                                         <div className="w-2.5rem h-2.5rem border-round-circle surface-primary flex align-items-center justify-content-center mr-3 shadow-sm shrink-0">
-                                            <i className={`${rule.icon} text-primary text-base`} />
+                                            <i className={`${section.icon} text-primary text-base`} />
                                         </div>
                                         <div className="flex flex-column overflow-hidden">
                                             <span

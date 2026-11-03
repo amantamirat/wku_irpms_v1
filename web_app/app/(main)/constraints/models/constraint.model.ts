@@ -28,6 +28,7 @@ export interface Constraint {
   activities?: IRange;
   equipments?: IRange;
   components?: IRange;
+  componentCollaborators?: IRange;
 
   phaseBudget?: IRange;
   phaseDuration?: IRange;

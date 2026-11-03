@@ -48,7 +48,7 @@ export class ApplicationController {
             if (!req.file) throw new Error(ERROR_CODES.FILE_NOT_FOUND);
 
             // documentPath is set by the service, never trusted from the client
-            const { documentPath, ...application } = JSON.parse(
+            const { ...application } = JSON.parse(
                 req.body.application
             ) as CreateApplicationDTO;
 

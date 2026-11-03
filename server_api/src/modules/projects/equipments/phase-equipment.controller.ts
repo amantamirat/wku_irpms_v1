@@ -45,10 +45,7 @@ export class PhaseEquipmentController {
                 itemName,
                 description,
                 unit,
-                unitPrice:
-                    unitPrice !== undefined
-                        ? Number(unitPrice)
-                        : undefined,
+                unitPrice: Number(unitPrice),
                 quantity: Number(quantity),
                 packSize: Number(packSize),
                 requiredBy,
@@ -91,7 +88,7 @@ export class PhaseEquipmentController {
             } = req.query;
 
             const filter: FilterPhaseEquipments = {
-                 project: project as string,
+                project: project as string,
                 phase: phase as string,
                 status: status as any,
             };

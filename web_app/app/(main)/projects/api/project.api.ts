@@ -9,7 +9,7 @@ const end_point = "/projects";
 interface IProjectApi extends EntityApi<Project, FilterProjects | undefined> {
     transitionState: (id: string, dto: StateTransition) => Promise<Project>;
     me: (filter?: FilterProjects) => Promise<Project[]>;
-    apply: (project: Partial<Project>) => Promise<any>;
+    apply: (id: string, project: Partial<Project>) => Promise<any>;
     getProgress: (id: string) => Promise<any>
 }
 
@@ -46,7 +46,7 @@ export const ProjectApi: IProjectApi = {
         return createdData as Project;
     },
 
-    async apply(project: Partial<Project>): Promise<any> {
+    async apply(id: string, project: Partial<Project>): Promise<any> {
         const formData = new FormData();
 
         // 1. Append the real file directly
@@ -61,7 +61,7 @@ export const ProjectApi: IProjectApi = {
         // 3. Stringify clean metadata
         formData.append("project", JSON.stringify(sanitized));
 
-        return ApiClient.post(`${end_point}/apply`, formData);
+        return ApiClient.post(`${end_point}/apply/${id}`, formData);
     },
 
     async update(project: Partial<Project>): Promise<Project> {

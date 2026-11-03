@@ -1,27 +1,80 @@
+
 import mongoose from "mongoose";
+
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import {
     IRange,
-    matchesRange
+    checkRange,
 } from "../../../common/types/range";
+import { calculateDurationDays } from "../../../common/utils/date.utils";
+
 import { PhaseActivityRepository } from "../../projects/activities/phase-activity.repository";
-import { CreatePhaseDto, PhaseDto } from "../../projects/phase/phase.dto";
+import { CollaboratorRepository } from "../../projects/collaborators/collaborator.repository";
+import { ProjectComponentRepository } from "../../projects/components/component.repository";
+import { PhaseEquipmentRepository } from "../../projects/equipments/phase-equipment.repository";
 import { PhaseRepository } from "../../projects/phase/phase.repository";
 import { ProjectRepository } from "../../projects/project.repository";
 import { ThemeRepository } from "../../thematics/themes/theme.repository";
+
+import { PhaseDto } from "../../projects/phase/phase.dto";
+
+import { PhaseActivityDto } from "../../projects/activities/phase-activity.dto";
+import { ProjectComponentDto } from "../../projects/components/component.dto";
+import { EquipmentDto } from "../../projects/equipments/phase-equipment.dto";
 import { IConstraint } from "../constraint.model";
 import { ConstraintRepository } from "../constraint.repository";
+import { CollaboratorDto } from "../../projects/collaborators/collaborator.dto";
+
+// =====================================================
+// TYPES
+// =====================================================
+
+export function countWords(text: string): number {
+    return text
+        .trim()
+        .split(/\s+/)
+        .filter(Boolean)
+        .length;
+}
 
 export interface ValidationResult {
     valid: boolean;
     errors: string[];
 }
 
+export type CollaboratorValidationInput = Pick<
+    CollaboratorDto,
+    "member"
+> & {
+    _id?: string | mongoose.Types.ObjectId;
+};
 
-type PhaseValidationInput = Pick<
-    CreatePhaseDto,
+export type PhaseValidationInput = Pick<
+    PhaseDto,
     "title" | "budget" | "duration"
+> & {
+    _id?: string | mongoose.Types.ObjectId;
+};
+
+export type ActivityValidationInput = Pick<
+    PhaseActivityDto,
+    "title" | "cost" | "startDate" | "endDate"
+> & {
+    _id?: string | mongoose.Types.ObjectId;
+};
+
+export type EquipmentValidationInput = Pick<
+    EquipmentDto,
+    "itemName" | "unitPrice" | "quantity"
+> & {
+    _id?: string | mongoose.Types.ObjectId;
+};
+
+
+export type ComponentValidationInput = Pick<
+    ProjectComponentDto,
+    "title" | "contributors"
 > & {
     _id?: string | mongoose.Types.ObjectId;
 };
@@ -29,6 +82,12 @@ type PhaseValidationInput = Pick<
 export interface ConstraintValidationInput {
     title: string;
     summary?: string;
+    keywords?: string[];
+
+    totalBudget: number;
+    totalDuration: number;
+
+    themes: string[];
 
     objectives?: {
         general?: string;
@@ -36,24 +95,49 @@ export interface ConstraintValidationInput {
         expectedOutputs?: string[];
     };
 
-    collaboratorsCount: number;
-    themes: string[];
-    phases: PhaseDto[];
+    collaborators?: CollaboratorValidationInput[];
+    phases?: PhaseValidationInput[];
+    activities?: ActivityValidationInput[];
+    equipments?: EquipmentValidationInput[];
+    components?: ComponentValidationInput[];
 }
+
+// =====================================================
+// SERVICE
+// =====================================================
 
 export class ConstraintValidationService {
 
     constructor(
         private readonly constraintRepo: ConstraintRepository,
-        private readonly themeRepo: ThemeRepository,
         private readonly projectRepo: ProjectRepository,
+        private readonly themeRepo: ThemeRepository,
+        private readonly collaboratorRepo: CollaboratorRepository,
         private readonly phaseRepo: PhaseRepository,
         private readonly activityRepo: PhaseActivityRepository,
+        private readonly equipmentRepo: PhaseEquipmentRepository,
+        private readonly componentRepo: ProjectComponentRepository,
     ) { }
 
+    // =====================================================
+    // COMMON HELPERS
+    // =====================================================
 
-    private async getConstraint(
-        constraintId: string
+    private createValidationResult(
+        errors: string[],
+    ): ValidationResult {
+        return {
+            valid: errors.length === 0,
+            errors,
+        };
+    }
+
+    // =====================================================
+    // CONSTRAINT
+    // =====================================================
+
+    public async getConstraint(
+        constraintId: string,
     ): Promise<IConstraint> {
 
         const constraint =
@@ -61,680 +145,849 @@ export class ConstraintValidationService {
 
         if (!constraint) {
             throw new AppError(
-                ERROR_CODES.CONSTRAINT_NOT_FOUND
+                ERROR_CODES.CONSTRAINT_NOT_FOUND,
             );
         }
 
         return constraint;
     }
 
-    async validateProjectById(
-        constraintId: string,
-        projectId: string
+    // =====================================================
+    // VALIDATE PROJECT BY ID
+    // =====================================================
+
+    public async validateProjectById(
+        constraint: IConstraint,
+        projectId: string,
     ): Promise<ValidationResult> {
 
-        const constraint =
-            await this.getConstraint(constraintId);
+        const projectDoc =
+            await this.projectRepo.findById(projectId);
 
-        const projectDoc = await this.projectRepo.findById(projectId);
         if (!projectDoc) {
-            throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
+            throw new AppError(
+                ERROR_CODES.PROJECT_NOT_FOUND,
+            );
         }
 
-        const errors: string[] = [];
-
-        // --------------------------------------------------
-        // Project content
-        // --------------------------------------------------
-
-        this.validateTitleWords(
-            constraint.titleWords,
-            projectDoc.title,
-            errors
-        );
-
-        this.validateSummaryWords(
-            constraint.summaryWords,
-            projectDoc.summary,
-            errors
-        );
-
-        //------------------------------------------------------------
-
-        this.validateGeneralObjectiveWords(
-            constraint.generalObjectiveWords,
-            projectDoc.objectives?.general,
-            errors
-        );
-
-        this.validateSpecificObjectiveWords(
-            constraint.specificObjectiveWords,
-            projectDoc.objectives?.specific ?? [],
-            errors
-        );
-
-        this.validateSpecificObjectiveCount(
-            constraint.specificObjectives,
-            projectDoc.objectives?.specific?.length ?? 0,
-            errors
-        );
-
-        //------------------------------------------------------------
-
-        this.validateExpectedOutputWords(
-            constraint.expectedOutputWords,
-            projectDoc.objectives?.expectedOutputs ?? [],
-            errors
-        );
-
-        this.validateExpectedOutputCount(
-            constraint.expectedOutputs,
-            projectDoc.objectives?.expectedOutputs?.length ?? 0,
-            errors
-        );
-
-        // --------------------------------------------------
-        // Participants
-        // --------------------------------------------------
-
-        this.validateParticipants(
-            constraint.participants,
-            projectDoc.totalCollabs ?? 0,
-            errors
-        );
-
-        const phases = await this.phaseRepo.find({ project: projectId });
-
-        // --------------------------------------------------
-        // Phases
-        // --------------------------------------------------
-
-        this.validatePhasesInternal(
-            constraint,
+        const [
+            collaborators,
             phases,
-            errors
+            activities,
+            equipments,
+            components,
+        ] = await Promise.all([
+            this.collaboratorRepo.find({
+                project: projectId,
+            }),
+
+            this.phaseRepo.find({
+                project: projectId,
+            }),
+
+            this.activityRepo.find({
+                project: projectId,
+            }),
+
+            this.equipmentRepo.find({
+                project: projectId,
+            }),
+
+            this.componentRepo.find({
+                project: projectId,
+            }),
+        ]);
+
+        const collaboratorsInput: CollaboratorValidationInput[] =
+            collaborators.map(collab => ({
+                _id: collab._id,
+                member: collab.member.toString(),
+            }));
+
+        const componentsInput: ComponentValidationInput[] = components.map(
+            comp => ({
+                _id: comp._id,
+                title: comp.title,
+                contributors: comp.contributors.map(cont => cont.toString()),
+            }),
         );
 
-        // --------------------------------------------------
-        // Themes
-        // --------------------------------------------------
+        return this.validateProject(constraint, {
+            title: projectDoc.title,
+            summary: projectDoc.summary,
 
-        await this.validateThemeInternal(
-            constraint,
-            projectDoc.themes.map(theme => theme.toString()),
-            errors
-        );
+            totalBudget: projectDoc.totalBudget ?? 0,
+            totalDuration: projectDoc.totalDuration ?? 0,
 
-        return {
-            valid: errors.length === 0,
-            errors
-        };
+            objectives: {
+                general: projectDoc.objectives?.general,
+                specific:
+                    projectDoc.objectives?.specific ?? [],
+                expectedOutputs:
+                    projectDoc.objectives?.expectedOutputs ?? [],
+            },
+
+            collaborators: collaboratorsInput,
+
+            themes: projectDoc.themes.map(
+                theme => theme.toString(),
+            ),
+
+            phases,
+            activities,
+            equipments,
+            components: componentsInput,
+        });
     }
 
+    // =====================================================
+    // VALIDATE COMPLETE PROJECT
+    // =====================================================
 
-    async validateProject(
-        constraintId: string,
-        dto: ConstraintValidationInput
+    public async validateProject(
+        constraint: IConstraint,
+        dto: ConstraintValidationInput,
     ): Promise<ValidationResult> {
 
-        const constraint =
-            await this.getConstraint(constraintId);
+        const results = await Promise.all([
 
-        const errors: string[] = [];
+            // Project content
+            this.validateProjectContent(
+                constraint,
+                dto.title,
+                dto.summary,
+                dto.totalBudget ?? 0,
+                dto.totalDuration ?? 0,
+                dto.objectives,
+                dto.keywords ?? [],
+            ),
 
-        // --------------------------------------------------
-        // Project content
-        // --------------------------------------------------
+            // Collaborators
+            Promise.resolve(
+                this.validateCollaborators(
+                    constraint,
+                    dto.collaborators ?? [],
+                ),
+            ),
 
-        this.validateTitleWords(
-            constraint.titleWords,
-            dto.title,
-            errors
+            // Phases
+            Promise.resolve(
+                this.validatePhases(
+                    constraint,
+                    dto.phases ?? [],
+                ),
+            ),
+
+            // Activities
+            Promise.resolve(
+                this.validateActivities(
+                    constraint,
+                    dto.activities ?? [],
+                ),
+            ),
+
+            // Equipments
+            Promise.resolve(
+                this.validateEquipments(
+                    constraint,
+                    dto.equipments ?? [],
+                ),
+            ),
+
+            // Components
+            Promise.resolve(
+                this.validateComponents(
+                    constraint,
+                    dto.components ?? [],
+                ),
+            ),
+
+            // Themes
+            this.validateThemes(
+                constraint,
+                dto.themes,
+            ),
+        ]);
+
+        const errors = results.flatMap(
+            result => result.errors,
         );
 
-        this.validateSummaryWords(
-            constraint.summaryWords,
-            dto.summary,
-            errors
-        );
-
-        //-----------------Objectives-------------------------
-
-        this.validateGeneralObjectiveWords(
-            constraint.generalObjectiveWords,
-            dto.objectives?.general,
-            errors
-        );
-
-        this.validateSpecificObjectiveWords(
-            constraint.specificObjectiveWords,
-            dto.objectives?.specific ?? [],
-            errors
-        );
-
-        this.validateSpecificObjectiveCount(
-            constraint.specificObjectives,
-            dto.objectives?.specific?.length ?? 0,
-            errors
-        );
-
-
-        this.validateExpectedOutputWords(
-            constraint.expectedOutputWords,
-            dto.objectives?.expectedOutputs ?? [],
-            errors
-        );
-
-        this.validateExpectedOutputCount(
-            constraint.expectedOutputs,
-            dto.objectives?.expectedOutputs?.length ?? 0,
-            errors
-        );
-
-        // --------------------------------------------------
-        // Participants
-        // --------------------------------------------------
-
-        this.validateParticipants(
-            constraint.participants,
-            dto.collaboratorsCount,
-            errors
-        );
-
-        // --------------------------------------------------
-        // Phases
-        // --------------------------------------------------
-
-        this.validatePhasesInternal(
-            constraint,
-            dto.phases,
-            errors
-        );
-
-        // --------------------------------------------------
-        // Themes
-        // --------------------------------------------------
-
-        await this.validateThemeInternal(
-            constraint,
-            dto.themes,
-            errors
-        );
-
-        return {
-            valid: errors.length === 0,
-            errors
-        };
+        return this.createValidationResult(errors);
     }
 
+    // =====================================================
+    // PROJECT CONTENT VALIDATION
+    // =====================================================
 
-    async validateProjectContent(
-        constraintId: string,
+    public async validateProjectContent(
+        constraint: IConstraint,
         title: string,
         summary?: string,
+        totalBudget: number = 0,
+        totalDuration: number = 0,
         objectives?: {
             general?: string;
             specific?: string[];
             expectedOutputs?: string[];
-        }
+        },
+        keywords: string[] = [],
     ): Promise<ValidationResult> {
-        const constraint = await this.getConstraint(constraintId);
+
         const errors: string[] = [];
 
-        this.validateTitleWords(
-            constraint.titleWords,
+        this.validateProjectTitle(
+            constraint,
             title,
-            errors
+            errors,
         );
 
-        this.validateSummaryWords(
-            constraint.summaryWords,
+        this.validateProjectSummary(
+            constraint,
             summary,
-            errors
+            errors,
         );
 
-        this.validateGeneralObjectiveWords(
-            constraint.generalObjectiveWords,
-            objectives?.general,
-            errors
-        );
-
-        this.validateSpecificObjectiveWords(
-            constraint.specificObjectiveWords,
-            objectives?.specific ?? [],
-            errors
-        );
-
-        this.validateSpecificObjectiveCount(
-            constraint.specificObjectives,
-            objectives?.specific?.length ?? 0,
-            errors
-        );
-
-
-        this.validateExpectedOutputWords(
-            constraint.expectedOutputWords,
-            objectives?.expectedOutputs ?? [],
-            errors
-        );
-
-        this.validateExpectedOutputCount(
-            constraint.expectedOutputs,
-            objectives?.expectedOutputs?.length ?? 0,
-            errors
-        );
-
-        return {
-            valid: errors.length === 0,
-            errors
-        };
-    }
-
-
-    async validateParticipantCount(
-        constraintId: string,
-        count: number
-    ): Promise<ValidationResult> {
-
-        const constraint =
-            await this.getConstraint(constraintId);
-
-        const errors: string[] = [];
-
-        this.validateParticipants(
-            constraint.participants,
-            count,
-            errors
-        );
-
-        return {
-            valid: errors.length === 0,
-            errors
-        };
-    }
-
-
-    async validatePhases(
-        constraintId: string,
-        phases: PhaseValidationInput[]
-    ): Promise<ValidationResult> {
-
-        const constraint =
-            await this.getConstraint(constraintId);
-
-        const errors: string[] = [];
-
-        this.validatePhasesInternal(
+        this.validateKeywordCount(
             constraint,
-            phases,
-            errors
+            keywords.length,
+            errors,
         );
 
-        return {
-            valid: errors.length === 0,
-            errors
-        };
-    }
-
-
-    async validateThemes(
-        constraintId: string,
-        selectedThemes: string[]
-    ): Promise<ValidationResult> {
-
-        const constraint =
-            await this.getConstraint(constraintId);
-
-        const errors: string[] = [];
-
-        await this.validateThemeInternal(
+        this.validateProjectObjectivesAndOutput(
             constraint,
-            selectedThemes,
-            errors
-        );
-
-        return {
-            valid: errors.length === 0,
-            errors
-        };
-    }
-
-    private validateTitleWords(
-        range: IRange | undefined,
-        title: string,
-        errors: string[]
-    ): void {
-
-        if (!range) {
-            return;
-        }
-
-        const count = this.countWords(title);
-
-        if (!matchesRange(range, count)) {
-            errors.push(
-                `Project title must contain between ${range.min} and ${range.max} words. Current count: ${count}.`
-            );
-        }
-    }
-
-    private validateSummaryWords(
-        range: IRange | undefined,
-        summary: string | undefined,
-        errors: string[]
-    ): void {
-
-        if (!range) {
-            return;
-        }
-
-        const count = this.countWords(summary ?? '');
-
-        if (!matchesRange(range, count)) {
-            errors.push(
-                `Project summary must contain between ${range.min} and ${range.max} words. Current count: ${count}.`
-            );
-        }
-    }
-
-
-    private countWords(text: string): number {
-        return text
-            .trim()
-            .split(/\s+/)
-            .filter(Boolean)
-            .length;
-    }
-
-    private validateGeneralObjectiveWords(
-        range: IRange | undefined,
-        generalObjective: string | undefined,
-        errors: string[]
-    ): void {
-        if (!range) {
-            return;
-        }
-
-        const count = this.countWords(generalObjective ?? "");
-
-        if (!matchesRange(range, count)) {
-            errors.push(
-                `General objective must contain between ${range.min} and ${range.max} words. Current count: ${count}.`
-            );
-        }
-    }
-
-    private validateSpecificObjectiveWords(
-        range: IRange | undefined,
-        specificObjectives: string[],
-        errors: string[]
-    ): void {
-        if (!range) {
-            return;
-        }
-
-        specificObjectives.forEach((objective, index) => {
-            const count = this.countWords(objective ?? "");
-
-            if (!matchesRange(range, count)) {
-                errors.push(
-                    `Specific objective ${index + 1} must contain between ${range.min} and ${range.max} words. Current count: ${count}.`
-                );
-            }
-        });
-    }
-
-    private validateSpecificObjectiveCount(
-        range: IRange | undefined,
-        count: number,
-        errors: string[]
-    ): void {
-        if (range && !matchesRange(range, count)) {
-            errors.push(
-                `Number of specific objectives must be between ${range.min} and ${range.max}. Current count: ${count}.`
-            );
-        }
-    }
-
-
-    private validateExpectedOutputWords(
-        range: IRange | undefined,
-        expectedOutputs: string[],
-        errors: string[]
-    ): void {
-        if (!range) {
-            return;
-        }
-
-        expectedOutputs.forEach((output, index) => {
-            const count = this.countWords(output ?? "");
-
-            if (!matchesRange(range, count)) {
-                errors.push(
-                    `Expected output ${index + 1} must contain between ${range.min} and ${range.max} words. Current count: ${count}.`
-                );
-            }
-        });
-    }
-
-    private validateExpectedOutputCount(
-        range: IRange | undefined,
-        count: number,
-        errors: string[]
-    ): void {
-        if (range && !matchesRange(range, count)) {
-            errors.push(
-                `Number of expected outputs must be between ${range.min} and ${range.max}. Current count: ${count}.`
-            );
-        }
-    }
-
-    private validateParticipants(
-        range: IRange | undefined,
-        count: number,
-        errors: string[]
-    ): void {
-
-        if (range && !matchesRange(range, count)) {
-            errors.push(
-                `Participants must be between ${range.min} and ${range.max}. Current count: ${count}.`
-            );
-        }
-    }
-
-
-    private validatePhaseCount(
-        range: IRange | undefined,
-        count: number,
-        errors: string[]
-    ): void {
-
-        if (range && !matchesRange(range, count)) {
-            errors.push(
-                `Phases must be between ${range.min} and ${range.max}. Current count: ${count}.`
-            );
-        }
-    }
-
-
-    private validateProjectBudget(
-        range: IRange | undefined,
-        budget: number,
-        errors: string[]
-    ): void {
-
-        if (range && !matchesRange(range, budget)) {
-            errors.push(
-                `Project budget must be between ${range.min} and ${range.max}. Current budget: ${budget}.`
-            );
-        }
-    }
-
-
-    private validateProjectDuration(
-        range: IRange | undefined,
-        duration: number,
-        errors: string[]
-    ): void {
-
-        if (range && !matchesRange(range, duration)) {
-            errors.push(
-                `Project duration must be between ${range.min} and ${range.max}. Current duration: ${duration}.`
-            );
-        }
-    }
-
-
-    private async validatePhasesInternal(
-        constraint: IConstraint,
-        phases: PhaseValidationInput[],
-        errors: string[]
-    ): Promise<void> {
-
-        this.validatePhaseCount(
-            constraint.phases,
-            phases.length,
-            errors
-        );
-
-        const projectBudget = phases.reduce(
-            (sum, phase) => sum + phase.budget,
-            0
+            objectives,
+            errors,
         );
 
         this.validateProjectBudget(
-            constraint.budget,
-            projectBudget,
-            errors
-        );
-
-        const projectDuration = phases.reduce(
-            (sum, phase) => sum + phase.duration,
-            0
+            constraint,
+            totalBudget,
+            errors,
         );
 
         this.validateProjectDuration(
-            constraint.duration,
-            projectDuration,
-            errors
+            constraint,
+            totalDuration,
+            errors,
         );
 
-        for (const phase of phases) {
+        return this.createValidationResult(errors);
+    }
 
-            // ---------------------------------------------
-            // Budget per phase
-            // ---------------------------------------------
+    // =====================================================
+    // COLLABORATORS VALIDATION
+    // =====================================================
+
+    public validateCollaborators(
+        constraint: IConstraint,
+        collaborators: CollaboratorValidationInput[],
+    ): ValidationResult {
+
+        const errors: string[] = [];
+
+        if (
+            constraint.participants &&
+            !checkRange(
+                constraint.participants,
+                collaborators.length,
+            )
+        ) {
+            errors.push(
+                `Collaborators must be between ${constraint.participants.min} and ${constraint.participants.max}. Current count: ${collaborators.length}.`,
+            );
+        }
+
+        return this.createValidationResult(errors);
+    }
+
+    // =====================================================
+    // PHASES VALIDATION
+    // =====================================================
+
+    public validatePhases(
+        constraint: IConstraint,
+        phases: PhaseValidationInput[],
+    ): ValidationResult {
+
+        const errors: string[] = [];
+
+        // Total number of phases
+        if (
+            constraint.phases &&
+            !checkRange(
+                constraint.phases,
+                phases.length,
+            )
+        ) {
+            errors.push(
+                `Number of phases must be between ${constraint.phases.min} and ${constraint.phases.max}. Current count: ${phases.length}.`,
+            );
+        }
+
+        phases.forEach(phase => {
+
+            // Phase budget
             if (
                 constraint.phaseBudget &&
-                !matchesRange(
+                !checkRange(
                     constraint.phaseBudget,
-                    phase.budget
+                    phase.budget,
                 )
             ) {
                 errors.push(
-                    `Phase "${phase.title}" budget must be between ${constraint.phaseBudget.min} and ${constraint.phaseBudget.max}. Current budget: ${phase.budget}.`
+                    `Phase "${phase.title}" budget must be between ${constraint.phaseBudget.min} and ${constraint.phaseBudget.max}. Current budget: ${phase.budget}.`,
                 );
             }
 
-            // ---------------------------------------------
-            // Duration per phase
-            // ---------------------------------------------
+            // Phase duration
             if (
                 constraint.phaseDuration &&
-                !matchesRange(
+                !checkRange(
                     constraint.phaseDuration,
-                    phase.duration
+                    phase.duration,
                 )
             ) {
                 errors.push(
-                    `Phase "${phase.title}" duration must be between ${constraint.phaseDuration.min} and ${constraint.phaseDuration.max}. Current duration: ${phase.duration}.`
+                    `Phase "${phase.title}" duration must be between ${constraint.phaseDuration.min} and ${constraint.phaseDuration.max}. Current duration: ${phase.duration}.`,
+                );
+            }
+        });
+
+        return this.createValidationResult(errors);
+    }
+
+    // =====================================================
+    // ACTIVITIES VALIDATION
+    // =====================================================
+
+    public validateActivities(
+        constraint: IConstraint,
+        activities: ActivityValidationInput[],
+    ): ValidationResult {
+
+        const errors: string[] = [];
+
+        // Total number of activities
+        if (
+            constraint.activities &&
+            !checkRange(
+                constraint.activities,
+                activities.length,
+            )
+        ) {
+            errors.push(
+                `Number of activities must be between ${constraint.activities.min} and ${constraint.activities.max}. Current count: ${activities.length}.`,
+            );
+        }
+
+        activities.forEach(activity => {
+
+            // Activity cost
+            if (
+                constraint.activityCost &&
+                !checkRange(
+                    constraint.activityCost,
+                    activity.cost,
+                )
+            ) {
+                errors.push(
+                    `Activity "${activity.title}" cost must be between ${constraint.activityCost.min} and ${constraint.activityCost.max}. Current cost: ${activity.cost}.`,
                 );
             }
 
-            // ---------------------------------------------
-            // Activities per phase
-            // ---------------------------------------------
-            if (
-                constraint.activities &&
-                phase._id
-            ) {
-                const activityCount =
-                    await this.activityRepo.countByPhase(
-                        phase._id.toString()
-                    );
+            // Activity duration
+            if (constraint.activityDuration) {
 
                 if (
-                    !matchesRange(
-                        constraint.activities,
-                        activityCount
+                    !activity.startDate ||
+                    !activity.endDate
+                ) {
+                    errors.push(
+                        `Activity "${activity.title}" must have both start and end dates to validate its duration.`,
+                    );
+
+                    return;
+                }
+
+                const duration = calculateDurationDays(
+                    activity.startDate,
+                    activity.endDate,
+                );
+
+                if (
+                    !checkRange(
+                        constraint.activityDuration,
+                        duration,
                     )
                 ) {
                     errors.push(
-                        `Phase "${phase.title}" must contain between ${constraint.activities.min} and ${constraint.activities.max} activities. Current count: ${activityCount}.`
+                        `Activity "${activity.title}" duration must be between ${constraint.activityDuration.min} and ${constraint.activityDuration.max} days. Current duration: ${duration} days.`,
                     );
                 }
             }
-        }
+        });
+
+        return this.createValidationResult(errors);
     }
 
+    // =====================================================
+    // EQUIPMENTS VALIDATION
+    // =====================================================
 
-    private async validateThemeInternal(
+    public validateEquipments(
         constraint: IConstraint,
-        selectedThemes: string[],
-        errors: string[]
-    ): Promise<void> {
+        equipments: EquipmentValidationInput[],
+    ): ValidationResult {
+
+        const errors: string[] = [];
+
+        // Equipment count
+        if (
+            constraint.equipments &&
+            !checkRange(
+                constraint.equipments,
+                equipments.length,
+            )
+        ) {
+            errors.push(
+                `Number of equipments must be between ${constraint.equipments.min} and ${constraint.equipments.max}. Current count: ${equipments.length}.`,
+            );
+        }
+
+        // Cost per equipment
+        if (constraint.equipmentCost) {
+
+            equipments.forEach(equipment => {
+
+
+                if (
+                    !checkRange(
+                        constraint.equipmentCost!,
+                        equipment.quantity * equipment.unitPrice,
+                    )
+                ) {
+                    errors.push(
+                        `Equipment "${equipment.itemName}" cost must be between ${constraint.equipmentCost!.min} and ${constraint.equipmentCost!.max}. Current cost: ${equipment.quantity * equipment.unitPrice}.`,
+                    );
+                }
+            });
+        }
+
+        return this.createValidationResult(errors);
+    }
+
+    // =====================================================
+    // COMPONENTS VALIDATION
+    // =====================================================
+
+    public validateComponents(
+        constraint: IConstraint,
+        components: ComponentValidationInput[],
+    ): ValidationResult {
+
+        const errors: string[] = [];
+
+        // Number of components
+        if (
+            constraint.components &&
+            !checkRange(
+                constraint.components,
+                components.length,
+            )
+        ) {
+            errors.push(
+                `Number of components must be between ${constraint.components.min} and ${constraint.components.max}. Current count: ${components.length}.`,
+            );
+        }
+
+        // Contributors per component
+        if (constraint.componentCollaborators) {
+
+            components.forEach(component => {
+
+                const count =
+                    component.contributors.length;
+
+                if (
+                    !checkRange(
+                        constraint.componentCollaborators!,
+                        count,
+                    )
+                ) {
+                    errors.push(
+                        `Component "${component.title}" must have between ${constraint.componentCollaborators!.min} and ${constraint.componentCollaborators!.max} collaborators. Current count: ${count}.`,
+                    );
+                }
+            });
+        }
+
+        return this.createValidationResult(errors);
+    }
+
+    // =====================================================
+    // THEMES VALIDATION
+    // =====================================================
+
+    public async validateThemes(
+        constraint: IConstraint,
+        themes: string[],
+    ): Promise<ValidationResult> {
+
+        const errors: string[] = [];
 
         const counts =
-            await this.countThemeLevels(selectedThemes);
+            await this.countThemeLevels(themes);
 
         this.validateThemeLevel(
             "Theme",
             counts[0]?.size ?? 0,
             constraint.themes,
-            errors
+            errors,
         );
 
         this.validateThemeLevel(
             "Sub-theme",
             counts[1]?.size ?? 0,
             constraint.subThemes,
-            errors
+            errors,
         );
 
         this.validateThemeLevel(
             "Focus Area",
             counts[2]?.size ?? 0,
             constraint.focusAreas,
-            errors
+            errors,
         );
 
         this.validateThemeLevel(
             "Indicator",
             counts[3]?.size ?? 0,
             constraint.indicators,
-            errors
+            errors,
+        );
+
+        return this.createValidationResult(errors);
+    }
+
+    // =====================================================
+    // PROJECT TITLE VALIDATION
+    // =====================================================
+
+    public validateProjectTitle(
+        constraint: IConstraint,
+        title: string,
+        errors: string[],
+    ): void {
+
+        if (!constraint.titleWords) {
+            return;
+        }
+
+        const count = countWords(title);
+
+        if (
+            !checkRange(
+                constraint.titleWords,
+                count,
+            )
+        ) {
+            errors.push(
+                `Project title must contain between ${constraint.titleWords.min} and ${constraint.titleWords.max} words. Current count: ${count}.`,
+            );
+        }
+    }
+
+    // =====================================================
+    // PROJECT SUMMARY VALIDATION
+    // =====================================================
+
+    public validateProjectSummary(
+        constraint: IConstraint,
+        summary: string | undefined,
+        errors: string[],
+    ): void {
+
+        if (!constraint.summaryWords) {
+            return;
+        }
+
+        const count = countWords(summary ?? "");
+
+        if (
+            !checkRange(
+                constraint.summaryWords,
+                count,
+            )
+        ) {
+            errors.push(
+                `Project summary must contain between ${constraint.summaryWords.min} and ${constraint.summaryWords.max} words. Current count: ${count}.`,
+            );
+        }
+    }
+
+    // =====================================================
+    // KEYWORD VALIDATION
+    // =====================================================
+
+    public validateKeywordCount(
+        constraint: IConstraint,
+        count: number,
+        errors: string[],
+    ): void {
+
+        const keywordRange = constraint.keyWords;
+
+        if (
+            keywordRange &&
+            !checkRange(keywordRange, count)
+        ) {
+            errors.push(
+                `Number of keywords must be between ${keywordRange.min} and ${keywordRange.max}. Current count: ${count}.`,
+            );
+        }
+    }
+
+    // =====================================================
+    // OBJECTIVES AND EXPECTED OUTPUTS VALIDATION
+    // =====================================================
+
+    public validateProjectObjectivesAndOutput(
+        constraint: IConstraint,
+        objectives: {
+            general?: string;
+            specific?: string[];
+            expectedOutputs?: string[];
+        } | undefined,
+        errors: string[],
+    ): void {
+
+        if (!objectives) {
+            return;
+        }
+
+        // General objective
+        this.validateGeneralObjective(
+            constraint,
+            objectives.general,
+            errors,
+        );
+
+        // Specific objectives
+        this.validateSpecificObjectives(
+            constraint,
+            objectives.specific ?? [],
+            errors,
+        );
+
+        // Expected outputs
+        this.validateExpectedOutputs(
+            constraint,
+            objectives.expectedOutputs ?? [],
+            errors,
         );
     }
 
+    private validateGeneralObjective(
+        constraint: IConstraint,
+        generalObjective: string | undefined,
+        errors: string[],
+    ): void {
+
+        if (!constraint.generalObjectiveWords) {
+            return;
+        }
+
+        const count = countWords(
+            generalObjective ?? "",
+        );
+
+        if (
+            !checkRange(
+                constraint.generalObjectiveWords,
+                count,
+            )
+        ) {
+            errors.push(
+                `General objective must contain between ${constraint.generalObjectiveWords.min} and ${constraint.generalObjectiveWords.max} words. Current count: ${count}.`,
+            );
+        }
+    }
+
+    private validateSpecificObjectives(
+        constraint: IConstraint,
+        specificObjectives: string[],
+        errors: string[],
+    ): void {
+
+        // Number of specific objectives
+        const objectiveRange =
+            constraint.specificObjectives;
+
+        if (
+            objectiveRange &&
+            !checkRange(
+                objectiveRange,
+                specificObjectives.length,
+            )
+        ) {
+            errors.push(
+                `Number of specific objectives must be between ${objectiveRange.min} and ${objectiveRange.max}. Current count: ${specificObjectives.length}.`,
+            );
+        }
+
+        // Word count of each specific objective
+        const wordRange =
+            constraint.specificObjectiveWords;
+
+        if (wordRange) {
+
+            specificObjectives.forEach(
+                (objective, index) => {
+
+                    const count = countWords(
+                        objective ?? "",
+                    );
+
+                    if (
+                        !checkRange(
+                            wordRange,
+                            count,
+                        )
+                    ) {
+                        errors.push(
+                            `Specific objective ${index + 1} must contain between ${wordRange.min} and ${wordRange.max} words. Current count: ${count}.`,
+                        );
+                    }
+                },
+            );
+        }
+    }
+
+    private validateExpectedOutputs(
+        constraint: IConstraint,
+        expectedOutputs: string[],
+        errors: string[],
+    ): void {
+
+        // Number of expected outputs
+        const outputRange =
+            constraint.expectedOutputs;
+
+        if (
+            outputRange &&
+            !checkRange(
+                outputRange,
+                expectedOutputs.length,
+            )
+        ) {
+            errors.push(
+                `Number of expected outputs must be between ${outputRange.min} and ${outputRange.max}. Current count: ${expectedOutputs.length}.`,
+            );
+        }
+
+        // Word count of each expected output
+        const wordRange =
+            constraint.expectedOutputWords;
+
+        if (wordRange) {
+
+            expectedOutputs.forEach(
+                (output, index) => {
+
+                    const count = countWords(
+                        output ?? "",
+                    );
+
+                    if (
+                        !checkRange(
+                            wordRange,
+                            count,
+                        )
+                    ) {
+                        errors.push(
+                            `Expected output ${index + 1} must contain between ${wordRange.min} and ${wordRange.max} words. Current count: ${count}.`,
+                        );
+                    }
+                },
+            );
+        }
+    }
+
+    // =====================================================
+    // PROJECT BUDGET VALIDATION
+    // =====================================================
+
+    public validateProjectBudget(
+        constraint: IConstraint,
+        budget: number,
+        errors: string[],
+    ): void {
+
+        const budgetRange = constraint.budget;
+
+        if (
+            budgetRange &&
+            !checkRange(
+                budgetRange,
+                budget,
+            )
+        ) {
+            errors.push(
+                `Project budget must be between ${budgetRange.min} and ${budgetRange.max}. Current budget: ${budget}.`,
+            );
+        }
+    }
+
+    // =====================================================
+    // PROJECT DURATION VALIDATION
+    // =====================================================
+
+    public validateProjectDuration(
+        constraint: IConstraint,
+        duration: number,
+        errors: string[],
+    ): void {
+
+        const durationRange = constraint.duration;
+
+        if (
+            durationRange &&
+            !checkRange(
+                durationRange,
+                duration,
+            )
+        ) {
+            errors.push(
+                `Project duration must be between ${durationRange.min} and ${durationRange.max}. Current duration: ${duration}.`,
+            );
+        }
+    }
+
+    // =====================================================
+    // PRIVATE THEME HELPERS
+    // =====================================================
 
     private validateThemeLevel(
         label: string,
         count: number,
         range: IRange | undefined,
-        errors: string[]
+        errors: string[],
     ): void {
 
-        if (range && !matchesRange(range, count)) {
+        if (
+            range &&
+            !checkRange(range, count)
+        ) {
             errors.push(
-                `${label} count must be between ${range.min} and ${range.max}. Current count: ${count}.`
+                `${label} count must be between ${range.min} and ${range.max}. Current count: ${count}.`,
             );
         }
     }
 
-
     private async countThemeLevels(
-        selectedThemes: string[]
-    ) {
+        selectedThemes: string[],
+    ): Promise<Record<number, Set<string>>> {
 
         const levels: Record<number, Set<string>> = {};
 
@@ -745,7 +998,7 @@ export class ConstraintValidationService {
 
             if (!current) {
                 throw new AppError(
-                    ERROR_CODES.THEME_NOT_FOUND
+                    ERROR_CODES.THEME_NOT_FOUND,
                 );
             }
 
@@ -756,7 +1009,7 @@ export class ConstraintValidationService {
                 }
 
                 levels[current.level].add(
-                    current._id.toString()
+                    current._id.toString(),
                 );
 
                 if (!current.parent) {
@@ -765,7 +1018,7 @@ export class ConstraintValidationService {
 
                 current =
                     await this.themeRepo.findById(
-                        current.parent.toString()
+                        current.parent.toString(),
                     );
             }
         }

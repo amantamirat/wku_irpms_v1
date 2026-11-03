@@ -16,8 +16,8 @@ import { MemberRequirementApi } from './api/requirement.api';
 // Models
 import { Composition } from './models/composition.model';
 import { EligibilityProfile } from './models/profile.model';
-import { HistoryParticipation, HistoryRule } from './models/history.model';
-import { MemberRequirement } from './models/requirement.model';
+import { HistoryParticipation, IHistoryRule } from './models/history.model';
+import { IMemberRequirement } from './models/requirement.model';
 
 // Forms
 import CompositionForm from './components/CompositionForm';
@@ -29,6 +29,7 @@ import RequirementForm from './components/RequirementForm';
 import { EligibilityProfileView } from './components/EligibilityProfileView';
 import { HistoryRuleView } from './components/HistoryRuleView';
 import { MemberRequirementView } from './components/MemberRequirementView';
+import { IRange } from '@/types/range';
 
 /* =====================================================================
    Shared helpers (module level => stable references)
@@ -69,7 +70,7 @@ const formatBounds = (range?: { min?: number | null; max?: number | null }) => {
 };
 
 const renderEntityName = (
-    entity?: string | EligibilityProfile | HistoryRule,
+    entity?: string | EligibilityProfile | IHistoryRule,
     fallback = 'None'
 ) => {
     if (!entity) return <span className="text-500">{fallback}</span>;
@@ -80,14 +81,14 @@ const renderEntityName = (
 };
 
 const renderMemberRequirements = (
-    requirements?: string[] | MemberRequirement[]
+    requirements?: string[] | IMemberRequirement[]
 ) => {
     if (!requirements || requirements.length === 0) {
         return <span className="text-500">No member rules set</span>;
     }
 
     const count = requirements.length;
-    const names = (requirements as Array<string | MemberRequirement>)
+    const names = (requirements as Array<string | IMemberRequirement>)
         .map((req) => (typeof req === 'object' ? req.name : null))
         .filter(Boolean);
 
@@ -104,56 +105,28 @@ const renderMemberRequirements = (
 /* =====================================================================
    1. Compositions
 ===================================================================== */
-
 const compositionColumns: ColumnProps[] = [
     nameColumn('Composition Name'),
     {
-        header: 'Lead Profile Rule',
-        field: 'leadProfileRule',
+        header: 'Lead Rule',
+        field: 'leadRule',
         body: (composition: Composition) =>
-            renderEntityName(composition.leadProfileRule)
+            renderEntityName(composition.leadRule)
     },
     {
-        header: 'Lead History Rules',
-        field: 'leadHistoryRules',
+        header: 'Member Rules Count',
+        field: 'memberRules',
         body: (composition: Composition) => {
-            if (!composition.leadHistoryRules?.length) {
-                return <span className="text-500 italic">None</span>;
-            }
-            return (
-                <div className="flex flex-column gap-1">
-                    {composition.leadHistoryRules.map((hr, idx) => {
-                        const ruleName =
-                            typeof hr.rule === 'object' && hr.rule !== null
-                                ? hr.rule.name
-                                : hr.rule;
-                        return (
-                            <div key={idx} className="flex align-items-center gap-2 text-xs">
-                                <Tag value={hr.context} severity="warning" className="text-xs" />
-                                <span className="font-medium text-900">
-                                    {ruleName || `ID: ${String(hr.rule)}`}
-                                </span>
-                            </div>
-                        );
-                    })}
-                </div>
-            );
+            const count = composition.memberRules?.length || 0;
+            return <span className="text-sm font-semibold text-primary">{count} rule(s)</span>;
         }
-    },
-    {
-        header: 'Member Requirements',
-        field: 'memberRequirements',
-        body: (composition: Composition) =>
-            renderMemberRequirements(composition.memberRequirements)
     }
 ];
 
-// Keep the permission ids the user picked: the API response may not echo them back
 const mapSaved = (saved: Composition, submitted: Partial<Composition>): Composition => ({
     ...saved,
-    leadProfileRule: submitted.leadProfileRule ?? saved.leadProfileRule,
-    leadHistoryRules: submitted.leadHistoryRules ?? saved.leadHistoryRules,
-    memberRequirements: submitted.memberRequirements ?? saved.memberRequirements
+    leadRule: submitted.leadRule ?? saved.leadRule,
+    memberRules: submitted.memberRules ?? saved.memberRules
 });
 
 const CompositionsTab = () => {
@@ -226,17 +199,29 @@ const ProfilesTab = () => {
 
 const PARTICIPATION_SEVERITY: Record<string, 'success' | 'info' | 'warning'> = {
     [HistoryParticipation.LEAD]: 'success',
-    [HistoryParticipation.MEMBER]: 'info'
+    [HistoryParticipation.MEMBER]: 'info',
+    [HistoryParticipation.ANY]: 'warning'
 };
+
+
 
 const historyColumns: ColumnProps[] = [
     nameColumn('Rule Name'),
+    {
+        header: 'Context',
+        field: 'context',
+        sortable: true,
+        style: { width: '140px' },
+        body: (rule: IHistoryRule) => (
+            <span className="text-sm font-medium text-700">{rule.context}</span>
+        )
+    },
     {
         header: 'Participation',
         field: 'participation',
         sortable: true,
         style: { width: '150px' },
-        body: (rule: HistoryRule) => {
+        body: (rule: IHistoryRule) => {
             const value = rule.participation || HistoryParticipation.ANY;
             return (
                 <Tag value={value} severity={PARTICIPATION_SEVERITY[value] ?? 'warning'} />
@@ -244,20 +229,20 @@ const historyColumns: ColumnProps[] = [
         }
     },
     {
-        header: 'Total Aggregated Rule',
-        field: 'total',
-        body: (rule: HistoryRule) => {
-            if (!rule.total) return <span className="text-400">No rule set</span>;
+        header: 'Aggregated History Rule',
+        field: 'sumRange',
+        body: (rule: IHistoryRule) => {
+            if (!rule.sumRange) return <span className="text-400">No rule set</span>;
 
-            const fields = rule.total.fields?.length
-                ? rule.total.fields.join(', ')
+            const fields = rule.metrics?.length
+                ? rule.metrics.join(', ')
                 : 'All metrics';
 
             return (
                 <div>
                     <div className="text-sm font-medium text-900">
-                        Range:{' '}
-                        <span className="text-primary">{formatBounds(rule.total.range)}</span>
+                        Sum Range:{' '}
+                        <span className="text-primary">{formatBounds(rule.sumRange)}</span>
                     </div>
                     <small className="text-500">Metrics: {fields}</small>
                 </div>
@@ -267,7 +252,7 @@ const historyColumns: ColumnProps[] = [
 ];
 
 const historyTableProps: ItemManagerProps<
-    HistoryRule,
+    IHistoryRule,
     undefined
 >['tableProps'] = {
     expandable: {
@@ -279,7 +264,7 @@ const HistoryTab = () => {
     const toasts = useCrudToasts('History rule');
 
     return (
-        <ItemManager<HistoryRule, undefined>
+        <ItemManager<IHistoryRule, undefined>
             api={HistoryApi}
             resource="composition"
             itemName="History Rule"
@@ -294,30 +279,40 @@ const HistoryTab = () => {
 };
 
 /* =====================================================================
-   4. Member requirements
+    4. Member requirements
 ===================================================================== */
 
 const requirementColumns: ColumnProps[] = [
     nameColumn('Requirement Name'),
     {
-        header: 'Mode',
-        field: 'mode',
-        sortable: true,
-        style: { width: '150px' },
-        body: (requirement: MemberRequirement) => (
-            <Tag value={requirement.mode} severity="info" />
-        )
+        header: 'Profile Filter',
+        field: 'profile',
+        body: (requirement: IMemberRequirement) => {
+            const profile = requirement.profile;
+            if (!profile) return <span className="text-400">None</span>;
+            const profileName = typeof profile === 'object' && profile !== null && 'name' in profile
+                ? (profile as any).name
+                : 'Linked Profile';
+            return <span className="text-sm font-medium text-700">{profileName}</span>;
+        }
     },
     {
-        header: 'Threshold Target',
-        field: 'threshold',
-        body: (requirement: MemberRequirement) =>
-            requirement.threshold ? formatBounds(requirement.threshold) : 'N/A'
+        header: 'History Rules',
+        field: 'historyRules',
+        body: (requirement: IMemberRequirement) => {
+            const rules = requirement.historyRules || [];
+            if (rules.length === 0) return <span className="text-400">No rules linked</span>;
+            return (
+                <span className="text-sm font-semibold text-primary">
+                    {rules.length} rule{rules.length === 1 ? '' : 's'} linked
+                </span>
+            );
+        }
     }
 ];
 
 const requirementTableProps: ItemManagerProps<
-    MemberRequirement,
+    IMemberRequirement,
     undefined
 >['tableProps'] = {
     expandable: {
@@ -331,11 +326,11 @@ const RequirementsTab = () => {
     const toasts = useCrudToasts('Member requirement');
 
     return (
-        <ItemManager<MemberRequirement, undefined>
+        <ItemManager<IMemberRequirement, undefined>
             api={MemberRequirementApi}
             resource="composition"
             itemName="Member Requirement"
-            headerTitle="Member Requirements & Aggregation Rules"
+            headerTitle="Member Requirements & Rules"
             columns={requirementColumns}
             tableProps={requirementTableProps}
             dialogWidth="680px"

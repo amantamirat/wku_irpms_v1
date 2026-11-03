@@ -5,17 +5,13 @@ export class CompositionRepository {
 
   private populateComposition(query: any) {
     return query
-      .populate("leadProfileRule")
-      .populate("leadHistoryRules.rule")
-      .populate("memberRequirements");
+      .populate("leadRule")
+      .populate("memberRules")
   }
 
   async create(data: Partial<IComposition> | any) {
     const composition = await Composition.create(data);
-
-    return this.populateComposition(
-      Composition.findById(composition._id)
-    );
+    return composition;
   }
 
   async findAll(options?: FilterOptions) {

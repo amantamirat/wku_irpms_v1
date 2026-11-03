@@ -15,7 +15,22 @@ export function isValid(range: IRange): boolean {
     return true;
 }
 
+export type RangeCheck = 'ok' | 'below' | 'above';
 
+export function checkRange2(range: IRange, value: number): RangeCheck {
+    if (value < range.min) return 'below';
+    if (value > range.max) return 'above';
+    return 'ok';
+}
+
+
+export function checkRange(range: IRange, value: number): boolean {
+    if (value < range.min) return false;
+    if (value > range.max) return false;
+    return true;
+}
+
+/*
 export function matchesRange(
     range: IRange,
     value: number,
@@ -36,3 +51,4 @@ export function matchesRange(
 
     return true;
 }
+*/
