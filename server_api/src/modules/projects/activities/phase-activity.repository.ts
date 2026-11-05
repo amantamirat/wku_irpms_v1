@@ -37,7 +37,8 @@ export interface IPhaseActivityRepository {
 
     update(
         id: string,
-        data: UpdatePhaseActivityData
+        data: UpdatePhaseActivityData,
+        userId: string
     ): Promise<IPhaseActivity | null>;
 
     updateStatus(
@@ -176,31 +177,36 @@ export class PhaseActivityRepository
         return results as unknown as IPhaseActivity[];
     }
 
+    
     async update(
         id: string,
-        data: UpdatePhaseActivityData
+        data: UpdatePhaseActivityData,
+        userId: string
     ): Promise<IPhaseActivity | null> {
 
-        // Load + save() so schema validation and the `details` hook run.
-        // findByIdAndUpdate would skip the hook.
-        const activity = await PhaseActivity.findById(
-            new mongoose.Types.ObjectId(id)
-        );
+        const activity = await PhaseActivity.findById(id);
 
         if (!activity) return null;
 
         const { kind, details, ...rest } = data as any;
 
-        activity.set(rest);
+        activity.set({
+            ...rest,
+            updatedBy: userId,
+        });
 
-        if (kind !== undefined && kind !== activity.kind) {
-            // Kind changed: old details no longer apply, so replace them
+        const kindChanged =
+            kind !== undefined && kind !== activity.kind;
+
+        if (kindChanged) {
             activity.set("kind", kind);
             activity.set("details", details ?? {});
         } else if (details !== undefined) {
-            // Same kind: merge so partial updates don't wipe other fields
+            const existingDetails =
+                activity.get("details") ?? {};
+
             activity.set("details", {
-                ...(activity.get("details") ?? {}),
+                ...existingDetails,
                 ...details,
             });
         }

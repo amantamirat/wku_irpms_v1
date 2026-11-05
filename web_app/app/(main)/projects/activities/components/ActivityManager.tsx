@@ -7,7 +7,11 @@ import { ItemManager } from '@/components/ItemManager';
 import { useToast } from '@/contexts/ToastContext';
 import { MENU_ICONS } from '@/utils/menu-icons';
 
-import { Activity, FilterActivitiesOptions } from '../models/phase-activity.model';
+import {
+    Activity,
+    FilterActivitiesOptions,
+    PhaseActivityTypeLabels,
+} from '../models/phase-activity.model';
 import { ActivityApi } from '../api/phase-activity.api';
 import ActivityForm from './ActivityForm';
 
@@ -16,6 +20,7 @@ import { etbCurrencyFormatter } from '@/utils/utils';
 import MyBadge from '@/templates/MyBadge';
 import { Phase } from '../../phases/models/phase.model';
 import { PHASE_ACTIVITY_TRANSITIONS } from '../models/phase-activity.state-machine';
+import ActivityExpandedRow from './ActivityExpandedRow';
 
 // Defined outside the component for a stable reference.
 const columns: ColumnProps[] = [
@@ -24,32 +29,45 @@ const columns: ColumnProps[] = [
         field: 'title',
         sortable: true,
         body: (activity: Activity) => (
-            <span className="font-medium">
-                {activity.title}
-            </span>
+            <span className="font-medium">{activity.title}</span>
         )
+    },
+    {
+        header: 'Type',
+        field: 'kind',
+        sortable: true,
+        body: (activity: Activity) => {
+            const meta = PhaseActivityTypeLabels[activity.kind];
+
+            return (
+                <span
+                    className="text-sm"
+                    title={meta?.description}
+                >
+                    {meta?.label ?? activity.kind ?? '—'}
+                </span>
+            );
+        }
     },
     {
         header: 'Phase',
         field: 'phase',
-        sortable: true,
+        // Phase is a populated object, so server-side sorting on it
+        // would sort by id rather than by phase order.
+        sortable: false,
         body: (activity: Activity) => {
             const phase = activity.phase;
 
-            if (!phase) {
+            // Phase is optional, and may be an unpopulated id.
+            if (!phase || typeof phase !== 'object') {
                 return <span className="text-400">—</span>;
             }
 
-            // Handle either a populated Phase object or an ID.
-            if (typeof phase === 'object') {
-                return (
-                    <span className="font-medium">
-                        Phase {phase.order}
-                    </span>
-                );
-            }
-
-            return <span className="text-400">—</span>;
+            return (
+                <span className="font-medium">
+                    Phase {phase.order}
+                </span>
+            );
         }
     },
     {
@@ -58,13 +76,11 @@ const columns: ColumnProps[] = [
         sortable: true,
         body: (activity: Activity) => (
             <span className="text-600 text-sm">
-                {activity.description ? (
-                    activity.description.length > 50
+                {activity.description
+                    ? activity.description.length > 50
                         ? `${activity.description.substring(0, 50)}...`
                         : activity.description
-                ) : (
-                    '—'
-                )}
+                    : '—'}
             </span>
         )
     },
@@ -82,15 +98,16 @@ const columns: ColumnProps[] = [
         header: 'Breakdown',
         field: 'detailCost',
         sortable: false,
-        body: (activity: Activity) => (
+        body: (activity: Activity) =>
             activity.detailCost ? (
                 <span className="text-xs text-600">
-                    {activity.detailCost.duration}d &times; {activity.detailCost.participants}p &times; {etbCurrencyFormatter.format(activity.detailCost.unitPrice)}
+                    {activity.detailCost.duration}d &times;{' '}
+                    {activity.detailCost.participants}p &times;{' '}
+                    {etbCurrencyFormatter.format(activity.detailCost.unitPrice)}
                 </span>
             ) : (
                 <span className="text-400">—</span>
             )
-        )
     },
     {
         header: 'Start Date',
@@ -115,10 +132,7 @@ const columns: ColumnProps[] = [
         field: 'status',
         sortable: true,
         body: (row: Activity) => (
-            <MyBadge
-                type="status"
-                value={row.status ?? 'Unknown'}
-            />
+            <MyBadge type="status" value={row.status ?? 'Unknown'} />
         )
     }
 ];
@@ -146,12 +160,27 @@ const ActivityManager = ({
 }: ActivityManagerProps) => {
     const toast = useToast();
 
+    const projectId = project?._id;
+    const phaseId = phase?._id;
+
+    // Depend on ids, not object identity, so a re-rendered parent
+    // passing an equal object doesn't trigger a refetch. Only send
+    // the keys that are actually set, and always send ids, never objects.
     const filter = useMemo<FilterActivitiesOptions>(
         () => ({
-            project: project?._id ?? project,
-            phase: phase?._id ?? phase
+            ...(projectId && { project: projectId }),
+            ...(phaseId && { phase: phaseId })
         }),
-        [project, phase]
+        [projectId, phaseId]
+    );
+
+    const tableProps = useMemo(
+        () => ({
+            expandable: {
+                template: (row: Activity) => <ActivityExpandedRow activity={row} />
+            }
+        }),
+        []
     );
 
     return (
@@ -171,9 +200,8 @@ const ActivityManager = ({
             hideCreateAction={disableCrud}
             hideEditAction={disableCrud}
             hideDeleteAction={disableCrud}
-            transitions={
-                PHASE_ACTIVITY_TRANSITIONS
-            }
+            transitions={PHASE_ACTIVITY_TRANSITIONS}
+            tableProps={tableProps}
             renderForm={
                 disableCrud
                     ? undefined

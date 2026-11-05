@@ -156,8 +156,7 @@ export const projectAuth = new ProjectAuth(projectRepo, authPermissionService);
 export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, grantRepo, callRepo, stageRepo,
     applicationRepo, constraintValidator, compositionValidator, projectAuth, notificationService, filterService);
 
-export const phaseActivityService = new PhaseActivityService(activityRepo, projectRepo, phaseRepo, projectAuth)
-
+export const phaseActivityService = new PhaseActivityService(activityRepo, phaseRepo, phaseDocRepo, projectAuth);
 
 export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, constraintValidator, phaseDocRepo, activityRepo, equipmentRepo, projectAuth);
 

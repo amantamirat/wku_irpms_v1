@@ -15,22 +15,23 @@ import {
     FilterPhaseActivities,
     UpdatePhaseActivityDto,
 } from "./phase-activity.dto";
-import {
-    IPhaseActivityRepository,
-} from "./phase-activity.repository";
+import { IPhaseActivityRepository } from "./phase-activity.repository";
 import {
     IPhaseActivityDetailCost,
     PhaseActivityStatus,
+    PhaseActivityType,
 } from "./phase-activity.model";
+import { findMissingDocumentTypes, humanize } from "./phase-activity-document.mapper";
 import { ProjectStatus } from "../project.model";
-import { IProjectRepository } from "../project.repository";
+import { IPhaseDocumentRepository } from "../phase/documents/phase.doc.repository";
+import { ProjectDocumentStatus } from "../phase/documents/phase.doc.model";
 
 export class PhaseActivityService {
 
     constructor(
         private readonly activityRepo: IPhaseActivityRepository,
-        private readonly projectRepo: IProjectRepository,
         private readonly phaseRepo: IPhaseRepository,
+        private readonly documentRepo: IPhaseDocumentRepository,
         private readonly projectAuth: ProjectAuth
     ) { }
 
@@ -53,40 +54,14 @@ export class PhaseActivityService {
             );
 
         // A lead PI can add activities only while the project is a draft.
-        if (
-            isLeadPI &&
-            projectDoc.status !== ProjectStatus.draft
-        ) {
+        if (isLeadPI && projectDoc.status !== ProjectStatus.draft) {
             throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
         }
 
-        // A phase is optional. Validate it only when provided.
-        if (phase) {
-            const phaseDoc = await this.phaseRepo.findById(phase);
-
-            if (!phaseDoc) {
-                throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
-            }
-
-            // Ensure the phase belongs to the specified project.
-            if (String(phaseDoc.project) !== String(project)) {
-                throw new AppError(ERROR_CODES.PHASE_PROJECT_MISMATCH);
-            }
-
-            // Lead PIs may add activities only to proposed phases.
-            if (
-                isLeadPI &&
-                phaseDoc.status !== PhaseStatus.proposed
-            ) {
-                throw new AppError(
-                    ERROR_CODES.PHASE_NOT_PROPOSED
-                );
-            }
-        }
+        // Validate before touching the DB.
+        this.validateCost(dto.cost, dto.detailCost);
 
         try {
-            this.validateCost(dto.cost, dto.detailCost);
-
             // `kind` and `details` travel inside dto. The model validates
             // `details` against `kind` and returns a ValidationError if invalid.
             return await this.activityRepo.create({
@@ -113,10 +88,7 @@ export class PhaseActivityService {
         filter: FilterPhaseActivities,
         options?: FilterOptions
     ) {
-        return await this.activityRepo.find(
-            filter,
-            options
-        );
+        return await this.activityRepo.find(filter, options);
     }
 
 
@@ -128,17 +100,12 @@ export class PhaseActivityService {
         id: string,
         options?: FilterOptions
     ) {
-
         const activity =
-            await this.activityRepo.findById(
-                id,
-                options
-            );
+            await this.activityRepo.findById(id, options);
 
-        if (!activity)
-            throw new AppError(
-                ERROR_CODES.PHASE_ACTIVITY_NOT_FOUND
-            );
+        if (!activity) {
+            throw new AppError(ERROR_CODES.PHASE_ACTIVITY_NOT_FOUND);
+        }
 
         return activity;
     }
@@ -156,131 +123,68 @@ export class PhaseActivityService {
     ) {
         const { id, data, userId } = dto;
 
-        const activity =
+        const activityDoc =
             await this.activityRepo.findById(id);
 
-        if (!activity) {
-            throw new AppError(
-                ERROR_CODES.PHASE_ACTIVITY_NOT_FOUND
-            );
+        if (!activityDoc) {
+            throw new AppError(ERROR_CODES.PHASE_ACTIVITY_NOT_FOUND);
         }
 
-        if (activity.status !== PhaseActivityStatus.planned) {
-            throw new AppError(
-                ERROR_CODES.PHASE_ACTIVITY_NOT_FOUND
-            );
+        if (!activityDoc.project) {
+            throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         }
 
+        if (!activityDoc.phase) {
+            throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
+        }
 
-        // Changing the kind makes the old details meaningless,
-        // so a full set of new details must come with it.
-        if (
+        const { projectDoc, isLeadPI } =
+            await this.projectAuth.auth(
+                activityDoc.project.toString(),
+                userId,
+                PERMISSIONS.PHASE_ACTIVITY.UPDATE
+            );
+
+        if (isLeadPI && projectDoc.status !== ProjectStatus.draft) {
+            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+        }
+
+        // Detect activity kind changes.
+        const kindChanged =
             data.kind !== undefined &&
-            data.kind !== activity.kind &&
-            !data.details
-        ) {
+            data.kind !== activityDoc.kind;
+
+        // A new kind requires new details.
+        if (kindChanged && data.details == null) {
             throw new AppError(
                 ERROR_CODES.PHASE_ACTIVITY_DETAILS_REQUIRED
             );
         }
 
-        // Determine the immutable project from the existing phase,
-        // if the activity currently belongs to a phase.
-        let projectId: string;
+        // Re-validate cost on the merged result, but only when the
+        // update touches cost or detailCost.
+        if (data.cost !== undefined || data.detailCost !== undefined) {
+            const effectiveCost =
+                data.cost !== undefined ? data.cost : activityDoc.cost;
 
-        if (activity.phase) {
-            const currentPhase =
-                await this.phaseRepo.findById(
-                    String(activity.phase)
-                );
+            const effectiveDetailCost =
+                data.detailCost !== undefined
+                    ? data.detailCost
+                    : activityDoc.detailCost;
 
-            if (!currentPhase) {
-                throw new AppError(
-                    ERROR_CODES.PHASE_NOT_FOUND
-                );
-            }
-
-            projectId = String(currentPhase.project);
-
-            if (
-                currentPhase.status === PhaseStatus.completed
-            ) {
-                throw new AppError(
-                    ERROR_CODES.PHASE_ALREADY_COMPLETED
-                );
-            }
-        } else {
-            // For activities without a phase, the project must be
-            // available from the activity itself.
-            projectId = String(activity.project);
-        }
-
-        const {
-            projectDoc,
-            isLeadPI,
-        } = await this.projectAuth.auth(
-            projectId,
-            userId,
-            PERMISSIONS.PHASE_ACTIVITY.UPDATE
-        );
-
-        if (
-            isLeadPI &&
-            projectDoc.status !== ProjectStatus.draft
-        ) {
-            throw new AppError(
-                ERROR_CODES.PROJECT_NOT_DRAFT
+            this.validateCost(
+                effectiveCost,
+                effectiveDetailCost ?? undefined
             );
         }
 
-        // Validate the new phase only when provided.
-        if (data.phase) {
-            const newPhase =
-                await this.phaseRepo.findById(data.phase);
-
-            if (!newPhase) {
-                throw new AppError(
-                    ERROR_CODES.PHASE_NOT_FOUND
-                );
-            }
-
-            // The new phase must belong to the same immutable project.
-            if (
-                String(newPhase.project) !== projectId
-            ) {
-                throw new AppError(
-                    ERROR_CODES.PHASE_NOT_FOUND
-                );
-            }
-
-            if (
-                newPhase.status === PhaseStatus.completed
-            ) {
-                throw new AppError(
-                    ERROR_CODES.PHASE_ALREADY_COMPLETED
-                );
-            }
-
-            if (
-                isLeadPI &&
-                newPhase.status !== PhaseStatus.proposed
-            ) {
-                throw new AppError(
-                    ERROR_CODES.PHASE_NOT_PROPOSED
-                );
-            }
-        }
-
-        // Prevent project changes, regardless of submitted data.
+        // Prevent project changes.
         const {
-            // project: _ignoredProject,
+            //project: _ignoredProject,
             ...updateData
         } = data;
 
-        return await this.activityRepo.update(
-            id,
-            updateData
-        );
+        return this.activityRepo.update(id, updateData, userId);
     }
 
     /**
@@ -310,32 +214,20 @@ export class PhaseActivityService {
         dto: TransitionRequestDto,
         userId: string
     ) {
+        const { id, next, current, reason } = dto;
 
-        const {
-            id,
-            next,
-            current,
-            reason
-        } = dto;
-
-        const activity =
+        const activityDoc =
             await this.activityRepo.findById(id);
 
-        if (!activity)
-            throw new AppError(
-                ERROR_CODES.PHASE_ACTIVITY_NOT_FOUND
-            );
+        if (!activityDoc) {
+            throw new AppError(ERROR_CODES.PHASE_ACTIVITY_NOT_FOUND);
+        }
 
-        const from =
-            activity.status as PhaseActivityStatus;
-
-        const to =
-            next as PhaseActivityStatus;
+        const from = activityDoc.status as PhaseActivityStatus;
+        const to = next as PhaseActivityStatus;
 
         if (current && current !== from) {
-            throw new AppError(
-                ERROR_CODES.STATE_OUT_OF_SYNC
-            );
+            throw new AppError(ERROR_CODES.STATE_OUT_OF_SYNC);
         }
 
         TransitionHelper.validateTransition(
@@ -344,28 +236,25 @@ export class PhaseActivityService {
             PHASE_ACTIVITY_TRANSITIONS
         );
 
-        if (!activity.phase) {
+        if (!activityDoc.phase) {
             throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
         }
 
         const phaseDoc =
-            await this.phaseRepo.findById(String(activity.phase));
+            await this.phaseRepo.findById(String(activityDoc.phase));
 
-        if (!phaseDoc)
-            throw new AppError(
-                ERROR_CODES.PHASE_NOT_FOUND
-            );
+        if (!phaseDoc) {
+            throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
+        }
 
-        /**
-         * Activity execution is only possible
-         * while its phase is active.
-         */
+        // Planning is only possible while the phase is proposed.
         if (to === PhaseActivityStatus.planned) {
-
             if (phaseDoc.status !== PhaseStatus.proposed) {
                 throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
             }
         }
+
+        // Activity execution is only possible while its phase is active.
         const executionStates = [
             PhaseActivityStatus.active,
             PhaseActivityStatus.completed,
@@ -376,21 +265,39 @@ export class PhaseActivityService {
             executionStates.includes(from) ||
             executionStates.includes(to);
 
-        if (
-            involvesExecution &&
-            phaseDoc.status !== PhaseStatus.active
-        ) {
-            throw new AppError(
-                ERROR_CODES.PHASE_NOT_ACTIVE
-            );
+        if (involvesExecution && phaseDoc.status !== PhaseStatus.active) {
+            throw new AppError(ERROR_CODES.PHASE_NOT_ACTIVE);
         }
 
-        return await this.activityRepo.updateStatus(
-            id,
-            to,
-            userId,
-            reason
-        );
+        // Completion requires the documents that prove the activity kind.
+        if (to === PhaseActivityStatus.completed) {
+
+            if (!activityDoc.kind) {
+                throw new AppError(ERROR_CODES.PHASE_ACTIVITY_DETAILS_REQUIRED);
+            }
+
+            const approvedDocuments = await this.documentRepo.find({
+                activity: id,
+                status: ProjectDocumentStatus.approved,
+            });
+
+            const missing = findMissingDocumentTypes(
+                activityDoc.kind as PhaseActivityType,
+                approvedDocuments
+            );
+
+            if (missing) {
+                const accepted = missing.map(humanize).join(" or ");
+
+                throw new AppError(
+                    ERROR_CODES.PHASE_ACTIVITY_DOCUMENTS_REQUIRED,
+                    `This ${humanize(activityDoc.kind)} activity cannot be completed yet. ` +
+                    `Upload and get approval for at least one of the following documents: ${accepted}.`
+                );
+            }
+        }
+
+        return await this.activityRepo.updateStatus(id, to, userId, reason);
     }
 
 
@@ -402,49 +309,38 @@ export class PhaseActivityService {
         dto: DeleteDto,
         userId: string
     ) {
-
         const { id } = dto;
 
         const activity =
             await this.activityRepo.findById(id);
 
-        if (!activity)
-            throw new AppError(
-                ERROR_CODES.PHASE_ACTIVITY_NOT_FOUND
-            );
+        if (!activity) {
+            throw new AppError(ERROR_CODES.PHASE_ACTIVITY_NOT_FOUND);
+        }
 
         // Authorize directly against the activity's project
-        const {
-            projectDoc,
-            isLeadPI,
-        } = await this.projectAuth.auth(
-            String(activity.project),
-            userId,
-            PERMISSIONS.PHASE_ACTIVITY.DELETE
-        );
+        const { projectDoc, isLeadPI } =
+            await this.projectAuth.auth(
+                String(activity.project),
+                userId,
+                PERMISSIONS.PHASE_ACTIVITY.DELETE
+            );
 
         if (isLeadPI && projectDoc.status !== ProjectStatus.draft) {
-            throw new AppError(
-                ERROR_CODES.PROJECT_NOT_DRAFT
-            );
+            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
         }
 
         // Phase is optional: only check it when the activity has one
         if (activity.phase) {
             const phaseDoc =
-                await this.phaseRepo.findById(
-                    String(activity.phase)
-                );
+                await this.phaseRepo.findById(String(activity.phase));
 
-            if (!phaseDoc)
-                throw new AppError(
-                    ERROR_CODES.PHASE_NOT_FOUND
-                );
+            if (!phaseDoc) {
+                throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
+            }
 
             if (phaseDoc.status !== PhaseStatus.proposed) {
-                throw new AppError(
-                    ERROR_CODES.PHASE_NOT_PROPOSED
-                );
+                throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
             }
         }
 

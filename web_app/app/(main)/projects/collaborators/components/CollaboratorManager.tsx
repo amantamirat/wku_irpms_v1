@@ -156,7 +156,7 @@ const CollaboratorManager = ({
 
 
     const defaultHiddenFields = useMemo(() => {
-        const hiddenFields = ['status', 'project.status'];
+        const hiddenFields = ['role', 'status', 'project.status'];
 
         if (member) {
             hiddenFields.push('member.name');
@@ -183,14 +183,36 @@ const CollaboratorManager = ({
                         return <div className="p-3 text-sm text-500">No project details available.</div>;
                     }
 
+                    const disableCrud = !row.isLeadPI || resolvedProject.status !== ProjectStatus.draft;
+
                     return (
                         <ProjectDetail
                             project={resolvedProject}
-                            useLookup={true}
-                            disableCrud={
-                                !row.isLeadPI ||
-                                resolvedProject.status !== ProjectStatus.draft
-                            }
+                            options={
+                                {
+                                    useLookup: true,
+                                    tabs: {
+                                        collaborators: {
+                                            disableCrud: disableCrud
+                                        },
+                                        phases: {
+                                            disableCrud: disableCrud
+                                        },
+
+                                        components: {
+                                            disableCrud: disableCrud
+                                        },
+
+                                        equipments: {
+                                            disableCrud: disableCrud
+                                        },
+
+                                        activities: {
+                                            disableCrud: disableCrud
+                                        },
+                                    }
+                                }}
+
                         />
                     );
                 }

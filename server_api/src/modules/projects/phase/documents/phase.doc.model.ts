@@ -4,7 +4,7 @@ import { IStatusHistory } from "../../../../common/types/status-history";
 import { createStatusHistorySchema } from "../../../../common/schemas/status-history.schema";
 
 export enum PhaseDocumentType {
-    progressReport = "progressReport",//phase
+    progressReport = "progressReport",
     technicalReport = "technicalReport",
     financialReport = "financialReport",
     activityEvidence = "activityEvidence",

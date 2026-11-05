@@ -231,7 +231,7 @@ const ProjectManager = ({
             expandable: {
                 template: (project: Project) => (
                     <ProjectDetail
-                        project={project}
+                        project={project} 
                     />
                 )
             }

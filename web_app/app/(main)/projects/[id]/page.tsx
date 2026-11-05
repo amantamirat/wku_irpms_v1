@@ -67,8 +67,7 @@ const Page = () => {
         <ProjectDetail
             project={project}
             updateProject={setProject}
-            disableCrud
-            useLookup
+            options={{ disableCrud: true, useLookup: true }}
         />
     );
 };

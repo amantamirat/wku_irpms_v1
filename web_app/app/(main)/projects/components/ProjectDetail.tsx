@@ -23,18 +23,65 @@ import EquipmentManager from '../equipments/components/EquipmentManager';
 import { Project, ProjectStatus } from '../models/project.model';
 import PhaseManager from '../phases/components/PhaseManager';
 import PhaseDocumentManager from '../phases/documents/components/PhaseDocumentManager';
+import ProjectComponentManager from '../project-components/components/ProjectComponentManager';
 import ProjectForm from './ProjectForm';
 import ProjectProgress from './ProjectProgress';
-import ProjectComponentManager from '../project-components/components/ProjectComponentManager';
+
+/* ------------------------------------------------------------------ */
+/* Types                                                               */
+/* ------------------------------------------------------------------ */
+
+export type ProjectTabKey =
+    | 'collaborators'
+    | 'phases'
+    | 'components'
+    | 'activities'
+    | 'equipments'
+    | 'documents'
+    | 'applications'
+    | 'verifications'
+    | 'statusHistory';
+
+/** Settings that can be applied globally and overridden for each tab */
+export interface ProjectTabOptions {
+    useLookup?: boolean;
+    disableCrud?: boolean;
+    /** Removes the tab (and its related metric, if any) */
+    hide?: boolean;
+}
+
+/** Single configuration object for ProjectDetail */
+export interface ProjectDetailOptions extends Omit<ProjectTabOptions, 'hide'> {
+    /** Hides the lead PI chip in the header (independent from the Collaborators tab) */
+    hideLeadPI?: boolean;
+    /** Per-tab overrides. Anything not set falls back to the global useLookup / disableCrud */
+    tabs?: Partial<Record<ProjectTabKey, ProjectTabOptions>>;
+}
 
 interface ProjectDetailProps {
     /** Project is loaded by the parent, this component never fetches it */
     project: Project;
     updateProject?: (project: Project) => void;
+    options?: ProjectDetailOptions;
+}
+
+interface TabContentProps {
+    project: Project;
     useLookup?: boolean;
     disableCrud?: boolean;
-    /** Hides the Collaborators tab, the collaborators metric and the lead PI */
-    hideCollaborators?: boolean;
+}
+
+interface TabDefinition {
+    key: ProjectTabKey;
+    header: string;
+    icon: string;
+    /** Resource used to build `<resource>:lookup|read`. Ignored when `permission` is set */
+    resource?: string;
+    /** Fixed permission (not affected by useLookup) */
+    permission?: string;
+    /** Extra condition for the tab to exist at all */
+    when?: boolean;
+    render: (props: TabContentProps) => ReactNode;
 }
 
 /* ------------------------------------------------------------------ */
@@ -61,6 +108,8 @@ const formatDuration = (totalDays?: number) => {
     return parts.join(' ');
 };
 
+const countWords = (text?: string) => (text?.trim() ? text.trim().split(/\s+/).length : 0);
+
 /**
  * The API may answer with ids instead of populated references.
  * Keep the populated object we already have when the id matches,
@@ -84,6 +133,22 @@ const mergeProject = (
 
     return merged as Project;
 };
+
+/**
+ * Scrollable tabs styling.
+ * Tip: you can move this to your global stylesheet if you prefer.
+ */
+const TABS_CSS = `
+.project-tabs .p-tabview-nav-container { position: relative; }
+.project-tabs .p-tabview-nav-content { overflow-x: auto; scrollbar-width: thin; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
+.project-tabs .p-tabview-nav-content::-webkit-scrollbar { height: 4px; }
+.project-tabs .p-tabview-nav-content::-webkit-scrollbar-thumb { background: var(--surface-300); border-radius: 4px; }
+.project-tabs .p-tabview-nav { flex-wrap: nowrap; border-bottom: 1px solid var(--surface-border); }
+.project-tabs .p-tabview-nav li { flex-shrink: 0; }
+.project-tabs .p-tabview-nav li .p-tabview-nav-link { white-space: nowrap; font-weight: 600; font-size: 0.875rem; padding: 0.9rem 1.1rem; border-radius: 0.5rem 0.5rem 0 0; }
+.project-tabs .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link { background: var(--surface-100); }
+.project-tabs .p-tabview-nav-btn.p-link { background: var(--surface-card); color: var(--primary-color); box-shadow: 0 0 12px rgba(0, 0, 0, 0.12); z-index: 2; width: 2.25rem; }
+`;
 
 /* ------------------------------------------------------------------ */
 /* Presentational pieces                                               */
@@ -187,13 +252,9 @@ const NumberedList = ({ items }: { items: string[] }) => (
 /* Component                                                           */
 /* ------------------------------------------------------------------ */
 
-export default function ProjectDetail({
-    project,
-    updateProject,
-    useLookup,
-    disableCrud,
-    hideCollaborators = false
-}: ProjectDetailProps) {
+export default function ProjectDetail({ project, updateProject, options = {} }: ProjectDetailProps) {
+    const { useLookup, disableCrud, hideLeadPI = false, tabs: tabOptions } = options;
+
     const { hasPermission } = useAuth();
     const toast = useToast();
 
@@ -230,13 +291,22 @@ export default function ProjectDetail({
         }
     };
 
+    /** Per-tab value wins, otherwise the global one */
+    const resolveTab = (key: ProjectTabKey) => ({
+        useLookup: tabOptions?.[key]?.useLookup ?? useLookup,
+        disableCrud: tabOptions?.[key]?.disableCrud ?? disableCrud,
+        hide: tabOptions?.[key]?.hide ?? false
+    });
+
     /* --------------------------- derived data ----------------------- */
     const grantLabel = refLabel(projectData.grant, ['title', 'name']);
     const calendarLabel = refLabel(projectData.calendar, ['year', 'name']);
     const callLabel = refLabel(projectData.call, ['title', 'name']);
-    const leadLabel = hideCollaborators ? null : refLabel(projectData.leadPI, ['name']);
+    const leadLabel = hideLeadPI ? null : refLabel(projectData.leadPI, ['name']);
 
     const keywords = (projectData.keywords ?? []).map((k) => k.trim()).filter(Boolean);
+
+    const summaryWords = countWords(projectData.summary);
 
     const objectives = projectData.objectives;
     const hasObjectives =
@@ -258,90 +328,91 @@ export default function ProjectDetail({
         projectData.status === ProjectStatus.draft &&
         hasPermission(['project:update:own']);
 
-    const getPermission = (resource: string) => `${resource}:${useLookup ? 'lookup' : 'read'}`;
+    const showCollaboratorsMetric = !resolveTab('collaborators').hide;
 
     /* ------------------------------ tabs ---------------------------- */
-    const tabs: { header: string; icon: string; permission: string; content: ReactNode }[] = [];
-
-    // Not even created when hidden, so the tab never mounts or loads
-    if (!hideCollaborators) {
-        tabs.push({
+    const tabDefinitions: TabDefinition[] = [
+        {
+            key: 'collaborators',
             header: 'Collaborators',
             icon: 'pi pi-users',
-            permission: getPermission('collaborator'),
-            content: (
-                <CollaboratorManager project={projectData} useLookup={useLookup} disableCrud={disableCrud} />
-            )
-        });
-    }
-
-    tabs.push(
+            resource: 'collaborator',
+            render: (p) => <CollaboratorManager {...p} />
+        },
         {
+            key: 'phases',
             header: 'Phases',
             icon: MENU_ICONS.phases,
-            permission: getPermission('phase'),
-            content: <PhaseManager project={projectData} useLookup={useLookup} disableCrud={disableCrud} />
+            resource: 'phase',
+            render: (p) => <PhaseManager {...p} />
         },
         {
+            key: 'components',
             header: 'Components',
             icon: MENU_ICONS.components,
-            permission: getPermission('projectComponent'),
-            content: <ProjectComponentManager project={projectData} useLookup={useLookup} disableCrud={disableCrud} />
+            resource: 'projectComponent',
+            render: (p) => <ProjectComponentManager {...p} />
         },
         {
+            key: 'activities',
             header: 'Activities',
             icon: MENU_ICONS.activities,
-            permission: getPermission('phaseActivity'),
-            content: <ActivityManager project={projectData} useLookup={useLookup} disableCrud={disableCrud} />
+            resource: 'phaseActivity',
+            render: (p) => <ActivityManager {...p} />
         },
         {
+            key: 'equipments',
             header: 'Equipments',
             icon: MENU_ICONS.equipments,
-            permission: getPermission('phaseEquipment'),
-            content: <EquipmentManager project={projectData} useLookup={useLookup} disableCrud={disableCrud} />
+            resource: 'phaseEquipment',
+            render: (p) => <EquipmentManager {...p} />
         },
         {
+            key: 'documents',
             header: 'Documents',
             icon: MENU_ICONS.documents,
-            permission: getPermission('phaseDocument'),
-            content: (
-                <PhaseDocumentManager project={projectData} useLookup={useLookup} disableCrud={disableCrud} />
-            )
-        }
-    );
-
-    if (projectData.call) {
-        tabs.push({
+            resource: 'phaseDocument',
+            render: (p) => <PhaseDocumentManager {...p} />
+        },
+        {
+            key: 'applications',
             header: 'Applications',
             icon: MENU_ICONS.applications,
-            permission: getPermission('application'),
-            content: (
-                <ApplicationManager project={projectData} useLookup={useLookup} disableCrud={disableCrud} />
-            )
-        });
-    }
-
-    if (projectData.currentVerification) {
-        tabs.push({
+            resource: 'application',
+            when: !!projectData.call,
+            render: (p) => <ApplicationManager {...p} />
+        },
+        {
+            key: 'verifications',
             header: 'Verifications',
             icon: MENU_ICONS.verifications,
-            permission: getPermission('verification'),
-            content: <VerificationManager project={projectData} useLookup={useLookup} />
+            resource: 'verification',
+            when: !!projectData.currentVerification,
+            render: (p) => <VerificationManager project={p.project} useLookup={p.useLookup} />
+        },
+        {
+            key: 'statusHistory',
+            header: 'Status History',
+            icon: 'pi pi-history',
+            permission: 'project:read',
+            render: (p) => <StatusHistoryWidget history={p.project.statusHistory} />
+        }
+    ];
+
+    // Hidden tabs are never rendered, so they never mount or load
+    const allowedTabs = tabDefinitions
+        .filter((def) => def.when !== false)
+        .map((def) => ({ def, opts: resolveTab(def.key) }))
+        .filter(({ def, opts }) => {
+            if (opts.hide) return false;
+            const permission = def.permission ?? `${def.resource}:${opts.useLookup ? 'lookup' : 'read'}`;
+            return hasPermission([permission]);
         });
-    }
-
-    tabs.push({
-        header: 'Status History',
-        icon: 'pi pi-history',
-        permission: 'project:read',
-        content: <StatusHistoryWidget history={projectData.statusHistory} />
-    });
-
-    const allowedTabs = tabs.filter((tab) => hasPermission([tab.permission]));
 
     /* ----------------------------- render --------------------------- */
     return (
         <div className="flex flex-column gap-3">
+            <style>{TABS_CSS}</style>
 
             {/* HEADER */}
             <div className="surface-card border-1 surface-border border-round-xl shadow-1 overflow-hidden">
@@ -419,7 +490,7 @@ export default function ProjectDetail({
                         </StatTile>
                     </div>
 
-                    {!hideCollaborators && (
+                    {showCollaboratorsMetric && (
                         <div className="col-12 sm:col-6 lg:col-3 p-2">
                             <StatTile icon="pi-users" label="Collaborators" color="orange">
                                 {projectData.totalCollabs ?? 0} Members
@@ -442,8 +513,13 @@ export default function ProjectDetail({
                 <div className="grid m-0 align-items-start" style={{ margin: '-0.5rem' }}>
                     {projectData.summary && (
                         <div className={classNames('col-12 p-2', { 'lg:col-5': hasObjectives })}>
-                            {/* expanded by default */}
-                            <CollapsibleCard icon="pi-align-left" title="Abstract / Summary" defaultOpen>
+                            {/* collapsed by default */}
+                            <CollapsibleCard
+                                icon="pi-align-left"
+                                title="Abstract / Summary"
+                                defaultOpen={false}
+                                meta={`${summaryWords} words`}
+                            >
                                 <p className="m-0 text-700 text-sm line-height-3 white-space-pre-line">
                                     {projectData.summary}
                                 </p>
@@ -499,11 +575,17 @@ export default function ProjectDetail({
 
             {/* TABS */}
             {allowedTabs.length > 0 && (
-                <div className="surface-card border-1 surface-border border-round-xl shadow-1 p-2">
-                    <TabView renderActiveOnly>
-                        {allowedTabs.map((tab) => (
-                            <TabPanel key={tab.header} header={tab.header} leftIcon={`${tab.icon} mr-2`}>
-                                <div className="pt-3 px-2 pb-2">{tab.content}</div>
+                <div className="surface-card border-1 surface-border border-round-xl shadow-1 p-2 project-tabs">
+                    <TabView scrollable renderActiveOnly>
+                        {allowedTabs.map(({ def, opts }) => (
+                            <TabPanel key={def.key} header={def.header} leftIcon={`${def.icon} mr-2`}>
+                                <div className="pt-3 px-2 pb-2">
+                                    {def.render({
+                                        project: projectData,
+                                        useLookup: opts.useLookup,
+                                        disableCrud: opts.disableCrud
+                                    })}
+                                </div>
                             </TabPanel>
                         ))}
                     </TabView>

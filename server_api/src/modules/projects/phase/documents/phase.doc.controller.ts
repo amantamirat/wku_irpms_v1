@@ -51,7 +51,7 @@ export class PhaseDocumentController {
                 phase: phase as string,
             };
 
-            const docs = await this.service.get(filter);
+            const docs = await this.service.get(filter, { populate: true });
             successResponse(res, 200, "Phase documents fetched successfully", docs);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

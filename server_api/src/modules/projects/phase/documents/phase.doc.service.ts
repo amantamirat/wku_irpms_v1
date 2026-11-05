@@ -14,6 +14,7 @@ import { IPhaseActivityRepository } from "../../activities/phase-activity.reposi
 import { PhaseActivityStatus } from "../../activities/phase-activity.model";
 import { ProjectAuth } from "../../project.auth";
 import { PERMISSIONS } from "../../../../common/constants/permissions";
+import { FilterOptions } from "../../../../common/dtos/filter.dto";
 
 export class PhaseDocumentService {
 
@@ -31,24 +32,25 @@ export class PhaseDocumentService {
         userId: string,
     ) {
 
-
         let savedPath: string | null = null;
 
         try {
 
             const { projectDoc, isLeadPI } = await this.projectAuth.auth(dto.project, userId, PERMISSIONS.PHASE_DOCUMENT.CREATE);
 
+            if (isLeadPI) {
+
+            }
+
             // Treat empty strings (e.g. from multipart forms) as "not provided"
             const phaseId = dto.phase || undefined;
             const activityId = dto.activity || undefined;
-
             // Only validate the phase when one is provided
             if (phaseId) {
                 const phase = await this.phaseRepo.findById(phaseId);
                 if (!phase) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
                 if (phase.status !== PhaseStatus.active)
                     throw new AppError(ERROR_CODES.PHASE_NOT_ACTIVE);
-
                 // The phase must belong to the project the document is for
                 // (adjust `phase.project` to however your Phase model stores it)
                 if (String(phase.project) !== String(dto.project))
@@ -84,8 +86,8 @@ export class PhaseDocumentService {
         }
     }
 
-    async get(options: FilterPhaseDocDTO) {
-        return this.repository.find(options);
+    async get(filter: FilterPhaseDocDTO, options?: FilterOptions) {
+        return this.repository.find(filter, options);
     }
 
 

@@ -26,7 +26,7 @@ const ApplicationDetail = ({ application, updateApplication }: ApplicationDetail
         {
             header: "Project",
             permission: "project:lookup",
-            content: <ProjectDetail project={projectData as Project} disableCrud={true} />
+            content: <ProjectDetail project={projectData as Project} options={{ disableCrud: true }} />
         },
         {
             header: "Reviewers",

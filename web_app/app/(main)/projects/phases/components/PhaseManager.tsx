@@ -108,6 +108,7 @@ const PhaseManager = ({
         [project]
     );
 
+    /*
     const tableProps = useMemo(
         () => ({
             expandable: {
@@ -121,7 +122,7 @@ const PhaseManager = ({
         }),
         [project]
     );
-
+    */
     return (
         <ItemManager<Phase, FilterPhasesOptions>
             api={PhaseApi}
@@ -152,7 +153,7 @@ const PhaseManager = ({
                         />
                     )
             }
-            tableProps={tableProps}
+            //tableProps={tableProps}
             onError={(error) => toast.error(error)}
             onSuccess={(operation) =>
                 toast.success(

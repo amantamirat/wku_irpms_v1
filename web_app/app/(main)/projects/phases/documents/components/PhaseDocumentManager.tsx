@@ -180,7 +180,7 @@ const PhaseDocumentManager = ({
             enableColumnToggle
             defaultHiddenFields={defaultHiddenFields}
             hideCreateAction={disableCrud}
-            hideEditAction={disableCrud || true} // Maintains your previous hideEditAction preference while respecting disableCrud
+            hideEditAction={disableCrud}
             hideDeleteAction={disableCrud}
             transitions={
                 disableCrud || disableTransition ? undefined : PROJECT_DOCUMENT_TRANSITIONS

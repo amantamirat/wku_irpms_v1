@@ -28,6 +28,7 @@ import { DisseminationDetailForm } from './activity-details/DisseminationDetailF
 import { DevelopmentDetailForm } from './activity-details/DevelopmentDetailForm';
 import { OtherDetailForm } from './activity-details/OtherDetailForm';
 import { optionTemplate } from '../../phases/documents/components/PhaseDocumentForm';
+import { ActivityDetailFields } from './ActivityDetailFields';
 
 interface ActivityFormProps extends ItemFormRenderProps<Activity> {
     project?: Project | string | null;
@@ -178,6 +179,7 @@ const ActivityForm = ({
         }));
     };
 
+    /*
     const renderActivitySpecificForm = () => {
         switch (localItem.kind) {
             case PhaseActivityType.DATA_COLLECTION:
@@ -256,6 +258,7 @@ const ActivityForm = ({
                 return null;
         }
     };
+    */
 
     const handleSubmit = async (e: FormEvent) => {
         e.preventDefault();
@@ -312,8 +315,8 @@ const ActivityForm = ({
                             typeof localItem.project === 'object' && localItem.project
                                 ? localItem.project.title
                                 : projectId
-                                ? `Project ID: ${projectId}`
-                                : 'No project selected'
+                                    ? `Project ID: ${projectId}`
+                                    : 'No project selected'
                         }
                     >
                         {typeof localItem.project === 'object' && localItem.project
@@ -436,7 +439,14 @@ const ActivityForm = ({
 
                 {/* Dynamic Sub-Details Form Section */}
                 <div className="col-12 surface-ground p-3 border-round my-2">
-                    {renderActivitySpecificForm()}
+                    <ActivityDetailFields
+                        kind={localItem.kind}
+                        details={(localItem as any).details}
+                        onChange={(details) =>
+                            setLocalItem((prev) => ({ ...prev, details } as Activity))
+                        }
+                        disabled={saving}
+                    />
                 </div>
 
                 {/* Cost breakdown */}
