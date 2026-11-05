@@ -4,13 +4,49 @@ import {
     Activity,
     PhaseActivityTypeLabels,
 } from '../models/phase-activity.model';
-import { etbCurrencyFormatter } from '@/utils/utils';
+import { computeDurationFromDates, etbCurrencyFormatter } from '@/utils/utils';
 import { ActivityDetailFields } from './ActivityDetailFields';
+
+const formatDate = (value?: Date | string | null) => {
+    if (!value) return null;
+    const date = new Date(value);
+    if (Number.isNaN(date.getTime())) return null;
+
+    return date.toLocaleDateString(undefined, {
+        day: 'numeric',
+        month: 'short',
+        year: 'numeric',
+    });
+};
+
+const DateBlock = ({
+    label,
+    value,
+    icon,
+}: {
+    label: string;
+    value: string | null;
+    icon: string;
+}) => (
+    <div className="flex align-items-center gap-2">
+        <i className={`${icon} text-primary`} />
+        <div>
+            <div className="text-xs text-500 uppercase font-semibold">{label}</div>
+            <div className="text-sm font-medium">
+                {value ?? <span className="text-400">Not set</span>}
+            </div>
+        </div>
+    </div>
+);
 
 const ActivityExpandedRow = ({ activity }: { activity: Activity }) => {
     const meta = PhaseActivityTypeLabels[activity.kind];
     const details = (activity as any).details;
     const hasDetails = details && Object.keys(details).length > 0;
+
+    const start = formatDate(activity.startDate);
+    const end = formatDate(activity.endDate);
+    const duration = computeDurationFromDates(activity.startDate, activity.endDate);
 
     return (
         <div className="p-3 surface-ground border-round">
@@ -27,6 +63,25 @@ const ActivityExpandedRow = ({ activity }: { activity: Activity }) => {
                         {activity.description}
                     </p>
                 )}
+            </div>
+
+            {/* Schedule */}
+            <div className="surface-card border-1 surface-border border-round p-3 mb-3">
+                <div className="flex flex-wrap align-items-center justify-content-between gap-3">
+                    <DateBlock label="Start" value={start} icon="pi pi-calendar-plus" />
+
+                    <div className="flex align-items-center gap-2 flex-1 justify-content-center">
+                        <div className="border-top-1 surface-border flex-1" />
+                        <span className="text-xs font-semibold text-primary border-1 border-round-3xl px-2 py-1 white-space-nowrap">
+                            {duration > 0
+                                ? `${duration} ${duration === 1 ? 'day' : 'days'}`
+                                : '—'}
+                        </span>
+                        <div className="border-top-1 surface-border flex-1" />
+                    </div>
+
+                    <DateBlock label="End" value={end} icon="pi pi-calendar-minus" />
+                </div>
             </div>
 
             {/* Cost breakdown */}
