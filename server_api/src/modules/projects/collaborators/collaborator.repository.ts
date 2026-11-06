@@ -376,7 +376,7 @@ export class CollaboratorRepository
                 },
                 $push: {
                     statusHistory: {
-                        newStatus,
+                        status:newStatus,
                         changedBy:
                             toObjectId(userId),
                         changedAt: new Date(),

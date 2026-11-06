@@ -209,7 +209,6 @@ export class CollaboratorService {
         const { member, project } = dto;
 
 
-
         let projectTitle = dto.projectTitle;
         if (!options?.skipValidation) {
 
