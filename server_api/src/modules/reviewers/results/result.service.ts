@@ -120,7 +120,7 @@ export class ResultService {
             const applicationDoc = await this.applicationRepo.findById(reviewerDoc.application.toString(), { populate: true });
             if (!applicationDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
             const stageDoc = applicationDoc.stage as unknown as IStage;
-            if (new Date(stageDoc.deadline) < new Date()) {
+            if (stageDoc.deadline &&  new Date(stageDoc.deadline) < new Date()) {
                 throw new AppError(ERROR_CODES.REVIEWER_DEADLINE_PASSED);
             }
         }
