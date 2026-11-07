@@ -120,8 +120,11 @@ export class ResultService {
             const applicationDoc = await this.applicationRepo.findById(reviewerDoc.application.toString(), { populate: true });
             if (!applicationDoc) throw new AppError(ERROR_CODES.APPLICATION_NOT_FOUND);
             const stageDoc = applicationDoc.stage as unknown as IStage;
-            if (stageDoc.deadline &&  new Date(stageDoc.deadline) < new Date()) {
-                throw new AppError(ERROR_CODES.REVIEWER_DEADLINE_PASSED);
+            if (stageDoc.deadline && new Date(stageDoc.deadline) < new Date()) {
+                throw new AppError(
+                    ERROR_CODES.REVIEWER_DEADLINE_PASSED,
+                    `The stage review deadline (${new Date(stageDoc.deadline).toLocaleString()}) has passed. Current date and time: ${new Date().toLocaleString()}.`
+                );
             }
         }
     }
