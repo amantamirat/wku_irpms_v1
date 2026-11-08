@@ -4,11 +4,20 @@ import { SettingKey } from "../settings/setting.model";
 import { SettingService } from "../settings/setting.service";
 import {
     CreateNotificationDTO,
-    GetNotificationsDTO
+    FilterNotificationsDTO
 } from "./notification.dto";
-import { NotificationType } from "./notification.model";
+import { MessageType, NotificationType } from "./notification.model";
 import { INotificationRepository } from "./notification.repository";
 import { SocketService } from "./socket.service";
+
+export interface CollaborationNotification {
+    recipientId: string;
+    projectTitle: string;
+    collaboratorName?: string;
+    role?: string;
+    reason?: string;
+    senderId?: string;
+}
 
 export class NotificationService {
     constructor(
@@ -49,7 +58,7 @@ export class NotificationService {
         userId: string,
         limit: number = 20
     ) {
-        const filters: GetNotificationsDTO = {
+        const filters: FilterNotificationsDTO = {
             recipient: userId,
             limit
         };
@@ -108,6 +117,7 @@ export class NotificationService {
             recipient: recipientId,
             sender: senderId,
             title: "New Project Invitation",
+            messageType: MessageType.INVITATION,
             message:
                 `You have been added as a ${role ?? "collaborator"} ` +
                 `to "${projectTitle}".`,
@@ -117,78 +127,61 @@ export class NotificationService {
     }
 
     /**
-     * Notify a collaborator that their invitation was declined.
-     */
-    async notifyProjectInvitationDeclined(
-        recipientId: string,
-        projectTitle: string,
-        role?: string,
-        senderId?: string
-    ) {
-        return this.notify({
-            recipient: recipientId,
-            sender: senderId,
-            title: "Project Invitation Declined",
-            message:
-                `Your invitation to add the user as a ` +
-                `${role ?? "collaborator"} to "${projectTitle}" ` +
-                `has been declined.`,
-            type: NotificationType.ERROR,
-            link: "/dashboard/my-projects"
-        });
-    }
-
-    /**
-     * Notify a project owner/lead when a collaborator is verified.
-     */
+ * Notify a project owner/lead when a collaborator is verified.
+ */
     async notifyCollaboratorVerified(
         recipientId: string,
         projectTitle: string,
         collaboratorName?: string,
         senderId?: string
     ) {
-        const collaboratorMessage = collaboratorName
-            ? `${collaboratorName} has been verified as a collaborator`
-            : `A collaborator has been verified`;
-
         return this.notify({
             recipient: recipientId,
             sender: senderId,
             title: "Collaborator Verified",
+            messageType: MessageType.INVITATION_ACCEPTED,
             message:
-                `${collaboratorMessage} for your project ` +
-                `"${projectTitle}".`,
+                `${collaboratorName ?? "A collaborator"} has successfully ` +
+                `completed verification and is now a verified collaborator ` +
+                `on your project "${projectTitle}".`,
             type: NotificationType.SUCCESS,
             link: "/dashboard/my-projects"
         });
     }
 
     /**
-     * Notify a project owner/lead when a collaborator is declined.
-     */
+ * Notify a project owner/lead when a collaborator declines an invitation.
+ */
     async notifyCollaboratorDeclined(
         recipientId: string,
         projectTitle: string,
         collaboratorName?: string,
+        role?: string,
+        reason?: string,
         senderId?: string
     ) {
-        const collaboratorMessage = collaboratorName
-            ? `${collaboratorName}'s collaboration request`
-            : `A collaborator's request`;
+        const message =
+            `${collaboratorName ?? "A collaborator"} declined ` +
+            `the invitation to join your project "${projectTitle}" ` +
+            `as a ${role ?? "collaborator"}.` +
+            (reason ? ` Reason: ${reason}` : "");
 
         return this.notify({
             recipient: recipientId,
             sender: senderId,
-            title: "Collaborator Declined",
-            message:
-                `${collaboratorMessage} for "${projectTitle}" ` +
-                `has been declined.`,
-            type: NotificationType.ERROR,
+            title: "Project Invitation Declined",
+            messageType: MessageType.INVITATION_DECLINED,
+            message,
+            type: NotificationType.WARNING,
             link: "/dashboard/my-projects"
         });
     }
 
-    async notifyProjectRemoval(
+
+    /**
+ * Notify a collaborator that they have been removed from a project.
+ */
+    async notifyCollaboratorRemovedFromProject(
         recipientId: string,
         projectTitle: string,
         role?: string,
@@ -198,12 +191,44 @@ export class NotificationService {
             recipient: recipientId,
             sender: senderId,
             title: "Removed from Project",
+            messageType: MessageType.COLLABORATION_REMOVED,
             message:
                 `You have been removed as a ${role ?? "collaborator"} ` +
                 `from "${projectTitle}".`,
             type: NotificationType.ERROR
         });
     }
+
+
+    /**
+ * Notify a collaborator that their role on a project has changed.
+ */
+    async notifyCollaboratorUpdate(
+        recipientId: string,
+        projectTitle: string,
+        newRole: string,
+        oldRole?: string,
+        senderId?: string
+    ) {
+        const change = oldRole && oldRole !== newRole
+            ? `from ${oldRole} to ${newRole}`
+            : `to ${newRole}`;
+
+        return this.notify({
+            recipient: recipientId,
+            sender: senderId,
+            title: "Project Role Updated",
+            messageType: MessageType.COLLABORATION_UPDATED,
+            message: `Your role in "${projectTitle}" has been changed ${change}.`,
+            type: NotificationType.INFO
+        });
+    }
+
+    ///////////////////////////////END OF COLLABORATION NOTIFICATION?????????????????????????????????????
+
+
+
+
 
     // =========================================================
     // APPLICATION NOTIFICATIONS

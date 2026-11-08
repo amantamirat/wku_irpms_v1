@@ -1,6 +1,5 @@
 'use client';
 
-import { format } from 'date-fns';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { TabPanel, TabView } from 'primereact/tabview';
@@ -11,7 +10,7 @@ import { StatusHistoryWidget } from '@/components/StatusHistoryWidget';
 import { useAuth } from '@/contexts/auth-context';
 import MyBadge from '@/templates/MyBadge';
 import { MENU_ICONS } from '@/utils/menu-icons';
-import { etbCurrencyFormatter, extractId } from '@/utils/utils';
+import { countWords, etbCurrencyFormatter, extractId, formatDate, formatDuration, getReferenceName } from '@/utils/utils';
 
 import { useToast } from '@/contexts/ToastContext';
 import ApplicationManager from '../../applications/components/ApplicationManager';
@@ -26,6 +25,7 @@ import PhaseDocumentManager from '../phases/documents/components/PhaseDocumentMa
 import ProjectComponentManager from '../project-components/components/ProjectComponentManager';
 import ProjectForm from './ProjectForm';
 import ProjectProgress from './ProjectProgress';
+import { StatCard, StatTile } from '@/templates/FormPrimitives';
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -90,25 +90,7 @@ interface TabDefinition {
 
 const REF_KEYS = ['grant', 'calendar', 'call', 'leadPI'] as const;
 
-/** Returns a label only when the reference is a populated object, otherwise null (skip rendering) */
-const refLabel = (field: unknown, keys: string[]): string | null => {
-    if (!field || typeof field !== 'object') return null;
-    const record = field as Record<string, unknown>;
-    const key = keys.find((k) => record[k] != null && record[k] !== '');
-    return key ? String(record[key]) : null;
-};
 
-const formatDuration = (totalDays?: number) => {
-    if (!totalDays) return 'Not specified';
-    const months = Math.floor(totalDays / 30);
-    const days = totalDays % 30;
-    const parts: string[] = [];
-    if (months > 0) parts.push(`${months}m`);
-    if (days > 0 || months === 0) parts.push(`${days}d`);
-    return parts.join(' ');
-};
-
-const countWords = (text?: string) => (text?.trim() ? text.trim().split(/\s+/).length : 0);
 
 /**
  * The API may answer with ids instead of populated references.
@@ -142,12 +124,12 @@ const TABS_CSS = `
 .project-tabs .p-tabview-nav-container { position: relative; }
 .project-tabs .p-tabview-nav-content { overflow-x: auto; scrollbar-width: thin; -webkit-overflow-scrolling: touch; scroll-behavior: smooth; }
 .project-tabs .p-tabview-nav-content::-webkit-scrollbar { height: 4px; }
-.project-tabs .p-tabview-nav-content::-webkit-scrollbar-thumb { background: var(--surface-300); border-radius: 4px; }
+.project-tabs .p-tabview-nav-content::-webkit-scrollbar-thumb { background: color-mix(in srgb, var(--text-color) 22%, var(--surface-card)); border-radius: 4px; }
 .project-tabs .p-tabview-nav { flex-wrap: nowrap; border-bottom: 1px solid var(--surface-border); }
 .project-tabs .p-tabview-nav li { flex-shrink: 0; }
 .project-tabs .p-tabview-nav li .p-tabview-nav-link { white-space: nowrap; font-weight: 600; font-size: 0.875rem; padding: 0.9rem 1.1rem; border-radius: 0.5rem 0.5rem 0 0; }
-.project-tabs .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link { background: var(--surface-100); }
-.project-tabs .p-tabview-nav-btn.p-link { background: var(--surface-card); color: var(--primary-color); box-shadow: 0 0 12px rgba(0, 0, 0, 0.12); z-index: 2; width: 2.25rem; }
+.project-tabs .p-tabview-nav li:not(.p-highlight):not(.p-disabled):hover .p-tabview-nav-link { background: color-mix(in srgb, var(--primary-color) 7%, var(--surface-card)); }
+.project-tabs .p-tabview-nav-btn.p-link { background: var(--surface-card); color: var(--primary-color); box-shadow: 0 0 12px color-mix(in srgb, var(--text-color) 14%, transparent); z-index: 2; width: 2.25rem; }
 `;
 
 /* ------------------------------------------------------------------ */
@@ -155,41 +137,19 @@ const TABS_CSS = `
 /* ------------------------------------------------------------------ */
 
 const MetaChip = ({ icon, iconClass, label }: { icon: string; iconClass: string; label: string }) => (
-    <span className="inline-flex align-items-center gap-2 px-3 py-2 border-round-2xl surface-100 text-700 text-sm font-medium">
+    <span
+        className="inline-flex align-items-center gap-2 px-3 py-2 border-round-2xl text-color-secondary text-sm font-medium"
+        style={{
+            background: 'color-mix(in srgb, var(--text-color) 5%, var(--surface-card))',
+            border: '1px solid var(--surface-border)'
+        }}
+    >
         <i className={classNames('pi text-sm', icon, iconClass)} />
         {label}
     </span>
 );
 
-const StatTile = ({
-    icon,
-    label,
-    color,
-    children
-}: {
-    icon: string;
-    label: string;
-    color: string;
-    children: ReactNode;
-}) => (
-    <div className="surface-card border-1 surface-border border-round-xl p-3 h-full flex align-items-center gap-3">
-        <div
-            className={classNames(
-                'flex align-items-center justify-content-center border-round-lg flex-shrink-0',
-                `bg-${color}-50 text-${color}-600`
-            )}
-            style={{ width: '2.75rem', height: '2.75rem' }}
-        >
-            <i className={classNames('pi text-xl', icon)} />
-        </div>
-        <div className="min-w-0">
-            <span className="block text-500 text-xs font-bold uppercase mb-1">{label}</span>
-            <div className="text-lg font-bold text-900 white-space-nowrap overflow-hidden text-overflow-ellipsis">
-                {children}
-            </div>
-        </div>
-    </div>
-);
+
 
 const CollapsibleCard = ({
     icon,
@@ -212,15 +172,19 @@ const CollapsibleCard = ({
         <div className="surface-card border-1 surface-border border-round-xl overflow-hidden">
             <button
                 type="button"
-                className="w-full flex align-items-center gap-2 p-4 border-none bg-transparent cursor-pointer text-left"
+                className="w-full flex align-items-center gap-2 p-4 border-none cursor-pointer text-left"
+                style={{
+                    background: 'color-mix(in srgb, var(--primary-color) 7%, var(--surface-card))',
+                    color: 'var(--text-color)'
+                }}
                 aria-expanded={open}
                 aria-controls={contentId}
                 onClick={() => setOpen((o) => !o)}
             >
                 <i className={classNames('pi text-primary', icon)} />
-                <span className="text-xs font-bold text-600 uppercase flex-1">{title}</span>
-                {meta && <span className="text-xs text-500">{meta}</span>}
-                <i className={classNames('pi text-500 text-sm', open ? 'pi-chevron-up' : 'pi-chevron-down')} />
+                <span className="text-xs font-bold text-color-secondary uppercase flex-1">{title}</span>
+                {meta && <span className="text-xs text-color-secondary">{meta}</span>}
+                <i className={classNames('pi text-color-secondary text-sm', open ? 'pi-chevron-up' : 'pi-chevron-down')} />
             </button>
 
             {open && (
@@ -234,15 +198,23 @@ const CollapsibleCard = ({
 
 const NumberedList = ({ items }: { items: string[] }) => (
     <ul className="list-none p-0 m-0 flex flex-column gap-2">
-        {items.map((text, i) => (
-            <li key={i} className="flex align-items-start gap-2">
+        {items.map((text, index) => (
+            <li
+                key={`${index}-${text}`}
+                className="flex align-items-start gap-3 p-2 surface-card border-1 surface-border border-round-lg"
+            >
                 <span
-                    className="flex align-items-center justify-content-center bg-primary-50 text-primary font-bold border-circle flex-shrink-0"
-                    style={{ width: '1.5rem', height: '1.5rem', fontSize: '0.7rem' }}
+                    className="flex align-items-center justify-content-center text-primary font-bold border-circle flex-shrink-0"
+                    style={{
+                        width: '1.75rem',
+                        height: '1.75rem',
+                        fontSize: '0.75rem',
+                        background: 'color-mix(in srgb, var(--primary-color) 12%, var(--surface-card))'
+                    }}
                 >
-                    {i + 1}
+                    {index + 1}
                 </span>
-                <span className="text-700 text-sm line-height-3">{text}</span>
+                <span className="flex-1 text-color text-sm line-height-3">{text}</span>
             </li>
         ))}
     </ul>
@@ -299,10 +271,10 @@ export default function ProjectDetail({ project, updateProject, options = {} }: 
     });
 
     /* --------------------------- derived data ----------------------- */
-    const grantLabel = refLabel(projectData.grant, ['title', 'name']);
-    const calendarLabel = refLabel(projectData.calendar, ['year', 'name']);
-    const callLabel = refLabel(projectData.call, ['title', 'name']);
-    const leadLabel = hideLeadPI ? null : refLabel(projectData.leadPI, ['name']);
+    const grantLabel = getReferenceName(projectData.grant, 'title');
+    const calendarLabel = getReferenceName(projectData.calendar, 'year');
+    const callLabel = projectData.call ? getReferenceName(projectData.call, 'title') : null;
+    const leadLabel = hideLeadPI ? null : getReferenceName(projectData.leadPI, 'name');
 
     const keywords = (projectData.keywords ?? []).map((k) => k.trim()).filter(Boolean);
 
@@ -328,7 +300,7 @@ export default function ProjectDetail({ project, updateProject, options = {} }: 
         projectData.status === ProjectStatus.draft &&
         hasPermission(['project:update:own']);
 
-    const showCollaboratorsMetric = !resolveTab('collaborators').hide;
+    //const showCollaboratorsMetric = !resolveTab('collaborators').hide;
 
     /* ------------------------------ tabs ---------------------------- */
     const tabDefinitions: TabDefinition[] = [
@@ -420,7 +392,7 @@ export default function ProjectDetail({ project, updateProject, options = {} }: 
                     className="p-4"
                     style={{
                         background:
-                            'linear-gradient(135deg, var(--primary-50, #eef2ff) 0%, var(--surface-0) 70%)'
+                            'linear-gradient(135deg, color-mix(in srgb, var(--primary-color) 14%, var(--surface-card)) 0%, var(--surface-card) 85%)'
                     }}
                 >
                     <div className="flex flex-column md:flex-row md:justify-content-between md:align-items-start gap-3">
@@ -429,7 +401,7 @@ export default function ProjectDetail({ project, updateProject, options = {} }: 
                                 <MyBadge type="status" value={projectData.status ?? 'Draft'} />
                             </div>
 
-                            <h1 className="text-2xl font-bold m-0 mb-3 text-900 line-height-2">
+                            <h1 className="text-2xl font-bold m-0 mb-3 text-color line-height-2">
                                 {projectData.title || 'Untitled Project'}
                             </h1>
 
@@ -455,7 +427,11 @@ export default function ProjectDetail({ project, updateProject, options = {} }: 
                                     {keywords.map((keyword) => (
                                         <span
                                             key={keyword}
-                                            className="inline-flex align-items-center px-2 py-1 border-round-2xl bg-primary-50 text-primary text-xs font-medium"
+                                            className="inline-flex align-items-center px-2 py-1 border-round-2xl text-primary text-xs font-medium"
+                                            style={{
+                                                background: 'color-mix(in srgb, var(--primary-color) 10%, var(--surface-card))',
+                                                border: '1px solid color-mix(in srgb, var(--primary-color) 24%, var(--surface-border))'
+                                            }}
                                         >
                                             # {keyword}
                                         </span>
@@ -490,18 +466,24 @@ export default function ProjectDetail({ project, updateProject, options = {} }: 
                         </StatTile>
                     </div>
 
-                    {showCollaboratorsMetric && (
-                        <div className="col-12 sm:col-6 lg:col-3 p-2">
-                            <StatTile icon="pi-users" label="Collaborators" color="orange">
-                                {projectData.totalCollabs ?? 0} Members
-                            </StatTile>
-                        </div>
-                    )}
+
+                    {
+                        /** 
+                         * {showCollaboratorsMetric && (
+                                            <div className="col-12 sm:col-6 lg:col-3 p-2">
+                                                <StatTile icon="pi-users" label="Collaborators" color="orange">
+                                                    {projectData.totalCollabs ?? 0} Members
+                                                </StatTile>
+                                            </div>
+                                        )}
+                        */
+                    }
+
 
                     {projectData.createdAt && (
                         <div className="col-12 sm:col-6 lg:col-3 p-2">
                             <StatTile icon="pi-calendar-plus" label="Created On" color="purple">
-                                {format(new Date(projectData.createdAt), 'PP')}
+                                {formatDate(projectData.createdAt)}
                             </StatTile>
                         </div>
                     )}
@@ -520,7 +502,7 @@ export default function ProjectDetail({ project, updateProject, options = {} }: 
                                 defaultOpen={false}
                                 meta={`${summaryWords} words`}
                             >
-                                <p className="m-0 text-700 text-sm line-height-3 white-space-pre-line">
+                                <p className="m-0 text-color-secondary text-sm line-height-3 white-space-pre-line">
                                     {projectData.summary}
                                 </p>
                             </CollapsibleCard>
@@ -538,17 +520,22 @@ export default function ProjectDetail({ project, updateProject, options = {} }: 
                             >
                                 <div className="flex flex-column gap-4">
                                     {objectives?.general && (
-                                        <div className="p-3 border-round-lg bg-primary-50 border-left-3 border-primary">
+                                        <div
+                                            className="p-3 border-round-lg border-left-3 border-primary"
+                                            style={{
+                                                background: 'color-mix(in srgb, var(--primary-color) 10%, var(--surface-card))'
+                                            }}
+                                        >
                                             <span className="block text-xs font-bold text-primary uppercase mb-1">
                                                 General Objective
                                             </span>
-                                            <p className="m-0 text-800 text-sm line-height-3">{objectives.general}</p>
+                                            <p className="m-0 text-color text-sm line-height-3">{objectives.general}</p>
                                         </div>
                                     )}
 
                                     {(objectives?.specific?.length ?? 0) > 0 && (
                                         <div>
-                                            <span className="block text-xs font-bold text-600 uppercase mb-2">
+                                            <span className="block text-xs font-bold text-color-secondary uppercase mb-2">
                                                 Specific Objectives
                                             </span>
                                             <NumberedList items={objectives!.specific!} />
@@ -557,7 +544,7 @@ export default function ProjectDetail({ project, updateProject, options = {} }: 
 
                                     {(objectives?.expectedOutputs?.length ?? 0) > 0 && (
                                         <div>
-                                            <span className="block text-xs font-bold text-600 uppercase mb-2">
+                                            <span className="block text-xs font-bold text-color-secondary uppercase mb-2">
                                                 Expected Outputs
                                             </span>
                                             <NumberedList items={objectives!.expectedOutputs!} />

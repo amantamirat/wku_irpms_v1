@@ -11,7 +11,7 @@ import { IGrantRepository } from "../../../modules/grants/grant.repository";
 import { IOrganizationRepository } from "../../../modules/organization/organization.repository";
 import { CollaboratorDto } from "../../../modules/projects/collaborators/collaborator.dto";
 import { PhaseDto } from "../../../modules/projects/phase/phase.dto";
-import { CreateProjectDTO } from "../../../modules/projects/project.dto";
+import { CreateOLDProjectDTO } from "../../../modules/projects/project.dto";
 import { ProjectService } from '../../../modules/projects/project.service';
 import { ThematicLevel } from '../../../modules/thematics/thematic.enum';
 import { IThematicRepository } from '../../../modules/thematics/thematic.repository';
@@ -21,6 +21,7 @@ import { UserService } from '../../../modules/users/user.service';
 import { ExtractedMember, LegacyProjectDTO } from "./legacy.dto";
 import { AccountService } from '../../../modules/accounts/account.service';
 import { SYSTEM } from '../../../common/constants/system.constant';
+import { LeaderRole } from '../../../modules/projects/collaborators/collaborator.model';
 
 export class LegacySeeder {
 
@@ -159,10 +160,9 @@ export class LegacySeeder {
                 member: String(user._id),
                 role:
                     parsedMemberName === parsedPIName
-                        ? "Principal Investigator"
+                        ? LeaderRole
                         : "Co-Investigator",
-                isLeadPI:
-                    parsedMemberName === parsedPIName
+                //isLeadPI:                    parsedMemberName === parsedPIName
             });
         }
 
@@ -198,7 +198,7 @@ export class LegacySeeder {
         item: LegacyProjectDTO,
         grantId: string,
         thematicId: string
-    ): Promise<CreateProjectDTO> {
+    ): Promise<CreateOLDProjectDTO> {
 
         const year = Number(
             item.Academic_Year?.substring(0, 4)
@@ -225,7 +225,7 @@ export class LegacySeeder {
         const collaborators = await this.buildCollaborators(item);
 
         const pi = collaborators.find(
-            collaborator => collaborator.isLeadPI
+            collaborator => collaborator.role === LeaderRole
         );
 
         if (!pi) {

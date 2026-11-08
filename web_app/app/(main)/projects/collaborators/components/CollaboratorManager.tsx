@@ -1,7 +1,7 @@
 'use client';
 
 import { ColumnProps } from 'primereact/column';
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 
 import {
     ItemManager
@@ -21,6 +21,8 @@ import MyBadge from '@/templates/MyBadge';
 import { useAuth } from '@/contexts/auth-context';
 import { SpinnerSkeleton } from '@/components/Skeletons';
 import { extractId } from '@/utils/utils';
+import { useValidationErrors } from '@/hooks/useValidationErrors';
+import { ValidationDialog } from '@/components/ValidationDialog'; // adjust path
 
 // Defined outside the component for a stable reference.
 const columns: ColumnProps[] = [
@@ -136,24 +138,32 @@ const CollaboratorManager = ({
     enableProjectDetail = false,
 }: CollaboratorManagerProps) => {
 
-
+    // ---- ALL hooks must run before any early return ----
     const { getUser, loading } = useAuth();
-    const me = getUser();
-    // Show loading skeleton while user session hydrates
-    if (loading) {
-        return (
-            <SpinnerSkeleton text='loading current user' />
-        );
-    }
-
     const toast = useToast();
+    const {
+        error,
+        //templateValidation,
+        validationResult,
+        handleError,
+        clearErrors
+    } = useValidationErrors();
+
+    const me = getUser();
+
+    // Plain (non-validation) errors still go to the toast
+    useEffect(() => {
+        if (error) {
+            toast.error(error);
+            clearErrors();
+        }
+    }, [error, toast, clearErrors]);
 
     // If you need filters, define them here. Otherwise, pass an empty object or omit.
     const filter = useMemo<FilterCollaboratorsOptions>(() => ({
         project: project,
         member: member
     }), [project, member]);
-
 
     const defaultHiddenFields = useMemo(() => {
         const hiddenFields = ['role', 'status', 'project.status'];
@@ -188,31 +198,16 @@ const CollaboratorManager = ({
                     return (
                         <ProjectDetail
                             project={resolvedProject}
-                            options={
-                                {
-                                    useLookup: true,
-                                    tabs: {
-                                        collaborators: {
-                                            disableCrud: disableCrud
-                                        },
-                                        phases: {
-                                            disableCrud: disableCrud
-                                        },
-
-                                        components: {
-                                            disableCrud: disableCrud
-                                        },
-
-                                        equipments: {
-                                            disableCrud: disableCrud
-                                        },
-
-                                        activities: {
-                                            disableCrud: disableCrud
-                                        },
-                                    }
-                                }}
-
+                            options={{
+                                useLookup: true,
+                                tabs: {
+                                    collaborators: { disableCrud },
+                                    phases: { disableCrud },
+                                    components: { disableCrud },
+                                    equipments: { disableCrud },
+                                    activities: { disableCrud },
+                                }
+                            }}
                         />
                     );
                 }
@@ -221,47 +216,59 @@ const CollaboratorManager = ({
         []
     );
 
+    // Show loading skeleton while user session hydrates
+    if (loading) {
+        return <SpinnerSkeleton text="loading current user" />;
+    }
+
     return (
-        <ItemManager<Collaborator, FilterCollaboratorsOptions>
-            api={CollaboratorApi}
-            useLookup={useLookup}
-            resource="collaborator"
-            itemName="Collaboration"
-            itemIcon={MENU_ICONS.collaborators}
-            headerTitle="Collaborations"
-            columns={columns}
-            defaultHiddenFields={defaultHiddenFields}
-            enableColumnToggle
-            mapSaved={mapSaved}
-            filter={filter}
-            hideCreateAction={disableCrud}
-            hideEditAction={disableCrud}
-            hideDeleteAction={disableCrud}
-            dialogWidth="500px"
-            renderForm={
-                disableCrud
-                    ? undefined
-                    : (props) => (
-                        <CollaboratorForm {...props} project={project} />
+        <>
+            <ItemManager<Collaborator, FilterCollaboratorsOptions>
+                api={CollaboratorApi}
+                useLookup={useLookup}
+                resource="collaborator"
+                itemName="Collaboration"
+                itemIcon={MENU_ICONS.collaborators}
+                headerTitle="Collaborations"
+                columns={columns}
+                defaultHiddenFields={defaultHiddenFields}
+                enableColumnToggle
+                mapSaved={mapSaved}
+                filter={filter}
+                hideCreateAction={disableCrud}
+                hideEditAction={disableCrud}
+                hideDeleteAction={disableCrud}
+                dialogWidth="500px"
+                renderForm={
+                    disableCrud
+                        ? undefined
+                        : (props) => (
+                            <CollaboratorForm {...props} project={project} />
+                        )
+                }
+                statusField="status"
+                transitions={COLLABORATION_TRANSITIONS}
+                hideTransition={(row) =>
+                    extractId(row.member) !== extractId(me)
+                }
+                tableProps={enableProjectDetail ? tableProps : undefined}
+                onError={handleError}
+                onSuccess={(operation) =>
+                    toast.success(
+                        operation === 'create'
+                            ? 'Collaborator added successfully'
+                            : 'Collaborator updated successfully'
                     )
-            }
-            statusField="status"
-            transitions={
-                COLLABORATION_TRANSITIONS
-            }
-            hideTransition={(row) =>
-                extractId(row.member) !== extractId(me)
-            }
-            tableProps={enableProjectDetail ? tableProps : undefined}
-            onError={(error) => toast.error(error)}
-            onSuccess={(operation) =>
-                toast.success(
-                    operation === 'create'
-                        ? 'Collaborator added successfully'
-                        : 'Collaborator updated successfully'
-                )
-            }
-        />
+                }
+            />
+
+            <ValidationDialog
+                header="Cannot save collaboration"
+                //templateValidation={templateValidation}
+                validationResult={validationResult}
+                onHide={clearErrors}
+            />
+        </>
     );
 };
 

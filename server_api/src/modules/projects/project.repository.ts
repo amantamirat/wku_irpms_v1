@@ -5,6 +5,7 @@ import { FilterOptions } from "../../common/dtos/filter.dto";
 
 import {
     FilterProjectsDTO,
+    CreateProjectDto,
     UpdateProjectDTO
 } from "./project.dto";
 
@@ -12,10 +13,11 @@ import { toObjectId } from "../../common/utils/mongoose.utils";
 import { ScopeFilter } from "../auth/auth.types";
 import {
     IProject,
-    IProjectObjectives,
     Project,
     ProjectStatus
 } from "./project.model";
+import { IStatusHistory } from "../../common/types/status-history";
+import { SYSTEM } from "../../common/constants/system.constant";
 
 
 export interface IProjectRepository {
@@ -45,22 +47,6 @@ export interface IProjectRepository {
         data: Partial<UpdateProjectData>,
         userId?: string
     ): Promise<IProject | null>;
-    /*
-        incrementTotals(
-            projectId: string,
-            delta: {
-                duration?: number;
-                budget?: number;
-                collabs?: number;
-            }
-        ): Promise<IProject | null>;*/
-
-    updateStatus(
-        id: string,
-        status: ProjectStatus,
-        userId: string,
-        reason?: string,
-    ): Promise<IProject | null>;
 
     exists(
         filters: FilterProjectsDTO
@@ -72,25 +58,6 @@ export interface IProjectRepository {
 }
 
 
-export interface ProjectDto {
-    grant: string;
-    calendar: string;
-    leadPI: string;
-
-    call?: string;
-
-    title: string;
-    objectives?: IProjectObjectives;
-    summary?: string;
-
-    themes: string[];
-    keywords?: string[];
-
-    totalBudget: number;
-    totalDuration: number;
-}
-
-
 /**
  * Data required by the repository to persist a project.
  *
@@ -98,18 +65,20 @@ export interface ProjectDto {
  * not supplied directly by the client.
  */
 export interface CreateProjectData
-    extends ProjectDto {
-
-    organization: string;
-    workspace: string;
+    extends CreateProjectDto {
+    organization?: string;
+    workspace?: string;
     conceptNoteId?: string;
     status?: ProjectStatus;
 }
 
 export interface UpdateProjectData extends UpdateProjectDTO {
-    currentApplication: string | null;
-    currentPhase: string | null;
-    currentVerification: string | null;
+    currentApplication?: string | null;
+    currentPhase?: string | null;
+    currentVerification?: string | null;
+    leadPI?: string | null;
+    status?: ProjectStatus;
+    statusHistory?: IStatusHistory<ProjectStatus>;
 }
 
 function populate(dbQuery: any) {
@@ -260,173 +229,77 @@ export class ProjectRepository
         data: CreateProjectData,
         userId: string
     ): Promise<IProject> {
-
-        const project = {
+        return Project.create({
             ...data,
             grant: toObjectId(data.grant),
-
-            organization:
-                toObjectId(data.organization),
-
-            workspace:
-                toObjectId(data.workspace),
-
-            calendar: toObjectId(data.calendar),
-
-            call: data.call
-                ? toObjectId(data.call)
-                : undefined,
-
-            leadPI: toObjectId(data.leadPI),
-
-            themes: data.themes.map(toObjectId),
-
+            calendar: data.calendar ? toObjectId(data.calendar) : undefined,
+            organization: data.organization ? toObjectId(data.organization) : undefined,
+            workspace: data.workspace ? toObjectId(data.workspace) : undefined,
+            call: data.call ? toObjectId(data.call) : undefined,
+            leadPI: data.leadPI ? toObjectId(data.leadPI) : undefined,
+            themes: data.themes?.map(toObjectId) ?? [],
             createdBy: toObjectId(userId),
-        };
-
-        return Project.create(project);
+        });
     }
 
 
     async update(
         id: string,
         data: Partial<UpdateProjectData>,
-        userId?: string
+        userId: string
     ): Promise<IProject | null> {
+        const { status, statusHistory, leadPI, ...rest } = data;
 
-        const updateData: Partial<IProject> = {};
-
-        if (data.title !== undefined)
-            updateData.title = data.title;
-
-        if (data.summary !== undefined)
-            updateData.summary = data.summary;
-
-        if (data.themes !== undefined)
-            updateData.themes = data.themes.map(toObjectId);
-
-        if (data.objectives !== undefined) {
-            updateData.objectives = {
-                general: data.objectives.general,
-                specific: data.objectives.specific ?? [],
-                expectedOutputs: data.objectives.expectedOutputs ?? []
-            };
-        }
-
-        if (data.totalBudget !== undefined)
-            updateData.totalBudget = data.totalBudget;
-
-        if (data.totalDuration !== undefined)
-            updateData.totalDuration = data.totalDuration;
-
-        if (data.currentApplication !== undefined) {
-            updateData.currentApplication = data.currentApplication
-                ? toObjectId(data.currentApplication)
-                : null;
-        }
-
-        if (data.currentPhase !== undefined) {
-            updateData.currentPhase = data.currentPhase
-                ? toObjectId(data.currentPhase)
-                : null;
-        }
-
-        if (data.currentVerification !== undefined) {
-            updateData.currentVerification = data.currentVerification
-                ? toObjectId(data.currentVerification)
-                : null;
-        }
-
-        if (userId)
-            updateData.updatedBy = toObjectId(userId);
-
-        return Project.findByIdAndUpdate(
-            toObjectId(id),
-            { $set: updateData },
-            {
-                new: true,
-                runValidators: true
-            }
-        ).exec();
-    }
-
-    /*
-        async incrementTotals(
-            projectId: string,
-            delta: {
-                duration?: number;
-                budget?: number;
-                collabs?: number;
-            }
-        ): Promise<IProject | null> {
-    
-            const increment: Record<string, number> = {};
-    
-            if (delta.duration !== undefined) {
-                increment.totalDuration =
-                    delta.duration;
-            }
-    
-            if (delta.budget !== undefined) {
-                increment.totalBudget =
-                    delta.budget;
-            }
-    
-            if (delta.collabs !== undefined) {
-                increment.totalCollabs =
-                    delta.collabs;
-            }
-    
-            if (!Object.keys(increment).length) {
-                return Project.findById(
-                    toObjectId(projectId)
-                ).exec();
-            }
-    
-            return Project.findByIdAndUpdate(
-                toObjectId(projectId),
-                {
-                    $inc: increment
+        const updateData = {
+            ...rest,
+            ...(rest.themes && {
+                themes: rest.themes.map(toObjectId),
+            }),
+            ...(rest.currentApplication !== undefined && {
+                currentApplication: rest.currentApplication
+                    ? toObjectId(rest.currentApplication)
+                    : null,
+            }),
+            ...(rest.currentPhase !== undefined && {
+                currentPhase: rest.currentPhase
+                    ? toObjectId(rest.currentPhase)
+                    : null,
+            }),
+            ...(rest.currentVerification !== undefined && {
+                currentVerification: rest.currentVerification
+                    ? toObjectId(rest.currentVerification)
+                    : null,
+            }),
+            ...(rest.objectives && {
+                objectives: {
+                    general: rest.objectives.general,
+                    specific: rest.objectives.specific ?? [],
+                    expectedOutputs: rest.objectives.expectedOutputs ?? [],
                 },
-                {
-                    new: true,
-                    runValidators: true
-                }
-            ).exec();
-        }
-        */
-
-
-    async updateStatus(
-        id: string,
-        status: ProjectStatus,
-        userId: string,
-        reason?: string,
-    ): Promise<IProject | null> {
+            }),
+            ...(leadPI !== undefined && {
+                leadPI: leadPI ? toObjectId(leadPI) : null,
+            }),
+            ...(userId !== SYSTEM.SU_USER && {
+                updatedBy: toObjectId(userId),
+            }),
+        };
 
         return Project.findByIdAndUpdate(
             toObjectId(id),
             {
                 $set: {
-                    status
+                    ...updateData,
+                    ...(status !== undefined && { status }),
                 },
-
-                $push: {
-                    statusHistory: {
-                        status,
-                        changedBy:
-                            toObjectId(userId),
-                        changedAt: new Date(),
-                        reason
-                    }
-                }
+                ...(statusHistory && {
+                    $push: { statusHistory },
+                }),
             },
-            {
-                new: true,
-                runValidators: true
-            }
+            { new: true, runValidators: true }
         ).exec();
     }
+
 
 
     async exists(

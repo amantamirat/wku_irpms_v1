@@ -16,7 +16,7 @@ import { ActivityApi } from '../api/phase-activity.api';
 import ActivityForm from './ActivityForm';
 
 import { Project } from '@/app/(main)/projects/models/project.model';
-import { etbCurrencyFormatter } from '@/utils/utils';
+import { etbCurrencyFormatter, formatDate } from '@/utils/utils';
 import MyBadge from '@/templates/MyBadge';
 import { Phase } from '../../phases/models/phase.model';
 import { PHASE_ACTIVITY_TRANSITIONS } from '../models/phase-activity.state-machine';
@@ -114,18 +114,14 @@ const columns: ColumnProps[] = [
         field: 'startDate',
         sortable: true,
         body: (activity: Activity) =>
-            activity.startDate
-                ? new Date(activity.startDate).toLocaleDateString()
-                : '—'
+           formatDate(activity.startDate)
     },
     {
         header: 'End Date',
         field: 'endDate',
         sortable: true,
         body: (activity: Activity) =>
-            activity.endDate
-                ? new Date(activity.endDate).toLocaleDateString()
-                : '—'
+            formatDate(activity.endDate)
     },
     {
         header: 'Status',

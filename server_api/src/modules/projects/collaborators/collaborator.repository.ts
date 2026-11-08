@@ -18,6 +18,19 @@ import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { ScopeFilter } from "../../auth/auth.types";
 import { Project } from "../project.model";
 import { toObjectId } from "../../../common/utils/mongoose.utils";
+import { SYSTEM } from "../../../common/constants/system.constant";
+import { IStatusHistory } from "../../../common/types/status-history";
+
+export interface CreateCollaboratorData extends CreateCollaboratorDto {
+    isLeadPI?: boolean;
+    status?: CollaboratorStatus;
+}
+
+export interface UpdateCollaboratorData extends UpdateCollaboratorDto {
+    isLeadPI?: boolean;
+    status?: CollaboratorStatus;
+    statusHistory?: IStatusHistory<CollaboratorStatus>;
+}
 
 
 export interface ICollaboratorRepository {
@@ -27,10 +40,12 @@ export interface ICollaboratorRepository {
         options?: FilterOptions
     ): Promise<ICollaborator | null>;
 
+    /*
     findOne(
         filters?: FilterCollaborators,
         options?: FilterOptions
     ): Promise<ICollaborator | null>;
+    */
 
     find(
         filters?: FilterCollaborators,
@@ -39,25 +54,29 @@ export interface ICollaboratorRepository {
     ): Promise<ICollaborator[]>;
 
     create(
-        dto: CreateCollaboratorDto
+        data: CreateCollaboratorData,
+        userId: string
     ): Promise<ICollaborator>;
 
+    /*
     createMany(
         dtos: CreateCollaboratorDto[]
     ): Promise<ICollaborator[]>;
-
+*/
     update(
         id: string,
-        data: UpdateCollaboratorDto["data"],
+        data: Partial<UpdateCollaboratorData>,
         userId: string
     ): Promise<ICollaborator | null>;
 
+    /*
     updateStatus(
         id: string,
         newStatus: CollaboratorStatus,
         userId: string,
         reason?: string,
     ): Promise<ICollaborator | null>;
+    */
 
     exists(
         filters: FilterCollaborators
@@ -84,6 +103,34 @@ export interface ICollaboratorRepository {
     deleteByProject(
         project: string
     ): Promise<any>;
+}
+
+
+function populate(dbQuery: any) {
+    /**
+     * dbQuery.populate([
+                {
+                    path: "member",
+                    populate: {
+                        path: "workspace"
+                    }
+                },
+                {
+                    path: "project",
+                    populate: {
+                        path: "leadPI"
+                    }
+                }
+            ]);
+     */
+    return dbQuery
+        .populate("project")
+        .populate("member")
+        .populate("createdBy")
+        .populate({
+            path: "statusHistory.changedBy",
+            select: "_id name",
+        });
 }
 
 
@@ -159,20 +206,7 @@ export class CollaboratorRepository
             );
 
         if (options?.populate) {
-            dbQuery.populate([
-                {
-                    path: "member",
-                    populate: {
-                        path: "workspace"
-                    }
-                },
-                {
-                    path: "project",
-                    populate: {
-                        path: "leadPI"
-                    }
-                }
-            ]);
+            dbQuery = populate(dbQuery)
         }
 
         return dbQuery
@@ -184,6 +218,7 @@ export class CollaboratorRepository
     /**
      * Find a single collaborator using filters.
      */
+    /*
     async findOne(
         filters: FilterCollaborators = {},
         options?: FilterOptions
@@ -216,7 +251,7 @@ export class CollaboratorRepository
             .lean<ICollaborator>()
             .exec();
     }
-
+*/
 
     /**
      * Find collaborators using filters.
@@ -238,20 +273,7 @@ export class CollaboratorRepository
             Collaborator.find(query);
 
         if (options?.populate) {
-            dbQuery.populate([
-                {
-                    path: "member",
-                    populate: {
-                        path: "workspace"
-                    }
-                },
-                {
-                    path: "project",
-                    populate: {
-                        path: "leadPI"
-                    }
-                }
-            ]);
+            dbQuery = populate(dbQuery)
         }
 
         return dbQuery
@@ -262,25 +284,20 @@ export class CollaboratorRepository
 
 
     /**
-     * Create collaborator.
-     */
+ * Create collaborator.
+ */
     async create(
-        dto: CreateCollaboratorDto
+        data: CreateCollaboratorData,
+        userId: string
     ): Promise<ICollaborator> {
-
-        const data: Partial<ICollaborator> = {
-            ...dto,
-
-            project:
-                new mongoose.Types.ObjectId(dto.project),
-
-            member:
-                new mongoose.Types.ObjectId(dto.member),
-            //createdBY
-        };
-
-        return Collaborator
-            .create(data)
+        return Collaborator.create({
+            ...data,
+            project: toObjectId(data.project),
+            member: toObjectId(data.member),
+            ...(userId !== SYSTEM.SU_USER && {
+                createdBy: toObjectId(userId),
+            }),
+        })
             .then(doc => doc.toObject() as ICollaborator);
     }
 
@@ -288,6 +305,7 @@ export class CollaboratorRepository
     /**
      * Create multiple collaborators.
      */
+    /*
     async createMany(
         dtos: CreateCollaboratorDto[]
     ): Promise<ICollaborator[]> {
@@ -313,6 +331,7 @@ export class CollaboratorRepository
 
         return documents as ICollaborator[];
     }
+        */
 
 
     /**
@@ -320,47 +339,41 @@ export class CollaboratorRepository
  */
     async update(
         id: string,
-        dtoData: UpdateCollaboratorDto["data"],
+        data: Partial<UpdateCollaboratorData>,
         userId: string
     ): Promise<ICollaborator | null> {
+        const { status, statusHistory, ...rest } = data;
 
-        const updateData: Partial<ICollaborator> = {
-            updatedBy: new mongoose.Types.ObjectId(userId)
+        const updateData = {
+            ...rest,
+            ...(rest.member && {
+                member: toObjectId(rest.member),
+            }),
+            ...(userId !== SYSTEM.SU_USER && {
+                updatedBy: toObjectId(userId),
+            }),
         };
 
-        if (dtoData.member !== undefined) {
-            updateData.member =
-                new mongoose.Types.ObjectId(dtoData.member);
-        }
-
-        if (dtoData.isLeadPI !== undefined) {
-            updateData.isLeadPI =
-                dtoData.isLeadPI;
-        }
-
-        if (dtoData.role !== undefined) {
-            updateData.role =
-                dtoData.role;
-        }
-
         return Collaborator.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
+            toObjectId(id),
             {
-                $set: updateData
+                $set: {
+                    ...updateData,
+                    ...(status !== undefined && { status }),
+                },
+                ...(statusHistory && {
+                    $push: { statusHistory },
+                }),
             },
-            {
-                new: true,
-                runValidators: true
-            }
-        )
-            .lean<ICollaborator>()
-            .exec();
+            { new: true, runValidators: true }
+        ).exec();
     }
 
 
     /**
      * Update collaborator status.
      */
+    /*
     async updateStatus(
         id: string,
         newStatus: CollaboratorStatus,
@@ -376,7 +389,7 @@ export class CollaboratorRepository
                 },
                 $push: {
                     statusHistory: {
-                        status:newStatus,
+                        status: newStatus,
                         changedBy:
                             toObjectId(userId),
                         changedAt: new Date(),
@@ -392,7 +405,7 @@ export class CollaboratorRepository
             .lean<ICollaborator>()
             .exec();
     }
-
+*/
 
     /**
      * Check whether a collaborator exists.

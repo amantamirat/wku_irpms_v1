@@ -11,7 +11,7 @@ import { IGrantRepository } from "../../../modules/grants/grant.repository";
 import { IOrganizationRepository } from "../../../modules/organization/organization.repository";
 import { CollaboratorDto } from "../../../modules/projects/collaborators/collaborator.dto";
 import { PhaseDto } from "../../../modules/projects/phase/phase.dto";
-import { CreateProjectDTO } from "../../../modules/projects/project.dto";
+import { CreateOLDProjectDTO } from "../../../modules/projects/project.dto";
 import { ProjectService } from '../../../modules/projects/project.service';
 import { ThematicLevel } from '../../../modules/thematics/thematic.enum';
 import { IThematicRepository } from '../../../modules/thematics/thematic.repository';
@@ -19,7 +19,7 @@ import { ThematicStatus } from '../../../modules/thematics/thematic.state-machin
 import { IThemeRepository } from "../../../modules/thematics/themes/theme.repository";
 import { UserService } from '../../../modules/users/user.service';
 import { NewLegacyProjectDTO } from './new-legacy.dto';
-import { CollaboratorStatus } from '../../../modules/projects/collaborators/collaborator.model';
+import { CollaboratorStatus, LeaderRole } from '../../../modules/projects/collaborators/collaborator.model';
 import { IPhaseActivityDetailCost, PhaseActivityStatus } from '../../../modules/projects/activities/phase-activity.model';
 import { PhaseStatus } from '../../../modules/projects/phase/phase.model';
 import { PhaseActivityDto } from '../../../modules/projects/activities/phase-activity.dto';
@@ -216,11 +216,11 @@ export class NewLegacySeeder {
                     collaborator.role?.trim() ||
                     (
                         isLeadPI
-                            ? "Principal Investigator"
+                            ? LeaderRole
                             : "Co-Investigator"
                     ),
-                status: CollaboratorStatus.verified,
-                isLeadPI
+                //status: CollaboratorStatus.verified,
+                //isLeadPI
             });
         }
 
@@ -242,7 +242,7 @@ export class NewLegacySeeder {
             collaborators.push({
                 member: principalUserId,
                 role: "Principal Investigator",
-                isLeadPI: true
+                //isLeadPI: true
             });
 
             addedUsers.add(principalUserId);
@@ -610,7 +610,7 @@ export class NewLegacySeeder {
         item: NewLegacyProjectDTO,
         grantId: string,
         thematicId: string
-    ): Promise<CreateProjectDTO & { status: ProjectStatus, usedBudget: number }> {
+    ): Promise<CreateOLDProjectDTO & { status: ProjectStatus, usedBudget: number }> {
 
         const year = Number(
             item.AcYear?.substring(0, 4)
@@ -637,7 +637,7 @@ export class NewLegacySeeder {
         const collaborators = await this.buildCollaborators(item);
 
         const pi = collaborators.find(
-            collaborator => collaborator.isLeadPI
+            collaborator => collaborator.role==="PI"
         );
 
         if (!pi) {

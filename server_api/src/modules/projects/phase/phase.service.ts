@@ -157,6 +157,7 @@ export class PhaseService {
     }
 
     /** Sum of activity durations in days. Throws if any activity has bad dates. */
+    /*
     private sumActivityDuration(activities: ActivityList): number {
         return activities.reduce((total, activity) => {
             if (!activity.startDate || !activity.endDate) {
@@ -175,6 +176,8 @@ export class PhaseService {
             return total + duration;
         }, 0);
     }
+
+    */
 
     /** Sum of activity costs plus equipment (unitPrice * quantity). */
     private sumCost(activities: ActivityList, equipment: EquipmentList): number {
@@ -197,14 +200,16 @@ export class PhaseService {
         activities: ActivityList,
         equipment: EquipmentList
     ) {
-        const activityDuration = this.sumActivityDuration(activities);
 
+        /*
+        const activityDuration = this.sumActivityDuration(activities);
         if (activityDuration !== Number(phaseDoc.duration)) {
             throw new AppError(
                 ERROR_CODES.PHASE_DURATION_MISMATCH,
                 `Total activity duration (${activityDuration} days) must equal the phase duration (${phaseDoc.duration} days).`
             );
         }
+        */
 
         const totalCost = this.sumCost(activities, equipment);
 
@@ -276,19 +281,6 @@ export class PhaseService {
 
         if (!hasProgressReport) {
             throw new AppError(ERROR_CODES.PHASE_PROGRESS_REPORT_REQUIRED);
-        }
-
-        // The final phase also needs the project's completion report.
-        if (isFinalPhase) {
-            const hasCompletionReport = await this.phaseDocRepo.exists({
-                project: projectId,
-                type: PhaseDocumentType.completionReport,
-                status: ProjectDocumentStatus.approved
-            });
-
-            if (!hasCompletionReport) {
-                throw new AppError(ERROR_CODES.COMPLETION_REPORT_REQUIRED);
-            }
         }
     }
 

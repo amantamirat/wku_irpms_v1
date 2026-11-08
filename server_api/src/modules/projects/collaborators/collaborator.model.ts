@@ -10,16 +10,18 @@ export enum CollaboratorStatus {
     declined = 'declined'
 }
 
+export const LeaderRole = 'LEADER';
+
 export interface ICollaborator extends Document {
     project: mongoose.Types.ObjectId;
-    member: mongoose.Types.ObjectId | IUser;//member//user
+    member: mongoose.Types.ObjectId | IUser;
     role: string;
     isLeadPI?: boolean;
     status: CollaboratorStatus;
     statusHistory: IStatusHistory<CollaboratorStatus>[];
 
+    createdBy?: mongoose.Types.ObjectId;
     updatedBy?: mongoose.Types.ObjectId;
-
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -34,7 +36,6 @@ const CollaboratorSchema = new Schema<ICollaborator>({
     member: {
         type: Schema.Types.ObjectId,
         ref: COLLECTIONS.USER,
-        //immutable: true,
         required: true
     },
     role: {
@@ -55,6 +56,10 @@ const CollaboratorSchema = new Schema<ICollaborator>({
             Object.values(CollaboratorStatus)
         )],
         default: []
+    },
+    createdBy: {
+        type: Schema.Types.ObjectId,
+        ref: COLLECTIONS.USER
     },
     updatedBy: {
         type: Schema.Types.ObjectId,

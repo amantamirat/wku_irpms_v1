@@ -1,8 +1,9 @@
 'use client';
 
-import { FormEvent, ReactNode, useEffect, useMemo, useState } from 'react';
+import { FormEvent, useEffect, useState } from 'react';
 
 import { Button } from 'primereact/button';
+import { Checkbox } from 'primereact/checkbox';
 import { Chips } from 'primereact/chips';
 import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
@@ -18,42 +19,46 @@ import { ItemFormRenderProps } from '@/components/ItemManager';
 import { CalendarApi } from '@/app/(main)/calendars/api/calendar.api';
 import { Calendar } from '@/app/(main)/calendars/models/calendar.model';
 
+import { CallApi } from '@/app/(main)/calls/api/call.api';
+import { Call } from '@/app/(main)/calls/models/call.model';
+
 import { GrantApi } from '@/app/(main)/grants/api/grant.api';
 import { Grant } from '@/app/(main)/grants/models/grant.model';
 import { GrantStatus } from '@/app/(main)/grants/models/grant.state-machine';
 
-import { ThemeApi } from '@/app/(main)/thematics/themes/api/theme.api';
 import {
     ThemeNode,
     buildTree
 } from '@/app/(main)/thematics/models/thematic.node';
+import { ThemeApi } from '@/app/(main)/thematics/themes/api/theme.api';
 
-import { UserApi } from '@/app/(main)/users/api/user.api';
+import { IProjectObjectives, Project } from '../models/project.model';
 
-import {
-    IProjectObjectives,
-    Project
-} from '../models/project.model';
+import { FieldError, FieldHint, FieldLabel, LockedField, SectionCard, StatCard } from '@/templates/FormPrimitives';
+import { etbCurrencyFormatter, extractId, formatDuration, getReferenceName } from '@/utils/utils';
 
-import { extractId } from '@/utils/utils';
-
-type ProjectFormProps = ItemFormRenderProps<Project>;
-
-interface UserOption {
-    _id: string;
-    name: string;
-    [key: string]: unknown;
-}
+type ProjectFormProps = ItemFormRenderProps<Project> & {
+    /** Do not render the "Project Setup" section at all (e.g. when reused for "apply for a call"). */
+    hideSetup?: boolean;
+    /** Render the setup section read-only. It is always locked on edit or when `item.call` is preset. */
+    lockSetup?: boolean;
+};
 
 /* ------------------------------------------------------------------ */
 /* Helpers                                                             */
 /* ------------------------------------------------------------------ */
 
-const createInitialProject = (
-    item: Partial<Project> | null | undefined
-): Project =>
-    ({
-        ...item,
+const createInitialProject = (item: Partial<Project> | null | undefined): Project => {
+    // Strip legacy fields that this form no longer manages
+    const {
+        phases: _phases,
+        collaborators: _collaborators,
+        leadPI: _leadPI,
+        ...rest
+    } = (item ?? {}) as Partial<Project> & Record<string, unknown>;
+
+    return {
+        ...rest,
         title: item?.title ?? '',
         summary: item?.summary ?? '',
         keywords: item?.keywords ?? [],
@@ -64,169 +69,40 @@ const createInitialProject = (
             expectedOutputs: [],
             ...item?.objectives
         },
-        collaborators: item?.collaborators ?? [],
-        phases: item?.phases ?? [],
         totalBudget: item?.totalBudget,
         totalDuration: item?.totalDuration
-    }) as Project;
-
-const getReferenceName = (
-    value: unknown,
-    property: 'title' | 'year' | 'name',
-    fallback: string
-): string => {
-    if (!value || typeof value !== 'object') return fallback;
-
-    const record = value as Record<string, unknown>;
-    return record[property] != null ? String(record[property]) : fallback;
+    } as Project;
 };
 
-const formatCurrency = (value: number) =>
-    new Intl.NumberFormat('en-US', {
-        style: 'currency',
-        currency: 'ETB',
-        maximumFractionDigits: 0
-    }).format(value);
 
-/* ------------------------------------------------------------------ */
-/* Presentational pieces                                               */
-/* ------------------------------------------------------------------ */
 
-const SectionCard = ({
-    step,
-    icon,
-    title,
-    description,
-    children
-}: {
-    step: number;
-    icon: string;
-    title: string;
-    description: string;
-    children: ReactNode;
-}) => (
-    <section className="surface-card border-1 surface-border border-round-xl shadow-1 overflow-hidden">
-        <div
-            className="flex align-items-center gap-3 px-4 py-3 border-bottom-1 surface-border"
-            style={{
-                background:
-                    'linear-gradient(135deg, var(--primary-50, #eef2ff) 0%, var(--surface-0) 100%)'
-            }}
-        >
-            <div
-                className="flex align-items-center justify-content-center bg-primary text-white border-round-lg flex-shrink-0 relative"
-                style={{ width: '2.75rem', height: '2.75rem' }}
-            >
-                <i className={classNames('pi text-xl', icon)} />
-                <span
-                    className="absolute flex align-items-center justify-content-center surface-0 text-primary font-bold border-circle border-1 border-primary"
-                    style={{
-                        width: '1.2rem',
-                        height: '1.2rem',
-                        fontSize: '0.65rem',
-                        top: '-0.4rem',
-                        right: '-0.4rem'
-                    }}
-                >
-                    {step}
-                </span>
-            </div>
-            <div className="min-w-0">
-                <h3 className="text-lg font-semibold m-0 text-900">{title}</h3>
-                <p className="text-sm text-500 m-0 mt-1">{description}</p>
-            </div>
-        </div>
 
-        <div className="p-4">{children}</div>
-    </section>
-);
-
-const LockedField = ({ id, value }: { id: string; value: string }) => (
-    <span className="p-input-icon-right w-full">
-        <i className="pi pi-lock text-500" />
-        <InputText id={id} value={value} disabled />
-    </span>
-);
-
-const FieldLabel = ({
-    htmlFor,
-    required,
-    children
-}: {
-    htmlFor: string;
-    required?: boolean;
-    children: ReactNode;
-}) => (
-    <label htmlFor={htmlFor} className="font-medium text-900 mb-2 block">
-        {children} {required && <span className="text-red-500">*</span>}
-    </label>
-);
-
-const FieldError = ({ show, children }: { show: boolean; children: ReactNode }) =>
-    show ? (
-        <small className="p-error flex align-items-center gap-1 mt-1">
-            <i className="pi pi-exclamation-circle text-xs" />
-            {children}
-        </small>
-    ) : null;
-
-const StatCard = ({
-    icon,
-    label,
-    color,
-    required,
-    children
-}: {
-    icon: string;
-    label: string;
-    color: 'green' | 'blue';
-    required?: boolean;
-    children: ReactNode;
-}) => (
-    <div
-        className={classNames(
-            'p-3 border-round-lg border-1 h-full',
-            color === 'green' ? 'bg-green-50 border-green-200' : 'bg-blue-50 border-blue-200'
-        )}
-    >
-        <div className="flex align-items-center gap-2 mb-3">
-            <i
-                className={classNames(
-                    'pi',
-                    icon,
-                    color === 'green' ? 'text-green-600' : 'text-blue-600'
-                )}
-            />
-            <span
-                className={classNames(
-                    'text-sm font-semibold uppercase',
-                    color === 'green' ? 'text-green-700' : 'text-blue-700'
-                )}
-            >
-                {label} {required && <span className="text-red-500">*</span>}
-            </span>
-        </div>
-        {children}
-    </div>
-);
 
 /* ------------------------------------------------------------------ */
 /* Form                                                                */
 /* ------------------------------------------------------------------ */
 
-const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
+const ProjectForm = ({
+    item,
+    saving,
+    formId,
+    onSubmit,
+    hideSetup = false,
+    lockSetup = false
+}: ProjectFormProps) => {
     const [project, setProject] = useState<Project>(() => createInitialProject(item));
+    const [isCallProject, setIsCallProject] = useState<boolean>(Boolean(item?.call));
 
     const [submitted, setSubmitted] = useState(false);
 
+    const [calls, setCalls] = useState<Call[]>([]);
     const [grants, setGrants] = useState<Grant[]>([]);
     const [calendars, setCalendars] = useState<Calendar[]>([]);
     const [themeNodes, setThemeNodes] = useState<ThemeNode[]>([]);
-    const [users, setUsers] = useState<UserOption[]>([]);
 
+    const [loadingCalls, setLoadingCalls] = useState(false);
     const [loadingGrants, setLoadingGrants] = useState(false);
     const [loadingCalendars, setLoadingCalendars] = useState(false);
-    const [loadingUsers, setLoadingUsers] = useState(false);
     const [loadingThemes, setLoadingThemes] = useState(false);
 
     const [newSpecificObjective, setNewSpecificObjective] = useState('');
@@ -234,17 +110,20 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
 
     useEffect(() => {
         setProject(createInitialProject(item));
+        setIsCallProject(Boolean(item?.call));
         setSubmitted(false);
         setNewSpecificObjective('');
         setNewExpectedOutput('');
     }, [item]);
 
+    const isEdit = Boolean(item?._id);
+
+    // Setup is immutable on edit, when a call is provided from outside, or when forced by the parent.
+    const setupLocked = lockSetup || isEdit || Boolean(item?.call);
+
+    const callId = extractId(project.call);
     const grantId = extractId(project.grant);
     const calendarId = extractId(project.calendar);
-
-    const isGrantLocked = Boolean(project.call);
-    const isCalendarLocked = Boolean(project.call);
-    const isLeadLocked = Boolean(project.call) || project.lockLead === true;
 
     const objectives: IProjectObjectives = project.objectives ?? {
         general: '',
@@ -271,45 +150,45 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
 
     /* ---------------------------- lookups --------------------------- */
     useEffect(() => {
+        // Nothing to pick when the setup is hidden or locked
+        if (hideSetup || setupLocked) return;
+
         let cancelled = false;
 
         const loadLookups = async () => {
-            if (!isGrantLocked) {
-                setLoadingGrants(true);
+            if (isCallProject) {
+                setLoadingCalls(true);
                 try {
-                    const result = GrantApi.lookup
-                        ? await GrantApi.lookup({ status: GrantStatus.active })
-                        : [];
-                    if (!cancelled) setGrants(result || []);
+                    const result = CallApi.lookup ? await CallApi.lookup() : [];
+                    if (!cancelled) setCalls(result || []);
                 } catch (error) {
-                    console.error('Failed to load grants:', error);
+                    console.error('Failed to load calls:', error);
                 } finally {
-                    if (!cancelled) setLoadingGrants(false);
+                    if (!cancelled) setLoadingCalls(false);
                 }
+                return;
             }
 
-            if (!isCalendarLocked) {
-                setLoadingCalendars(true);
-                try {
-                    const result = CalendarApi.lookup ? await CalendarApi.lookup() : [];
-                    if (!cancelled) setCalendars(result || []);
-                } catch (error) {
-                    console.error('Failed to load calendars:', error);
-                } finally {
-                    if (!cancelled) setLoadingCalendars(false);
-                }
+            setLoadingGrants(true);
+            try {
+                const result = GrantApi.lookup
+                    ? await GrantApi.lookup({ status: GrantStatus.active })
+                    : [];
+                if (!cancelled) setGrants(result || []);
+            } catch (error) {
+                console.error('Failed to load grants:', error);
+            } finally {
+                if (!cancelled) setLoadingGrants(false);
             }
 
-            if (!isLeadLocked) {
-                setLoadingUsers(true);
-                try {
-                    const result = UserApi.lookup ? await UserApi.lookup() : [];
-                    if (!cancelled) setUsers((result || []) as UserOption[]);
-                } catch (error) {
-                    console.error('Failed to load applicants:', error);
-                } finally {
-                    if (!cancelled) setLoadingUsers(false);
-                }
+            setLoadingCalendars(true);
+            try {
+                const result = CalendarApi.lookup ? await CalendarApi.lookup() : [];
+                if (!cancelled) setCalendars(result || []);
+            } catch (error) {
+                console.error('Failed to load calendars:', error);
+            } finally {
+                if (!cancelled) setLoadingCalendars(false);
             }
         };
 
@@ -318,9 +197,10 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
         return () => {
             cancelled = true;
         };
-    }, [isGrantLocked, isCalendarLocked, isLeadLocked]);
+    }, [hideSetup, setupLocked, isCallProject]);
 
     /* ----------------------------- themes --------------------------- */
+    // The grant (selected directly, or taken from the selected call) drives the available themes.
     useEffect(() => {
         let cancelled = false;
 
@@ -371,44 +251,32 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
     }, [grantId, project.grant]);
 
     /* ------------------------- derived values ----------------------- */
-    const selectedLeadMember = project.collaborators?.[0]?.member;
-    const selectedLeadId = extractId(selectedLeadMember || project.leadPI);
-
-    const selectedLeadName = useMemo(() => {
-        const lead =
-            project.leadPI && typeof project.leadPI === 'object'
-                ? project.leadPI
-                : selectedLeadMember && typeof selectedLeadMember === 'object'
-                    ? selectedLeadMember
-                    : null;
-
-        return getReferenceName(lead, 'name', 'Lead PI Profile');
-    }, [project.leadPI, selectedLeadMember]);
-
-    const grantLabel = getReferenceName(project.grant, 'title', 'Bound Grant Framework');
-    const calendarLabel = getReferenceName(project.calendar, 'year', 'Bound Calendar Framework');
-
-    // Totals computed from phases (SubmissionStep uses these when phases exist)
-    const phasesBudget = useMemo(
-        () => (project.phases ?? []).reduce((s, p: any) => s + (Number(p?.budget) || 0), 0),
-        [project.phases]
+    const callLabel = getReferenceName(project.call, 'title', 'Bound Call');
+    const grantLabel = getReferenceName(project.grant, 'title',
+        isCallProject ? 'Defined by the selected call' : 'Bound Grant Framework'
     );
-    const phasesDuration = useMemo(
-        () => (project.phases ?? []).reduce((s, p: any) => s + (Number(p?.duration) || 0), 0),
-        [project.phases]
+    const calendarLabel = getReferenceName(
+        project.calendar,
+        'year',
+        isCallProject ? 'Defined by the selected call' : 'Bound Calendar Framework'
     );
-    const hasPhases = (project.phases?.length ?? 0) > 0;
-
-    const hasLead = Boolean(project.collaborators?.[0]?.member || project.leadPI);
 
     // Required by ProjectDto: totalBudget >= 0, totalDuration > 0
     const hasBudget = project.totalBudget != null && project.totalBudget >= 0;
     const hasDuration = project.totalDuration != null && project.totalDuration > 0;
 
+    // Call project  -> call required (grant/calendar come from the call)
+    // Grant project -> grant AND calendar required
+    const setupChecks = isCallProject
+        ? [{ label: 'Call', done: Boolean(callId) }]
+        : [
+            { label: 'Grant', done: Boolean(grantId) },
+            { label: 'Calendar', done: Boolean(calendarId) }
+        ];
+    const setupValid = setupChecks.every((c) => c.done);
+
     const requiredChecks = [
-        { label: 'Grant', done: Boolean(grantId) },
-        { label: 'Lead PI', done: hasLead },
-        { label: 'Calendar', done: Boolean(calendarId) },
+        ...(hideSetup ? [] : setupChecks),
         { label: 'Title', done: Boolean(project.title?.trim()) },
         { label: 'Themes', done: Boolean(project.themes?.length) },
         { label: 'Budget', done: hasBudget },
@@ -417,26 +285,28 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
     const completed = requiredChecks.filter((c) => c.done).length;
     const percent = Math.round((completed / requiredChecks.length) * 100);
 
+    const stepOffset = hideSetup ? 0 : 1;
+
     /* ----------------------------- handlers ------------------------- */
-    const handleLeadChange = (userId: string) => {
-        const selectedUser = users.find((user) => user._id === userId);
-        if (!selectedUser) return;
-
-        const collaborators = project.collaborators ?? [];
-        const currentLead = collaborators[0] ?? {};
-
+    const handleCallModeChange = (checked: boolean) => {
+        setIsCallProject(checked);
         setProject((previous) => ({
             ...previous,
-            leadPI: selectedUser as Project['leadPI'],
-            collaborators: [
-                {
-                    ...currentLead,
-                    member: selectedUser,
-                    role: currentLead.role || 'Lead PI',
-                    isLeadPI: true
-                },
-                ...collaborators.slice(1)
-            ] as Project['collaborators']
+            call: undefined,
+            grant: undefined,
+            calendar: undefined,
+            themes: []
+        }));
+    };
+
+    const handleCallChange = (selected: Call | undefined) => {
+        // grant & calendar are inherited from the call (read-only in the UI)
+        setProject((previous) => ({
+            ...previous,
+            call: selected as Project['call'],
+            grant: (selected as Call | undefined)?.grant as Project['grant'],
+            calendar: (selected as Call | undefined)?.calendar as Project['calendar'],
+            themes: []
         }));
     };
 
@@ -506,10 +376,8 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
 
         const isValid =
             Boolean(project.title?.trim()) &&
-            Boolean(grantId) &&
-            Boolean(calendarId) &&
+            setupValid &&
             Boolean(project.themes?.length) &&
-            hasLead &&
             hasBudget &&
             hasDuration;
 
@@ -518,10 +386,11 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
         await onSubmit({
             ...project,
             title: project.title.trim(),
-            // DTO expects plain string ids, not populated objects
-            grant: grantId as Project['grant'],
-            calendar: calendarId as Project['calendar'],
-            leadPI: selectedLeadId as Project['leadPI'],
+            // DTO expects plain string ids, not populated objects.
+            // Call project  -> only `call` is sent. Grant project -> `grant` + `calendar`.
+            call: (isCallProject ? callId : undefined) as Project['call'],
+            grant: (isCallProject ? undefined : grantId) as Project['grant'],
+            calendar: (isCallProject ? undefined : calendarId) as Project['calendar'],
             themes: (project.themes ?? []).map((t) => extractId(t)) as Project['themes'],
             totalBudget: project.totalBudget as number,
             totalDuration: project.totalDuration as number,
@@ -592,7 +461,7 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
                 <div className="flex align-items-center justify-content-between mb-3">
                     <div>
                         <div className="font-semibold text-900">
-                            {item?._id ? 'Edit project' : 'New project'}
+                            {isEdit ? 'Edit project' : 'New project'}
                         </div>
                         <small className="text-500">
                             {completed === requiredChecks.length
@@ -631,119 +500,154 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
                 </div>
             </div>
 
-            {/* 1. Setup */}
+            {/* 1. Setup (optional) */}
+            {!hideSetup && (
+                <SectionCard
+                    step={1}
+                    icon="pi-id-card"
+                    title="Project Setup"
+                    description={
+                        setupLocked
+                            ? 'The setup is fixed and cannot be changed.'
+                            : 'Link the project to a call, or to a grant and calendar.'
+                    }
+                >
+                    <div className="formgrid grid">
+                        {/* Call-project toggle (only while the setup can still be chosen) */}
+                        {!setupLocked && (
+                            <div className="field col-12">
+                                <div className="flex align-items-center gap-2">
+                                    <Checkbox
+                                        inputId="project-is-call"
+                                        checked={isCallProject}
+                                        disabled={saving}
+                                        onChange={(e) => handleCallModeChange(Boolean(e.checked))}
+                                    />
+                                    <label htmlFor="project-is-call" className="font-medium text-900">
+                                        This project belongs to a call
+                                    </label>
+                                </div>
+                                <small className="text-500 flex align-items-center gap-1 mt-2">
+                                    <i className="pi pi-info-circle text-xs" />
+                                    Grant and calendar are taken from the call. Otherwise choose them
+                                    yourself.
+                                </small>
+                            </div>
+                        )}
+
+                        {/* Call */}
+                        {isCallProject && (
+                            <div className="field col-12">
+                                <FieldLabel htmlFor="project-call" required>
+                                    Call
+                                </FieldLabel>
+
+                                {setupLocked ? (
+                                    <LockedField id="project-call" value={callLabel} />
+                                ) : (
+                                    <Dropdown
+                                        inputId="project-call"
+                                        value={callId || null}
+                                        options={calls}
+                                        optionLabel="title"
+                                        optionValue="_id"
+                                        filter
+                                        showClear
+                                        disabled={saving || loadingCalls}
+                                        placeholder={loadingCalls ? 'Loading calls...' : 'Select a call'}
+                                        emptyMessage="No calls found"
+                                        onChange={(event) =>
+                                            handleCallChange(
+                                                calls.find((c) => c._id === event.value)
+                                            )
+                                        }
+                                        className={classNames({ 'p-invalid': submitted && !callId })}
+                                    />
+                                )}
+
+                                <FieldError show={submitted && !callId}>Select a call.</FieldError>
+                            </div>
+                        )}
+
+                        {/* Grant */}
+                        <div className="field col-12 md:col-6 mb-0">
+                            <FieldLabel htmlFor="project-grant" required={!isCallProject}>
+                                Grant Source
+                            </FieldLabel>
+
+                            {setupLocked || isCallProject ? (
+                                <LockedField id="project-grant" value={grantLabel} />
+                            ) : (
+                                <Dropdown
+                                    inputId="project-grant"
+                                    value={grantId || null}
+                                    options={grants}
+                                    optionLabel="title"
+                                    optionValue="_id"
+                                    filter
+                                    showClear
+                                    disabled={saving || loadingGrants}
+                                    placeholder={
+                                        loadingGrants ? 'Loading grants...' : 'Select an active grant'
+                                    }
+                                    onChange={(event) => {
+                                        const selected = grants.find((g) => g._id === event.value);
+
+                                        setProject((previous) => ({
+                                            ...previous,
+                                            grant: selected as Project['grant'],
+                                            themes: []
+                                        }));
+                                    }}
+                                    className={classNames({ 'p-invalid': submitted && !grantId })}
+                                />
+                            )}
+
+                            <FieldError show={submitted && !isCallProject && !grantId}>
+                                Select a grant source.
+                            </FieldError>
+                        </div>
+
+                        {/* Calendar */}
+                        <div className="field col-12 md:col-6 mb-0">
+                            <FieldLabel htmlFor="project-calendar" required={!isCallProject}>
+                                Project Calendar Framework
+                            </FieldLabel>
+
+                            {setupLocked || isCallProject ? (
+                                <LockedField id="project-calendar" value={calendarLabel} />
+                            ) : (
+                                <Dropdown
+                                    inputId="project-calendar"
+                                    value={calendarId || null}
+                                    options={calendars}
+                                    optionLabel="year"
+                                    optionValue="_id"
+                                    filter
+                                    showClear
+                                    disabled={saving || loadingCalendars}
+                                    placeholder={
+                                        loadingCalendars ? 'Loading calendars...' : 'Select calendar'
+                                    }
+                                    onChange={(event) => {
+                                        const selected = calendars.find((c) => c._id === event.value);
+                                        updateField('calendar', selected as Project['calendar']);
+                                    }}
+                                    className={classNames({ 'p-invalid': submitted && !calendarId })}
+                                />
+                            )}
+
+                            <FieldError show={submitted && !isCallProject && !calendarId}>
+                                Select a calendar framework.
+                            </FieldError>
+                        </div>
+                    </div>
+                </SectionCard>
+            )}
+
+            {/* Core information */}
             <SectionCard
-                step={1}
-                icon="pi-id-card"
-                title="Project Setup & Leadership"
-                description="Funding framework, academic calendar, and principal investigator."
-            >
-                <div className="formgrid grid">
-                    <div className="field col-12 md:col-6">
-                        <FieldLabel htmlFor="project-grant" required>
-                            Grant Source
-                        </FieldLabel>
-
-                        {isGrantLocked ? (
-                            <LockedField id="project-grant" value={grantLabel} />
-                        ) : (
-                            <Dropdown
-                                inputId="project-grant"
-                                value={grantId || null}
-                                options={grants}
-                                optionLabel="title"
-                                optionValue="_id"
-                                filter
-                                showClear
-                                disabled={saving || loadingGrants}
-                                placeholder={
-                                    loadingGrants ? 'Loading grants...' : 'Select an active grant'
-                                }
-                                onChange={(event) => {
-                                    const selected = grants.find((g) => g._id === event.value);
-
-                                    setProject((previous) => ({
-                                        ...previous,
-                                        grant: selected as Project['grant'],
-                                        themes: [],
-                                        phases: [],
-                                        collaborators: previous.collaborators?.slice(0, 1) ?? []
-                                    }));
-                                }}
-                                className={classNames({ 'p-invalid': submitted && !grantId })}
-                            />
-                        )}
-
-                        <FieldError show={submitted && !grantId}>Select a grant source.</FieldError>
-                    </div>
-
-                    <div className="field col-12 md:col-6">
-                        <FieldLabel htmlFor="project-lead" required>
-                            Lead Principal Investigator
-                        </FieldLabel>
-
-                        {isLeadLocked ? (
-                            <LockedField id="project-lead" value={selectedLeadName} />
-                        ) : (
-                            <Dropdown
-                                inputId="project-lead"
-                                value={selectedLeadId || null}
-                                options={users}
-                                optionLabel="name"
-                                optionValue="_id"
-                                filter
-                                showClear
-                                disabled={saving || loadingUsers}
-                                placeholder={loadingUsers ? 'Loading applicants...' : 'Select lead PI'}
-                                emptyMessage="No applicants found"
-                                onChange={(event) => {
-                                    if (event.value) handleLeadChange(event.value);
-                                }}
-                                className={classNames({ 'p-invalid': submitted && !selectedLeadId })}
-                            />
-                        )}
-
-                        <FieldError show={submitted && !selectedLeadId}>
-                            Select a lead principal investigator.
-                        </FieldError>
-                    </div>
-
-                    <div className="field col-12 mb-0">
-                        <FieldLabel htmlFor="project-calendar" required>
-                            Project Calendar Framework
-                        </FieldLabel>
-
-                        {isCalendarLocked ? (
-                            <LockedField id="project-calendar" value={calendarLabel} />
-                        ) : (
-                            <Dropdown
-                                inputId="project-calendar"
-                                value={calendarId || null}
-                                options={calendars}
-                                optionLabel="year"
-                                optionValue="_id"
-                                filter
-                                showClear
-                                disabled={saving || loadingCalendars}
-                                placeholder="Select calendar"
-                                onChange={(event) => {
-                                    const selected = calendars.find((c) => c._id === event.value);
-                                    updateField('calendar', (selected ?? null) as Project['calendar']);
-                                }}
-                                className={classNames({ 'p-invalid': submitted && !calendarId })}
-                            />
-                        )}
-
-                        <FieldError show={submitted && !calendarId}>
-                            Select a calendar framework.
-                        </FieldError>
-                    </div>
-                </div>
-            </SectionCard>
-
-            {/* 2. Core information */}
-            <SectionCard
-                step={2}
+                step={1 + stepOffset}
                 icon="pi-file-edit"
                 title="Core Information"
                 description="Project title, thematic focus, and searchable keywords."
@@ -789,7 +693,9 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
                         disabled={saving || !grantId || loadingThemes}
                         placeholder={
                             !grantId
-                                ? 'Select a grant first'
+                                ? isCallProject
+                                    ? 'Select a call first'
+                                    : 'Select a grant first'
                                 : loadingThemes
                                     ? 'Loading thematic areas...'
                                     : 'Select thematic areas'
@@ -806,7 +712,7 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
 
                     <small className="text-500 flex align-items-center gap-1 mt-2">
                         <i className="pi pi-info-circle text-xs" />
-                        Available thematic areas depend on the selected grant.
+                        Available thematic areas depend on the grant (or the grant of the selected call).
                     </small>
                 </div>
 
@@ -831,9 +737,9 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
                 </div>
             </SectionCard>
 
-            {/* 3. Budget & timeline */}
+            {/* Budget & timeline */}
             <SectionCard
-                step={3}
+                step={2 + stepOffset}
                 icon="pi-wallet"
                 title="Budget & Timeline"
                 description="Estimated total funding and duration of the project."
@@ -864,11 +770,11 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
                             <FieldError show={submitted && !hasBudget}>
                                 Enter the total budget.
                             </FieldError>
-                            <small className="text-green-700 block mt-2">
+                            <FieldHint>
                                 {project.totalBudget
-                                    ? `≈ ${formatCurrency(project.totalBudget)}`
+                                    ? `≈ ${etbCurrencyFormatter.format(project.totalBudget)}`
                                     : 'Total estimated cost of the project.'}
-                            </small>
+                            </FieldHint>
                         </StatCard>
                     </div>
 
@@ -900,48 +806,19 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
                             <FieldError show={submitted && !hasDuration}>
                                 Duration must be greater than 0 days.
                             </FieldError>
-                            <small className="text-blue-700 block mt-2">
+                            <FieldHint>
                                 {project.totalDuration
-                                    ? `≈ ${(project.totalDuration / 30).toFixed(1)} months`
+                                    ? `≈ ${formatDuration(project.totalDuration)}`
                                     : 'Total length of the project in days.'}
-                            </small>
+                            </FieldHint>
                         </StatCard>
                     </div>
-
-                    {hasPhases && (
-                        <div className="col-12">
-                            <div className="flex flex-column md:flex-row md:align-items-center justify-content-between gap-2 p-3 border-round-lg surface-50 border-1 surface-border">
-                                <small className="text-600">
-                                    <i className="pi pi-sitemap mr-2 text-primary" />
-                                    Your phases add up to <strong>{formatCurrency(phasesBudget)}</strong> and{' '}
-                                    <strong>{phasesDuration} days</strong>. When phases exist, these totals are
-                                    used on submission.
-                                </small>
-                                <Button
-                                    type="button"
-                                    label="Use phase totals"
-                                    icon="pi pi-refresh"
-                                    size="small"
-                                    outlined
-                                    disabled={saving}
-                                    className="w-auto flex-shrink-0"
-                                    onClick={() =>
-                                        setProject((prev) => ({
-                                            ...prev,
-                                            totalBudget: phasesBudget,
-                                            totalDuration: phasesDuration
-                                        }))
-                                    }
-                                />
-                            </div>
-                        </div>
-                    )}
                 </div>
             </SectionCard>
 
-            {/* 4. Summary & objectives */}
+            {/* Summary & objectives */}
             <SectionCard
-                step={4}
+                step={3 + stepOffset}
                 icon="pi-compass"
                 title="Summary & Objectives"
                 description="Describe the purpose, specific objectives, and expected outputs."
@@ -1023,7 +900,11 @@ const ProjectForm = ({ item, saving, formId, onSubmit }: ProjectFormProps) => {
                         <label htmlFor="new-expected-output" className="font-medium text-900">
                             Expected Outputs
                         </label>
-                        <Tag value={objectives.expectedOutputs?.length ?? 0} rounded severity="success" />
+                        <Tag
+                            value={objectives.expectedOutputs?.length ?? 0}
+                            rounded
+                            severity="success"
+                        />
                     </div>
 
                     <div className="flex flex-column sm:flex-row gap-2 mb-3">

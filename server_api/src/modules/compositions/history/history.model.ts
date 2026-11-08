@@ -31,9 +31,6 @@ export interface IHistoryRule extends Document {
     updatedAt?: Date;
 }
 
-
-
-
 const HistoryRuleSchema = new Schema<IHistoryRule>(
     {
         name: {

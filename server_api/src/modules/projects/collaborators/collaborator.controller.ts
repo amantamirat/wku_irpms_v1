@@ -72,6 +72,7 @@ export class CollaboratorController {
         }
     };
 
+
     getMyCollaborations = async (
         req: AuthenticatedRequest,
         res: Response
@@ -109,14 +110,11 @@ export class CollaboratorController {
             const { member, role } = req.body;
 
             const dto: UpdateCollaboratorDto = {
-                id,
-                data: {
-                    member,
-                    role
-                }
+                member,
+                role
             };
 
-            const updated = await this.service.update(dto,  req.auth.userId);
+            const updated = await this.service.update(id, dto, req.auth.userId);
             successResponse(res, 200, 'Collaborator updated successfully', updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);
@@ -128,14 +126,14 @@ export class CollaboratorController {
         try {
             if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
             const { id } = req.params;
-            const { current, next,reason } = req.body;
+            const { current, next, reason } = req.body;
             const dto: TransitionRequestDto = {
                 id: String(id),
                 current: current,
                 next: next,
-                reason:reason
+                reason: reason
             };
-            const updated = await this.service.transitionState(dto, req.auth.userId);
+            const updated = await this.service.transitionState(dto, req.auth.userId, req.auth.userName);
             successResponse(res, 200, "Collaborator status updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

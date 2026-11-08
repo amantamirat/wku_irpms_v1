@@ -8,6 +8,7 @@ export interface JwtPayload {
     accountId: string;
     userId: string;
     email: string;
+    userName: string;
     status: AccountStatus;
     scope: AuthScope;
     iat?: number;

@@ -4,17 +4,14 @@ import { FundingSource } from "../../grants/grant.model";
 import { ValidationResult } from "../../constraints/services/constraint-validator.service";
 import { HistoryContext, HistoryParticipation, IHistoryRule } from "./history.model";
 import { sameId } from "../../../common/utils/mongoose.utils";
-import { checkRange2 } from "../../../common/types/range";
-import { IUser } from "../../users/user.model";
-
-
+import { checkRange } from "../../../common/types/range";
 
 export type collaborationRole = Exclude<HistoryParticipation, HistoryParticipation.ANY>;
 
 type GrantInput = {
     source: FundingSource;
     organization: string | mongoose.Types.ObjectId;
-}
+};
 
 export type ProjectInput = {
     _id?: string | mongoose.Types.ObjectId;
@@ -26,77 +23,52 @@ export type ProjectInput = {
 };
 
 export interface HistoryValidationInput {
-    user: string|IUser;
+    userId: string;
+    userName?: string;
     projects: ProjectInput[];
 }
 
-
 export interface HistoryContextInput {
     organization: string;
+    organizationName?: string;
     source: FundingSource;
     call?: string;
+    callName?: string;
     calendar?: string;
+    calendarName?: string;
 }
-
 
 export class HistoryValidationService {
 
-    constructor(
-    ) { }
-
     async validate(
-        historyRule: IHistoryRule,
-        historyContext: HistoryContextInput,
+        rule: IHistoryRule,
+        context: HistoryContextInput,
         history: HistoryValidationInput
     ): Promise<ValidationResult> {
-        const errors: string[] = [];
-
-        // 1. Filter by context
-        const contextResult = this.filterByContext(
-            history.projects,
-            historyRule.context,
-            historyContext
-        );
-
+        // 1. Filter by context (CALL, CALENDAR, ORGANIZATION, SOURCE)
+        const contextResult = this.filterByContext(history.projects, rule.context, context);
         if (contextResult.error) {
             return { valid: false, errors: [contextResult.error] };
         }
 
-        // 2. Filter by participation (skipped for ANY / null)
-        const participating = this.filterByParticipation(
-            contextResult.projects,
-            historyRule.participation ?? HistoryParticipation.ANY
-        );
+        // 2. Filter by participation (no-op for ANY)
+        const participation = rule.participation ?? HistoryParticipation.ANY;
+        const participating = this.filterByParticipation(contextResult.projects, participation);
 
-        // 3. Count projects whose status is one of the rule's metrics
-        const metrics = historyRule.metrics ?? [];
-        const count = metrics.length
-            ? participating.filter(p => metrics.includes(p.status)).length
-            : participating.length;
+        // 3. Count projects matching the rule's statuses
+        const count = this.countByStatus(participating, rule.metrics ?? []);
 
+        // 4. Validate against the range
+        const error = this.buildRangeError(rule, count, history, context);
 
-        // 4. Validate against sumRange
-
-        const range = historyRule.sumRange;
-        if (range) {
-            const result = checkRange2(range, count);
-
-            if (result === 'below') {
-                errors.push(
-                    `${historyRule.name}: user ${history.user} has ${count} project(s) with status [${historyRule.metrics?.join(", ") ?? "any"}] as ${historyRule.participation ?? HistoryParticipation.ANY} in this ${historyRule.context}, minimum required is ${range.min}.`
-                );
-            } else if (result === 'above') {
-                errors.push(
-                    `${historyRule.name}: user ${history.user} has ${count} project(s) with status [${historyRule.metrics?.join(", ") ?? "any"}] as ${historyRule.participation ?? HistoryParticipation.ANY} in this ${historyRule.context}, maximum allowed is ${range.max}.`
-                );
-            }
-        }
-
-        return {
-            valid: errors.length === 0,
-            errors
-        };
+        return error
+            ? { valid: false, errors: [error] }
+            : { valid: true, errors: [] };
     }
+
+    // ---------------------------------------------------------------
+    // Filtering & counting
+    // ---------------------------------------------------------------
 
     private filterByContext(
         projects: ProjectInput[],
@@ -122,9 +94,7 @@ export class HistoryValidationService {
 
             case HistoryContext.ORGANIZATION:
                 return {
-                    projects: projects.filter(p =>
-                        sameId(p.grant.organization, input.organization)
-                    )
+                    projects: projects.filter(p => sameId(p.grant.organization, input.organization))
                 };
 
             case HistoryContext.SOURCE:
@@ -146,5 +116,53 @@ export class HistoryValidationService {
             return projects;
         }
         return projects.filter(p => p.role === participation);
+    }
+
+    private countByStatus(projects: ProjectInput[], statuses: ProjectStatus[]): number {
+        return statuses.length
+            ? projects.filter(p => statuses.includes(p.status)).length
+            : projects.length;
+    }
+
+    // ---------------------------------------------------------------
+    // Messages
+    // ---------------------------------------------------------------
+
+    private buildRangeError(
+        rule: IHistoryRule,
+        count: number,
+        history: HistoryValidationInput,
+        context: HistoryContextInput
+    ): string | undefined {
+        const range = rule.sumRange;
+        if (!range) return undefined;
+
+        const result = checkRange(range, count);
+        if (result !== "below" && result !== "above") return undefined;
+
+        const user = history.userName ?? history.userId;
+        const statuses = rule.metrics?.length ? rule.metrics.join(", ") : "any";
+        const participation = rule.participation ?? HistoryParticipation.ANY;
+        const scope = this.describeContext(rule.context, context);
+        const limit = result === "below"
+            ? `minimum required is ${range.min}`
+            : `maximum allowed is ${range.max}`;
+
+        return `${rule.name}: user ${user} has ${count} project(s) with status [${statuses}] as ${participation} in ${scope}, ${limit}.`;
+    }
+
+    private describeContext(context: HistoryContext, input: HistoryContextInput): string {
+        switch (context) {
+            case HistoryContext.CALL:
+                return `call ${input.callName ?? ''}`;
+            case HistoryContext.CALENDAR:
+                return `calendar ${input.calendarName ?? ''}`;
+            case HistoryContext.ORGANIZATION:
+                return `organization ${input.organizationName ?? ''}`;
+            case HistoryContext.SOURCE:
+                return `source ${input.source}`;
+            default:
+                return String(context).toLowerCase();
+        }
     }
 }

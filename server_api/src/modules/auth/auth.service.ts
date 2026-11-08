@@ -1,7 +1,6 @@
 import bcrypt from "bcryptjs";
 import crypto from "crypto";
 import jwt, { JwtPayload } from "jsonwebtoken";
-import { Unit } from "../../common/constants/enums";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { CacheService } from "../../common/services/cache.service";
@@ -159,6 +158,7 @@ export class AuthService {
             accountId,
             userId,
             email,
+            userName: userDoc.name,
             status: accountDoc.status,
             scope
         };

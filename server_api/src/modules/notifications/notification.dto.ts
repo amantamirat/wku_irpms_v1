@@ -1,16 +1,17 @@
-import { NotificationType } from "./notification.model";
+import { MessageType, NotificationType } from "./notification.model";
 
 export interface CreateNotificationDTO {
     recipient: string;
     sender?: string;
     title: string;
     message: string;
+    messageType?: MessageType;
     type?: NotificationType;
     link?: string;
     expiresAt?: Date;
 }
 
-export interface GetNotificationsDTO {
+export interface FilterNotificationsDTO {
     recipient?: string;
     isRead?: boolean;
     type?: NotificationType;
@@ -18,9 +19,7 @@ export interface GetNotificationsDTO {
 }
 
 export interface UpdateNotificationDTO {
-    data: {
-        isRead?: boolean;
-    };
+    isRead?: boolean;
 }
 
 export interface MarkAllAsReadDTO {

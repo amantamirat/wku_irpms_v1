@@ -98,7 +98,7 @@ export default function StageSubmitPage() {
     const [success, setSuccess] = useState(false);
     const [loadError, setLoadError] = useState<string | null>(null);
 
-    const { error, templateValidation, constraintValidation, handleError, clearErrors } =
+    const { error, templateValidation, validationResult, handleError, clearErrors } =
         useValidationErrors();
 
     /* -------------------------------------------------------------- */
@@ -132,7 +132,7 @@ export default function StageSubmitPage() {
 
                 // Resolve current applications (only fetch the ones that are ids)
                 const evaluated = await Promise.all(
-                    callProjects.map(async (project): Promise<ProjectEligibility> => {
+                    callProjects.map(async (project:any): Promise<ProjectEligibility> => {
                         let app: Application | null = null;
                         const current = project.currentApplication as any;
 
@@ -337,7 +337,7 @@ export default function StageSubmitPage() {
             <ValidationReport
                 error={error}
                 templateValidation={templateValidation}
-                constraintValidation={constraintValidation}
+                validationResult={validationResult}
             />
 
             {/* PROJECT */}

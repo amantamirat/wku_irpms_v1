@@ -34,7 +34,7 @@ export class ProfileValidatorService {
             if (user.birthDate) {
                 const age = this.calculateAge(user.birthDate);
 
-                if (!checkRange(profile.age, age)) {
+                if (checkRange(profile.age, age) !== "ok") {
                     return false;
                 }
             }
@@ -48,7 +48,7 @@ export class ProfileValidatorService {
 
             const experienceYears = this.calculateTotalExperienceYears(experiences);
 
-            if (!checkRange(profile.experienceYears, experienceYears)
+            if (checkRange(profile.experienceYears, experienceYears) !== "ok"
             ) {
                 return false;
             }

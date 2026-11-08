@@ -38,8 +38,8 @@ router.post(
     '/',
     verifyAuthToken,
     checkPermission([
-        PERMISSIONS.PROJECT.CREATE,
-        PERMISSIONS.PROJECT.CREATE_OWN,
+        PERMISSIONS.PROJECT.CREATE
+        //PERMISSIONS.PROJECT.CREATE_OWN,
     ]),
     controller.create
 );
@@ -64,11 +64,13 @@ router.get(
 );
 
 // Put /me before /:id
+/*
 router.get(
     '/me',
     verifyAuthToken,
     controller.getMyProjects
 );
+*/
 
 // Lookup projects
 router.get(

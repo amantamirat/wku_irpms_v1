@@ -1,3 +1,5 @@
+import { format, intervalToDuration, isValid, formatDuration as dateFnsFormatDuration, differenceInCalendarDays } from "date-fns";
+
 export type Unpopulate<T> =
     T extends { _id: infer ID }
     ? ID
@@ -65,21 +67,80 @@ export const etbCurrencyFormatter = new Intl.NumberFormat(
     'en-US',
     {
         style: 'currency',
-        currency: 'ETB'
+        currency: 'ETB',
+        maximumFractionDigits: 0
     }
 );
+
+export const formatDate = (date?: Date | string | null): string => {
+    if (!date) return 'N/A';
+
+    const parsedDate = new Date(date);
+
+    return isValid(parsedDate)
+        ? format(parsedDate, 'MMM d, yyyy')
+        : 'N/A';
+};
+
+export const formatDateTime = (date?: Date | string | null): string => {
+    if (!date) return 'N/A';
+
+    const parsedDate = new Date(date);
+
+    return isValid(parsedDate)
+        ? format(parsedDate, 'MMM d, yyyy hh:mm a')
+        : 'N/A';
+};
+
+
+export const formatDuration = (duration?: number): string => {
+    if (!duration) return 'N/A';
+
+    const result = intervalToDuration({
+        start: 0,
+        end: duration * 24 * 60 * 60 * 1000,
+    });
+
+    return dateFnsFormatDuration(result, {
+        format: ['years', 'months', 'days'],
+        delimiter: ' ',
+    });
+};
 
 
 export const capitalize = (value: string) =>
     value.charAt(0).toUpperCase() + value.slice(1);
 
 
-// Helper exported for reuse in SaveDialog and Manager
-export const computeDurationFromDates = (startDate?: Date | string, endDate?: Date | string): number => {
+
+export const computeDurationFromDates = (
+    startDate?: Date | string,
+    endDate?: Date | string
+): number => {
     if (!startDate || !endDate) return 0;
+
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const diffTime = end.getTime() - start.getTime();
-    if (diffTime < 0) return 0;
-    return Math.ceil(diffTime / (1000 * 60 * 60 * 24)) + 1;
+
+    const diff = differenceInCalendarDays(end, start);
+
+    return diff < 0 ? 0 : diff + 1;
 };
+
+
+
+export const getReferenceName = <K extends PropertyKey>(
+    value: unknown,
+    property: K,
+    fallback: string = "N/A"
+): string => {
+    if (!value || typeof value !== 'object') return fallback;
+
+    const record = value as Record<PropertyKey, unknown>;
+    const result = record[property];
+
+    return result != null ? String(result) : fallback;
+};
+
+
+export const countWords = (text?: string) => (text?.trim() ? text.trim().split(/\s+/).length : 0);

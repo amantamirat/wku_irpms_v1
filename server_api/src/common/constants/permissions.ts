@@ -205,7 +205,7 @@ export const PERMISSIONS = {
 
   PROJECT: {
     CREATE: "project:create",
-    CREATE_OWN: "project:create:own",
+    //CREATE_OWN: "project:create:own",
     READ: "project:read",
     UPDATE: "project:update",
     UPDATE_OWN: "project:update:own",

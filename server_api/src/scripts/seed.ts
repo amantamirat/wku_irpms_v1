@@ -1,11 +1,9 @@
 import dotenv from "dotenv";
 import mongoose from "mongoose";
 import { createDemoSeeder } from "../util/seeder/demo.seed";
-import { createLegacySeeder } from "../util/seeder/legacy/legacy.seed";
-import { createSystemSeeder } from "../util/seeder/system.seed";
-import { createNewLegacySeeder } from "../util/seeder/new-legacy/new-legacy.seed";
-import { createUserSeeder } from "../util/seeder/user.seeder";
 import { createOrganizationSeeder } from "../util/seeder/organization.seeder";
+import { createSystemSeeder } from "../util/seeder/system.seed";
+import { createUserSeeder } from "../util/seeder/user.seeder";
 
 dotenv.config();
 
@@ -45,13 +43,14 @@ async function main() {
             break;*/
 
         case "legacy":
-            await createNewLegacySeeder().run();
+            //await createNewLegacySeeder().run();
+            console.log("Currently Legacy Seeder is Not Functional");
             break;
 
         case "all":
             await createSystemSeeder().run();
             await createDemoSeeder().run();
-            await createLegacySeeder().run();
+            //await createLegacySeeder().run();
             break;
 
         default:

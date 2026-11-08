@@ -19,17 +19,28 @@ import { EligibilityProfile } from '../models/profile.model';
 import { IHistoryRule } from '../models/history.model';
 import { ProfileApi } from '../api/profile.api';
 import { HistoryApi } from '../api/history.api';
+import { extractId } from '@/utils/utils';
 
 type Draft = Partial<IMemberRequirement>;
+
+type Option = { label: string; value: string };
+
+// Unique, truthy ids only
+const toIdList = (list?: any[] | null): string[] =>
+    Array.from(
+        new Set(
+            (list ?? [])
+                .map((v) => extractId(v))
+                .filter((id): id is string => Boolean(id))
+        )
+    );
 
 const toDraft = (item?: IMemberRequirement | null): Draft => ({
     _id: item?._id,
     name: item?.name ?? '',
     description: item?.description ?? '',
-    profile: (typeof item?.profile === 'object'
-        ? (item.profile as any)?._id
-        : item?.profile) as any,
-    historyRules: item?.historyRules ? [...(item.historyRules as any[])] : []
+    profile: extractId(item?.profile) as any,
+    historyRules: toIdList(item?.historyRules as any[]) as any
 });
 
 const RequirementForm = ({
@@ -45,8 +56,8 @@ const RequirementForm = ({
     const [formError, setFormError] = useState<string | null>(null);
 
     const [loadingOptions, setLoadingOptions] = useState(true);
-    const [profileOptions, setProfileOptions] = useState<{ label: string; value: string }[]>([]);
-    const [historyOptions, setHistoryOptions] = useState<{ label: string; value: string }[]>([]);
+    const [profileOptions, setProfileOptions] = useState<Option[]>([]);
+    const [historyOptions, setHistoryOptions] = useState<Option[]>([]);
 
     useEffect(() => {
         let cancelled = false;
@@ -66,11 +77,15 @@ const RequirementForm = ({
                     }))
                 );
 
+                // Dedupe by _id so option keys are always unique
+                const seen = new Set<string>();
                 setHistoryOptions(
-                    ((histories || []) as IHistoryRule[]).map((h) => ({
-                        label: h.name,
-                        value: h._id!
-                    }))
+                    ((histories || []) as IHistoryRule[])
+                        .filter((h) => h._id && !seen.has(h._id) && seen.add(h._id))
+                        .map((h) => ({
+                            label: h.name,
+                            value: h._id!
+                        }))
                 );
             } catch (err: any) {
                 if (!cancelled) toast.error(err?.message || 'Failed to load reference options.');
@@ -103,7 +118,9 @@ const RequirementForm = ({
         const payload = {
             ...localItem,
             name: localItem.name!.trim(),
-            description: localItem.description?.trim() || undefined
+            description: localItem.description?.trim() || undefined,
+            profile: extractId(localItem.profile) || undefined,
+            historyRules: toIdList(localItem.historyRules as any[])
         } as IMemberRequirement;
 
         const base = validateMemberRequirement(payload);
@@ -177,7 +194,7 @@ const RequirementForm = ({
                 </label>
                 <MultiSelect
                     inputId="historyRules"
-                    value={localItem.historyRules ?? []}
+                    value={(localItem.historyRules as unknown as string[]) ?? []}
                     options={historyOptions}
                     disabled={saving || loadingOptions}
                     onChange={(e) => update('historyRules', e.value)}

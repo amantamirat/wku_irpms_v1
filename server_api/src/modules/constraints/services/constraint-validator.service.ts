@@ -1,10 +1,10 @@
-
 import mongoose from "mongoose";
 
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import {
     IRange,
+    RangeCheck,
     checkRange,
 } from "../../../common/types/range";
 import { calculateDurationDays } from "../../../common/utils/date.utils";
@@ -43,6 +43,18 @@ export interface ValidationResult {
     errors: string[];
 }
 
+/**
+ * Controls which side of a range is enforced.
+ * By default (both false/undefined) the min AND the max are checked.
+ *
+ *  - skipMin: ignore "below" violations (only enforce the max)
+ *  - skipMax: ignore "above" violations (only enforce the min)
+ */
+export interface ValidationOptions {
+    skipMin?: boolean;
+    skipMax?: boolean;
+}
+
 export type CollaboratorValidationInput = Pick<
     CollaboratorDto,
     "member"
@@ -71,13 +83,24 @@ export type EquipmentValidationInput = Pick<
     _id?: string | mongoose.Types.ObjectId;
 };
 
-
 export type ComponentValidationInput = Pick<
     ProjectComponentDto,
     "title" | "contributors"
 > & {
     _id?: string | mongoose.Types.ObjectId;
 };
+
+
+export function toCollaboratorValidationInput<
+    T extends { _id?: string | mongoose.Types.ObjectId; member: any }
+>(
+    items: T[],
+) {
+    return items.map(item => ({
+        ...(item._id && { _id: item._id }),
+        member: item.member.toString(),
+    }));
+}
 
 export interface ConstraintValidationInput {
     title: string;
@@ -132,6 +155,72 @@ export class ConstraintValidationService {
         };
     }
 
+    /**
+     * Runs checkRange and then discards the side(s) the caller asked to skip.
+     */
+    private evaluateRange(
+        range: IRange,
+        value: number,
+        options: ValidationOptions = {},
+    ): RangeCheck {
+
+        const result = checkRange(range, value);
+
+        if (result === "below" && options.skipMin) {
+            return "ok";
+        }
+
+        if (result === "above" && options.skipMax) {
+            return "ok";
+        }
+
+        return result;
+    }
+
+    /**
+     * Validates a value against an optional range and pushes a
+     * direction-specific error message ("at least" / "must not exceed").
+     *
+     * @param subject Text that starts the message, e.g. `Number of phases`
+     * @param unit    Optional unit appended to the numbers, e.g. `days`
+     */
+    private validateRange(
+        errors: string[],
+        range: IRange | undefined,
+        value: number,
+        subject: string,
+        options: ValidationOptions = {},
+        unit: string = "",
+    ): void {
+
+        if (!range) {
+            return;
+        }
+
+        const result = this.evaluateRange(
+            range,
+            value,
+            options,
+        );
+
+        if (result === "ok") {
+            return;
+        }
+
+        const suffix = unit ? ` ${unit}` : "";
+
+        if (result === "below") {
+            errors.push(
+                `${subject} must be at least ${range.min}${suffix}. Current: ${value}${suffix}.`,
+            );
+            return;
+        }
+
+        errors.push(
+            `${subject} must not exceed ${range.max}${suffix}. Current: ${value}${suffix}.`,
+        );
+    }
+
     // =====================================================
     // CONSTRAINT
     // =====================================================
@@ -159,6 +248,7 @@ export class ConstraintValidationService {
     public async validateProjectById(
         constraint: IConstraint,
         projectId: string,
+        options: ValidationOptions = {},
     ): Promise<ValidationResult> {
 
         const projectDoc =
@@ -198,11 +288,6 @@ export class ConstraintValidationService {
             }),
         ]);
 
-        const collaboratorsInput: CollaboratorValidationInput[] =
-            collaborators.map(collab => ({
-                _id: collab._id,
-                member: collab.member.toString(),
-            }));
 
         const componentsInput: ComponentValidationInput[] = components.map(
             comp => ({
@@ -212,32 +297,36 @@ export class ConstraintValidationService {
             }),
         );
 
-        return this.validateProject(constraint, {
-            title: projectDoc.title,
-            summary: projectDoc.summary,
+        return this.validateProject(
+            constraint,
+            {
+                title: projectDoc.title,
+                summary: projectDoc.summary,
 
-            totalBudget: projectDoc.totalBudget ?? 0,
-            totalDuration: projectDoc.totalDuration ?? 0,
+                totalBudget: projectDoc.totalBudget ?? 0,
+                totalDuration: projectDoc.totalDuration ?? 0,
 
-            objectives: {
-                general: projectDoc.objectives?.general,
-                specific:
-                    projectDoc.objectives?.specific ?? [],
-                expectedOutputs:
-                    projectDoc.objectives?.expectedOutputs ?? [],
+                objectives: {
+                    general: projectDoc.objectives?.general,
+                    specific:
+                        projectDoc.objectives?.specific ?? [],
+                    expectedOutputs:
+                        projectDoc.objectives?.expectedOutputs ?? [],
+                },
+
+                collaborators: toCollaboratorValidationInput(collaborators),
+
+                themes: projectDoc.themes.map(
+                    theme => theme.toString(),
+                ),
+
+                phases,
+                activities,
+                equipments,
+                components: componentsInput,
             },
-
-            collaborators: collaboratorsInput,
-
-            themes: projectDoc.themes.map(
-                theme => theme.toString(),
-            ),
-
-            phases,
-            activities,
-            equipments,
-            components: componentsInput,
-        });
+            options,
+        );
     }
 
     // =====================================================
@@ -247,6 +336,7 @@ export class ConstraintValidationService {
     public async validateProject(
         constraint: IConstraint,
         dto: ConstraintValidationInput,
+        options: ValidationOptions = {},
     ): Promise<ValidationResult> {
 
         const results = await Promise.all([
@@ -260,6 +350,7 @@ export class ConstraintValidationService {
                 dto.totalDuration ?? 0,
                 dto.objectives,
                 dto.keywords ?? [],
+                options,
             ),
 
             // Collaborators
@@ -267,6 +358,7 @@ export class ConstraintValidationService {
                 this.validateCollaborators(
                     constraint,
                     dto.collaborators ?? [],
+                    options,
                 ),
             ),
 
@@ -275,6 +367,7 @@ export class ConstraintValidationService {
                 this.validatePhases(
                     constraint,
                     dto.phases ?? [],
+                    options,
                 ),
             ),
 
@@ -283,6 +376,7 @@ export class ConstraintValidationService {
                 this.validateActivities(
                     constraint,
                     dto.activities ?? [],
+                    options,
                 ),
             ),
 
@@ -291,6 +385,7 @@ export class ConstraintValidationService {
                 this.validateEquipments(
                     constraint,
                     dto.equipments ?? [],
+                    options,
                 ),
             ),
 
@@ -299,6 +394,7 @@ export class ConstraintValidationService {
                 this.validateComponents(
                     constraint,
                     dto.components ?? [],
+                    options,
                 ),
             ),
 
@@ -306,6 +402,7 @@ export class ConstraintValidationService {
             this.validateThemes(
                 constraint,
                 dto.themes,
+                options,
             ),
         ]);
 
@@ -332,6 +429,7 @@ export class ConstraintValidationService {
             expectedOutputs?: string[];
         },
         keywords: string[] = [],
+        options: ValidationOptions = {},
     ): Promise<ValidationResult> {
 
         const errors: string[] = [];
@@ -340,36 +438,42 @@ export class ConstraintValidationService {
             constraint,
             title,
             errors,
+            options,
         );
 
         this.validateProjectSummary(
             constraint,
             summary,
             errors,
+            options,
         );
 
         this.validateKeywordCount(
             constraint,
             keywords.length,
             errors,
+            options,
         );
 
         this.validateProjectObjectivesAndOutput(
             constraint,
             objectives,
             errors,
+            options,
         );
 
         this.validateProjectBudget(
             constraint,
             totalBudget,
             errors,
+            options,
         );
 
         this.validateProjectDuration(
             constraint,
             totalDuration,
             errors,
+            options,
         );
 
         return this.createValidationResult(errors);
@@ -382,21 +486,18 @@ export class ConstraintValidationService {
     public validateCollaborators(
         constraint: IConstraint,
         collaborators: CollaboratorValidationInput[],
+        options: ValidationOptions = {},
     ): ValidationResult {
 
         const errors: string[] = [];
 
-        if (
-            constraint.participants &&
-            !checkRange(
-                constraint.participants,
-                collaborators.length,
-            )
-        ) {
-            errors.push(
-                `Collaborators must be between ${constraint.participants.min} and ${constraint.participants.max}. Current count: ${collaborators.length}.`,
-            );
-        }
+        this.validateRange(
+            errors,
+            constraint.participants,
+            collaborators.length,
+            "Number of collaborators",
+            options,
+        );
 
         return this.createValidationResult(errors);
     }
@@ -408,50 +509,39 @@ export class ConstraintValidationService {
     public validatePhases(
         constraint: IConstraint,
         phases: PhaseValidationInput[],
+        options: ValidationOptions = {},
     ): ValidationResult {
 
         const errors: string[] = [];
 
         // Total number of phases
-        if (
-            constraint.phases &&
-            !checkRange(
-                constraint.phases,
-                phases.length,
-            )
-        ) {
-            errors.push(
-                `Number of phases must be between ${constraint.phases.min} and ${constraint.phases.max}. Current count: ${phases.length}.`,
-            );
-        }
+        this.validateRange(
+            errors,
+            constraint.phases,
+            phases.length,
+            "Number of phases",
+            options,
+        );
 
         phases.forEach(phase => {
 
             // Phase budget
-            if (
-                constraint.phaseBudget &&
-                !checkRange(
-                    constraint.phaseBudget,
-                    phase.budget,
-                )
-            ) {
-                errors.push(
-                    `Phase "${phase.title}" budget must be between ${constraint.phaseBudget.min} and ${constraint.phaseBudget.max}. Current budget: ${phase.budget}.`,
-                );
-            }
+            this.validateRange(
+                errors,
+                constraint.phaseBudget,
+                phase.budget,
+                `Phase "${phase.title}" budget`,
+                options,
+            );
 
             // Phase duration
-            if (
-                constraint.phaseDuration &&
-                !checkRange(
-                    constraint.phaseDuration,
-                    phase.duration,
-                )
-            ) {
-                errors.push(
-                    `Phase "${phase.title}" duration must be between ${constraint.phaseDuration.min} and ${constraint.phaseDuration.max}. Current duration: ${phase.duration}.`,
-                );
-            }
+            this.validateRange(
+                errors,
+                constraint.phaseDuration,
+                phase.duration,
+                `Phase "${phase.title}" duration`,
+                options,
+            );
         });
 
         return this.createValidationResult(errors);
@@ -464,37 +554,30 @@ export class ConstraintValidationService {
     public validateActivities(
         constraint: IConstraint,
         activities: ActivityValidationInput[],
+        options: ValidationOptions = {},
     ): ValidationResult {
 
         const errors: string[] = [];
 
         // Total number of activities
-        if (
-            constraint.activities &&
-            !checkRange(
-                constraint.activities,
-                activities.length,
-            )
-        ) {
-            errors.push(
-                `Number of activities must be between ${constraint.activities.min} and ${constraint.activities.max}. Current count: ${activities.length}.`,
-            );
-        }
+        this.validateRange(
+            errors,
+            constraint.activities,
+            activities.length,
+            "Number of activities",
+            options,
+        );
 
         activities.forEach(activity => {
 
             // Activity cost
-            if (
-                constraint.activityCost &&
-                !checkRange(
-                    constraint.activityCost,
-                    activity.cost,
-                )
-            ) {
-                errors.push(
-                    `Activity "${activity.title}" cost must be between ${constraint.activityCost.min} and ${constraint.activityCost.max}. Current cost: ${activity.cost}.`,
-                );
-            }
+            this.validateRange(
+                errors,
+                constraint.activityCost,
+                activity.cost,
+                `Activity "${activity.title}" cost`,
+                options,
+            );
 
             // Activity duration
             if (constraint.activityDuration) {
@@ -515,16 +598,14 @@ export class ConstraintValidationService {
                     activity.endDate,
                 );
 
-                if (
-                    !checkRange(
-                        constraint.activityDuration,
-                        duration,
-                    )
-                ) {
-                    errors.push(
-                        `Activity "${activity.title}" duration must be between ${constraint.activityDuration.min} and ${constraint.activityDuration.max} days. Current duration: ${duration} days.`,
-                    );
-                }
+                this.validateRange(
+                    errors,
+                    constraint.activityDuration,
+                    duration,
+                    `Activity "${activity.title}" duration`,
+                    options,
+                    "days",
+                );
             }
         });
 
@@ -538,41 +619,31 @@ export class ConstraintValidationService {
     public validateEquipments(
         constraint: IConstraint,
         equipments: EquipmentValidationInput[],
+        options: ValidationOptions = {},
     ): ValidationResult {
 
         const errors: string[] = [];
 
         // Equipment count
-        if (
-            constraint.equipments &&
-            !checkRange(
-                constraint.equipments,
-                equipments.length,
-            )
-        ) {
-            errors.push(
-                `Number of equipments must be between ${constraint.equipments.min} and ${constraint.equipments.max}. Current count: ${equipments.length}.`,
-            );
-        }
+        this.validateRange(
+            errors,
+            constraint.equipments,
+            equipments.length,
+            "Number of equipments",
+            options,
+        );
 
         // Cost per equipment
-        if (constraint.equipmentCost) {
+        equipments.forEach(equipment => {
 
-            equipments.forEach(equipment => {
-
-
-                if (
-                    !checkRange(
-                        constraint.equipmentCost!,
-                        equipment.quantity * equipment.unitPrice,
-                    )
-                ) {
-                    errors.push(
-                        `Equipment "${equipment.itemName}" cost must be between ${constraint.equipmentCost!.min} and ${constraint.equipmentCost!.max}. Current cost: ${equipment.quantity * equipment.unitPrice}.`,
-                    );
-                }
-            });
-        }
+            this.validateRange(
+                errors,
+                constraint.equipmentCost,
+                equipment.quantity * equipment.unitPrice,
+                `Equipment "${equipment.itemName}" cost`,
+                options,
+            );
+        });
 
         return this.createValidationResult(errors);
     }
@@ -584,43 +655,31 @@ export class ConstraintValidationService {
     public validateComponents(
         constraint: IConstraint,
         components: ComponentValidationInput[],
+        options: ValidationOptions = {},
     ): ValidationResult {
 
         const errors: string[] = [];
 
         // Number of components
-        if (
-            constraint.components &&
-            !checkRange(
-                constraint.components,
-                components.length,
-            )
-        ) {
-            errors.push(
-                `Number of components must be between ${constraint.components.min} and ${constraint.components.max}. Current count: ${components.length}.`,
-            );
-        }
+        this.validateRange(
+            errors,
+            constraint.components,
+            components.length,
+            "Number of components",
+            options,
+        );
 
         // Contributors per component
-        if (constraint.componentCollaborators) {
+        components.forEach(component => {
 
-            components.forEach(component => {
-
-                const count =
-                    component.contributors.length;
-
-                if (
-                    !checkRange(
-                        constraint.componentCollaborators!,
-                        count,
-                    )
-                ) {
-                    errors.push(
-                        `Component "${component.title}" must have between ${constraint.componentCollaborators!.min} and ${constraint.componentCollaborators!.max} collaborators. Current count: ${count}.`,
-                    );
-                }
-            });
-        }
+            this.validateRange(
+                errors,
+                constraint.componentCollaborators,
+                component.contributors.length,
+                `Number of collaborators in component "${component.title}"`,
+                options,
+            );
+        });
 
         return this.createValidationResult(errors);
     }
@@ -632,6 +691,7 @@ export class ConstraintValidationService {
     public async validateThemes(
         constraint: IConstraint,
         themes: string[],
+        options: ValidationOptions = {},
     ): Promise<ValidationResult> {
 
         const errors: string[] = [];
@@ -644,6 +704,7 @@ export class ConstraintValidationService {
             counts[0]?.size ?? 0,
             constraint.themes,
             errors,
+            options,
         );
 
         this.validateThemeLevel(
@@ -651,6 +712,7 @@ export class ConstraintValidationService {
             counts[1]?.size ?? 0,
             constraint.subThemes,
             errors,
+            options,
         );
 
         this.validateThemeLevel(
@@ -658,6 +720,7 @@ export class ConstraintValidationService {
             counts[2]?.size ?? 0,
             constraint.focusAreas,
             errors,
+            options,
         );
 
         this.validateThemeLevel(
@@ -665,6 +728,7 @@ export class ConstraintValidationService {
             counts[3]?.size ?? 0,
             constraint.indicators,
             errors,
+            options,
         );
 
         return this.createValidationResult(errors);
@@ -678,24 +742,17 @@ export class ConstraintValidationService {
         constraint: IConstraint,
         title: string,
         errors: string[],
+        options: ValidationOptions = {},
     ): void {
 
-        if (!constraint.titleWords) {
-            return;
-        }
-
-        const count = countWords(title);
-
-        if (
-            !checkRange(
-                constraint.titleWords,
-                count,
-            )
-        ) {
-            errors.push(
-                `Project title must contain between ${constraint.titleWords.min} and ${constraint.titleWords.max} words. Current count: ${count}.`,
-            );
-        }
+        this.validateRange(
+            errors,
+            constraint.titleWords,
+            countWords(title),
+            "Project title word count",
+            options,
+            "words",
+        );
     }
 
     // =====================================================
@@ -706,24 +763,17 @@ export class ConstraintValidationService {
         constraint: IConstraint,
         summary: string | undefined,
         errors: string[],
+        options: ValidationOptions = {},
     ): void {
 
-        if (!constraint.summaryWords) {
-            return;
-        }
-
-        const count = countWords(summary ?? "");
-
-        if (
-            !checkRange(
-                constraint.summaryWords,
-                count,
-            )
-        ) {
-            errors.push(
-                `Project summary must contain between ${constraint.summaryWords.min} and ${constraint.summaryWords.max} words. Current count: ${count}.`,
-            );
-        }
+        this.validateRange(
+            errors,
+            constraint.summaryWords,
+            countWords(summary ?? ""),
+            "Project summary word count",
+            options,
+            "words",
+        );
     }
 
     // =====================================================
@@ -734,18 +784,16 @@ export class ConstraintValidationService {
         constraint: IConstraint,
         count: number,
         errors: string[],
+        options: ValidationOptions = {},
     ): void {
 
-        const keywordRange = constraint.keyWords;
-
-        if (
-            keywordRange &&
-            !checkRange(keywordRange, count)
-        ) {
-            errors.push(
-                `Number of keywords must be between ${keywordRange.min} and ${keywordRange.max}. Current count: ${count}.`,
-            );
-        }
+        this.validateRange(
+            errors,
+            constraint.keyWords,
+            count,
+            "Number of keywords",
+            options,
+        );
     }
 
     // =====================================================
@@ -760,6 +808,7 @@ export class ConstraintValidationService {
             expectedOutputs?: string[];
         } | undefined,
         errors: string[],
+        options: ValidationOptions = {},
     ): void {
 
         if (!objectives) {
@@ -771,6 +820,7 @@ export class ConstraintValidationService {
             constraint,
             objectives.general,
             errors,
+            options,
         );
 
         // Specific objectives
@@ -778,6 +828,7 @@ export class ConstraintValidationService {
             constraint,
             objectives.specific ?? [],
             errors,
+            options,
         );
 
         // Expected outputs
@@ -785,6 +836,7 @@ export class ConstraintValidationService {
             constraint,
             objectives.expectedOutputs ?? [],
             errors,
+            options,
         );
     }
 
@@ -792,126 +844,81 @@ export class ConstraintValidationService {
         constraint: IConstraint,
         generalObjective: string | undefined,
         errors: string[],
+        options: ValidationOptions = {},
     ): void {
 
-        if (!constraint.generalObjectiveWords) {
-            return;
-        }
-
-        const count = countWords(
-            generalObjective ?? "",
+        this.validateRange(
+            errors,
+            constraint.generalObjectiveWords,
+            countWords(generalObjective ?? ""),
+            "General objective word count",
+            options,
+            "words",
         );
-
-        if (
-            !checkRange(
-                constraint.generalObjectiveWords,
-                count,
-            )
-        ) {
-            errors.push(
-                `General objective must contain between ${constraint.generalObjectiveWords.min} and ${constraint.generalObjectiveWords.max} words. Current count: ${count}.`,
-            );
-        }
     }
 
     private validateSpecificObjectives(
         constraint: IConstraint,
         specificObjectives: string[],
         errors: string[],
+        options: ValidationOptions = {},
     ): void {
 
         // Number of specific objectives
-        const objectiveRange =
-            constraint.specificObjectives;
-
-        if (
-            objectiveRange &&
-            !checkRange(
-                objectiveRange,
-                specificObjectives.length,
-            )
-        ) {
-            errors.push(
-                `Number of specific objectives must be between ${objectiveRange.min} and ${objectiveRange.max}. Current count: ${specificObjectives.length}.`,
-            );
-        }
+        this.validateRange(
+            errors,
+            constraint.specificObjectives,
+            specificObjectives.length,
+            "Number of specific objectives",
+            options,
+        );
 
         // Word count of each specific objective
-        const wordRange =
-            constraint.specificObjectiveWords;
+        specificObjectives.forEach(
+            (objective, index) => {
 
-        if (wordRange) {
-
-            specificObjectives.forEach(
-                (objective, index) => {
-
-                    const count = countWords(
-                        objective ?? "",
-                    );
-
-                    if (
-                        !checkRange(
-                            wordRange,
-                            count,
-                        )
-                    ) {
-                        errors.push(
-                            `Specific objective ${index + 1} must contain between ${wordRange.min} and ${wordRange.max} words. Current count: ${count}.`,
-                        );
-                    }
-                },
-            );
-        }
+                this.validateRange(
+                    errors,
+                    constraint.specificObjectiveWords,
+                    countWords(objective ?? ""),
+                    `Specific objective ${index + 1} word count`,
+                    options,
+                    "words",
+                );
+            },
+        );
     }
 
     private validateExpectedOutputs(
         constraint: IConstraint,
         expectedOutputs: string[],
         errors: string[],
+        options: ValidationOptions = {},
     ): void {
 
         // Number of expected outputs
-        const outputRange =
-            constraint.expectedOutputs;
-
-        if (
-            outputRange &&
-            !checkRange(
-                outputRange,
-                expectedOutputs.length,
-            )
-        ) {
-            errors.push(
-                `Number of expected outputs must be between ${outputRange.min} and ${outputRange.max}. Current count: ${expectedOutputs.length}.`,
-            );
-        }
+        this.validateRange(
+            errors,
+            constraint.expectedOutputs,
+            expectedOutputs.length,
+            "Number of expected outputs",
+            options,
+        );
 
         // Word count of each expected output
-        const wordRange =
-            constraint.expectedOutputWords;
+        expectedOutputs.forEach(
+            (output, index) => {
 
-        if (wordRange) {
-
-            expectedOutputs.forEach(
-                (output, index) => {
-
-                    const count = countWords(
-                        output ?? "",
-                    );
-
-                    if (
-                        !checkRange(
-                            wordRange,
-                            count,
-                        )
-                    ) {
-                        errors.push(
-                            `Expected output ${index + 1} must contain between ${wordRange.min} and ${wordRange.max} words. Current count: ${count}.`,
-                        );
-                    }
-                },
-            );
-        }
+                this.validateRange(
+                    errors,
+                    constraint.expectedOutputWords,
+                    countWords(output ?? ""),
+                    `Expected output ${index + 1} word count`,
+                    options,
+                    "words",
+                );
+            },
+        );
     }
 
     // =====================================================
@@ -922,21 +929,16 @@ export class ConstraintValidationService {
         constraint: IConstraint,
         budget: number,
         errors: string[],
+        options: ValidationOptions = {},
     ): void {
 
-        const budgetRange = constraint.budget;
-
-        if (
-            budgetRange &&
-            !checkRange(
-                budgetRange,
-                budget,
-            )
-        ) {
-            errors.push(
-                `Project budget must be between ${budgetRange.min} and ${budgetRange.max}. Current budget: ${budget}.`,
-            );
-        }
+        this.validateRange(
+            errors,
+            constraint.budget,
+            budget,
+            "Project budget",
+            options,
+        );
     }
 
     // =====================================================
@@ -947,21 +949,16 @@ export class ConstraintValidationService {
         constraint: IConstraint,
         duration: number,
         errors: string[],
+        options: ValidationOptions = {},
     ): void {
 
-        const durationRange = constraint.duration;
-
-        if (
-            durationRange &&
-            !checkRange(
-                durationRange,
-                duration,
-            )
-        ) {
-            errors.push(
-                `Project duration must be between ${durationRange.min} and ${durationRange.max}. Current duration: ${duration}.`,
-            );
-        }
+        this.validateRange(
+            errors,
+            constraint.duration,
+            duration,
+            "Project duration",
+            options,
+        );
     }
 
     // =====================================================
@@ -973,16 +970,16 @@ export class ConstraintValidationService {
         count: number,
         range: IRange | undefined,
         errors: string[],
+        options: ValidationOptions = {},
     ): void {
 
-        if (
-            range &&
-            !checkRange(range, count)
-        ) {
-            errors.push(
-                `${label} count must be between ${range.min} and ${range.max}. Current count: ${count}.`,
-            );
-        }
+        this.validateRange(
+            errors,
+            range,
+            count,
+            `${label} count`,
+            options,
+        );
     }
 
     private async countThemeLevels(

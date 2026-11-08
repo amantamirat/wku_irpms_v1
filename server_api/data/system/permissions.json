@@ -768,11 +768,6 @@
   },
   {
     "category": "Project Management",
-    "name": "project:create:own",
-    "description": "Create projects as the Lead PI"
-  },
-  {
-    "category": "Project Management",
     "name": "project:read",
     "description": "Read project entries"
   },

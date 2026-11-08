@@ -65,6 +65,7 @@ export interface FilterProjects {
     status?: ProjectStatus;
 }
 
+
 export const validateProject = (project: Project): { valid: boolean; message?: string } => {
     if (!project.grant) {
         return { valid: false, message: 'Grant is required.' };

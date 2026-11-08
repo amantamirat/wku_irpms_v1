@@ -42,7 +42,7 @@ export interface IProject extends Document {
      *
      * Used as an organizational access boundary.
      */
-    organization: mongoose.Types.ObjectId;
+    organization?: mongoose.Types.ObjectId;
 
     /**
      * Workspace/organization of the lead PI.
@@ -50,7 +50,7 @@ export interface IProject extends Document {
      *
      * Used as an organizational access boundary.
      */
-    workspace: mongoose.Types.ObjectId;
+    workspace?: mongoose.Types.ObjectId;
 
     calendar?: mongoose.Types.ObjectId | null;
 
@@ -70,7 +70,7 @@ export interface IProject extends Document {
 
     verifiedCollaboratorsProportion?: number;
 
-    leadPI: mongoose.Types.ObjectId;
+    leadPI?: mongoose.Types.ObjectId | null;
 
     themes: mongoose.Types.ObjectId[];
 
@@ -123,7 +123,7 @@ const ProjectSchema = new Schema<IProject>(
         organization: {
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.ORGANIZATION,
-            required: true
+            //required: true
         },
 
         /**
@@ -132,7 +132,7 @@ const ProjectSchema = new Schema<IProject>(
         workspace: {
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.ORGANIZATION,
-            required: true
+            //required: true
         },
 
         calendar: {
@@ -192,7 +192,7 @@ const ProjectSchema = new Schema<IProject>(
         leadPI: {
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.USER,
-            required: true
+            //required: true
         },
 
         themes: {

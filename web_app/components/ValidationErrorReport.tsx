@@ -5,23 +5,23 @@ import { Message } from 'primereact/message';
 interface ValidationReportProps {
     error?: string | null;
     templateValidation?: TemplateValidationResult | null;
-    constraintValidation?: ValidationResult | null;
+    validationResult?: ValidationResult | null;
 }
 
 export const ValidationReport = ({
     error,
     templateValidation,
-    constraintValidation
+    validationResult
 }: ValidationReportProps) => {
-    if (!error && !templateValidation && !constraintValidation) return null;
+    if (!error && !templateValidation && !validationResult) return null;
 
     return (
         <div className="mb-4">
-            {error && !templateValidation && !constraintValidation && (
+            {error && !templateValidation && !validationResult && (
                 <Message severity="error" text={error} className="w-full shadow-2" />
             )}
 
-            {constraintValidation && (
+            {validationResult && (
                 <div className="surface-card border-left-3 border-orange-500 shadow-2 p-4 border-round-lg mb-3">
                     <div className="flex align-items-center text-orange-700 font-bold text-lg mb-2">
                         <i className="pi pi-shield mr-2 text-xl"></i>
@@ -32,7 +32,7 @@ export const ValidationReport = ({
                     </p>
                     <div className="bg-orange-50 p-3 border-round border-1 border-orange-200">
                         <ul className="m-0 pl-3 text-sm text-orange-900">
-                            {constraintValidation.errors.map((errItem, idx) => (
+                            {validationResult.errors.map((errItem, idx) => (
                                 <li key={idx} className="mb-1 font-medium">{errItem}</li>
                             ))}
                         </ul>

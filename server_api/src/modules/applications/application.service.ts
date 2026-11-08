@@ -30,6 +30,7 @@ import {
 } from "./application.dto";
 import { ApplicationStatus, IApplication } from "./application.model";
 import { IApplicationRepository } from "./application.repository";
+import { SYSTEM } from "../../common/constants/system.constant";
 
 export class ApplicationService {
 
@@ -271,7 +272,7 @@ export class ApplicationService {
             if (!projectDoc.call && stageDoc.call) {
                 projectUpdate.call = String(stageDoc.call);
             }
-            await this.projectRepo.update(data.project, projectUpdate);
+            await this.projectRepo.update(data.project, projectUpdate, SYSTEM.SU_USER);
         } catch (err: any) {
             if (savedPath) await this.fileStorage.delete(savedPath);
             await this.fileStorage.discardTemp(file.path);
@@ -837,7 +838,8 @@ export class ApplicationService {
             {
                 currentApplication:
                     previousApplicationId
-            }
+            },
+            SYSTEM.SU_USER
         );
 
         return deleted;

@@ -121,7 +121,7 @@ const ApplicationForm = ({ mode, item, saving, formId, onSubmit, project }: Appl
     const [eligibility, setEligibility] = useState<Eligibility>({ state: 'loading' });
     const [submitted, setSubmitted] = useState(false);
 
-    const { error, templateValidation, constraintValidation, handleError, clearErrors } =
+    const { error, templateValidation, validationResult: constraintValidation, handleError, clearErrors } =
         useValidationErrors();
 
     const isEdit = !!item?._id;
@@ -296,7 +296,7 @@ const ApplicationForm = ({ mode, item, saving, formId, onSubmit, project }: Appl
                     <ValidationReport
                         error={error}
                         templateValidation={templateValidation}
-                        constraintValidation={constraintValidation}
+                        validationResult={constraintValidation}
                     />
                 </div>
 

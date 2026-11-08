@@ -26,7 +26,7 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
     const [success, setSuccess] = useState(false);
     const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
-    const { error, templateValidation, constraintValidation, handleError, clearErrors } =
+    const { error, templateValidation, validationResult, handleError, clearErrors } =
         useValidationErrors();
 
     // Automatically calculate total budget and total duration from project phases
@@ -116,7 +116,7 @@ export const SubmissionStep = ({ data, onBack, onComplete }: SubmissionStepProps
             <ValidationReport
                 error={error}
                 templateValidation={templateValidation}
-                constraintValidation={constraintValidation}
+                validationResult={validationResult}
             />
 
             <div

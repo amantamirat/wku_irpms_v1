@@ -1,12 +1,47 @@
 import mongoose from "mongoose";
+import { PhaseActivityDto } from "./activities/phase-activity.dto";
+import { PhaseActivityType } from "./activities/phase-activity.model";
 import { CollaboratorDto } from "./collaborators/collaborator.dto";
+import { ProjectComponentDto } from "./components/component.dto";
+import { EquipmentDto } from "./equipments/phase-equipment.dto";
 import { PhaseDto } from "./phase/phase.dto";
 import { IProjectObjectives, ProjectStatus } from "./project.model";
-import { ProjectComponentDto as ProjectComponentDto } from "./components/component.dto";
-import { PhaseActivityDetailsPatch, PhaseActivityDto } from "./activities/phase-activity.dto";
-import { PhaseActivityType } from "./activities/phase-activity.model";
-import { EquipmentDto } from "./equipments/phase-equipment.dto";
 
+interface ProjectActivityDto extends PhaseActivityDto {
+    kind: PhaseActivityType;
+    details: any;
+}
+
+
+export interface CreateProjectDto {
+    grant: string;
+    calendar: string;
+    leadPI?: string;
+
+    call?: string;
+
+    title: string;
+    objectives?: IProjectObjectives;
+    summary?: string;
+
+    themes: string[];
+    keywords?: string[];
+
+    totalBudget: number;
+    totalDuration: number;
+}
+
+export interface UpdateProjectDTO
+    extends Partial<Omit<CreateProjectDto, 'grant' | 'calendar' | 'call' | 'leadPI'>> { }
+
+
+export interface ApplyProjectDto extends Partial<Omit<CreateProjectDto, 'grant' | 'calendar' | 'call' | 'leadPI'>> {
+    collaborators?: CollaboratorDto[];
+    phases?: PhaseDto[];
+    components?: ProjectComponentDto[];
+    activities?: ProjectActivityDto[];
+    equipments?: EquipmentDto[];
+}
 
 export interface FilterProjectsDTO {
     id?: mongoose.Types.ObjectId;
@@ -29,22 +64,14 @@ export interface FilterProjectsDTO {
 }
 
 
-export interface UpdateProjectDTO {
-    title?: string;
-    summary?: string;
-    themes?: string[];
-    objectives?: IProjectObjectives;
-    totalBudget?: number;
-    totalDuration?: number;
-}
-
-interface ProjectActivityDto extends PhaseActivityDto {
-    kind: PhaseActivityType;
-    details: any;
-}
 
 
-export interface ApplyProjectDto {
+//////////////////////older dtos/////
+
+
+
+
+export interface ApplyProjectDTO {
 
     title: string;
     objectives?: IProjectObjectives;
@@ -63,11 +90,10 @@ export interface ApplyProjectDto {
     equipments?: EquipmentDto[];
 }
 
-export interface InternalCreateProjectDto extends ApplyProjectDto {
+export interface InternalCreateProjectDto extends ApplyProjectDTO {
     leadPI: string;
     grant: string;
     calendar: string;
-    //workspace: string;
     organization: string;
     call?: string;
 }
@@ -76,7 +102,7 @@ export interface InternalCreateProjectDto extends ApplyProjectDto {
 
 
 ///old////
-export interface CreateProjectDTO {
+export interface CreateOLDProjectDTO {
     grant: string;
 
     conceptNoteId?: string;
@@ -101,5 +127,6 @@ export interface CreateProjectDTO {
 
     documentPath?: string;
 }
+
 
 

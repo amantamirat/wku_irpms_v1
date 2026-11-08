@@ -33,20 +33,23 @@ import { ICollaboratorRepository } from "./collaborators/collaborator.repository
 import { CollaboratorService } from "./collaborators/collaborator.service";
 import { ProjectComponentRepository } from "./components/component.repository";
 import { PhaseEquipmentRepository } from "./equipments/phase-equipment.repository";
+import { PhaseDocumentType, ProjectDocumentStatus } from "./phase/documents/phase.doc.model";
+import { PhaseDocumentRepository } from "./phase/documents/phase.doc.repository";
 import { PhaseStatus } from "./phase/phase.model";
 import { IPhaseRepository } from "./phase/phase.repository";
 import { PhaseService } from "./phase/phase.service";
 import { ProjectAuth } from "./project.auth";
 import {
-    ApplyProjectDto,
-    CreateProjectDTO,
+    ApplyProjectDTO,
     FilterProjectsDTO,
     InternalCreateProjectDto,
     UpdateProjectDTO,
 } from "./project.dto";
 import { ProjectStatus } from "./project.model";
-import { IProjectRepository, ProjectDto } from "./project.repository";
+import { IProjectRepository } from "./project.repository";
+import { CreateProjectDto } from "./project.dto";
 import { PROJECT_TRANSITIONS } from "./project.state-machine";
+import { toObjectId } from "../../common/utils/mongoose.utils";
 
 
 export class ProjectService {
@@ -59,6 +62,7 @@ export class ProjectService {
         private readonly componentRepo: ProjectComponentRepository,
         private readonly activityRepo: PhaseActivityRepository,
         private readonly equipmentRepo: PhaseEquipmentRepository,
+        private readonly documentRepo: PhaseDocumentRepository,
 
         private readonly userRepo: IUserRepository,
         private readonly verificationRepo: IVerificationRepository,
@@ -84,28 +88,10 @@ export class ProjectService {
         private readonly fileStorage: FileStorageService
     ) { }
 
-    async create(
-        dto: ProjectDto,
-        userId: string,
-        options?: { skipValidation?: boolean }
-    ) {
-        const { grant, calendar, call, leadPI, title, totalBudget, totalDuration } = dto;
+    async create(dto: CreateProjectDto, userId: string) {
+        const { grant, calendar, call, title, totalBudget, totalDuration } = dto;
 
-        const isLeadPI = leadPI === userId;
-
-        // --- Authorization ---
-        if (!options?.skipValidation) {
-            const isAdmin = await this.authPermissionService.hasPermission(
-                userId,
-                PERMISSIONS.PROJECT.CREATE
-            );
-
-            if (!isAdmin && !isLeadPI) {
-                throw new AppError(ERROR_CODES.UNAUTHORIZED);
-            }
-        }
-
-        // --- Basic numeric validation ---
+        // --- Basic validation ---
         if (totalBudget < 0 || totalDuration <= 0) {
             throw new AppError(
                 ERROR_CODES.INVALID_INPUT,
@@ -113,37 +99,39 @@ export class ProjectService {
             );
         }
 
-        // --- Lead PI (project.workspace is derived from it) ---
-        const leadDoc = await this.userRepo.findById(leadPI);
-        if (!leadDoc) throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND);
-        if (!leadDoc.workspace) {
-            throw new AppError(
-                ERROR_CODES.WORKSPACE_NOT_FOUND,
-                "The lead PI does not have a workspace."
-            );
-        }
-
-        // --- Grant (project.organization is derived from it) ---
+        // --- Grant ---
         const grantDoc = await this.grantRepo.findById(grant);
+
         if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
-        if (!grantDoc.organization) {
-            throw new AppError(
-                ERROR_CODES.ORGANIZATION_NOT_FOUND,
-                "The grant does not have an organization."
-            );
-        }
-        if (!options?.skipValidation && grantDoc.status !== GrantStatus.active) {
+
+        if (grantDoc.status !== GrantStatus.active) {
             throw new AppError(ERROR_CODES.GRANT_NOT_ACTIVE);
         }
 
-        // --- Calendar (required) ---
-        const calendarDoc = await this.calendarRepo.findById(calendar);
-        if (!calendarDoc) throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
+        if (!grantDoc.organization) {
+            throw new AppError(ERROR_CODES.ORGANIZATION_NOT_FOUND);
+        }
 
-        // --- Call (optional) ---
+        // --- Call and Calendar ---
+        let calendarId = calendar;
+
         if (call) {
             const callDoc = await this.callRepo.findById(call);
+
             if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+
+            calendarId = String(callDoc.calendar);
+        }
+
+        const calendarDoc = await this.calendarRepo.findById(calendarId);
+
+        if (!calendarDoc) throw new AppError(ERROR_CODES.CALENDAR_NOT_FOUND);
+
+        // --- Creator's workspace ---
+        const userDoc = await this.userRepo.findById(userId);
+
+        if (!userDoc?.workspace) {
+           // throw new AppError(ERROR_CODES.WORKSPACE_NOT_FOUND);
         }
 
         // --- Duplicate title ---
@@ -154,35 +142,35 @@ export class ProjectService {
             );
         }
 
-        // --- Create project (scope anchors derived server-side) ---
+        // --- Create project ---
         const created = await this.projectRepo.create(
             {
                 ...dto,
-                workspace: String(leadDoc.workspace),
-                organization: String(grantDoc.organization)
+                calendar: calendarId,
+                //workspace: userDoc?.workspace??String(userDoc?.workspace),
+                organization: String(grantDoc.organization),
             },
             userId
         );
 
         if (!created) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
-        const projectId = String(created._id);
+        /*
+    // --- Lead PI as first collaborator ---
+    await this.collabRepo.create({
+        project: projectId,
+        projectTitle: title,
+        member: leadPI,
+        isLeadPI: true,
+        status:
+            userId === leadPI
+                ? CollaboratorStatus.verified
+                : CollaboratorStatus.pending,
+        role: "Principal Investigator"
+    });
 
-        // --- Lead PI as first collaborator ---
-        await this.collabRepo.create(
-            {
-                project: projectId,
-                projectTitle: title,
-                member: leadPI,
-                isLeadPI: true,
-                status:
-                    userId === leadPI
-                        ? CollaboratorStatus.verified
-                        : CollaboratorStatus.pending,
-                role: "Principal Investigator"
-            }
-        );
-        await this.collabRepo.updateFemaleProportionByProject(projectId);
+    await this.collabRepo.updateFemaleProportionByProject(projectId);
+    */
 
         return created;
     }
@@ -191,7 +179,7 @@ export class ProjectService {
 
     async apply(
         id: string,
-        dto: ApplyProjectDto,
+        dto: ApplyProjectDTO,
         userId: string,
         file: Express.Multer.File
     ) {
@@ -314,6 +302,7 @@ export class ProjectService {
         return this.projectRepo.find(filter, options);
     }
 
+    /*
     getMyProjects = async (
         userId: string,
         filter?: FilterProjectsDTO,
@@ -323,6 +312,7 @@ export class ProjectService {
             ...filter, leadPI: userId
         }, options);
     };
+    */
 
     async getById(id: string, options?: FilterOptions) {
         const proj = await this.projectRepo.findById(id, options);
@@ -335,7 +325,6 @@ export class ProjectService {
     // ---------------------------------------------------
     async update(id: string, dto: UpdateProjectDTO, userId: string) {
 
-
         const { projectDoc, isLeadPI } = await this.projectAuth.auth(id, userId, PERMISSIONS.PROJECT.UPDATE);
 
         if (projectDoc.status === ProjectStatus.completed || projectDoc.status === ProjectStatus.verified) {
@@ -347,6 +336,8 @@ export class ProjectService {
                 throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
             }
         }
+
+        //the budget should be maintained
 
         return this.projectRepo.update(id, dto, userId);
     }
@@ -490,49 +481,23 @@ export class ProjectService {
                 }
 
             }
-
-            if (from === ProjectStatus.approved) {
-                if (projectDoc.call) {
-                    const callDoc = await this.callRepo.findById(
-                        String(projectDoc.call)
-                    );
-
-                    if (!callDoc) {
-                        throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
-                    }
-
-                    if (callDoc) {
-                        /*
-                        const lastStageDoc = await this.stageRepo.getLastStage(String(projectDoc.call));
-                        if (!lastStageDoc) {
-                            throw new AppError(ERROR_CODES.LAST_STAGE_NOT_FOUND);
-                        }
-                        const results = await this.compositionValidator.validateByProjectId(
-                            String(callDoc.composition),
-                            id,
-                            lastStageDoc
-                        );
-
-                        if (!results.valid) {
-                            throw new AppError(ERROR_CODES.INVALID_COMPOSITION,
-                                "The proposed member does not satisfy the composition requirements.",
-                                400,
-                                results.errors
-                            );
-                        }
-                             */
-                    }
-
-
-                }
-            }
-
         }
 
         if (to === ProjectStatus.completed) {
             const phases = await this.phaseRepo.find({ project: id });
             if (!phases.every(p => p.status === PhaseStatus.completed))
                 throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_COMPLETED);
+
+            const hasCompletionReport = await this.documentRepo.exists({
+                project: id,
+                type: PhaseDocumentType.completionReport,
+                status: ProjectDocumentStatus.approved
+            });
+
+            if (!hasCompletionReport) {
+                throw new AppError(ERROR_CODES.COMPLETION_REPORT_REQUIRED);
+            }
+
         }
 
 
@@ -554,7 +519,16 @@ export class ProjectService {
 
         }
 
-        return await this.projectRepo.updateStatus(id, to, userId, reason);
+        return await this.projectRepo.update(id, {
+            status: to,
+            statusHistory: {
+                status: to,
+                changedBy: toObjectId(userId),
+                reason,
+                changedAt: new Date(),
+            },
+        }, userId);
+
     }
 
 
@@ -676,9 +650,10 @@ export class ProjectService {
             await this.collabService.create(
                 {
                     project: projectId,
-                    projectTitle: title,
+                    //projectTitle: title,
                     member: collab.member,
-                    isLeadPI: collaboratorIsLeadPI,
+                   // isLeadPI: collaboratorIsLeadPI,
+                   /*
                     status:
                         collab.status ??
                         (
@@ -686,6 +661,7 @@ export class ProjectService {
                                 ? CollaboratorStatus.verified
                                 : CollaboratorStatus.pending
                         ),
+                        */
                     role: collaboratorIsLeadPI
                         ? "Principal Investigator"
                         : collab.role,

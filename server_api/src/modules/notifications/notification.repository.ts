@@ -2,16 +2,16 @@ import mongoose, { ClientSession } from "mongoose";
 import { Notification, INotification } from "./notification.model";
 import {
     CreateNotificationDTO,
-    GetNotificationsDTO,
+    FilterNotificationsDTO,
     UpdateNotificationDTO,
     MarkAllAsReadDTO
 } from "./notification.dto";
 
 export interface INotificationRepository {
     findById(id: string): Promise<INotification | null>;
-    find(filters: GetNotificationsDTO): Promise<INotification[]>;
+    find(filters: FilterNotificationsDTO): Promise<INotification[]>;
     create(dto: CreateNotificationDTO): Promise<INotification>;
-    update(id: string, data: UpdateNotificationDTO["data"]): Promise<INotification | null>;
+    update(id: string, data: UpdateNotificationDTO): Promise<INotification | null>;
     markAllAsRead(filters: MarkAllAsReadDTO): Promise<number>;
     delete(id: string): Promise<INotification | null>;
 }
@@ -25,7 +25,7 @@ export class NotificationRepository implements INotificationRepository {
             .exec();
     }
 
-    async find(filters: GetNotificationsDTO) {
+    async find(filters: FilterNotificationsDTO) {
         const query: any = {};
 
         if (filters.recipient) {
@@ -51,11 +51,10 @@ export class NotificationRepository implements INotificationRepository {
             .exec();
     }
 
-    async create(dto: CreateNotificationDTO) {      
-
+    async create(dto: CreateNotificationDTO) {     
         return Notification.create(dto);
     }
-    async update(id: string, dtoData: UpdateNotificationDTO["data"]): Promise<INotification | null> {
+    async update(id: string, dtoData: UpdateNotificationDTO): Promise<INotification | null> {
         const updateData: Partial<INotification> = {};
 
         if (dtoData.isRead !== undefined) {

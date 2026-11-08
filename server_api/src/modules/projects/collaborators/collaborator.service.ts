@@ -11,26 +11,32 @@ import {
 import { ICollaboratorRepository } from "./collaborator.repository";
 
 import { PERMISSIONS } from "../../../common/constants/permissions";
-import { SYSTEM } from "../../../common/constants/system.constant";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import ScopeFilterService from "../../../common/services/scope-filter.service";
+import { sameId, toObjectId } from "../../../common/utils/mongoose.utils";
+import { ApplicationStatus } from "../../applications/application.model";
 import { IApplicationRepository } from "../../applications/application.repository";
 import { AuthScope } from "../../auth/auth.types";
-import { CallStatus } from "../../calls/call.model";
 import { ICallRepository } from "../../calls/call.repository";
 import { StageStatus } from "../../calls/stages/stage.model";
 import { IStageRepository } from "../../calls/stages/stage.repository";
-import { CollaboratorValidationInput, ConstraintValidationService } from "../../constraints/services/constraint-validator.service";
+import { CompositionValidationService, toCompositionValidationInput } from "../../compositions/composition-validation-service";
+import { HistoryContextInput } from "../../compositions/history/history-validation-service";
+import { ConstraintValidationService, toCollaboratorValidationInput, ValidationOptions } from "../../constraints/services/constraint-validator.service";
+import { GrantRepository } from "../../grants/grant.repository";
 import { NotificationService } from "../../notifications/notification.service";
 import { ProjectAuth } from "../project.auth";
 import { IProject, ProjectStatus } from "../project.model";
-import { CollaboratorStatus, ICollaborator } from "./collaborator.model";
-import { CompositionValidationInput, CompositionValidationService } from "../../compositions/composition-validation-service";
-import { GrantRepository } from "../../grants/grant.repository";
-import { ApplicationStatus } from "../../applications/application.model";
-import { HistoryContextInput } from "../../compositions/history/history-validation-service";
+import { CollaboratorStatus, ICollaborator, LeaderRole } from "./collaborator.model";
+import { SYSTEM } from "../../../common/constants/system.constant";
+
+export interface CollaboratorRef {
+    member: string;
+    isLeadPI: boolean;
+    status?: CollaboratorStatus;
+}
 
 /**
  * Describes how the project's membership changes:
@@ -39,7 +45,7 @@ import { HistoryContextInput } from "../../compositions/history/history-validati
  *  - delete: { remove }
  */
 interface MembershipChange {
-    add?: string;
+    add?: CollaboratorRef;
     remove?: string;
 }
 
@@ -49,8 +55,7 @@ interface ValidateMembershipParams {
     change: MembershipChange;
     /** Wording used in error messages, e.g. "proposed" or "remaining". */
     label: "proposed" | "remaining";
-    /** Pass when the caller has already loaded it, to avoid a second fetch. */
-    currentInput?: CompositionValidationInput;
+    input: CollaboratorRef[];
 }
 
 export class CollaboratorService {
@@ -74,19 +79,10 @@ export class CollaboratorService {
     // Shared validation helpers
     // ---------------------------------------------------------------------
 
-    private async validateCall(projectDoc: IProject) {
-        if (projectDoc.call) {
-            const callDoc = await this.callRepo.findById(projectDoc.call.toString());
-            if (!callDoc) {
-                throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
-            }
-            if (callDoc.status !== CallStatus.active) {
-                throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
-            }
+    private async assertCurrentApplicationStage(projectDoc: IProject) {
+        if (projectDoc.status === ProjectStatus.draft &&
+            projectDoc.currentApplication) {
 
-            if (!projectDoc.currentApplication) {
-                throw new AppError(ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND);
-            }
             const currentAppDoc = await this.applicationRepo.findById(String(projectDoc.currentApplication));
             if (!currentAppDoc) {
                 throw new AppError(ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND);
@@ -103,44 +99,33 @@ export class CollaboratorService {
             if (stageDoc.status !== StageStatus.active) {
                 throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
             }
-            return callDoc;
+
         }
     }
 
-    /**
-     * Loads the project's current composition input (lead + members).
-     * Throws INVALID_COMPOSITION if it cannot be resolved.
-     */
-    private async getCompositionInput(projectId: string): Promise<CompositionValidationInput> {
-        const result = await this.compositionValidator.getCompositionInputByProjectId(projectId);
-        if (!result.ok) {
-            throw new AppError(ERROR_CODES.INVALID_COMPOSITION, "", 404, result.errors);
-        }
-        return result.input;
-    }
 
     /**
-     * Returns the composition input as it would look after applying `change`.
-     */
+ * Returns the collaborator list as it would look after applying `change`.
+ */
     private applyMembershipChange(
-        input: CompositionValidationInput,
+        input: CollaboratorRef[],
         change: MembershipChange
-    ): CompositionValidationInput {
-        const members = input.members.filter(m => m !== change.remove);
+    ): CollaboratorRef[] {
+        const next = input.filter(c => c.member !== change.remove);
         if (change.add !== undefined) {
-            members.push(change.add);
+            next.push(change.add);
         }
-        return { lead: input.lead, members };
+        return next;
     }
 
     /**
      * Validates that the project's grant constraint and composition rules
      * still hold after applying `change`. Used by create, update and delete.
      */
-    private async validateMembershipChange(params: ValidateMembershipParams): Promise<void> {
+    private async validateMembershipChange(params: ValidateMembershipParams, options?: ValidationOptions): Promise<void> {
         const { projectDoc, projectId, change, label } = params;
 
-        const currentInput = params.currentInput ?? await this.getCompositionInput(projectId);
+        const currentInput = params.input;
         const proposed = this.applyMembershipChange(currentInput, change);
 
         const grantDoc = await this.grantRepo.findById(String(projectDoc.grant));
@@ -153,28 +138,35 @@ export class CollaboratorService {
             const constraintDoc = await this.constraintValidator.getConstraint(
                 String(grantDoc.constraint)
             );
-            const collaborators: CollaboratorValidationInput[] = [
-                proposed.lead,
-                ...proposed.members,
-            ].map(member => ({
-                member,
-            }));
+            const constraintInput = toCollaboratorValidationInput(proposed);
+
             const constraintResult = this.constraintValidator.validateCollaborators(
                 constraintDoc,
-                collaborators
+                constraintInput,
+                options
             );
             if (!constraintResult.valid) {
                 throw new AppError(
                     ERROR_CODES.INVALID_CONSTRAINT,
                     `The ${label} members do not satisfy the constraint requirements.`,
                     400,
-                    constraintResult.errors
+                    constraintResult
                 );
             }
         }
 
         // Composition validation
         if (grantDoc.composition) {
+            const compositionInput = toCompositionValidationInput(proposed);
+            if (!compositionInput.valid) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_COMPOSITION,
+                    `The ${label} members do not satisfy the composition requirements.`,
+                    400,
+                    compositionInput
+                );
+            }
+
             const compositionDoc = await this.compositionValidator.getComposition(
                 String(grantDoc.composition)
             );
@@ -184,10 +176,11 @@ export class CollaboratorService {
                 calendar: projectDoc.calendar?.toString(),
                 call: projectDoc.call?.toString(),
             };
+
             const compositionResult = await this.compositionValidator.validate(
                 compositionDoc,
                 context,
-                proposed,
+                compositionInput.input,          // unwrapped
                 projectId
             );
             if (!compositionResult.valid) {
@@ -195,10 +188,18 @@ export class CollaboratorService {
                     ERROR_CODES.INVALID_COMPOSITION,
                     `The ${label} members do not satisfy the composition requirements.`,
                     400,
-                    compositionResult.errors
+                    compositionResult
                 );
             }
         }
+    }
+
+    private toCollaboratorRefs(collabs: ICollaborator[]): CollaboratorRef[] {
+        return collabs.map(c => ({
+            member: String(c.member),
+            isLeadPI: !!c.isLeadPI,
+            status: c.status as CollaboratorStatus,
+        }));
     }
 
     // ---------------------------------------------------------------------
@@ -206,55 +207,63 @@ export class CollaboratorService {
     // ---------------------------------------------------------------------
 
     async create(dto: CreateCollaboratorDto, userId: string, options?: { skipValidation?: boolean }) {
-        const { member, project } = dto;
 
+        try {
+            const { member, project, role } = dto;
 
-        let projectTitle = dto.projectTitle;
-        if (!options?.skipValidation) {
-
-            const currentInput = await this.getCompositionInput(project);
-
-            const memberExists =
-                currentInput.lead === member ||
-                currentInput.members.includes(member);
-
-            if (memberExists) {
-                throw new AppError(
-                    ERROR_CODES.COLLABORATOR_ALREADY_EXISTS,
-                    'This member is already a collaborator on the project.',
-                );
-            }
+            let isLeadRole = role === LeaderRole;
 
             const { projectDoc, isLeadPI } = await this.projectAuth.auth(
                 project,
                 userId,
                 PERMISSIONS.COLLABORATOR.CREATE
             );
-            projectTitle = projectDoc.title;
 
             if (isLeadPI) {
                 if (projectDoc.status !== ProjectStatus.draft) {
                     throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
                 }
-                await this.validateCall(projectDoc);
+                await this.assertCurrentApplicationStage(projectDoc);
+            }
+
+            const currentCollabs = await this.collabRepo.find({ project: project });
+
+            // 1. Member is already part of this project
+            const alreadyMember = currentCollabs.some(c => c.member.toString() === member);
+            if (alreadyMember) {
+                throw new AppError(ERROR_CODES.COLLABORATOR_ALREADY_EXISTS);
+            }
+
+            // 2. Only one lead per project
+            if (isLeadRole) {
+                const leadExists = currentCollabs.some(c => c.isLeadPI);
+                if (leadExists) {
+                    throw new AppError(ERROR_CODES.PROJECT_LEAD_ALREADY_EXISTS);
+                }
             }
 
             await this.validateMembershipChange({
                 projectDoc,
                 projectId: project,
-                change: { add: member },
+                change: { add: { member, isLeadPI: isLeadRole } },
                 label: "proposed",
-                currentInput,
-            });
-        }
+                input: this.toCollaboratorRefs(currentCollabs),
+            },
+                { skipMin: true });
 
-        try {
-            const created = await this.collabRepo.create(dto);
-            await this.collabRepo.updateFemaleProportionByProject(project);
-            if (dto.status !== CollaboratorStatus.verified) {
+            const created = await this.collabRepo.create({
+                ...dto,
+                status: member === userId ? CollaboratorStatus.verified : undefined,
+                isLeadPI: isLeadRole
+            }, userId);
+            //await this.collabRepo.updateFemaleProportionByProject(project);
+            if (member !== userId) {
                 await this.notificationService.notifyProjectInvitation(
-                    member, projectTitle ?? project, dto.role, userId
+                    member, projectDoc.title, dto.role, userId
                 );
+            }
+            if (isLeadRole) {
+                await this.projectRepo.update(project, { leadPI: member }, SYSTEM.SU_USER);
             }
             return created;
         } catch (err: any) {
@@ -279,6 +288,7 @@ export class CollaboratorService {
         return this.collabRepo.find(filter, options);
     }
 
+
     getMyCollaborations = async (
         userId: string,
         filter?: Partial<FilterCollaborators>,
@@ -296,17 +306,13 @@ export class CollaboratorService {
         );
     };
 
-    // ---------------------------------------------------------------------
-    // Update
-    // ---------------------------------------------------------------------
-
     async update(
+        id: string,
         dto: UpdateCollaboratorDto,
         userId: string
     ): Promise<ICollaborator | null> {
 
-        const collaboratorDoc = await this.collabRepo.findById(dto.id);
-
+        const collaboratorDoc = await this.collabRepo.findById(id);
         if (!collaboratorDoc) {
             throw new AppError(ERROR_CODES.COLLABORATOR_NOT_FOUND);
         }
@@ -319,60 +325,165 @@ export class CollaboratorService {
             PERMISSIONS.COLLABORATOR.UPDATE
         );
 
-        // The lead PI collaborator record cannot be updated.
-        if (collaboratorDoc.isLeadPI) {
-            throw new AppError(ERROR_CODES.LEAD_PI_CANNOT_BE_UPDATED);
-        }
-
-        // Only pending and declined collaborators can be updated.
-        if (collaboratorDoc.status === CollaboratorStatus.verified) {
-            throw new AppError(ERROR_CODES.COLLABORATOR_ALREADY_VERIFIED);
-        }
-
         // The lead PI can update collaborators only while the project is in draft.
         if (isLeadPI) {
             if (projectDoc.status !== ProjectStatus.draft) {
                 throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
             }
-            await this.validateCall(projectDoc);
+            await this.assertCurrentApplicationStage(projectDoc);
         }
 
-        if (dto.data.member !== undefined) {
-            const newMember = dto.data.member;
-            const oldMember = String(collaboratorDoc.member);
+        // What is this update actually doing?
+        const oldMember = String(collaboratorDoc.member);
+        const newMember = dto.member ?? oldMember;
+        const isMemberChange = newMember !== oldMember;
+        const wasLead = collaboratorDoc.isLeadPI;
+        const isBecomingLead = dto.role === LeaderRole && !wasLead;
 
-            if (newMember !== oldMember) {
-                // Prevent duplicate membership in the same project.
-                const exists = await this.collabRepo.exists({
-                    project: projectId,
-                    member: newMember
-                });
-                if (exists) {
-                    throw new AppError(ERROR_CODES.COLLABORATOR_ALREADY_EXISTS);
-                }
+        // The current lead can't be replaced or demoted directly.
+        if (wasLead && (isMemberChange || (dto.role !== undefined && dto.role !== LeaderRole))) {
+            throw new AppError(ERROR_CODES.LEAD_PI_CANNOT_BE_UPDATED);
+        }
 
-                await this.validateMembershipChange({
-                    projectDoc,
-                    projectId,
-                    change: { remove: oldMember, add: newMember },
-                    label: "proposed",
-                });
+        if (isMemberChange) {
+            if (collaboratorDoc.status === CollaboratorStatus.verified) {
+                throw new AppError(ERROR_CODES.COLLABORATOR_ALREADY_VERIFIED);
+            }
+
+            const exists = await this.collabRepo.exists({
+                project: projectId,
+                member: newMember
+            });
+
+            if (exists) {
+                throw new AppError(ERROR_CODES.COLLABORATOR_ALREADY_EXISTS);
             }
         }
 
-        // Persist the update after all authorization and validation.
-        const updated = await this.collabRepo.update(dto.id, dto.data, userId);
+        // Validate the proposed team when the member changes or the lead is exchanged.
+        let currentLead: ICollaborator | undefined;
 
-        await this.collabRepo.updateFemaleProportionByProject(projectId);
+        if (isMemberChange || isBecomingLead) {
+            const currentCollabs = await this.collabRepo.find({ project: projectId });
 
-        return updated;
+            currentLead = currentCollabs.find(
+                c => c.isLeadPI && !sameId(c._id, id)
+            );
+
+            const proposedInput = this.toCollaboratorRefs(currentCollabs).map(ref =>
+                isBecomingLead && currentLead && sameId(
+                    ref.member,
+                    currentLead.member.toString()
+                )
+                    ? { ...ref, isLeadPI: false }
+                    : ref
+            );
+
+            await this.validateMembershipChange({
+                projectDoc,
+                projectId,
+                change: {
+                    remove: oldMember,
+                    add: {
+                        member: newMember,
+                        isLeadPI: isBecomingLead
+                    },
+                },
+                label: "proposed",
+                input: proposedInput,
+            });
+        }
+
+        // Persist after all authorization and validation.
+        if (isBecomingLead && currentLead) {
+            await this.collabRepo.update(
+                String(currentLead._id),
+                { isLeadPI: false, role: "DemotedLeadRole" },
+                userId
+            );
+        }
+
+        let updatedCollaborator: ICollaborator | null;
+
+        try {
+            updatedCollaborator = await this.collabRepo.update(
+                id,
+                isBecomingLead ? { ...dto, isLeadPI: true } : dto,
+                userId
+            );
+            if (isBecomingLead) {
+                await this.projectRepo.update(projectId, { leadPI: dto.member }, SYSTEM.SU_USER);
+            }
+        } catch (err) {
+            // Restore the old lead if promoting the new one failed.
+            if (isBecomingLead && currentLead) {
+                await this.collabRepo.update(
+                    String(currentLead._id),
+                    { isLeadPI: true, role: LeaderRole },
+                    userId
+                );
+                await this.projectRepo.update(projectId, { leadPI: currentLead.member.toString() }, SYSTEM.SU_USER);
+            }
+            throw err;
+        }
+
+        // Don't send notifications if the update returned null.
+        if (!updatedCollaborator) {
+            return null;
+        }
+
+        // Notify only after the write succeeded.
+        const projectTitle = projectDoc.title;
+        const newRole = dto.role ?? collaboratorDoc.role;
+
+        if (isMemberChange) {
+            // Old member is removed, new member is invited.
+            await this.notificationService.notifyCollaboratorRemovedFromProject(
+                oldMember,
+                projectTitle,
+                collaboratorDoc.role,
+                userId
+            );
+
+            await this.notificationService.notifyProjectInvitation(
+                newMember,
+                projectTitle,
+                newRole,
+                userId
+            );
+
+        } else if (
+            dto.role !== undefined &&
+            dto.role !== collaboratorDoc.role
+        ) {
+            await this.notificationService.notifyCollaboratorUpdate(
+                oldMember,
+                projectTitle,
+                newRole,
+                collaboratorDoc.role,
+                userId
+            );
+        }
+
+        // Lead exchange: notify the demoted lead too.
+        if (isBecomingLead && currentLead) {
+            await this.notificationService.notifyCollaboratorUpdate(
+                String(currentLead.member),
+                projectTitle,
+                "DemotedLeadRole",
+                LeaderRole,
+                userId
+            );
+        }
+
+        return updatedCollaborator;
     }
 
     // ---------------------------------------------------------------------
     // Transition
     // ---------------------------------------------------------------------
 
-    async transitionState(dto: TransitionRequestDto, userId: string) {
+    async transitionState(dto: TransitionRequestDto, userId: string, userName: string) {
         const { id, current, next, reason } = dto;
 
         const collabDoc = await this.collabRepo.findById(id);
@@ -382,9 +493,11 @@ export class CollaboratorService {
             // use permission for the special permission
             throw new AppError(ERROR_CODES.UNAUTHORIZED);
         }
+
         const projectDoc = await this.projectRepo.findById(String(collabDoc.project));
         if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
-        await this.validateCall(projectDoc);
+
+        await this.assertCurrentApplicationStage(projectDoc);
 
         const from = collabDoc.status as CollaboratorStatus;
         const to = next as CollaboratorStatus;
@@ -401,28 +514,54 @@ export class CollaboratorService {
             }
         }
 
-        return this.collabRepo.updateStatus(id, to, userId, reason);
-    }
+        const updated = await this.collabRepo.update(id, {
+            status: to,
+            statusHistory: {
+                status: to,
+                changedBy: toObjectId(userId),
+                reason,
+                changedAt: new Date(),
+            },
+        }, userId);
 
-    // ---------------------------------------------------------------------
-    // Delete
-    // ---------------------------------------------------------------------
+        if (!updated) return null;
+
+        // Resolve these from your project and collaborator records.
+        const recipientId = String(projectDoc.createdBy);
+
+        if (updated.status === CollaboratorStatus.pending) {
+            //... pending remained
+        }
+
+        if (updated.status === CollaboratorStatus.verified) {
+            await this.notificationService.notifyCollaboratorVerified(
+                recipientId,
+                projectDoc.title,
+                userName,
+                userId
+            );
+        }
+
+        if (updated?.status === CollaboratorStatus.declined) {
+            await this.notificationService.notifyCollaboratorDeclined(
+                recipientId,
+                projectDoc.title,
+                userName,
+                collabDoc.role,
+                reason,
+                userId
+            );
+        }
+
+        return updated;
+    }
 
     async delete(dto: DeleteDto, userId: string) {
         const { id } = dto;
 
         const collabDoc = await this.collabRepo.findById(id);
-
         if (!collabDoc) {
             throw new AppError(ERROR_CODES.COLLABORATOR_NOT_FOUND);
-        }
-
-        if (collabDoc.isLeadPI) {
-            throw new AppError(ERROR_CODES.COLLABORATOR_LEAD_PI_CANNOT_DELETE);
-        }
-
-        if (collabDoc.status === CollaboratorStatus.verified) {
-            throw new AppError(ERROR_CODES.COLLABORATOR_ALREADY_VERIFIED);
         }
 
         const projectId = String(collabDoc.project);
@@ -433,33 +572,46 @@ export class CollaboratorService {
             PERMISSIONS.COLLABORATOR.DELETE
         );
 
+        if (collabDoc.isLeadPI) {
+            throw new AppError(ERROR_CODES.COLLABORATOR_LEAD_PI_CANNOT_DELETE);
+        }
 
+        if (collabDoc.status === CollaboratorStatus.verified) {
+            throw new AppError(ERROR_CODES.COLLABORATOR_ALREADY_VERIFIED);
+        }
 
+        // The lead PI can remove collaborators only while the project is in draft.
         if (isLeadPI) {
-            if (projectDoc.status !== ProjectStatus.draft)
+            if (projectDoc.status !== ProjectStatus.draft) {
                 throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
-            await this.validateCall(projectDoc);
+            }
+            await this.assertCurrentApplicationStage(projectDoc);
         }
 
         const memberToRemove = String(collabDoc.member);
 
-        await this.validateMembershipChange({
-            projectDoc,
-            projectId,
-            change: { remove: memberToRemove },
-            label: "remaining",
-        });
+        // Validate the team that would remain after the removal.
+        const currentCollabs = await this.collabRepo.find({ project: projectId });
+
+        await this.validateMembershipChange(
+            {
+                projectDoc,
+                projectId,
+                change: { remove: memberToRemove },
+                label: "remaining",
+                input: this.toCollaboratorRefs(currentCollabs),
+            },
+            { skipMin: true }
+        );
 
         // Delete only after all validations pass.
         const deleted = await this.collabRepo.delete(id);
 
-        await this.notificationService.notifyProjectRemoval(
+        await this.notificationService.notifyCollaboratorRemovedFromProject(
             memberToRemove,
             projectDoc.title,
             collabDoc.role
         );
-
-        await this.collabRepo.updateFemaleProportionByProject(projectId);
 
         return deleted;
     }

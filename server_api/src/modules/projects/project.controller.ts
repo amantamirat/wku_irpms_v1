@@ -9,14 +9,14 @@ import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
 import { ProjectStatus } from "./project.model";
 import {
-  ApplyProjectDto,
-  CreateProjectDTO,
+  ApplyProjectDTO,
+  CreateOLDProjectDTO,
   FilterProjectsDTO,
   UpdateProjectDTO
 } from "./project.dto";
 import { ProjectProgressService } from "./project-progress-service";
 import { toObjectId } from "../../common/utils/mongoose.utils";
-import { ProjectDto } from "./project.repository";
+import { CreateProjectDto } from "./project.dto";
 import { AppError } from "../../common/errors/app.error";
 
 
@@ -61,7 +61,7 @@ export class ProjectController {
       const {
         grant,
         calendar,
-        leadPI,
+        //leadPI,
         call,
         title,
         objectives,
@@ -72,10 +72,10 @@ export class ProjectController {
         totalDuration
       } = req.body;
 
-      const dto: ProjectDto = {
+      const dto: CreateProjectDto = {
         grant,
         calendar,
-        leadPI,
+        //leadPI,
         call,
         title,
         objectives,
@@ -117,9 +117,9 @@ export class ProjectController {
       // Parse application project data
       const parsedProject = JSON.parse(
         req.body.project,
-      ) as ApplyProjectDto;
+      ) as ApplyProjectDTO;
 
-      const dto: ApplyProjectDto = {
+      const dto: ApplyProjectDTO = {
         title: parsedProject.title,
         objectives: parsedProject.objectives,
         summary: parsedProject.summary,
@@ -211,6 +211,7 @@ export class ProjectController {
     }
   };
 
+  /*
   getMyProjects = async (
     req: AuthenticatedRequest,
     res: Response
@@ -236,6 +237,8 @@ export class ProjectController {
       errorResponse(res, 400, err.message, err);
     }
   };
+
+  */
 
 
 

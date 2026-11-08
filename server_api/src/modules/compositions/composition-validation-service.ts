@@ -1,10 +1,11 @@
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import { checkRange2 } from "../../common/types/range";
+import { checkRange } from "../../common/types/range";
 import { ValidationResult } from "../constraints/services/constraint-validator.service";
 import { GrantRepository } from "../grants/grant.repository";
 import { CollaboratorStatus, ICollaborator } from "../projects/collaborators/collaborator.model";
 import { CollaboratorRepository } from "../projects/collaborators/collaborator.repository";
+import { CollaboratorRef } from "../projects/collaborators/collaborator.service";
 import { ProjectRepository } from "../projects/project.repository";
 import { IUser } from "../users/user.model";
 import { UserRepository } from "../users/user.repository";
@@ -23,6 +24,40 @@ export interface CompositionValidationInput {
 type LoadedParticipants =
     | { ok: true; users: Map<string, IUser>; histories: Map<string, HistoryValidationInput> }
     | { ok: false; errors: string[] };
+
+
+export const toUserId = (member: ICollaborator['member']): string =>
+    (member as IUser)._id !== undefined
+        ? (member as IUser)._id.toString()
+        : member.toString();
+
+
+export type CompositionInputResult =
+    | { valid: true; input: CompositionValidationInput }
+    | ({ valid: false } & Pick<ValidationResult, 'errors'>);
+
+export function toCompositionValidationInput(
+    items: CollaboratorRef[],
+): CompositionInputResult {
+    const leads = items.filter(i => i.isLeadPI);
+
+    if (leads.length === 0) return { valid: false, errors: ['Project has no lead PI.'] };
+    if (leads.length > 1) return { valid: false, errors: ['Project has more than one lead PI.'] };
+
+    const lead = leads[0].member;
+
+    const members = [
+        ...new Set(
+            items
+                .filter(i => !i.isLeadPI)
+                .map(i => i.member)
+                .filter(id => id !== lead),
+        ),
+    ];
+
+    return { valid: true, input: { lead, members } };
+}
+
 
 export class CompositionValidationService {
     constructor(
@@ -77,12 +112,6 @@ export class CompositionValidationService {
             project: projectId,
             excludeStatus: [CollaboratorStatus.declined],
         });
-
-        // `member` can be an ObjectId or a populated IUser
-        const toUserId = (member: ICollaborator['member']): string =>
-            (member as IUser)._id !== undefined
-                ? (member as IUser)._id.toString()
-                : member.toString();
 
         const leads = collaborators.filter(c => c.isLeadPI);
 
@@ -160,7 +189,7 @@ export class CompositionValidationService {
 
         const errors = result.valid
             ? []
-            : result.errors.map(e => `Lead requirement "${leadRequirement.name}": ${e}`);
+            : result.errors.map(e => `Lead requirement (${leadRequirement.name}): ${e}`);
 
         return { valid: errors.length === 0, errors };
     }
@@ -217,11 +246,15 @@ export class CompositionValidationService {
             const qualifyingCount = results.filter(r => r.valid).length;
 
             const isRatio = rule.mode === AggregationMode.RATIO;
+
+            // A ratio over zero members is undefined, so there is nothing to evaluate
+            if (isRatio && members.length === 0) continue;
+
             const value = isRatio
                 ? (members.length > 0 ? qualifyingCount / members.length : 0)
                 : qualifyingCount;
 
-            const check = checkRange2(rule.threshold, value);
+            const check = checkRange(rule.threshold, value);
 
             if (check !== 'ok') {
                 const fmt = (n: number) => (isRatio ? `${(n * 100).toFixed(1)}%` : `${n}`);
@@ -267,7 +300,10 @@ export class CompositionValidationService {
         }
 
         const historyEntries = await Promise.all(
-            userIds.map(async id => [id, await this.userProjectHistory(id, excludeProjectId)] as const),
+            userIds.map(async id => {
+                const user = users.get(id)!; // safe: missing users already returned above
+                return [id, await this.userProjectHistory(user, excludeProjectId)] as const;
+            }),
         );
 
         historyEntries.forEach(([id, history]) => histories.set(id, history));
@@ -283,9 +319,12 @@ export class CompositionValidationService {
         return HistoryParticipation.MEMBER;
     }
 
-    async userProjectHistory(userId: string,
+    private async userProjectHistory(user: IUser,
         excludeProjectId?: string
     ): Promise<HistoryValidationInput> {
+
+        const userId = user._id.toString();
+        const userName = user.name;
 
         const collaborations = (await this.collaboratorRepo.find({
             member: userId,
@@ -293,7 +332,7 @@ export class CompositionValidationService {
         })).filter(c => !excludeProjectId || c.project.toString() !== excludeProjectId);
 
         if (collaborations.length === 0) {
-            return { user: userId, projects: [] };
+            return { userId: userId, userName, projects: [] };
         }
 
         // One query for all projects
@@ -334,6 +373,6 @@ export class CompositionValidationService {
             });
         }
 
-        return { user: userId, projects };
+        return { userId, userName, projects };
     }
 }
