@@ -1,7 +1,7 @@
 
 'use client';
 
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
 import { ColumnProps } from 'primereact/column';
 
 import { ItemManager } from '@/components/ItemManager';
@@ -233,6 +233,14 @@ const ProjectManager = ({
         handleError,
         clearErrors
     } = useValidationErrors();
+
+    // Plain (non-validation) errors still go to the toast
+    useEffect(() => {
+        if (error) {
+            toast.error(error);
+            clearErrors();
+        }
+    }, [error, toast, clearErrors]);
 
     const tableProps = useMemo(
         () => ({
