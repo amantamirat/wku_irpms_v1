@@ -211,7 +211,7 @@ export class ProjectController {
     }
   };
 
-  /*
+  
   getMyProjects = async (
     req: AuthenticatedRequest,
     res: Response
@@ -238,7 +238,7 @@ export class ProjectController {
     }
   };
 
-  */
+ 
 
 
 

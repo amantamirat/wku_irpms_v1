@@ -54,8 +54,12 @@ export class PhaseActivityService {
             );
 
         // A lead PI can add activities only while the project is a draft.
-        if (isLeadPI && projectDoc.status !== ProjectStatus.draft) {
-            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+        if (isLeadPI) {
+            await this.projectAuth.validateOwner(projectDoc);
+        }
+
+        if (!phase) {
+            throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
         }
 
         // Validate before touching the DB.
@@ -145,8 +149,8 @@ export class PhaseActivityService {
                 PERMISSIONS.PHASE_ACTIVITY.UPDATE
             );
 
-        if (isLeadPI && projectDoc.status !== ProjectStatus.draft) {
-            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+        if (isLeadPI) {
+            await this.projectAuth.validateOwner(projectDoc);
         }
 
         // Detect activity kind changes.

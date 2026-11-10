@@ -8,7 +8,7 @@ const end_point = "/projects";
 
 interface IProjectApi extends EntityApi<Project, FilterProjects | undefined> {
     transitionState: (id: string, dto: StateTransition) => Promise<Project>;
-    //me: (filter?: FilterProjects) => Promise<Project[]>;
+    me: (filter?: FilterProjects) => Promise<Project[]>;
     apply: (id: string, project: Partial<Project>) => Promise<any>;
     getProgress: (id: string) => Promise<any>
 }
@@ -24,12 +24,12 @@ export const ProjectApi: IProjectApi = {
         return ApiClient.get(`${end_point}/lookup`, options);
     },
 
-    /*
+   
     async me(filter?: FilterProjects): Promise<Project[]> {
         const data = await ApiClient.get(`${end_point}/me`, filter);
         return data as Project[];
     },
-    */
+    
 
     async getProgress(id: string): Promise<any> {
         const data = await ApiClient.get(`${end_point}/${id}/progress`);

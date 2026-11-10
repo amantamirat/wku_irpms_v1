@@ -138,7 +138,7 @@ export class PhaseService {
                 ERROR_CODES.INVALID_CONSTRAINT,
                 `The ${label} phases do not satisfy the constraint requirements.`,
                 400,
-                result.errors
+                result
             );
         }
     }
@@ -361,15 +361,22 @@ export class PhaseService {
             PERMISSIONS.PHASE.UPDATE
         );
 
-        if (isLeadPI && projectDoc.status !== ProjectStatus.draft) {
-            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+        if (isLeadPI) {
+            await this.projectAuth.validateOwner(projectDoc);
+        }
+
+        // Budget modification is currently not supported
+        if (
+            data.budget !== undefined &&
+            data.budget !== phaseDoc.budget
+        ) {
+            throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
         }
 
         // Only re-validate when a constrained field is being changed.
         const touchesConstrainedFields =
             data.title !== undefined ||
-            data.duration !== undefined ||
-            data.budget !== undefined;
+            data.duration !== undefined;
 
         if (touchesConstrainedFields) {
             await this.validatePhaseChange({
@@ -381,7 +388,6 @@ export class PhaseService {
                         data: {
                             title: data.title,
                             duration: data.duration,
-                            budget: data.budget
                         }
                     }
                 },

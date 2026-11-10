@@ -64,13 +64,13 @@ router.get(
 );
 
 // Put /me before /:id
-/*
+
 router.get(
     '/me',
     verifyAuthToken,
     controller.getMyProjects
 );
-*/
+
 
 // Lookup projects
 router.get(

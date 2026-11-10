@@ -15,6 +15,8 @@ import ProjectDetail from './ProjectDetail';
 import ProjectForm from './ProjectForm';
 import { MENU_ICONS } from '@/utils/menu-icons';
 import { useToast } from '@/contexts/ToastContext';
+import { useValidationErrors } from '@/hooks/useValidationErrors';
+import { ValidationDialog } from '@/components/ValidationDialog';
 
 const getReference = (
     value: unknown
@@ -225,13 +227,19 @@ const ProjectManager = ({
     status
 }: ProjectManagerProps) => {
     const toast = useToast();
+    const {
+        error,
+        validationResult,
+        handleError,
+        clearErrors
+    } = useValidationErrors();
 
     const tableProps = useMemo(
         () => ({
             expandable: {
                 template: (project: Project) => (
                     <ProjectDetail
-                        project={project} 
+                        project={project}
                     />
                 )
             }
@@ -244,32 +252,40 @@ const ProjectManager = ({
     }), [status]);
 
     return (
-        <ItemManager<Project, FilterProjects>
-            api={ProjectApi}
-            filter={filter}
-            resource="project"
-            itemName="Project"
-            headerTitle="Manage Projects"
-            itemIcon={MENU_ICONS.projects}
-            columns={columns}
-            renderForm={(props) => (
-                <ProjectForm {...props} />
-            )}
-            dialogWidth="900px"
-            enableColumnToggle={true}
-            defaultHiddenFields={defaultHiddenFields}
-            statusField="status"
-            transitions={PROJECT_TRANSITIONS}
-            tableProps={tableProps}
-            onError={(error) => toast.error(error)}
-            onSuccess={(operation) =>
-                toast.success(
-                    operation === 'create'
-                        ? 'Project created successfully'
-                        : 'Project updated successfully'
-                )
-            }
-        />
+        <>
+            <ItemManager<Project, FilterProjects>
+                api={ProjectApi}
+                filter={filter}
+                resource="project"
+                itemName="Project"
+                headerTitle="Manage Projects"
+                itemIcon={MENU_ICONS.projects}
+                columns={columns}
+                renderForm={(props) => (
+                    <ProjectForm {...props} />
+                )}
+                dialogWidth="900px"
+                enableColumnToggle={true}
+                defaultHiddenFields={defaultHiddenFields}
+                statusField="status"
+                transitions={PROJECT_TRANSITIONS}
+                tableProps={tableProps}
+                onError={handleError}
+                onSuccess={(operation) =>
+                    toast.success(
+                        operation === 'create'
+                            ? 'Project created successfully'
+                            : 'Project updated successfully'
+                    )
+                }
+            />
+            <ValidationDialog
+                header="Cannot save project"
+                validationResult={validationResult}
+                onHide={clearErrors}
+            />
+        </>
+
     );
 };
 

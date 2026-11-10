@@ -151,7 +151,7 @@ export const filterService = new ScopeFilterService(projectRepo, userRepo);
 // Services
 export const stageService = new StageService(stageRepo, callRepo, evaluationRepo, applicationRepo);
 
-export const projectAuth = new ProjectAuth(projectRepo, authPermissionService);
+export const projectAuth = new ProjectAuth(projectRepo, applicationRepo, authPermissionService);
 
 export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, grantRepo, callRepo, stageRepo,
     applicationRepo, constraintValidator, compositionValidator, projectAuth, notificationService, filterService);

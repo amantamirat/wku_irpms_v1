@@ -32,6 +32,11 @@ import { ApplicationStatus, IApplication } from "./application.model";
 import { IApplicationRepository } from "./application.repository";
 import { SYSTEM } from "../../common/constants/system.constant";
 
+export const FAILED_STATES: ApplicationStatus[] = [
+    ApplicationStatus.notShortlisted,
+    ApplicationStatus.rejected,
+];
+
 export class ApplicationService {
 
     constructor(

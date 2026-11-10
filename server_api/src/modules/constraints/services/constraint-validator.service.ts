@@ -344,12 +344,9 @@ export class ConstraintValidationService {
             // Project content
             this.validateProjectContent(
                 constraint,
-                dto.title,
-                dto.summary,
-                dto.totalBudget ?? 0,
-                dto.totalDuration ?? 0,
-                dto.objectives,
-                dto.keywords ?? [],
+                {
+                    ...dto
+                },
                 options,
             ),
 
@@ -402,6 +399,7 @@ export class ConstraintValidationService {
             this.validateThemes(
                 constraint,
                 dto.themes,
+                [],
                 options,
             ),
         ]);
@@ -419,62 +417,86 @@ export class ConstraintValidationService {
 
     public async validateProjectContent(
         constraint: IConstraint,
-        title: string,
-        summary?: string,
-        totalBudget: number = 0,
-        totalDuration: number = 0,
-        objectives?: {
-            general?: string;
-            specific?: string[];
-            expectedOutputs?: string[];
+        dto: {
+            title?: string;
+            summary?: string;
+            totalBudget?: number;
+            totalDuration?: number;
+            objectives?: {
+                general?: string;
+                specific?: string[];
+                expectedOutputs?: string[];
+            };
+            keywords?: string[];
+            themes?: string[];
         },
-        keywords: string[] = [],
         options: ValidationOptions = {},
     ): Promise<ValidationResult> {
 
         const errors: string[] = [];
 
-        this.validateProjectTitle(
-            constraint,
-            title,
-            errors,
-            options,
-        );
+        if (dto.title !== undefined) {
+            this.validateProjectTitle(
+                constraint,
+                dto.title,
+                errors,
+                options,
+            );
+        }
 
-        this.validateProjectSummary(
-            constraint,
-            summary,
-            errors,
-            options,
-        );
+        if (dto.summary !== undefined) {
+            this.validateProjectSummary(
+                constraint,
+                dto.summary,
+                errors,
+                options,
+            );
+        }
 
-        this.validateKeywordCount(
-            constraint,
-            keywords.length,
-            errors,
-            options,
-        );
+        if (dto.keywords !== undefined) {
+            this.validateKeywordCount(
+                constraint,
+                dto.keywords.length,
+                errors,
+                options,
+            );
+        }
 
-        this.validateProjectObjectivesAndOutput(
-            constraint,
-            objectives,
-            errors,
-            options,
-        );
+        if (dto.objectives !== undefined) {
+            this.validateProjectObjectivesAndOutput(
+                constraint,
+                dto.objectives,
+                errors,
+                options,
+            );
+        }
 
-        this.validateProjectBudget(
-            constraint,
-            totalBudget,
-            errors,
-            options,
-        );
+        if (dto.totalBudget !== undefined) {
+            this.validateProjectBudget(
+                constraint,
+                dto.totalBudget,
+                errors,
+                options,
+            );
+        }
 
-        this.validateProjectDuration(
-            constraint,
-            totalDuration,
-            errors,
-            options,
-        );
+        if (dto.totalDuration !== undefined) {
+            this.validateProjectDuration(
+                constraint,
+                dto.totalDuration,
+                errors,
+                options,
+            );
+        }
+
+        if (dto.themes !== undefined) {
+            this.validateThemes(
+                constraint,
+                dto.themes,
+                errors,
+                options,
+            );
+        }
 
         return this.createValidationResult(errors);
     }
@@ -691,10 +713,11 @@ export class ConstraintValidationService {
     public async validateThemes(
         constraint: IConstraint,
         themes: string[],
+        errors: string[],
         options: ValidationOptions = {},
     ): Promise<ValidationResult> {
 
-        const errors: string[] = [];
+        //const errors: string[] = [];
 
         const counts =
             await this.countThemeLevels(themes);
