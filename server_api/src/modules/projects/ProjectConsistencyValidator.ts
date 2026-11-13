@@ -76,7 +76,7 @@ export class ProjectConsistencyValidator {
         }
 
         return value;
-    }
+    }  
 
     // ---------------------------------------------
     // PROJECT

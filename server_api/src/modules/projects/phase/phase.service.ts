@@ -172,7 +172,7 @@ export class PhaseService {
         const result = this.constraintValidator.validatePhases(
             constraintDoc,
             proposedPhases,
-            change.add ? { skipMin: true } : undefined
+            !change.remove ? { skipMin: true } : undefined
         );
 
         if (!result.valid) {
@@ -269,10 +269,11 @@ export class PhaseService {
 
     private async assertCanApprove(phaseDoc: IPhase) {
         const { activities, equipment } = await this.loadPhaseItems(phaseDoc._id.toString());
-
+        /*
         if (!activities.length) {
             throw new AppError(ERROR_CODES.PHASE_APPROVAL_REQUIRES_ACTIVITY);
         }
+        */
 
         if (activities.some(a => a.status !== PhaseActivityStatus.approved)) {
             throw new AppError(ERROR_CODES.PHASE_ACTIVITIES_MUST_BE_APPROVED);

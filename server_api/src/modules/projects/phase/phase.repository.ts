@@ -120,8 +120,8 @@ export class PhaseRepository implements IPhaseRepository {
     }
 
     /**
- * Update phase.
- */
+  * Update phase.
+  */
     async update(
         id: string,
         data: Partial<UpdatePhaseData>,
@@ -129,7 +129,7 @@ export class PhaseRepository implements IPhaseRepository {
         reason?: string,
     ): Promise<IPhase | null> {
 
-        const { status, ...rest } = data;
+        const { status, statusHistory, ...rest } = data;
 
         return Phase.findByIdAndUpdate(
             toObjectId(id),
