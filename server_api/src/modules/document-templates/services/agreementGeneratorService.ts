@@ -63,9 +63,9 @@ export class AgreementGeneratorService {
         // 2. Validate phase status
         // ---------------------------------------------------------
 
-        if (phase.status !== PhaseStatus.approved) {
+        if (phase.status !== PhaseStatus.active) {
             throw new AppError(
-                ERROR_CODES.PHASE_NOT_APPROVED
+                ERROR_CODES.PHASE_NOT_ACTIVE
             );
         }
 

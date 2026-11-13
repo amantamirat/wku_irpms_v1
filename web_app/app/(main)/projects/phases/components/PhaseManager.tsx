@@ -131,7 +131,7 @@ const PhaseManager = ({
                 severity: 'success',
                 tooltip: 'Generate Agreement PDF',
                 disabled: (row: Phase) =>
-                    row.status !== PhaseStatus.approved ||
+                    row.status !== PhaseStatus.active ||
                     generatingId === row._id,
 
                 onClick: async (row: Phase) => {
