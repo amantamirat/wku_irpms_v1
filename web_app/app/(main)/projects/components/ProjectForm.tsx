@@ -74,10 +74,6 @@ const createInitialProject = (item: Partial<Project> | null | undefined): Projec
     } as Project;
 };
 
-
-
-
-
 /* ------------------------------------------------------------------ */
 /* Form                                                                */
 /* ------------------------------------------------------------------ */
@@ -388,9 +384,9 @@ const ProjectForm = ({
             title: project.title.trim(),
             // DTO expects plain string ids, not populated objects.
             // Call project  -> only `call` is sent. Grant project -> `grant` + `calendar`.
-            call: (isCallProject ? callId : undefined) as Project['call'],
-            grant: (isCallProject ? undefined : grantId) as Project['grant'],
-            calendar: (isCallProject ? undefined : calendarId) as Project['calendar'],
+            call: (isCallProject ? project.call : undefined) as Project['call'],
+            grant: (isCallProject ? undefined : project.grant) as Project['grant'],
+            calendar: (isCallProject ? undefined : project.calendar) as Project['calendar'],
             themes: (project.themes ?? []).map((t) => extractId(t)) as Project['themes'],
             totalBudget: project.totalBudget as number,
             totalDuration: project.totalDuration as number,

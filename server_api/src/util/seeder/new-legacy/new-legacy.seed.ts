@@ -475,7 +475,7 @@ export class NewLegacySeeder {
 
     private buildPhases(
         item: NewLegacyProjectDTO
-    ): PhaseDto[] {
+    ): any[] {
 
         const phaseData = [
             {
@@ -671,8 +671,8 @@ export class NewLegacySeeder {
         // Used budget = budgets of phases that have started (active) or finished (completed)
         const usedBudget = phases
             .filter(phase =>
-                phase.status === PhaseStatus.active ||
-                phase.status === PhaseStatus.completed
+                (phase as any).status === PhaseStatus.active ||
+                (phase as any).status === PhaseStatus.completed
             )
             .reduce((total, phase) => {
                 const budget = Number(phase.budget);
@@ -684,7 +684,7 @@ export class NewLegacySeeder {
 
         const allPhasesCompleted =
             phases.length > 0 &&
-            phases.every(phase => phase.status === PhaseStatus.completed);
+            phases.every(phase => (phase as any) === PhaseStatus.completed);
 
         let status: ProjectStatus;
 

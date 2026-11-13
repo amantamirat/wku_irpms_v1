@@ -140,8 +140,8 @@ type PhaseActivityBase = {
     cost: number;
     detailCost?: IPhaseActivityDetailCost | null;
 
-    startDate: Date | null;
-    endDate: Date | null;
+    startDate: Date;
+    endDate: Date;
 
     status: PhaseActivityStatus;
     statusHistory: IStatusHistory<PhaseActivityStatus>[];
@@ -357,8 +357,8 @@ const PhaseActivitySchema = new Schema<IPhaseActivity>(
 
         detailCost: { type: PhaseActivityDetailCostSchema, required: false },
 
-        startDate: { type: Date, required: true, default: null },
-        endDate: { type: Date, required: true, default: null },
+        startDate: { type: Date, required: true },
+        endDate: { type: Date, required: true },
 
         status: {
             type: String,

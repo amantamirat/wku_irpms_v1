@@ -26,7 +26,7 @@ export type CreatePhaseActivityDto =
     PhaseActivityDto &
     PhaseActivityDetails & {
         project: string;
-        phase?: string;
+        phase: string;
     };
 
 // Partial of any details shape. Partial<> distributes over the union.

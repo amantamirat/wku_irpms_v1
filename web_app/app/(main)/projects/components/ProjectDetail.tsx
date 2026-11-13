@@ -318,13 +318,7 @@ export default function ProjectDetail({ project, updateProject, options = {} }: 
             resource: 'phase',
             render: (p) => <PhaseManager {...p} />
         },
-        {
-            key: 'components',
-            header: 'Components',
-            icon: MENU_ICONS.components,
-            resource: 'projectComponent',
-            render: (p) => <ProjectComponentManager {...p} />
-        },
+
         {
             key: 'activities',
             header: 'Activities',
@@ -338,6 +332,13 @@ export default function ProjectDetail({ project, updateProject, options = {} }: 
             icon: MENU_ICONS.equipments,
             resource: 'phaseEquipment',
             render: (p) => <EquipmentManager {...p} />
+        },
+        {
+            key: 'components',
+            header: 'Components',
+            icon: MENU_ICONS.components,
+            resource: 'projectComponent',
+            render: (p) => <ProjectComponentManager {...p} />
         },
         {
             key: 'documents',

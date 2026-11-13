@@ -1,11 +1,11 @@
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { checkRange } from "../../common/types/range";
+import { toStringId } from "../../common/utils/mongoose.utils";
 import { ValidationResult } from "../constraints/services/constraint-validator.service";
 import { GrantRepository } from "../grants/grant.repository";
 import { CollaboratorStatus, ICollaborator } from "../projects/collaborators/collaborator.model";
 import { CollaboratorRepository } from "../projects/collaborators/collaborator.repository";
-import { CollaboratorRef } from "../projects/collaborators/collaborator.service";
 import { ProjectRepository } from "../projects/project.repository";
 import { IUser } from "../users/user.model";
 import { UserRepository } from "../users/user.repository";
@@ -16,46 +16,45 @@ import { HistoryParticipation } from "./history/history.model";
 import { RequirementRepository } from "./requirements/requirement.repository";
 import { RequirementValidationService } from "./requirements/requirement.validation-service";
 
+type LoadedParticipants =
+    | { ok: true; users: Map<string, IUser>; histories: Map<string, HistoryValidationInput> }
+    | { ok: false; errors: string[] };
+
 export interface CompositionValidationInput {
     lead: string;
     members: string[];
 }
 
-type LoadedParticipants =
-    | { ok: true; users: Map<string, IUser>; histories: Map<string, HistoryValidationInput> }
-    | { ok: false; errors: string[] };
+export type MembershipCompositionItem = Pick<
+    ICollaborator,
+    "member" | "isLeadPI"
+>;
 
-
-export const toUserId = (member: ICollaborator['member']): string =>
-    (member as IUser)._id !== undefined
-        ? (member as IUser)._id.toString()
-        : member.toString();
-
-
-export type CompositionInputResult =
-    | { valid: true; input: CompositionValidationInput }
-    | ({ valid: false } & Pick<ValidationResult, 'errors'>);
 
 export function toCompositionValidationInput(
-    items: CollaboratorRef[],
-): CompositionInputResult {
+    items: MembershipCompositionItem[],
+): CompositionValidationInput {
+
     const leads = items.filter(i => i.isLeadPI);
 
-    if (leads.length === 0) return { valid: false, errors: ['Project has no lead PI.'] };
-    if (leads.length > 1) return { valid: false, errors: ['Project has more than one lead PI.'] };
+    if (leads.length === 0)
+        throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND, 'Project has no lead PI.');
 
-    const lead = leads[0].member;
+    if (leads.length > 1)
+        throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND, 'Project has more than one lead PI.');
+
+    const lead = toStringId(leads[0].member);
 
     const members = [
         ...new Set(
             items
                 .filter(i => !i.isLeadPI)
-                .map(i => i.member)
+                .map(i => toStringId(i.member))
                 .filter(id => id !== lead),
         ),
     ];
 
-    return { valid: true, input: { lead, members } };
+    return { lead, members };
 }
 
 
@@ -122,13 +121,13 @@ export class CompositionValidationService {
             return { ok: false, errors: [`Project ${projectId} has more than one lead PI.`] };
         }
 
-        const lead = toUserId(leads[0].member);
+        const lead = toStringId(leads[0].member);
 
         const members = [
             ...new Set(
                 collaborators
                     .filter(c => !c.isLeadPI)
-                    .map(c => toUserId(c.member))
+                    .map(c => toStringId(c.member))
                     .filter(id => id !== lead),
             ),
         ];

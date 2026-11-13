@@ -12,19 +12,29 @@ export enum PhaseStatus {
     cancelled = 'cancelled',
 }
 
+export enum PaymentStatus {
+    unpaid = 'unpaid',
+    //partially_paid = 'partially_paid',
+    paid = 'paid',
+    refunded = 'refunded',
+}
+
+
 
 export interface IPhase extends Document {
     _id: mongoose.Types.ObjectId;
     project: mongoose.Types.ObjectId;
     order: number;
-    title?: string;
+    //title?: string;
     duration: number;
 
-    startDate?: Date;
-    endDate?: Date;
+    startDate: Date;
+    endDate: Date;
 
     budget: number;
-    description?: string;
+    //description?: string;
+    paymentStatus: PaymentStatus;
+
     status: PhaseStatus;
     statusHistory: IStatusHistory<PhaseStatus>[];
 
@@ -47,10 +57,12 @@ const PhaseSchema = new Schema<IPhase>(
             type: Number,
             required: true,
         },
+        /*
         title: {
             type: String,
             //required: true
         },
+        */
         duration: {
             type: Number,
             min: 0,
@@ -58,21 +70,32 @@ const PhaseSchema = new Schema<IPhase>(
         },
         startDate: {
             type: Date,
-            required: false
+            required: true
         },
         endDate: {
             type: Date,
-            required: false
+            required: true
         },
         budget: {
             type: Number,
             min: 0,
             required: true
         },
+        /*
         description: {
             type: String,
             trim: true
         },
+        */
+
+        paymentStatus: {
+            type: String,
+            enum: Object.values(PaymentStatus),
+            default: PaymentStatus.unpaid,
+            required: true
+        },
+
+
         status: {
             type: String,
             enum: Object.values(PhaseStatus),

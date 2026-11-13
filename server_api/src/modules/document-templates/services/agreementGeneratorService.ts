@@ -32,7 +32,13 @@ export class AgreementGeneratorService {
         private readonly fileStorage: FileStorageService,
         private readonly builder: AgreementDataBuilder,
         private readonly pdf: PdfRenderer,
-    ) { }
+    ) { 
+        // Register Handlebars helpers
+        Handlebars.registerHelper(
+            "incrementedNo",
+            (index: number) => index + 1
+        );
+    }
 
 
     async generatePhaseAgreement(
@@ -130,7 +136,7 @@ export class AgreementGeneratorService {
 
             this.collaboratorRepo.find({
                 project: projectId,
-            }),
+            },{populate:true}),
 
             this.activityRepo.find({
                 phase: phaseId,

@@ -352,15 +352,15 @@ export class AgreementDataBuilder {
             members: otherMembers,
 
             coordinator: {
-                name: this.getPersonName(grant?.coordinator),
+                name: "",
             },
 
             director: {
-                name: this.getPersonName(grant?.director),
+                name: "Getachew M. Wubu (Ph.D)",
             },
 
             vp: {
-                name: this.getPersonName(grant?.vicePresident),
+                name: "Yohannes G. Aemero (Ph.D)"//this.getPersonName(grant?.vicePresident),
             },
         };
     }
@@ -379,35 +379,10 @@ export class AgreementDataBuilder {
 
         return (
             collaborator.member.name ||
-            collaborator?.member?.name ||
-            this.getPersonName(
-                collaborator?.member
-            )
+            collaborator?.member?.name
+            
         );
     }
 
-    /* ---------------------------------------------------------------------- */
-    /*  Generic person name                                                   */
-    /* ---------------------------------------------------------------------- */
-
-    private getPersonName(
-        person: any
-    ): string {
-
-        if (!person) {
-            return "";
-        }
-
-        if (person?.fullName) {
-            return person.fullName;
-        }
-
-        return [
-            person?.firstName,
-            person?.middleName,
-            person?.lastName,
-        ]
-            .filter(Boolean)
-            .join(" ");
-    }
+    
 }

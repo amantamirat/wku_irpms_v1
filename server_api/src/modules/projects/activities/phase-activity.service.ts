@@ -70,7 +70,7 @@ export class PhaseActivityService {
             // `details` against `kind` and returns a ValidationError if invalid.
             return await this.activityRepo.create({
                 ...dto,
-                phase: phase || undefined
+                phase: phase
             });
         } catch (err: any) {
             if (err?.code === 11000) {

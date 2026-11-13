@@ -1,7 +1,7 @@
 'use client';
 
 import { ColumnProps } from 'primereact/column';
-import { useMemo } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 
 import {
     ItemManager
@@ -10,15 +10,18 @@ import {
 import { useToast } from '@/contexts/ToastContext';
 import { MENU_ICONS } from '@/utils/menu-icons';
 
-import { Phase, FilterPhasesOptions } from '../models/phase.model';
 import { PhaseApi } from '../api/phase.api';
+import { FilterPhasesOptions, Phase, PhaseStatus } from '../models/phase.model';
 import PhaseForm from './PhaseForm';
 
 import { Project } from '@/app/(main)/projects/models/project.model';
+import MyBadge from '@/templates/MyBadge';
 import { etbCurrencyFormatter, formatDate } from '@/utils/utils';
 import { PHASE_TRANSITIONS } from '../models/phase.state-machine';
-import MyBadge from '@/templates/MyBadge';
-import PhaseDetail from './PhaseDetail';
+import { RowActionButton } from '@/components/data-table/ItemDataTable';
+import { useValidationErrors } from '@/hooks/useValidationErrors';
+import { ValidationDialog } from '@/components/ValidationDialog';
+import { DocumentTemplateApi } from '@/app/(main)/documentTemplates/api/documentTemplate.api';
 
 // Defined outside the component for a stable reference.
 const columns: ColumnProps[] = [
@@ -95,7 +98,22 @@ const PhaseManager = ({
     useLookup = false,
     disableCrud = false
 }: PhaseManagerProps) => {
+
     const toast = useToast();
+    const {
+        error,
+        validationResult,
+        handleError,
+        clearErrors
+    } = useValidationErrors();
+
+    // Plain (non-validation) errors still go to the toast
+    useEffect(() => {
+        if (error) {
+            toast.error(error);
+            clearErrors();
+        }
+    }, [error, toast, clearErrors]);
 
     const filter = useMemo<FilterPhasesOptions>(
         () => ({
@@ -104,61 +122,109 @@ const PhaseManager = ({
         [project]
     );
 
-    /*
-    const tableProps = useMemo(
-        () => ({
-            expandable: {
-                template: (phase: Phase) => (
-                    <PhaseDetail
-                        project={project}
-                        phase={phase}
-                    />
-                )
+    const [generatingId, setGeneratingId] = useState<string | null>(null);
+
+    const extraRowActions = useMemo<RowActionButton<Phase>[]>(
+        () => [
+            {
+                icon: 'pi pi-file-pdf',
+                severity: 'success',
+                tooltip: 'Generate Agreement PDF',
+                disabled: (row: Phase) =>
+                    row.status !== PhaseStatus.approved ||
+                    generatingId === row._id,
+
+                onClick: async (row: Phase) => {
+                    if (!row._id) return;
+
+                    // Open synchronously to avoid popup blockers.
+                    const newWindow = window.open("", "_blank");
+
+                    try {
+                        setGeneratingId(row._id);
+
+                        const blob = await DocumentTemplateApi.generate(row._id);
+
+                        const blobUrl = window.URL.createObjectURL(blob);
+
+                        if (newWindow) {
+                            newWindow.location.href = blobUrl;
+                        } else {
+                            window.open(blobUrl, "_blank");
+                        }
+
+                        setTimeout(() => {
+                            window.URL.revokeObjectURL(blobUrl);
+                        }, 60000);
+
+                    } catch (error) {
+                        newWindow?.close();
+
+                        console.error("Failed to generate agreement PDF", error);
+
+                        toast.error(
+                            error instanceof Error
+                                ? error.message
+                                : "Failed to generate agreement PDF"
+                        );
+                    } finally {
+                        setGeneratingId(null);
+                    }
+                }
             }
-        }),
-        [project]
+        ],
+        [generatingId, toast]
     );
-    */
+
+
     return (
-        <ItemManager<Phase, FilterPhasesOptions>
-            api={PhaseApi}
-            useLookup={useLookup}
-            resource="phase"
-            itemName="Phase"
-            itemIcon={MENU_ICONS.phases}
-            headerTitle="Manage Phases"
-            columns={columns}
-            filter={filter}
-            dialogWidth="620px"
-            enableColumnToggle
-            defaultHiddenFields={defaultHiddenFields}
-            statusField="status"
-            hideCreateAction={disableCrud}
-            hideEditAction={disableCrud}
-            hideDeleteAction={disableCrud}
-            transitions={
-                PHASE_TRANSITIONS
-            }
-            renderForm={
-                disableCrud
-                    ? undefined
-                    : (props) => (
-                        <PhaseForm
-                            {...props}
-                            project={project}
-                        />
+        <>
+            <ItemManager<Phase, FilterPhasesOptions>
+                api={PhaseApi}
+                useLookup={useLookup}
+                resource="phase"
+                itemName="Phase"
+                itemIcon={MENU_ICONS.phases}
+                headerTitle="Manage Phases"
+                columns={columns}
+                filter={filter}
+                dialogWidth="620px"
+                enableColumnToggle
+                defaultHiddenFields={defaultHiddenFields}
+                statusField="status"
+                hideCreateAction={disableCrud}
+                hideEditAction={disableCrud}
+                hideDeleteAction={disableCrud}
+                transitions={
+                    PHASE_TRANSITIONS
+                }
+                renderForm={
+                    disableCrud
+                        ? undefined
+                        : (props) => (
+                            <PhaseForm
+                                {...props}
+                                project={project}
+                            />
+                        )
+                }
+                //tableProps={tableProps}
+                extraRowActions={extraRowActions}
+                onError={handleError}
+                onSuccess={(operation) =>
+                    toast.success(
+                        operation === 'create'
+                            ? 'Phase created successfully'
+                            : 'Phase updated successfully'
                     )
-            }
-            //tableProps={tableProps}
-            onError={(error) => toast.error(error)}
-            onSuccess={(operation) =>
-                toast.success(
-                    operation === 'create'
-                        ? 'Phase created successfully'
-                        : 'Phase updated successfully'
-                )
-            }
-        />
+                }
+            />
+            <ValidationDialog
+                header="Cannot save phase"
+                validationResult={validationResult}
+                onHide={clearErrors}
+            />
+        </>
     );
 };
 

@@ -18,8 +18,8 @@ export class PhaseController {
             if (!req.auth) throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const {
-                title,
-                order,       // Added: required for unique sequence
+                //title,
+                //order,       // Added: required for unique sequence
                 duration,
                 budget,
                 //description,
@@ -29,7 +29,7 @@ export class PhaseController {
             } = req.body;
 
             const data: CreatePhaseDto = {
-                title,
+                //title,
                 // order: Number(order),
                 duration: Number(duration),
                 budget: Number(budget),
@@ -37,7 +37,7 @@ export class PhaseController {
                 project: project as string,
                 startDate, endDate,
                 //breakdown,    // Passed to service for validation
-                userId: req.auth.userId,
+                //userId: req.auth.userId,
             };
 
             const created = await this.service.create(data, req.auth.userId);
@@ -76,18 +76,12 @@ export class PhaseController {
             const { title, order, duration, budget, description, startDate, endDate } = req.body;
 
             const dto: UpdatePhaseDto = {
-                id: id as string,
-                data: {
-                    title,
-                    duration,
-                    budget,
-                    //description,
-                    startDate, endDate
-                },
-                userId: req.auth.userId,
+                duration,
+                budget,
+                startDate, endDate
             };
 
-            const updated = await this.service.update(dto);
+            const updated = await this.service.update(id, dto, req.auth.userId,);
             successResponse(res, 200, "Phase updated successfully", updated);
         } catch (err: any) {
             errorResponse(res, 400, err.message, err);

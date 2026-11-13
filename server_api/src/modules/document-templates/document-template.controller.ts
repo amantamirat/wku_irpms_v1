@@ -191,6 +191,7 @@ export class DocumentTemplateController {
             });
             res.send(pdf);                       // nothing saved to disk or DB
         } catch (err: any) {
+            console.log(err)
             errorResponse(res, 400, err.message, err);
         }
     };

@@ -63,6 +63,7 @@ import { ProjectComponentRepository } from "../modules/projects/components/compo
 import { HistoryValidationService } from "../modules/compositions/history/history-validation-service";
 import { RequirementValidationService } from "../modules/compositions/requirements/requirement.validation-service";
 import { CompositionValidationService } from "../modules/compositions/composition-validation-service";
+import { ProjectConsistencyValidator } from "../modules/projects/ProjectConsistencyValidator";
 
 export const fileStorageService = new FileStorageService();
 
@@ -146,6 +147,8 @@ export const compositionValidator = new CompositionValidationService(composition
     requirementRepo, collaboratorRepo, projectRepo, grantRepo, userRepo
 );
 
+export const consistencyValidator = new ProjectConsistencyValidator();
+
 export const filterService = new ScopeFilterService(projectRepo, userRepo);
 
 // Services
@@ -158,7 +161,9 @@ export const collabService = new CollaboratorService(collaboratorRepo, projectRe
 
 export const phaseActivityService = new PhaseActivityService(activityRepo, phaseRepo, phaseDocRepo, projectAuth);
 
-export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, constraintValidator, phaseDocRepo, activityRepo, equipmentRepo, projectAuth);
+export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, phaseDocRepo, activityRepo, equipmentRepo,
+    constraintValidator, consistencyValidator,
+    projectAuth);
 
 
 export const applicationService = new ApplicationService(
@@ -173,8 +178,8 @@ export const projectService = new ProjectService(projectRepo, collaboratorRepo, 
     userRepo, verificationRepo,
     grantRepo, callRepo, calendarRepo, stageRepo,
     collabService, phaseService, applicationService,
-    constraintValidator, compositionValidator, templateValidtor, projectAuth,
-    authPermissionService, notificationService, filterService, fileStorageService);
+    constraintValidator, compositionValidator, templateValidtor, consistencyValidator,
+    projectAuth, authPermissionService, notificationService, filterService, fileStorageService);
 
 export const userService = new UserService(userRepo, organizationRepo, roleRepo, collaboratorRepo);
 

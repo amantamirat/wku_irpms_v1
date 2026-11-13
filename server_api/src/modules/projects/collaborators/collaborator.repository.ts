@@ -40,12 +40,6 @@ export interface ICollaboratorRepository {
         options?: FilterOptions
     ): Promise<ICollaborator | null>;
 
-    /*
-    findOne(
-        filters?: FilterCollaborators,
-        options?: FilterOptions
-    ): Promise<ICollaborator | null>;
-    */
 
     find(
         filters?: FilterCollaborators,
@@ -58,25 +52,13 @@ export interface ICollaboratorRepository {
         userId: string
     ): Promise<ICollaborator>;
 
-    /*
-    createMany(
-        dtos: CreateCollaboratorDto[]
-    ): Promise<ICollaborator[]>;
-*/
+  
     update(
         id: string,
         data: Partial<UpdateCollaboratorData>,
         userId: string
     ): Promise<ICollaborator | null>;
 
-    /*
-    updateStatus(
-        id: string,
-        newStatus: CollaboratorStatus,
-        userId: string,
-        reason?: string,
-    ): Promise<ICollaborator | null>;
-    */
 
     exists(
         filters: FilterCollaborators
@@ -107,22 +89,6 @@ export interface ICollaboratorRepository {
 
 
 function populate(dbQuery: any) {
-    /**
-     * dbQuery.populate([
-                {
-                    path: "member",
-                    populate: {
-                        path: "workspace"
-                    }
-                },
-                {
-                    path: "project",
-                    populate: {
-                        path: "leadPI"
-                    }
-                }
-            ]);
-     */
     return dbQuery
         .populate("project")
         .populate("member")
@@ -214,45 +180,6 @@ export class CollaboratorRepository
             .exec();
     }
 
-
-    /**
-     * Find a single collaborator using filters.
-     */
-    /*
-    async findOne(
-        filters: FilterCollaborators = {},
-        options?: FilterOptions
-    ): Promise<ICollaborator | null> {
-
-        const query =
-            this.buildFilter(filters);
-
-        let dbQuery =
-            Collaborator.findOne(query);
-
-        if (options?.populate) {
-            dbQuery.populate([
-                {
-                    path: "member",
-                    populate: {
-                        path: "workspace"
-                    }
-                },
-                {
-                    path: "project",
-                    populate: {
-                        path: "leadPI"
-                    }
-                }
-            ]);
-        }
-
-        return dbQuery
-            .lean<ICollaborator>()
-            .exec();
-    }
-*/
-
     /**
      * Find collaborators using filters.
      */
@@ -303,38 +230,6 @@ export class CollaboratorRepository
 
 
     /**
-     * Create multiple collaborators.
-     */
-    /*
-    async createMany(
-        dtos: CreateCollaboratorDto[]
-    ): Promise<ICollaborator[]> {
-
-        const data: Partial<ICollaborator>[] =
-            dtos.map(dto => ({
-                ...dto,
-
-                project:
-                    new mongoose.Types.ObjectId(dto.project),
-
-                member:
-                    new mongoose.Types.ObjectId(dto.member)
-            }));
-
-        const documents =
-            await Collaborator.insertMany(
-                data,
-                {
-                    ordered: true
-                }
-            );
-
-        return documents as ICollaborator[];
-    }
-        */
-
-
-    /**
  * Update collaborator.
  */
     async update(
@@ -368,44 +263,6 @@ export class CollaboratorRepository
             { new: true, runValidators: true }
         ).exec();
     }
-
-
-    /**
-     * Update collaborator status.
-     */
-    /*
-    async updateStatus(
-        id: string,
-        newStatus: CollaboratorStatus,
-        userId: string,
-        reason?: string,
-    ): Promise<ICollaborator | null> {
-
-        return Collaborator.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
-            {
-                $set: {
-                    status: newStatus
-                },
-                $push: {
-                    statusHistory: {
-                        status: newStatus,
-                        changedBy:
-                            toObjectId(userId),
-                        changedAt: new Date(),
-                        reason
-                    }
-                }
-            },
-            {
-                new: true,
-                runValidators: true
-            }
-        )
-            .lean<ICollaborator>()
-            .exec();
-    }
-*/
 
     /**
      * Check whether a collaborator exists.

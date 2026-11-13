@@ -259,6 +259,17 @@ const ProjectManager = ({
         status
     }), [status]);
 
+    // Keep the permission ids the user picked: the API response may not echo them back
+    const mapSaved = (saved: Project, submitted: Partial<Project>): Project => ({
+        ...saved,
+        grant: submitted.grant ?? saved.grant,
+        call: submitted.call ?? saved.call,
+        calendar: submitted.calendar ?? saved.calendar,
+        workspace: submitted.workspace ?? saved.workspace,
+        organization: submitted.organization ?? saved.organization,
+        leadPI: submitted.leadPI ?? saved.leadPI
+    });
+
     return (
         <>
             <ItemManager<Project, FilterProjects>
@@ -278,6 +289,7 @@ const ProjectManager = ({
                 statusField="status"
                 transitions={PROJECT_TRANSITIONS}
                 tableProps={tableProps}
+                mapSaved={mapSaved}
                 onError={handleError}
                 onSuccess={(operation) =>
                     toast.success(

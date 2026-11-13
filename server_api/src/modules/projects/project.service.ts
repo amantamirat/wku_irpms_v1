@@ -8,8 +8,9 @@ import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionHelper } from "../../common/helpers/transition.helper";
 import { FileStorageService } from "../../common/services/file-storage.service";
 import ScopeFilterService from "../../common/services/scope-filter.service";
+import { toObjectId } from "../../common/utils/mongoose.utils";
 import { ApplicationStatus } from "../applications/application.model";
-import { ApplicationService, FAILED_STATES } from "../applications/application.service";
+import { ApplicationService } from "../applications/application.service";
 import { AuthPermissionService } from "../auth/auth.permission-service";
 import { AuthScope } from "../auth/auth.types";
 import { ICalendarRepository } from "../calendar/calendar.repository";
@@ -18,8 +19,8 @@ import { ICallRepository } from "../calls/call.repository";
 import { IStageRepository } from "../calls/stages/stage.repository";
 import { CompositionValidationService } from "../compositions/composition-validation-service";
 import { HistoryContextInput } from "../compositions/history/history-validation-service";
-import { ConstraintValidationService } from "../constraints/services/constraint-validator.service";
-import { GrantStatus } from "../grants/grant.model";
+import { ConstraintValidationService, toPhaseValidationInput } from "../constraints/services/constraint-validator.service";
+import { GrantStatus, IGrant } from "../grants/grant.model";
 import { IGrantRepository } from "../grants/grant.repository";
 import { VerificationStatus } from "../grants/verifications/verification.model";
 import { IVerificationRepository } from "../grants/verifications/verification.repository";
@@ -35,22 +36,21 @@ import { ProjectComponentRepository } from "./components/component.repository";
 import { PhaseEquipmentRepository } from "./equipments/phase-equipment.repository";
 import { PhaseDocumentType, ProjectDocumentStatus } from "./phase/documents/phase.doc.model";
 import { PhaseDocumentRepository } from "./phase/documents/phase.doc.repository";
-import { PhaseStatus } from "./phase/phase.model";
+import { IPhase, PhaseStatus } from "./phase/phase.model";
 import { IPhaseRepository } from "./phase/phase.repository";
 import { PhaseService } from "./phase/phase.service";
 import { ProjectAuth } from "./project.auth";
 import {
     ApplyProjectDTO,
+    CreateProjectDto,
     FilterProjectsDTO,
     InternalCreateProjectDto,
     UpdateProjectDTO,
 } from "./project.dto";
 import { ProjectStatus } from "./project.model";
 import { IProjectRepository } from "./project.repository";
-import { CreateProjectDto } from "./project.dto";
 import { PROJECT_TRANSITIONS } from "./project.state-machine";
-import { toObjectId } from "../../common/utils/mongoose.utils";
-import { ApplicationRepository } from "../applications/application.repository";
+import { ProjectConsistencyValidator } from "./ProjectConsistencyValidator";
 
 const HALT_STATES: ProjectStatus[] = [
     ProjectStatus.refused,
@@ -60,10 +60,16 @@ const HALT_STATES: ProjectStatus[] = [
 ];
 
 const EXECUTION_STATES: ProjectStatus[] = [
-    ProjectStatus.approved,
+    ProjectStatus.draft,
     ProjectStatus.granted
 ];
 
+interface ValidateProjectParams {
+    grantDoc: IGrant;
+    project: Record<string, any> & { totalBudget?: number; totalDuration?: number };
+    phases?: IPhase[];
+    label: string;
+}
 
 export class ProjectService {
 
@@ -95,6 +101,7 @@ export class ProjectService {
         private readonly constraintValidator: ConstraintValidationService,
         private readonly compositionValidator: CompositionValidationService,
         private readonly templateValidator: TemplateValidationService,
+        private readonly consistencyValidator: ProjectConsistencyValidator,
 
         private readonly projectAuth: ProjectAuth,
         private readonly authPermissionService: AuthPermissionService,
@@ -102,6 +109,43 @@ export class ProjectService {
         private readonly scopeFilterService: ScopeFilterService,
         private readonly fileStorage: FileStorageService
     ) { }
+
+
+
+    private async validateProject(params: ValidateProjectParams): Promise<void> {
+        const { grantDoc, project, phases, label } = params;
+
+        // 1. Consistency (no DB)
+        this.consistencyValidator.validateProjectLimits(project);
+
+        if (phases?.length) {
+            this.consistencyValidator.validatePhaseAllocations(
+                project,
+                phases.map(toPhaseValidationInput)
+            );
+        }
+
+        // 2. Constraint: project content only
+        if (!grantDoc.constraint) return;
+
+        const constraintDoc = await this.constraintValidator.getConstraint(
+            String(grantDoc.constraint)
+        );
+
+        const result = await this.constraintValidator.validateProjectContent(
+            constraintDoc,
+            project
+        );
+
+        if (!result.valid) {
+            throw new AppError(
+                ERROR_CODES.INVALID_CONSTRAINT,
+                `The ${label} project does not satisfy the constraint requirements.`,
+                400,
+                result
+            );
+        }
+    }
 
     async create(dto: CreateProjectDto, userId: string) {
         const {
@@ -117,14 +161,6 @@ export class ProjectService {
             themes
         } = dto;
 
-        // --- Basic validation ---
-        if (totalBudget < 0 || totalDuration <= 0) {
-            throw new AppError(
-                ERROR_CODES.INVALID_INPUT,
-                "Total budget must be non-negative and total duration must be greater than zero."
-            );
-        }
-
         // --- Grant ---
         const grantDoc = await this.grantRepo.findById(grant);
 
@@ -134,26 +170,18 @@ export class ProjectService {
             throw new AppError(ERROR_CODES.GRANT_NOT_ACTIVE);
         }
 
-        // --- Constraint validation ---
-        if (grantDoc.constraint) {
-            const constraintDoc = await this.constraintValidator.getConstraint(
-                grantDoc.constraint.toString()
+        await this.validateProject({
+            grantDoc,
+            project: { ...dto },
+            label: "proposed",
+        });
+
+        // --- Duplicate title ---
+        if (await this.projectRepo.exists({ title })) {
+            throw new AppError(
+                ERROR_CODES.PROJECT_ALREADY_EXISTS,
+                "A project with this title already exists. Please choose a different title."
             );
-
-            const validationResult =
-                await this.constraintValidator.validateProjectContent(
-                    constraintDoc,
-                    { ...dto },
-                );
-
-            if (!validationResult.valid) {
-                throw new AppError(
-                    ERROR_CODES.INVALID_CONSTRAINT,
-                    `The Project ${title} do not satisfy the constraint requirements.`,
-                    400,
-                    validationResult
-                );
-            }
         }
 
         // --- Call and Calendar ---
@@ -174,14 +202,6 @@ export class ProjectService {
         // --- Creator's workspace ---
         const userDoc = await this.userRepo.findById(userId);
 
-        // --- Duplicate title ---
-        if (await this.projectRepo.exists({ title })) {
-            throw new AppError(
-                ERROR_CODES.PROJECT_ALREADY_EXISTS,
-                "A project with this title already exists. Please choose a different title."
-            );
-        }
-
         // --- Create project ---
         const created = await this.projectRepo.create(
             {
@@ -198,114 +218,6 @@ export class ProjectService {
         if (!created) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
         return created;
-    }
-
-
-
-    async apply(
-        id: string,
-        dto: ApplyProjectDTO,
-        userId: string,
-        file: Express.Multer.File
-    ) {
-        try {
-
-            const callDoc = await this.callRepo.findById(id);
-            if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
-            if (callDoc.status !== CallStatus.active) throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
-
-            const firstStageDoc = await this.stageRepo.getFirstStage(id);
-            if (!firstStageDoc) throw new AppError(ERROR_CODES.FIRST_STAGE_NOT_FOUND);
-
-            if (new Date(firstStageDoc.deadline) < new Date()) {
-                throw new AppError(ERROR_CODES.CALL_DEADLINE_PASSED);
-            }
-
-            if (dto.collaborators) {
-                const memberIds = dto.collaborators.map(c => c.member);
-                const memberUsers = await this.userRepo.find({ ids: memberIds });
-                if (memberUsers.length !== memberIds.length) {
-                    throw new AppError(ERROR_CODES.USER_NOT_FOUND);
-                }
-            }
-
-            if (firstStageDoc.constraint) {
-                const constantDoc = await this.constraintValidator.getConstraint(firstStageDoc.constraint.toString());
-                const result =
-                    await this.constraintValidator.validateProject
-                        (constantDoc, dto);
-
-                if (!result?.valid) {
-                    throw new AppError(
-                        ERROR_CODES.INVALID_CONSTRAINT,
-                        "Stage Constraint validation failed",
-                        400,
-                        result
-                    );
-                }
-            }
-
-
-            if (firstStageDoc.template) {
-                const result =
-                    await this.templateValidator.validate(
-                        String(firstStageDoc.template),
-                        file.path
-                    );
-
-                if (!result.valid) {
-                    throw new AppError(
-                        ERROR_CODES.INVALID_DOCUMENT,
-                        "Document validation failed",
-                        400,
-                        result
-                    );
-                }
-            }
-
-            if (await this.projectRepo.exists({ title: dto.title })) {
-                throw new AppError(
-                    ERROR_CODES.PROJECT_ALREADY_EXISTS,
-                    "A project with this title already exists. Please choose a different title."
-                );
-            }
-
-            // The project must exist first: the file path needs its id
-            const projectDoc = await this.internalCreate(
-                {
-                    ...dto,
-                    grant: String(callDoc.grant),
-                    calendar: String(callDoc.calendar),
-                    organization: String(callDoc.organization),
-                    leadPI: userId
-                },
-                userId,
-                { skipValidation: true }
-            );
-
-            try {
-                await this.applicationService.internalCreate(
-                    {
-                        project: String(projectDoc._id),
-                        stage: String(firstStageDoc._id),
-                    },
-                    userId,
-                    projectDoc,
-                    firstStageDoc,
-                    file
-                );
-            } catch (err) {
-                // Don't leave a project without its application
-                await this.projectRepo.delete(String(projectDoc._id)); // adjust to your repo API
-                throw err;
-            }
-
-            return projectDoc;
-        } catch (error) {
-            // No-op if internalCreate already moved or discarded the file
-            await this.fileStorage.discardTemp(file.path);
-            throw error;
-        }
     }
 
     async readProjects(
@@ -351,26 +263,37 @@ export class ProjectService {
     async update(id: string, dto: UpdateProjectDTO, userId: string) {
 
         const { projectDoc, isLeadPI } = await this.projectAuth.auth(
-            id,
-            userId,
-            PERMISSIONS.PROJECT.UPDATE,
+            id, userId, PERMISSIONS.PROJECT.UPDATE
         );
+
+        if (isLeadPI) await this.projectAuth.validateOwner(projectDoc);
 
         if (HALT_STATES.includes(projectDoc.status)) {
             throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
         }
 
-        if (isLeadPI) {
-            await this.projectAuth.validateOwner(projectDoc);
-        }
-
-        // Budget modification is currently not supported
-        if (
+        const budgetChanged =
             dto.totalBudget !== undefined &&
-            dto.totalBudget !== projectDoc.totalBudget
-        ) {
-            throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
-        }
+            dto.totalBudget !== projectDoc.totalBudget;
+
+        const durationChanged =
+            dto.totalDuration !== undefined &&
+            dto.totalDuration !== projectDoc.totalDuration;
+
+        const grantDoc = await this.grantRepo.findById(String(projectDoc.grant));
+        if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+
+        // Only load phases when the change can affect them
+        const phases = (budgetChanged || durationChanged)
+            ? await this.phaseRepo.find({ project: id })
+            : undefined;
+
+        await this.validateProject({
+            grantDoc,
+            project: { ...projectDoc, ...dto },
+            phases,
+            label: "updated"
+        });
 
         return this.projectRepo.update(id, dto, userId);
     }
@@ -565,6 +488,120 @@ export class ProjectService {
     }
 
 
+
+    async apply(
+        id: string,
+        dto: ApplyProjectDTO,
+        userId: string,
+        file: Express.Multer.File
+    ) {
+        try {
+            const { phases } = dto;
+
+            const callDoc = await this.callRepo.findById(id);
+            if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+            if (callDoc.status !== CallStatus.active) throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
+
+            const firstStageDoc = await this.stageRepo.getFirstStage(id);
+            if (!firstStageDoc) throw new AppError(ERROR_CODES.FIRST_STAGE_NOT_FOUND);
+
+            if (new Date(firstStageDoc.deadline) < new Date()) {
+                throw new AppError(ERROR_CODES.CALL_DEADLINE_PASSED);
+            }
+
+            if (dto.collaborators) {
+                const memberIds = dto.collaborators.map(c => c.member);
+                const memberUsers = await this.userRepo.find({ ids: memberIds });
+                if (memberUsers.length !== memberIds.length) {
+                    throw new AppError(ERROR_CODES.USER_NOT_FOUND);
+                }
+            }
+
+            if (firstStageDoc.constraint) {
+                const constantDoc = await this.constraintValidator.getConstraint(firstStageDoc.constraint.toString());
+                const result =
+                    await this.constraintValidator.validateProject
+                        (constantDoc, {
+                            ...dto, phases: phases?.map((phase, index) => ({
+                                ...phase,
+                                order: index + 1,
+                            }))
+                        });
+
+                if (!result?.valid) {
+                    throw new AppError(
+                        ERROR_CODES.INVALID_CONSTRAINT,
+                        "Stage Constraint validation failed",
+                        400,
+                        result
+                    );
+                }
+            }
+
+
+            if (firstStageDoc.template) {
+                const result =
+                    await this.templateValidator.validate(
+                        String(firstStageDoc.template),
+                        file.path
+                    );
+
+                if (!result.valid) {
+                    throw new AppError(
+                        ERROR_CODES.INVALID_DOCUMENT,
+                        "Document validation failed",
+                        400,
+                        result
+                    );
+                }
+            }
+
+            if (await this.projectRepo.exists({ title: dto.title })) {
+                throw new AppError(
+                    ERROR_CODES.PROJECT_ALREADY_EXISTS,
+                    "A project with this title already exists. Please choose a different title."
+                );
+            }
+
+            // The project must exist first: the file path needs its id
+            const projectDoc = await this.internalCreate(
+                {
+                    ...dto,
+                    grant: String(callDoc.grant),
+                    calendar: String(callDoc.calendar),
+                    organization: String(callDoc.organization),
+                    leadPI: userId
+                },
+                userId,
+                { skipValidation: true }
+            );
+
+            try {
+                await this.applicationService.internalCreate(
+                    {
+                        project: String(projectDoc._id),
+                        stage: String(firstStageDoc._id),
+                    },
+                    userId,
+                    projectDoc,
+                    firstStageDoc,
+                    file
+                );
+            } catch (err) {
+                // Don't leave a project without its application
+                await this.projectRepo.delete(String(projectDoc._id)); // adjust to your repo API
+                throw err;
+            }
+
+            return projectDoc;
+        } catch (error) {
+            // No-op if internalCreate already moved or discarded the file
+            await this.fileStorage.discardTemp(file.path);
+            throw error;
+        }
+    }
+
+
     // ---------------------------------------------------
     // DELETE
     // ---------------------------------------------------
@@ -714,11 +751,11 @@ export class ProjectService {
                     {
                         ...phase,
                         project: projectId,
-                        status: phase.status ?? PhaseStatus.proposed,
-                        userId,
+                        //status: phase.status ?? PhaseStatus.proposed,
+                        // userId,
                     },
                     SYSTEM.SU_USER,
-                    options,
+                    //options,
                 );
             }
         }
@@ -744,6 +781,7 @@ export class ProjectService {
         // --------------------------------------------------
 
         if (activities?.length) {
+            /*
             for (const activity of activities) {
                 await this.activityRepo.create(
                     {
@@ -753,6 +791,7 @@ export class ProjectService {
                     // userId,
                 );
             }
+            */
         }
 
         // --------------------------------------------------

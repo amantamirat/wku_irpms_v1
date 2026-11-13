@@ -1,4 +1,4 @@
-import mongoose from "mongoose";
+import mongoose, { Schema, Document } from "mongoose";
 import { AppError } from "../errors/app.error";
 import { ERROR_CODES } from "../errors/error.codes";
 
@@ -9,9 +9,13 @@ export function toObjectId(id: string): mongoose.Types.ObjectId {
             `Invalid ObjectId: ${id}`
         );
     }
-
     return new mongoose.Types.ObjectId(id);
 }
+
+export const toStringId = (objectId: mongoose.Types.ObjectId | Document): string =>
+    (objectId as any)._id !== undefined
+        ? (objectId as any)._id.toString()
+        : objectId.toString();
 
 export function sameId(
     a: string | mongoose.Types.ObjectId,

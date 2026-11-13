@@ -35,11 +35,11 @@ const ProjectWizard = ({ item, onComplete, onHide, visible }: EntitySaveDialogPr
             }]
             : [],
         phases: [{
-            title: 'Phase 1',
+            //title: 'Phase 1',
             order: 1,
             budget: 1000,
             duration: 10,
-            description: ''
+            //description: ''
         }]
     });
 

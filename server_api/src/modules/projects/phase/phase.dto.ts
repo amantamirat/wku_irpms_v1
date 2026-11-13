@@ -1,43 +1,21 @@
-import { PhaseActivityDto } from "../activities/phase-activity.dto";
-import { EquipmentDto } from "../equipments/phase-equipment.dto";
-import { PhaseStatus } from "./phase.model";
-
-/*
-// 1. New Breakdown DTO for the array items
-export interface PhaseBreakdownDto {
-    activity: string;
-    duration: number;
-    budget: number;
-}
-    */
+import mongoose from "mongoose";
 
 // 2. Base Phase structure
 export interface PhaseDto {
-    title?: string;
-    //order: number;           // Added: critical for the unique index {project, order}
+    //_id?: string | mongoose.Types.ObjectId;
     duration: number;        // Total duration of the phase
     budget: number;          // Total budget of the phase
-    //description: string;
-
-    startDate?: Date;
-    endDate?: Date;
-    
-    status?: PhaseStatus;
-    //activities?: PhaseActivityDto[]; // Added: the array of details
-    //equipments?: PhaseEquipmentDto[];
+    startDate: Date;
+    endDate: Date;
 }
 
 // ---------- CREATE DTO ----------
 export interface CreatePhaseDto extends PhaseDto {
     project: string;         // Hex String ID
-    userId?: string;     // Made required: needed for authorization check
 }
 
 // ---------- UPDATE DTO ----------
-export interface UpdatePhaseDto {
-    id: string;              // The Phase ID
-    userId: string;
-    data: Partial<PhaseDto>;
+export interface UpdatePhaseDto extends Partial<PhaseDto> {
 }
 
 // ---------- GET_OPTIONS ----------

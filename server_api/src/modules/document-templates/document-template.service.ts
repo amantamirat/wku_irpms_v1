@@ -1,25 +1,21 @@
 import fs from "fs/promises";
-import path from "path";
 import Handlebars from "handlebars";
+import path from "path";
 import slugify from "slugify";
-
-
-
 import {
-    DocumentTemplateStatus,
     DocumentTemplateType,
-    TemplateEngine,
+    TemplateEngine
 } from "./document-template.model";
 
+import { AppError } from "../../common/errors/app.error";
+import { ERROR_CODES } from "../../common/errors/error.codes";
+import { FileStorageService } from "../../common/services/file-storage.service";
 import {
     CreateDocumentTemplateDTO,
     FilterDocumentTemplateDTO,
     UpdateDocumentTemplateDTO,
 } from "./document-template.dto";
 import { DocumentTemplateRepository } from "./document-template.repository";
-import { FileStorageService } from "../../common/services/file-storage.service";
-import { ERROR_CODES } from "../../common/errors/error.codes";
-import { AppError } from "../../common/errors/app.error";
 
 
 

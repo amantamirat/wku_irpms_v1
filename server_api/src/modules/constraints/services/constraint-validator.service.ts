@@ -22,9 +22,9 @@ import { PhaseDto } from "../../projects/phase/phase.dto";
 import { PhaseActivityDto } from "../../projects/activities/phase-activity.dto";
 import { ProjectComponentDto } from "../../projects/components/component.dto";
 import { EquipmentDto } from "../../projects/equipments/phase-equipment.dto";
+import { IPhase } from "../../projects/phase/phase.model";
 import { IConstraint } from "../constraint.model";
 import { ConstraintRepository } from "../constraint.repository";
-import { CollaboratorDto } from "../../projects/collaborators/collaborator.dto";
 
 // =====================================================
 // TYPES
@@ -55,18 +55,13 @@ export interface ValidationOptions {
     skipMax?: boolean;
 }
 
-export type CollaboratorValidationInput = Pick<
-    CollaboratorDto,
-    "member"
-> & {
-    _id?: string | mongoose.Types.ObjectId;
-};
 
 export type PhaseValidationInput = Pick<
     PhaseDto,
-    "title" | "budget" | "duration"
+    "budget" | "duration" | "startDate" | "endDate"
 > & {
     _id?: string | mongoose.Types.ObjectId;
+    order: number;
 };
 
 export type ActivityValidationInput = Pick<
@@ -91,16 +86,25 @@ export type ComponentValidationInput = Pick<
 };
 
 
-export function toCollaboratorValidationInput<
-    T extends { _id?: string | mongoose.Types.ObjectId; member: any }
->(
-    items: T[],
-) {
-    return items.map(item => ({
+export function toPhaseValidationInput(
+    item: IPhase
+): PhaseValidationInput {
+    return {
         ...(item._id && { _id: item._id }),
-        member: item.member.toString(),
-    }));
+        order: item.order,
+        budget: item.budget,
+        duration: item.duration,
+        startDate: item.startDate,
+        endDate: item.endDate
+    };
 }
+
+export function toPhaseValidationInputs(
+    items: IPhase[]
+): PhaseValidationInput[] {
+    return items.map(toPhaseValidationInput);
+}
+
 
 export interface ConstraintValidationInput {
     title: string;
@@ -118,7 +122,7 @@ export interface ConstraintValidationInput {
         expectedOutputs?: string[];
     };
 
-    collaborators?: CollaboratorValidationInput[];
+    participants?: number;
     phases?: PhaseValidationInput[];
     activities?: ActivityValidationInput[];
     equipments?: EquipmentValidationInput[];
@@ -261,16 +265,15 @@ export class ConstraintValidationService {
         }
 
         const [
-            collaborators,
+            participants,
             phases,
             activities,
             equipments,
             components,
         ] = await Promise.all([
-            this.collaboratorRepo.find({
-                project: projectId,
-            }),
-
+            this.collaboratorRepo.countByProject(
+                projectId,
+            ),
             this.phaseRepo.find({
                 project: projectId,
             }),
@@ -314,13 +317,13 @@ export class ConstraintValidationService {
                         projectDoc.objectives?.expectedOutputs ?? [],
                 },
 
-                collaborators: toCollaboratorValidationInput(collaborators),
+                participants: participants,
 
                 themes: projectDoc.themes.map(
                     theme => theme.toString(),
                 ),
 
-                phases,
+                phases: toPhaseValidationInputs(phases),
                 activities,
                 equipments,
                 components: componentsInput,
@@ -352,9 +355,9 @@ export class ConstraintValidationService {
 
             // Collaborators
             Promise.resolve(
-                this.validateCollaborators(
+                this.validateParticipants(
                     constraint,
-                    dto.collaborators ?? [],
+                    dto.participants ?? 0,
                     options,
                 ),
             ),
@@ -475,8 +478,7 @@ export class ConstraintValidationService {
             this.validateProjectBudget(
                 constraint,
                 dto.totalBudget,
-                errors,
-                options,
+                errors
             );
         }
 
@@ -505,9 +507,9 @@ export class ConstraintValidationService {
     // COLLABORATORS VALIDATION
     // =====================================================
 
-    public validateCollaborators(
+    public validateParticipants(
         constraint: IConstraint,
-        collaborators: CollaboratorValidationInput[],
+        participants: number,
         options: ValidationOptions = {},
     ): ValidationResult {
 
@@ -516,8 +518,8 @@ export class ConstraintValidationService {
         this.validateRange(
             errors,
             constraint.participants,
-            collaborators.length,
-            "Number of collaborators",
+            participants,
+            "Number of pariticipants",
             options,
         );
 
@@ -552,8 +554,8 @@ export class ConstraintValidationService {
                 errors,
                 constraint.phaseBudget,
                 phase.budget,
-                `Phase "${phase.title}" budget`,
-                options,
+                `Phase-${phase.order} budget`,
+                //options,
             );
 
             // Phase duration
@@ -561,8 +563,8 @@ export class ConstraintValidationService {
                 errors,
                 constraint.phaseDuration,
                 phase.duration,
-                `Phase "${phase.title}" duration`,
-                options,
+                `Phase-${phase.order} duration`,
+                //options,
             );
         });
 
@@ -598,7 +600,7 @@ export class ConstraintValidationService {
                 constraint.activityCost,
                 activity.cost,
                 `Activity "${activity.title}" cost`,
-                options,
+                //options,
             );
 
             // Activity duration
@@ -625,7 +627,7 @@ export class ConstraintValidationService {
                     constraint.activityDuration,
                     duration,
                     `Activity "${activity.title}" duration`,
-                    options,
+                    undefined,
                     "days",
                 );
             }
@@ -652,7 +654,7 @@ export class ConstraintValidationService {
             constraint.equipments,
             equipments.length,
             "Number of equipments",
-            options,
+            //options,
         );
 
         // Cost per equipment
@@ -663,7 +665,7 @@ export class ConstraintValidationService {
                 constraint.equipmentCost,
                 equipment.quantity * equipment.unitPrice,
                 `Equipment "${equipment.itemName}" cost`,
-                options,
+                //options,
             );
         });
 
@@ -699,7 +701,7 @@ export class ConstraintValidationService {
                 constraint.componentCollaborators,
                 component.contributors.length,
                 `Number of collaborators in component "${component.title}"`,
-                options,
+                //options,
             );
         });
 
@@ -834,14 +836,10 @@ export class ConstraintValidationService {
         options: ValidationOptions = {},
     ): void {
 
-        if (!objectives) {
-            return;
-        }
-
         // General objective
         this.validateGeneralObjective(
             constraint,
-            objectives.general,
+            objectives?.general,
             errors,
             options,
         );
@@ -849,17 +847,15 @@ export class ConstraintValidationService {
         // Specific objectives
         this.validateSpecificObjectives(
             constraint,
-            objectives.specific ?? [],
-            errors,
-            options,
+            objectives?.specific ?? [],
+            errors
         );
 
         // Expected outputs
         this.validateExpectedOutputs(
             constraint,
-            objectives.expectedOutputs ?? [],
-            errors,
-            options,
+            objectives?.expectedOutputs ?? [],
+            errors
         );
     }
 
@@ -893,7 +889,7 @@ export class ConstraintValidationService {
             constraint.specificObjectives,
             specificObjectives.length,
             "Number of specific objectives",
-            options,
+            //options,
         );
 
         // Word count of each specific objective
@@ -905,7 +901,7 @@ export class ConstraintValidationService {
                     constraint.specificObjectiveWords,
                     countWords(objective ?? ""),
                     `Specific objective ${index + 1} word count`,
-                    options,
+                    undefined,
                     "words",
                 );
             },
@@ -915,8 +911,7 @@ export class ConstraintValidationService {
     private validateExpectedOutputs(
         constraint: IConstraint,
         expectedOutputs: string[],
-        errors: string[],
-        options: ValidationOptions = {},
+        errors: string[]
     ): void {
 
         // Number of expected outputs
@@ -925,7 +920,6 @@ export class ConstraintValidationService {
             constraint.expectedOutputs,
             expectedOutputs.length,
             "Number of expected outputs",
-            options,
         );
 
         // Word count of each expected output
@@ -937,7 +931,7 @@ export class ConstraintValidationService {
                     constraint.expectedOutputWords,
                     countWords(output ?? ""),
                     `Expected output ${index + 1} word count`,
-                    options,
+                    undefined,
                     "words",
                 );
             },
@@ -952,15 +946,13 @@ export class ConstraintValidationService {
         constraint: IConstraint,
         budget: number,
         errors: string[],
-        options: ValidationOptions = {},
     ): void {
 
         this.validateRange(
             errors,
             constraint.budget,
             budget,
-            "Project budget",
-            options,
+            "Project budget"
         );
     }
 
@@ -980,7 +972,8 @@ export class ConstraintValidationService {
             constraint.duration,
             duration,
             "Project duration",
-            options,
+            undefined,
+            "days"
         );
     }
 

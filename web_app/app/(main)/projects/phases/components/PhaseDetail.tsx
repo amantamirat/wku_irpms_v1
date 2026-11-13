@@ -69,11 +69,6 @@ export default function PhaseDetail({ project, phase }: PhaseDetailProps) {
                     <h1 className="text-xl md:text-2xl font-bold m-0 mb-2 text-900">
                         Phase {phase.order}
                     </h1>
-                    {phase.description && (
-                        <p className="text-600 text-sm m-0 line-height-3">
-                            {phase.description}
-                        </p>
-                    )}
                 </div>
                 <div className="flex align-items-center gap-3">
                     <MyBadge type="status" value={phase.status ?? 'proposed'} />

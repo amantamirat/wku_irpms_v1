@@ -1,21 +1,22 @@
-import { CollaboratorStatus, LeaderRole } from "./collaborator.model";
+import { CollaboratorStatus, ICollaborator, LeaderRole } from "./collaborator.model";
 
 export interface CollaboratorDto {
-    member: string; //memeber
+    _id?: string;
+    member: string;
     role: string;
     //isLeadPI?: boolean;
     //status?: CollaboratorStatus;
 }
 
+
+
 // Base fields for creating a collaborator
-export interface CreateCollaboratorDto extends CollaboratorDto {
+export interface CreateCollaboratorDto extends Omit<CollaboratorDto, '_id' | 'isLeadPI' | 'status'> {
     project: string;
-    //projectTitle?: string;
-    //status?: CollaboratorStatus;
 }
 
 // Base fields for updating a collaborator
-export interface UpdateCollaboratorDto extends Partial<CollaboratorDto> {
+export interface UpdateCollaboratorDto extends Partial<CreateCollaboratorDto> {
 }
 
 // Options for querying collaborators

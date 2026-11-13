@@ -171,7 +171,7 @@ export class LegacySeeder {
 
     private buildPhases(
         budget: number
-    ): PhaseDto[] {
+    ): any[] {
 
         const half = budget / 2;
 

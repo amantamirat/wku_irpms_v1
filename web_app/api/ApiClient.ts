@@ -219,6 +219,34 @@ export const ApiClient = {
     },
 
     /**
+ * GET PDF / binary response
+ */
+    async getBlob(endpoint: string): Promise<Blob> {
+        const url = `${BASE_URL}${endpoint}`;
+        const token = getAuthToken();
+
+        try {
+            const response = await fetch(url, {
+                method: "GET",
+                headers: {
+                    Accept: "application/pdf",
+                    ...(token && {
+                        Authorization: `Bearer ${token}`,
+                    }),
+                },
+                cache: "no-store",
+            });
+
+            await handleError(response);
+
+            return await response.blob();
+        } catch (error) {
+            console.log("[ApiClient.getBlob] Error:", error);
+            throw normalizeError(error);
+        }
+    },
+
+    /**
      * POST
      */
     async post<T = any>(

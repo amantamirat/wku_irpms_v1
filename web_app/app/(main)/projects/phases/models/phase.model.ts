@@ -31,24 +31,3 @@ export type Phase = {
 export interface FilterPhasesOptions {
     project?: string | Project;
 }
-
-// --- Validation Logic ---
-export const validatePhase = (phase: Phase): { valid: boolean; message?: string } => {
-    if (!phase.project) {
-        return { valid: false, message: 'Project is required.' };
-    }
-
-    if (!phase.title || phase.title.trim() === '') {
-        return { valid: false, message: 'Title is required.' };
-    }
-
-    if (!phase.duration || phase.duration <= 0) {
-        return { valid: false, message: 'Total duration must be greater than 0.' };
-    }
-
-    if (phase.budget === undefined || phase.budget < 0) {
-        return { valid: false, message: 'A valid budget is required.' };
-    }
-
-    return { valid: true };
-};

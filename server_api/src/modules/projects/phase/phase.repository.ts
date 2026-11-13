@@ -1,21 +1,23 @@
 import mongoose from "mongoose";
-import { Phase, IPhase, PhaseStatus } from "./phase.model";
-import {
-    CreatePhaseDto,
-    FilterPhases,
-    UpdatePhaseDto,
-} from "./phase.dto";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { toObjectId } from "../../../common/utils/mongoose.utils";
+import {
+    FilterPhases,
+    PhaseDto,
+    UpdatePhaseDto
+} from "./phase.dto";
+import { IPhase, Phase, PhaseStatus } from "./phase.model";
+import { IStatusHistory } from "../../../common/types/status-history";
 
-export interface CreatePhaseData {
+export interface CreatePhaseData extends PhaseDto {
     project: string;
-    //title: string;
     order: number;
-    duration: number;
-    budget: number;
-    description?: string;
     status?: PhaseStatus;
+}
+
+export interface UpdatePhaseData extends UpdatePhaseDto {
+    status?: PhaseStatus;
+    statusHistory?: IStatusHistory<PhaseStatus>;
 }
 
 export interface IPhaseRepository {
@@ -31,14 +33,8 @@ export interface IPhaseRepository {
 
     update(
         id: string,
-        data: UpdatePhaseDto["data"]
-    ): Promise<IPhase | null>;
-
-    updateStatus(
-        id: string,
-        newStatus: PhaseStatus,
+        data: UpdatePhaseData,
         userId: string,
-        reason?: string,
     ): Promise<IPhase | null>;
 
     countByProject(projectId: string): Promise<number>;
@@ -100,9 +96,6 @@ export class PhaseRepository implements IPhaseRepository {
             .lean<IPhase>()
             .exec();
     }
-
-
-
     /**
      * Returns the last phase of a project.
      * Last = highest order.
@@ -126,45 +119,41 @@ export class PhaseRepository implements IPhaseRepository {
         return created;
     }
 
+    /**
+ * Update phase.
+ */
     async update(
         id: string,
-        dtoData: UpdatePhaseDto["data"]
-    ): Promise<IPhase | null> {
-        return Phase.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
-            { $set: dtoData },
-            {
-                new: true,
-                runValidators: true,
-            }
-        ).exec();
-    }
-
-    async updateStatus(
-        id: string,
-        status: PhaseStatus,
-        userId: string,
+        data: Partial<UpdatePhaseData>,
+        userId?: string,
         reason?: string,
     ): Promise<IPhase | null> {
 
+        const { status, ...rest } = data;
+
         return Phase.findByIdAndUpdate(
-            new mongoose.Types.ObjectId(id),
+            toObjectId(id),
             {
                 $set: {
-                    status
+                    ...rest,
+                    ...(status !== undefined && { status }),
                 },
-                $push: {
-                    statusHistory: {
-                        status,
-                        changedBy: new mongoose.Types.ObjectId(userId),
-                        changedAt: new Date(),
-                        reason
-                    }
-                }
+                ...(status !== undefined && {
+                    $push: {
+                        statusHistory: {
+                            status,
+                            ...(userId && {
+                                changedBy: toObjectId(userId),
+                            }),
+                            changedAt: new Date(),
+                            reason,
+                        },
+                    },
+                }),
             },
             {
                 new: true,
-                runValidators: true
+                runValidators: true,
             }
         ).exec();
     }

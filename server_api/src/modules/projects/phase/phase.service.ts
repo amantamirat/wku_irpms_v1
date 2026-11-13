@@ -1,38 +1,38 @@
 import { PERMISSIONS } from "../../../common/constants/permissions";
-import { SYSTEM } from "../../../common/constants/system.constant";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
 import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
-import { calculateDurationDays } from "../../../common/utils/date.utils";
-import { IGrantRepository } from "../../grants/grant.repository";
+import { toObjectId } from "../../../common/utils/mongoose.utils";
 import {
     ConstraintValidationService,
-    PhaseValidationInput
+    PhaseValidationInput,
+    toPhaseValidationInput,
+    ValidationOptions,
 } from "../../constraints/services/constraint-validator.service";
+import { IGrantRepository } from "../../grants/grant.repository";
+import { PhaseActivityStatus } from "../activities/phase-activity.model";
+import { IPhaseActivityRepository } from "../activities/phase-activity.repository";
+import { PhaseEquipmentStatus } from "../equipments/phase-equipment.model";
+import { IPhaseEquipmentRepository } from "../equipments/phase-equipment.repository";
 import { ProjectAuth } from "../project.auth";
 import { IProject, ProjectStatus } from "../project.model";
 import { IProjectRepository } from "../project.repository";
-import { PhaseActivityStatus } from "../activities/phase-activity.model";
-import { IPhaseActivityRepository } from "../activities/phase-activity.repository";
+import { ProjectConsistencyValidator } from "../ProjectConsistencyValidator";
 import { PhaseDocumentType, ProjectDocumentStatus } from "./documents/phase.doc.model";
 import { IPhaseDocumentRepository } from "./documents/phase.doc.repository";
 import { CreatePhaseDto, FilterPhases, UpdatePhaseDto } from "./phase.dto";
 import { IPhase, PhaseStatus } from "./phase.model";
 import { IPhaseRepository } from "./phase.repository";
-import { IPhaseEquipmentRepository } from "../equipments/phase-equipment.repository";
-import { PhaseEquipmentStatus } from "../equipments/phase-equipment.model";
-
-type PhaseConstraintFields = Pick<PhaseValidationInput, "title" | "duration" | "budget">;
 
 type ActivityList = Awaited<ReturnType<IPhaseActivityRepository["find"]>>;
 type EquipmentList = Awaited<ReturnType<IPhaseEquipmentRepository["find"]>>;
 
 interface PhaseChange {
-    add?: PhaseConstraintFields;
-    update?: { id: string; data: Partial<PhaseConstraintFields> };
+    add?: PhaseValidationInput;
+    update?: { id: string; data: Partial<PhaseValidationInput> };
     remove?: string;
 }
 
@@ -57,80 +57,122 @@ export class PhaseService {
         private readonly phaseRepo: IPhaseRepository,
         private readonly projectRepo: IProjectRepository,
         private readonly grantRepo: IGrantRepository,
-        private readonly constraintValidator: ConstraintValidationService,
         private readonly phaseDocRepo: IPhaseDocumentRepository,
         private readonly activityRepo: IPhaseActivityRepository,
         private readonly equipmentRepo: IPhaseEquipmentRepository,
+        private readonly constraintValidator: ConstraintValidationService,
+        private readonly consistencyValidator: ProjectConsistencyValidator,
         private readonly projectAuth: ProjectAuth
     ) { }
 
-    // ---------------------------------------------------
-    // Constraint validation helpers
-    // ---------------------------------------------------
-
-    private toValidationInput(phase: IPhase): PhaseValidationInput {
-        return {
-            _id: phase._id,
-            title: phase.title,
-            duration: phase.duration,
-            budget: phase.budget
-        };
-    }
 
     /** Returns the project's phases as they would look after applying `change`. */
     private applyPhaseChange(
         current: IPhase[],
         change: PhaseChange
     ): PhaseValidationInput[] {
+
         let phases = [...current]
             .sort((a, b) => a.order - b.order)
-            .map(phase => this.toValidationInput(phase));
+            .map(toPhaseValidationInput);
 
-        if (change.remove !== undefined) {
-            phases = phases.filter(p => String(p._id) !== change.remove);
+        if (change.remove) {
+            phases = phases.filter(
+                phase => String(phase._id) !== change.remove
+            );
         }
 
         if (change.update) {
             const { id, data } = change.update;
-            phases = phases.map(p =>
-                String(p._id) === id
-                    ? {
-                        ...p,
-                        title: data.title ?? p.title,
-                        duration: data.duration ?? p.duration,
-                        budget: data.budget ?? p.budget
-                    }
-                    : p
+
+            phases = phases.map(phase =>
+                String(phase._id) === id
+                    ? { ...phase, ...data }
+                    : phase
             );
         }
 
         if (change.add) {
-            phases.push({ ...change.add });
+            phases.push(change.add);
         }
 
         return phases;
     }
 
-    /** Validates the grant constraint against the phases after `change`. */
-    private async validatePhaseChange(params: ValidatePhaseChangeParams): Promise<void> {
+
+    /** Validates grant constraints and project budget against the proposed phases. */
+    private async validatePhaseChange(
+        params: ValidatePhaseChangeParams
+    ): Promise<void> {
         const { projectDoc, projectId, change, label } = params;
 
-        const grantDoc = await this.grantRepo.findById(String(projectDoc.grant));
-        if (!grantDoc) throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+        const currentPhases = await this.phaseRepo.find({
+            project: projectId
+        });
 
-        // Nothing to validate when the grant has no constraint.
+        const proposedPhases = this.applyPhaseChange(
+            currentPhases,
+            change
+        );
+
+        // 1. Identify the phase being added or updated.
+        const targetPhase = change.add
+            ? proposedPhases[proposedPhases.length - 1]
+            : change.update
+                ? proposedPhases.find(
+                    phase => String(phase._id) === change.update!.id
+                )
+                : undefined;
+
+        if (targetPhase) {
+            const otherPhases = proposedPhases.filter(
+                phase => String(phase._id) !== String(targetPhase._id)
+            );
+
+            // 2. Validate phase dates against other phases.
+            this.consistencyValidator.validatePhaseDates(
+                targetPhase,
+                otherPhases
+            );
+
+            // 3. Validate existing activities against the proposed phase.
+            if (change.update) {
+                const activities = await this.activityRepo.find({
+                    phase: targetPhase._id
+                });
+
+                this.consistencyValidator.validateActivityAllocations(
+                    targetPhase,
+                    activities
+                );
+            }
+        }
+
+        // 4. Validate project budget.
+        this.consistencyValidator.validatePhaseAllocations(
+            projectDoc,
+            proposedPhases
+        );
+
+        // 5. Validate grant constraints.
+        const grantDoc = await this.grantRepo.findById(
+            String(projectDoc.grant)
+        );
+
+        if (!grantDoc) {
+            throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+        }
+
         if (!grantDoc.constraint) return;
 
         const constraintDoc = await this.constraintValidator.getConstraint(
             String(grantDoc.constraint)
         );
 
-        const currentPhases = await this.phaseRepo.find({ project: projectId });
-        const proposedPhases = this.applyPhaseChange(currentPhases, change);
-
         const result = this.constraintValidator.validatePhases(
             constraintDoc,
-            proposedPhases
+            proposedPhases,
+            change.add ? { skipMin: true } : undefined
         );
 
         if (!result.valid) {
@@ -289,20 +331,21 @@ export class PhaseService {
     // ---------------------------------------------------
     async create(
         dto: CreatePhaseDto,
-        userId: string,
-        options?: { skipValidation?: boolean }
+        userId: string
     ) {
-        const { project } = dto;
+        try {
+            const { project } = dto;
+            const lastPhase = await this.phaseRepo.findLastPhase(project);
+            const order = lastPhase ? lastPhase.order + 1 : 1;
 
-        if (!options?.skipValidation && userId !== SYSTEM.SU_USER) {
             const { projectDoc, isLeadPI } = await this.projectAuth.auth(
                 project,
                 userId,
                 PERMISSIONS.PHASE.CREATE
             );
 
-            if (isLeadPI && projectDoc.status !== ProjectStatus.draft) {
-                throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+            if (isLeadPI) {
+                await this.projectAuth.validateOwner(projectDoc);
             }
 
             await this.validatePhaseChange({
@@ -310,18 +353,16 @@ export class PhaseService {
                 projectId: project,
                 change: {
                     add: {
-                        title: dto.title,
+                        order,
                         duration: dto.duration,
-                        budget: dto.budget
+                        budget: dto.budget,
+                        startDate: dto.startDate,
+                        endDate: dto.endDate
                     }
                 },
-                label: "proposed"
-            });
-        }
-
-        try {
-            const lastPhase = await this.phaseRepo.findLastPhase(project);
-            const order = lastPhase ? lastPhase.order + 1 : 1;
+                label: "proposed",
+            }
+            );
 
             return await this.phaseRepo.create({ ...dto, order });
         } catch (err: any) {
@@ -343,15 +384,10 @@ export class PhaseService {
     // ---------------------------------------------------
     // UPDATE
     // ---------------------------------------------------
-    async update(dto: UpdatePhaseDto) {
-        const { id, data, userId } = dto;
+    async update(id: string, dto: UpdatePhaseDto, userId: string) {
 
         const phaseDoc = await this.phaseRepo.findById(id);
         if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
-
-        if (phaseDoc.status !== PhaseStatus.proposed) {
-            throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
-        }
 
         const projectId = String(phaseDoc.project);
 
@@ -362,47 +398,36 @@ export class PhaseService {
         );
 
         if (isLeadPI) {
+            if (phaseDoc.status !== PhaseStatus.proposed) {
+                throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
+            }
             await this.projectAuth.validateOwner(projectDoc);
         }
 
-        // Budget modification is currently not supported
-        if (
-            data.budget !== undefined &&
-            data.budget !== phaseDoc.budget
-        ) {
-            throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
-        }
-
-        // Only re-validate when a constrained field is being changed.
-        const touchesConstrainedFields =
-            data.title !== undefined ||
-            data.duration !== undefined;
-
-        if (touchesConstrainedFields) {
-            await this.validatePhaseChange({
-                projectDoc,
-                projectId,
-                change: {
-                    update: {
-                        id,
-                        data: {
-                            title: data.title,
-                            duration: data.duration,
-                        }
+        await this.validatePhaseChange({
+            projectDoc,
+            projectId,
+            change: {
+                update: {
+                    id,
+                    data: {
+                        order: phaseDoc.order,
+                        duration: dto.duration,
+                        budget: dto.budget
                     }
-                },
-                label: "proposed"
-            });
-        }
+                }
+            },
+            label: "proposed"
+        });
 
-        return await this.phaseRepo.update(id, data);
+        return await this.phaseRepo.update(id, dto, userId);
     }
 
     // ---------------------------------------------------
     // TRANSITION
     // ---------------------------------------------------
     async transitionState(dto: TransitionRequestDto, userId: string) {
-        const { id, next, current } = dto;
+        const { id, next, current, reason } = dto;
 
         const phaseDoc = await this.phaseRepo.findById(id);
         if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
@@ -469,8 +494,17 @@ export class PhaseService {
 
         // ---- Apply ----
 
-        const updated = await this.phaseRepo.updateStatus(id, to, userId);
+        const updated = await this.phaseRepo.update(id, {
+            status: to,
+            statusHistory: {
+                status: to,
+                changedBy: toObjectId(userId),
+                reason,
+                changedAt: new Date(),
+            },
+        }, userId);
 
+        /*
         if (updated) {
             if (to === PhaseStatus.active) {
                 await this.projectRepo.update(projectId, { currentPhase: id }, userId);
@@ -478,6 +512,7 @@ export class PhaseService {
                 await this.projectRepo.update(projectId, { currentPhase: null }, userId);
             }
         }
+        */
 
         return updated;
     }
@@ -503,8 +538,8 @@ export class PhaseService {
             PERMISSIONS.PHASE.DELETE
         );
 
-        if (isLeadPI && projectDoc.status !== ProjectStatus.draft) {
-            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+        if (isLeadPI) {
+            await this.projectAuth.validateOwner(projectDoc);
         }
 
         // Validate the remaining phases BEFORE deleting anything.

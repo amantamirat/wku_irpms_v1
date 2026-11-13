@@ -38,8 +38,10 @@ export const DocumentTemplateApi: EntityApi<IDocumentTemplate> & {
         return ApiClient.post(end_point, formData);
     },
 
-    async generate(phaseId) {
-        return ApiClient.get(`${end_point}/${phaseId}/generate`);
+    async generate(phaseId: string): Promise<Blob> {
+        return ApiClient.getBlob(
+            `${end_point}/${phaseId}/generate`
+        );
     },
 
     async getById(id: string) {
