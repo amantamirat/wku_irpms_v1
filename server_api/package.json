@@ -11,6 +11,7 @@
     "seed:user": "ts-node src/scripts/seed.ts user",
     "seed:org": "ts-node src/scripts/seed.ts org",
     "seed:legacy": "ts-node src/scripts/seed.ts legacy",
+    "setup:chrome": "puppeteer browsers install chrome",
     "build": "tsc",
     "start": "node dist/irpms-api.js"
   },
