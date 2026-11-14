@@ -1375,6 +1375,26 @@
     "description": "Delete project components from own projects"
   },
   {
+    "category": "Project Component Management",
+    "name": "projectComponent:transition.pending.approved",
+    "description": "Approve a pending project component"
+  },
+  {
+    "category": "Project Component Management",
+    "name": "projectComponent:transition.pending.refused",
+    "description": "Refuse a pending project component"
+  },
+  {
+    "category": "Project Component Management",
+    "name": "projectComponent:transition.approved.pending",
+    "description": "Return an approved project component to pending"
+  },
+  {
+    "category": "Project Component Management",
+    "name": "projectComponent:transition.refused.pending",
+    "description": "Return a refused project component to pending"
+  },
+  {
     "category": "Report Management",
     "name": "report:overview"
   },
@@ -1439,7 +1459,7 @@
     "category": "Experience Management",
     "name": "experience:transition.verified.pending",
     "description": "Return a verified experience to pending status for re-evaluation or correction of its employment information."
-  },  
+  },
   {
     "category": "Experience Management",
     "name": "experience:delete",

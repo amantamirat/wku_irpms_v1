@@ -7,8 +7,6 @@ import { AuthenticatedRequest } from "../../auth/auth.middleware";
 import { CreatePhaseEquipmentDto, FilterPhaseEquipments, UpdatePhaseEquipmentDto } from "./phase-equipment.dto";
 import { PhaseEquipmentService } from "./phase-equipment.service";
 
-
-
 export class PhaseEquipmentController {
 
     constructor(
@@ -28,7 +26,6 @@ export class PhaseEquipmentController {
                 throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const {
-                project,
                 phase,
                 itemName,
                 description,
@@ -40,7 +37,6 @@ export class PhaseEquipmentController {
             } = req.body;
 
             const data: CreatePhaseEquipmentDto = {
-                project: project as string,
                 phase: phase as string,
                 itemName,
                 description,
@@ -48,8 +44,7 @@ export class PhaseEquipmentController {
                 unitPrice: Number(unitPrice),
                 quantity: Number(quantity),
                 packSize: Number(packSize),
-                requiredBy,
-                createdBy: req.auth.userId,
+                requiredBy
             };
 
             const created =
@@ -167,6 +162,7 @@ export class PhaseEquipmentController {
                 throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const { id } = req.params;
+            const userId = req.auth.userId;
 
             const {
                 itemName,
@@ -176,37 +172,31 @@ export class PhaseEquipmentController {
                 quantity,
                 packSize,
                 requiredBy,
+                phase,
             } = req.body;
 
-            const dto: UpdatePhaseEquipmentDto & {
-                id: string;
-                userId: string;
-            } = {
-                id: String(id),
-
-                data: {
-                    itemName,
-                    description,
-                    unit,
-                    unitPrice:
-                        unitPrice !== undefined
-                            ? Number(unitPrice)
-                            : undefined,
-                    quantity:
-                        quantity !== undefined
-                            ? Number(quantity)
-                            : undefined,
-                    packSize: packSize !== undefined
-                        ? Number(packSize) : undefined,
-                    requiredBy,
-                    updatedBy: req.auth.userId,
-                },
-
-                userId: req.auth.userId,
+            const dto: UpdatePhaseEquipmentDto = {
+                ...(itemName !== undefined && { itemName }),
+                ...(description !== undefined && { description }),
+                ...(unit !== undefined && { unit }),
+                ...(unitPrice !== undefined && {
+                    unitPrice: Number(unitPrice),
+                }),
+                ...(quantity !== undefined && {
+                    quantity: Number(quantity),
+                }),
+                ...(packSize !== undefined && {
+                    packSize: Number(packSize),
+                }),
+                ...(requiredBy !== undefined && { requiredBy }),
+                ...(phase !== undefined && { phase }),
             };
 
-            const updated =
-                await this.service.update(dto);
+            const updated = await this.service.update(
+                id,
+                dto,
+                userId
+            );
 
             successResponse(
                 res,

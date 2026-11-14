@@ -14,15 +14,15 @@ export class ProjectAuth {
         private readonly authPermissionService: AuthPermissionService,
     ) { }
 
-    async auth(id: string, userId: string, permission: string) {
+    async auth(id: string, userId: string, permission?: string) {
         const projectDoc = await this.projectRepo.findById(id);
 
         if (!projectDoc) {
             throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
         }
 
-        const isAdmin =
-            await this.authPermissionService.hasPermission(userId, permission);
+        const isAdmin = permission ?
+            await this.authPermissionService.hasPermission(userId, permission) : false;
 
         const isLeadPI =
             String(projectDoc.leadPI) === String(userId);
@@ -53,6 +53,6 @@ export class ProjectAuth {
         }
     }
 
-    
+
 
 }

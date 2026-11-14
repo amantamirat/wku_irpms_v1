@@ -173,12 +173,13 @@ export class PhaseRepository implements IPhaseRepository {
         }).exec();
     }
 
-    async getProjectProgressAggregation(projectId: mongoose.Types.ObjectId) {
-        return await Phase.aggregate([
+    async getProjectProgressAggregation(
+        projectId: mongoose.Types.ObjectId
+    ) {
+        const results = await Phase.aggregate([
             {
                 $match: {
                     project: projectId,
-
                     status: {
                         $nin: [
                             PhaseStatus.cancelled,
@@ -187,24 +188,14 @@ export class PhaseRepository implements IPhaseRepository {
                     },
                 },
             },
-
             {
                 $group: {
                     _id: null,
-
-                    total: {
-                        $sum: 1,
-                    },
-
+                    total: { $sum: 1 },
                     completed: {
                         $sum: {
                             $cond: [
-                                {
-                                    $eq: [
-                                        '$status',
-                                        PhaseStatus.completed,
-                                    ],
-                                },
+                                { $eq: ["$status", PhaseStatus.completed] },
                                 1,
                                 0,
                             ],
@@ -213,6 +204,12 @@ export class PhaseRepository implements IPhaseRepository {
                 },
             },
         ]);
+
+        return results[0] ?? {
+            _id: null,
+            total: 0,
+            completed: 0,
+        };
     }
 
     async delete(id: string): Promise<IPhase | null> {

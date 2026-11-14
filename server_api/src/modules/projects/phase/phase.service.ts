@@ -9,13 +9,12 @@ import { toObjectId } from "../../../common/utils/mongoose.utils";
 import {
     ConstraintValidationService,
     PhaseValidationInput,
-    toPhaseValidationInput,
-    ValidationOptions,
+    toPhaseValidationInput
 } from "../../constraints/services/constraint-validator.service";
 import { IGrantRepository } from "../../grants/grant.repository";
-import { PhaseActivityStatus } from "../activities/phase-activity.model";
+import { IPhaseActivity, PhaseActivityStatus } from "../activities/phase-activity.model";
 import { IPhaseActivityRepository } from "../activities/phase-activity.repository";
-import { PhaseEquipmentStatus } from "../equipments/phase-equipment.model";
+import { IPhaseEquipment, PhaseEquipmentStatus } from "../equipments/phase-equipment.model";
 import { IPhaseEquipmentRepository } from "../equipments/phase-equipment.repository";
 import { ProjectAuth } from "../project.auth";
 import { IProject, ProjectStatus } from "../project.model";
@@ -27,8 +26,6 @@ import { CreatePhaseDto, FilterPhases, UpdatePhaseDto } from "./phase.dto";
 import { IPhase, PhaseStatus } from "./phase.model";
 import { IPhaseRepository } from "./phase.repository";
 
-type ActivityList = Awaited<ReturnType<IPhaseActivityRepository["find"]>>;
-type EquipmentList = Awaited<ReturnType<IPhaseEquipmentRepository["find"]>>;
 
 interface PhaseChange {
     add?: PhaseValidationInput;
@@ -51,6 +48,11 @@ const EXECUTION_STATES: PhaseStatus[] = [
     PhaseStatus.cancelled,
 ];
 
+export const PHASE_HALT_STATES: PhaseStatus[] = [
+    PhaseStatus.completed,
+    PhaseStatus.cancelled,
+];
+
 export class PhaseService {
 
     constructor(
@@ -64,6 +66,15 @@ export class PhaseService {
         private readonly consistencyValidator: ProjectConsistencyValidator,
         private readonly projectAuth: ProjectAuth
     ) { }
+
+    private async loadPhaseItems(phaseId: string) {
+        const [activities, equipment] = await Promise.all([
+            this.activityRepo.find({ phase: phaseId }),
+            this.equipmentRepo.find({ phase: phaseId }),
+        ]);
+
+        return { activities, equipment };
+    }
 
 
     /** Returns the project's phases as they would look after applying `change`. */
@@ -136,14 +147,13 @@ export class PhaseService {
             );
 
             // 3. Validate existing activities against the proposed phase.
-            if (change.update) {
-                const activities = await this.activityRepo.find({
-                    phase: targetPhase._id
-                });
+            if (change.update && targetPhase._id) {
+                const { activities, equipment } = await this.loadPhaseItems(targetPhase._id?.toString());
 
-                this.consistencyValidator.validateActivityAllocations(
+                this.consistencyValidator.validatePhaseResourceAllocations(
                     targetPhase,
-                    activities
+                    activities,
+                    equipment
                 );
             }
         }
@@ -189,71 +199,18 @@ export class PhaseService {
     // Totals helpers (shared by approval and completion)
     // ---------------------------------------------------
 
-    private async loadPhaseItems(phaseId: string) {
-        const [activities, equipment] = await Promise.all([
-            this.activityRepo.find({ phase: phaseId }),
-            this.equipmentRepo.find({ phase: phaseId }),
-        ]);
-
-        return { activities, equipment };
-    }
-
-    /** Sum of activity durations in days. Throws if any activity has bad dates. */
-    /*
-    private sumActivityDuration(activities: ActivityList): number {
-        return activities.reduce((total, activity) => {
-            if (!activity.startDate || !activity.endDate) {
-                throw new AppError(ERROR_CODES.PHASE_ACTIVITY_DATES_REQUIRED);
-            }
-
-            const duration = calculateDurationDays(
-                activity.startDate,
-                activity.endDate
-            );
-
-            if (duration <= 0) {
-                throw new AppError(ERROR_CODES.PHASE_ACTIVITY_INVALID_DATES);
-            }
-
-            return total + duration;
-        }, 0);
-    }
-
-    */
-
-    /** Sum of activity costs plus equipment (unitPrice * quantity). */
-    private sumCost(activities: ActivityList, equipment: EquipmentList): number {
-        const activityCost = activities.reduce(
-            (total, a) => total + Number(a.cost || 0),
-            0
-        );
-
-        const equipmentCost = equipment.reduce(
-            (total, e) => total + Number(e.unitPrice || 0) * Number(e.quantity || 0),
-            0
-        );
-
-        return activityCost + equipmentCost;
-    }
-
-    /** Activity duration and total cost must match the phase's duration and budget. */
-    private assertPhaseTotals(
+    /** Activity total cost and equipments cost must match the phase and budget. */
+    private assertPhaseCost(
         phaseDoc: IPhase,
-        activities: ActivityList,
-        equipment: EquipmentList
+        activities: IPhaseActivity[],
+        equipments: IPhaseEquipment[]
     ) {
 
-        /*
-        const activityDuration = this.sumActivityDuration(activities);
-        if (activityDuration !== Number(phaseDoc.duration)) {
-            throw new AppError(
-                ERROR_CODES.PHASE_DURATION_MISMATCH,
-                `Total activity duration (${activityDuration} days) must equal the phase duration (${phaseDoc.duration} days).`
-            );
-        }
-        */
+        const activitiesCost = this.consistencyValidator.getAllocatedActivityCost(activities);
 
-        const totalCost = this.sumCost(activities, equipment);
+        const equipmentsCost = this.consistencyValidator.getAllocatedEquipmentCost(equipments);
+
+        const totalCost = activitiesCost + equipmentsCost;
 
         if (Math.abs(totalCost - Number(phaseDoc.budget)) > 0.01) {
             throw new AppError(
@@ -269,12 +226,6 @@ export class PhaseService {
 
     private async assertCanApprove(phaseDoc: IPhase) {
         const { activities, equipment } = await this.loadPhaseItems(phaseDoc._id.toString());
-        /*
-        if (!activities.length) {
-            throw new AppError(ERROR_CODES.PHASE_APPROVAL_REQUIRES_ACTIVITY);
-        }
-        */
-
         if (activities.some(a => a.status !== PhaseActivityStatus.approved)) {
             throw new AppError(ERROR_CODES.PHASE_ACTIVITIES_MUST_BE_APPROVED);
         }
@@ -283,7 +234,7 @@ export class PhaseService {
             throw new AppError(ERROR_CODES.PHASE_EQUIPMENT_MUST_BE_APPROVED);
         }
 
-        this.assertPhaseTotals(phaseDoc, activities, equipment);
+        this.assertPhaseCost(phaseDoc, activities, equipment);
     }
 
     private assertCanActivate(previousPhases: IPhase[], nextPhases: IPhase[]) {
@@ -297,14 +248,10 @@ export class PhaseService {
     }
 
     private async assertCanComplete(
-        phaseDoc: IPhase,
-        projectId: string,
-        isFinalPhase: boolean
+        phaseDoc: IPhase
     ) {
         const { activities, equipment } = await this.loadPhaseItems(phaseDoc._id.toString());
-
         if (
-            !activities.length ||
             activities.some(a => a.status !== PhaseActivityStatus.completed)
         ) {
             throw new AppError(ERROR_CODES.PHASE_ACTIVITIES_NOT_COMPLETED);
@@ -314,7 +261,7 @@ export class PhaseService {
             throw new AppError(ERROR_CODES.PHASE_EQUIPMENT_NOT_DELIVERED);
         }
 
-        this.assertPhaseTotals(phaseDoc, activities, equipment);
+        this.assertPhaseCost(phaseDoc, activities, equipment);
 
         const hasProgressReport = await this.phaseDocRepo.exists({
             phase: String(phaseDoc._id),
@@ -389,6 +336,10 @@ export class PhaseService {
 
         const phaseDoc = await this.phaseRepo.findById(id);
         if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
+
+        if (PHASE_HALT_STATES.includes(phaseDoc.status)) {
+            throw new AppError(ERROR_CODES.INVALID_PHASE_STATUS);
+        }
 
         const projectId = String(phaseDoc.project);
 
@@ -487,9 +438,7 @@ export class PhaseService {
 
         if (to === PhaseStatus.completed) {
             await this.assertCanComplete(
-                phaseDoc,
-                projectId,
-                nextPhases.length === 0
+                phaseDoc
             );
         }
 

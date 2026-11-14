@@ -1,19 +1,48 @@
 
 import { FilterQuery } from "mongoose";
 import { CreateProjectComponentDTO, FilterProjectComponents, ProjectComponentDto, UpdateProjectComponentDTO } from "./component.dto";
-import { IProjectComponent, ProjectComponent } from "./component.model";
+import { IProjectComponent, ProjectComponent, ProjectComponentStatus } from "./component.model";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
+import { toObjectId } from "../../../common/utils/mongoose.utils";
 
-
-
+export interface UpdateProjectComponentStatusDto {
+    status: ProjectComponentStatus;
+    reason?: string;
+}
 
 export class ProjectComponentRepository {
 
+    // Maps the DTO filter to a real Mongo query
+    private buildQuery(
+        filters: FilterProjectComponents = {}
+    ): FilterQuery<IProjectComponent> {
+        const query: FilterQuery<IProjectComponent> = {};
+
+        if (filters.project) query.project = filters.project;
+        if (filters.title) query.title = filters.title;
+        if (filters.description) query.description = filters.description;
+
+        if (filters.contributor) query.contributors = filters.contributor;
+        if (filters.theme) query.themes = filters.theme;
+
+        // single `activity` and multi `activities` can be combined
+        const activityIds = [
+            ...(filters.activity ? [filters.activity] : []),
+            ...(filters.activities ?? []),
+        ];
+        if (activityIds.length) query.activities = { $in: activityIds };
+
+        if (filters.excludeId) query._id = { $ne: filters.excludeId };
+
+        return query;
+    }
+
     async create(
-        dto: CreateProjectComponentDTO
+        dto: CreateProjectComponentDTO,
+        userId: string
     ): Promise<IProjectComponent> {
-        return await ProjectComponent.create(dto);
-    }    
+        return await ProjectComponent.create({ ...dto, createdBy: toObjectId(userId) });
+    }
 
     async findById(
         id: string,
@@ -25,7 +54,8 @@ export class ProjectComponentRepository {
             query = query
                 .populate("project")
                 .populate("contributors")
-            //.populate("investigator");
+                .populate("activities")
+                .populate("themes");
         }
 
         return await query;
@@ -35,50 +65,70 @@ export class ProjectComponentRepository {
         filters: FilterProjectComponents,
         options?: FilterOptions
     ): Promise<IProjectComponent[]> {
-
-        let query = ProjectComponent.find(
-            filters as FilterQuery<IProjectComponent>
-        );
+        let query = ProjectComponent.find(this.buildQuery(filters));
 
         if (options?.populate) {
             query = query
                 .populate("project")
                 .populate("contributors")
-            //.populate("investigator");
+                .populate("activities")
+                .populate("themes");
         }
 
         return await query.sort({ title: 1 });
     }
 
-    async findOne(
-        filters: FilterQuery<IProjectComponent>,
-        options?: FilterOptions
-    ): Promise<IProjectComponent | null> {
 
-        let query = ProjectComponent.findOne(filters);
-
-        if (options?.populate) {
-            query = query
-                .populate("project")
-                .populate("contributors")
-            //.populate("investigator");
-        }
-
-        return await query;
-    }
 
     async update(
         id: string,
-        data: UpdateProjectComponentDTO
+        data: UpdateProjectComponentDTO,
+        userId: string
     ): Promise<IProjectComponent | null> {
         return await ProjectComponent.findByIdAndUpdate(
             id,
-            data,
+            { ...data, updatedBy: userId },
             {
                 new: true,
                 runValidators: true,
             }
         );
+    }
+
+    async updateStatus(
+        id: string,
+        data: UpdateProjectComponentStatusDto,
+        userId: string
+    ): Promise<IProjectComponent | null> {
+        const { status, reason } = data;
+
+        const component = await ProjectComponent.findById(toObjectId(id));
+        if (!component) return null;
+
+        // Avoid unnecessary history entries.
+        if (component.status === status) return component;
+
+        component.status = status;
+
+        component.statusHistory.push({
+            status,
+            changedBy: toObjectId(userId),
+            changedAt: new Date(),
+            reason,
+        });
+
+        component.set("updatedBy", toObjectId(userId));
+
+        return component.save();
+    }
+
+    async exists(filters: FilterProjectComponents): Promise<boolean> {
+        const doc = await ProjectComponent.exists(this.buildQuery(filters));
+        return doc !== null;
+    }
+
+    async count(filters: FilterProjectComponents = {}): Promise<number> {
+        return await ProjectComponent.countDocuments(this.buildQuery(filters));
     }
 
     async delete(id: string): Promise<IProjectComponent | null> {
@@ -91,11 +141,5 @@ export class ProjectComponentRepository {
         });
 
         return result.deletedCount ?? 0;
-    }
-
-    async count(
-        filters: FilterQuery<IProjectComponent> = {}
-    ): Promise<number> {
-        return await ProjectComponent.countDocuments(filters);
     }
 }

@@ -57,7 +57,6 @@ export class PhaseActivityController {
                 throw new Error(ERROR_CODES.UNAUTHORIZED);
 
             const {
-                project,
                 phase,
                 title,
                 description,
@@ -73,7 +72,6 @@ export class PhaseActivityController {
             // model (details are cast and unknown keys stripped per kind),
             // so numeric strings in `details` need no manual parsing here.
             const data = {
-                project,
                 phase: phase as string,
                 title,
                 description,
@@ -195,6 +193,7 @@ export class PhaseActivityController {
     };
 
 
+
     // -----------------------
     // Update
     // -----------------------
@@ -203,8 +202,9 @@ export class PhaseActivityController {
         res: Response
     ) => {
         try {
-            if (!req.auth)
+            if (!req.auth) {
                 throw new Error(ERROR_CODES.UNAUTHORIZED);
+            }
 
             const { id } = req.params;
 
@@ -220,32 +220,35 @@ export class PhaseActivityController {
                 endDate,
             } = req.body;
 
-            const dto: UpdatePhaseActivityDto & {
-                id: string;
-                userId: string;
-            } = {
-                id: String(id),
+            const dto: UpdatePhaseActivityDto = {
+                phase,
+                title,
+                description,
+                kind,
+                details,
 
-                data: {
-                    phase,
-                    title,
-                    description,
+                cost: cost !== undefined
+                    ? Number(cost)
+                    : undefined,
 
-                    kind,
-                    details,
+                detailCost: detailCost !== undefined
+                    ? parseDetailCost(detailCost)
+                    : undefined,
 
-                    cost: cost !== undefined ? Number(cost) : undefined,
-                    detailCost: parseDetailCost(detailCost),
+                startDate: startDate !== undefined
+                    ? parseDate(startDate)
+                    : undefined,
 
-                    startDate: parseDate(startDate),
-                    endDate: parseDate(endDate),
-                },
-
-                userId: req.auth.userId,
+                endDate: endDate !== undefined
+                    ? parseDate(endDate)
+                    : undefined,
             };
 
-            const updated =
-                await this.service.update(dto);
+            const updated = await this.service.update(
+                String(id),
+                dto,
+                req.auth.userId
+            );
 
             successResponse(
                 res,
@@ -263,6 +266,7 @@ export class PhaseActivityController {
             );
         }
     };
+
 
 
     // -----------------------

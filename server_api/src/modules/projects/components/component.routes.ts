@@ -2,10 +2,12 @@ import { Router } from "express";
 import { PERMISSIONS } from "../../../common/constants/permissions";
 
 import {
-    componentRepo,
-    userRepo,
-    projectAuth,
+    activityRepo,
     checkPermission,
+    collaboratorRepo,
+    componentRepo,
+    projectAuth,
+    themeRepo
 } from "../../../core/container";
 
 import { verifyAuthToken } from "../../auth/auth.middleware";
@@ -15,7 +17,9 @@ import { ProjectComponentService } from "./component.service";
 const controller = new ProjectComponentController(
     new ProjectComponentService(
         componentRepo,
-        userRepo,
+        collaboratorRepo,
+        activityRepo,
+        themeRepo,
         projectAuth
     )
 );

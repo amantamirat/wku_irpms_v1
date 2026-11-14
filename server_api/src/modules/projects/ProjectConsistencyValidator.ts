@@ -9,7 +9,7 @@ interface ProjectAllocation {
 
 interface PhaseAllocation {
     _id?: string | mongoose.Types.ObjectId;
-    project?: string;
+    project?: string| mongoose.Types.ObjectId;
     order?: number;
     budget?: number;
     duration?: number;
@@ -24,6 +24,21 @@ interface ActivityAllocation {
     startDate?: Date | string;
     endDate?: Date | string;
 }
+
+interface EquipmentAllocation {
+    _id?: string | mongoose.Types.ObjectId;
+    phase?: string | mongoose.Types.ObjectId;
+
+    itemName?: string;
+
+    quantity?: number;
+    unitPrice?: number;
+    packSize?: number;
+
+    requiredBy?: Date | string;
+}
+
+
 export class ProjectConsistencyValidator {
 
     // ---------------------------------------------
@@ -76,7 +91,7 @@ export class ProjectConsistencyValidator {
         }
 
         return value;
-    }  
+    }
 
     // ---------------------------------------------
     // PROJECT
@@ -138,7 +153,6 @@ export class ProjectConsistencyValidator {
             maximumFractionDigits: 2
         }).format(value);
     }
-
 
     /**
  * Validates that phases do not overlap.
@@ -269,6 +283,104 @@ export class ProjectConsistencyValidator {
     }
 
     // ---------------------------------------------
+    // EQUIPMENT ALLOCATIONS
+    // ---------------------------------------------
+
+    getAllocatedEquipmentCost(
+        equipment: EquipmentAllocation[]
+    ): number {
+
+        return equipment.reduce((total, item) => {
+
+            const quantity = this.validateNonNegative(
+                item.quantity,
+                `Equipment quantity (${item.itemName})`
+            );
+
+            const unitPrice = this.validateNonNegative(
+                item.unitPrice,
+                `Equipment unit price (${item.itemName})`
+            );
+
+            return total + (quantity * unitPrice);
+
+        }, 0);
+    }
+
+    validateEquipmentDates(
+        phase: PhaseAllocation,
+        equipment: EquipmentAllocation[]
+    ): void {
+
+        const phaseDates = this.validateDateRange(
+            phase.startDate,
+            phase.endDate,
+            "phase"
+        );
+
+        for (const item of equipment) {
+
+            // requiredBy is optional
+            if (!item.requiredBy) {
+                continue;
+            }
+
+            const requiredDate = this.getDate(item.requiredBy);
+
+            if (!Number.isFinite(requiredDate)) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_INPUT,
+                    `Invalid required date for equipment: ${item.itemName}.`
+                );
+            }
+
+            if (
+                requiredDate < phaseDates.start ||
+                requiredDate > phaseDates.end
+            ) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_INPUT,
+                    `Equipment "${item.itemName}" required date must fall within the parent phase dates.`,
+                    400,
+                    {
+                        equipmentId: item._id,
+                        phaseId: phase._id,
+                        requiredBy: item.requiredBy,
+                        phaseStartDate: phase.startDate,
+                        phaseEndDate: phase.endDate
+                    }
+                );
+            }
+        }
+    }
+
+    validateEquipmentPhase(
+        phase: PhaseAllocation,
+        equipment: EquipmentAllocation[]
+    ): void {
+
+        for (const item of equipment) {
+
+            if (
+                item.phase &&
+                phase._id &&
+                String(item.phase) !== String(phase._id)
+            ) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_INPUT,
+                    `Equipment "${item.itemName}" does not belong to the specified phase.`,
+                    400,
+                    {
+                        equipmentId: item._id,
+                        equipmentPhaseId: item.phase,
+                        expectedPhaseId: phase._id
+                    }
+                );
+            }
+        }
+    }
+
+    // ---------------------------------------------
     // ACTIVITY ALLOCATIONS
     // ---------------------------------------------
 
@@ -364,6 +476,68 @@ export class ProjectConsistencyValidator {
     // ---------------------------------------------
     // FINAL VALIDATION
     // ---------------------------------------------
+
+    validatePhaseResourceAllocations(
+        phase: PhaseAllocation,
+        activities: ActivityAllocation[],
+        equipment: EquipmentAllocation[]
+    ): void {
+
+        const activityCost =
+            this.getAllocatedActivityCost(activities);
+
+        const equipmentCost =
+            this.getAllocatedEquipmentCost(equipment);
+
+        const allocatedCost = activityCost + equipmentCost;
+
+        const phaseBudget = phase.budget ?? 0;
+
+        if (allocatedCost > phaseBudget) {
+
+            const remainingBudget = phaseBudget - allocatedCost;
+
+            throw new AppError(
+                ERROR_CODES.INVALID_PHASE_BUDGET,
+
+                `Total activity and equipment cost
+            (${this.formatNumber(allocatedCost)})
+            exceeds the phase budget
+            (${this.formatNumber(phaseBudget)}).
+            The allocated cost exceeds the available
+            phase budget by
+            ${this.formatNumber(Math.abs(remainingBudget))}.`,
+
+                400,
+                {
+                    phaseId: phase._id,
+                    phaseBudget,
+                    activityCost,
+                    equipmentCost,
+                    allocatedCost,
+                    remainingBudget
+                }
+            );
+        }
+
+        // Validate activity dates
+        this.validateActivityDates(
+            phase,
+            activities
+        );
+
+        // Validate equipment dates
+        this.validateEquipmentDates(
+            phase,
+            equipment
+        );
+
+        // Validate equipment ownership
+        this.validateEquipmentPhase(
+            phase,
+            equipment
+        );
+    }
 
     validateFinalAllocation(
         project: ProjectAllocation,

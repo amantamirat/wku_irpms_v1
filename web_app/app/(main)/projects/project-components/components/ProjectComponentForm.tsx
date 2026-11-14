@@ -1,29 +1,74 @@
-
 'use client';
 
-import { FormEvent, useEffect, useState } from 'react';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
-import { Dropdown } from 'primereact/dropdown';
 import { MultiSelect } from 'primereact/multiselect';
 import { classNames } from 'primereact/utils';
+import { FormEvent, useEffect, useMemo, useState } from 'react';
 
 import { ItemFormRenderProps } from '@/components/ItemManager';
 
 import { Project } from '@/app/(main)/projects/models/project.model';
 
-
-import { User } from '@/app/(main)/users/models/user.model';
-import { UserApi } from '@/app/(main)/users/api/user.api';
-
 import { extractId } from '@/utils/utils';
-import { ProjectComponentDTO } from '../models/component.model';
 import { CollaboratorApi } from '../../collaborators/api/collaborator.api';
+                   // adjust path
+import { ProjectComponentDTO } from '../models/component.model';
+import { ActivityApi } from '../../activities/api/phase-activity.api';
+import { ThemeApi } from '@/app/(main)/thematics/themes/api/theme.api';
+import { Theme } from '@/app/(main)/thematics/themes/models/theme.model';
 
 interface ProjectComponentFormProps
     extends ItemFormRenderProps<ProjectComponentDTO> {
     project?: Project | string | null;
 }
+
+type Option = { label: string; value: string };
+
+// ---------- helpers ----------
+
+const idOf = (x: any): string => String(extractId(x) ?? '');
+
+const labelOf = (x: any, fallback: string): string =>
+    x && typeof x === 'object'
+        ? String(x.name ?? x.title ?? x.email ?? fallback)
+        : fallback;
+
+// Unique, non-empty IDs
+const uniqueIds = (list: any[] = []): string[] =>
+    [...new Set(list.map(idOf).filter(Boolean))];
+
+/**
+ * Build unique { label, value } options from the loaded items, plus any
+ * currently selected items (so selected chips always have a matching option).
+ */
+const buildOptions = (loaded: any[] = [], selected: any[] = []): Option[] => {
+    const map = new Map<string, Option>();
+
+    [...loaded, ...selected].forEach((x) => {
+        const id = idOf(x);
+        if (!id || map.has(id)) return;
+        map.set(id, { value: id, label: labelOf(x, id) });
+    });
+
+    return [...map.values()];
+};
+
+const buildInitial = (
+    item: ProjectComponentDTO | null | undefined,
+    project?: Project | string | null
+): ProjectComponentDTO =>
+    ({
+        ...(item ?? {}),
+        project: project ?? item?.project ?? undefined,
+        title: item?.title ?? '',
+        description: item?.description ?? '',
+        contributors: item?.contributors ?? [],
+        activities: item?.activities ?? [],
+        themes: item?.themes ?? [],
+    }) as ProjectComponentDTO;
+
+// ---------- component ----------
 
 const ProjectComponentForm = ({
     item,
@@ -33,112 +78,167 @@ const ProjectComponentForm = ({
     project,
 }: ProjectComponentFormProps) => {
 
-    const [localItem, setLocalItem] = useState<ProjectComponentDTO>({
-        ...(item ?? {}),
-        project: project ?? item?.project ?? undefined,
-        title: item?.title ?? '',
-        description: item?.description ?? '',
-        contributors: item?.contributors ?? [],
-        //investigator: item?.investigator ?? '',
-    } as ProjectComponentDTO);
+    const [localItem, setLocalItem] = useState<ProjectComponentDTO>(
+        buildInitial(item, project)
+    );
 
-    const [users, setUsers] = useState<User[]>([]);
+    // Raw loaded data
+    const [users, setUsers] = useState<any[]>([]);
+    const [activities, setActivities] = useState<any[]>([]);
+    const [themes, setThemes] = useState<any[]>([]);
+
     const [loadingUsers, setLoadingUsers] = useState(false);
+    const [loadingActivities, setLoadingActivities] = useState(false);
+    const [loadingThemes, setLoadingThemes] = useState(false);
     const [submitted, setSubmitted] = useState(false);
 
-    const projectId = extractId(localItem.project);
+    const projectId = idOf(localItem.project);
+
+    // Project themes: populated objects or plain ID strings.
+    const projectThemes: any[] = useMemo(() => {
+        const p = localItem.project;
+        return typeof p === 'object' && p ? ((p as Project).themes ?? []) as any[] : [];
+    }, [localItem.project]);
+
+    // Stable key so the effect only reruns when the theme list really changes.
+    const themesKey = projectThemes.map(idOf).join(',');
 
     // Reset form when selected component or project changes.
     useEffect(() => {
-        setLocalItem({
-            ...(item ?? {}),
-            project: project ?? item?.project ?? undefined,
-            title: item?.title ?? '',
-            description: item?.description ?? '',
-            contributors: item?.contributors ?? [],
-            // investigator: item?.investigator ?? '',
-        } as ProjectComponentDTO);
-
+        setLocalItem(buildInitial(item, project));
         setSubmitted(false);
     }, [item, project]);
 
-    // Load available users.
+    // Load project collaborators (contributor options).
     useEffect(() => {
+        if (!projectId) {
+            setUsers([]);
+            return;
+        }
+
         let cancelled = false;
 
         const fetchUsers = async () => {
             setLoadingUsers(true);
-
             try {
                 const data = await CollaboratorApi.lookup!({ project: projectId });
-
-                const users = data
-                    .map(c => c.member) as User[];
-
-                if (!cancelled) {
-                    setUsers(users);
-                }
+                if (!cancelled) setUsers(data.map((c: any) => c.member));
             } catch (error) {
                 console.error('Failed to load users:', error);
-
-                if (!cancelled) {
-                    setUsers([]);
-                }
+                if (!cancelled) setUsers([]);
             } finally {
-                if (!cancelled) {
-                    setLoadingUsers(false);
-                }
+                if (!cancelled) setLoadingUsers(false);
             }
         };
 
         fetchUsers();
-
-        return () => {
-            cancelled = true;
-        };
+        return () => { cancelled = true; };
     }, [projectId]);
 
-    // Convert populated users or IDs to IDs for form controls.
-    const contributorIds = (localItem.contributors ?? []).map(
-        (user: any) => extractId(user)
+    // Load project activities.
+    useEffect(() => {
+        if (!projectId) {
+            setActivities([]);
+            return;
+        }
+
+        let cancelled = false;
+
+        const fetchActivities = async () => {
+            setLoadingActivities(true);
+            try {
+                const data = await ActivityApi.lookup!({ project: projectId });
+                if (!cancelled) setActivities(data as any[]);
+            } catch (error) {
+                console.error('Failed to load activities:', error);
+                if (!cancelled) setActivities([]);
+            } finally {
+                if (!cancelled) setLoadingActivities(false);
+            }
+        };
+
+        fetchActivities();
+        return () => { cancelled = true; };
+    }, [projectId]);
+
+    // Resolve project themes (use populated objects, fetch by ID otherwise).
+    useEffect(() => {
+        if (!projectThemes.length) {
+            setThemes([]);
+            return;
+        }
+
+        let cancelled = false;
+
+        const resolveThemes = async () => {
+            setLoadingThemes(true);
+            try {
+                const resolved = await Promise.all(
+                    projectThemes.map(async (t) => {
+                        if (typeof t === 'object' && t?.title) return t as Theme;
+                        try {
+                            return (await ThemeApi.getById!(idOf(t))) as Theme;
+                        } catch {
+                            return null;
+                        }
+                    })
+                );
+                if (!cancelled) setThemes(resolved.filter(Boolean));
+            } finally {
+                if (!cancelled) setLoadingThemes(false);
+            }
+        };
+
+        resolveThemes();
+        return () => { cancelled = true; };
+        // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, [themesKey]);
+
+    // Selected IDs (unique, always strings)
+    const contributorIds = uniqueIds(localItem.contributors as any[]);
+    const activityIds = uniqueIds(localItem.activities as any[]);
+    const themeIds = uniqueIds(localItem.themes as any[]);
+
+    // Options: loaded items + current selection, deduped, always labeled
+    const userOptions = useMemo(
+        () => buildOptions(users, (localItem.contributors as any[]) ?? []),
+        [users, localItem.contributors]
+    );
+    const activityOptions = useMemo(
+        () => buildOptions(activities, (localItem.activities as any[]) ?? []),
+        [activities, localItem.activities]
+    );
+    const themeOptions = useMemo(
+        () => buildOptions(themes, (localItem.themes as any[]) ?? []),
+        [themes, localItem.themes]
     );
 
-    /*
-    const investigatorId = localItem.investigator
-        ? extractId(localItem.investigator)
-        : null;
-        */
     const titleMissing = !localItem.title?.trim();
     const descriptionMissing = !localItem.description?.trim();
-    //const investigatorMissing = !investigatorId;
     const projectMissing = !projectId;
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setSubmitted(true);
 
-        if (
-            saving ||
-            projectMissing ||
-            titleMissing ||
-            descriptionMissing //||
-            //investigatorMissing
-        ) {
+        if (saving || projectMissing || titleMissing || descriptionMissing) {
             return;
         }
 
-        /*
-        const componentData: ProjectComponentDTO = {
+        const payload: ProjectComponentDTO = {
             ...localItem,
             project: projectId,
-            contributors: contributorIds,
-            investigator: investigatorId!,
             title: localItem.title.trim(),
             description: localItem.description?.trim(),
-        };*/
+            contributors: contributorIds,
+            activities: activityIds,
+            themes: themeIds,
+        };
 
-        await onSubmit(localItem);
+        await onSubmit(payload);
     };
+
+    const isLocked = (item as any)?.status === 'approved';
 
     return (
         <form
@@ -158,13 +258,10 @@ const ProjectComponentForm = ({
                     <div
                         className={classNames(
                             'p-inputtext p-component flex align-items-center surface-100 text-color-secondary',
-                            {
-                                'p-invalid': submitted && projectMissing
-                            }
+                            { 'p-invalid': submitted && projectMissing }
                         )}
                     >
-                        {typeof localItem.project === 'object' &&
-                            localItem.project
+                        {typeof localItem.project === 'object' && localItem.project
                             ? localItem.project.title
                             : projectId
                                 ? `Project ID: ${projectId}`
@@ -178,31 +275,21 @@ const ProjectComponentForm = ({
                     )}
                 </div>
 
-
                 {/* Component Title */}
                 <div className="field col-12">
-                    <label
-                        htmlFor="title"
-                        className="font-bold text-sm block mb-2"
-                    >
-                        Component Title{' '}
-                        <span className="text-red-500">*</span>
+                    <label htmlFor="title" className="font-bold text-sm block mb-2">
+                        Component Title <span className="text-red-500">*</span>
                     </label>
 
                     <InputText
                         id="title"
                         value={localItem.title}
                         onChange={(e) =>
-                            setLocalItem((prev: any) => ({
-                                ...prev,
-                                title: e.target.value
-                            }))
+                            setLocalItem((prev) => ({ ...prev, title: e.target.value }))
                         }
-                        placeholder="e.g., Research Design"
-                        disabled={saving}
-                        className={classNames({
-                            'p-invalid': submitted && titleMissing
-                        })}
+                        placeholder="e.g., Component 1: Baseline Survey"
+                        disabled={saving || isLocked}
+                        className={classNames({ 'p-invalid': submitted && titleMissing })}
                     />
 
                     {submitted && titleMissing && (
@@ -212,33 +299,23 @@ const ProjectComponentForm = ({
                     )}
                 </div>
 
-
                 {/* Description */}
                 <div className="field col-12">
-                    <label
-                        htmlFor="description"
-                        className="font-bold text-sm block mb-2"
-                    >
-                        Description
+                    <label htmlFor="description" className="font-bold text-sm block mb-2">
+                        Description <span className="text-red-500">*</span>
                     </label>
 
                     <InputTextarea
                         id="description"
                         value={localItem.description ?? ''}
                         onChange={(e) =>
-                            setLocalItem((prev: any) => ({
-                                ...prev,
-                                description: e.target.value
-                            }))
+                            setLocalItem((prev) => ({ ...prev, description: e.target.value }))
                         }
                         rows={3}
                         autoResize
                         placeholder="Describe the project component..."
-                        disabled={saving}
-                        className={classNames({
-                            'p-invalid':
-                                submitted && descriptionMissing
-                        })}
+                        disabled={saving || isLocked}
+                        className={classNames({ 'p-invalid': submitted && descriptionMissing })}
                     />
 
                     {submitted && descriptionMissing && (
@@ -248,95 +325,98 @@ const ProjectComponentForm = ({
                     )}
                 </div>
 
-
-                {/* Investigator */}
-                {
-                    /**
-                     * 
-                     * <div className="field col-12">
-                    <label
-                        htmlFor="investigator"
-                        className="font-bold text-sm block mb-2"
-                    >
-                        Investigator{' '}
-                        <span className="text-red-500">*</span>
-                    </label>
-
-                    <Dropdown
-                        id="investigator"
-                        value={investigatorId}
-                        options={users}
-                        optionValue="_id"
-                        optionLabel="name"
-                        onChange={(e) => {
-                            const selectedUser =
-                                users.find((u) => u._id === e.value);
-
-                            setLocalItem((prev) => ({
-                                ...prev,
-                                investigator: selectedUser ?? e.value
-                            }));
-                        }}
-                        placeholder="Select investigator"
-                        filter
-                        showClear
-                        //loading={loadingUsers}
-                        disabled={saving || loadingUsers}
-                        className={classNames({
-                            'p-invalid':
-                                submitted && investigatorMissing
-                        })}
-                        itemTemplate={(user: User) => (
-                            <div className="flex flex-column">
-                                <span className="font-medium">
-                                    {user.name}
-                                </span>
-                            </div>
-                        )}
-                    />
-
-                    {submitted && investigatorMissing && (
-                        <small className="p-error block mt-1">
-                            Investigator is required.
-                        </small>
-                    )}
-                </div>
-                     * 
-                     */
-                }
-
                 {/* Contributors */}
                 <div className="field col-12">
-                    <label
-                        htmlFor="contributors"
-                        className="font-bold text-sm block mb-2"
-                    >
+                    <label htmlFor="contributors" className="font-bold text-sm block mb-2">
                         Contributors
                     </label>
 
                     <MultiSelect
                         id="contributors"
                         value={contributorIds}
-                        options={users}
-                        optionValue="_id"
-                        optionLabel="name"
-                        onChange={(e) => {
-                            setLocalItem((prev) => ({
-                                ...prev,
-                                contributors: e.value
-                            }));
-                        }}
+                        options={userOptions}
+                        optionLabel="label"
+                        optionValue="value"
+                        dataKey="value"
+                        onChange={(e) =>
+                            setLocalItem((prev) => ({ ...prev, contributors: e.value }))
+                        }
                         placeholder="Select contributors"
                         display="chip"
                         filter
                         showClear
-                        //loading={loadingUsers}
-                        disabled={saving || loadingUsers}
+                        disabled={saving || loadingUsers || isLocked}
                         maxSelectedLabels={3}
                     />
 
                     <small className="text-color-secondary block mt-1">
-                        Select one or more contributors.
+                        Only project collaborators can be selected.
+                    </small>
+                </div>
+
+                {/* Themes */}
+                <div className="field col-12">
+                    <label htmlFor="themes" className="font-bold text-sm block mb-2">
+                        Themes
+                    </label>
+
+                    <MultiSelect
+                        id="themes"
+                        value={themeIds}
+                        options={themeOptions}
+                        optionLabel="label"
+                        optionValue="value"
+                        dataKey="value"
+                        onChange={(e) =>
+                            setLocalItem((prev) => ({ ...prev, themes: e.value }))
+                        }
+                        placeholder={
+                            themeOptions.length || loadingThemes
+                                ? 'Select themes'
+                                : 'This project has no themes'
+                        }
+                        display="chip"
+                        filter
+                        showClear
+                        disabled={saving || loadingThemes || !themeOptions.length || isLocked}
+                        maxSelectedLabels={3}
+                    />
+
+                    <small className="text-color-secondary block mt-1">
+                        Themes come from the project.
+                    </small>
+                </div>
+
+                {/* Activities */}
+                <div className="field col-12">
+                    <label htmlFor="activities" className="font-bold text-sm block mb-2">
+                        Activities
+                    </label>
+
+                    <MultiSelect
+                        id="activities"
+                        value={activityIds}
+                        options={activityOptions}
+                        optionLabel="label"
+                        optionValue="value"
+                        dataKey="value"
+                        onChange={(e) =>
+                            setLocalItem((prev) => ({ ...prev, activities: e.value }))
+                        }
+                        placeholder={
+                            activityOptions.length || loadingActivities
+                                ? 'Select activities'
+                                : 'This project has no activities'
+                        }
+                        display="chip"
+                        filter
+                        showClear
+                        disabled={saving || loadingActivities || !activityOptions.length || isLocked}
+                        maxSelectedLabels={3}
+                    />
+
+                    <small className="text-color-secondary block mt-1">
+                        An activity can belong to only one component.
                     </small>
                 </div>
 

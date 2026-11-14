@@ -147,6 +147,7 @@ const columns: ColumnProps[] = [
             />
         )
     },
+    /*
     {
         header: 'Female Proportion',
         field: 'femaleProportion',
@@ -165,6 +166,7 @@ const columns: ColumnProps[] = [
                 ? `${row.verifiedCollaboratorsProportion.toFixed(2)}%`
                 : 'N/A'
     },
+    */
     {
         header: 'Budget',
         field: 'totalBudget',
@@ -210,8 +212,8 @@ const defaultHiddenFields = [
     'calendar.year',
     'leadPI.gender',
     'currentApplication.status',
-    'femaleProportion',
-    'verifiedCollaboratorsProportion',
+    //'femaleProportion',
+    //'verifiedCollaboratorsProportion',
     'organization.name',
     'workspace.name',
     'call.title',

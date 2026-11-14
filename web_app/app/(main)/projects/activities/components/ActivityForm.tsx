@@ -155,25 +155,7 @@ const ActivityForm = ({
         return phases.find((p) => p._id === phaseId) ?? (fetchedPhase?._id === phaseId ? fetchedPhase : null);
     }, [localItem.phase, phaseId, phases, fetchedPhase]);
 
-    useEffect(() => {
-        let cancelled = false;
-
-        const loadPhase = async () => {
-            if (!phaseId || resolvedPhase || !PhaseApi.getById) return;
-            try {
-                const data = await PhaseApi.getById(phaseId);
-                if (!cancelled) setFetchedPhase(data ?? null);
-            } catch (error) {
-                console.error('Failed to load phase:', error);
-            }
-        };
-
-        void loadPhase();
-        return () => {
-            cancelled = true;
-        };
-    }, [phaseId, resolvedPhase]);
-
+    
     /* --------------------------- validation ------------------------- */
     const phaseStart = startOfDay((resolvedPhase as any)?.startDate);
     const phaseEnd = startOfDay((resolvedPhase as any)?.endDate);
@@ -215,18 +197,6 @@ const ActivityForm = ({
             : null;
 
     const datesDisabled = saving || phaseMissing;
-
-    /* ------------------------ progress indicator -------------------- */
-    const requiredChecks = [
-        { label: 'Phase', done: !phaseMissing },
-        { label: 'Title', done: !titleMissing },
-        { label: 'Type', done: !kindMissing },
-        { label: 'Cost', done: !costInvalid },
-        { label: 'Start date', done: !startDateMissing && !startOutOfPhase },
-        { label: 'End date', done: !endDateMissing && !endOutOfPhase && !dateRangeInvalid }
-    ];
-    const completed = requiredChecks.filter((c) => c.done).length;
-    const percent = Math.round((completed / requiredChecks.length) * 100);
 
     /* ----------------------------- handlers ------------------------- */
     const handlePhaseChange = (selected: Phase | null) => {
@@ -342,51 +312,6 @@ const ActivityForm = ({
             className="p-fluid flex flex-column gap-4"
             noValidate
         >
-            {/* Progress header */}
-            <div className="surface-card border-1 surface-border border-round-xl shadow-1 p-4">
-                <div className="flex align-items-center justify-content-between mb-3">
-                    <div>
-                        <div className="font-semibold text-900">
-                            {isEdit ? 'Edit activity' : 'New activity'}
-                        </div>
-                        <small className="text-500">
-                            {completed === requiredChecks.length
-                                ? 'All required information is filled in.'
-                                : `${requiredChecks.length - completed} required field${
-                                      requiredChecks.length - completed > 1 ? 's' : ''
-                                  } left`}
-                        </small>
-                    </div>
-                    <Tag
-                        value={`${percent}%`}
-                        severity={percent === 100 ? 'success' : 'info'}
-                        rounded
-                    />
-                </div>
-
-                <ProgressBar value={percent} showValue={false} style={{ height: '6px' }} />
-
-                <div className="flex flex-wrap gap-2 mt-3">
-                    {requiredChecks.map((check) => (
-                        <span
-                            key={check.label}
-                            className={classNames(
-                                'inline-flex align-items-center gap-1 px-2 py-1 border-round-2xl text-xs font-medium',
-                                check.done ? 'bg-green-50 text-green-700' : 'surface-100 text-500'
-                            )}
-                        >
-                            <i
-                                className={classNames(
-                                    'pi text-xs',
-                                    check.done ? 'pi-check-circle' : 'pi-circle'
-                                )}
-                            />
-                            {check.label}
-                        </span>
-                    ))}
-                </div>
-            </div>
-
             {/* 1. Project & phase */}
             <SectionCard
                 step={1}

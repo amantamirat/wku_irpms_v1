@@ -11,6 +11,13 @@ export const ThemeApi: EntityApi<Theme, FilterThemes> = {
         return ApiClient.get(end_point, options);
     },
 
+    async getById(
+        id: string
+    ): Promise<Theme> {
+        const data = await ApiClient.get(`${end_point}/${id}`);
+        return data as Theme;
+    },
+
     async lookup(options?: FilterThemes) {
         return ApiClient.get(`${end_point}/lookup`, options);
     },
@@ -29,10 +36,5 @@ export const ThemeApi: EntityApi<Theme, FilterThemes> = {
     async delete(theme) {
         if (!theme._id) throw new Error("_id required");
         return ApiClient.delete(`${end_point}/${theme._id}`);
-    },
-
-    /*
-    async import(formData: FormData, thematicId?: string) {
-        return ApiClient.post(`${end_point}/import/${thematicId}`, formData);
-    }*/
+    }
 };

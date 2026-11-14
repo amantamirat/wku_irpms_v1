@@ -1,16 +1,32 @@
 import mongoose, { Document, model, Schema } from "mongoose";
 import { COLLECTIONS } from "../../../common/constants/collections.enum";
+import { IStatusHistory } from "../../../common/types/status-history";
+import { createStatusHistorySchema } from "../../../common/schemas/status-history.schema";
+
+export enum ProjectComponentStatus {
+    pending = "pending",
+    approved = "approved",
+    refused = "refused",
+}
 
 
 export interface IProjectComponent extends Document {
     _id: mongoose.Types.ObjectId;
+
     project: mongoose.Types.ObjectId;
     title: string;
     description?: string;
-    //investigator: mongoose.Types.ObjectId;
+
     contributors: mongoose.Types.ObjectId[];
+    activities: mongoose.Types.ObjectId[];
+    themes: mongoose.Types.ObjectId[];
+
+    status: ProjectComponentStatus;
+    statusHistory: IStatusHistory<ProjectComponentStatus>[];
+
     createdBy?: mongoose.Types.ObjectId;
     updatedBy?: mongoose.Types.ObjectId;
+
     createdAt?: Date;
     updatedAt?: Date;
 }
@@ -33,16 +49,33 @@ const ProjectComponentSchema = new Schema<IProjectComponent>(
             type: String,
             trim: true,
         },
-        /*
-        investigator: {
-            type: Schema.Types.ObjectId,
-            ref: COLLECTIONS.USER,
-        },*/
         contributors: [{
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.USER,
             required: true,
         }],
+        activities: [{
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.ACTIVITY,
+            required: true,
+        }],
+        themes: [{
+            type: Schema.Types.ObjectId,
+            ref: COLLECTIONS.THEME,
+            required: true,
+        }],
+
+        // schema
+        status: {
+            type: String,
+            enum: Object.values(ProjectComponentStatus),
+            default: ProjectComponentStatus.pending,
+            index: true,
+        },
+        statusHistory: {
+            type: [createStatusHistorySchema(Object.values(ProjectComponentStatus))],
+            default: [],
+        },
         createdBy: {
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.USER,

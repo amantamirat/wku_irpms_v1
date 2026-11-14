@@ -38,7 +38,7 @@ export interface IProjectProgress {
     totalCost: number;
     completedCost: number;
 
-   // phases?: IPhaseProgress[];
+    // phases?: IPhaseProgress[];
 }
 
 export class ProjectProgressService {
@@ -64,14 +64,12 @@ export class ProjectProgressService {
      * - phaseProgress:
      *      completed phases / total valid phases
      */
+
     async getProjectProgress(
         projectId: mongoose.Types.ObjectId
     ): Promise<IProjectProgress> {
 
-        // --------------------------------------------------
         // Validate project
-        // --------------------------------------------------
-
         const projectExists = await this.projectRepo.exists({
             id: projectId,
         });
@@ -80,75 +78,37 @@ export class ProjectProgressService {
             return this.emptyProgress();
         }
 
-        // --------------------------------------------------
-        // Aggregate activities
-        // --------------------------------------------------        
-
-        // --------------------------------------------------
-        // Aggregate phases
-        // --------------------------------------------------       
-
-
-        const [
-            [activityResult],
-            [phaseResult],
-        ] = await Promise.all([
+        // Aggregate activities and phases
+        const [activityResult, phaseResult] = await Promise.all([
             this.phaseActivityRepo.getProjectProgressAggregation(projectId),
             this.phaseRepo.getProjectProgressAggregation(projectId),
         ]);
 
+        // Extract activity information
+        const totalActivities = activityResult?.total ?? 0;
+        const completedActivities = activityResult?.completed ?? 0;
 
-        // --------------------------------------------------
-        // Extract values
-        // --------------------------------------------------
+        const totalCost = activityResult?.totalCost ?? 0;
+        const completedCost = activityResult?.completedCost ?? 0;
 
-        const totalActivities =
-            activityResult?.total ?? 0;
+        // Extract phase information
+        const totalPhases = phaseResult?.total ?? 0;
+        const completedPhases = phaseResult?.completed ?? 0;
 
-        const completedActivities =
-            activityResult?.completed ?? 0;
+        // Calculate progress percentages
+        const activityProgress = totalActivities > 0
+            ? Math.round((completedActivities / totalActivities) * 100)
+            : 0;
 
-        const totalCost =
-            activityResult?.totalCost ?? 0;
+        const costProgress = totalCost > 0
+            ? Math.round((completedCost / totalCost) * 100)
+            : 0;
 
-        const completedCost =
-            activityResult?.completedCost ?? 0;
+        const phaseProgress = totalPhases > 0
+            ? Math.round((completedPhases / totalPhases) * 100)
+            : 0;
 
-        const totalPhases =
-            phaseResult?.total ?? 0;
-
-        const completedPhases =
-            phaseResult?.completed ?? 0;
-
-        // --------------------------------------------------
-        // Calculate progress
-        // --------------------------------------------------
-
-        const activityProgress =
-            totalActivities > 0
-                ? Math.round(
-                    (completedActivities / totalActivities) * 100
-                )
-                : 0;
-
-        const costProgress =
-            totalCost > 0
-                ? Math.round(
-                    (completedCost / totalCost) * 100
-                )
-                : 0;
-
-        const phaseProgress =
-            totalPhases > 0
-                ? Math.round(
-                    (completedPhases / totalPhases) * 100
-                )
-                : 0;
-
-        // --------------------------------------------------
-        // Return
-        // --------------------------------------------------
-
+        // Return project progress
         return {
             activityProgress,
             costProgress,
@@ -164,6 +124,7 @@ export class ProjectProgressService {
             completedCost,
         };
     }
+
 
     /**
      * Empty progress response.

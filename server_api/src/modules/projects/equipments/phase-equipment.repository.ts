@@ -10,6 +10,17 @@ import {
     UpdatePhaseEquipmentDto,
 } from "./phase-equipment.dto";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
+import { toObjectId } from "../../../common/utils/mongoose.utils";
+
+interface CreatePhaseEquipmentData extends CreatePhaseEquipmentDto {
+    project: mongoose.Types.ObjectId;
+};
+
+
+export interface UpdateEquipmentStatusDto {
+    status: PhaseEquipmentStatus;
+    reason?: string;
+}
 
 export interface IPhaseEquipmentRepository {
     findById(
@@ -28,7 +39,8 @@ export interface IPhaseEquipmentRepository {
     ): Promise<IPhaseEquipment | null>;
 
     create(
-        dto: CreatePhaseEquipmentDto
+        dto: CreatePhaseEquipmentData,
+        userId: string
     ): Promise<IPhaseEquipment>;
 
     createMany(
@@ -37,14 +49,14 @@ export interface IPhaseEquipmentRepository {
 
     update(
         id: string,
-        data: UpdatePhaseEquipmentDto["data"]
+        data: UpdatePhaseEquipmentDto,
+        userId: string,
     ): Promise<IPhaseEquipment | null>;
 
     updateStatus(
         id: string,
-        status: PhaseEquipmentStatus,
+        dto: UpdateEquipmentStatusDto,
         userId: string,
-        reason?: string
     ): Promise<IPhaseEquipment | null>;
 
     countByPhase(
@@ -134,12 +146,14 @@ export class PhaseEquipmentRepository
     }
 
     async create(
-        dto: CreatePhaseEquipmentDto
+        dto: CreatePhaseEquipmentData,
+        userId: string
     ): Promise<IPhaseEquipment> {
 
         const data = {
             ...dto,
             phase: new mongoose.Types.ObjectId(dto.phase),
+            createdBy: toObjectId(userId)
         };
 
         const created = await PhaseEquipment.create(data);
@@ -148,7 +162,7 @@ export class PhaseEquipmentRepository
     }
 
     async createMany(
-        dtos: CreatePhaseEquipmentDto[]
+        dtos: CreatePhaseEquipmentData[]
     ): Promise<IPhaseEquipment[]> {
 
         const data = dtos.map(dto => ({
@@ -168,13 +182,17 @@ export class PhaseEquipmentRepository
 
     async update(
         id: string,
-        data: UpdatePhaseEquipmentDto["data"]
+        data: UpdatePhaseEquipmentDto,
+        userId: string
     ): Promise<IPhaseEquipment | null> {
 
         return PhaseEquipment.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),
             {
-                $set: data,
+                $set: {
+                    ...data,
+                    updateBy: new mongoose.Types.ObjectId(userId),
+                },
             },
             {
                 new: true,
@@ -185,10 +203,11 @@ export class PhaseEquipmentRepository
 
     async updateStatus(
         id: string,
-        status: PhaseEquipmentStatus,
+        dto: UpdateEquipmentStatusDto,
         userId: string,
-        reason?: string
     ): Promise<IPhaseEquipment | null> {
+
+        const { status, reason } = dto;
 
         return PhaseEquipment.findByIdAndUpdate(
             new mongoose.Types.ObjectId(id),

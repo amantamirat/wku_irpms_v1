@@ -191,10 +191,11 @@ const PhaseManager = ({
                 dialogWidth="620px"
                 enableColumnToggle
                 defaultHiddenFields={defaultHiddenFields}
-                statusField="status"
+                
                 hideCreateAction={disableCrud}
                 hideEditAction={disableCrud}
                 hideDeleteAction={disableCrud}
+                statusField="status"
                 transitions={
                     PHASE_TRANSITIONS
                 }

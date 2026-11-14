@@ -12,7 +12,8 @@ import ProjectComponentForm from './ProjectComponentForm';
 import { Project } from '@/app/(main)/projects/models/project.model';
 import { User } from '@/app/(main)/users/models/user.model';
 import { ProjectComponentApi } from '../api/component.api';
-import { ProjectComponentDTO, FilterProjectComponents } from '../models/component.model';
+import { ProjectComponentDTO, FilterProjectComponents, PROJECT_COMPONENT_TRANSITIONS } from '../models/component.model';
+import MyBadge from '@/templates/MyBadge';
 
 const getUserName = (user?: string | User) => {
     if (!user) return '—';
@@ -46,6 +47,17 @@ const columns: ColumnProps[] = [
                         : row.description
                     : '—'}
             </span>
+        )
+    },
+    {
+        header: 'Status',
+        field: 'status',
+        sortable: true,
+        body: (row: ProjectComponentDTO) => (
+            <MyBadge
+                type="status"
+                value={row.status ?? 'Unknown'}
+            />
         )
     },
     /*
@@ -114,6 +126,10 @@ const ProjectComponentManager = ({
             hideCreateAction={disableCrud}
             hideEditAction={disableCrud}
             hideDeleteAction={disableCrud}
+            statusField="status"
+            transitions={
+                PROJECT_COMPONENT_TRANSITIONS
+            }
             renderForm={
                 disableCrud
                     ? undefined

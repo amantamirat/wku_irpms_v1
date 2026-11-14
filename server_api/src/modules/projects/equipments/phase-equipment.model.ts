@@ -93,7 +93,7 @@ const PhaseEquipmentSchema = new Schema<IPhaseEquipment>(
         phase: {
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.PHASE,
-            //required: true,
+            required: true,
             //immutable: true,
             index: true,
         },

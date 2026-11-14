@@ -1,4 +1,3 @@
-import mongoose from "mongoose";
 
 // 2. Base Phase structure
 export interface PhaseDto {

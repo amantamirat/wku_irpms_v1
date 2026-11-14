@@ -197,7 +197,7 @@ export const PERMISSIONS = {
   },
   THEME: {
     CREATE: "theme:create",
-    IMPORT: "theme:import",
+    LOOKUP: "theme:lookup",
     READ: "theme:read",
     UPDATE: "theme:update",
     DELETE: "theme:delete",

@@ -32,6 +32,7 @@ import { CollaboratorDto } from "./collaborators/collaborator.dto";
 import { CollaboratorStatus } from "./collaborators/collaborator.model";
 import { ICollaboratorRepository } from "./collaborators/collaborator.repository";
 import { CollaboratorService } from "./collaborators/collaborator.service";
+import { ProjectComponentStatus } from "./components/component.model";
 import { ProjectComponentRepository } from "./components/component.repository";
 import { PhaseEquipmentRepository } from "./equipments/phase-equipment.repository";
 import { PhaseDocumentType, ProjectDocumentStatus } from "./phase/documents/phase.doc.model";
@@ -324,6 +325,19 @@ export class ProjectService {
             if (!phases.every(p => p.status === PhaseStatus.approved))
                 throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_APPROVED);
 
+            const phasesBudget = this.consistencyValidator.getAllocatedPhaseBudget(phases);
+            const phasesDuration = this.consistencyValidator.getAllocatedPhaseDuration(phases);
+            if (Math.abs(phasesBudget - Number(projectDoc.totalBudget)) > 0.01) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_BUDGET_MISMATCH,
+                    `Total phase budget (${phasesBudget.toFixed(2)}) must equal the project budget (${Number(projectDoc.totalBudget).toFixed(2)}).`
+                );
+            }
+
+            const components = await this.componentRepo.find({ project: id });
+            if (!components.every(p => p.status === ProjectComponentStatus.approved))
+                throw new AppError(ERROR_CODES.COMPONENTS_NOT_FULLY_APPROVED);
+
             if (projectDoc.call) {
                 if (!projectDoc.currentApplication) {
                     throw new AppError(ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND);
@@ -443,6 +457,15 @@ export class ProjectService {
             const phases = await this.phaseRepo.find({ project: id });
             if (!phases.every(p => p.status === PhaseStatus.completed))
                 throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_COMPLETED);
+
+            const phasesBudget = this.consistencyValidator.getAllocatedPhaseBudget(phases);
+            const phasesDuration = this.consistencyValidator.getAllocatedPhaseDuration(phases);
+            if (Math.abs(phasesBudget - Number(projectDoc.totalBudget)) > 0.01) {
+                throw new AppError(
+                    ERROR_CODES.PHASE_BUDGET_MISMATCH,
+                    `Total phase budget (${phasesBudget.toFixed(2)}) must equal the project budget (${Number(projectDoc.totalBudget).toFixed(2)}).`
+                );
+            }
 
             const hasCompletionReport = await this.documentRepo.exists({
                 project: id,
@@ -765,6 +788,7 @@ export class ProjectService {
         // --------------------------------------------------
 
         if (components?.length) {
+            /*
             for (const component of components) {
                 await this.componentRepo.create(
                     {
@@ -774,6 +798,7 @@ export class ProjectService {
                     //userId,
                 );
             }
+                */
         }
 
         // --------------------------------------------------
@@ -799,15 +824,17 @@ export class ProjectService {
         // --------------------------------------------------
 
         if (equipments?.length) {
+            /*
             for (const equipment of equipments) {
                 await this.equipmentRepo.create(
                     {
                         ...equipment,
                         project: projectId,
                     },
-                    // userId,
+                    userId,
                 );
             }
+                */
         }
 
         return created;

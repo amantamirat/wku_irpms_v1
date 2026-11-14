@@ -18,12 +18,22 @@ import {
 import { Phase } from '../../phases/models/phase.model';
 import { PhaseApi } from '../../phases/api/phase.api';
 
-import { etbCurrencyFormatter, extractId } from '@/utils/utils';
+import {
+    FieldError,
+    FieldHint,
+    FieldLabel,
+    LockedField,
+    SectionCard,
+    StatCard
+} from '@/templates/FormPrimitives';
+import { etbCurrencyFormatter, extractId, getReferenceName } from '@/utils/utils';
 
 interface EquipmentFormProps extends ItemFormRenderProps<PhaseEquipment> {
     project?: Project | string | null;
     phase?: Phase | string | null;
 }
+
+const phaseLabelOf = (p?: Phase | null) => (p ? `Phase ${p.order}` : '');
 
 const EquipmentForm = ({
     item,
@@ -111,7 +121,7 @@ const EquipmentForm = ({
             }
         };
 
-        fetchPhases();
+        void fetchPhases();
 
         return () => {
             cancelled = true;
@@ -123,10 +133,13 @@ const EquipmentForm = ({
         value: unit
     }));
 
+    const resolvedPhase: Phase | null = phases.find((p) => p._id === phaseId) ?? 
+        (typeof localItem.phase === 'object' ? (localItem.phase as Phase) : null);
+
     const projectMissing = !projectId;
+    const phaseMissing = !phaseId;
     const itemNameMissing = !localItem.itemName?.trim();
     const descriptionMissing = !localItem.description?.trim();
-
     const unitMissing = !localItem.unit;
 
     const packSizeInvalid =
@@ -150,6 +163,15 @@ const EquipmentForm = ({
     const totalCost =
         (localItem.quantity ?? 0) * (localItem.unitPrice ?? 0);
 
+    const projectLabel = getReferenceName(
+        localItem.project,
+        'title',
+        projectId ? `Project ID: ${projectId}` : 'No project selected'
+    );
+
+    const lockedPhaseLabel =
+        phaseLabelOf(resolvedPhase) || (phaseId ? 'Selected phase' : 'No phase selected');
+
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setSubmitted(true);
@@ -157,6 +179,7 @@ const EquipmentForm = ({
         if (
             saving ||
             projectMissing ||
+            phaseMissing ||
             itemNameMissing ||
             descriptionMissing ||
             unitMissing ||
@@ -170,7 +193,7 @@ const EquipmentForm = ({
         const equipmentData = {
             ...localItem,
             project: localItem.project,
-            phase: localItem.phase || undefined,
+            phase: localItem.phase,
             packSize:
                 localItem.unit === EquipmentUnit.number
                     ? 1
@@ -191,329 +214,271 @@ const EquipmentForm = ({
         <form
             id={formId}
             onSubmit={handleSubmit}
-            className="p-fluid"
+            className="p-fluid flex flex-column gap-4"
             noValidate
         >
-            <div className="grid">
-                {/* Project: supplied by the parent */}
-                <div className="field col-12 md:col-6">
-                    <label className="font-bold text-sm block mb-2">
-                        Project <span className="text-red-500">*</span>
-                    </label>
-
-                    <div
-                        className={classNames(
-                            'p-inputtext p-component flex align-items-center surface-100 text-color-secondary',
-                            {
-                                'p-invalid': submitted && projectMissing
-                            }
-                        )}
-                    >
-                        {typeof localItem.project === 'object' &&
-                        localItem.project
-                            ? localItem.project.title
-                            : projectId
-                            ? `Project ID: ${projectId}`
-                            : 'No project selected'}
+            {/* 1. Project & phase */}
+            <SectionCard
+                step={1}
+                icon="pi-sitemap"
+                title="Project & Phase"
+                description="The equipment item must be assigned to a specific project and phase."
+            >
+                <div className="formgrid grid">
+                    <div className="field col-12 md:col-6 mb-0">
+                        <FieldLabel htmlFor="equipment-project" required>
+                            Project
+                        </FieldLabel>
+                        <LockedField id="equipment-project" value={projectLabel} />
+                        <FieldError show={submitted && projectMissing}>
+                            A project is required.
+                        </FieldError>
                     </div>
 
-                    {submitted && projectMissing && (
-                        <small className="p-error block mt-1">
-                            A project is required.
-                        </small>
-                    )}
+                    <div className="field col-12 md:col-6 mb-0">
+                        <FieldLabel htmlFor="equipment-phase" required>
+                            Phase
+                        </FieldLabel>
+
+                        {phaseLocked ? (
+                            <LockedField id="equipment-phase" value={lockedPhaseLabel} />
+                        ) : (
+                            <Dropdown
+                                inputId="equipment-phase"
+                                value={phaseId ?? null}
+                                options={phases}
+                                optionValue="_id"
+                                optionLabel="order"
+                                onChange={(e) => {
+                                    const selectedPhase =
+                                        phases.find((p) => p._id === e.value) ?? null;
+
+                                    setLocalItem((prev) => ({
+                                        ...prev,
+                                        phase: selectedPhase ?? undefined
+                                    }));
+                                }}
+                                placeholder={loadingPhases ? 'Loading phases...' : 'Select the phase'}
+                                emptyMessage="No phases found for this project"
+                                valueTemplate={(p: Phase | null, props) =>
+                                    p ? `Phase ${p.order}` : props?.placeholder
+                                }
+                                itemTemplate={(p: Phase) => `Phase ${p.order}`}
+                                disabled={saving || !projectId || loadingPhases}
+                                className={classNames({ 'p-invalid': submitted && phaseMissing })}
+                            />
+                        )}
+
+                        <FieldError show={submitted && phaseMissing}>A phase is required.</FieldError>
+                    </div>
                 </div>
+            </SectionCard>
 
-                {/* Phase: Side-by-side with project, optional, independent */}
-                <div className="field col-12 md:col-6">
-                    <label
-                        htmlFor="phase"
-                        className="font-bold text-sm block mb-2"
-                    >
-                        Phase
-                    </label>
+            {/* 2. Equipment Specifications */}
+            <SectionCard
+                step={2}
+                icon="pi-box"
+                title="Equipment Specifications"
+                description="Name, description, and measurement units for the equipment."
+            >
+                <div className="formgrid grid">
+                    <div className="field col-12">
+                        <FieldLabel htmlFor="itemName" required>
+                            Equipment Name
+                        </FieldLabel>
+                        <InputText
+                            id="itemName"
+                            value={localItem.itemName}
+                            onChange={(e) =>
+                                setLocalItem((prev) => ({
+                                    ...prev,
+                                    itemName: e.target.value
+                                }))
+                            }
+                            placeholder="e.g., Laptop Computer"
+                            disabled={saving}
+                            className={classNames({
+                                'p-invalid': submitted && itemNameMissing
+                            })}
+                        />
+                        <FieldError show={submitted && itemNameMissing}>
+                            Equipment name is required.
+                        </FieldError>
+                    </div>
 
-                    {phaseLocked ? (
-                        <div className="p-inputtext p-component flex align-items-center surface-100 text-color-secondary">
-                            {typeof phase === 'object'
-                                ? `Phase ${phase.order}`
-                                : typeof item?.phase === 'object'
-                                ? `Phase ${item.phase.order}`
-                                : phaseId
-                                ? `Selected phase`
-                                : 'No phase selected'}
-                        </div>
-                    ) : (
+                    <div className="field col-12 mb-0">
+                        <FieldLabel htmlFor="description" required>
+                            Description
+                        </FieldLabel>
+                        <InputTextarea
+                            id="description"
+                            value={localItem.description ?? ''}
+                            onChange={(e) =>
+                                setLocalItem((prev) => ({
+                                    ...prev,
+                                    description: e.target.value
+                                }))
+                            }
+                            rows={2}
+                            autoResize
+                            placeholder="Describe the equipment specifications..."
+                            disabled={saving}
+                            className={classNames({
+                                'p-invalid': submitted && descriptionMissing
+                            })}
+                        />
+                        <FieldError show={submitted && descriptionMissing}>
+                            Description is required.
+                        </FieldError>
+                    </div>
+                </div>
+            </SectionCard>
+
+            {/* 3. Quantity & Pricing */}
+            <SectionCard
+                step={3}
+                icon="pi-wallet"
+                title="Quantity & Pricing"
+                description="Specify units, packaging sizes, quantities, and unit costs."
+            >
+                <div className="formgrid grid">
+                    <div className="field col-12 md:col-6">
+                        <FieldLabel htmlFor="unit" required>
+                            Unit
+                        </FieldLabel>
                         <Dropdown
-                            id="phase"
-                            value={phaseId ?? null}
-                            options={phases}
-                            optionValue="_id"
-                            optionLabel="order"
+                            id="unit"
+                            value={localItem.unit}
+                            options={unitOptions}
                             onChange={(e) => {
-                                const selectedPhase =
-                                    phases.find((p) => p._id === e.value) ?? null;
+                                const selectedUnit = e.value as EquipmentUnit;
 
                                 setLocalItem((prev) => ({
                                     ...prev,
-                                    phase: selectedPhase ?? undefined
+                                    unit: selectedUnit,
+                                    packSize:
+                                        selectedUnit === EquipmentUnit.number
+                                            ? 1
+                                            : prev.packSize ?? 1
                                 }));
                             }}
-                            placeholder="No phase selected"
-                            showClear
-                            filter
-                            disabled={saving || !projectId}
-                            itemTemplate={(phase: Phase) => `Phase ${phase.order}`}
+                            placeholder="Select unit"
+                            disabled={saving}
+                            className={classNames({
+                                'p-invalid': submitted && unitMissing
+                            })}
                         />
-                    )}
-                </div>
-
-                {/* Equipment name */}
-                <div className="field col-12">
-                    <label
-                        htmlFor="itemName"
-                        className="font-bold text-sm block mb-2"
-                    >
-                        Equipment Name{' '}
-                        <span className="text-red-500">*</span>
-                    </label>
-
-                    <InputText
-                        id="itemName"
-                        value={localItem.itemName}
-                        onChange={(e) =>
-                            setLocalItem((prev) => ({
-                                ...prev,
-                                itemName: e.target.value
-                            }))
-                        }
-                        placeholder="e.g., Laptop Computer"
-                        disabled={saving}
-                        className={classNames({
-                            'p-invalid': submitted && itemNameMissing
-                        })}
-                    />
-
-                    {submitted && itemNameMissing && (
-                        <small className="p-error block mt-1">
-                            Equipment name is required.
-                        </small>
-                    )}
-                </div>
-
-                {/* Description */}
-                <div className="field col-12">
-                    <label
-                        htmlFor="description"
-                        className="font-bold text-sm block mb-2"
-                    >
-                        Description{' '}
-                        <span className="text-red-500">*</span>
-                    </label>
-
-                    <InputTextarea
-                        id="description"
-                        value={localItem.description ?? ''}
-                        onChange={(e) =>
-                            setLocalItem((prev) => ({
-                                ...prev,
-                                description: e.target.value
-                            }))
-                        }
-                        rows={2}
-                        autoResize
-                        placeholder="Describe the equipment specifications..."
-                        disabled={saving}
-                        className={classNames({
-                            'p-invalid':
-                                submitted && descriptionMissing
-                        })}
-                    />
-
-                    {submitted && descriptionMissing && (
-                        <small className="p-error block mt-1">
-                            Description is required.
-                        </small>
-                    )}
-                </div>
-
-                {/* Unit */}
-                <div className="field col-12 md:col-6">
-                    <label
-                        htmlFor="unit"
-                        className="font-bold text-sm block mb-2"
-                    >
-                        Unit <span className="text-red-500">*</span>
-                    </label>
-
-                    <Dropdown
-                        id="unit"
-                        value={localItem.unit}
-                        options={unitOptions}
-                        onChange={(e) => {
-                            const selectedUnit = e.value as EquipmentUnit;
-
-                            setLocalItem((prev) => ({
-                                ...prev,
-                                unit: selectedUnit,
-                                packSize:
-                                    selectedUnit === EquipmentUnit.number
-                                        ? 1
-                                        : prev.packSize ?? 1
-                            }));
-                        }}
-                        placeholder="Select unit"
-                        disabled={saving}
-                        className={classNames({
-                            'p-invalid': submitted && unitMissing
-                        })}
-                    />
-
-                    {submitted && unitMissing && (
-                        <small className="p-error block mt-1">
+                        <FieldError show={submitted && unitMissing}>
                             Unit is required.
-                        </small>
-                    )}
-                </div>
+                        </FieldError>
+                    </div>
 
-                {/* Pack size */}
-                <div className="field col-12 md:col-6">
-                    <label
-                        htmlFor="packSize"
-                        className="font-bold text-sm block mb-2"
-                    >
-                        Pack Size
-                        {localItem.unit !== EquipmentUnit.number && (
-                            <span className="text-red-500"> *</span>
-                        )}
-                    </label>
-
-                    <InputNumber
-                        id="packSize"
-                        value={
-                            localItem.unit === EquipmentUnit.number
-                                ? 1
-                                : localItem.packSize ?? 1
-                        }
-                        onValueChange={(e) =>
-                            setLocalItem((prev) => ({
-                                ...prev,
-                                packSize: e.value ?? 1
-                            }))
-                        }
-                        useGrouping={false}
-                        min={0.0001}
-                        maxFractionDigits={4}
-                        disabled={
-                            saving ||
-                            localItem.unit === EquipmentUnit.number
-                        }
-                        placeholder="Enter pack size"
-                        className={classNames({
-                            'p-invalid':
-                                submitted && packSizeInvalid
-                        })}
-                    />
-
-                    {submitted && packSizeInvalid && (
-                        <small className="p-error block mt-1">
-                            Pack size must be greater than zero.
-                        </small>
-                    )}
-                </div>
-
-                {/* Quantity */}
-                <div className="field col-12 md:col-6">
-                    <label
-                        htmlFor="quantity"
-                        className="font-bold text-sm block mb-2"
-                    >
-                        Quantity <span className="text-red-500">*</span>
-                    </label>
-
-                    <InputNumber
-                        id="quantity"
-                        value={localItem.quantity ?? 1}
-                        onValueChange={(e) =>
-                            setLocalItem((prev) => ({
-                                ...prev,
-                                quantity: e.value ?? 1
-                            }))
-                        }
-                        useGrouping={false}
-                        min={0.0001}
-                        maxFractionDigits={4}
-                        placeholder="Enter quantity"
-                        disabled={saving}
-                        className={classNames({
-                            'p-invalid': submitted && quantityInvalid
-                        })}
-                    />
-
-                    {submitted && quantityInvalid && (
-                        <small className="p-error block mt-1">
-                            Quantity must be greater than zero.
-                        </small>
-                    )}
-                </div>
-
-                {/* Unit price */}
-                <div className="field col-12 md:col-6">
-                    <label
-                        htmlFor="unitPrice"
-                        className="font-bold text-sm block mb-2"
-                    >
-                        Unit Price (ETB){' '}
-                        <span className="text-red-500">*</span>
-                    </label>
-
-                    <InputNumber
-                        id="unitPrice"
-                        value={localItem.unitPrice ?? 0}
-                        onValueChange={(e) =>
-                            setLocalItem((prev) => ({
-                                ...prev,
-                                unitPrice: e.value ?? 0
-                            }))
-                        }
-                        mode="currency"
-                        currency="ETB"
-                        locale="en-ET"
-                        min={0}
-                        placeholder="Enter unit price"
-                        disabled={saving}
-                        className={classNames({
-                            'p-invalid': submitted && unitPriceInvalid
-                        })}
-                    />
-
-                    {submitted && unitPriceInvalid && (
-                        <small className="p-error block mt-1">
-                            Unit price cannot be negative.
-                        </small>
-                    )}
-                </div>
-
-                {/* Calculated total */}
-                <div className="field col-12">
-                    <label className="font-bold text-sm block mb-2">
-                        Total Cost
-                    </label>
-
-                    <div className="p-3 border-round surface-100 flex align-items-center justify-content-between">
-                        <span className="text-sm text-color-secondary">
-                            {localItem.quantity ?? 0} ×{' '}
-                            {etbCurrencyFormatter.format(
-                                localItem.unitPrice ?? 0
+                    <div className="field col-12 md:col-6">
+                        <FieldLabel htmlFor="packSize">
+                            Pack Size
+                            {localItem.unit !== EquipmentUnit.number && (
+                                <span className="text-red-500"> *</span>
                             )}
-                        </span>
+                        </FieldLabel>
+                        <InputNumber
+                            inputId="packSize"
+                            value={
+                                localItem.unit === EquipmentUnit.number
+                                    ? 1
+                                    : localItem.packSize ?? 1
+                            }
+                            onValueChange={(e) =>
+                                setLocalItem((prev) => ({
+                                    ...prev,
+                                    packSize: e.value ?? 1
+                                }))
+                            }
+                            useGrouping={false}
+                            min={0.0001}
+                            maxFractionDigits={4}
+                            disabled={
+                                saving ||
+                                localItem.unit === EquipmentUnit.number
+                            }
+                            placeholder="Enter pack size"
+                            className={classNames({
+                                'p-invalid': submitted && packSizeInvalid
+                            })}
+                        />
+                        <FieldError show={submitted && packSizeInvalid}>
+                            Pack size must be greater than zero.
+                        </FieldError>
+                    </div>
 
-                        <span className="text-lg font-bold text-primary">
-                            {etbCurrencyFormatter.format(totalCost)}
-                        </span>
+                    <div className="field col-12 md:col-6 mb-0">
+                        <FieldLabel htmlFor="quantity" required>
+                            Quantity
+                        </FieldLabel>
+                        <InputNumber
+                            inputId="quantity"
+                            value={localItem.quantity ?? 1}
+                            onValueChange={(e) =>
+                                setLocalItem((prev) => ({
+                                    ...prev,
+                                    quantity: e.value ?? 1
+                                }))
+                            }
+                            useGrouping={false}
+                            min={0.0001}
+                            maxFractionDigits={4}
+                            placeholder="Enter quantity"
+                            disabled={saving}
+                            className={classNames({
+                                'p-invalid': submitted && quantityInvalid
+                            })}
+                        />
+                        <FieldError show={submitted && quantityInvalid}>
+                            Quantity must be greater than zero.
+                        </FieldError>
+                    </div>
+
+                    <div className="field col-12 md:col-6 mb-0">
+                        <FieldLabel htmlFor="unitPrice" required>
+                            Unit Price (ETB)
+                        </FieldLabel>
+                        <InputNumber
+                            inputId="unitPrice"
+                            value={localItem.unitPrice ?? 0}
+                            onValueChange={(e) =>
+                                setLocalItem((prev) => ({
+                                    ...prev,
+                                    unitPrice: e.value ?? 0
+                                }))
+                            }
+                            mode="currency"
+                            currency="ETB"
+                            locale="en-ET"
+                            min={0}
+                            placeholder="Enter unit price"
+                            disabled={saving}
+                            className={classNames({
+                                'p-invalid': submitted && unitPriceInvalid
+                            })}
+                        />
+                        <FieldError show={submitted && unitPriceInvalid}>
+                            Unit price cannot be negative.
+                        </FieldError>
+                    </div>
+
+                    <div className="col-12 pt-3">
+                        <StatCard icon="pi-money-bill" label="Total Cost (ETB)" color="green">
+                            <div className="flex align-items-center justify-content-between w-full">
+                                <span className="text-xs text-500 font-semibold">
+                                    {localItem.quantity ?? 0} units × {etbCurrencyFormatter.format(localItem.unitPrice ?? 0)}
+                                </span>
+                                <span className="text-lg font-bold text-green-700 font-mono">
+                                    {etbCurrencyFormatter.format(totalCost)}
+                                </span>
+                            </div>
+                        </StatCard>
                     </div>
                 </div>
-            </div>
+            </SectionCard>
         </form>
     );
 };

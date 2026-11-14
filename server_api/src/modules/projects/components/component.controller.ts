@@ -38,7 +38,8 @@ export class ProjectComponentController {
                 title,
                 description,
                 contributors,
-                //investigator,
+                activities,
+                themes
             } = req.body;
 
             const data: CreateProjectComponentDTO = {
@@ -46,7 +47,8 @@ export class ProjectComponentController {
                 title,
                 description,
                 contributors: contributors ?? [],
-                //investigator,
+                activities,
+                themes
             };
 
             const created =
@@ -90,8 +92,6 @@ export class ProjectComponentController {
 
             const filter: FilterProjectComponents = {
                 project: project as string,
-                title: title as string,
-                //investigator: investigator as string,
             };
 
             const components =
@@ -175,25 +175,20 @@ export class ProjectComponentController {
                 title,
                 description,
                 contributors,
-                //investigator,
+                activities,
+                themes
             } = req.body;
 
             const dto = {
-                id: String(id),
-
-                data: {
-                    title,
-                    description,
-                    contributors,
-                    //investigator,
-                    updatedBy: req.auth.userId,
-                } as UpdateProjectComponentDTO,
-
-                userId: req.auth.userId,
-            };
+                title,
+                description,
+                contributors,
+                activities,
+                themes
+            } as UpdateProjectComponentDTO;
 
             const updated =
-                await this.service.update(dto);
+                await this.service.update(id, dto, req.auth.userId);
 
             successResponse(
                 res,

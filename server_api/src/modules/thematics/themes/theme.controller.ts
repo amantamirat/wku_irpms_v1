@@ -39,6 +39,16 @@ export class ThemeController {
         }
     }
 
+    getById = async (req: Request, res: Response) => {
+        try {
+            const { id } = req.params;
+            const theme = await this.service.getById(id);
+            successResponse(res, 200, 'THEME fetched successfully', theme);
+        } catch (err: any) {
+            errorResponse(res, 400, err.message, err);
+        }
+    };
+
     update = async (req: AuthenticatedRequest, res: Response) => {
         try {
             const { id } = req.params;

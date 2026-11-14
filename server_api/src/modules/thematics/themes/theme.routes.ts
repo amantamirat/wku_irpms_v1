@@ -25,7 +25,7 @@ router.post(
 router.get(
     '/lookup',
     verifyAuthToken,
-    checkPermission("theme:lookup"),
+    checkPermission(PERMISSIONS.THEME.LOOKUP),
     controller.get
 );
 
@@ -36,6 +36,10 @@ router.get(
     checkPermission([PERMISSIONS.THEME.READ]),
     controller.get
 );
+
+router.get('/:id', verifyAuthToken,
+    checkPermission(PERMISSIONS.THEME.LOOKUP),
+    controller.getById);
 
 // Update
 router.put(
