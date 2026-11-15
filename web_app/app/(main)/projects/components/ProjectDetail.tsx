@@ -26,6 +26,7 @@ import ProjectComponentManager from '../project-components/components/ProjectCom
 import ProjectForm from './ProjectForm';
 import ProjectProgress from './ProjectProgress';
 import { StatCard, StatTile } from '@/templates/FormPrimitives';
+import { Theme } from '../../thematics/themes/models/theme.model';
 
 /* ------------------------------------------------------------------ */
 /* Types                                                               */
@@ -90,7 +91,15 @@ interface TabDefinition {
 
 const REF_KEYS = ['grant', 'calendar', 'call', 'leadPI'] as const;
 
+/** Only populated themes can be displayed. Plain ids (strings) are skipped */
+const isPopulatedTheme = (t: unknown): t is Theme =>
+    !!t && typeof t === 'object' && typeof (t as Theme).title === 'string' && !!(t as Theme).title.trim();
 
+/** Thematic area name, only when it is populated */
+const thematicAreaName = (t: Theme): string | undefined => {
+    const area = t.thematicArea;
+    return area && typeof area === 'object' ? (area as any).title ?? (area as any).name : undefined;
+};
 
 /**
  * The API may answer with ids instead of populated references.
@@ -112,6 +121,16 @@ const mergeProject = (
             if (candidate) merged[key] = candidate;
         }
     });
+
+    // Same idea for themes: keep populated objects when the API returns ids
+    if (Array.isArray(merged.themes)) {
+        const pool = [...(((submitted as any).themes ?? []) as any[]), ...(((previous as any).themes ?? []) as any[])];
+        merged.themes = merged.themes.map((t: any) =>
+            t && typeof t === 'object'
+                ? t
+                : pool.find((c) => c && typeof c === 'object' && extractId(c) === t) ?? t
+        );
+    }
 
     return merged as Project;
 };
@@ -136,8 +155,19 @@ const TABS_CSS = `
 /* Presentational pieces                                               */
 /* ------------------------------------------------------------------ */
 
-const MetaChip = ({ icon, iconClass, label }: { icon: string; iconClass: string; label: string }) => (
+const MetaChip = ({
+    icon,
+    iconClass,
+    label,
+    title
+}: {
+    icon: string;
+    iconClass: string;
+    label: string;
+    title?: string;
+}) => (
     <span
+        title={title}
         className="inline-flex align-items-center gap-2 px-3 py-2 border-round-2xl text-color-secondary text-sm font-medium"
         style={{
             background: 'color-mix(in srgb, var(--text-color) 5%, var(--surface-card))',
@@ -148,8 +178,6 @@ const MetaChip = ({ icon, iconClass, label }: { icon: string; iconClass: string;
         {label}
     </span>
 );
-
-
 
 const CollapsibleCard = ({
     icon,
@@ -277,6 +305,11 @@ export default function ProjectDetail({ project, updateProject, options = {} }: 
     const leadLabel = hideLeadPI ? null : getReferenceName(projectData.leadPI, 'name');
 
     const keywords = (projectData.keywords ?? []).map((k) => k.trim()).filter(Boolean);
+
+    // Only populated themes are shown; plain ids are skipped
+    const themes = ((projectData.themes ?? []) as unknown[])
+        .filter(isPopulatedTheme)
+        .sort((a, b) => (a.priority ?? 0) - (b.priority ?? 0));
 
     const summaryWords = countWords(projectData.summary);
 
@@ -439,6 +472,20 @@ export default function ProjectDetail({ project, updateProject, options = {} }: 
                                     ))}
                                 </div>
                             )}
+
+                            {themes.length > 0 && (
+                                <div className="flex flex-wrap gap-2 mt-3">
+                                    {themes.map((theme) => (
+                                        <MetaChip
+                                            key={theme._id ?? theme.title}
+                                            icon="pi-sitemap"
+                                            iconClass="text-teal-500"
+                                            label={theme.title}
+                                            title={thematicAreaName(theme)}
+                                        />
+                                    ))}
+                                </div>
+                            )}
                         </div>
 
                         {canEdit && (
@@ -467,19 +514,15 @@ export default function ProjectDetail({ project, updateProject, options = {} }: 
                         </StatTile>
                     </div>
 
-
-                    {
-                        /** 
-                         * {showCollaboratorsMetric && (
-                                            <div className="col-12 sm:col-6 lg:col-3 p-2">
-                                                <StatTile icon="pi-users" label="Collaborators" color="orange">
-                                                    {projectData.totalCollabs ?? 0} Members
-                                                </StatTile>
-                                            </div>
-                                        )}
-                        */
-                    }
-
+                    {/*
+                    {showCollaboratorsMetric && (
+                        <div className="col-12 sm:col-6 lg:col-3 p-2">
+                            <StatTile icon="pi-users" label="Collaborators" color="orange">
+                                {projectData.totalCollabs ?? 0} Members
+                            </StatTile>
+                        </div>
+                    )}
+                    */}
 
                     {projectData.createdAt && (
                         <div className="col-12 sm:col-6 lg:col-3 p-2">
