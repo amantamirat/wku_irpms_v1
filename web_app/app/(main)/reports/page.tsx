@@ -20,6 +20,7 @@ import { PortfolioWidget } from './components/PortfolioWidget';
 import { ReportFilterPanel } from './components/ReportFilterPanel';
 import { VerificationWidget } from './components/VerificationWidget';
 import { CallApi } from '../calls/api/call.api';
+import { StageApi } from '../calls/stages/api/stage.api';
 
 type ReportType = 'departments' | 'directorates' | 'phases' | 'portfolio' | 'applications' | 'evaluations' | 'verifications' | 'financial';
 
@@ -43,6 +44,8 @@ export default function ReportsPage() {
   const [workspaces, setWorkpaces] = useState<any[]>([]);
   const [directorates, setDirectorates] = useState<any[]>([]);
   const [calls, setCalls] = useState<any[]>([]);
+  const [stages, setStages] = useState<any[]>([]);
+
 
   const [reportData, setReportData] = useState<any>(null);
   const [loading, setLoading] = useState<boolean>(false);
@@ -72,6 +75,32 @@ export default function ReportsPage() {
     };
     fetchLookups();
   }, []);
+
+  // Fetch stages whenever the selected call changes
+  useEffect(() => {
+    const callId = filterForm.call;
+
+    if (!callId) {
+      setStages([]);
+      return;
+    }
+
+    let cancelled = false;
+    const fetchStages = async () => {
+      try {
+        const stageData = await StageApi.lookup!({ call: callId });
+        if (!cancelled) setStages(stageData || []);
+      } catch (err) {
+        console.error('Failed to load stages:', err);
+        if (!cancelled) setStages([]);
+      }
+    };
+    fetchStages();
+
+    return () => {
+      cancelled = true; // avoids a stale response overwriting a newer one
+    };
+  }, [filterForm.call]);
 
   // Fetch Data on Report Type or Applied Filter Change
   useEffect(() => {
@@ -160,6 +189,7 @@ export default function ReportsPage() {
         workspaces={workspaces}
         organizations={directorates}
         calls={calls}
+        stages={stages}
         onApply={handleApplyFilter}
         onReset={handleResetFilter}
       />

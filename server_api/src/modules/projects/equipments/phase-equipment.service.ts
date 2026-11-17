@@ -439,7 +439,7 @@ export class PhaseEquipmentService {
         }
 
         if (phaseDoc.status !== PhaseStatus.proposed) {
-            throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
+           // throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
         }
 
         const { projectDoc, isLeadPI } =

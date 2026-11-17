@@ -14,7 +14,8 @@ interface ReportFilterPanelProps {
     calendars?: any[];
     workspaces?: any[];
     organizations?: any[];
-    calls?: any[]; // Added calls lookup data
+    calls?: any[];
+    stages?: any[]; // Stages lookup data (loaded per selected call)
     onApply: () => void;
     onReset: () => void;
 }
@@ -27,6 +28,7 @@ export const ReportFilterPanel: React.FC<ReportFilterPanelProps> = ({
     workspaces = [],
     organizations = [],
     calls = [],
+    stages = [],
     onApply,
     onReset,
 }) => {
@@ -52,16 +54,34 @@ export const ReportFilterPanel: React.FC<ReportFilterPanelProps> = ({
                     />
                 </div>
 
-                {/* Call Filter */}
+                {/* Call Filter (changing it clears the dependent stage) */}
                 <div className="col-12 sm:col-6 lg:col-3">
                     <label className="text-700 font-medium text-xs block mb-1">Call</label>
                     <Dropdown
                         value={filterForm.call || ''}
                         options={calls}
-                        onChange={(e) => setFilterForm({ ...filterForm, call: e.value })}
+                        onChange={(e) =>
+                            setFilterForm({ ...filterForm, call: e.value, stage: undefined })
+                        }
                         optionLabel="title" // Adjust property name based on Call model (e.g., title, name)
                         optionValue="_id"
                         placeholder="All Calls"
+                        className="w-full p-inputtext-sm"
+                        showClear
+                    />
+                </div>
+
+                {/* Stage Filter (depends on Call) */}
+                <div className="col-12 sm:col-6 lg:col-3">
+                    <label className="text-700 font-medium text-xs block mb-1">Stage</label>
+                    <Dropdown
+                        value={filterForm.stage || ''}
+                        options={stages}
+                        onChange={(e) => setFilterForm({ ...filterForm, stage: e.value })}
+                        optionLabel="name" // Adjust to your Stage model (e.g., name, title)
+                        optionValue="_id"
+                        placeholder={filterForm.call ? 'All Stages' : 'Select a call first'}
+                        disabled={!filterForm.call}
                         className="w-full p-inputtext-sm"
                         showClear
                     />
@@ -138,8 +158,8 @@ export const ReportFilterPanel: React.FC<ReportFilterPanelProps> = ({
                     />
                 </div>
 
-                {/* Actions */}
-                <div className="col-12 lg:col-6 flex gap-2 justify-content-end">
+                {/* Actions (own row, since 8 filters fill two rows of four) */}
+                <div className="col-12 flex gap-2 justify-content-end">
                     <Button
                         label="Reset"
                         icon="pi pi-refresh"

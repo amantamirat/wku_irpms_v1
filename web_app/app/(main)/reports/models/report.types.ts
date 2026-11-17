@@ -11,6 +11,7 @@ export interface IReportFilter {
   workspace?: string;
   organization?: string;
   calendar?: string;
+  stage?: string;
 
   fundingSource?: FundingSource;
 }
