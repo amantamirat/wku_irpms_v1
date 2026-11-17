@@ -61,8 +61,8 @@ export class ProjectConsistencyValidator {
         const end = this.getDate(endDate);
 
         if (
-            !Number.isFinite(start) ||
-            !Number.isFinite(end) ||
+           // !Number.isFinite(start) ||
+           // !Number.isFinite(end) ||
             end < start
         ) {
             throw new AppError(
