@@ -273,14 +273,14 @@ export class PhaseActivityService {
             );
         }
 
-        const { projectDoc, isLeadPI } =
+        const { projectDoc, isLeadPI, isAdmin } =
             await this.projectAuth.auth(
                 activityDoc.project.toString(),
                 userId,
                 PERMISSIONS.PHASE_ACTIVITY.UPDATE
             );
 
-        if (isLeadPI) {
+        if (!isAdmin) {
             await this.projectAuth.validateOwner(projectDoc);
         }
 
