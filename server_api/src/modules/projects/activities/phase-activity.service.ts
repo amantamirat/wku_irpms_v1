@@ -280,7 +280,7 @@ export class PhaseActivityService {
                 PERMISSIONS.PHASE_ACTIVITY.UPDATE
             );
 
-        if (!isAdmin) {
+        if (isLeadPI) {
             await this.projectAuth.validateOwner(projectDoc);
         }
 
