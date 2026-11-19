@@ -51,10 +51,10 @@ const columns: ColumnProps[] = [
     },
     {
         header: 'Phase',
-        field: 'phase',
+        field: 'phase.order',
         // Phase is a populated object, so server-side sorting on it
         // would sort by id rather than by phase order.
-        sortable: false,
+        sortable: true,
         body: (activity: Activity) => {
             const phase = activity.phase;
 

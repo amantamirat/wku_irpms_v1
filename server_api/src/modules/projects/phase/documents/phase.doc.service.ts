@@ -39,7 +39,7 @@ export class PhaseDocumentService {
             const { projectDoc, isLeadPI } = await this.projectAuth.auth(dto.project, userId, PERMISSIONS.PHASE_DOCUMENT.CREATE);
 
             if (isLeadPI) {
-
+                await this.projectAuth.validateOwner(projectDoc);
             }
 
             // Treat empty strings (e.g. from multipart forms) as "not provided"
@@ -49,8 +49,9 @@ export class PhaseDocumentService {
             if (phaseId) {
                 const phase = await this.phaseRepo.findById(phaseId);
                 if (!phase) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
-                if (phase.status !== PhaseStatus.active)
-                    throw new AppError(ERROR_CODES.PHASE_NOT_ACTIVE);
+
+               // if (phase.status !== PhaseStatus.active)
+               //     throw new AppError(ERROR_CODES.PHASE_NOT_ACTIVE);
                 // The phase must belong to the project the document is for
                 // (adjust `phase.project` to however your Phase model stores it)
                 if (String(phase.project) !== String(dto.project))
@@ -152,25 +153,6 @@ export class PhaseDocumentService {
 
         if (proDocDoc.status !== ProjectDocumentStatus.pending) {
             throw new AppError(ERROR_CODES.PHASE_DOCUMENT_NOT_PENDING);
-        }
-
-        // Only check the phase if the document belongs to one
-        if (proDocDoc.phase) {
-            const phase = await this.phaseRepo.findById(
-                String(proDocDoc.phase)
-            );
-            if (!phase) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
-            if (phase.status === PhaseStatus.completed)
-                throw new AppError(ERROR_CODES.PHASE_ALREADY_COMPLETED);
-        }
-
-        if (proDocDoc.activity) {
-            const activityDoc = await this.activityRepo.findById(
-                proDocDoc.activity.toString()
-            );
-            if (!activityDoc) throw new AppError(ERROR_CODES.PHASE_ACTIVITY_NOT_FOUND);
-            if (activityDoc.status === PhaseActivityStatus.completed)
-                throw new AppError(ERROR_CODES.PHASE_ALREADY_COMPLETED);
         }
 
         if (proDocDoc.documentPath) {

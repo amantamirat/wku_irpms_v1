@@ -1,18 +1,18 @@
-import { EntityApi } from "@/api/EntityApi";
 import { ApiClient } from "@/api/ApiClient";
-import { FilterProjects, Project } from "../models/project.model";
-import { StateTransition } from "@/api/EntityApi";
+import { EntityApi, StateTransition } from "@/api/EntityApi";
 import { sanitize } from "@/utils/utils";
+import { FilterProjects, Project, ProjectNextStage } from "../models/project.model";
+
 
 const end_point = "/projects";
 
 interface IProjectApi extends EntityApi<Project, FilterProjects | undefined> {
     transitionState: (id: string, dto: StateTransition) => Promise<Project>;
     me: (filter?: FilterProjects) => Promise<Project[]>;
+    meReadyForNextStage: () => Promise<ProjectNextStage[]>;   // new
     apply: (id: string, project: Partial<Project>) => Promise<any>;
     getProgress: (id: string) => Promise<any>
 }
-
 export const ProjectApi: IProjectApi = {
 
     async getAll(filter?: FilterProjects): Promise<Project[]> {
@@ -24,12 +24,16 @@ export const ProjectApi: IProjectApi = {
         return ApiClient.get(`${end_point}/lookup`, options);
     },
 
-   
+
     async me(filter?: FilterProjects): Promise<Project[]> {
         const data = await ApiClient.get(`${end_point}/me`, filter);
         return data as Project[];
     },
-    
+
+    async meReadyForNextStage(): Promise<ProjectNextStage[]> {
+        const data = await ApiClient.get(`${end_point}/me/ready-for-next-stage`);
+        return data as ProjectNextStage[];
+    },
 
     async getProgress(id: string): Promise<any> {
         const data = await ApiClient.get(`${end_point}/${id}/progress`);

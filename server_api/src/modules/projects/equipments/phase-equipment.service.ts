@@ -1,13 +1,3 @@
-import {
-    CreatePhaseEquipmentDto,
-    FilterPhaseEquipments,
-    UpdatePhaseEquipmentDto,
-} from "./phase-equipment.dto";
-import { IPhaseEquipmentRepository } from "./phase-equipment.repository";
-import {
-    IPhaseEquipment,
-    PhaseEquipmentStatus,
-} from "./phase-equipment.model";
 import { PERMISSIONS } from "../../../common/constants/permissions";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
@@ -15,13 +5,22 @@ import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
-import { IPhase, PhaseStatus } from "../phase/phase.model";
-import { IPhaseRepository } from "../phase/phase.repository";
-import { PHASE_HALT_STATES } from "../phase/phase.service";
-import { ProjectAuth } from "../project.auth";
-import { ProjectStatus } from "../project.model";
-import { ProjectConsistencyValidator } from "../ProjectConsistencyValidator";
 import { IPhaseActivityRepository } from "../activities/phase-activity.repository"; // adjust path to your folder
+import { IPhase } from "../phase/phase.model";
+import { IPhaseRepository } from "../phase/phase.repository";
+import { PHASE_EDITABLE_STATES } from "../phase/phase.service";
+import { ProjectAuth } from "../project.auth";
+import { ProjectConsistencyValidator } from "../ProjectConsistencyValidator";
+import {
+    CreatePhaseEquipmentDto,
+    FilterPhaseEquipments,
+    UpdatePhaseEquipmentDto,
+} from "./phase-equipment.dto";
+import {
+    IPhaseEquipment,
+    PhaseEquipmentStatus,
+} from "./phase-equipment.model";
+import { IPhaseEquipmentRepository } from "./phase-equipment.repository";
 
 /** Minimal shape the consistency validator needs for equipment. */
 interface EquipmentValidationInput {
@@ -115,6 +114,11 @@ export class PhaseEquipmentService {
         params: ValidateEquipmentChangeParams
     ): Promise<void> {
         const { phaseDoc, change } = params;
+
+        if (!PHASE_EDITABLE_STATES.includes(phaseDoc.status)) {
+            throw new AppError(ERROR_CODES.PHASE_NOT_EDITABLE);
+        }
+
         const phaseId = String(phaseDoc._id);
 
         const [currentEquipment, activities] = await Promise.all([
@@ -162,10 +166,6 @@ export class PhaseEquipmentService {
 
         if (!phaseDoc) {
             throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
-        }
-
-        if (PHASE_HALT_STATES.includes(phaseDoc.status)) {
-            throw new AppError(ERROR_CODES.INVALID_PHASE_STATUS);
         }
 
         const { projectDoc, isLeadPI } =
@@ -279,8 +279,8 @@ export class PhaseEquipmentService {
             );
 
         // Lead PIs can update equipment only while the project is a draft.
-        if (isLeadPI && projectDoc.status !== ProjectStatus.draft) {
-            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+        if (isLeadPI) {
+            await this.projectAuth.validateOwner(projectDoc);
         }
 
         // Loaded when dto.phase is given; reused for validation below.
@@ -297,11 +297,6 @@ export class PhaseEquipmentService {
             // The phase must belong to the equipment's original project.
             if (phaseDoc.project.toString() !== projectId) {
                 throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
-            }
-
-            // Lead PIs can assign equipment only to proposed phases.
-            if (isLeadPI && phaseDoc.status !== PhaseStatus.proposed) {
-                throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
             }
 
             targetPhaseDoc = phaseDoc;
@@ -394,12 +389,8 @@ export class PhaseEquipmentService {
             throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
         }
 
-        const involvesDelivery =
-            from === PhaseEquipmentStatus.delivered ||
-            to === PhaseEquipmentStatus.delivered;
-
-        if (involvesDelivery && phaseDoc.status !== PhaseStatus.active) {
-            throw new AppError(ERROR_CODES.PHASE_NOT_ACTIVE);
+        if (!PHASE_EDITABLE_STATES.includes(phaseDoc.status)) {
+            throw new AppError(ERROR_CODES.PHASE_NOT_EDITABLE);
         }
 
         return await this.equipmentRepo.updateStatus(
@@ -431,6 +422,13 @@ export class PhaseEquipmentService {
             );
         }
 
+        if (equipment.status !== PhaseEquipmentStatus.planned) {
+            throw new AppError(
+                ERROR_CODES.PHASE_EQUIPMENT_NOT_PLANNED
+            );
+        }
+
+
         const phaseDoc =
             await this.phaseRepo.findById(String(equipment.phase));
 
@@ -438,8 +436,8 @@ export class PhaseEquipmentService {
             throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
         }
 
-        if (phaseDoc.status !== PhaseStatus.proposed) {
-           // throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
+        if (!PHASE_EDITABLE_STATES.includes(phaseDoc.status)) {
+            throw new AppError(ERROR_CODES.PHASE_NOT_EDITABLE);
         }
 
         const { projectDoc, isLeadPI } =
@@ -449,8 +447,8 @@ export class PhaseEquipmentService {
                 PERMISSIONS.PHASE_EQUIPMENT.DELETE
             );
 
-        if (isLeadPI && projectDoc.status !== ProjectStatus.draft) {
-            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+        if (isLeadPI) {
+            await this.projectAuth.validateOwner(projectDoc);
         }
 
         return await this.equipmentRepo.delete(id);

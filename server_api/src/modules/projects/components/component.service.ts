@@ -20,6 +20,8 @@ import { ProjectComponentStatus } from "./component.model";
 import { PhaseActivityRepository } from "../activities/phase-activity.repository";
 import { IThemeRepository } from "../../thematics/themes/theme.repository";
 import { CollaboratorStatus } from "../collaborators/collaborator.model";
+import { PhaseActivityStatus } from "../activities/phase-activity.model";
+import { PROJECT_EDITABLE_STATES } from "../project.service";
 
 
 interface ComponentRelations {
@@ -225,6 +227,31 @@ export class ProjectComponentService {
         await this.validateThemes(projectDoc, component.themes);
     }
 
+
+    private async validateAllActivitiesCompleted(
+        activityIds: (string | any)[]
+    ): Promise<void> {
+        const ids = this.unique(activityIds);
+
+        if (!ids.length) {
+            throw new AppError(ERROR_CODES.COMPONENT_NO_ACTIVITIES);
+        }
+
+        const activities = await Promise.all(
+            ids.map((id) => this.activityRepo.findById(id))
+        );
+
+        for (const activity of activities) {
+            if (!activity) {
+                throw new AppError(ERROR_CODES.PHASE_ACTIVITY_NOT_FOUND);
+            }
+
+            if (activity.status !== PhaseActivityStatus.completed) {
+                throw new AppError(ERROR_CODES.PHASE_ACTIVITIES_NOT_COMPLETED);
+            }
+        }
+    }
+
     // ---------------------------------------------------
     // CREATE
     // ---------------------------------------------------
@@ -241,9 +268,14 @@ export class ProjectComponentService {
             PERMISSIONS.PROJECT_COMPONENT.CREATE
         );
 
-        if (isLeadPI && projectDoc.status !== ProjectStatus.draft) {
-            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+        if (isLeadPI) {
+            throw this.projectAuth.validateOwner(projectDoc);
         }
+
+        if (!PROJECT_EDITABLE_STATES.includes(projectDoc.status)) {
+            throw new AppError(ERROR_CODES.PROJECT_NOT_EDITABLE);
+        }
+
 
         await this.validateRelations(projectId, projectDoc, {
             contributors: dto.contributors,
@@ -287,15 +319,10 @@ export class ProjectComponentService {
     // ---------------------------------------------------
 
     async update(
-
         id: string,
         data: UpdateProjectComponentDTO,
         userId: string,
-
-
     ) {
-
-
         const component = await this.componentRepo.findById(id);
 
         if (!component) {
@@ -304,7 +331,9 @@ export class ProjectComponentService {
 
         // An approved component is locked so its approval stays valid.
         // To edit it, transition it back to pending first.
-        if (component.status === ProjectComponentStatus.approved) {
+        if (component.status === ProjectComponentStatus.approved
+            || component.status === ProjectComponentStatus.completed
+        ) {
             throw new AppError(ERROR_CODES.COMPONENT_LOCKED);
         }
 
@@ -316,9 +345,14 @@ export class ProjectComponentService {
             PERMISSIONS.PROJECT_COMPONENT.UPDATE
         );
 
-        if (isLeadPI && projectDoc.status !== ProjectStatus.draft) {
-            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+        if (isLeadPI) {
+            await this.projectAuth.validateOwner(projectDoc);
         }
+
+        if (!PROJECT_EDITABLE_STATES.includes(projectDoc.status)) {
+            throw new AppError(ERROR_CODES.PROJECT_NOT_EDITABLE);
+        }
+
 
         await this.validateRelations(
             projectId,
@@ -365,12 +399,11 @@ export class ProjectComponentService {
 
         const projectId = String(component.project);
 
+        const projectDoc = await this.projectAuth.getProject(projectId);
 
-        const { projectDoc } = await this.projectAuth.auth(
-            projectId,
-            userId,
-            //PERMISSIONS.PROJECT_COMPONENT.TRANSITION   // adjust to your permission name
-        );
+        if (!PROJECT_EDITABLE_STATES.includes(projectDoc.status)) {
+            throw new AppError(ERROR_CODES.PROJECT_NOT_EDITABLE);
+        }
 
         if (to === ProjectComponentStatus.refused && !reason?.trim()) {
             //throw new AppError(ERROR_CODES.REASON_REQUIRED);
@@ -381,6 +414,12 @@ export class ProjectComponentService {
                 component,
                 projectId,
                 projectDoc
+            );
+        }
+
+        if (to === ProjectComponentStatus.completed) {
+            await this.validateAllActivitiesCompleted(
+                component.activities
             );
         }
 
@@ -415,8 +454,12 @@ export class ProjectComponentService {
             PERMISSIONS.PROJECT_COMPONENT.DELETE
         );
 
-        if (isLeadPI && projectDoc.status !== ProjectStatus.draft) {
-            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
+        if (!PROJECT_EDITABLE_STATES.includes(projectDoc.status)) {
+            throw new AppError(ERROR_CODES.PROJECT_NOT_EDITABLE);
+        }
+
+        if (isLeadPI) {
+            await this.projectAuth.validateOwner(projectDoc);
         }
 
         return await this.componentRepo.delete(id);
@@ -426,6 +469,7 @@ export class ProjectComponentService {
     // DELETE BY PROJECT
     // ---------------------------------------------------
 
+    /*
     async deleteByProject(
         projectId: string,
         userId: string
@@ -436,12 +480,13 @@ export class ProjectComponentService {
             PERMISSIONS.PROJECT_COMPONENT.DELETE
         );
 
-        if (isLeadPI && projectDoc.status !== ProjectStatus.draft) {
+        if (isLeadPI) {
             throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
         }
 
         return await this.componentRepo.deleteByProject(projectId);
     }
+        */
 }
 
 export const PROJECT_COMPONENT_TRANSITIONS: Record<
@@ -452,6 +497,7 @@ export const PROJECT_COMPONENT_TRANSITIONS: Record<
         ProjectComponentStatus.approved,
         ProjectComponentStatus.refused,
     ],
-    [ProjectComponentStatus.approved]: [ProjectComponentStatus.pending], // reopen
+    [ProjectComponentStatus.approved]: [ProjectComponentStatus.completed, ProjectComponentStatus.pending], // reopen
     [ProjectComponentStatus.refused]: [ProjectComponentStatus.pending],  // resubmit
+    [ProjectComponentStatus.completed]: [ProjectComponentStatus.approved],
 };

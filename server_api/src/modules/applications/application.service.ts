@@ -1,6 +1,7 @@
 import { randomUUID } from "crypto";
 import path from "path";
 import { PERMISSIONS } from "../../common/constants/permissions";
+import { SYSTEM } from "../../common/constants/system.constant";
 import { DeleteDto } from "../../common/dtos/delete.dto";
 import { FilterOptions } from "../../common/dtos/filter.dto";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
@@ -14,8 +15,8 @@ import { AuthScope } from "../auth/auth.types";
 import { ICallRepository } from "../calls/call.repository";
 import { IStage, StageStatus } from "../calls/stages/stage.model";
 import { IStageRepository } from "../calls/stages/stage.repository";
-import { CompositionValidationInput, CompositionValidationService } from "../compositions/composition-validation-service";
-import { ConstraintValidationInput, ConstraintValidationService } from "../constraints/services/constraint-validator.service";
+import { CompositionValidationService } from "../compositions/composition-validation-service";
+import { ConstraintValidationService } from "../constraints/services/constraint-validator.service";
 import { NotificationService } from "../notifications/notification.service";
 import { ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
 import { ProjectAuth } from "../projects/project.auth";
@@ -30,7 +31,6 @@ import {
 } from "./application.dto";
 import { ApplicationStatus, IApplication } from "./application.model";
 import { IApplicationRepository } from "./application.repository";
-import { SYSTEM } from "../../common/constants/system.constant";
 
 export const FAILED_STATES: ApplicationStatus[] = [
     ApplicationStatus.notShortlisted,
@@ -598,58 +598,58 @@ export class ApplicationService {
         const updated = await this.applicationRepo.updateStatus(id, to, userId, reason);
 
 
-        if (this.notificationService) {
-            const leadUser = String(projectDoc.leadPI);
-            const title = projectDoc.title;
-            const stageName = stageDoc.name;
 
-            if (from === ApplicationStatus.submitted && to === ApplicationStatus.shortlisted) {
-                await this.notificationService.notifyApplicationShortlisted(
-                    leadUser,
-                    title,
-                    stageName
-                );
-            }
+        const leadUser = String(projectDoc.leadPI);
+        const title = projectDoc.title;
+        const stageName = stageDoc.name;
 
-            else if (to === ApplicationStatus.rejected) {
-                await this.notificationService.notifyApplicationRejected(
-                    leadUser,
-                    title,
-                    stageName
-                );
-            } else if (to === ApplicationStatus.accepted) {
-
-                let nextStageInfo:
-                    | { name: string; deadline?: Date }
-                    | undefined;
-
-                const nextStage =
-                    await this.stageRepo.getNextStage(String(stageDoc.call), stageDoc.order);
-
-                if (nextStage)
-                    nextStageInfo = {
-                        name: nextStage.name,
-                        deadline: nextStage.deadline
-                            ? new Date(nextStage.deadline)
-                            : undefined
-                    };
-
-                await this.notificationService.notifyApplicationAccepted(
-                    leadUser,
-                    title,
-                    stageName,
-                    nextStageInfo
-                );
-            }
-            else if (to === ApplicationStatus.submitted) {
-                await this.notificationService.notifyRollback(
-                    leadUser,
-                    title,
-                    ApplicationStatus.submitted,
-                    stageName,
-                );
-            }
+        if (from === ApplicationStatus.submitted && to === ApplicationStatus.shortlisted) {
+            await this.notificationService.notifyApplicationShortlisted(
+                leadUser,
+                title,
+                stageName
+            );
         }
+
+        else if (to === ApplicationStatus.rejected) {
+            await this.notificationService.notifyApplicationRejected(
+                leadUser,
+                title,
+                stageName
+            );
+        } else if (to === ApplicationStatus.accepted) {
+
+            let nextStageInfo:
+                | { name: string; deadline?: Date }
+                | undefined;
+
+            const nextStage =
+                await this.stageRepo.getNextStage(String(stageDoc.call), stageDoc.order);
+
+            if (nextStage)
+                nextStageInfo = {
+                    name: nextStage.name,
+                    deadline: nextStage.deadline
+                        ? new Date(nextStage.deadline)
+                        : undefined
+                };
+
+            await this.notificationService.notifyApplicationAccepted(
+                leadUser,
+                title,
+                stageName,
+                nextStageInfo
+            );
+        }
+        else if (to === ApplicationStatus.submitted) {
+            await this.notificationService.notifyRollback(
+                leadUser,
+                title,
+                ApplicationStatus.submitted,
+                stageName,
+            );
+        }
+
 
         return updated;
     }

@@ -6,29 +6,28 @@ import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 
+import { IPhaseEquipmentRepository } from "../equipments/phase-equipment.repository";
+import { IPhase } from "../phase/phase.model";
+import { IPhaseRepository } from "../phase/phase.repository";
 import { ProjectAuth } from "../project.auth";
 import { ProjectConsistencyValidator } from "../ProjectConsistencyValidator";
-import { IPhaseRepository } from "../phase/phase.repository";
-import { IPhase, PhaseStatus } from "../phase/phase.model";
-import { IPhaseEquipmentRepository } from "../equipments/phase-equipment.repository";
 
+import { ProjectDocumentStatus } from "../phase/documents/phase.doc.model";
+import { IPhaseDocumentRepository } from "../phase/documents/phase.doc.repository";
+import { PHASE_EDITABLE_STATES } from "../phase/phase.service";
+import { findMissingDocumentTypes, humanize } from "./phase-activity-document.mapper";
 import {
     CreatePhaseActivityDto,
     FilterPhaseActivities,
     UpdatePhaseActivityDto,
 } from "./phase-activity.dto";
-import { IPhaseActivityRepository } from "./phase-activity.repository";
 import {
     IPhaseActivity,
     IPhaseActivityDetailCost,
     PhaseActivityStatus,
     PhaseActivityType,
 } from "./phase-activity.model";
-import { findMissingDocumentTypes, humanize } from "./phase-activity-document.mapper";
-import { ProjectStatus } from "../project.model";
-import { IPhaseDocumentRepository } from "../phase/documents/phase.doc.repository";
-import { ProjectDocumentStatus } from "../phase/documents/phase.doc.model";
-import { PHASE_HALT_STATES } from "../phase/phase.service";
+import { IPhaseActivityRepository } from "./phase-activity.repository";
 
 /** Minimal shape the consistency validator needs for an activity. */
 interface ActivityValidationInput {
@@ -63,6 +62,8 @@ const definedOnly = <T extends object>(obj: T): Partial<T> =>
     Object.fromEntries(
         Object.entries(obj).filter(([, v]) => v !== undefined)
     ) as Partial<T>;
+
+
 
 export class PhaseActivityService {
 
@@ -135,6 +136,11 @@ export class PhaseActivityService {
         params: ValidateActivityChangeParams
     ): Promise<void> {
         const { phaseDoc, change } = params;
+
+        if (!PHASE_EDITABLE_STATES.includes(phaseDoc.status)) {
+            throw new AppError(ERROR_CODES.PHASE_NOT_EDITABLE);
+        }
+
         const phaseId = String(phaseDoc._id);
 
         const [currentActivities, equipment] = await Promise.all([
@@ -174,10 +180,6 @@ export class PhaseActivityService {
 
         if (!phaseDoc) {
             throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
-        }
-
-        if (PHASE_HALT_STATES.includes(phaseDoc.status)) {
-            throw new AppError(ERROR_CODES.INVALID_PHASE_STATUS);
         }
 
         const { projectDoc, isLeadPI } =
@@ -273,7 +275,7 @@ export class PhaseActivityService {
             );
         }
 
-        const { projectDoc, isLeadPI, isAdmin } =
+        const { projectDoc, isLeadPI } =
             await this.projectAuth.auth(
                 activityDoc.project.toString(),
                 userId,
@@ -385,26 +387,8 @@ export class PhaseActivityService {
             throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
         }
 
-        // Planning is only possible while the phase is proposed.
-        if (to === PhaseActivityStatus.planned) {
-            if (phaseDoc.status !== PhaseStatus.proposed) {
-                throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
-            }
-        }
-
-        // Activity execution is only possible while its phase is active.
-        const executionStates = [
-            PhaseActivityStatus.active,
-            PhaseActivityStatus.completed,
-            PhaseActivityStatus.cancelled,
-        ];
-
-        const involvesExecution =
-            executionStates.includes(from) ||
-            executionStates.includes(to);
-
-        if (involvesExecution && phaseDoc.status !== PhaseStatus.active) {
-            throw new AppError(ERROR_CODES.PHASE_NOT_ACTIVE);
+        if (!PHASE_EDITABLE_STATES.includes(phaseDoc.status)) {
+            throw new AppError(ERROR_CODES.PHASE_NOT_EDITABLE);
         }
 
         // Completion requires the documents that prove the activity kind.
@@ -458,6 +442,17 @@ export class PhaseActivityService {
             throw new AppError(ERROR_CODES.PHASE_ACTIVITY_NOT_FOUND);
         }
 
+        const phaseDoc =
+            await this.phaseRepo.findById(String(activity.phase));
+
+        if (!phaseDoc) {
+            throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
+        }
+
+        if (!PHASE_EDITABLE_STATES.includes(phaseDoc.status)) {
+            throw new AppError(ERROR_CODES.PHASE_NOT_EDITABLE);
+        }
+
         // Authorize directly against the activity's project
         const { projectDoc, isLeadPI } =
             await this.projectAuth.auth(
@@ -466,22 +461,8 @@ export class PhaseActivityService {
                 PERMISSIONS.PHASE_ACTIVITY.DELETE
             );
 
-        if (isLeadPI && projectDoc.status !== ProjectStatus.draft) {
-            throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
-        }
-
-        // Phase is optional: only check it when the activity has one
-        if (activity.phase) {
-            const phaseDoc =
-                await this.phaseRepo.findById(String(activity.phase));
-
-            if (!phaseDoc) {
-                throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
-            }
-
-            if (phaseDoc.status !== PhaseStatus.proposed) {
-               // throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
-            }
+        if (isLeadPI) {
+            await this.projectAuth.validateOwner(projectDoc);
         }
 
         return await this.activityRepo.delete(id);

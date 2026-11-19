@@ -154,10 +154,10 @@ export const filterService = new ScopeFilterService(projectRepo, userRepo);
 // Services
 export const stageService = new StageService(stageRepo, callRepo, evaluationRepo, applicationRepo);
 
-export const projectAuth = new ProjectAuth(projectRepo, applicationRepo, authPermissionService);
+export const projectAuth = new ProjectAuth(projectRepo, applicationRepo, stageRepo, authPermissionService);
 
-export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, grantRepo, callRepo, stageRepo,
-    applicationRepo, constraintValidator, compositionValidator, projectAuth, notificationService, filterService);
+export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, grantRepo,
+    constraintValidator, compositionValidator, projectAuth, notificationService, filterService);
 
 export const phaseActivityService = new PhaseActivityService(activityRepo, phaseRepo, phaseDocRepo,
     equipmentRepo, consistencyValidator, projectAuth);
@@ -175,12 +175,13 @@ export const applicationService = new ApplicationService(
     collaboratorRepo, userRepo, fileStorageService
 );
 
-export const projectService = new ProjectService(projectRepo, collaboratorRepo, phaseRepo, componentRepo, activityRepo, equipmentRepo, phaseDocRepo,
-    userRepo, verificationRepo,
-    grantRepo, callRepo, calendarRepo, stageRepo,
+export const projectService = new ProjectService(projectRepo, 
+    collaboratorRepo, phaseRepo, componentRepo, phaseDocRepo,
+    userRepo, verificationRepo,calendarRepo,
+    grantRepo, callRepo, stageRepo, applicationRepo,
     collabService, phaseService, applicationService,
     constraintValidator, compositionValidator, templateValidtor, consistencyValidator,
-    projectAuth, authPermissionService, notificationService, filterService, fileStorageService);
+    projectAuth, notificationService, filterService, fileStorageService);
 
 export const userService = new UserService(userRepo, organizationRepo, roleRepo, collaboratorRepo);
 

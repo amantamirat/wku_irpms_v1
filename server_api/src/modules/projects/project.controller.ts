@@ -1,23 +1,20 @@
-import fs from "fs";
-import path from "path";
 import { Response } from "express";
-import { errorResponse, successResponse } from "../../common/helpers/response";
-import { AuthenticatedRequest } from "../auth/auth.middleware";
-import { ProjectService } from "./project.service";
 import { DeleteDto } from "../../common/dtos/delete.dto";
-import { ERROR_CODES } from "../../common/errors/error.codes";
 import { TransitionRequestDto } from "../../common/dtos/transition.dto";
-import { ProjectStatus } from "./project.model";
+import { AppError } from "../../common/errors/app.error";
+import { ERROR_CODES } from "../../common/errors/error.codes";
+import { errorResponse, successResponse } from "../../common/helpers/response";
+import { toObjectId } from "../../common/utils/mongoose.utils";
+import { AuthenticatedRequest } from "../auth/auth.middleware";
+import { ProjectProgressService } from "./project-progress-service";
 import {
   ApplyProjectDTO,
-  CreateOLDProjectDTO,
+  CreateProjectDto,
   FilterProjectsDTO,
   UpdateProjectDTO
 } from "./project.dto";
-import { ProjectProgressService } from "./project-progress-service";
-import { toObjectId } from "../../common/utils/mongoose.utils";
-import { CreateProjectDto } from "./project.dto";
-import { AppError } from "../../common/errors/app.error";
+import { ProjectStatus } from "./project.model";
+import { ProjectService } from "./project.service";
 
 
 const buildProjectFilter = (
@@ -211,7 +208,7 @@ export class ProjectController {
     }
   };
 
-  
+
   getMyProjects = async (
     req: AuthenticatedRequest,
     res: Response
@@ -238,8 +235,32 @@ export class ProjectController {
     }
   };
 
- 
 
+  
+
+  getMyProjectsReadyForNextStage = async (
+    req: AuthenticatedRequest,
+    res: Response
+  ) => {
+    try {
+      if (!req.auth) {
+        throw new Error(ERROR_CODES.UNAUTHORIZED);
+      }
+
+      const result = await this.service.getMyProjectsReadyForNextStage(
+        req.auth.userId
+      );
+
+      successResponse(
+        res,
+        200,
+        "Projects ready for next stage fetched successfully",
+        result
+      );
+    } catch (err: any) {
+      errorResponse(res, 400, err.message, err);
+    }
+  };
 
 
   // -----------------------

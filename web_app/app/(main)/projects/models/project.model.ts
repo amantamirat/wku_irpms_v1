@@ -9,6 +9,7 @@ import { Theme } from "../../thematics/themes/models/theme.model";
 import { User } from "../../users/models/user.model";
 import { Verification } from "../../verifications/models/verification.model";
 import { Phase } from "../phases/models/phase.model";
+import { Stage } from "../../calls/stages/models/stage.model";
 
 export enum ProjectStatus {
     draft = 'draft',
@@ -19,6 +20,12 @@ export enum ProjectStatus {
     terminated = 'terminated',
     verified = 'verified'
 }
+
+export interface ProjectNextStage {
+    project: Project;
+    nextStage: Stage;
+}
+
 
 export interface IProjectObjectives {
     general: string;

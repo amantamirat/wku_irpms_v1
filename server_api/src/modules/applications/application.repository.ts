@@ -88,6 +88,12 @@ export class ApplicationRepository
 
         const query: Record<string, any> = {};
 
+        // Specific applications (e.g. projects' currentApplication ids)
+        if (filters.ids?.length) {
+            query._id = { $in: filters.ids.map(toObjectId) };
+        }
+
+
         if (filters.project) {
             query.project =
                 toObjectId(filters.project);

@@ -31,6 +31,7 @@ import { NotificationService } from "../../notifications/notification.service";
 import { ProjectAuth } from "../project.auth";
 import { IProject, ProjectStatus } from "../project.model";
 import { CollaboratorStatus, ICollaborator, LeaderRole } from "./collaborator.model";
+import { PROJECT_EDITABLE_STATES } from "../project.service";
 
 
 /**
@@ -61,9 +62,6 @@ export class CollaboratorService {
         private readonly collabRepo: ICollaboratorRepository,
         private readonly projectRepo: IProjectRepository,
         private readonly grantRepo: GrantRepository,
-        private readonly callRepo: ICallRepository,
-        private readonly stageRepo: IStageRepository,
-        private readonly applicationRepo: IApplicationRepository,
         private readonly constraintValidator: ConstraintValidationService,
         private readonly compositionValidator: CompositionValidationService,
         private readonly projectAuth: ProjectAuth,
@@ -72,37 +70,7 @@ export class CollaboratorService {
     ) {
     }
 
-    // ---------------------------------------------------------------------
-    // Shared validation helpers
-    // ---------------------------------------------------------------------
 
-    private async assertCurrentApplicationStage(projectDoc: IProject) {
-        if (projectDoc.status === ProjectStatus.draft &&
-            projectDoc.currentApplication) {
-
-            const currentAppDoc = await this.applicationRepo.findById(String(projectDoc.currentApplication));
-            if (!currentAppDoc) {
-                throw new AppError(ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND);
-            }
-
-            if (currentAppDoc.status !== ApplicationStatus.submitted) {
-                throw new AppError(ERROR_CODES.APPLICATION_NOT_IN_SUBMITTED_STATE);
-            }
-
-            const stageDoc = await this.stageRepo.findById(currentAppDoc.stage.toString());
-            if (!stageDoc) {
-                throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-            }
-            if (stageDoc.status !== StageStatus.active) {
-                throw new AppError(ERROR_CODES.STAGE_NOT_ACTIVE);
-            }
-
-        }
-    }
-
-    /**
- * Returns the composition input as it would look after applying `change`.
- */
     /**
  * Returns the composition input as it would look after applying `change`.
  */
@@ -144,6 +112,10 @@ export class CollaboratorService {
         options?: ValidationOptions
     ): Promise<void> {
         const { projectDoc, projectId, change, label } = params;
+
+        if (!PROJECT_EDITABLE_STATES.includes(projectDoc.status)) {
+            throw new AppError(ERROR_CODES.PROJECT_NOT_EDITABLE);
+        }
 
         const currentCollaborators = await this.collabRepo.find({
             project: projectId,
@@ -265,11 +237,7 @@ export class CollaboratorService {
             );
 
             if (isLeadPI) {
-                if (projectDoc.status !== ProjectStatus.draft) {
-                    throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
-                }
-
-                await this.assertCurrentApplicationStage(projectDoc);
+                await this.projectAuth.validateOwner(projectDoc);
             }
 
             // Centralized membership validation
@@ -386,11 +354,7 @@ export class CollaboratorService {
 
         // The lead PI can update collaborators only while the project is in draft.
         if (isLeadPI) {
-            if (projectDoc.status !== ProjectStatus.draft) {
-                throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
-            }
-
-            await this.assertCurrentApplicationStage(projectDoc);
+            await this.projectAuth.validateOwner(projectDoc);
         }
 
         // Determine the actual membership changes.
@@ -596,7 +560,11 @@ export class CollaboratorService {
         const projectDoc = await this.projectRepo.findById(String(collabDoc.project));
         if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
-        await this.assertCurrentApplicationStage(projectDoc);
+        await this.projectAuth.validateOwner(projectDoc, true);
+
+        if (!PROJECT_EDITABLE_STATES.includes(projectDoc.status)) {
+            throw new AppError(ERROR_CODES.PROJECT_NOT_EDITABLE);
+        }
 
         const from = collabDoc.status as CollaboratorStatus;
         const to = next as CollaboratorStatus;
@@ -608,9 +576,7 @@ export class CollaboratorService {
         TransitionHelper.validateTransition(from, to, COLLAB_TRANSITIONS);
 
         if (next === CollaboratorStatus.pending) {
-            if (projectDoc.status !== ProjectStatus.draft) {
-                throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
-            }
+            throw new AppError(ERROR_CODES.UNSUPPORTED_OPERTATION);
         }
 
         const updated = await this.collabRepo.update(id, {
@@ -681,10 +647,7 @@ export class CollaboratorService {
 
         // The lead PI can remove collaborators only while the project is in draft.
         if (isLeadPI) {
-            if (projectDoc.status !== ProjectStatus.draft) {
-                throw new AppError(ERROR_CODES.PROJECT_NOT_DRAFT);
-            }
-            await this.assertCurrentApplicationStage(projectDoc);
+            await this.projectAuth.validateOwner(projectDoc);
         }
 
         const memberToRemove = String(collabDoc.member);

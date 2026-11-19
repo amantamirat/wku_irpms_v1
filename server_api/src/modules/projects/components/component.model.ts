@@ -6,6 +6,7 @@ import { createStatusHistorySchema } from "../../../common/schemas/status-histor
 export enum ProjectComponentStatus {
     pending = "pending",
     approved = "approved",
+    completed = 'completed',
     refused = "refused",
 }
 

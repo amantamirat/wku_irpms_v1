@@ -19,6 +19,7 @@ import { IPhaseEquipmentRepository } from "../equipments/phase-equipment.reposit
 import { ProjectAuth } from "../project.auth";
 import { IProject, ProjectStatus } from "../project.model";
 import { IProjectRepository } from "../project.repository";
+import { PROJECT_EDITABLE_STATES } from "../project.service";
 import { ProjectConsistencyValidator } from "../ProjectConsistencyValidator";
 import { PhaseDocumentType, ProjectDocumentStatus } from "./documents/phase.doc.model";
 import { IPhaseDocumentRepository } from "./documents/phase.doc.repository";
@@ -41,17 +42,12 @@ interface ValidatePhaseChangeParams {
     label: "proposed" | "remaining";
 }
 
-/** Phase states that mean the phase is being (or has been) executed. */
-const EXECUTION_STATES: PhaseStatus[] = [
+
+export const PHASE_EDITABLE_STATES: PhaseStatus[] = [
+    PhaseStatus.proposed,
     PhaseStatus.active,
-    PhaseStatus.completed,
-    PhaseStatus.cancelled,
 ];
 
-export const PHASE_HALT_STATES: PhaseStatus[] = [
-    PhaseStatus.completed,
-    PhaseStatus.cancelled,
-];
 
 export class PhaseService {
 
@@ -117,6 +113,10 @@ export class PhaseService {
     ): Promise<void> {
         const { projectDoc, projectId, change, label } = params;
 
+        if (!PROJECT_EDITABLE_STATES.includes(projectDoc.status)) {
+            throw new AppError(ERROR_CODES.PROJECT_NOT_EDITABLE);
+        }
+
         const currentPhases = await this.phaseRepo.find({
             project: projectId
         });
@@ -141,7 +141,7 @@ export class PhaseService {
             );
 
             // 2. Validate phase dates against other phases.
-        
+
             this.consistencyValidator.validatePhaseDates(
                 targetPhase,
                 otherPhases
@@ -198,10 +198,10 @@ export class PhaseService {
 
     // ---------------------------------------------------
     // Totals helpers (shared by approval and completion)
+    /* Activity total cost and equipments cost must match the phase budget. */
     // ---------------------------------------------------
 
-    /** Activity total cost and equipments cost must match the phase and budget. */
-    private assertPhaseCost(
+    private assertPhaseBudget(
         phaseDoc: IPhase,
         activities: IPhaseActivity[],
         equipments: IPhaseEquipment[]
@@ -235,16 +235,33 @@ export class PhaseService {
             throw new AppError(ERROR_CODES.PHASE_EQUIPMENT_MUST_BE_APPROVED);
         }
 
-        this.assertPhaseCost(phaseDoc, activities, equipment);
+        this.assertPhaseBudget(phaseDoc, activities, equipment);
     }
 
-    private assertCanActivate(previousPhases: IPhase[], nextPhases: IPhase[]) {
+    private async assertCanActivate(projectDoc: IProject, phaseDoc: IPhase) {
+        if (projectDoc.status !== ProjectStatus.granted) {
+            throw new AppError(ERROR_CODES.PROJECT_NOT_GRANTED);
+        }
+
+        const phases = await this.phaseRepo.find({
+            project: projectDoc._id.toString()
+        });
+
+        // Ensure all previous phases are completed
+        const previousPhases = phases.filter(p => p.order < phaseDoc.order);
+
         if (previousPhases.some(p => p.status !== PhaseStatus.completed)) {
             throw new AppError(ERROR_CODES.PREVIOUS_PHASE_NOT_COMPLETED);
         }
 
-        if (nextPhases.some(p => EXECUTION_STATES.includes(p.status))) {
-            throw new AppError(ERROR_CODES.NEXT_PHASE_ALREADY_EXECUTED);
+        // Ensure no other phase is currently active
+        const anotherActivePhase = phases.some(
+            p => p._id.toString() !== phaseDoc._id.toString() &&
+                p.status === PhaseStatus.active
+        );
+
+        if (anotherActivePhase) {
+            throw new AppError(ERROR_CODES.ANOTHER_PHASE_ALREADY_ACTIVE);
         }
     }
 
@@ -262,7 +279,7 @@ export class PhaseService {
             throw new AppError(ERROR_CODES.PHASE_EQUIPMENT_NOT_DELIVERED);
         }
 
-        this.assertPhaseCost(phaseDoc, activities, equipment);
+        this.assertPhaseBudget(phaseDoc, activities, equipment);
 
         const hasProgressReport = await this.phaseDocRepo.exists({
             phase: String(phaseDoc._id),
@@ -271,7 +288,7 @@ export class PhaseService {
         });
 
         if (!hasProgressReport) {
-            throw new AppError(ERROR_CODES.PHASE_PROGRESS_REPORT_REQUIRED);
+            throw new AppError(ERROR_CODES.PHASE_PROGRESS_REPORT_REQUIRED, "Approved Phase Progress Report Document Required");
         }
     }
 
@@ -336,9 +353,10 @@ export class PhaseService {
     async update(id: string, dto: UpdatePhaseDto, userId: string) {
 
         const phaseDoc = await this.phaseRepo.findById(id);
+
         if (!phaseDoc) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
 
-        if (PHASE_HALT_STATES.includes(phaseDoc.status)) {
+        if (!PHASE_EDITABLE_STATES.includes(phaseDoc.status)) {
             throw new AppError(ERROR_CODES.INVALID_PHASE_STATUS);
         }
 
@@ -351,9 +369,6 @@ export class PhaseService {
         );
 
         if (isLeadPI) {
-            if (phaseDoc.status !== PhaseStatus.proposed) {
-                throw new AppError(ERROR_CODES.PHASE_NOT_PROPOSED);
-            }
             await this.projectAuth.validateOwner(projectDoc);
         }
 
@@ -397,29 +412,20 @@ export class PhaseService {
         const projectId = String(phaseDoc.project);
 
         const projectDoc = await this.projectRepo.findById(projectId);
+
         if (!projectDoc) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
 
-        const phases = await this.phaseRepo.find({ project: projectId });
-        const previousPhases = phases.filter(p => p.order < phaseDoc.order);
-        const nextPhases = phases.filter(p => p.order > phaseDoc.order);
+        if (!PROJECT_EDITABLE_STATES.includes(projectDoc.status)) {
+            throw new AppError(ERROR_CODES.PROJECT_NOT_EDITABLE);
+        }
 
         // ---- Rules per target state ----
-
         if (to === PhaseStatus.approved) {
             await this.assertCanApprove(phaseDoc);
         }
 
-        // Execution states require the project to be granted.
-        const involvesExecution =
-            EXECUTION_STATES.includes(from) || EXECUTION_STATES.includes(to);
-
-        if (involvesExecution && projectDoc.status !== ProjectStatus.granted) {
-            throw new AppError(ERROR_CODES.PROJECT_NOT_GRANTED);
-        }
-
         if (to === PhaseStatus.active) {
-            this.assertCanActivate(previousPhases, nextPhases);
-
+            await this.assertCanActivate(projectDoc, phaseDoc)
             // The budget is consumed only when execution actually starts.
             if (from === PhaseStatus.approved) {
                 await this.grantRepo.consumeBudget(

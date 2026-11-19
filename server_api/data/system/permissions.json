@@ -1386,6 +1386,16 @@
   },
   {
     "category": "Project Component Management",
+    "name": "projectComponent:transition.approved.completed",
+    "description": "Mark an approved project component as completed"
+  },
+  {
+    "category": "Project Component Management",
+    "name": "projectComponent:transition.completed.approved",
+    "description": "Return a completed project component to approved"
+  },
+  {
+    "category": "Project Component Management",
     "name": "projectComponent:transition.approved.pending",
     "description": "Return an approved project component to pending"
   },

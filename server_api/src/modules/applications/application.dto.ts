@@ -10,6 +10,7 @@ export interface CreateApplicationDTO {
 
 
 export interface FilterApplicationDTO {
+    ids?:string[];
     reviewerAssigner?:string;
     project?: string;
     projectIds?: string[];

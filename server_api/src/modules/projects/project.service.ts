@@ -10,12 +10,14 @@ import { FileStorageService } from "../../common/services/file-storage.service";
 import ScopeFilterService from "../../common/services/scope-filter.service";
 import { toObjectId } from "../../common/utils/mongoose.utils";
 import { ApplicationStatus } from "../applications/application.model";
+import { ApplicationRepository } from "../applications/application.repository";
 import { ApplicationService } from "../applications/application.service";
 import { AuthPermissionService } from "../auth/auth.permission-service";
 import { AuthScope } from "../auth/auth.types";
 import { ICalendarRepository } from "../calendar/calendar.repository";
 import { CallStatus } from "../calls/call.model";
 import { ICallRepository } from "../calls/call.repository";
+import { StageStatus } from "../calls/stages/stage.model";
 import { IStageRepository } from "../calls/stages/stage.repository";
 import { CompositionValidationService } from "../compositions/composition-validation-service";
 import { HistoryContextInput } from "../compositions/history/history-validation-service";
@@ -48,19 +50,12 @@ import {
     InternalCreateProjectDto,
     UpdateProjectDTO,
 } from "./project.dto";
-import { ProjectStatus } from "./project.model";
+import { IProject, ProjectStatus } from "./project.model";
 import { IProjectRepository } from "./project.repository";
 import { PROJECT_TRANSITIONS } from "./project.state-machine";
 import { ProjectConsistencyValidator } from "./ProjectConsistencyValidator";
 
-const HALT_STATES: ProjectStatus[] = [
-    ProjectStatus.refused,
-    ProjectStatus.completed,
-    ProjectStatus.verified,
-    ProjectStatus.terminated
-];
-
-const EXECUTION_STATES: ProjectStatus[] = [
+export const PROJECT_EDITABLE_STATES: ProjectStatus[] = [
     ProjectStatus.draft,
     ProjectStatus.granted
 ];
@@ -71,7 +66,7 @@ interface ValidateProjectParams {
     phases?: IPhase[];
     label: string;
 }
-
+const idOf = (v: any): string => (typeof v === 'string' ? v : (v._id ?? v).toString());
 export class ProjectService {
 
     constructor(
@@ -81,18 +76,16 @@ export class ProjectService {
         private readonly collabRepo: ICollaboratorRepository,
         private readonly phaseRepo: IPhaseRepository,
         private readonly componentRepo: ProjectComponentRepository,
-        private readonly activityRepo: PhaseActivityRepository,
-        private readonly equipmentRepo: PhaseEquipmentRepository,
         private readonly documentRepo: PhaseDocumentRepository,
-
 
         private readonly userRepo: IUserRepository,
         private readonly verificationRepo: IVerificationRepository,
 
+        private readonly calendarRepo: ICalendarRepository,
         private readonly grantRepo: IGrantRepository,
         private readonly callRepo: ICallRepository,
-        private readonly calendarRepo: ICalendarRepository,
         private readonly stageRepo: IStageRepository,
+        private readonly applicationRepo: ApplicationRepository,
 
         private readonly collabService: CollaboratorService,
         private readonly phaseService: PhaseService,
@@ -105,7 +98,6 @@ export class ProjectService {
         private readonly consistencyValidator: ProjectConsistencyValidator,
 
         private readonly projectAuth: ProjectAuth,
-        private readonly authPermissionService: AuthPermissionService,
         private readonly notificationService: NotificationService,
         private readonly scopeFilterService: ScopeFilterService,
         private readonly fileStorage: FileStorageService
@@ -133,7 +125,7 @@ export class ProjectService {
             String(grantDoc.constraint)
         );
 
-        const result = await this.constraintValidator.validateProjectContent(
+        const result = this.constraintValidator.validateProjectContent(
             constraintDoc,
             project
         );
@@ -252,6 +244,53 @@ export class ProjectService {
     };
 
 
+    async getMyProjectsReadyForNextStage(userId: string) {
+        // 1. My projects (no populate: call and currentApplication stay as ids)
+        const projects = await this.projectRepo.find({
+            status: ProjectStatus.draft,
+            leadPI: userId,
+        });
+        const withApp = projects.filter(p => p.currentApplication);
+        if (!withApp.length) return [];
+
+        // 2. Their current applications, accepted only
+        const apps = await this.applicationRepo.find({
+            ids: withApp.map(p => idOf(p.currentApplication)),
+            status: ApplicationStatus.accepted,
+        });
+        const appById = new Map(apps.map(a => [idOf(a._id), a]));
+
+        const accepted = withApp.filter(p => appById.has(idOf(p.currentApplication)));
+        if (!accepted.length) return [];
+
+        // 3. All stages of those calls (NO status filter), so we get both
+        //    the accepted application's stage order and the active stage
+        const stages = await this.stageRepo.find({
+            callIds: [...new Set(accepted.map(p => idOf(p.call)))],
+        });
+        const stageById = new Map(stages.map(s => [idOf(s._id), s]));
+        const activeByCall = new Map(
+            stages
+                .filter(s => s.status === StageStatus.active)
+                .map(s => [idOf(s.call), s])
+        );
+
+        // 4. Apply the rule
+        const now = Date.now();
+        return accepted.flatMap(project => {
+            const app = appById.get(idOf(project.currentApplication))!;
+            const appStage = stageById.get(idOf(app.stage));
+            const active = activeByCall.get(idOf(project.call));
+
+            if (!appStage || !active) return [];                       // missing data / no active stage
+            if (active.order !== appStage.order + 1) return [];        // not the very next stage
+            if (active.deadline && new Date(active.deadline).getTime() <= now) return []; // closed
+
+            return [{ project, nextStage: active }];
+        });
+    }
+
+
     async getById(id: string, options?: FilterOptions) {
         const proj = await this.projectRepo.findById(id, options);
         if (!proj) throw new AppError(ERROR_CODES.PROJECT_NOT_FOUND);
@@ -269,8 +308,8 @@ export class ProjectService {
 
         if (isLeadPI) await this.projectAuth.validateOwner(projectDoc);
 
-        if (HALT_STATES.includes(projectDoc.status)) {
-            throw new AppError(ERROR_CODES.INVALID_PROJECT_STATUS);
+        if (!PROJECT_EDITABLE_STATES.includes(projectDoc.status)) {
+            throw new AppError(ERROR_CODES.PROJECT_NOT_EDITABLE);
         }
 
         const budgetChanged =
@@ -299,6 +338,199 @@ export class ProjectService {
         return this.projectRepo.update(id, dto, userId);
     }
 
+
+    private async assertGrantCompliance(projectDoc: IProject): Promise<void> {
+        const id = String(projectDoc._id);
+
+        const grantDoc = await this.grantRepo.findById(String(projectDoc.grant));
+        if (!grantDoc) {
+            throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
+        }
+
+        if (grantDoc.constraint) {
+            const constraintDoc = await this.constraintValidator.getConstraint(
+                grantDoc.constraint.toString()
+            );
+            const result = await this.constraintValidator.validateProjectById(constraintDoc, id);
+
+            if (!result.valid) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_CONSTRAINT,
+                    "Constraint validation failed",
+                    400,
+                    result
+                );
+            }
+        }
+
+        if (grantDoc.composition) {
+            const context: HistoryContextInput = {
+                organization: grantDoc.organization.toString(),
+                source: grantDoc.fundingSource,
+                calendar: projectDoc.calendar?.toString(),
+                call: projectDoc.call?.toString(),
+            };
+
+            const compositionDoc = await this.compositionValidator.getComposition(
+                grantDoc.composition.toString()
+            );
+            const result = await this.compositionValidator.validateByProjectId(
+                compositionDoc,
+                context,
+                id
+            );
+
+            if (!result.valid) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_COMPOSITION,
+                    "Composition validation failed",
+                    400,
+                    result
+                );
+            }
+        }
+    }
+
+
+
+    private assertProjectBudget(
+        projectDoc: IProject,
+        phases: IPhase[]
+    ) {
+        const allocatedPhaseBudget = this.consistencyValidator.getAllocatedPhaseBudget(phases);
+        const totalBudget = Number(projectDoc.totalBudget);
+
+        if (Math.abs(totalBudget - allocatedPhaseBudget) > 0.01) {
+            throw new AppError(
+                ERROR_CODES.PHASE_BUDGET_MISMATCH,
+                `The total of all phase budgets (${allocatedPhaseBudget.toFixed(2)}) must equal the project's total budget (${totalBudget.toFixed(2)}).`
+            );
+        }
+    }
+
+    private async assertCallApplication(projectDoc: IProject): Promise<void> {
+        if (!projectDoc.call) return;
+
+        if (!projectDoc.currentApplication) {
+            throw new AppError(ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND);
+        }
+
+        const callDoc = await this.callRepo.findById(String(projectDoc.call));
+        if (!callDoc) {
+            throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
+        }
+
+        const [currentAppDoc, lastStage] = await Promise.all([
+            this.applicationService.getById(String(projectDoc.currentApplication)),
+            this.stageRepo.getLastStage(String(callDoc._id)),
+        ]);
+
+        if (!lastStage) {
+            throw new AppError(ERROR_CODES.LAST_STAGE_NOT_FOUND);
+        }
+
+        // Project can only be approved from an accepted application
+        // that reached the final stage.
+        if (currentAppDoc.status !== ApplicationStatus.accepted) {
+            throw new AppError(
+                ERROR_CODES.APPLICATION_NOT_ACCEPTED,
+                "The current application must be accepted before the project can be approved"
+            );
+        }
+
+        if (String(currentAppDoc.stage) !== String(lastStage._id)) {
+            throw new AppError(
+                ERROR_CODES.APPLICATION_NOT_AT_FINAL_STAGE,
+                "The current application has not reached the final stage"
+            );
+        }
+    }
+
+
+    private async assertProjectApproval(projectDoc: IProject): Promise<void> {
+        const id = projectDoc._id.toString(); // adjust if your id is stored differently
+
+        await this.assertGrantCompliance(projectDoc);
+
+        await this.assertCallApplication(projectDoc);
+
+        const collabs = await this.collabRepo.find({ project: id });
+        if (!collabs.every(c => c.status === CollaboratorStatus.verified)) {
+            throw new AppError(ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED);
+        }
+
+        const phases = await this.phaseRepo.find({ project: id });
+        if (!phases.every(p => p.status === PhaseStatus.approved)) {
+            throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_APPROVED);
+        }
+
+        this.assertProjectBudget(projectDoc, phases);
+
+        const components = await this.componentRepo.find({ project: id });
+        if (!components.every(c => c.status === ProjectComponentStatus.approved)) {
+            throw new AppError(ERROR_CODES.COMPONENTS_NOT_FULLY_APPROVED);
+        }
+    }
+
+
+    private async assertProjectCompletion(projectDoc: IProject): Promise<void> {
+        const id = projectDoc._id.toString();
+
+        const phases = await this.phaseRepo.find({ project: id });
+        if (!phases.every(p => p.status === PhaseStatus.completed)) {
+            throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_COMPLETED);
+        }
+
+        this.assertProjectBudget(projectDoc, phases);
+
+        const hasCompletionReport = await this.documentRepo.exists({
+            project: id,
+            type: PhaseDocumentType.completionReport,
+            status: ProjectDocumentStatus.approved,
+        });
+        if (!hasCompletionReport) {
+            throw new AppError(ERROR_CODES.COMPLETION_REPORT_REQUIRED);
+        }
+    }
+
+
+    private async assertProjectVerification(projectDoc: IProject): Promise<void> {
+        if (!projectDoc.currentVerification) {
+            throw new AppError(ERROR_CODES.VERIFICATION_NOT_FOUND);
+        }
+
+        const verificationDoc = await this.verificationRepo.findById(
+            String(projectDoc.currentVerification)
+        );
+        if (!verificationDoc) {
+            throw new AppError(ERROR_CODES.CURRENT_VERIFICATION_NOT_FOUND);
+        }
+
+        if (verificationDoc.status !== VerificationStatus.verified) {
+            throw new AppError(ERROR_CODES.VERIFICATION_NOT_VERIFIED);
+        }
+    }
+
+
+    private async assertNoActiveVerification(projectDoc: IProject): Promise<void> {
+        if (!projectDoc.currentVerification) return;
+
+        const verificationDoc = await this.verificationRepo.findById(
+            String(projectDoc.currentVerification)
+        );
+        if (!verificationDoc) {
+            throw new AppError(ERROR_CODES.CURRENT_VERIFICATION_NOT_FOUND);
+        }
+
+        switch (verificationDoc.status) {
+            case VerificationStatus.submitted:
+                throw new AppError(ERROR_CODES.CURRENT_VERIFICATION_SUBMITTED);
+            case VerificationStatus.verified:
+                throw new AppError(ERROR_CODES.VERIFICATION_ALREADY_VERIFIED);
+        }
+    }
+
+
     //TRANSISITIONS
 
     async transitionState(dto: TransitionRequestDto, userId: string) {
@@ -316,113 +548,19 @@ export class ProjectService {
         TransitionHelper.validateTransition(from, to, PROJECT_TRANSITIONS);
 
         if (to === ProjectStatus.approved) {
+            await this.assertProjectApproval(projectDoc);
+        }
 
-            const collabs = await this.collabRepo.find({ project: id });
-            if (!collabs.every(c => c.status === CollaboratorStatus.verified))
-                throw new AppError(ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED);
+        if (to === ProjectStatus.granted) {
+            //await this.assertNoActiveVerification(projectDoc)
+        }
 
-            const phases = await this.phaseRepo.find({ project: id });
-            if (!phases.every(p => p.status === PhaseStatus.approved))
-                throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_APPROVED);
+        if (to === ProjectStatus.completed) {
+            await this.assertProjectCompletion(projectDoc);
+        }
 
-            const phasesBudget = this.consistencyValidator.getAllocatedPhaseBudget(phases);
-            const phasesDuration = this.consistencyValidator.getAllocatedPhaseDuration(phases);
-            if (Math.abs(phasesBudget - Number(projectDoc.totalBudget)) > 0.01) {
-                throw new AppError(
-                    ERROR_CODES.PHASE_BUDGET_MISMATCH,
-                    `Total phase budget (${phasesBudget.toFixed(2)}) must equal the project budget (${Number(projectDoc.totalBudget).toFixed(2)}).`
-                );
-            }
-
-            const components = await this.componentRepo.find({ project: id });
-            if (!components.every(p => p.status === ProjectComponentStatus.approved))
-                throw new AppError(ERROR_CODES.COMPONENTS_NOT_FULLY_APPROVED);
-
-            if (projectDoc.call) {
-                if (!projectDoc.currentApplication) {
-                    throw new AppError(ERROR_CODES.CURRENT_APPLICATION_NOT_FOUND);
-                }
-                const callDoc = await this.callRepo.findById(
-                    String(projectDoc.call)
-                );
-
-                if (!callDoc) {
-                    throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
-                }
-                const currentAppDoc = await this.applicationService.getById(
-                    String(projectDoc.currentApplication)
-                );
-
-                const lastStage = await this.stageRepo.getLastStage(
-                    String(callDoc._id)
-                );
-
-                if (!lastStage) {
-                    throw new AppError(ERROR_CODES.LAST_STAGE_NOT_FOUND);
-                }
-                /**
-                 * Project can only be approved from an accepted
-                 * application that reached the final stage.
-                 */
-                if (currentAppDoc.status !== ApplicationStatus.accepted) {
-                    throw new AppError(
-                        ERROR_CODES.APPLICATION_NOT_ACCEPTED,
-                        "The current application must be accepted before the project can be approved"
-                    );
-                }
-
-                if (
-                    String(currentAppDoc.stage) !==
-                    String(lastStage._id)
-                ) {
-                    throw new AppError(
-                        ERROR_CODES.APPLICATION_NOT_AT_FINAL_STAGE,
-                        "The current application has not reached the final stage"
-                    );
-                }
-            }
-
-            const grantDoc = await this.grantRepo.findById(
-                String(projectDoc.grant)
-            );
-
-            if (!grantDoc) {
-                throw new AppError(ERROR_CODES.GRANT_NOT_FOUND);
-            }
-
-            const context: HistoryContextInput = {
-                organization: grantDoc.organization.toString(),
-                source: grantDoc.fundingSource,
-                calendar: projectDoc.calendar?.toString(),
-                call: projectDoc.call?.toString()
-            };
-
-            if (grantDoc.constraint) {
-                const constraintDoc = await this.constraintValidator.getConstraint(grantDoc.constraint.toString());
-                const result = await this.constraintValidator.validateProjectById(constraintDoc, id);
-                if (!result.valid) {
-                    throw new AppError(
-                        ERROR_CODES.INVALID_CONSTRAINT,
-                        "Constraint validation failed",
-                        400,
-                        result
-                    );
-                }
-            }
-
-            if (grantDoc.composition) {
-                const compositionDoc = await this.compositionValidator.getComposition(grantDoc.composition.toString());
-
-                const result = await this.compositionValidator.validateByProjectId(compositionDoc, context, id);
-                if (!result.valid) {
-                    throw new AppError(
-                        ERROR_CODES.INVALID_COMPOSITION,
-                        "Composition validation failed",
-                        400,
-                        result
-                    );
-                }
-            }
+        if (to === ProjectStatus.verified) {
+            await this.assertProjectVerification(projectDoc);
         }
 
 
@@ -432,71 +570,15 @@ export class ProjectService {
             );
         }
 
+
         //rollback notification remain
 
-        if (to === ProjectStatus.granted) {
-
-            if (projectDoc.currentVerification) {
-                const verificationDoc = await this.verificationRepo.findById(
-                    String(projectDoc.currentVerification)
-                );
-                if (!verificationDoc) {
-                    throw new AppError(ERROR_CODES.CURRENT_VERIFICATION_NOT_FOUND);
-                }
-                if (verificationDoc.status === VerificationStatus.submitted) {
-                    throw new AppError(ERROR_CODES.CURRENT_VERIFICATION_SUBMITTED);
-                }
-                if (verificationDoc.status === VerificationStatus.verified) {
-                    throw new AppError(ERROR_CODES.VERIFICATION_ALREADY_VERIFIED);
-                }
-
-            }
-        }
-
-        if (to === ProjectStatus.completed) {
-            const phases = await this.phaseRepo.find({ project: id });
-            if (!phases.every(p => p.status === PhaseStatus.completed))
-                throw new AppError(ERROR_CODES.PHASES_NOT_FULLY_COMPLETED);
-
-            const phasesBudget = this.consistencyValidator.getAllocatedPhaseBudget(phases);
-            const phasesDuration = this.consistencyValidator.getAllocatedPhaseDuration(phases);
-            if (Math.abs(phasesBudget - Number(projectDoc.totalBudget)) > 0.01) {
-                throw new AppError(
-                    ERROR_CODES.PHASE_BUDGET_MISMATCH,
-                    `Total phase budget (${phasesBudget.toFixed(2)}) must equal the project budget (${Number(projectDoc.totalBudget).toFixed(2)}).`
-                );
-            }
-
-            const hasCompletionReport = await this.documentRepo.exists({
-                project: id,
-                type: PhaseDocumentType.completionReport,
-                status: ProjectDocumentStatus.approved
-            });
-
-            if (!hasCompletionReport) {
-                throw new AppError(ERROR_CODES.COMPLETION_REPORT_REQUIRED);
-            }
-
-        }
 
 
-        if (to === ProjectStatus.verified) {
-            if (!projectDoc.currentVerification) {
-                throw new AppError(ERROR_CODES.VERIFICATION_NOT_FOUND);
-            }
 
-            const verificationDoc = await this.verificationRepo.findById(
-                String(projectDoc.currentVerification)
-            );
-            if (!verificationDoc) {
-                throw new AppError(ERROR_CODES.CURRENT_VERIFICATION_NOT_FOUND);
-            }
 
-            if (verificationDoc.status !== VerificationStatus.verified) {
-                throw new AppError(ERROR_CODES.VERIFICATION_NOT_VERIFIED);
-            }
 
-        }
+
 
         return await this.projectRepo.update(id, {
             status: to,

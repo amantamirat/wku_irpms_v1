@@ -71,6 +71,12 @@ router.get(
     controller.getMyProjects
 );
 
+router.get(
+    '/me/ready-for-next-stage',
+    verifyAuthToken,
+    controller.getMyProjectsReadyForNextStage
+);
+
 
 // Lookup projects
 router.get(

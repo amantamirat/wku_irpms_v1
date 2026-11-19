@@ -418,7 +418,7 @@ export class ConstraintValidationService {
     // PROJECT CONTENT VALIDATION
     // =====================================================
 
-    public async validateProjectContent(
+    public  validateProjectContent(
         constraint: IConstraint,
         dto: {
             title?: string;
@@ -434,7 +434,7 @@ export class ConstraintValidationService {
             themes?: string[];
         },
         options: ValidationOptions = {},
-    ): Promise<ValidationResult> {
+    ): ValidationResult {
 
         const errors: string[] = [];
 
