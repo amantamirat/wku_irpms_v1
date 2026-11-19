@@ -15,6 +15,7 @@ import { PhaseActivityStatus } from "../../activities/phase-activity.model";
 import { ProjectAuth } from "../../project.auth";
 import { PERMISSIONS } from "../../../../common/constants/permissions";
 import { FilterOptions } from "../../../../common/dtos/filter.dto";
+import { PROJECT_EDITABLE_STATES } from "../../project.service";
 
 export class PhaseDocumentService {
 
@@ -38,8 +39,8 @@ export class PhaseDocumentService {
 
             const { projectDoc, isLeadPI } = await this.projectAuth.auth(dto.project, userId, PERMISSIONS.PHASE_DOCUMENT.CREATE);
 
-            if (isLeadPI) {
-                await this.projectAuth.validateOwner(projectDoc);
+            if (!PROJECT_EDITABLE_STATES.includes(projectDoc.status)) {
+                throw new AppError(ERROR_CODES.PROJECT_NOT_EDITABLE);
             }
 
             // Treat empty strings (e.g. from multipart forms) as "not provided"
@@ -50,8 +51,8 @@ export class PhaseDocumentService {
                 const phase = await this.phaseRepo.findById(phaseId);
                 if (!phase) throw new AppError(ERROR_CODES.PHASE_NOT_FOUND);
 
-               // if (phase.status !== PhaseStatus.active)
-               //     throw new AppError(ERROR_CODES.PHASE_NOT_ACTIVE);
+                // if (phase.status !== PhaseStatus.active)
+                //     throw new AppError(ERROR_CODES.PHASE_NOT_ACTIVE);
                 // The phase must belong to the project the document is for
                 // (adjust `phase.project` to however your Phase model stores it)
                 if (String(phase.project) !== String(dto.project))
