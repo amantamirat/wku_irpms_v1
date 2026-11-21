@@ -1,4 +1,4 @@
-import { ValidationResult } from "../../constraints/services/constraint-validator.service";
+import { ValidationResult } from "../../constraints/ConstraintValidationService";
 import { IUser } from "../../users/user.model";
 import { HistoryContextInput, HistoryValidationInput, HistoryValidationService } from "../history/history-validation-service";
 import { HistoryRepository } from "../history/history.repository";

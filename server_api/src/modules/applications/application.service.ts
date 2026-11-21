@@ -16,7 +16,6 @@ import { ICallRepository } from "../calls/call.repository";
 import { IStage, StageStatus } from "../calls/stages/stage.model";
 import { IStageRepository } from "../calls/stages/stage.repository";
 import { CompositionValidationService } from "../compositions/composition-validation-service";
-import { ConstraintValidationService } from "../constraints/services/constraint-validator.service";
 import { NotificationService } from "../notifications/notification.service";
 import { ICollaboratorRepository } from "../projects/collaborators/collaborator.repository";
 import { ProjectAuth } from "../projects/project.auth";
@@ -51,7 +50,7 @@ export class ApplicationService {
         private readonly notificationService: NotificationService,
         private readonly scopeFilterService: ScopeFilterService,
 
-        private readonly constraintValidator: ConstraintValidationService,
+        //private readonly constraintValidator: ConstraintValidationServiceOLD,
         private readonly compositionValidator: CompositionValidationService,
 
         private readonly collaboratorRepo: ICollaboratorRepository,
@@ -172,6 +171,7 @@ export class ApplicationService {
             }
         }
 
+        /*
         if (stageDoc.constraint) {
             const stageConstraint = await this.constraintValidator.getConstraint(stageDoc.constraint.toString());
             const result =
@@ -187,7 +187,7 @@ export class ApplicationService {
                 );
             }
         }
-
+*/
         // --------------------------------------------------
         // Validate document against stage template
         // --------------------------------------------------

@@ -91,7 +91,6 @@ function populate(dbQuery: any) {
         .populate("calendar")
         .populate("themes")
         .populate("currentApplication")
-        //.populate("currentPhase")
         .populate("currentVerification")
         .populate("createdBy")
         .populate({
@@ -117,6 +116,20 @@ export class ProjectRepository
         if (filters.ids?.length) {
             query._id = {
                 $in: filters.ids.map(toObjectId)
+            };
+        }
+
+        if (filters.excludeId) {
+            query._id = {
+                ...((query._id as Record<string, unknown>) ?? {}),
+                $ne: toObjectId(filters.excludeId)
+            };
+        }
+
+        if (filters.excludeIds?.length) {
+            query._id = {
+                ...((query._id as Record<string, unknown>) ?? {}),
+                $nin: filters.excludeIds.map(toObjectId)
             };
         }
 

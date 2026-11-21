@@ -6,11 +6,7 @@ import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import { toObjectId } from "../../../common/utils/mongoose.utils";
-import {
-    ConstraintValidationService,
-    PhaseValidationInput,
-    toPhaseValidationInput
-} from "../../constraints/services/constraint-validator.service";
+import { ConstraintValidationService, PhaseValidationInput } from "../../constraints/ConstraintValidationService";
 import { IGrantRepository } from "../../grants/grant.repository";
 import { IPhaseActivity, PhaseActivityStatus } from "../activities/phase-activity.model";
 import { IPhaseActivityRepository } from "../activities/phase-activity.repository";
@@ -42,6 +38,24 @@ interface ValidatePhaseChangeParams {
     label: "proposed" | "remaining";
 }
 
+export function toPhaseValidationInput(
+    item: IPhase
+): PhaseValidationInput {
+    return {
+        ...(item._id && { _id: item._id }),
+        // order: item.order,
+        budget: item.budget,
+        startDate: item.startDate,
+        endDate: item.endDate
+    };
+}
+
+export function toPhaseValidationInputs(
+    items: IPhase[]
+): PhaseValidationInput[] {
+    return items.map(toPhaseValidationInput);
+}
+
 
 export const PHASE_EDITABLE_STATES: PhaseStatus[] = [
     PhaseStatus.proposed,
@@ -58,7 +72,7 @@ export class PhaseService {
         private readonly phaseDocRepo: IPhaseDocumentRepository,
         private readonly activityRepo: IPhaseActivityRepository,
         private readonly equipmentRepo: IPhaseEquipmentRepository,
-        private readonly constraintValidator: ConstraintValidationService,
+        private readonly constraintValidationService: ConstraintValidationService,
         private readonly consistencyValidator: ProjectConsistencyValidator,
         private readonly projectAuth: ProjectAuth
     ) { }
@@ -176,14 +190,14 @@ export class PhaseService {
 
         if (!grantDoc.constraint) return;
 
-        const constraintDoc = await this.constraintValidator.getConstraint(
+        const constraintDoc = await this.constraintValidationService.getConstraint(
             String(grantDoc.constraint)
         );
 
-        const result = this.constraintValidator.validatePhases(
+        const result = this.constraintValidationService.validatePhases(
             constraintDoc,
             proposedPhases,
-            !change.remove ? { skipMin: true } : undefined
+            change.add ? { skipMin: true } : undefined
         );
 
         if (!result.valid) {
@@ -320,7 +334,7 @@ export class PhaseService {
                 change: {
                     add: {
                         order,
-                        duration: dto.duration,
+                        //duration: dto.duration,
                         budget: dto.budget,
                         startDate: dto.startDate,
                         endDate: dto.endDate
@@ -380,7 +394,7 @@ export class PhaseService {
                     id,
                     data: {
                         order: phaseDoc.order,
-                        duration: dto.duration,
+                        //duration: dto.duration,
                         budget: dto.budget
                     }
                 }

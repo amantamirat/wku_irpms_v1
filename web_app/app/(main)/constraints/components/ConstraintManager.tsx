@@ -4,12 +4,12 @@ import { useMemo } from 'react';
 import { ColumnProps } from 'primereact/column';
 import { ItemManager, ItemManagerProps } from '@/components/ItemManager';
 import { useToast } from '@/contexts/ToastContext';
-import { IRange, formatRange } from '@/types/range';
+import { formatRange } from '@/types/range';
 import { etbCurrencyFormatter } from '@/utils/utils';
 import { MENU_ICONS } from '@/utils/menu-icons';
 import { Constraint } from '../models/constraint.model';
 import { ConstraintApi } from '../api/constraint.api';
-import ConstraintForm from './ConstraintForm';
+import ConstraintForm, { GroupKey, getRange } from './ConstraintForm';
 import { ConstraintView } from './ConstraintView';
 
 /* ---------- Formatters (stable references) ---------- */
@@ -25,21 +25,48 @@ const wordsFormat = unit('word');
 
 /* ---------- Columns ---------- */
 
-type RangeField = {
-    [K in keyof Constraint]-?: NonNullable<Constraint[K]> extends IRange ? K : never;
-}[keyof Constraint];
+interface RangeColumnSpec {
+    header: string;
+    group: GroupKey;
+    key: string;
+    formatter?: (val: number) => string;
+    hidden?: boolean;
+}
 
-// Builds a column that renders a range field with the given formatter.
-const rangeColumn = (
-    header: string,
-    field: RangeField,
-    formatter?: (val: number) => string
-): ColumnProps => ({
-    header,
-    field,
+// Column field uses the nested path (e.g. "phaseConstraints.budget"),
+// which is also the id used by the column toggle.
+const fieldOf = (s: RangeColumnSpec) => `${s.group}.${s.key}`;
+
+const rangeColumn = (spec: RangeColumnSpec): ColumnProps => ({
+    header: spec.header,
+    field: fieldOf(spec),
     body: (constraint: Constraint) =>
-        formatRange(constraint[field] as IRange | undefined, formatter)
+        formatRange(getRange(constraint, spec.group, spec.key), spec.formatter)
 });
+
+const rangeSpecs: RangeColumnSpec[] = [
+    // Visible by default
+    { header: 'Budget Range', group: 'projectConstraints', key: 'budget', formatter: currencyFormat },
+    { header: 'Duration', group: 'projectConstraints', key: 'duration', formatter: daysFormat },
+    { header: 'Members', group: 'collaboratorConstraints', key: 'members' },
+
+    // Hidden by default
+    { header: 'Phases', group: 'phaseConstraints', key: 'phases', hidden: true },
+    { header: 'Phase Budget', group: 'phaseConstraints', key: 'budget', formatter: currencyFormat, hidden: true },
+    { header: 'Phase Duration', group: 'phaseConstraints', key: 'duration', formatter: daysFormat, hidden: true },
+    { header: 'Activities', group: 'activityConstraints', key: 'activities', hidden: true },
+    { header: 'Activity Cost', group: 'activityConstraints', key: 'cost', formatter: currencyFormat, hidden: true },
+    { header: 'Activity Duration', group: 'activityConstraints', key: 'duration', formatter: daysFormat, hidden: true },
+    { header: 'Equipments', group: 'equipmentConstraints', key: 'equipments', hidden: true },
+    { header: 'Equipment Cost', group: 'equipmentConstraints', key: 'cost', formatter: currencyFormat, hidden: true },
+    { header: 'Components', group: 'componentConstraints', key: 'components', hidden: true },
+    { header: 'Component Collaborators', group: 'componentConstraints', key: 'collaborators', hidden: true },
+    { header: 'Title Words', group: 'projectConstraints', key: 'titleWords', formatter: wordsFormat, hidden: true },
+    { header: 'Summary Words', group: 'projectConstraints', key: 'summaryWords', formatter: wordsFormat, hidden: true },
+    { header: 'Specific Objectives', group: 'projectConstraints', key: 'specificObjectives', hidden: true },
+    { header: 'Expected Outputs', group: 'projectConstraints', key: 'expectedOutputs', hidden: true },
+    { header: 'Themes', group: 'projectConstraints', key: 'themes', hidden: true }
+];
 
 // Defined outside the component for a stable reference.
 const columns: ColumnProps[] = [
@@ -56,49 +83,10 @@ const columns: ColumnProps[] = [
             </div>
         )
     },
-
-    // Visible by default
-    rangeColumn('Budget Range', 'budget', currencyFormat),
-    rangeColumn('Duration', 'duration', daysFormat),
-    rangeColumn('Participants', 'participants'),
-
-    // Hidden by default
-    rangeColumn('Phases', 'phases'),
-    rangeColumn('Phase Budget', 'phaseBudget', currencyFormat),
-    rangeColumn('Phase Duration', 'phaseDuration', daysFormat),
-    rangeColumn('Activities', 'activities'),
-    rangeColumn('Activity Duration', 'activityDuration', daysFormat),
-    rangeColumn('Equipments', 'equipments'),
-    rangeColumn('Equipment Cost', 'equipmentCost', currencyFormat),
-    rangeColumn('Components', 'components'),
-    rangeColumn('Title Words', 'titleWords', wordsFormat),
-    rangeColumn('Summary Words', 'summaryWords', wordsFormat),
-    rangeColumn('Specific Objectives', 'specificObjectives'),
-    rangeColumn('Expected Outputs', 'expectedOutputs'),
-    rangeColumn('Themes', 'themes'),
-    rangeColumn('Sub-Themes', 'subThemes'),
-    rangeColumn('Focus Areas', 'focusAreas'),
-    rangeColumn('Indicators', 'indicators')
+    ...rangeSpecs.map(rangeColumn)
 ];
 
-const defaultHiddenColumns: string[] = [
-    'phases',
-    'phaseBudget',
-    'phaseDuration',
-    'activities',
-    'activityDuration',
-    'equipments',
-    'equipmentCost',
-    'components',
-    'titleWords',
-    'summaryWords',
-    'specificObjectives',
-    'expectedOutputs',
-    'themes',
-    'subThemes',
-    'focusAreas',
-    'indicators'
-];
+const defaultHiddenColumns: string[] = rangeSpecs.filter((s) => s.hidden).map(fieldOf);
 
 export default function ConstraintManager() {
     const toast = useToast();

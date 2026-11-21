@@ -2,11 +2,11 @@ import { Router } from "express";
 import { PhaseEquipmentController } from "./phase-equipment.controller";
 import { PhaseEquipmentService } from "./phase-equipment.service";
 import { PERMISSIONS } from "../../../common/constants/permissions";
-import { equipmentRepo, phaseRepo, projectAuth, checkPermission, checkTransitionPermission, activityRepo, consistencyValidator } from "../../../core/container";
+import { equipmentRepo, phaseRepo, projectAuth, checkPermission, checkTransitionPermission, activityRepo, consistencyValidator, constraintValidationService } from "../../../core/container";
 import { verifyAuthToken } from "../../auth/auth.middleware";
 
 const controller = new PhaseEquipmentController(
-    new PhaseEquipmentService(equipmentRepo, phaseRepo, activityRepo, consistencyValidator, projectAuth)
+    new PhaseEquipmentService(equipmentRepo, phaseRepo, activityRepo, constraintValidationService, consistencyValidator, projectAuth)
 );
 
 const router: Router = Router();

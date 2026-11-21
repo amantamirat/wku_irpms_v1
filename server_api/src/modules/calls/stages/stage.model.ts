@@ -20,7 +20,7 @@ export interface IStage extends Document {
     minAcceptanceScore: number;
     deadline: Date;
 
-    constraint?: mongoose.Types.ObjectId | null;
+    //constraint?: mongoose.Types.ObjectId | null;
 
     reviewersDeadline?: Date | null;
     template?: mongoose.Types.ObjectId;
@@ -83,11 +83,12 @@ const StageSchema = new Schema<IStage>(
         deadline: { type: Date, required: true },
         reviewersDeadline: { type: Date, default: null },
 
+        /*
         constraint: {
             type: Schema.Types.ObjectId,
             ref: COLLECTIONS.CONSTRAINT,
             // required: false,
-        },
+        },*/
 
         template: {
             type: Schema.Types.ObjectId,

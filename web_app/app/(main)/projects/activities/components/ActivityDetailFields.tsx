@@ -21,7 +21,8 @@ type DetailFormProps = {
 
 const DETAIL_FORMS: Record<PhaseActivityType, ComponentType<DetailFormProps>> = {
     [PhaseActivityType.DATA_COLLECTION]: DataCollectionDetailForm,
-    [PhaseActivityType.TRAINING_WORKSHOP]: TrainingWorkshopDetailForm,
+    [PhaseActivityType.TRAINING]: TrainingWorkshopDetailForm,
+    [PhaseActivityType.WORKSHOP]: TrainingWorkshopDetailForm,
     [PhaseActivityType.MEETING]: MeetingDetailForm,
     [PhaseActivityType.TRANSPORTATION]: TransportationDetailForm,
     [PhaseActivityType.ANALYSIS]: AnalysisDetailForm,

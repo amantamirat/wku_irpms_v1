@@ -11,9 +11,11 @@ export const ACTIVITY_REQUIRED_DOCUMENTS: Record<
     PhaseDocumentType[]
 > = {
     [PhaseActivityType.DATA_COLLECTION]: [PhaseDocumentType.dataset],
-    [PhaseActivityType.TRAINING_WORKSHOP]: [PhaseDocumentType.attendance],
+    [PhaseActivityType.TRAINING]: [PhaseDocumentType.attendance],
+    [PhaseActivityType.WORKSHOP]: [PhaseDocumentType.activityEvidence],
     [PhaseActivityType.MEETING]: [PhaseDocumentType.meetingMinutes],
-    [PhaseActivityType.TRANSPORTATION]: [PhaseDocumentType.activityEvidence],
+    //[PhaseActivityType.TRANSPORTATION]: [PhaseDocumentType.financialReport],
+    [PhaseActivityType.TRANSPORTATION]: [],
     [PhaseActivityType.ANALYSIS]: [PhaseDocumentType.technicalReport],
     [PhaseActivityType.FIELD_VISIT]: [
         PhaseDocumentType.photo,

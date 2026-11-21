@@ -28,15 +28,8 @@ import {
     PhaseActivityType,
 } from "./phase-activity.model";
 import { IPhaseActivityRepository } from "./phase-activity.repository";
-
-/** Minimal shape the consistency validator needs for an activity. */
-interface ActivityValidationInput {
-    _id?: string;
-    phase?: string;
-    cost?: number;
-    startDate?: Date | string;
-    endDate?: Date | string;
-}
+import { ActivityValidationInput, ConstraintValidationService } from "../../constraints/ConstraintValidationService";
+import { IProject } from "../project.model";
 
 interface ActivityChange {
     add?: ActivityValidationInput;
@@ -45,6 +38,7 @@ interface ActivityChange {
 }
 
 interface ValidateActivityChangeParams {
+    projectDoc: IProject;
     phaseDoc: IPhase;
     change: ActivityChange;
 }
@@ -52,6 +46,7 @@ interface ValidateActivityChangeParams {
 const toActivityValidationInput = (a: IPhaseActivity): ActivityValidationInput => ({
     _id: String(a._id),
     phase: a.phase ? String(a.phase) : undefined,
+    title: a.title,
     cost: Number(a.cost),
     startDate: (a as any).startDate,
     endDate: (a as any).endDate,
@@ -72,6 +67,7 @@ export class PhaseActivityService {
         private readonly phaseRepo: IPhaseRepository,
         private readonly documentRepo: IPhaseDocumentRepository,
         private readonly equipmentRepo: IPhaseEquipmentRepository,          // NEW
+        private readonly constraintValidationService: ConstraintValidationService,
         private readonly consistencyValidator: ProjectConsistencyValidator, // NEW
         private readonly projectAuth: ProjectAuth
     ) { }
@@ -135,7 +131,7 @@ export class PhaseActivityService {
     private async validateActivityChange(
         params: ValidateActivityChangeParams
     ): Promise<void> {
-        const { phaseDoc, change } = params;
+        const { projectDoc, phaseDoc, change } = params;
 
         if (!PHASE_EDITABLE_STATES.includes(phaseDoc.status)) {
             throw new AppError(ERROR_CODES.PHASE_NOT_EDITABLE);
@@ -163,6 +159,29 @@ export class PhaseActivityService {
             proposedActivities,
             equipment
         );
+
+
+        // Validate grant constraints.
+        const constraintDoc = await this.constraintValidationService.getConstraintByGrant(
+            String(projectDoc.grant)
+        );
+
+        if (!constraintDoc) return;
+
+        const result = this.constraintValidationService.validateActivities(
+            constraintDoc,
+            proposedActivities,
+            change.add ? { skipMin: true } : undefined
+        );
+
+        if (!result.valid) {
+            throw new AppError(
+                ERROR_CODES.INVALID_CONSTRAINT,
+                'The ${label} activities do not satisfy the constraint requirements.',
+                400,
+                result
+            );
+        }
     }
 
 
@@ -198,10 +217,12 @@ export class PhaseActivityService {
         this.validateCost(dto.cost, dto.detailCost);
 
         await this.validateActivityChange({
+            projectDoc,
             phaseDoc,
             change: {
                 add: {
                     phase,
+                    title: dto.title,
                     cost: dto.cost,
                     startDate: (dto as any).startDate,
                     endDate: (dto as any).endDate,
@@ -332,6 +353,7 @@ export class PhaseActivityService {
             }
 
             await this.validateActivityChange({
+                projectDoc,
                 phaseDoc,
                 change: { update: { id, data: changed } },
             });

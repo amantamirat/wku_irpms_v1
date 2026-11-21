@@ -34,7 +34,7 @@ export class StageController {
                 name,
                 template,
                 evaluation,
-                constraint,
+                //constraint,
                 minReviewers,
                 maxReviewers,
                 deadline,

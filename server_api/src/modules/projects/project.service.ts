@@ -1,3 +1,4 @@
+import mongoose, { Types } from "mongoose";
 import { PERMISSIONS } from "../../common/constants/permissions";
 import { DeleteDto } from "../../common/dtos/delete.dto";
 import { FilterOptions } from "../../common/dtos/filter.dto";
@@ -19,7 +20,7 @@ import { StageStatus } from "../calls/stages/stage.model";
 import { IStageRepository } from "../calls/stages/stage.repository";
 import { CompositionValidationService, toCompositionValidationInput } from "../compositions/composition-validation-service";
 import { HistoryContextInput } from "../compositions/history/history-validation-service";
-import { ConstraintValidationService, toPhaseValidationInput } from "../constraints/services/constraint-validator.service";
+import { ConstraintValidationService, ProjectInput } from "../constraints/ConstraintValidationService";
 import { GrantStatus, IGrant } from "../grants/grant.model";
 import { IGrantRepository } from "../grants/grant.repository";
 import { VerificationStatus } from "../grants/verifications/verification.model";
@@ -45,7 +46,7 @@ import {
     FilterProjectsDTO,
     UpdateProjectDTO
 } from "./project.dto";
-import { IProject, ProjectStatus } from "./project.model";
+import { IProject, IProjectObjectives, ProjectStatus } from "./project.model";
 import { IProjectRepository } from "./project.repository";
 import { PROJECT_TRANSITIONS } from "./project.state-machine";
 import { ProjectConsistencyValidator } from "./ProjectConsistencyValidator";
@@ -55,13 +56,45 @@ export const PROJECT_EDITABLE_STATES: ProjectStatus[] = [
     ProjectStatus.granted
 ];
 
+type ProjectMapperInput = {
+    title?: string;
+    summary?: string;
+    keywords?: string[];
+    totalBudget?: number;
+    totalDuration?: number;
+    themes?: (string | Types.ObjectId)[];
+    objectives?: IProjectObjectives;
+};
+
+export const mapProjectToInput = (
+    project: ProjectMapperInput
+): ProjectInput => ({
+    title: project.title ?? '',
+    summary: project.summary ?? '',
+    keywords: project.keywords ?? [],
+
+    totalBudget: project.totalBudget ?? 0,
+    totalDuration: project.totalDuration ?? 0,
+
+    themes: project.themes?.map(String) ?? [],
+
+    objectives: {
+        general: project.objectives?.general ?? '',
+        specific: project.objectives?.specific ?? [],
+        expectedOutputs: project.objectives?.expectedOutputs ?? [],
+    },
+});
+
 interface ValidateProjectParams {
     grantDoc: IGrant;
-    project: Record<string, any> & { totalBudget?: number; totalDuration?: number };
+    projectId?: string;
+    project: ProjectMapperInput;
     phases?: IPhase[];
     label: string;
 }
 const idOf = (v: any): string => (typeof v === 'string' ? v : (v._id ?? v).toString());
+
+
 export class ProjectService {
 
     constructor(
@@ -86,8 +119,7 @@ export class ProjectService {
         private readonly phaseService: PhaseService,
         private readonly applicationService: ApplicationService,
 
-
-        private readonly constraintValidator: ConstraintValidationService,
+        private readonly constraintValidationService: ConstraintValidationService,
         private readonly compositionValidator: CompositionValidationService,
         private readonly templateValidator: TemplateValidationService,
         private readonly consistencyValidator: ProjectConsistencyValidator,
@@ -101,7 +133,16 @@ export class ProjectService {
 
 
     private async validateProject(params: ValidateProjectParams): Promise<void> {
-        const { grantDoc, project, phases, label } = params;
+        const { grantDoc, projectId, project, phases, label } = params;
+
+        // --- Duplicate title ---
+        if (await this.projectRepo.exists({ title: project.title, excludeId: projectId })) {
+            throw new AppError(
+                ERROR_CODES.PROJECT_ALREADY_EXISTS,
+                "A project with this title already exists. Please choose a different title."
+            );
+        }
+
 
         // 1. Consistency (no DB)
         this.consistencyValidator.validateProjectLimits(project);
@@ -109,20 +150,20 @@ export class ProjectService {
         if (phases?.length) {
             this.consistencyValidator.validatePhaseAllocations(
                 project,
-                phases.map(toPhaseValidationInput)
+                phases
             );
         }
 
         // 2. Constraint: project content only
         if (!grantDoc.constraint) return;
 
-        const constraintDoc = await this.constraintValidator.getConstraint(
+        const constraintDoc = await this.constraintValidationService.getConstraint(
             String(grantDoc.constraint)
         );
 
-        const result = this.constraintValidator.validateProjectContent(
+        const result = this.constraintValidationService.validateProject(
             constraintDoc,
-            project
+            mapProjectToInput(project)
         );
 
         if (!result.valid) {
@@ -164,13 +205,6 @@ export class ProjectService {
             label: "proposed",
         });
 
-        // --- Duplicate title ---
-        if (await this.projectRepo.exists({ title })) {
-            throw new AppError(
-                ERROR_CODES.PROJECT_ALREADY_EXISTS,
-                "A project with this title already exists. Please choose a different title."
-            );
-        }
 
         // --- Call and Calendar ---
         let calendarId = calendar;
@@ -327,7 +361,8 @@ export class ProjectService {
 
         await this.validateProject({
             grantDoc,
-            project: { ...projectDoc, ...dto },
+            projectId: projectDoc._id.toString(),
+            project: mapProjectToInput({ ...projectDoc, ...dto }),
             phases,
             label: "updated"
         });
@@ -345,10 +380,17 @@ export class ProjectService {
         }
 
         if (grantDoc.constraint) {
-            const constraintDoc = await this.constraintValidator.getConstraint(
+            throw new AppError(
+                ERROR_CODES.UNSUPPORTED_OPERTATION,
+                "Constraint check on grant is not implemented",
+                400,
+                // result
+            );
+            /*
+            const constraintDoc = await this.constraintValidationService.getConstraint(
                 grantDoc.constraint.toString()
             );
-            const result = await this.constraintValidator.validateProjectById(constraintDoc, id);
+            const result = await this.constraintValidationService.validateAll(constraintDoc, id);
 
             if (!result.valid) {
                 throw new AppError(
@@ -358,6 +400,7 @@ export class ProjectService {
                     result
                 );
             }
+                */
         }
 
         if (grantDoc.composition) {
@@ -639,9 +682,11 @@ export class ProjectService {
                 } as CollaboratorDto);
             }
 
+
             const callDoc = await this.callRepo.findById(id);
             if (!callDoc) throw new AppError(ERROR_CODES.CALL_NOT_FOUND);
             if (callDoc.status !== CallStatus.active) throw new AppError(ERROR_CODES.CALL_NOT_ACTIVE);
+
 
             // Composition validation
             const grantDoc = await this.grantRepo.findById(
@@ -693,38 +738,29 @@ export class ProjectService {
                 throw new AppError(ERROR_CODES.CALL_DEADLINE_PASSED);
             }
 
-            if (dto.collaborators) {
-                const memberIds = dto.collaborators.map(c => c.member);
-                const memberUsers = await this.userRepo.find({ ids: memberIds });
-                if (memberUsers.length !== memberIds.length) {
-                    throw new AppError(ERROR_CODES.USER_NOT_FOUND);
-                }
+            /*
+             if (firstStageDoc.constraint) {
+            const constantDoc = await this.constraintValidator.getConstraint(firstStageDoc.constraint.toString());
+            const result =
+                await this.constraintValidator.validateProject
+                    (constantDoc, {
+                        ...dto, phases: phases?.map((phase, index) => ({
+                            ...phase,
+                            order: index + 1,
+                        }))
+                    });
+
+            if (!result?.valid) {
+                throw new AppError(
+                    ERROR_CODES.INVALID_CONSTRAINT,
+                    "Stage Constraint validation failed",
+                    400,
+                    result
+                );
             }
-
-
-
-            if (firstStageDoc.constraint) {
-                /*
-                const constantDoc = await this.constraintValidator.getConstraint(firstStageDoc.constraint.toString());
-                const result =
-                    await this.constraintValidator.validateProject
-                        (constantDoc, {
-                            ...dto, phases: phases?.map((phase, index) => ({
-                                ...phase,
-                                order: index + 1,
-                            }))
-                        });
-
-                if (!result?.valid) {
-                    throw new AppError(
-                        ERROR_CODES.INVALID_CONSTRAINT,
-                        "Stage Constraint validation failed",
-                        400,
-                        result
-                    );
                 }
-                    */
-            }
+                */
+
 
 
             if (firstStageDoc.template) {
@@ -744,21 +780,14 @@ export class ProjectService {
                 }
             }
 
-
-            if (await this.projectRepo.exists({ title: dto.title })) {
-                throw new AppError(
-                    ERROR_CODES.PROJECT_ALREADY_EXISTS,
-                    "A project with this title already exists. Please choose a different title."
-                );
-            }
-
-            const projectDoc = await this.create(
+            const projectDoc = await this.projectRepo.create(
                 {
                     ...dto,
                     title: dto.title,
                     themes: dto.themes,
                     totalBudget: dto.totalBudget,
                     totalDuration: dto.totalDuration,
+                    workspace: userDoc.workspace?.toString(),
                     call: id,
                     grant: String(callDoc.grant),
                     calendar: String(callDoc.calendar),

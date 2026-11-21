@@ -5,11 +5,13 @@ import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
+import { ConstraintValidationService } from "../../constraints/ConstraintValidationService";
 import { IPhaseActivityRepository } from "../activities/phase-activity.repository"; // adjust path to your folder
 import { IPhase } from "../phase/phase.model";
 import { IPhaseRepository } from "../phase/phase.repository";
 import { PHASE_EDITABLE_STATES } from "../phase/phase.service";
 import { ProjectAuth } from "../project.auth";
+import { IProject } from "../project.model";
 import { ProjectConsistencyValidator } from "../ProjectConsistencyValidator";
 import {
     CreatePhaseEquipmentDto,
@@ -26,9 +28,9 @@ import { IPhaseEquipmentRepository } from "./phase-equipment.repository";
 interface EquipmentValidationInput {
     _id?: string;
     phase?: string;
-    itemName?: string;
-    quantity?: number;
-    unitPrice?: number;
+    itemName: string;
+    quantity: number;
+    unitPrice: number;
     packSize?: number;
     requiredBy?: Date | string;
 }
@@ -40,6 +42,7 @@ interface EquipmentChange {
 }
 
 interface ValidateEquipmentChangeParams {
+    projectDoc: IProject;
     phaseDoc: IPhase;
     change: EquipmentChange;
 }
@@ -68,6 +71,7 @@ export class PhaseEquipmentService {
         private readonly equipmentRepo: IPhaseEquipmentRepository,
         private readonly phaseRepo: IPhaseRepository,
         private readonly activityRepo: IPhaseActivityRepository,            // NEW
+        private readonly constraintValidationService: ConstraintValidationService,
         private readonly consistencyValidator: ProjectConsistencyValidator, // NEW
         private readonly projectAuth: ProjectAuth
     ) { }
@@ -113,7 +117,7 @@ export class PhaseEquipmentService {
     private async validateEquipmentChange(
         params: ValidateEquipmentChangeParams
     ): Promise<void> {
-        const { phaseDoc, change } = params;
+        const { projectDoc, phaseDoc, change } = params;
 
         if (!PHASE_EDITABLE_STATES.includes(phaseDoc.status)) {
             throw new AppError(ERROR_CODES.PHASE_NOT_EDITABLE);
@@ -149,6 +153,28 @@ export class PhaseEquipmentService {
             activityInputs,
             proposedEquipment
         );
+
+        // Validate grant constraints.
+        const constraintDoc = await this.constraintValidationService.getConstraintByGrant(
+            String(projectDoc.grant)
+        );
+
+        if (!constraintDoc) return;
+
+        const result = this.constraintValidationService.validateEquipments(
+            constraintDoc,
+            proposedEquipment,
+            change.add ? { skipMin: true } : undefined
+        );
+
+        if (!result.valid) {
+            throw new AppError(
+                ERROR_CODES.INVALID_CONSTRAINT,
+                'The ${label} activities do not satisfy the constraint requirements.',
+                400,
+                result
+            );
+        }
     }
 
 
@@ -182,6 +208,7 @@ export class PhaseEquipmentService {
 
         // Validate before touching the DB.
         await this.validateEquipmentChange({
+            projectDoc,
             phaseDoc,
             change: {
                 add: {
@@ -330,6 +357,7 @@ export class PhaseEquipmentService {
             const targetPhaseId = String(targetPhaseDoc._id);
 
             await this.validateEquipmentChange({
+                projectDoc,
                 phaseDoc: targetPhaseDoc,
                 change: movingPhase
                     // Moving: the item is new to the target phase, with merged values.

@@ -18,7 +18,8 @@ export enum PhaseActivityStatus {
 
 export enum PhaseActivityType {
     DATA_COLLECTION = "DATA_COLLECTION",
-    TRAINING_WORKSHOP = "TRAINING_WORKSHOP",
+    TRAINING = "TRAINING",
+    WORKSHOP = "WORKSHOP",
     MEETING = "MEETING",
     TRANSPORTATION = "TRANSPORTATION",
     ANALYSIS = "ANALYSIS",
@@ -119,7 +120,8 @@ export interface IOtherActivityDetails {
 
 export type PhaseActivityDetails =
     | { kind: PhaseActivityType.DATA_COLLECTION; details: IDataCollectionDetails }
-    | { kind: PhaseActivityType.TRAINING_WORKSHOP; details: ITrainingWorkshopDetails }
+    | { kind: PhaseActivityType.TRAINING; details: ITrainingWorkshopDetails }
+    | { kind: PhaseActivityType.WORKSHOP; details: ITrainingWorkshopDetails }
     | { kind: PhaseActivityType.MEETING; details: IMeetingDetails }
     | { kind: PhaseActivityType.TRANSPORTATION; details: ITransportationDetails }
     | { kind: PhaseActivityType.ANALYSIS; details: IAnalysisDetails }
@@ -305,7 +307,8 @@ const detailModel = (name: string, schema: Schema): mongoose.Model<any> =>
 
 const DETAIL_MODELS: Record<PhaseActivityType, mongoose.Model<any>> = {
     [PhaseActivityType.DATA_COLLECTION]: detailModel("_ActivityDetails_DataCollection", DataCollectionDetailsSchema),
-    [PhaseActivityType.TRAINING_WORKSHOP]: detailModel("_ActivityDetails_TrainingWorkshop", TrainingWorkshopDetailsSchema),
+    [PhaseActivityType.TRAINING]: detailModel("_ActivityDetails_TrainingWorkshop", TrainingWorkshopDetailsSchema),
+    [PhaseActivityType.WORKSHOP]: detailModel("_ActivityDetails_TrainingWorkshop", TrainingWorkshopDetailsSchema),
     [PhaseActivityType.MEETING]: detailModel("_ActivityDetails_Meeting", MeetingDetailsSchema),
     [PhaseActivityType.TRANSPORTATION]: detailModel("_ActivityDetails_Transportation", TransportationDetailsSchema),
     [PhaseActivityType.ANALYSIS]: detailModel("_ActivityDetails_Analysis", AnalysisDetailsSchema),

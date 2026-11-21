@@ -21,7 +21,8 @@ export enum ActivityStatus {
 
 export enum PhaseActivityType {
     DATA_COLLECTION = "DATA_COLLECTION",
-    TRAINING_WORKSHOP = "TRAINING_WORKSHOP",
+    TRAINING = "TRAINING",
+    WORKSHOP = "WORKSHOP",
     MEETING = "MEETING",
     TRANSPORTATION = "TRANSPORTATION",
     ANALYSIS = "ANALYSIS",
@@ -45,10 +46,16 @@ export const PhaseActivityTypeLabels: Record<
             "Surveys, structured interviews, focus group discussions (FGDs), observations, and empirical field measurements",
     },
 
-    [PhaseActivityType.TRAINING_WORKSHOP]: {
-        label: "Training & Workshop",
+    [PhaseActivityType.TRAINING]: {
+        label: "Training",
         description:
-            "Capacity building, practical instruction sessions, participatory workshops, and stakeholder engagement to build skills and strengthen institutional or community capacity",
+            "Structured capacity-building and instructional sessions designed to develop knowledge, technical skills, research competencies, and practical expertise among project staff, researchers, students, community members, and other target participants.",
+    },
+
+    [PhaseActivityType.WORKSHOP]: {
+        label: "Workshop",
+        description:
+            "Facilitated, interactive, and participatory sessions designed to support collaborative learning, research planning, data analysis, knowledge exchange, stakeholder consultation, problem-solving, validation of research findings, and joint development of project outputs.",
     },
 
     [PhaseActivityType.MEETING]: {
@@ -295,7 +302,7 @@ export type PhaseActivityDetails =
     }
     | {
         kind:
-        | PhaseActivityType.TRAINING_WORKSHOP;
+        | PhaseActivityType.TRAINING;
         details: ITrainingWorkshopDetails;
     }
     | {

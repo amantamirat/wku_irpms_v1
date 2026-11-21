@@ -21,13 +21,13 @@ import { sameId, toObjectId, toStringId } from "../../../common/utils/mongoose.u
 import { AuthScope } from "../../auth/auth.types";
 import { CompositionValidationInput, CompositionValidationService, toCompositionValidationInput } from "../../compositions/composition-validation-service";
 import { HistoryContextInput } from "../../compositions/history/history-validation-service";
-import { ConstraintValidationService, ValidationOptions } from "../../constraints/services/constraint-validator.service";
 import { GrantRepository } from "../../grants/grant.repository";
 import { NotificationService } from "../../notifications/notification.service";
 import { ProjectAuth } from "../project.auth";
 import { IProject } from "../project.model";
 import { PROJECT_EDITABLE_STATES } from "../project.service";
 import { CollaboratorStatus, ICollaborator, LeaderRole } from "./collaborator.model";
+import { ConstraintValidationService } from "../../constraints/ConstraintValidationService";
 
 
 /**
@@ -58,7 +58,7 @@ export class CollaboratorService {
         private readonly collabRepo: ICollaboratorRepository,
         private readonly projectRepo: IProjectRepository,
         private readonly grantRepo: GrantRepository,
-        private readonly constraintValidator: ConstraintValidationService,
+        private readonly constraintValidationService: ConstraintValidationService,
         private readonly compositionValidator: CompositionValidationService,
         private readonly projectAuth: ProjectAuth,
         private readonly notificationService: NotificationService,
@@ -106,8 +106,7 @@ export class CollaboratorService {
  * Used by create, update and delete.
  */
     private async validateMembershipChange(
-        params: ValidateMembershipParams,
-        options?: ValidationOptions
+        params: ValidateMembershipParams
     ): Promise<void> {
         const { projectDoc, projectId, change, label } = params;
 
@@ -163,15 +162,16 @@ export class CollaboratorService {
 
         // 5. Constraint validation
         if (grantDoc.constraint) {
-            const constraintDoc = await this.constraintValidator.getConstraint(
+            const constraintDoc = await this.constraintValidationService.getConstraint(
                 String(grantDoc.constraint)
             );
 
             const constraintResult =
-                this.constraintValidator.validateParticipants(
-                    constraintDoc,
-                    proposed.members.length + 1,
-                    options
+                this.constraintValidationService.validateCollaborators(constraintDoc,
+                    {
+                        members: proposed.members.length + 1// added one is for lead pi
+                    },
+                    change.add ? { skipMin: true } : undefined
                 );
 
             if (!constraintResult.valid) {
@@ -252,8 +252,7 @@ export class CollaboratorService {
                             },
                         },
                         label: "proposed",
-                    },
-                    { skipMin: true }
+                    }
                 );
             }
 
@@ -658,8 +657,7 @@ export class CollaboratorService {
                 projectId,
                 change: { remove: memberToRemove },
                 label: "remaining",
-            },
-            { skipMin: true }
+            }
         );
 
         // Delete only after all validations pass.

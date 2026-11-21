@@ -148,6 +148,7 @@ const StageForm = ({
 
         if (invalidReviewerCount) return;
 
+        /*
         const payload = {
             ...localStage,
             name: localStage.name.trim(),
@@ -155,13 +156,10 @@ const StageForm = ({
             template: localStage.template
                 ? extractId(localStage.template) ?? localStage.template
                 : null,
-            constraint: localStage.constraint
-                ? extractId(localStage.constraint) ?? localStage.constraint
-                : null,
             evaluation: extractId(localStage.evaluation) ?? localStage.evaluation,
-        } as Stage;
+        } as Stage;*/
 
-        await onSubmit(payload);
+        await onSubmit(localStage);
     };
 
     return (
@@ -252,7 +250,7 @@ const StageForm = ({
                             showTime
                             stepMinute={5}
                             hourFormat="12"
-                            placeholder="Select Reviewer Deadline"                            
+                            placeholder="Select Reviewer Deadline"
                         />
                     </div>
                 </div>
@@ -423,23 +421,29 @@ const StageForm = ({
                         />
                     </div>
 
-                    <div className="field col-12 md:col-6">
-                        <label htmlFor="stage-constraint" className="font-bold block mb-2">
-                            Constraint Profile
-                        </label>
-                        <Dropdown
-                            inputId="stage-constraint"
-                            value={extractId(localStage.constraint) ?? null}
-                            options={constraints}
-                            optionLabel="name"
-                            optionValue="_id"
-                            placeholder="Select Constraint (Optional)"
-                            showClear
-                            onChange={(event) =>
-                                updateStage({ constraint: event.value ?? null })
-                            }
-                        />
-                    </div>
+                    {
+                        /** 
+                         * <div className="field col-12 md:col-6">
+                                            <label htmlFor="stage-constraint" className="font-bold block mb-2">
+                                                Constraint Profile
+                                            </label>
+                                            <Dropdown
+                                                inputId="stage-constraint"
+                                                value={extractId(localStage.constraint) ?? null}
+                                                options={constraints}
+                                                optionLabel="name"
+                                                optionValue="_id"
+                                                placeholder="Select Constraint (Optional)"
+                                                showClear
+                                                onChange={(event) =>
+                                                    updateStage({ constraint: event.value ?? null })
+                                                }
+                                            />
+                                        </div>
+                         * 
+                        */
+                    }
+
                 </div>
             </div>
 

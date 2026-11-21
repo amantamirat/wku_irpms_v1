@@ -2,7 +2,7 @@ import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
 import { checkRange } from "../../common/types/range";
 import { toStringId } from "../../common/utils/mongoose.utils";
-import { ValidationResult } from "../constraints/services/constraint-validator.service";
+import { ValidationResult } from "../constraints/ConstraintValidationService";
 import { GrantRepository } from "../grants/grant.repository";
 import { CollaboratorDto } from "../projects/collaborators/collaborator.dto";
 import { CollaboratorStatus, ICollaborator } from "../projects/collaborators/collaborator.model";
@@ -183,7 +183,7 @@ export class CompositionValidationService {
 
         const errors = result.valid
             ? []
-            : result.errors.map(e => `Lead requirement (${leadRequirement.name}): ${e}`);
+            : result.errors.map((e:any) => `Lead requirement (${leadRequirement.name}): ${e}`);
 
         return { valid: errors.length === 0, errors };
     }
@@ -237,7 +237,7 @@ export class CompositionValidationService {
                     ),
                 ),
             );
-            const qualifyingCount = results.filter(r => r.valid).length;
+            const qualifyingCount = results.filter((r:any) => r.valid).length;
 
             const isRatio = rule.mode === AggregationMode.RATIO;
 

@@ -1,49 +1,71 @@
-import { IRange, isValidRange } from "@/types/range";
+import { IRange } from '@/types/range';
 
-export interface Constraint {
-  _id?: string;
+/* ---------- Grouped constraints (mirrors the backend model) ---------- */
 
-  name: string;
-  description?: string;
+export interface IProjectConstraints {
+    // Text length
+    titleWords?: IRange;
+    summaryWords?: IRange;
+    keyWords?: IRange;
 
-  titleWords?: IRange;
-  summaryWords?: IRange;
+    // Objectives
+    generalObjectiveWords?: IRange;
+    specificObjectiveWords?: IRange;
+    specificObjectives?: IRange;
 
-  // Objectives
-  generalObjectiveWords?: IRange;
-  specificObjectiveWords?: IRange;
-  specificObjectives?: IRange;
-  // Expected Outputs
-  expectedOutputs?: IRange;
-  expectedOutputWords?: IRange;
+    // Expected outputs
+    expectedOutputs?: IRange;
+    expectedOutputWords?: IRange;
 
-  keyWords?: IRange;
+    // Budget & time
+    budget?: IRange;
+    duration?: IRange;
 
-  // Project structure
-  participants?: IRange;
-  phases?: IRange;
-  budget?: IRange;
-  duration?: IRange;
-
-  activities?: IRange;
-  equipments?: IRange;
-  components?: IRange;
-  componentCollaborators?: IRange;
-
-  phaseBudget?: IRange;
-  phaseDuration?: IRange;
-
-  activityCost?: IRange;
-  activityDuration?: IRange;
-
-  equipmentCost?: IRange;
-
-  themes?: IRange;
-  subThemes?: IRange;
-  focusAreas?: IRange;
-  indicators?: IRange;
-
-  createdAt?: string | Date;
-  updatedAt?: string | Date;
+    // Classification
+    themes?: IRange;
 }
 
+export interface ICollaboratorConstraints {
+    members?: IRange; // was participants
+}
+
+export interface IPhaseConstraints {
+    phases?: IRange; // number of phases
+    budget?: IRange; // was phaseBudget
+    duration?: IRange; // was phaseDuration
+}
+
+export interface IActivityConstraints {
+    activities?: IRange; // number of activities
+    cost?: IRange; // was activityCost
+    duration?: IRange; // was activityDuration
+}
+
+export interface IEquipmentConstraints {
+    equipments?: IRange; // number of equipments
+    cost?: IRange; // was equipmentCost
+}
+
+export interface IComponentConstraints {
+    components?: IRange; // number of components
+    collaborators?: IRange; // was componentCollaborators
+}
+
+/* ---------- Constraint ---------- */
+
+export interface Constraint {
+    _id?: string;
+
+    name: string;
+    description?: string;
+
+    projectConstraints?: IProjectConstraints;
+    collaboratorConstraints?: ICollaboratorConstraints;
+    phaseConstraints?: IPhaseConstraints;
+    activityConstraints?: IActivityConstraints;
+    equipmentConstraints?: IEquipmentConstraints;
+    componentConstraints?: IComponentConstraints;
+
+    createdAt?: string | Date;
+    updatedAt?: string | Date;
+}

@@ -47,6 +47,9 @@ export interface FilterProjectsDTO {
     id?: mongoose.Types.ObjectId;
     ids?: string[];
 
+    excludeId?: string;
+    excludeIds?: string[];
+
     grant?: string;
     grantIds?: string[];
 

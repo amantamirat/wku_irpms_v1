@@ -16,7 +16,6 @@ import { ProfileValidatorService } from "../modules/compositions/profile/profile
 import { ProfileRepository } from "../modules/compositions/profile/profile.repository";
 import { RequirementRepository } from "../modules/compositions/requirements/requirement.repository";
 import { ConstraintRepository } from "../modules/constraints/constraint.repository";
-import { ConstraintValidationService } from "../modules/constraints/services/constraint-validator.service";
 import { CriterionRepository } from "../modules/evaluations/criteria/criterion.repository";
 import { EvaluationRepository } from "../modules/evaluations/evaluation.repository";
 import { GrantRepository } from "../modules/grants/grant.repository";
@@ -64,6 +63,7 @@ import { HistoryValidationService } from "../modules/compositions/history/histor
 import { RequirementValidationService } from "../modules/compositions/requirements/requirement.validation-service";
 import { CompositionValidationService } from "../modules/compositions/composition-validation-service";
 import { ProjectConsistencyValidator } from "../modules/projects/ProjectConsistencyValidator";
+import { ConstraintValidationService } from "../modules/constraints/ConstraintValidationService";
 
 export const fileStorageService = new FileStorageService();
 
@@ -132,8 +132,11 @@ export const templateValidtor = new TemplateValidationService(
     new PdfExtractorService(), new TemplateParserService(), templateRepo
 );
 //validator services 
-export const constraintValidator = new ConstraintValidationService(
-    constraintRepo, projectRepo, themeRepo, collaboratorRepo, phaseRepo, activityRepo, equipmentRepo, componentRepo);
+
+
+export const constraintValidationService = new ConstraintValidationService(constraintRepo, grantRepo);
+
+
 
 export const profileValidator = new ProfileValidatorService(
     exprienceRepo, specializationRepo
@@ -157,13 +160,13 @@ export const stageService = new StageService(stageRepo, callRepo, evaluationRepo
 export const projectAuth = new ProjectAuth(projectRepo, applicationRepo, stageRepo, authPermissionService);
 
 export const collabService = new CollaboratorService(collaboratorRepo, projectRepo, grantRepo,
-    constraintValidator, compositionValidator, projectAuth, notificationService, filterService);
+    constraintValidationService, compositionValidator, projectAuth, notificationService, filterService);
 
 export const phaseActivityService = new PhaseActivityService(activityRepo, phaseRepo, phaseDocRepo,
-    equipmentRepo, consistencyValidator, projectAuth);
+    equipmentRepo, constraintValidationService, consistencyValidator, projectAuth);
 
 export const phaseService = new PhaseService(phaseRepo, projectRepo, grantRepo, phaseDocRepo, activityRepo, equipmentRepo,
-    constraintValidator, consistencyValidator,
+    constraintValidationService, consistencyValidator,
     projectAuth);
 
 
@@ -171,16 +174,16 @@ export const applicationService = new ApplicationService(
     applicationRepo, projectRepo, callRepo, stageRepo, reviewerRepo,
     templateValidtor,
     new AnonymizerService(applicationRepo, collaboratorRepo, fileStorageService), projectAuth,
-    notificationService, filterService, constraintValidator, compositionValidator,
+    notificationService, filterService, compositionValidator,
     collaboratorRepo, userRepo, fileStorageService
 );
 
-export const projectService = new ProjectService(projectRepo, 
+export const projectService = new ProjectService(projectRepo,
     collaboratorRepo, phaseRepo, componentRepo, phaseDocRepo,
-    userRepo, verificationRepo,calendarRepo,
+    userRepo, verificationRepo, calendarRepo,
     grantRepo, callRepo, stageRepo, applicationRepo,
     collabService, phaseService, applicationService,
-    constraintValidator, compositionValidator, templateValidtor, consistencyValidator,
+    constraintValidationService, compositionValidator, templateValidtor, consistencyValidator,
     projectAuth, notificationService, filterService, fileStorageService);
 
 export const userService = new UserService(userRepo, organizationRepo, roleRepo, collaboratorRepo);

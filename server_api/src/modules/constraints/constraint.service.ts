@@ -48,7 +48,7 @@ export class ConstraintService {
         dto: UpdateConstraintDTO
     ): Promise<IConstraint | null> {
 
-        const { id, data } = dto
+        const { id, data } = dto;
 
         if (data.name) {
             const exists = await this.repository.exists(
@@ -81,44 +81,56 @@ export class ConstraintService {
     private validateRange(
         dto: Partial<CreateConstraintDTO>
     ): void {
+
+        const project = dto.projectConstraints;
+        const collaborator = dto.collaboratorConstraints;
+        const phase = dto.phaseConstraints;
+        const activity = dto.activityConstraints;
+        const equipment = dto.equipmentConstraints;
+        const component = dto.componentConstraints;
+
         const ranges = [
-            ["Title words", dto.titleWords],
-            ["Summary words", dto.summaryWords],
-            ["Keywords", dto.keyWords], // Added
+            // Project: text length
+            ["Title words", project?.titleWords],
+            ["Summary words", project?.summaryWords],
+            ["Keywords", project?.keyWords],
 
-            // Objectives
-            ["General objective words", dto.generalObjectiveWords],
-            ["Specific objective words", dto.specificObjectiveWords],
-            ["Number of specific objectives", dto.specificObjectives],
+            // Project: objectives
+            ["General objective words", project?.generalObjectiveWords],
+            ["Specific objective words", project?.specificObjectiveWords],
+            ["Number of specific objectives", project?.specificObjectives],
 
-            // Expected Outputs
-            ["Number of expected outputs", dto.expectedOutputs],
-            ["Expected output words", dto.expectedOutputWords],
+            // Project: expected outputs
+            ["Number of expected outputs", project?.expectedOutputs],
+            ["Expected output words", project?.expectedOutputWords],
 
-            // Participants and project structure
-            ["Participants", dto.participants],
-            ["Phases", dto.phases],
+            // Project: budget & time
+            ["Project budget", project?.budget],
+            ["Project duration", project?.duration],
 
-            // Budget and duration
-            ["Budget", dto.budget],
-            ["Duration", dto.duration],
-            ["Phase budget", dto.phaseBudget],         // was budgetPerPhase
-            ["Phase duration", dto.phaseDuration],       // was durationPerPhase
-            ["Activity cost", dto.activityCost],         // Added
-            ["Activity duration", dto.activityDuration], // added
-            ["Equipment cost", dto.equipmentCost],       // added
+            // Project: classification
+            ["Themes", project?.themes],
 
-            // Research themes
-            ["Themes", dto.themes],
-            ["Sub themes", dto.subThemes],
-            ["Focus areas", dto.focusAreas],
-            ["Indicators", dto.indicators],
+            // Collaborators
+            ["Members", collaborator?.members],
 
-            // Project resources
-            ["Activities", dto.activities],              // was activitiesPerPhase
-            ["Equipments", dto.equipments],              // was equipmentsPerPhase
-            ["Components", dto.components],              // added
-            ["Component Collaborators", dto.componentCollaborators],    
+            // Phases
+            ["Number of phases", phase?.phases],
+            ["Phase budget", phase?.budget],
+            ["Phase duration", phase?.duration],
+
+            // Activities
+            ["Number of activities", activity?.activities],
+            ["Activity cost", activity?.cost],
+            ["Activity duration", activity?.duration],
+
+            // Equipments
+            ["Number of equipments", equipment?.equipments],
+            ["Equipment cost", equipment?.cost],
+
+            // Components
+            ["Number of components", component?.components],
+            ["Component collaborators", component?.collaborators],
         ] as const;
 
         for (const [name, range] of ranges) {

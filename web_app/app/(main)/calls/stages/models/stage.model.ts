@@ -18,7 +18,7 @@ export type Stage = {
     deadline: Date;
 
     template?: string | Template | null;
-    constraint?: string | Constraint | null;
+    //constraint?: string | Constraint | null;
     evaluation?: string | Evaluation;
     minReviewers?: number;
     maxReviewers?: number;

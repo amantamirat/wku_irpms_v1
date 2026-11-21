@@ -1,10 +1,10 @@
 import mongoose from "mongoose";
 import { ProjectStatus } from "../../projects/project.model";
 import { FundingSource } from "../../grants/grant.model";
-import { ValidationResult } from "../../constraints/services/constraint-validator.service";
 import { HistoryContext, HistoryParticipation, IHistoryRule } from "./history.model";
 import { sameId } from "../../../common/utils/mongoose.utils";
 import { checkRange } from "../../../common/types/range";
+import { ValidationResult } from "../../constraints/ConstraintValidationService";
 
 export type collaborationRole = Exclude<HistoryParticipation, HistoryParticipation.ANY>;
 

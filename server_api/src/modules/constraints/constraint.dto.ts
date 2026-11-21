@@ -1,4 +1,11 @@
-import { IRange } from "../../common/types/range";
+import {
+    IActivityConstraints,
+    ICollaboratorConstraints,
+    IComponentConstraints,
+    IEquipmentConstraints,
+    IPhaseConstraints,
+    IProjectConstraints,
+} from "./constraint.model";
 
 /**
  * Create Constraint
@@ -7,42 +14,12 @@ export interface CreateConstraintDTO {
     name: string;
     description?: string;
 
-    titleWords?: IRange;
-    summaryWords?: IRange;
-    keyWords?: IRange;
-
-    // Objectives
-    generalObjectiveWords?: IRange;
-    specificObjectiveWords?: IRange;
-    specificObjectives?: IRange;
-
-    // Expected Outputs
-    expectedOutputs?: IRange;
-    expectedOutputWords?: IRange;
-
-    // Project structure
-    participants?: IRange;
-    phases?: IRange;
-    budget?: IRange;
-    duration?: IRange;
-
-    activities?: IRange;
-    equipments?: IRange;
-    components?: IRange;
-    componentCollaborators?: IRange;
-
-    phaseBudget?: IRange;
-    phaseDuration?: IRange;
-
-    activityCost?: IRange;
-    activityDuration?: IRange;
-    equipmentCost?: IRange;
-
-    themes?: IRange;
-    subThemes?: IRange;
-
-    focusAreas?: IRange;
-    indicators?: IRange;
+    projectConstraints?: IProjectConstraints;
+    collaboratorConstraints?: ICollaboratorConstraints;
+    phaseConstraints?: IPhaseConstraints;
+    activityConstraints?: IActivityConstraints;
+    equipmentConstraints?: IEquipmentConstraints;
+    componentConstraints?: IComponentConstraints;
 }
 
 /**
