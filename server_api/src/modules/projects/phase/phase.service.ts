@@ -1,3 +1,4 @@
+import mongoose from "mongoose";
 import { PERMISSIONS } from "../../../common/constants/permissions";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
@@ -23,10 +24,14 @@ import { CreatePhaseDto, FilterPhases, UpdatePhaseDto } from "./phase.dto";
 import { IPhase, PhaseStatus } from "./phase.model";
 import { IPhaseRepository } from "./phase.repository";
 
+interface MyPhaseValidationInput extends PhaseValidationInput {
+    _id?: string | mongoose.Types.ObjectId;
+    order?: number;
+}
 
 interface PhaseChange {
-    add?: PhaseValidationInput;
-    update?: { id: string; data: Partial<PhaseValidationInput> };
+    add?: MyPhaseValidationInput;
+    update?: { id: string; data: Partial<MyPhaseValidationInput> };
     remove?: string;
 }
 
@@ -40,7 +45,7 @@ interface ValidatePhaseChangeParams {
 
 export function toPhaseValidationInput(
     item: IPhase
-): PhaseValidationInput {
+): MyPhaseValidationInput {
     return {
         ...(item._id && { _id: item._id }),
         // order: item.order,
@@ -91,7 +96,7 @@ export class PhaseService {
     private applyPhaseChange(
         current: IPhase[],
         change: PhaseChange
-    ): PhaseValidationInput[] {
+    ): MyPhaseValidationInput[] {
 
         let phases = [...current]
             .sort((a, b) => a.order - b.order)

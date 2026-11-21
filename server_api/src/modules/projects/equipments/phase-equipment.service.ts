@@ -5,7 +5,7 @@ import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
-import { ConstraintValidationService } from "../../constraints/ConstraintValidationService";
+import { ConstraintValidationService, EquipmentValidationInput } from "../../constraints/ConstraintValidationService";
 import { IPhaseActivityRepository } from "../activities/phase-activity.repository"; // adjust path to your folder
 import { IPhase } from "../phase/phase.model";
 import { IPhaseRepository } from "../phase/phase.repository";
@@ -25,19 +25,16 @@ import {
 import { IPhaseEquipmentRepository } from "./phase-equipment.repository";
 
 /** Minimal shape the consistency validator needs for equipment. */
-interface EquipmentValidationInput {
+interface MyEquipmentValidationInput extends EquipmentValidationInput {
     _id?: string;
     phase?: string;
-    itemName: string;
-    quantity: number;
-    unitPrice: number;
     packSize?: number;
     requiredBy?: Date | string;
 }
 
 interface EquipmentChange {
-    add?: EquipmentValidationInput;
-    update?: { id: string; data: Partial<EquipmentValidationInput> };
+    add?: MyEquipmentValidationInput;
+    update?: { id: string; data: Partial<MyEquipmentValidationInput> };
     remove?: string;
 }
 
@@ -49,7 +46,7 @@ interface ValidateEquipmentChangeParams {
 
 const toEquipmentValidationInput = (
     e: IPhaseEquipment
-): EquipmentValidationInput => ({
+): MyEquipmentValidationInput => ({
     _id: String(e._id),
     phase: e.phase ? String(e.phase) : undefined,
     itemName: (e as any).itemName,
@@ -85,7 +82,7 @@ export class PhaseEquipmentService {
     private applyEquipmentChange(
         current: IPhaseEquipment[],
         change: EquipmentChange
-    ): EquipmentValidationInput[] {
+    ): MyEquipmentValidationInput[] {
 
         let items = current.map(toEquipmentValidationInput);
 

@@ -179,7 +179,7 @@ export const applicationService = new ApplicationService(
 );
 
 export const projectService = new ProjectService(projectRepo,
-    collaboratorRepo, phaseRepo, componentRepo, phaseDocRepo,
+    collaboratorRepo, phaseRepo, activityRepo, equipmentRepo, componentRepo, phaseDocRepo,
     userRepo, verificationRepo, calendarRepo,
     grantRepo, callRepo, stageRepo, applicationRepo,
     collabService, phaseService, applicationService,

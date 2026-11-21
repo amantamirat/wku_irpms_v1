@@ -50,6 +50,8 @@ import { IProject, IProjectObjectives, ProjectStatus } from "./project.model";
 import { IProjectRepository } from "./project.repository";
 import { PROJECT_TRANSITIONS } from "./project.state-machine";
 import { ProjectConsistencyValidator } from "./ProjectConsistencyValidator";
+import { PhaseActivityRepository } from "./activities/phase-activity.repository";
+import { PhaseEquipmentRepository } from "./equipments/phase-equipment.repository";
 
 export const PROJECT_EDITABLE_STATES: ProjectStatus[] = [
     ProjectStatus.draft,
@@ -103,6 +105,8 @@ export class ProjectService {
 
         private readonly collabRepo: ICollaboratorRepository,
         private readonly phaseRepo: IPhaseRepository,
+        private readonly activityRepo: PhaseActivityRepository,
+        private readonly equipmentRepo: PhaseEquipmentRepository,
         private readonly componentRepo: ProjectComponentRepository,
         private readonly documentRepo: PhaseDocumentRepository,
 
@@ -380,17 +384,48 @@ export class ProjectService {
         }
 
         if (grantDoc.constraint) {
-            throw new AppError(
-                ERROR_CODES.UNSUPPORTED_OPERTATION,
-                "Constraint check on grant is not implemented",
-                400,
-                // result
-            );
-            /*
             const constraintDoc = await this.constraintValidationService.getConstraint(
                 grantDoc.constraint.toString()
             );
-            const result = await this.constraintValidationService.validateAll(constraintDoc, id);
+
+            const [
+                members,
+                phases,
+                activities,
+                equipments,
+                components,
+            ] = await Promise.all([
+                this.collabRepo.countByProject(id),
+                this.phaseRepo.find({
+                    project: id,
+                }),
+
+                this.activityRepo.find({
+                    project: id,
+                }),
+
+                this.equipmentRepo.find({
+                    project: id,
+                }),
+
+                this.componentRepo.find({
+                    project: id,
+                }),
+            ]);
+
+            const result = await this.constraintValidationService.validateAll(constraintDoc,
+                {
+                    project: mapProjectToInput(projectDoc),
+                    collaborators: { members: members },
+                    phases,
+                    activities,
+                    equipments,
+                    components: components.map((component) => ({
+                        title: component.title,
+                        contributors: component.contributors.length,
+                    }))
+                }
+            );
 
             if (!result.valid) {
                 throw new AppError(
@@ -400,7 +435,7 @@ export class ProjectService {
                     result
                 );
             }
-                */
+
         }
 
         if (grantDoc.composition) {

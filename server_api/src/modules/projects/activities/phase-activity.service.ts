@@ -30,10 +30,16 @@ import {
 import { IPhaseActivityRepository } from "./phase-activity.repository";
 import { ActivityValidationInput, ConstraintValidationService } from "../../constraints/ConstraintValidationService";
 import { IProject } from "../project.model";
+import mongoose from "mongoose";
+
+interface MyActivityValidationInput extends ActivityValidationInput {
+    _id?: string | mongoose.Types.ObjectId;
+    phase?: string;
+}
 
 interface ActivityChange {
-    add?: ActivityValidationInput;
-    update?: { id: string; data: Partial<ActivityValidationInput> };
+    add?: MyActivityValidationInput;
+    update?: { id: string; data: Partial<MyActivityValidationInput> };
     remove?: string;
 }
 
@@ -43,7 +49,7 @@ interface ValidateActivityChangeParams {
     change: ActivityChange;
 }
 
-const toActivityValidationInput = (a: IPhaseActivity): ActivityValidationInput => ({
+const toActivityValidationInput = (a: IPhaseActivity): MyActivityValidationInput => ({
     _id: String(a._id),
     phase: a.phase ? String(a.phase) : undefined,
     title: a.title,

@@ -1,11 +1,10 @@
-import { IRange, checkRange } from "../../common/types/range";
-import { IConstraint } from "./constraint.model";
-import { calculateDurationDays } from "../../common/utils/date.utils";
-import { ConstraintRepository } from "./constraint.repository";
 import { AppError } from "../../common/errors/app.error";
 import { ERROR_CODES } from "../../common/errors/error.codes";
-import mongoose from "mongoose";
+import { IRange, checkRange } from "../../common/types/range";
+import { calculateDurationDays } from "../../common/utils/date.utils";
 import { GrantRepository } from "../grants/grant.repository";
+import { IConstraint } from "./constraint.model";
+import { ConstraintRepository } from "./constraint.repository";
 
 export interface ValidationResult {
     valid: boolean;
@@ -46,17 +45,13 @@ export interface CollaboratorValidationInput {
 
 // Phase
 export interface PhaseValidationInput {
-    _id?: string | mongoose.Types.ObjectId;
     startDate: Date;
     endDate: Date;
     budget: number;
-    order?: number;
 }
 
 // Activity
 export interface ActivityValidationInput {
-    _id?: string | mongoose.Types.ObjectId;
-    phase?: string;
     title: string;
     cost: number;
     startDate: Date;
@@ -72,8 +67,8 @@ export interface EquipmentValidationInput {
 
 // Component
 export interface ComponentValidationInput {
-    name: string;
-    collaborators: number;
+    title: string;
+    contributors: number;
 }
 
 // All sections at once
@@ -94,7 +89,7 @@ export class ConstraintValidationService {
 
     constructor(
         private readonly constraintRepo: ConstraintRepository,
-        private readonly grantRepo: GrantRepository,
+        private readonly grantRepo: GrantRepository
     ) { }
 
     // =====================================================
@@ -143,6 +138,10 @@ export class ConstraintValidationService {
 
         return constraint;
     }
+
+
+
+    //===============================DB STUFF END++++++++++++++++++++++++++++++++///
 
     // =====================================================
     // COMMON HELPERS
@@ -523,8 +522,8 @@ export class ConstraintValidationService {
             this.validateRange(
                 errors,
                 rules.collaborators,
-                component.collaborators,
-                `Number of collaborators in component "${component.name}"`,
+                component.contributors,
+                `Number of collaborators in component "${component.title}"`,
                 options,
             );
         });
