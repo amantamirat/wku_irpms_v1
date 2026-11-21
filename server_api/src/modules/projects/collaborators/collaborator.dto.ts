@@ -1,11 +1,11 @@
+import mongoose from "mongoose";
 import { CollaboratorStatus, ICollaborator, LeaderRole } from "./collaborator.model";
 
 export interface CollaboratorDto {
     _id?: string;
     member: string;
     role: string;
-    //isLeadPI?: boolean;
-    //status?: CollaboratorStatus;
+    isLeadPI?: boolean;
 }
 
 

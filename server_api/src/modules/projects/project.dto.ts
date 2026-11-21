@@ -66,67 +66,7 @@ export interface FilterProjectsDTO {
 
 
 
-//////////////////////older dtos/////
 
-
-
-
-export interface ApplyProjectDTO {
-
-    title: string;
-    objectives?: IProjectObjectives;
-    summary?: string;
-
-    themes: string[];
-    keywords?: string[];
-
-    totalBudget: number;
-    totalDuration: number;
-
-    collaborators?: CollaboratorDto[];
-    phases?: PhaseDto[];
-    components?: ProjectComponentDto[];
-    activities?: ProjectActivityDto[];
-    equipments?: EquipmentDto[];
-}
-
-export interface InternalCreateProjectDto extends ApplyProjectDTO {
-    leadPI: string;
-    grant: string;
-    calendar: string;
-    organization: string;
-    call?: string;
-}
-
-
-
-
-///old////
-export interface CreateOLDProjectDTO {
-    grant: string;
-
-    conceptNoteId?: string;
-
-    title: string;
-    summary?: string;
-
-    leadPI: string;
-
-    themes: string[];
-
-    objectives?: IProjectObjectives;
-
-    collaborators: CollaboratorDto[];
-    phases?: PhaseDto[];
-    components?: ProjectComponentDto[];
-    activities?: ProjectActivityDto[];
-    equipments?: EquipmentDto[];
-
-    calendar?: string;
-    call?: string;
-
-    documentPath?: string;
-}
 
 
 

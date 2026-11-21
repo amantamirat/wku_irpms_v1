@@ -10,7 +10,7 @@ interface IProjectApi extends EntityApi<Project, FilterProjects | undefined> {
     transitionState: (id: string, dto: StateTransition) => Promise<Project>;
     me: (filter?: FilterProjects) => Promise<Project[]>;
     meReadyForNextStage: () => Promise<ProjectNextStage[]>;   // new
-    apply: (id: string, project: Partial<Project>) => Promise<any>;
+    apply: (id: string, project: Partial<Project>, files: File[]) => Promise<any>;
     getProgress: (id: string) => Promise<any>
 }
 export const ProjectApi: IProjectApi = {
@@ -52,6 +52,7 @@ export const ProjectApi: IProjectApi = {
         return createdData as Project;
     },
 
+    /*
     async apply(id: string, project: Partial<Project>): Promise<any> {
         const formData = new FormData();
 
@@ -66,6 +67,19 @@ export const ProjectApi: IProjectApi = {
 
         // 3. Stringify clean metadata
         formData.append("project", JSON.stringify(sanitized));
+
+        return ApiClient.post(`${end_point}/apply/${id}`, formData);
+    },*/
+
+    async apply(id: string, project: Partial<Project>, files: File[] = []): Promise<any> {
+        const formData = new FormData();
+
+        // 1. Real files, appended directly (never through sanitize)
+        files.forEach((f) => formData.append('file', f));
+
+        // 2. Only text/metadata goes through sanitize
+        const sanitized = sanitize(project);
+        formData.append('project', JSON.stringify(sanitized));
 
         return ApiClient.post(`${end_point}/apply/${id}`, formData);
     },

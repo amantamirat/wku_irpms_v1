@@ -56,7 +56,7 @@ export type Project = {
     updatedAt?: Date;
     collaborators?: Collaborator[];
     phases?: Phase[];
-    file?: File;
+   // file?: File;
     statusHistory?: IStatusHistory<ProjectStatus>[];
     currentApplication?: string | Application;
     currentVerification?: string | Verification;
@@ -83,12 +83,3 @@ export const validateProject = (project: Project): { valid: boolean; message?: s
     return { valid: true };
 };
 
-export const validateApplyProject = (project: Project): { valid: boolean; message?: string } => {
-    const result = validateProject(project);
-    if (!result.valid) return result;
-
-    if (!project.file) {
-        return { valid: false, message: 'Please select a project file.' };
-    }
-    return { valid: true };
-};

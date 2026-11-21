@@ -8,7 +8,7 @@ import { toObjectId } from "../../common/utils/mongoose.utils";
 import { AuthenticatedRequest } from "../auth/auth.middleware";
 import { ProjectProgressService } from "./project-progress-service";
 import {
-  ApplyProjectDTO,
+  ApplyProjectDto,
   CreateProjectDto,
   FilterProjectsDTO,
   UpdateProjectDTO
@@ -114,9 +114,9 @@ export class ProjectController {
       // Parse application project data
       const parsedProject = JSON.parse(
         req.body.project,
-      ) as ApplyProjectDTO;
+      ) as ApplyProjectDto;
 
-      const dto: ApplyProjectDTO = {
+      const dto: ApplyProjectDto = {
         title: parsedProject.title,
         objectives: parsedProject.objectives,
         summary: parsedProject.summary,
@@ -128,10 +128,10 @@ export class ProjectController {
         totalDuration: parsedProject.totalDuration ?? 0,
 
         collaborators: parsedProject.collaborators ?? [],
-        phases: parsedProject.phases ?? [],
-        components: parsedProject.components ?? [],
-        activities: parsedProject.activities ?? [],
-        equipments: parsedProject.equipments ?? [],
+        //phases: parsedProject.phases ?? [],
+        //components: parsedProject.components ?? [],
+        //activities: parsedProject.activities ?? [],
+        //equipments: parsedProject.equipments ?? [],
       };
 
       const submitted = await this.service.apply(

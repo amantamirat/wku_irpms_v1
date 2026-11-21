@@ -1,115 +1,147 @@
+// ApplyWizard.tsx
 'use client';
-import { useAuth } from '@/contexts/auth-context';
-import { Steps } from 'primereact/steps';
-import { useState } from 'react';
-import { BasicInfoStep } from '../../components/wirzard/BasicInfoStep';
-import { CollaboratorsStep } from '../../components/wirzard/CollaboratorsStep';
-import { PhasesStep } from '../../components/wirzard/PhasesStep';
-import { Project } from '../../models/project.model';
-import { SubmissionStep } from './SubmissionStep';
 
+import { Button } from 'primereact/button';
+import { Steps } from 'primereact/steps';
+import { useMemo, useState } from 'react';
+import { useRouter } from 'next/navigation';
+
+import { Call } from '@/app/(main)/calls/models/call.model';
+import { Constraint } from '@/app/(main)/constraints/models/constraint.model';
+import { User } from '@/app/(main)/users/models/user.model';
+import { useAuth } from '@/contexts/auth-context';
+
+import ProjectForm from '../../components/ProjectForm';
+import { Collaborator } from '../../collaborators/models/collaborator.model';
+import { Project } from '../../models/project.model';
+import CollaboratorsStep, { validateCollaborators } from './steps/CollaboratorsStep';
+import SubmissionStep from './steps/SubmissionStep';
 
 interface ApplyWizardProps {
-    project?: Partial<Project>;
-    onComplete?: (data: any) => void;
+    call?: Call;
+    constraint?: Constraint | null;
+    onSubmit: (project: Partial<Project>, files: File[]) => Promise<unknown>;
+    onComplete?: () => void;
 }
 
-const ApplyWizard = ({ project, onComplete }: ApplyWizardProps) => {
-    const { getUser } = useAuth();
-    const appUser = getUser();
-    const [activeIndex, setActiveIndex] = useState(0);
-    const [formData, setFormData] = useState<Project>({
-        ...project,
-        title: '',
-        summary: '',
-        themes: [],
-        leadPI: appUser ? appUser : "",
-        collaborators: [{ member: appUser?._id, role: "Principal Investigator", isLeadPI: true }],
-        phases: [{ title: 'Phase 1', order: 1, budget: 1000, duration: 10, description: '' }]
-    });
+const PROJECT_FORM_ID = 'apply-project-form';
 
-    const wizardSteps = [
-        { label: 'Basic Information' },
-        { label: 'Budget & Phases' },
+const ApplyWizard = ({ call, constraint, onSubmit, onComplete }: ApplyWizardProps) => {
+    const router = useRouter();
+    const { getUser } = useAuth();
+    const appUser = getUser() as User | null;
+
+    const [activeIndex, setActiveIndex] = useState(0);
+    const [showErrors, setShowErrors] = useState(false);
+    const [project, setProject] = useState<Partial<Project> | null>(null);
+    const [collaborators, setCollaborators] = useState<Collaborator[]>(
+        appUser ? [{ member: appUser, role: 'Principal Investigator', isLeadPI: true }] : []
+    );
+
+    // Stable reference: ProjectForm resets itself whenever `item` changes identity.
+    const projectItem = useMemo<Partial<Project>>(
+        () =>
+            project ??
+            (call
+                ? ({ call, grant: call.grant, calendar: call.calendar } as Partial<Project>)
+                : {}),
+        [project, call]
+    );
+
+    const steps = [
+        { label: 'Project' },
         { label: 'Collaborators' },
-        { label: 'Submission' }
+        { label: 'Review & Submit' }
     ];
 
-    const updateFormData = (data: Partial<Project>) => {
-        setFormData(prev => ({ ...prev, ...data }));
+    const next = () => {
+        setShowErrors(false);
+        setActiveIndex((i) => i + 1);
     };
 
-    const handleNext = () => {
-        setActiveIndex(prev => prev + 1);
+    const back = () => {
+        setShowErrors(false);
+        setActiveIndex((i) => i - 1);
     };
 
-    const handleBack = () => {
-        setActiveIndex(prev => prev - 1);
-    };
-
-    const handleComplete = () => {
-        onComplete?.(formData);
-    };
-
-    const renderStep = () => {
-        switch (activeIndex) {
-            case 0:
-                return (
-                    <BasicInfoStep
-                        data={formData}
-                        //call={call}
-                        //constraints={constraints}
-                        onUpdate={updateFormData}
-                        onNext={handleNext}
-                    />
-                );
-            case 1:
-                return (
-                    <PhasesStep
-                        data={formData}
-                        //constraints={constraints}
-                        onUpdate={updateFormData}
-                        onNext={handleNext}
-                        onBack={handleBack}
-                    />
-                );
-            case 2:
-
-                return (
-                    <CollaboratorsStep
-                        data={formData}
-                        //constraints={constraints}
-                        onUpdate={updateFormData}
-                        onNext={handleNext}
-                        onBack={handleBack}
-                    />
-                );
-
-            case 3:
-
-                return (
-                    <SubmissionStep
-                        data={formData}
-                        onComplete={handleComplete}
-                        onBack={handleBack}
-                    />
-                );
-
-            default:
-                return null;
-        }
+    const handleCollaboratorsNext = () => {
+        setShowErrors(true);
+        if (validateCollaborators(collaborators, constraint).isValid) next();
     };
 
     return (
         <div className="apply-wizard">
-            <Steps
-                model={wizardSteps}
-                activeIndex={activeIndex}
-                className="mb-4"
-            />
+            <Steps model={steps} activeIndex={activeIndex} className="mb-4" readOnly />
+
             <div className="min-h-20rem">
-                {renderStep()}
+                {activeIndex === 0 && (
+                    <ProjectForm
+                        mode="create"
+                        formId={PROJECT_FORM_ID}
+                        item={projectItem as Project}
+                        saving={false}
+                        hideSetup={Boolean(call)} // call already chosen -> no setup section
+                        onSubmit={async (data) => {
+                            setProject(data);
+                            next();
+                        }}
+                        onCancel={() => router.back()}
+                    />
+                )}
+
+                {activeIndex === 1 && (
+                    <CollaboratorsStep
+                        collaborators={collaborators}
+                        constraint={constraint}
+                        showErrors={showErrors}
+                        onChange={setCollaborators}
+                    />
+                )}
+
+                {activeIndex === 2 && project && (
+                    <SubmissionStep
+                        project={project}
+                        collaborators={collaborators}
+                        onBack={back}
+                        onSubmit={onSubmit}
+                        onComplete={onComplete}
+                    />
+                )}
             </div>
+
+            {/* Footer: the last step renders its own Back/Submit buttons */}
+            {activeIndex < 2 && (
+                <div className="flex justify-content-between mt-4">
+                    <Button
+                        type="button"
+                        label="Back"
+                        icon="pi pi-arrow-left"
+                        severity="secondary"
+                        outlined
+                        disabled={activeIndex === 0}
+                        onClick={back}
+                    />
+
+                    {activeIndex === 0 ? (
+                        // submits ProjectForm; it validates and calls onSubmit -> next()
+                        <Button
+                            type="submit"
+                            form={PROJECT_FORM_ID}
+                            label="Next"
+                            icon="pi pi-arrow-right"
+                            iconPos="right"
+                        />
+                    ) : (
+                        <Button
+                            type="button"
+                            label="Next"
+                            icon="pi pi-arrow-right"
+                            iconPos="right"
+                            onClick={handleCollaboratorsNext}
+                        />
+                    )}
+                </div>
+            )}
         </div>
     );
 };

@@ -4,6 +4,7 @@ import { checkRange } from "../../common/types/range";
 import { toStringId } from "../../common/utils/mongoose.utils";
 import { ValidationResult } from "../constraints/services/constraint-validator.service";
 import { GrantRepository } from "../grants/grant.repository";
+import { CollaboratorDto } from "../projects/collaborators/collaborator.dto";
 import { CollaboratorStatus, ICollaborator } from "../projects/collaborators/collaborator.model";
 import { CollaboratorRepository } from "../projects/collaborators/collaborator.repository";
 import { ProjectRepository } from "../projects/project.repository";
@@ -25,14 +26,8 @@ export interface CompositionValidationInput {
     members: string[];
 }
 
-export type MembershipCompositionItem = Pick<
-    ICollaborator,
-    "member" | "isLeadPI"
->;
-
-
 export function toCompositionValidationInput(
-    items: MembershipCompositionItem[],
+    items: CollaboratorDto[],
 ): CompositionValidationInput {
 
     const leads = items.filter(i => i.isLeadPI);
@@ -43,16 +38,16 @@ export function toCompositionValidationInput(
     if (leads.length > 1)
         throw new AppError(ERROR_CODES.LEAD_PI_NOT_FOUND, 'Project has more than one lead PI.');
 
-    const lead = toStringId(leads[0].member);
+    const lead = String(leads[0].member);
 
     const members = [
         ...new Set(
             items
                 .filter(i => !i.isLeadPI)
-                .map(i => toStringId(i.member))
+                .map(i => i.member)
                 .filter(id => id !== lead),
         ),
-    ];
+    ].map(i => String(i));
 
     return { lead, members };
 }

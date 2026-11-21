@@ -1,9 +1,9 @@
+// ApplyPage.tsx
 'use client';
 import { useParams, useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 
 // PrimeReact Components
-import { BreadCrumb } from 'primereact/breadcrumb';
 import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
 import { ProgressSpinner } from 'primereact/progressspinner';
@@ -12,61 +12,92 @@ import { Sidebar } from 'primereact/sidebar';
 // API and Models
 import { CallApi } from '@/app/(main)/calls/api/call.api';
 import { Call } from '@/app/(main)/calls/models/call.model';
-
-// Local Components
 import { ConstraintApi } from '@/app/(main)/constraints/api/constraint.api';
 import { ConstraintView } from '@/app/(main)/constraints/components/ConstraintView';
 import { Constraint } from '@/app/(main)/constraints/models/constraint.model';
+import { GrantApi } from '@/app/(main)/grants/api/grant.api';
+import { Grant } from '@/app/(main)/grants/models/grant.model';
+import { ProjectApi } from '@/app/(main)/projects/api/project.api'; // adjust path
+
 import ApplyWizard from '../wizard/ApplyWizard';
-import { Project } from '@/app/(main)/projects/models/project.model';
+import { Project } from '../../models/project.model';
 
 const ApplyPage = () => {
     const { id: callId } = useParams();
     const router = useRouter();
 
     const [call, setCall] = useState<Call | null>(null);
-    const [project, setProject] = useState<Partial<Project> | null>(null);
     const [constraint, setConstraint] = useState<Constraint | null>(null);
-
 
     const [loading, setLoading] = useState(true);
     const [showSidebar, setShowSidebar] = useState(false);
     const [error, setError] = useState<string | null>(null);
 
     useEffect(() => {
-        const initPage = async () => {
-            if (!callId) return;
+        if (!callId) return;
 
+        let cancelled = false;
+
+        const initPage = async () => {
             try {
                 setLoading(true);
                 setError(null);
 
                 const callData = await CallApi.getById!(callId as string, true);
-                setCall(callData);
-                setProject({
-                    call: callData,
-                    grant: callData.grant,
-                    calendar: callData.calendar,
-                });
 
-                if (callData.constraint) {
-                    const constraintData = await ConstraintApi.getById!(callData.constraint as string);
-                    setConstraint(constraintData);
+                // The wizard needs call.grant populated (themes load from it).
+                let grant = callData.grant as Grant | string | undefined;
+                if (typeof grant === 'string') {
+                    grant = await GrantApi.getById!(grant);
                 }
 
-            } catch (err: any) {
-                console.error("Initialization error:", err);
-                setError("Failed to load application context. Please verify the call ID.");
+                if (cancelled) return;
+                setCall({ ...callData, grant } as Call);
+
+                // Constraint lives on the grant: call.grant.constraint
+                // (either already populated, or just an id)
+                const constraintRef = (grant as Grant | undefined)?.constraint as
+                    | Constraint
+                    | string
+                    | undefined;
+
+                if (constraintRef) {
+                    try {
+                        const constraintData =
+                            typeof constraintRef === 'string'
+                                ? await ConstraintApi.getById!(constraintRef)
+                                : constraintRef;
+
+                        if (!cancelled) setConstraint(constraintData);
+                    } catch (constraintError) {
+                        // Rules are informative; don't block the application
+                        console.error('Failed to load constraint:', constraintError);
+                    }
+                }
+            } catch (err) {
+                console.error('Initialization error:', err);
+                if (!cancelled) {
+                    setError('Failed to load application context. Please verify the call ID.');
+                }
             } finally {
-                setLoading(false);
+                if (!cancelled) setLoading(false);
             }
         };
 
-        initPage();
+        void initPage();
+
+        return () => {
+            cancelled = true;
+        };
     }, [callId]);
 
-    
-    
+    // The only place that talks to the API. Errors propagate to SubmissionStep,
+    // which shows them in its ValidationReport.
+    const handleSubmit = (project: Partial<Project>, files: File[]) =>
+        ProjectApi.apply(callId as string, project, files);
+
+    // Runs after the step's success message has been shown.
+    const handleComplete = () => router.push('/');
 
     if (loading) {
         return (
@@ -79,10 +110,10 @@ const ApplyPage = () => {
         );
     }
 
-    if (error) {
+    if (error || !call) {
         return (
             <div className="p-4 surface-ground">
-                <Message severity="error" text={error} className="w-full" />
+                <Message severity="error" text={error ?? 'Call not found.'} className="w-full" />
                 <Button
                     label="Go Back"
                     icon="pi pi-arrow-left"
@@ -95,8 +126,7 @@ const ApplyPage = () => {
 
     return (
         <div className="p-2 md:p-4 min-h-screen surface-ground">
-
-            {/* Sidebar */}
+            {/* Rules sidebar */}
             <Sidebar
                 visible={showSidebar}
                 onHide={() => setShowSidebar(false)}
@@ -106,9 +136,7 @@ const ApplyPage = () => {
                 header={
                     <div className="flex align-items-center gap-2">
                         <i className="pi pi-shield text-primary text-xl"></i>
-                        <span className="font-bold text-xl text-color">
-                            Call Requirements
-                        </span>
+                        <span className="font-bold text-xl text-color">Call Requirements</span>
                     </div>
                 }
             >
@@ -116,21 +144,19 @@ const ApplyPage = () => {
                     {constraint ? (
                         <>
                             <ConstraintView constraint={constraint} />
-                            {/* Cautionary Note */}
                             <div className="mt-4 p-3 bg-yellow-50 border-left-3 border-yellow-500 border-round-right">
                                 <p className="m-0 text-xs text-yellow-800 line-height-2">
-                                    <strong>Note:</strong> Applicants must satisfy all criteria outlined above to meet profile eligibility.
+                                    <strong>Note:</strong> Applicants must satisfy all criteria outlined
+                                    above to meet profile eligibility.
                                 </p>
                             </div>
                         </>
                     ) : (
                         <div className="flex flex-column align-items-center justify-content-center py-8 text-center">
                             <i className="pi pi-exclamation-circle text-4xl text-orange-500 mb-3"></i>
-                            <p className="text-lg font-semibold text-color m-0">
-                                No rules found
-                            </p>
+                            <p className="text-lg font-semibold text-color m-0">No rules found</p>
                             <p className="text-sm text-color-secondary mt-1">
-                                There are no constraint profiles configured yet.
+                                No constraint profile is configured for this grant.
                             </p>
                         </div>
                     )}
@@ -139,7 +165,6 @@ const ApplyPage = () => {
 
             {/* Header */}
             <div className="flex flex-column md:flex-row justify-content-between align-items-start md:align-items-center mb-4 card shadow-1 p-3 surface-card border-round-xl">
-
                 <div className="flex align-items-center gap-3">
                     <Button
                         icon="pi pi-arrow-left"
@@ -149,10 +174,7 @@ const ApplyPage = () => {
                     />
 
                     <div>
-                        <h2 className="m-0 text-xl font-bold text-color">
-                            {call?.title}
-                        </h2>
-
+                        <h2 className="m-0 text-xl font-bold text-color">{call.title}</h2>
                         <div className="flex align-items-center gap-2 mt-1">
                             <i className="pi pi-file-edit text-color-secondary text-xs"></i>
                             <small className="text-color-secondary uppercase font-bold tracking-wider">
@@ -166,31 +188,23 @@ const ApplyPage = () => {
                     <Button
                         label="View Rules"
                         icon="pi pi-info-circle"
-                        //  badge={constraints.length > 0 ? constraints.length.toString() : undefined}
-                        badgeClassName="p-badge-info"
                         className="p-button-rounded p-button-outlined"
                         onClick={() => setShowSidebar(true)}
                     />
                 </div>
             </div>
 
-            {/* Main Content */}
+            {/* Main content */}
             <div className="grid">
-                <div className={`col-12 ${showSidebar ? 'lg:col-8 xl:col-9' : 'lg:col-12'} transition-all transition-duration-300`}>
-
+                <div className="col-12">
                     <div className="card shadow-2 border-top-3 border-primary surface-card min-h-screen p-0 md:p-4">
-                        {call && project ? (
-                            <ApplyWizard
-                                project={project}
-                            //onComplete={(data) => console.log('Final Data', data)}
-                            />
-                        ) : (
-                            <div className="flex align-items-center justify-content-center p-8">
-                                <ProgressSpinner />
-                            </div>
-                        )}
+                        <ApplyWizard
+                            call={call}
+                            constraint={constraint}
+                            onSubmit={handleSubmit}
+                            onComplete={handleComplete}
+                        />
                     </div>
-
                 </div>
             </div>
         </div>

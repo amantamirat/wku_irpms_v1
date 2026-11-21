@@ -76,7 +76,7 @@ export interface UpdateProjectData extends UpdateProjectDTO {
     currentApplication?: string | null;
     currentPhase?: string | null;
     currentVerification?: string | null;
-    leadPI?: string | null;
+    leadPI?: string | mongoose.Types.ObjectId | null;
     status?: ProjectStatus;
     statusHistory?: IStatusHistory<ProjectStatus>;
 }
@@ -278,7 +278,7 @@ export class ProjectRepository
                 },
             }),
             ...(leadPI !== undefined && {
-                leadPI: leadPI ? toObjectId(leadPI) : null,
+                leadPI: leadPI ? leadPI : null,
             }),
             ...(userId !== SYSTEM.SU_USER && {
                 updatedBy: toObjectId(userId),

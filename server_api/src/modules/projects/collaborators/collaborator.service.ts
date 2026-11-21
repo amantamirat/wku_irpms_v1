@@ -4,6 +4,7 @@ import { AppError } from "../../../common/errors/app.error";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { IProjectRepository } from "../project.repository";
 import {
+    CollaboratorDto,
     CreateCollaboratorDto,
     FilterCollaborators,
     UpdateCollaboratorDto
@@ -17,21 +18,16 @@ import { TransitionRequestDto } from "../../../common/dtos/transition.dto";
 import { TransitionHelper } from "../../../common/helpers/transition.helper";
 import ScopeFilterService from "../../../common/services/scope-filter.service";
 import { sameId, toObjectId, toStringId } from "../../../common/utils/mongoose.utils";
-import { ApplicationStatus } from "../../applications/application.model";
-import { IApplicationRepository } from "../../applications/application.repository";
 import { AuthScope } from "../../auth/auth.types";
-import { ICallRepository } from "../../calls/call.repository";
-import { StageStatus } from "../../calls/stages/stage.model";
-import { IStageRepository } from "../../calls/stages/stage.repository";
-import { CompositionValidationInput, CompositionValidationService, MembershipCompositionItem, toCompositionValidationInput } from "../../compositions/composition-validation-service";
+import { CompositionValidationInput, CompositionValidationService, toCompositionValidationInput } from "../../compositions/composition-validation-service";
 import { HistoryContextInput } from "../../compositions/history/history-validation-service";
 import { ConstraintValidationService, ValidationOptions } from "../../constraints/services/constraint-validator.service";
 import { GrantRepository } from "../../grants/grant.repository";
 import { NotificationService } from "../../notifications/notification.service";
 import { ProjectAuth } from "../project.auth";
-import { IProject, ProjectStatus } from "../project.model";
-import { CollaboratorStatus, ICollaborator, LeaderRole } from "./collaborator.model";
+import { IProject } from "../project.model";
 import { PROJECT_EDITABLE_STATES } from "../project.service";
+import { CollaboratorStatus, ICollaborator, LeaderRole } from "./collaborator.model";
 
 
 /**
@@ -43,7 +39,7 @@ import { PROJECT_EDITABLE_STATES } from "../project.service";
 
 
 interface MembershipChange {
-    add?: MembershipCompositionItem;
+    add?: CollaboratorDto;
     remove?: string;
     lead?: string;
 }
@@ -78,10 +74,12 @@ export class CollaboratorService {
         input: ICollaborator[],
         change: MembershipChange
     ): CompositionValidationInput {
-        let next: MembershipCompositionItem[] = input
+
+        let next: CollaboratorDto[] = input
             .filter(c => toStringId(c.member) !== change.remove)
             .map(c => ({
-                member: c.member,
+                member: toStringId(c.member),
+                role: c.role,
                 isLeadPI: c.isLeadPI,
             }));
 
@@ -93,7 +91,7 @@ export class CollaboratorService {
         if (change.lead) {
             next = next.map(c => ({
                 ...c,
-                isLeadPI: toStringId(c.member) === change.lead,
+                isLeadPI: c.member === change.lead,
             }));
         }
 
@@ -123,7 +121,7 @@ export class CollaboratorService {
 
         // 1. Membership validation
         if (change.add) {
-            const memberId = toStringId(change.add.member);
+            const memberId = change.add.member;
 
             const alreadyMember = currentCollaborators.some(
                 c =>
@@ -248,7 +246,8 @@ export class CollaboratorService {
                         projectId: project,
                         change: {
                             add: {
-                                member: toObjectId(member),
+                                member: member,
+                                role: "",
                                 isLeadPI: isLeadRole,
                             },
                         },
@@ -271,7 +270,7 @@ export class CollaboratorService {
 
             if (member !== userId) {
                 await this.notificationService.notifyProjectInvitation(
-                    member,
+                    String(member),
                     projectDoc.title,
                     dto.role,
                     userId
@@ -404,24 +403,25 @@ export class CollaboratorService {
                     ? {
                         remove: oldMember,
                         add: {
-                            member: dto.member ? toObjectId(dto.member) : collaboratorDoc.member,
+                            member: dto.member
+                                ? dto.member
+                                : toStringId(collaboratorDoc.member),
+                            role: dto.role ?? collaboratorDoc.role,
                             isLeadPI: isBecomingLead,
                         },
                     }
                     : {}),
                 ...(isBecomingLead
-                    ? { lead: newMember }
+                    ? { lead: String(newMember) }
                     : {}),
             };
 
-            await this.validateMembershipChange(
-                {
-                    projectDoc,
-                    projectId,
-                    change,
-                    label: "proposed",
-                }
-            );
+            await this.validateMembershipChange({
+                projectDoc,
+                projectId,
+                change,
+                label: "proposed",
+            });
         }
 
         // Persist the changes.
@@ -485,7 +485,7 @@ export class CollaboratorService {
                 );
 
                 await this.notificationService.notifyProjectInvitation(
-                    newMember,
+                    String(newMember),
                     projectTitle,
                     newRole,
                     userId
