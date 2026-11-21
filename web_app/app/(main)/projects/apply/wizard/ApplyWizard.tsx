@@ -66,7 +66,7 @@ const ApplyWizard = ({ call, constraint, onSubmit, onComplete }: ApplyWizardProp
 
     const handleCollaboratorsNext = () => {
         setShowErrors(true);
-        if (validateCollaborators(collaborators, constraint).isValid) next();
+        if (validateCollaborators(collaborators, constraint?.collaboratorConstraints).isValid) next();
     };
 
     return (
@@ -92,7 +92,7 @@ const ApplyWizard = ({ call, constraint, onSubmit, onComplete }: ApplyWizardProp
                 {activeIndex === 1 && (
                     <CollaboratorsStep
                         collaborators={collaborators}
-                        constraint={constraint}
+                        constraint={constraint?.collaboratorConstraints}
                         showErrors={showErrors}
                         onChange={setCollaborators}
                     />

@@ -75,6 +75,7 @@ const getStageColumns = (): ColumnProps[] => [
                 ? stage.template.name
                 : stage.template ?? '-',
     },
+    /*
     {
         header: 'Constraint',
         field: 'constraint',
@@ -83,6 +84,7 @@ const getStageColumns = (): ColumnProps[] => [
                 ? stage.constraint.name
                 : stage.constraint ?? '-',
     },
+    */
     {
         header: 'Deadline',
         field: 'deadline',

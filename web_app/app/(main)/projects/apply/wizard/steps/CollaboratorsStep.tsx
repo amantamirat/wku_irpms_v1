@@ -1,6 +1,6 @@
 'use client';
 
-import { Constraint } from '@/app/(main)/constraints/models/constraint.model';
+import { Constraint, ICollaboratorConstraints } from '@/app/(main)/constraints/models/constraint.model';
 import { UserApi } from '@/app/(main)/users/api/user.api';
 import { User } from '@/app/(main)/users/models/user.model';
 import { useAuth } from '@/contexts/auth-context';
@@ -17,10 +17,10 @@ import { Collaborator, roleOptions } from '../../../collaborators/models/collabo
 
 export const validateCollaborators = (
     collaborators: Collaborator[],
-    constraint?: Constraint | null
+    constraint?: ICollaboratorConstraints
 ) => {
-    const min = constraint?.participants?.min ?? 1;
-    const max = constraint?.participants?.max ?? Infinity;
+    const min = constraint?.members?.min ?? 1;
+    const max = constraint?.members?.max ?? Infinity;
     const count = collaborators.length;
 
     const isCountValid = count >= min && count <= max;
@@ -31,7 +31,7 @@ export const validateCollaborators = (
 
 interface CollaboratorsStepProps {
     collaborators: Collaborator[];
-    constraint?: Constraint | null;
+    constraint?: ICollaboratorConstraints;
     showErrors?: boolean;
     onChange: (items: Collaborator[]) => void;
 }
@@ -77,14 +77,14 @@ export const CollaboratorsStep = ({
         return [...map.values()];
     }, [users, collaborators]);
 
-    
+
 
     const validation = useMemo(
         () => validateCollaborators(collaborators, constraint),
         [collaborators, constraint]
     );
 
-    const max = constraint?.participants?.max;
+    const max = constraint?.members?.max;
     const isMaxReached = max !== undefined && max !== null && collaborators.length >= max;
     const maxLabel = max ?? 'No limit';
 
