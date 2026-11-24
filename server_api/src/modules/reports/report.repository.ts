@@ -1129,6 +1129,7 @@ export class ReportRepository {
 
 
 
+
     async getResearcherReport(
         projectMatch: Record<string, any>
     ): Promise<IResearcherReport> {
@@ -1137,6 +1138,7 @@ export class ReportRepository {
 
         const emptyResult: IResearcherReport = {
             totalResearchers: 0,
+
             activeResearchers: 0,
             inactiveResearchers: 0,
 
@@ -1147,31 +1149,38 @@ export class ReportRepository {
             femaleResearchers: 0,
             unknownGender: 0,
 
+            activeMaleResearchers: 0,
+            activeFemaleResearchers: 0,
+            activeUnknownGender: 0,
+
             researchersWithProjects: 0,
             researchersWithoutProjects: 0,
 
             averageProjectsPerResearcher: 0,
+            averageTeamSize: 0,
 
             byCollege: [],
             bySpecialization: []
         };
 
-        // 1. Fetch all department organizations (with their parent college).
+        // 1. Fetch all departments and their parent colleges.
         const departments = await Organization.find({
             type: Unit.department
         })
-            .select("_id parent") 
+            .select("_id parent")
             .lean();
 
         const departmentIds = departments.map(
             department => department._id
         );
 
-        // departmentId -> collegeId (or null when the department has no parent)
+        // Department ID -> College ID
         const departmentCollege = new Map<string, string | null>(
             departments.map((department: any) => [
                 department._id.toString(),
-                department.parent ? department.parent.toString() : null
+                department.parent
+                    ? department.parent.toString()
+                    : null
             ])
         );
 
@@ -1213,7 +1222,7 @@ export class ReportRepository {
                 .lean()
             : [];
 
-        // researcherId -> set of project IDs
+        // Researcher ID -> unique project IDs
         const researcherProjects = new Map<string, Set<string>>();
 
         const leadResearchers = new Set<string>();
@@ -1224,14 +1233,17 @@ export class ReportRepository {
             researchers.map(researcher => researcher._id.toString())
         );
 
+        // 5. Register researcher participation in a project.
         const addParticipation = (
             memberId: mongoose.Types.ObjectId,
             projectId: mongoose.Types.ObjectId
         ) => {
+            if (!memberId || !projectId) return;
+
             const memberKey = memberId.toString();
             const projectKey = projectId.toString();
 
-            // Only count users who belong to the researcher population.
+            // Only count users belonging to the researcher population.
             if (!researcherIdSet.has(memberKey)) return;
 
             if (!researcherProjects.has(memberKey)) {
@@ -1242,6 +1254,8 @@ export class ReportRepository {
 
             const project = projectMap.get(projectKey);
 
+            // A researcher is active if they participate in
+            // at least one approved or granted project.
             if (
                 project &&
                 [
@@ -1253,7 +1267,7 @@ export class ReportRepository {
             }
         };
 
-        // 5. Project lead PIs.
+        // 6. Process project lead PIs.
         for (const project of projects) {
             if (!project.leadPI) continue;
 
@@ -1266,7 +1280,7 @@ export class ReportRepository {
             }
         }
 
-        // 6. Verified collaborators.
+        // 7. Process verified collaborators.
         for (const collaboration of collaborations) {
             const memberId = collaboration.member as mongoose.Types.ObjectId;
 
@@ -1286,12 +1300,16 @@ export class ReportRepository {
             }
         }
 
-        // 7. Calculate researcher statistics.
+        // 8. Calculate researcher statistics.
         const totalResearchers = researchers.length;
 
         let maleResearchers = 0;
         let femaleResearchers = 0;
         let unknownGender = 0;
+
+        let activeMaleResearchers = 0;
+        let activeFemaleResearchers = 0;
+        let activeUnknownGender = 0;
 
         let researchersWithProjects = 0;
         let totalProjectParticipations = 0;
@@ -1311,15 +1329,32 @@ export class ReportRepository {
                 researchersWithProjects++;
             }
 
+            const isActive = activeResearchers.has(researcherId);
+
+            // Gender distribution.
             if (researcher.gender === Gender.Male) {
                 maleResearchers++;
+
+                if (isActive) {
+                    activeMaleResearchers++;
+                }
+
             } else if (researcher.gender === Gender.Female) {
                 femaleResearchers++;
+
+                if (isActive) {
+                    activeFemaleResearchers++;
+                }
+
             } else {
                 unknownGender++;
+
+                if (isActive) {
+                    activeUnknownGender++;
+                }
             }
 
-            // Group by the college (parent) of the researcher's department.
+            // Group researchers by their department's parent college.
             const collegeKey = researcher.workspace
                 ? departmentCollege.get(researcher.workspace.toString()) ?? UNASSIGNED
                 : UNASSIGNED;
@@ -1329,6 +1364,7 @@ export class ReportRepository {
                 (collegeCounts.get(collegeKey) ?? 0) + 1
             );
 
+            // Group researchers by specialization.
             for (const specialization of researcher.specializations ?? []) {
                 const specializationId = specialization.toString();
 
@@ -1339,7 +1375,7 @@ export class ReportRepository {
             }
         }
 
-        // 8. Resolve college names.
+        // 9. Resolve college names.
         const collegeIds = [...collegeCounts.keys()]
             .filter(id => id !== UNASSIGNED)
             .map(id => new mongoose.Types.ObjectId(id));
@@ -1359,12 +1395,31 @@ export class ReportRepository {
             ])
         );
 
-        // 9. Calculate active researchers.
-        const activeCount = researchers.filter(user =>
-            activeResearchers.has(user._id.toString())
-        ).length;
+        // 10. Calculate active researchers.
+        const activeCount = activeResearchers.size;
 
-        // 10. Return report.
+        // 11. Calculate average team size.
+        // Total unique researcher-project participations / total projects.
+        const averageTeamSize = projects.length > 0
+            ? Number(
+                (
+                    totalProjectParticipations /
+                    projects.length
+                ).toFixed(2)
+            )
+            : 0;
+
+        // 12. Calculate average projects per researcher.
+        const averageProjectsPerResearcher = totalResearchers > 0
+            ? Number(
+                (
+                    totalProjectParticipations /
+                    totalResearchers
+                ).toFixed(2)
+            )
+            : 0;
+
+        // 13. Return report.
         return {
             totalResearchers,
 
@@ -1383,20 +1438,18 @@ export class ReportRepository {
             femaleResearchers,
             unknownGender,
 
+            activeMaleResearchers,
+            activeFemaleResearchers,
+            activeUnknownGender,
+
             researchersWithProjects,
 
             researchersWithoutProjects:
                 totalResearchers - researchersWithProjects,
 
-            averageProjectsPerResearcher:
-                totalResearchers > 0
-                    ? Number(
-                        (
-                            totalProjectParticipations /
-                            totalResearchers
-                        ).toFixed(2)
-                    )
-                    : 0,
+            averageProjectsPerResearcher,
+
+            averageTeamSize,
 
             byCollege: [...collegeCounts.entries()]
                 .map(([collegeId, count]) => ({
@@ -1408,8 +1461,7 @@ export class ReportRepository {
                 }))
                 .sort((a, b) => b.count - a.count),
 
-            // NOTE: these are still specialization IDs, not names.
-            // Resolve them with your Specialization model the same way as colleges.
+            // Specialization IDs (resolve names separately if needed).
             bySpecialization: [...specializationCounts.entries()]
                 .map(([specialization, count]) => ({
                     specialization,
@@ -1418,10 +1470,6 @@ export class ReportRepository {
                 .sort((a, b) => b.count - a.count)
         };
     }
-
-
-
-
 
 
     /*

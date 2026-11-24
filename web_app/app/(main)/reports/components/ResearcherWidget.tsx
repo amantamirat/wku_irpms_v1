@@ -232,6 +232,17 @@ export function ResearcherWidget({ data, loading }: Props) {
   const lead = num(report.leadResearchers);
   const collaborating = num(report.collaboratingResearchers);
 
+  const male = num(report.maleResearchers);
+  const female = num(report.femaleResearchers);
+  const unknownGender = num(report.unknownGender);
+
+  const activeMale = num(report.activeMaleResearchers);
+  const activeFemale = num(report.activeFemaleResearchers);
+  const activeUnknownGender = num(report.activeUnknownGender);
+
+  const avgProjectsPerResearcher = num(report.averageProjectsPerResearcher);
+  const avgTeamSize = num(report.averageTeamSize);
+
   const maxCollege = Math.max(...colleges.map((c) => c.count), 1);
   const maxSpec = Math.max(...specializations.map((s) => s.count), 1);
 
@@ -288,8 +299,12 @@ export function ResearcherWidget({ data, loading }: Props) {
               { value: active.toLocaleString(), label: 'On approved or granted projects' },
               { value: withProjects.toLocaleString(), label: 'Engaged in any project' },
               {
-                value: num(report.averageProjectsPerResearcher).toFixed(2),
+                value: avgProjectsPerResearcher.toFixed(2),
                 label: 'Projects per researcher',
+              },
+              {
+                value: avgTeamSize.toFixed(2),
+                label: 'Average team size',
               },
             ].map((s) => (
               <div key={s.label} style={{ maxWidth: '10rem' }}>
@@ -317,15 +332,29 @@ export function ResearcherWidget({ data, loading }: Props) {
       {/* WHO THEY ARE */}
       <div className="grid">
         <div className="col-12 lg:col-4">
-          <Block title="Gender" hint="Share of all researchers">
+          <Block title="Gender" hint="Share of all and active researchers">
             <SegmentBar
               height="1.1rem"
               segments={[
-                { label: 'Male', value: num(report.maleResearchers), color: COLORS.male },
-                { label: 'Female', value: num(report.femaleResearchers), color: COLORS.female },
-                { label: 'Unknown', value: num(report.unknownGender), color: COLORS.unknown },
+                { label: 'Male', value: male, color: COLORS.male },
+                { label: 'Female', value: female, color: COLORS.female },
+                { label: 'Unknown', value: unknownGender, color: COLORS.unknown },
               ]}
             />
+
+            <div className="mt-4 pt-3 border-top-1 surface-border">
+              <div className="text-xs font-medium text-color-secondary mb-2">
+                Active researchers
+              </div>
+              <SegmentBar
+                height="0.65rem"
+                segments={[
+                  { label: 'Male', value: activeMale, color: COLORS.male },
+                  { label: 'Female', value: activeFemale, color: COLORS.female },
+                  { label: 'Unknown', value: activeUnknownGender, color: COLORS.unknown },
+                ]}
+              />
+            </div>
           </Block>
         </div>
 

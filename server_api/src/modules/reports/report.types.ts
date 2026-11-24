@@ -122,10 +122,15 @@ export interface IResearcherReport {
     femaleResearchers: number;
     unknownGender: number;
 
+    activeMaleResearchers: number;
+    activeFemaleResearchers: number;
+    activeUnknownGender: number;
+
     researchersWithProjects: number;
     researchersWithoutProjects: number;
 
     averageProjectsPerResearcher: number;
+    averageTeamSize: number;
 
     byCollege: {
         college: string;

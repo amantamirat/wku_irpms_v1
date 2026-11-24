@@ -73,32 +73,37 @@ export interface IReviewersReport {
 
 
 export interface IResearcherReport {
-    totalResearchers: number;
+  totalResearchers: number;
 
-    activeResearchers: number;
-    inactiveResearchers: number;
+  activeResearchers: number;
+  inactiveResearchers: number;
 
-    leadResearchers: number;
-    collaboratingResearchers: number;
+  leadResearchers: number;
+  collaboratingResearchers: number;
 
-    maleResearchers: number;
-    femaleResearchers: number;
-    unknownGender: number;
+  maleResearchers: number;
+  femaleResearchers: number;
+  unknownGender: number;
 
-    researchersWithProjects: number;
-    researchersWithoutProjects: number;
+  activeMaleResearchers: number;
+  activeFemaleResearchers: number;
+  activeUnknownGender: number;
 
-    averageProjectsPerResearcher: number;
+  researchersWithProjects: number;
+  researchersWithoutProjects: number;
 
-    byCollege: {
-        college: string;
-        count: number;
-    }[];
+  averageProjectsPerResearcher: number;
+  averageTeamSize: number;
 
-    bySpecialization: {
-        specialization: string;
-        count: number;
-    }[];
+  byCollege: {
+    college: string;
+    count: number;
+  }[];
+
+  bySpecialization: {
+    specialization: string;
+    count: number;
+  }[];
 }
 
 
