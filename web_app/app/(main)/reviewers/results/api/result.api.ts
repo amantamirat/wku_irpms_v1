@@ -1,13 +1,13 @@
 import { ApiClient } from "@/api/ApiClient";
-import { FilterResultsOptions, Result } from "../models/result.model";
+import { FilterResultsDto, Result } from "../models/result.model";
 import { EntityApi } from "@/api/EntityApi";
 import { sanitize } from "@/utils/utils";
 
 const end_point = '/project/results';
 
-export const ResultApi: EntityApi<Result, FilterResultsOptions | undefined> = {
+export const ResultApi: EntityApi<Result, FilterResultsDto | undefined> = {
 
-    async getAll(filter?: FilterResultsOptions): Promise<Result[]> {
+    async getAll(filter?: FilterResultsDto): Promise<Result[]> {
         const data = await ApiClient.get(end_point, filter);
         return data as Result[];
     },

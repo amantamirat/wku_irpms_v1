@@ -493,6 +493,39 @@ export class ApplicationService {
         return updatedApplication;
     }
 
+    private async assertApplicationShortlisted(
+        applicationDoc: IApplication
+    ): Promise<void> {
+        const hasUnverified = await this.collaboratorRepo.existsUnverified(
+            String(applicationDoc.project)
+        );
+
+        if (hasUnverified) {
+            throw new AppError(
+                ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED,
+                'All project collaborators must be verified before reviewers can be assigned.'
+            );
+        }
+    }
+
+
+    private async assertApplicationAccepted(
+        applicationDoc: IApplication,
+        stageDoc: IStage,
+    ): Promise<void> {
+        if (applicationDoc.totalScore == null) {
+            throw new AppError(ERROR_CODES.SCORE_NOT_COMPUTED);
+        }
+
+        const minAcceptanceScore = stageDoc.minAcceptanceScore ?? 0;
+
+        if (applicationDoc.totalScore < minAcceptanceScore) {
+            throw new AppError(
+                ERROR_CODES.SCORE_BELOW_THRESHOLD,
+                `Application cannot be accepted. Minimum required score: ${minAcceptanceScore}; actual score: ${applicationDoc.totalScore}.`
+            );
+        }
+    }
 
 
     /**
@@ -527,6 +560,8 @@ export class ApplicationService {
             );
         }
 
+
+
         const from = applicationDoc.status as ApplicationStatus;
         const to = next as ApplicationStatus;
 
@@ -541,19 +576,21 @@ export class ApplicationService {
             APPLICATION_TRANSITIONS
         );
 
-        if (to === ApplicationStatus.shortlisted) {
-            const hasUnverified =
-                await this.collaboratorRepo.existsUnverified(
-                    String(applicationDoc.project)
-                );
+        const stageDoc = await this.stageRepo.findById(
+            String(applicationDoc.stage)
+        );
 
-            if (hasUnverified) {
-                throw new AppError(
-                    ERROR_CODES.COLLABORATORS_NOT_FULLY_VERIFIED,
-                    'All project collaborators must be verified before reviewers can be assigned.'
-                );
-            }
+        if (!stageDoc) {
+            throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
         }
+
+        if (to === ApplicationStatus.shortlisted) {
+            await this.assertApplicationShortlisted(applicationDoc);
+        }
+        else if (to === ApplicationStatus.accepted) {
+            await this.assertApplicationAccepted(applicationDoc, stageDoc);
+        }
+
         else if (to === ApplicationStatus.submitted) {
             if (
                 await this.reviewerRepo.exists({
@@ -567,89 +604,49 @@ export class ApplicationService {
         }
 
 
-
-        const stageDoc = await this.stageRepo.findById(String(applicationDoc.stage));
-
-        if (!stageDoc)
-            throw new AppError(ERROR_CODES.STAGE_NOT_FOUND);
-
-        if (
-            to === ApplicationStatus.accepted ||
-            to === ApplicationStatus.rejected
-        ) {
-
-            if (!applicationDoc.totalScore) {
-                throw new AppError(
-                    ERROR_CODES.SCORE_NOT_COMPUTED
-                );
-            }
-
-            if (to === ApplicationStatus.accepted) {
-                const minAcceptanceScore = stageDoc.minAcceptanceScore ?? 0;
-                if (applicationDoc.totalScore < minAcceptanceScore) {
-                    throw new AppError(
-                        ERROR_CODES.SCORE_BELOW_THRESHOLD,
-                        `Application cannot be accepted. Minimum required score: ${minAcceptanceScore}; actual score: ${applicationDoc.totalScore}.`);
-                }
-
-            }
-        }
-
         const updated = await this.applicationRepo.updateStatus(id, to, userId, reason);
-
-
 
         const leadUser = String(projectDoc.leadPI);
         const title = projectDoc.title;
         const stageName = stageDoc.name;
 
-        if (from === ApplicationStatus.submitted && to === ApplicationStatus.shortlisted) {
+        if (
+            to === ApplicationStatus.shortlisted
+        ) {
             await this.notificationService.notifyApplicationShortlisted(
                 leadUser,
                 title,
                 stageName
             );
-        }
-
-        else if (to === ApplicationStatus.rejected) {
+        } else if (to === ApplicationStatus.rejected) {
             await this.notificationService.notifyApplicationRejected(
+                leadUser,
+                title,
+                stageName,
+                reason
+            );
+        } else if (to === ApplicationStatus.accepted) {
+            await this.notificationService.notifyApplicationAccepted(
                 leadUser,
                 title,
                 stageName
             );
-        } else if (to === ApplicationStatus.accepted) {
-
-            let nextStageInfo:
-                | { name: string; deadline?: Date }
-                | undefined;
-
-            const nextStage =
-                await this.stageRepo.getNextStage(String(stageDoc.call), stageDoc.order);
-
-            if (nextStage)
-                nextStageInfo = {
-                    name: nextStage.name,
-                    deadline: nextStage.deadline
-                        ? new Date(nextStage.deadline)
-                        : undefined
-                };
-
-            await this.notificationService.notifyApplicationAccepted(
+        } else if (to === ApplicationStatus.notShortlisted) {
+            await this.notificationService.notifyApplicationNotShortlisted(
                 leadUser,
                 title,
                 stageName,
-                nextStageInfo
+                reason
             );
-        }
-        else if (to === ApplicationStatus.submitted) {
+        } else {
             await this.notificationService.notifyRollback(
                 leadUser,
                 title,
-                ApplicationStatus.submitted,
+                to,
                 stageName,
+                reason
             );
         }
-
 
         return updated;
     }

@@ -288,6 +288,7 @@ const ApplicationManager = ({ project, stage, useLookup = false, disableCrud = f
                     <ApplicationDetail
                         application={application}
                         updateApplication={replace}
+                        enableDetail={enableDetail}
                     />
                 )
             }
@@ -330,7 +331,7 @@ const ApplicationManager = ({ project, stage, useLookup = false, disableCrud = f
                 statusField="status"
                 transitions={enableDetail ? APPLICATION_TRANSITIONS : undefined}
                 extraRowActions={enableDetail ? extraRowActions : undefined}
-                tableProps={enableDetail ? tableProps : undefined}
+                tableProps={tableProps}
                 onError={(error, operation) =>
                     toast.error(error, operation)
                 }

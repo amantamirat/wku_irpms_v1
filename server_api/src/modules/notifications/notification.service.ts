@@ -226,10 +226,6 @@ export class NotificationService {
 
     ///////////////////////////////END OF COLLABORATION NOTIFICATION?????????????????????????????????????
 
-
-
-
-
     // =========================================================
     // APPLICATION NOTIFICATIONS
     // =========================================================
@@ -244,6 +240,7 @@ export class NotificationService {
             recipient: recipientId,
             sender: senderId,
             title: "Application Submitted",
+            messageType: MessageType.APPLICATION_SUBMITTED,
             message:
                 `Your application "${projectTitle}" for the ` +
                 `"${stageName}" stage has been submitted successfully.`,
@@ -262,6 +259,7 @@ export class NotificationService {
             recipient: recipientId,
             sender: senderId,
             title: "Application Shortlisted",
+            messageType: MessageType.APPLICATION_SHORTLISTED,
             message:
                 `Congratulations! Your application "${projectTitle}" ` +
                 `for the "${stageName}" stage has been shortlisted ` +
@@ -272,24 +270,29 @@ export class NotificationService {
     }
 
     /**
-     * Notify an applicant that their application was not shortlisted.
-     */
+  * Notify an applicant that their application was not shortlisted.
+  */
     async notifyApplicationNotShortlisted(
         recipientId: string,
         projectTitle: string,
         stageName: string,
+        reason?: string,
         senderId?: string
     ) {
+        const message =
+            `Your application "${projectTitle}" for the ` +
+            `"${stageName}" stage was not shortlisted for ` +
+            `further evaluation.` +
+            (reason ? ` Reason: ${reason}` : "");
+
         return this.notify({
             recipient: recipientId,
             sender: senderId,
             title: "Application Not Shortlisted",
-            message:
-                `Your application "${projectTitle}" for the ` +
-                `"${stageName}" stage was not shortlisted for ` +
-                `further evaluation.`,
+            messageType: MessageType.APPLICATION_NOT_SHORTLISTED,
+            message,
             type: NotificationType.ERROR,
-            link: "/dashboard/my-projects"
+            link: "/dashboard/my-collaborations"
         });
     }
 
@@ -297,33 +300,20 @@ export class NotificationService {
         recipientId: string,
         projectTitle: string,
         stageName: string,
-        nextStageInfo?: {
-            name: string;
-            deadline?: Date;
-        },
         senderId?: string
     ) {
-        let message =
+        const message =
             `Congratulations! Your application "${projectTitle}" ` +
             `for the "${stageName}" stage has been accepted.`;
-
-        if (nextStageInfo) {
-            const deadlineStr = nextStageInfo.deadline
-                ? ` by ${nextStageInfo.deadline.toLocaleDateString()}`
-                : "";
-
-            message +=
-                ` Please prepare for the next stage: ` +
-                `"${nextStageInfo.name}"${deadlineStr}.`;
-        }
 
         return this.notify({
             recipient: recipientId,
             sender: senderId,
             title: "Application Accepted",
+            messageType: MessageType.APPLICATION_ACCEPTED,
             message,
             type: NotificationType.SUCCESS,
-            link: "/dashboard/my-projects"
+            link: "/dashboard/my-collaborations"
         });
     }
 
@@ -331,16 +321,21 @@ export class NotificationService {
         recipientId: string,
         projectTitle: string,
         stageName: string,
+        reason?: string,
         senderId?: string
     ) {
+        const message =
+            `We regret to inform you that your application ` +
+            `"${projectTitle}" for the "${stageName}" stage ` +
+            `was not selected.` +
+            (reason ? ` Reason: ${reason}` : "");
+
         return this.notify({
             recipient: recipientId,
             sender: senderId,
             title: "Application Rejected",
-            message:
-                `We regret to inform you that your application ` +
-                `"${projectTitle}" for the "${stageName}" stage ` +
-                `was not selected.`,
+            message,
+            messageType: MessageType.APPLICATION_REJECTED,
             type: NotificationType.ERROR,
             link: "/dashboard/my-projects"
         });
@@ -351,10 +346,15 @@ export class NotificationService {
         title: string,
         status: string,
         stageName?: string,
+        reason?: string,
         senderId?: string
     ) {
         const stageMessage = stageName
             ? ` for the "${stageName}" stage`
+            : "";
+
+        const reasonMessage = reason
+            ? ` Reason: ${reason}`
             : "";
 
         return this.notify({
@@ -362,8 +362,9 @@ export class NotificationService {
             sender: senderId,
             title: "Returned for Review",
             message:
-                `Your "${title}"${stageMessage} has been returned ` +
-                `to ${status} status for further review.`,
+                `Your project application "${title}"${stageMessage} has been returned ` +
+                `to ${status} status for further review.` +
+                reasonMessage,
             type: NotificationType.INFO,
             link: "/dashboard/my-projects"
         });

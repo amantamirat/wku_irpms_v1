@@ -7,52 +7,63 @@ import { Project } from "../../projects/models/project.model";
 import ReviewerManager from "../../reviewers/components/ReviewerManager";
 import { ReviewerTargetType } from "../../reviewers/models/reviewer.model";
 import { Application } from "../models/application.model";
+import ResultViewer from "../../reviewers/results/components/ResultViewer";
 
 interface ApplicationDetailProps {
     application: Application;
     updateApplication?: (application: Application) => void;
+    enableDetail?: boolean;
 }
 
-const ApplicationDetail = ({ application, updateApplication }: ApplicationDetailProps) => {
+const ApplicationDetail = ({ application, updateApplication, enableDetail = false }: ApplicationDetailProps) => {
 
     const { hasPermission } = useAuth();
 
-    // Safely extract project ID whether application.project is an object or string ID
     const projectData = application.project;
+
     /**
-     * Define tabs in a scalable configuration array
+     * Define tabs in a scalable configuration array.
+     * `detailOnly` tabs are shown only when enableDetail is true.
      */
     const tabs = useMemo(() => [
         {
             header: "Project",
-            permission: "project:lookup",
+            permission: "project:read",
+            detailOnly: true,
             content: <ProjectDetail project={projectData as Project} options={{ disableCrud: true }} />
         },
         {
             header: "Reviewers",
-            permission: "reviewer:lookup",
+            permission: "reviewer:read",
+            detailOnly: true,
             content: <ReviewerManager targetType={ReviewerTargetType.APPLICATION} application={application}
                 updateApplication={updateApplication} />
         },
         {
+            header: "Results",
+            permission: "result:read",
+            content: <ResultViewer application={application._id} />
+        },
+        {
             header: "Status History",
             icon: "pi pi-history",
-            permission: "application:read",
+            permission: "application:lookup",
             content: <StatusHistoryWidget history={application.statusHistory} />
         }
-    ], [application, projectData]);
+    ], [application, projectData, updateApplication]);
 
     /**
-     * Filter tabs based on permissions
+     * Filter tabs based on detail mode and permissions
      */
     const allowedTabs = tabs.filter(tab =>
+        (enableDetail || !tab.detailOnly) &&
         hasPermission([tab.permission])
     );
 
     return (
         <TabView>
-            {allowedTabs.map((tab, index) => (
-                <TabPanel key={index} header={tab.header}>
+            {allowedTabs.map((tab) => (
+                <TabPanel key={tab.header} header={tab.header}>
                     {tab.content}
                 </TabPanel>
             ))}

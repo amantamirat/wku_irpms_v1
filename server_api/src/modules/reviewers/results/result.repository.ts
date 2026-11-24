@@ -1,8 +1,10 @@
 //result.repository.ts
-import mongoose from "mongoose";
+import mongoose, { FilterQuery } from "mongoose";
 import { Result, IResult } from "./result.model";
 import { CreateResultDTO, FilterResultsDTO, UpdateResultDTO } from "./result.dto";
 import { FilterOptions } from "../../../common/dtos/filter.dto";
+import { toObjectId } from "../../../common/utils/mongoose.utils";
+import { Reviewer } from "../reviewer.model";
 
 export interface IResultRepository {
     findById(id: string): Promise<IResult | null>;
@@ -17,17 +19,62 @@ export interface IResultRepository {
 
 // MongoDB implementation
 export class ResultRepository implements IResultRepository {
+    /**
+     * Builds the Mongo query for the Result collection.
+     * Returns null when the reviewer-level filters match no reviewer,
+     * meaning there can be no results (callers short-circuit).
+     */
+    private async buildFilter(
+        filters: FilterResultsDTO
+    ): Promise<FilterQuery<IResult> | null> {
+        const query: FilterQuery<IResult> = {};
+
+        if (filters.criterion) {
+            query.criterion = toObjectId(filters.criterion);
+        }
+
+        // Filters that live on the Reviewer collection
+        const hasReviewerLevelFilter =
+            filters.application || filters.verification || filters.reviewerStatus;
+
+        // Only a reviewer id: no lookup needed
+        if (filters.reviewer && !hasReviewerLevelFilter) {
+            query.reviewer = toObjectId(filters.reviewer);
+            return query;
+        }
+
+        if (hasReviewerLevelFilter) {
+            const reviewerFilter: Record<string, any> = {};
+
+            if (filters.reviewer) {
+                reviewerFilter._id = toObjectId(filters.reviewer);
+            }
+            if (filters.application) {
+                reviewerFilter.application = toObjectId(filters.application);
+            }
+            if (filters.verification) {
+                reviewerFilter.verification = toObjectId(filters.verification);
+            }
+            if (filters.reviewerStatus) {
+                reviewerFilter.status = filters.reviewerStatus;
+            }
+
+            const reviewerIds = await Reviewer.find(reviewerFilter).distinct("_id");
+            if (reviewerIds.length === 0) return null;
+
+            query.reviewer = { $in: reviewerIds };
+        }
+
+        return query;
+    }
 
     async findById(id: string) {
         return Result.findById(new mongoose.Types.ObjectId(id)).lean<IResult>().exec();
     }
 
     async find(filters: FilterResultsDTO, options?: FilterOptions) {
-        const query: any = {};
-
-        if (filters.reviewer) {
-            query.reviewer = new mongoose.Types.ObjectId(filters.reviewer);
-        }
+        const query = await this.buildFilter(filters);
+        if (!query) return [];
 
         let dbQuery = Result.find(query);
 
@@ -88,15 +135,8 @@ export class ResultRepository implements IResultRepository {
     }
 
     async exists(filters: FilterResultsDTO): Promise<boolean> {
-        const query: any = {};
-
-        if (filters.reviewer) {
-            query.reviewer = new mongoose.Types.ObjectId(filters.reviewer);
-        }
-
-        if (filters.criterion) {
-            query.criterion = new mongoose.Types.ObjectId(filters.criterion);
-        }
+        const query = await this.buildFilter(filters);
+        if (!query) return false;
 
         /*
         if (filters.selectedOption) {

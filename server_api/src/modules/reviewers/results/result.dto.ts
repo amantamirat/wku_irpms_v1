@@ -1,10 +1,14 @@
 //result.dto.ts
 
+import { ReviewerStatus } from "../reviewer.state-machine";
+
 export interface FilterResultsDTO {
     reviewer?: string;
     criterion?: string;
+    application?: string;
+    verification?: string;
+    reviewerStatus?: ReviewerStatus;
 }
-
 
 export interface CreateResultDTO {
     reviewer: string;

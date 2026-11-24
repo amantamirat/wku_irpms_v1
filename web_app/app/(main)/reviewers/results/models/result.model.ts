@@ -1,5 +1,5 @@
 import { Criterion, CriterionOption, FormType } from "@/app/(main)/evaluations/models/criterion.model";
-import { Reviewer } from "../../models/reviewer.model";
+import { Reviewer, ReviewerStatus } from "../../models/reviewer.model";
 
 export type Result = {
     _id?: string;
@@ -14,8 +14,12 @@ export type Result = {
     comment?: string;
 };
 
-export interface FilterResultsOptions {
-    reviewer: Reviewer | string;
+export interface FilterResultsDto {
+    reviewer?: Reviewer | string;
+    criterion?: string;
+    application?: string;
+    verification?: string;
+    reviewerStatus?: ReviewerStatus;
 }
 
 

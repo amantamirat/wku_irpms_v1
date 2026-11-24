@@ -11,7 +11,6 @@ import { IGrantRepository } from "../../../modules/grants/grant.repository";
 import { IOrganizationRepository } from "../../../modules/organization/organization.repository";
 import { CollaboratorDto } from "../../../modules/projects/collaborators/collaborator.dto";
 import { PhaseDto } from "../../../modules/projects/phase/phase.dto";
-import { CreateOLDProjectDTO } from "../../../modules/projects/project.dto";
 import { ProjectService } from '../../../modules/projects/project.service';
 import { ThematicLevel } from '../../../modules/thematics/thematic.enum';
 import { IThematicRepository } from '../../../modules/thematics/thematic.repository';
@@ -198,7 +197,7 @@ export class LegacySeeder {
         item: LegacyProjectDTO,
         grantId: string,
         thematicId: string
-    ): Promise<CreateOLDProjectDTO> {
+    ): Promise<any> {
 
         const year = Number(
             item.Academic_Year?.substring(0, 4)

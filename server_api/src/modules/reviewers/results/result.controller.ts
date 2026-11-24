@@ -5,6 +5,7 @@ import { CreateResultDTO, FilterResultsDTO, UpdateResultDTO } from "./result.dto
 import { AuthenticatedRequest } from "../../auth/auth.middleware";
 import { ERROR_CODES } from "../../../common/errors/error.codes";
 import { DeleteDto } from "../../../common/dtos/delete.dto";
+import { ReviewerStatus } from "../reviewer.state-machine";
 
 export class ResultController {
 
@@ -41,10 +42,13 @@ export class ResultController {
     // -----------------------
     get = async (req: Request, res: Response) => {
         try {
-            const { reviewer } = req.query;
+            const { reviewer, application, verification, reviewerStatus } = req.query;
 
             const filter: FilterResultsDTO = {
-                reviewer: String(reviewer)
+                reviewer: reviewer ? String(reviewer) : undefined,
+                application: application ? String(application) : undefined,
+                verification: verification ? String(verification) : undefined,
+                reviewerStatus: reviewerStatus ? (String(reviewerStatus) as ReviewerStatus) : undefined,
             };
 
             const results = await this.service.getResults(filter);
