@@ -10,6 +10,7 @@ export interface IReportFilter {
 
     grant?: mongoose.Types.ObjectId;
     call?: mongoose.Types.ObjectId;
+    stage?: mongoose.Types.ObjectId;
 
     workspace?: mongoose.Types.ObjectId;
     organization?: mongoose.Types.ObjectId;
@@ -107,6 +108,60 @@ export interface IPhaseReport {
     completionRate: number;
 }
 
+
+export interface IResearcherReport {
+    totalResearchers: number;
+
+    activeResearchers: number;
+    inactiveResearchers: number;
+
+    leadResearchers: number;
+    collaboratingResearchers: number;
+
+    maleResearchers: number;
+    femaleResearchers: number;
+    unknownGender: number;
+
+    researchersWithProjects: number;
+    researchersWithoutProjects: number;
+
+    averageProjectsPerResearcher: number;
+
+    byCollege: {
+        college: string;
+        count: number;
+    }[];
+
+    bySpecialization: {
+        specialization: string;
+        count: number;
+    }[];
+}
+
+/*
+export interface ICollaboratorReport {
+    totalCollaborations: number;
+    verifiedCollaborations: number;
+    pendingCollaborations: number;
+    declinedCollaborations: number;
+    totalCollaborators: number;
+    projectsWithCollaborators: number;
+    averageTeamSize: number;
+    largestTeams: {
+        project: string;
+        collaboratorCount: number;
+    }[];
+    byGender: {
+        male: number;
+        female: number;
+        unknown: number;
+    };
+    byWorkspace: {
+        workspace: string;
+        count: number;
+    }[];
+}
+*/
 
 
 /*

@@ -34,6 +34,7 @@ export class ReportController {
             dateTo,
             grant,
             call,
+            stage,
             workspace,
             organization,
             calendar,
@@ -58,6 +59,12 @@ export class ReportController {
             ...(call && {
                 call: toObjectId(
                     call as string
+                )
+            }),
+
+            ...(stage && {
+                stage: toObjectId(
+                    stage as string
                 )
             }),
 
@@ -257,6 +264,25 @@ export class ReportController {
             res,
             200,
             "Phase report fetched successfully",
+            report
+        );
+    };
+
+
+     getResercherReport = async (
+        req: Request,
+        res: Response
+    ) => {
+
+        const report =
+            await this.reportService.getResercherReport(
+                this.buildFilter(req)
+            );
+
+        successResponse(
+            res,
+            200,
+            "Researcher report fetched successfully",
             report
         );
     };

@@ -5,18 +5,44 @@ import { Phase } from "../../models/phase.model";
 import { TransitionMap } from "@/hooks/useStateTransitionActions";
 
 export enum PhaseDocumentType {
-    progressReport = "progressReport",
-    technicalReport = "technicalReport",
-    financialReport = "financialReport",
-    deliverable = "deliverable",
-    meetingMinutes = "meetingMinutes",
-    attendance = "attendance",
-    photo = "photo",    
-    dataset = "dataset",   
-    activityEvidence = "activityEvidence",
-    completionReport = "completionReport",    
-    other = "other"
+    progressReport = "progressReport",       // phase level
+    technicalReport = "technicalReport",     // activity level
+    financialReport = "financialReport",     // activity
+    activityEvidence = "activityEvidence",   // activity
+    deliverable = "deliverable",             // activity
+    meetingMinutes = "meetingMinutes",       // activity
+    attendance = "attendance",               // activity
+    photo = "photo",                         // activity
+    dataset = "dataset",                     // activity
+    // externalReviewResult = "externalReviewResult", // project level
+    demandRequest = "demandRequest",         // project level (support letter / proof of need)
+    completionReport = "completionReport",   // project level
+    other = "other"                          // project level
 }
+
+export enum DocumentScope {
+    project = "project",
+    phase = "phase",
+    activity = "activity"
+}
+
+// Record<> forces a compile error if a new type is added without a scope
+export const DOCUMENT_TYPE_SCOPE: Record<PhaseDocumentType, DocumentScope> = {
+    [PhaseDocumentType.progressReport]: DocumentScope.phase,
+
+    [PhaseDocumentType.technicalReport]: DocumentScope.activity,
+    [PhaseDocumentType.financialReport]: DocumentScope.activity,
+    [PhaseDocumentType.activityEvidence]: DocumentScope.activity,
+    [PhaseDocumentType.deliverable]: DocumentScope.activity,
+    [PhaseDocumentType.meetingMinutes]: DocumentScope.activity,
+    [PhaseDocumentType.attendance]: DocumentScope.activity,
+    [PhaseDocumentType.photo]: DocumentScope.activity,
+    [PhaseDocumentType.dataset]: DocumentScope.activity,
+
+    [PhaseDocumentType.demandRequest]: DocumentScope.project,
+    [PhaseDocumentType.completionReport]: DocumentScope.project,
+    [PhaseDocumentType.other]: DocumentScope.project,
+};
 
 // Helper labels and descriptions for UI components
 export const PhaseDocumentTypeLabels: Record<
@@ -39,6 +65,12 @@ export const PhaseDocumentTypeLabels: Record<
         label: "Financial Report",
         description:
             "Financial records documenting expenditures, budget utilization, financial statements, receipts, and supporting evidence of project expenses",
+    },
+
+    [PhaseDocumentType.activityEvidence]: {
+        label: "Activity Evidence",
+        description:
+            "Supporting evidence demonstrating that an activity was performed, such as signed records, certificates, inspection reports, test results, or other verification documents",
     },
 
     [PhaseDocumentType.deliverable]: {
@@ -71,16 +103,16 @@ export const PhaseDocumentTypeLabels: Record<
             "Structured data collected, generated, processed, or analyzed during research, surveys, experiments, monitoring, or other project activities",
     },
 
-    [PhaseDocumentType.activityEvidence]: {
-        label: "Activity Evidence",
+    [PhaseDocumentType.demandRequest]: {
+        label: "Support Letter / Demand Request",
         description:
-            "Supporting evidence demonstrating that an activity was performed, such as signed records, certificates, inspection reports, test results, or other verification documents",
+            "A letter or formal request from a community member, stakeholder, or institution confirming that the problem addressed by the project is real, urgent, and needs to be solved",
     },
 
     [PhaseDocumentType.completionReport]: {
         label: "Completion Report",
         description:
-            "A final report summarizing completed work, achieved objectives, results, deliverables, challenges, and overall completion of a project phase or activity",
+            "A final report summarizing completed work, achieved objectives, results, deliverables, challenges, and overall completion of the project",
     },
 
     [PhaseDocumentType.other]: {

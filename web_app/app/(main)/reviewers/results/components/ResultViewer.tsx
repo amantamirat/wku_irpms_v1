@@ -21,24 +21,62 @@ interface ResultRow {
     comment?: string;
 }
 
-interface ReviewerGroup {
-    reviewerId: string;
-    rows: ResultRow[];
-    average: number | null;
+interface Totals {
+    totalWeight: number; // Σ weight = maximum possible score
+    totalScore: number; // Σ score
+    result: number | null; // totalScore / totalWeight (0..1)
 }
 
-// Weighted average over scored criteria (falls back to weight 1)
-const computeAverage = (rows: ResultRow[]): number | null => {
-    const scored = rows.filter(r => typeof r.score === "number");
-    if (scored.length === 0) return null;
+interface ReviewerGroup extends Totals {
+    reviewerId: string;
+    rows: ResultRow[];
+}
 
-    const totalWeight = scored.reduce((sum, r) => sum + (r.criterion?.weight || 1), 0);
-    const weighted = scored.reduce(
-        (sum, r) => sum + (r.score as number) * (r.criterion?.weight || 1),
-        0
-    );
-    return totalWeight ? weighted / totalWeight : null;
+const getMax = (r: ResultRow) => r.criterion?.weight ?? 0;
+const isScored = (r: ResultRow) => typeof r.score === "number";
+
+const computeTotals = (rows: ResultRow[]): Totals => {
+    // Total weight counts every criterion, so an unscored one counts as 0 out of its max.
+    const totalWeight = rows.reduce((s, r) => s + getMax(r), 0);
+    const totalScore = rows.reduce((s, r) => s + (isScored(r) ? (r.score as number) : 0), 0);
+    return {
+        totalWeight,
+        totalScore,
+        result: totalWeight > 0 ? totalScore / totalWeight : null,
+    };
 };
+
+const formatPercent = (v: number | null) => (v === null ? "N/A" : `${(v * 100).toFixed(1)}%`);
+
+const severityFor = (v: number | null): "success" | "info" | "warning" | "danger" => {
+    if (v === null) return "warning";
+    if (v >= 0.75) return "success";
+    if (v >= 0.5) return "info";
+    if (v >= 0.35) return "warning";
+    return "danger";
+};
+
+const NeutralTag = ({ value }: { value: React.ReactNode }) => (
+    <Tag
+        value={value}
+        style={{ background: "var(--surface-200)", color: "var(--text-color-secondary)" }}
+    />
+);
+
+const Stat = ({ label, value, icon }: { label: string; value: React.ReactNode; icon: string }) => (
+    <div className="surface-card border-1 surface-border border-round-xl p-3 flex-1 flex align-items-center gap-3 shadow-1">
+        <div
+            className="flex align-items-center justify-content-center border-round-lg bg-primary-100 text-primary"
+            style={{ width: "2.75rem", height: "2.75rem" }}
+        >
+            <i className={`pi ${icon} text-xl`} />
+        </div>
+        <div className="flex flex-column">
+            <span className="text-500 text-sm">{label}</span>
+            <span className="text-2xl font-bold">{value}</span>
+        </div>
+    </div>
+);
 
 export default function ResultViewer({ application, verification }: Props) {
     const [results, setResults] = useState<ResultRow[]>([]);
@@ -68,11 +106,9 @@ export default function ResultViewer({ application, verification }: Props) {
         };
     }, [application, verification]);
 
-    // Group by reviewer
     const groups = useMemo<ReviewerGroup[]>(() => {
         const map = new Map<string, ResultRow[]>();
-
-        results.forEach(r => {
+        results.forEach((r) => {
             const key = String(r.reviewer);
             if (!map.has(key)) map.set(key, []);
             map.get(key)!.push(r);
@@ -80,31 +116,31 @@ export default function ResultViewer({ application, verification }: Props) {
 
         return Array.from(map.entries()).map(([reviewerId, rows]) => ({
             reviewerId,
-            rows: [...rows].sort(
-                (a, b) => (a.criterion?.order ?? 0) - (b.criterion?.order ?? 0)
-            ),
-            average: computeAverage(rows),
+            rows: [...rows].sort((a, b) => (a.criterion?.order ?? 0) - (b.criterion?.order ?? 0)),
+            ...computeTotals(rows),
         }));
     }, [results]);
 
-    const overallAverage = useMemo(() => {
-        const avgs = groups.map(g => g.average).filter((a): a is number => a !== null);
-        return avgs.length ? avgs.reduce((s, a) => s + a, 0) / avgs.length : null;
+    // Overall = average of each reviewer's percentage
+    const overall = useMemo(() => {
+        const vals = groups.map((g) => g.result).filter((a): a is number => a !== null);
+        return vals.length ? vals.reduce((s, a) => s + a, 0) / vals.length : null;
     }, [groups]);
 
-    if (loading) return <ProgressSpinner />;
-    if (error) return <Message severity="error" text={error} />;
-    if (groups.length === 0) return <Message severity="warn" text="No results found!" />;
+    if (loading)
+        return (
+            <div className="flex justify-content-center p-5">
+                <ProgressSpinner style={{ width: "3rem", height: "3rem" }} />
+            </div>
+        );
+    if (error) return <Message severity="error" text={error} className="w-full" />;
+    if (groups.length === 0) return <Message severity="warn" text="No results found!" className="w-full" />;
 
     return (
-        <div className="flex flex-column gap-3">
-            <div className="flex align-items-center gap-2">
-                <span className="font-semibold">Overall average:</span>
-                <Tag
-                    value={overallAverage !== null ? overallAverage.toFixed(2) : "N/A"}
-                    severity="info"
-                />
-                <span className="text-500">({groups.length} reviewers)</span>
+        <div className="flex flex-column gap-4">
+            <div className="flex flex-column md:flex-row gap-3">
+                <Stat label="Overall result" icon="pi-chart-line" value={formatPercent(overall)} />
+                <Stat label="Reviewers" icon="pi-users" value={groups.length} />
             </div>
 
             <Accordion multiple activeIndex={[0]}>
@@ -112,37 +148,76 @@ export default function ResultViewer({ application, verification }: Props) {
                     <AccordionTab
                         key={group.reviewerId}
                         header={
-                            <div className="flex align-items-center justify-content-between w-full">
-                                <span>Reviewer #{i + 1}</span>
-                                <Tag
-                                    value={
-                                        group.average !== null
-                                            ? `Avg: ${group.average.toFixed(2)}`
-                                            : "No score"
-                                    }
-                                    severity={group.average !== null ? "success" : "warning"}
-                                />
+                            <div className="flex align-items-center justify-content-between w-full gap-3 flex-wrap">
+                                <span className="font-semibold">
+                                    <i className="pi pi-user mr-2" />
+                                    Reviewer #{i + 1}
+                                </span>
+                                <div className="flex align-items-center gap-2 flex-wrap">
+                                    <NeutralTag value={`Total weight: ${group.totalWeight}`} />
+                                    <NeutralTag value={`Total score: ${group.totalScore}`} />
+                                    <Tag
+                                        severity={severityFor(group.result)}
+                                        value={`${group.totalScore} / ${group.totalWeight} = ${formatPercent(group.result)}`}
+                                    />
+                                </div>
                             </div>
                         }
                     >
-                        <DataTable value={group.rows} dataKey="_id" size="small" stripedRows>
+                        <DataTable
+                            value={group.rows}
+                            dataKey="_id"
+                            size="small"
+                            stripedRows
+                            showGridlines
+                            responsiveLayout="scroll"
+                        >
                             <Column
                                 header="Criterion"
                                 body={(r: ResultRow) => r.criterion?.title ?? "-"}
+                                footer={<span className="font-bold">Total</span>}
                             />
                             <Column
-                                header="Weight"
-                                style={{ width: "6rem" }}
+                                header="Weight (max)"
+                                align="center"
+                                style={{ width: "8rem" }}
                                 body={(r: ResultRow) => r.criterion?.weight ?? "-"}
+                                footer={<span className="font-bold">{group.totalWeight}</span>}
                             />
                             <Column
                                 header="Score"
-                                style={{ width: "6rem" }}
-                                body={(r: ResultRow) => r.score ?? "-"}
+                                align="center"
+                                style={{ width: "8rem" }}
+                                body={(r: ResultRow) =>
+                                    isScored(r) ? (
+                                        <Tag
+                                            value={r.score as number}
+                                            severity={severityFor(getMax(r) > 0 ? (r.score as number) / getMax(r) : null)}
+                                            rounded
+                                        />
+                                    ) : (
+                                        "-"
+                                    )
+                                }
+                                footer={<span className="font-bold">{group.totalScore}</span>}
                             />
                             <Column
                                 header="Comment"
-                                body={(r: ResultRow) => r.comment || "-"}
+                                body={(r: ResultRow) =>
+                                    r.comment ? (
+                                        <span className="line-height-3">{r.comment}</span>
+                                    ) : (
+                                        <span className="text-400">-</span>
+                                    )
+                                }
+                                footer={
+                                    <div className="flex justify-content-end">
+                                        <Tag
+                                            severity={severityFor(group.result)}
+                                            value={`Total score / Total weight = ${formatPercent(group.result)}`}
+                                        />
+                                    </div>
+                                }
                             />
                         </DataTable>
                     </AccordionTab>

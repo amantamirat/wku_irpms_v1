@@ -355,6 +355,14 @@ export const PERMISSIONS = {
   REPORT: {
     OVERVIEW: "report:overview",
     DASHBOARD: "report:dashboard",
+    PORTFOLIO: "report:portfolio",
+    APPLICATIONS: "report:applications",
+    EVALUATIONS: "report:evaluations",
+    VERIFICATIONS: "report:verifications",
+    DEPARTMENTS: "report:departments",
+    DIRECTORATES: "report:directorates",
+    FINANCIAL: "report:financial",
+    RESEARCHER: "report:researcher",
   }
 } as const;
 

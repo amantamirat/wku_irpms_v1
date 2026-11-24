@@ -1,5 +1,5 @@
 import { ApiClient } from "@/api/ApiClient";
-import { IReportFilter, IDashboardReport, IPortfolioReport, IApplicationReport, IReviewersReport, IVerificationReport, IFinancialReport, IDirectorateFinancialReport, IDepartmentReport } from "../models/report.types";
+import { IReportFilter, IDashboardReport, IPortfolioReport, IApplicationReport, IReviewersReport, IVerificationReport, IFinancialReport, IDirectorateFinancialReport, IDepartmentReport, IResearcherReport } from "../models/report.types";
 
 
 const ENDPOINT = "/reports";
@@ -51,6 +51,15 @@ export const ReportApi = {
   async getDepartmentReport(filter?: IReportFilter): Promise<IDepartmentReport[]> {
     const data = await ApiClient.get(`${ENDPOINT}/departments`, filter);
     return data as IDepartmentReport[];
+  },
+
+  /**
+   * Get researchers report
+   */
+  async getResercherReport(filter?: IReportFilter): Promise<IResearcherReport> {
+    const data = await ApiClient.get(`${ENDPOINT}/researcher`, filter);
+    //console.log("RESEARCHER REPORT", data);
+    return data as IResearcherReport;
   },
 
   ////////////

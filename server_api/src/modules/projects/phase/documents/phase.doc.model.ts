@@ -4,18 +4,44 @@ import { IStatusHistory } from "../../../../common/types/status-history";
 import { createStatusHistorySchema } from "../../../../common/schemas/status-history.schema";
 
 export enum PhaseDocumentType {
-    progressReport = "progressReport",
-    technicalReport = "technicalReport",
-    financialReport = "financialReport",
-    activityEvidence = "activityEvidence",
-    deliverable = "deliverable",
-    meetingMinutes = "meetingMinutes",
-    attendance = "attendance",
-    photo = "photo",
-    dataset = "dataset",
-    completionReport = "completionReport",
-    other = "other"
+    progressReport = "progressReport",       // phase level
+    technicalReport = "technicalReport",     // activity level
+    financialReport = "financialReport",     // activity
+    activityEvidence = "activityEvidence",   // activity
+    deliverable = "deliverable",             // activity
+    meetingMinutes = "meetingMinutes",       // activity
+    attendance = "attendance",               // activity
+    photo = "photo",                         // activity
+    dataset = "dataset",                     // activity
+    //externalReviewResult = "externalReviewResult", // project level
+    demandRequest = "demandRequest",         // project level (support letter / proof of need)
+    completionReport = "completionReport",   // project level
+    other = "other"                          // project level
 }
+
+export enum DocumentScope {
+    project = "project",
+    phase = "phase",
+    activity = "activity"
+}
+
+// Record<> forces a compile error if a new type is added without a scope
+export const DOCUMENT_TYPE_SCOPE: Record<PhaseDocumentType, DocumentScope> = {
+    [PhaseDocumentType.progressReport]: DocumentScope.phase,
+
+    [PhaseDocumentType.technicalReport]: DocumentScope.activity,
+    [PhaseDocumentType.financialReport]: DocumentScope.activity,
+    [PhaseDocumentType.activityEvidence]: DocumentScope.activity,
+    [PhaseDocumentType.deliverable]: DocumentScope.activity,
+    [PhaseDocumentType.meetingMinutes]: DocumentScope.activity,
+    [PhaseDocumentType.attendance]: DocumentScope.activity,
+    [PhaseDocumentType.photo]: DocumentScope.activity,
+    [PhaseDocumentType.dataset]: DocumentScope.activity,
+
+    [PhaseDocumentType.demandRequest]: DocumentScope.project,
+    [PhaseDocumentType.completionReport]: DocumentScope.project,
+    [PhaseDocumentType.other]: DocumentScope.project,
+};
 
 export enum ProjectDocumentStatus {
     pending = 'pending',

@@ -386,7 +386,7 @@ export default function ProjectDetail({ project, updateProject, options = {} }: 
             icon: MENU_ICONS.applications,
             resource: 'application',
             when: !!projectData.call,
-            render: (p) => <ApplicationManager {...p} />
+            render: (p) => <ApplicationManager {...p} enableDetail={false} />
         },
         {
             key: 'verifications',

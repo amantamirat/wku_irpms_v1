@@ -23,13 +23,11 @@ export class ReportService {
     }
 
     async getApplications(filter: IReportFilter) {
-        const projectMatch = buildProjectMatch(filter);
-        return this.repository.getApplications(projectMatch);
+        return this.repository.getApplications(filter);
     }
 
     async getEvaluations(filter: IReportFilter) {
-        const projectMatch = buildProjectMatch(filter);
-        return this.repository.getReviewerReport(projectMatch);
+        return this.repository.getReviewerReport(filter);
     }
 
     async getVerifications(filter: IReportFilter) {
@@ -59,6 +57,10 @@ export class ReportService {
         return this.repository.getPhases(filter);
     }
 
+    async getResercherReport(filter: IReportFilter) {
+        const projectMatch = buildProjectMatch(filter);
+        return this.repository.getResearcherReport(projectMatch);
+    }
     /*
     async getFundingOrganizations(filter: IReportFilter) {
         return this.repository.getFundingOrganizations(filter);

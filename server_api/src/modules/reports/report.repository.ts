@@ -6,7 +6,12 @@ import { Phase, PhaseStatus } from "../projects/phase/phase.model";
 import { Project, ProjectStatus } from "../projects/project.model";
 import { Reviewer } from "../reviewers/reviewer.model";
 import { ReviewerStatus } from "../reviewers/reviewer.state-machine";
-import { IDashboardReport, IDepartmentReport, IReportFilter, IVerificationReport } from "./report.types";
+import { IDashboardReport, IDepartmentReport, IReportFilter, IResearcherReport, IVerificationReport } from "./report.types";
+import mongoose from "mongoose";
+import { Organization } from "../organization/organization.model";
+import User, { Gender } from "../users/user.model";
+import { Collaborator, CollaboratorStatus } from "../projects/collaborators/collaborator.model";
+import { Unit } from "../../common/constants/enums";
 
 export function buildProjectMatch(
     filter: IReportFilter
@@ -219,12 +224,9 @@ export class ReportRepository {
         };
     }
 
-    async getApplications(
-        projectMatch: Record<string, any>
-    ) {
-
+    async getApplications(filter: IReportFilter) {
         const projectIds = await Project
-            .find(projectMatch)
+            .find(buildProjectMatch(filter))
             .select("_id")
             .lean();
 
@@ -246,34 +248,30 @@ export class ReportRepository {
             return emptyResult;
         }
 
+        // Application-level filters
+        const applicationMatch: Record<string, any> = {
+            project: { $in: ids }
+        };
+
+        if (filter.stage) {
+            applicationMatch.stage = filter.stage;
+        }
+
         const [result] = await Application.aggregate([
             {
-                $match: {
-                    project: {
-                        $in: ids
-                    }
-                }
+                $match: applicationMatch
             },
-
             {
                 $group: {
                     _id: null,
 
-                    total: {
-                        $sum: 1
-                    },
+                    total: { $sum: 1 },
 
                     submitted: {
                         $sum: {
                             $cond: [
-                                {
-                                    $eq: [
-                                        "$status",
-                                        ApplicationStatus.submitted
-                                    ]
-                                },
-                                1,
-                                0
+                                { $eq: ["$status", ApplicationStatus.submitted] },
+                                1, 0
                             ]
                         }
                     },
@@ -281,14 +279,8 @@ export class ReportRepository {
                     shortlisted: {
                         $sum: {
                             $cond: [
-                                {
-                                    $eq: [
-                                        "$status",
-                                        ApplicationStatus.shortlisted
-                                    ]
-                                },
-                                1,
-                                0
+                                { $eq: ["$status", ApplicationStatus.shortlisted] },
+                                1, 0
                             ]
                         }
                     },
@@ -296,14 +288,8 @@ export class ReportRepository {
                     notShortlisted: {
                         $sum: {
                             $cond: [
-                                {
-                                    $eq: [
-                                        "$status",
-                                        ApplicationStatus.notShortlisted
-                                    ]
-                                },
-                                1,
-                                0
+                                { $eq: ["$status", ApplicationStatus.notShortlisted] },
+                                1, 0
                             ]
                         }
                     },
@@ -311,14 +297,8 @@ export class ReportRepository {
                     accepted: {
                         $sum: {
                             $cond: [
-                                {
-                                    $eq: [
-                                        "$status",
-                                        ApplicationStatus.accepted
-                                    ]
-                                },
-                                1,
-                                0
+                                { $eq: ["$status", ApplicationStatus.accepted] },
+                                1, 0
                             ]
                         }
                     },
@@ -326,14 +306,8 @@ export class ReportRepository {
                     rejected: {
                         $sum: {
                             $cond: [
-                                {
-                                    $eq: [
-                                        "$status",
-                                        ApplicationStatus.rejected
-                                    ]
-                                },
-                                1,
-                                0
+                                { $eq: ["$status", ApplicationStatus.rejected] },
+                                1, 0
                             ]
                         }
                     },
@@ -350,8 +324,7 @@ export class ReportRepository {
         }
 
         const shortlistingDecided =
-            result.shortlisted +
-            result.notShortlisted;
+            result.shortlisted + result.notShortlisted;
 
         const finalDecided =
             result.accepted +
@@ -377,6 +350,157 @@ export class ReportRepository {
             averageScore: result.averageScore !== null
                 ? Number(result.averageScore.toFixed(2))
                 : null
+        };
+    }
+
+
+    async getReviewerReport(filter: IReportFilter) {
+        const emptyResult = {
+            totalReviews: 0,
+            completedReviews: 0,
+            pendingReviews: 0,
+            declinedReviews: 0,
+            rejectedReviews: 0,
+            completionRate: 0,
+            averageScore: null
+        };
+
+        const projects = await Project
+            .find(buildProjectMatch(filter))
+            .select("_id")
+            .lean();
+
+        const projectIds = projects.map(project => project._id);
+
+        if (!projectIds.length) {
+            return emptyResult;
+        }
+
+        const pipeline: any[] = [
+            {
+                $match: {
+                    project: { $in: projectIds }
+                }
+            }
+        ];
+
+        // Filter by application stage
+        if (filter.stage) {
+            pipeline.push(
+                {
+                    $lookup: {
+                        from: "applications",
+                        localField: "application",
+                        foreignField: "_id",
+                        as: "applicationData"
+                    }
+                },
+                {
+                    $unwind: "$applicationData"
+                },
+                {
+                    $match: {
+                        "applicationData.stage": filter.stage
+                    }
+                }
+            );
+        }
+
+        pipeline.push({
+            $group: {
+                _id: null,
+
+                totalReviews: { $sum: 1 },
+
+                completedReviews: {
+                    $sum: {
+                        $cond: [
+                            {
+                                $in: [
+                                    "$status",
+                                    [
+                                        ReviewerStatus.submitted,
+                                        ReviewerStatus.accepted,
+                                        ReviewerStatus.rejected
+                                    ]
+                                ]
+                            },
+                            1,
+                            0
+                        ]
+                    }
+                },
+
+                pendingReviews: {
+                    $sum: {
+                        $cond: [
+                            {
+                                $in: [
+                                    "$status",
+                                    [
+                                        ReviewerStatus.pending,
+                                        ReviewerStatus.verified
+                                    ]
+                                ]
+                            },
+                            1,
+                            0
+                        ]
+                    }
+                },
+
+                declinedReviews: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ["$status", ReviewerStatus.declined] },
+                            1,
+                            0
+                        ]
+                    }
+                },
+
+                rejectedReviews: {
+                    $sum: {
+                        $cond: [
+                            { $eq: ["$status", ReviewerStatus.rejected] },
+                            1,
+                            0
+                        ]
+                    }
+                },
+
+                averageScore: { $avg: "$score" }
+            }
+        });
+
+        const [result] = await Reviewer.aggregate(pipeline);
+
+        if (!result) {
+            return emptyResult;
+        }
+
+        return {
+            totalReviews: result.totalReviews,
+            completedReviews: result.completedReviews,
+            pendingReviews: result.pendingReviews,
+            declinedReviews: result.declinedReviews,
+            rejectedReviews: result.rejectedReviews,
+
+            completionRate:
+                result.totalReviews > 0
+                    ? Number(
+                        (
+                            (result.completedReviews / result.totalReviews) *
+                            100
+                        ).toFixed(2)
+                    )
+                    : 0,
+
+            averageScore:
+                result.averageScore !== null &&
+                    result.averageScore !== undefined
+                    ? Number(result.averageScore.toFixed(2))
+                    : null
         };
     }
 
@@ -653,133 +777,6 @@ export class ReportRepository {
                 result.averageVerificationAttempts !== null
                     ? Number(result.averageVerificationAttempts.toFixed(2))
                     : 0
-        };
-    }
-
-    async getReviewerReport(
-        projectMatch: Record<string, any>
-    ) {
-        const emptyResult = {
-            totalReviews: 0,
-            completedReviews: 0,
-            pendingReviews: 0,
-            declinedReviews: 0,
-            rejectedReviews: 0,
-            completionRate: 0,
-            averageScore: null
-        };
-
-        const projects = await Project
-            .find(projectMatch)
-            .select("_id")
-            .lean();
-
-        const projectIds = projects.map(project => project._id);
-
-        if (!projectIds.length) {
-            return emptyResult;
-        }
-
-        const [result] = await Reviewer.aggregate([
-            {
-                $match: {
-                    // targetType: ReviewerTargetType.APPLICATION,
-                    project: { $in: projectIds }
-                }
-            },
-            {
-                $group: {
-                    _id: null,
-
-                    totalReviews: { $sum: 1 },
-
-                    completedReviews: {
-                        $sum: {
-                            $cond: [
-                                {
-                                    $in: [
-                                        "$status",
-                                        [
-                                            ReviewerStatus.submitted,
-                                            ReviewerStatus.accepted,
-                                            ReviewerStatus.rejected
-                                        ]
-                                    ]
-                                },
-                                1,
-                                0
-                            ]
-                        }
-                    },
-
-                    pendingReviews: {
-                        $sum: {
-                            $cond: [
-                                {
-                                    $in: [
-                                        "$status",
-                                        [
-                                            ReviewerStatus.pending,
-                                            ReviewerStatus.verified
-                                        ]
-                                    ]
-                                },
-                                1,
-                                0
-                            ]
-                        }
-                    },
-
-                    declinedReviews: {
-                        $sum: {
-                            $cond: [
-                                { $eq: ["$status", ReviewerStatus.declined] },
-                                1,
-                                0
-                            ]
-                        }
-                    },
-
-                    rejectedReviews: {
-                        $sum: {
-                            $cond: [
-                                { $eq: ["$status", ReviewerStatus.rejected] },
-                                1,
-                                0
-                            ]
-                        }
-                    },
-
-                    averageScore: { $avg: "$score" }
-                }
-            }
-        ]);
-
-        if (!result) {
-            return emptyResult;
-        }
-
-        return {
-            totalReviews: result.totalReviews,
-            completedReviews: result.completedReviews,
-            pendingReviews: result.pendingReviews,
-            declinedReviews: result.declinedReviews,
-            rejectedReviews: result.rejectedReviews,
-
-            completionRate:
-                result.totalReviews > 0
-                    ? Number(
-                        (
-                            (result.completedReviews / result.totalReviews) *
-                            100
-                        ).toFixed(2)
-                    )
-                    : 0,
-
-            averageScore:
-                result.averageScore !== null && result.averageScore !== undefined
-                    ? Number(result.averageScore.toFixed(2))
-                    : null
         };
     }
 
@@ -1128,6 +1125,300 @@ export class ReportRepository {
                     : 0
         };
     }
+
+
+
+
+    async getResearcherReport(
+        projectMatch: Record<string, any>
+    ): Promise<IResearcherReport> {
+
+        const UNASSIGNED = "unassigned";
+
+        const emptyResult: IResearcherReport = {
+            totalResearchers: 0,
+            activeResearchers: 0,
+            inactiveResearchers: 0,
+
+            leadResearchers: 0,
+            collaboratingResearchers: 0,
+
+            maleResearchers: 0,
+            femaleResearchers: 0,
+            unknownGender: 0,
+
+            researchersWithProjects: 0,
+            researchersWithoutProjects: 0,
+
+            averageProjectsPerResearcher: 0,
+
+            byCollege: [],
+            bySpecialization: []
+        };
+
+        // 1. Fetch all department organizations (with their parent college).
+        const departments = await Organization.find({
+            type: Unit.department
+        })
+            .select("_id parent") 
+            .lean();
+
+        const departmentIds = departments.map(
+            department => department._id
+        );
+
+        // departmentId -> collegeId (or null when the department has no parent)
+        const departmentCollege = new Map<string, string | null>(
+            departments.map((department: any) => [
+                department._id.toString(),
+                department.parent ? department.parent.toString() : null
+            ])
+        );
+
+        // 2. Fetch all researchers belonging to departments.
+        const researchers = departmentIds.length
+            ? await User.find({
+                workspace: { $in: departmentIds },
+                deletedAt: null
+            })
+                .select("gender workspace specializations")
+                .lean()
+            : [];
+
+        if (!researchers.length) {
+            return emptyResult;
+        }
+
+        // 3. Fetch projects matching the report filters.
+        const projects = await Project.find(projectMatch)
+            .select("_id leadPI status")
+            .lean();
+
+        const projectMap = new Map(
+            projects.map(project => [
+                project._id.toString(),
+                project
+            ])
+        );
+
+        const projectIds = projects.map(project => project._id);
+
+        // 4. Fetch verified collaborators.
+        const collaborations = projectIds.length
+            ? await Collaborator.find({
+                project: { $in: projectIds },
+                status: CollaboratorStatus.verified
+            })
+                .select("project member isLeadPI")
+                .lean()
+            : [];
+
+        // researcherId -> set of project IDs
+        const researcherProjects = new Map<string, Set<string>>();
+
+        const leadResearchers = new Set<string>();
+        const collaboratorResearchers = new Set<string>();
+        const activeResearchers = new Set<string>();
+
+        const researcherIdSet = new Set(
+            researchers.map(researcher => researcher._id.toString())
+        );
+
+        const addParticipation = (
+            memberId: mongoose.Types.ObjectId,
+            projectId: mongoose.Types.ObjectId
+        ) => {
+            const memberKey = memberId.toString();
+            const projectKey = projectId.toString();
+
+            // Only count users who belong to the researcher population.
+            if (!researcherIdSet.has(memberKey)) return;
+
+            if (!researcherProjects.has(memberKey)) {
+                researcherProjects.set(memberKey, new Set());
+            }
+
+            researcherProjects.get(memberKey)!.add(projectKey);
+
+            const project = projectMap.get(projectKey);
+
+            if (
+                project &&
+                [
+                    ProjectStatus.approved,
+                    ProjectStatus.granted
+                ].includes(project.status)
+            ) {
+                activeResearchers.add(memberKey);
+            }
+        };
+
+        // 5. Project lead PIs.
+        for (const project of projects) {
+            if (!project.leadPI) continue;
+
+            const leadId = project.leadPI as mongoose.Types.ObjectId;
+
+            addParticipation(leadId, project._id);
+
+            if (researcherIdSet.has(leadId.toString())) {
+                leadResearchers.add(leadId.toString());
+            }
+        }
+
+        // 6. Verified collaborators.
+        for (const collaboration of collaborations) {
+            const memberId = collaboration.member as mongoose.Types.ObjectId;
+
+            if (!memberId) continue;
+
+            addParticipation(
+                memberId,
+                collaboration.project as mongoose.Types.ObjectId
+            );
+
+            if (researcherIdSet.has(memberId.toString())) {
+                collaboratorResearchers.add(memberId.toString());
+
+                if (collaboration.isLeadPI) {
+                    leadResearchers.add(memberId.toString());
+                }
+            }
+        }
+
+        // 7. Calculate researcher statistics.
+        const totalResearchers = researchers.length;
+
+        let maleResearchers = 0;
+        let femaleResearchers = 0;
+        let unknownGender = 0;
+
+        let researchersWithProjects = 0;
+        let totalProjectParticipations = 0;
+
+        const collegeCounts = new Map<string, number>();
+        const specializationCounts = new Map<string, number>();
+
+        for (const researcher of researchers) {
+            const researcherId = researcher._id.toString();
+
+            const projectCount =
+                researcherProjects.get(researcherId)?.size ?? 0;
+
+            totalProjectParticipations += projectCount;
+
+            if (projectCount > 0) {
+                researchersWithProjects++;
+            }
+
+            if (researcher.gender === Gender.Male) {
+                maleResearchers++;
+            } else if (researcher.gender === Gender.Female) {
+                femaleResearchers++;
+            } else {
+                unknownGender++;
+            }
+
+            // Group by the college (parent) of the researcher's department.
+            const collegeKey = researcher.workspace
+                ? departmentCollege.get(researcher.workspace.toString()) ?? UNASSIGNED
+                : UNASSIGNED;
+
+            collegeCounts.set(
+                collegeKey,
+                (collegeCounts.get(collegeKey) ?? 0) + 1
+            );
+
+            for (const specialization of researcher.specializations ?? []) {
+                const specializationId = specialization.toString();
+
+                specializationCounts.set(
+                    specializationId,
+                    (specializationCounts.get(specializationId) ?? 0) + 1
+                );
+            }
+        }
+
+        // 8. Resolve college names.
+        const collegeIds = [...collegeCounts.keys()]
+            .filter(id => id !== UNASSIGNED)
+            .map(id => new mongoose.Types.ObjectId(id));
+
+        const colleges = collegeIds.length
+            ? await Organization.find({
+                _id: { $in: collegeIds }
+            })
+                .select("name")
+                .lean()
+            : [];
+
+        const collegeMap = new Map(
+            colleges.map(college => [
+                college._id.toString(),
+                college.name
+            ])
+        );
+
+        // 9. Calculate active researchers.
+        const activeCount = researchers.filter(user =>
+            activeResearchers.has(user._id.toString())
+        ).length;
+
+        // 10. Return report.
+        return {
+            totalResearchers,
+
+            activeResearchers: activeCount,
+            inactiveResearchers: totalResearchers - activeCount,
+
+            leadResearchers: researchers.filter(user =>
+                leadResearchers.has(user._id.toString())
+            ).length,
+
+            collaboratingResearchers: researchers.filter(user =>
+                collaboratorResearchers.has(user._id.toString())
+            ).length,
+
+            maleResearchers,
+            femaleResearchers,
+            unknownGender,
+
+            researchersWithProjects,
+
+            researchersWithoutProjects:
+                totalResearchers - researchersWithProjects,
+
+            averageProjectsPerResearcher:
+                totalResearchers > 0
+                    ? Number(
+                        (
+                            totalProjectParticipations /
+                            totalResearchers
+                        ).toFixed(2)
+                    )
+                    : 0,
+
+            byCollege: [...collegeCounts.entries()]
+                .map(([collegeId, count]) => ({
+                    college:
+                        collegeId === UNASSIGNED
+                            ? "Unassigned"
+                            : collegeMap.get(collegeId) ?? "Unknown",
+                    count
+                }))
+                .sort((a, b) => b.count - a.count),
+
+            // NOTE: these are still specialization IDs, not names.
+            // Resolve them with your Specialization model the same way as colleges.
+            bySpecialization: [...specializationCounts.entries()]
+                .map(([specialization, count]) => ({
+                    specialization,
+                    count
+                }))
+                .sort((a, b) => b.count - a.count)
+        };
+    }
+
 
 
 

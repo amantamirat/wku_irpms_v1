@@ -13,7 +13,9 @@ import { extractId } from '@/utils/utils';
 import {
     ProjectDocument,
     PhaseDocumentType,
-    PhaseDocumentTypeLabels
+    PhaseDocumentTypeLabels,
+    DocumentScope,
+    DOCUMENT_TYPE_SCOPE
 } from '../model/phase.doc';
 import { PhaseApi } from '../../api/phase.api';
 import { Phase } from '../../models/phase.model';
@@ -21,21 +23,6 @@ import { Activity } from '../../../activities/models/phase-activity.model';
 import { ActivityApi } from '../../../activities/api/phase-activity.api';
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024;
-
-// Map each document type to its required level
-const DocumentScope = {
-    [PhaseDocumentType.completionReport]: 'project',
-    [PhaseDocumentType.progressReport]: 'phase',
-    [PhaseDocumentType.technicalReport]: 'activity',
-    [PhaseDocumentType.financialReport]: 'activity',
-    [PhaseDocumentType.deliverable]: 'activity',
-    [PhaseDocumentType.meetingMinutes]: 'activity',
-    [PhaseDocumentType.attendance]: 'activity',
-    [PhaseDocumentType.photo]: 'activity',
-    [PhaseDocumentType.dataset]: 'activity',
-    [PhaseDocumentType.activityEvidence]: 'activity',
-    [PhaseDocumentType.other]: 'all'
-} as const;
 
 interface PhaseDocumentFormProps
     extends ItemFormRenderProps<ProjectDocument> {
@@ -89,10 +76,17 @@ const PhaseDocumentForm = ({
     const phaseLocked = phase != null;
     const activityLocked = activity != null;
 
-    // Determine current scope based on selected document type
-    const scope = localItem.type ? DocumentScope[localItem.type] : 'all';
-    const showPhase = phaseLocked || scope === 'phase' || scope === 'activity' || scope === 'all';
-    const showActivity = activityLocked || scope === 'activity' || scope === 'all';
+    // Scope of the selected type (undefined until a type is chosen)
+    const scope = localItem.type ? DOCUMENT_TYPE_SCOPE[localItem.type] : undefined;
+
+    // project  -> no phase, no activity
+    // phase    -> phase (required)
+    // activity -> activity (required); phase shown as an optional filter
+    const showPhase = scope === DocumentScope.phase || scope === DocumentScope.activity;
+    const showActivity = scope === DocumentScope.activity;
+
+    const phaseRequired = scope === DocumentScope.phase;
+    const activityRequired = scope === DocumentScope.activity;
 
     useEffect(() => {
         setLocalItem(buildInitialItem());
@@ -132,12 +126,23 @@ const PhaseDocumentForm = ({
     const typeMissing = !localItem.type;
     const descriptionMissing = !localItem.description?.trim();
     const fileMissing = !localItem._id && !localItem.file && !localItem.documentPath;
+    const phaseMissing = phaseRequired && !phaseId;
+    const activityMissing = activityRequired && !activityId;
 
     const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
         e.preventDefault();
         setSubmitted(true);
 
-        if (saving || projectMissing || typeMissing || descriptionMissing || fileMissing || fileError) {
+        if (
+            saving ||
+            projectMissing ||
+            typeMissing ||
+            descriptionMissing ||
+            fileMissing ||
+            phaseMissing ||
+            activityMissing ||
+            fileError
+        ) {
             return;
         }
 
@@ -173,21 +178,32 @@ const PhaseDocumentForm = ({
                         id="type"
                         value={localItem.type ?? null}
                         options={typeOptions}
+                        optionLabel="label"
+                        optionValue="value"
                         onChange={(e) => {
                             const newType = e.value as PhaseDocumentType;
-                            const newScope = newType ? DocumentScope[newType] : 'all';
+                            const newScope = newType ? DOCUMENT_TYPE_SCOPE[newType] : undefined;
 
                             setLocalItem((prev) => ({
                                 ...prev,
                                 type: newType,
-                                phase: newScope === 'project' ? undefined : prev.phase,
-                                activity: newScope === 'project' || newScope === 'phase' ? undefined : prev.activity
+                                // Restore locked props when the new scope needs them,
+                                // otherwise clear values that no longer apply
+                                phase:
+                                    newScope === DocumentScope.phase || newScope === DocumentScope.activity
+                                        ? (phase ?? prev.phase)
+                                        : undefined,
+                                activity:
+                                    newScope === DocumentScope.activity
+                                        ? (activity ?? prev.activity)
+                                        : undefined
                             }));
                         }}
-                        optionLabel="label"
                         placeholder="Select a document type"
                         itemTemplate={optionTemplate}
-                        valueTemplate={(option) => (option ? option.label : 'Select a document type')}
+                        valueTemplate={(option) =>
+                            option ? PhaseDocumentTypeLabels[option.value as PhaseDocumentType]?.label ?? option.label : 'Select a document type'
+                        }
                         filter
                         disabled={saving}
                         className={classNames({ 'p-invalid': submitted && typeMissing })}
@@ -195,10 +211,12 @@ const PhaseDocumentForm = ({
                     {submitted && typeMissing && <small className="p-error block mt-1">Document type is required.</small>}
                 </div>
 
-                {/* Phase (Conditional) */}
+                {/* Phase (phase and activity scopes) */}
                 {showPhase && (
                     <div className="field col-12 md:col-6">
-                        <label htmlFor="phase" className="font-bold text-sm block mb-2">Phase</label>
+                        <label htmlFor="phase" className="font-bold text-sm block mb-2">
+                            Phase {phaseRequired && <span className="text-red-500">*</span>}
+                        </label>
                         {phaseLocked ? (
                             <div className="p-inputtext p-component flex align-items-center surface-100 text-color-secondary">
                                 {typeof phase === 'object' && phase ? `Phase ${phase.order}` : `Phase ID: ${phaseId}`}
@@ -210,20 +228,33 @@ const PhaseDocumentForm = ({
                                 options={phases.map((p) => ({ label: `Phase ${p.order}`, value: p._id }))}
                                 optionLabel="label"
                                 optionValue="value"
-                                onChange={(e) => setLocalItem((prev) => ({ ...prev, phase: phases.find((p) => p._id === e.value), activity: undefined }))}
+                                onChange={(e) =>
+                                    setLocalItem((prev) => ({
+                                        ...prev,
+                                        phase: phases.find((p) => p._id === e.value),
+                                        activity: undefined
+                                    }))
+                                }
                                 placeholder="Select phase"
-                                showClear
+                                showClear={!phaseRequired}
                                 filter
                                 disabled={saving}
+                                className={classNames({ 'p-invalid': submitted && phaseMissing })}
                             />
+                        )}
+                        {submitted && phaseMissing && <small className="p-error block mt-1">Phase is required for this document type.</small>}
+                        {scope === DocumentScope.activity && !phaseLocked && (
+                            <small className="block mt-1 text-500">Optional: filters the activity list.</small>
                         )}
                     </div>
                 )}
 
-                {/* Activity (Conditional) */}
+                {/* Activity (activity scope only) */}
                 {showActivity && (
                     <div className="field col-12 md:col-6">
-                        <label htmlFor="activity" className="font-bold text-sm block mb-2">Activity</label>
+                        <label htmlFor="activity" className="font-bold text-sm block mb-2">
+                            Activity <span className="text-red-500">*</span>
+                        </label>
                         {activityLocked ? (
                             <div className="p-inputtext p-component flex align-items-center surface-100 text-color-secondary">
                                 {typeof activity === 'object' && activity ? activity.title : `Activity ID: ${activityId}`}
@@ -235,13 +266,19 @@ const PhaseDocumentForm = ({
                                 options={activities.map((a) => ({ label: a.title, value: a._id }))}
                                 optionLabel="label"
                                 optionValue="value"
-                                onChange={(e) => setLocalItem((prev) => ({ ...prev, activity: activities.find((a) => a._id === e.value) }))}
+                                onChange={(e) =>
+                                    setLocalItem((prev) => ({
+                                        ...prev,
+                                        activity: activities.find((a) => a._id === e.value)
+                                    }))
+                                }
                                 placeholder="Select activity"
-                                showClear
                                 filter
                                 disabled={saving}
+                                className={classNames({ 'p-invalid': submitted && activityMissing })}
                             />
                         )}
+                        {submitted && activityMissing && <small className="p-error block mt-1">Activity is required for this document type.</small>}
                     </div>
                 )}
 

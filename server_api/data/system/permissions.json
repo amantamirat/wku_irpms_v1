@@ -1413,6 +1413,38 @@
     "name": "report:dashboard"
   },
   {
+    "category": "Report Management",
+    "name": "report:portfolio"
+  },
+  {
+    "category": "Report Management",
+    "name": "report:applications"
+  },
+  {
+    "category": "Report Management",
+    "name": "report:evaluations"
+  },
+  {
+    "category": "Report Management",
+    "name": "report:verifications"
+  },
+  {
+    "category": "Report Management",
+    "name": "report:departments"
+  },
+  {
+    "category": "Report Management",
+    "name": "report:directorates"
+  },
+  {
+    "category": "Report Management",
+    "name": "report:financial"
+  },
+  {
+    "category": "Report Management",
+    "name": "report:researcher"
+  },
+  {
     "category": "Enrollment Management",
     "name": "enrollment:create",
     "description": "Enroll a user as a student in a specified calendar and program",

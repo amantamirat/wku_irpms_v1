@@ -72,6 +72,36 @@ export interface IReviewersReport {
 }
 
 
+export interface IResearcherReport {
+    totalResearchers: number;
+
+    activeResearchers: number;
+    inactiveResearchers: number;
+
+    leadResearchers: number;
+    collaboratingResearchers: number;
+
+    maleResearchers: number;
+    femaleResearchers: number;
+    unknownGender: number;
+
+    researchersWithProjects: number;
+    researchersWithoutProjects: number;
+
+    averageProjectsPerResearcher: number;
+
+    byCollege: {
+        college: string;
+        count: number;
+    }[];
+
+    bySpecialization: {
+        specialization: string;
+        count: number;
+    }[];
+}
+
+
 export interface IDepartmentReport {
   _id: string;
   name: string;

@@ -9,7 +9,7 @@ import { ReportController } from "./report.controller";
 import {
     verifyAuthToken
 } from "../auth/auth.middleware";
-import { checkPermission, fileStorageService, filterService } from '../../core/container';
+import { checkPermission, filterService } from '../../core/container';
 
 import { PERMISSIONS } from "../../common/constants/permissions";
 
@@ -37,7 +37,7 @@ router.get(
 router.get(
     "/portfolio",
     checkPermission([
-        PERMISSIONS.REPORT.OVERVIEW
+        PERMISSIONS.REPORT.PORTFOLIO
     ]),
     controller.getPortfolio
 );
@@ -45,7 +45,7 @@ router.get(
 router.get(
     "/applications",
     checkPermission([
-        PERMISSIONS.REPORT.OVERVIEW
+        PERMISSIONS.REPORT.APPLICATIONS
     ]),
     controller.getApplications
 );
@@ -53,7 +53,7 @@ router.get(
 router.get(
     "/verifications",
     checkPermission([
-        PERMISSIONS.REPORT.OVERVIEW
+        PERMISSIONS.REPORT.VERIFICATIONS
     ]),
     controller.getVerifications
 );
@@ -61,7 +61,7 @@ router.get(
 router.get(
     "/evaluations",
     checkPermission([
-        PERMISSIONS.REPORT.OVERVIEW
+        PERMISSIONS.REPORT.EVALUATIONS
     ]),
     controller.getEvaluations
 );
@@ -69,7 +69,7 @@ router.get(
 router.get(
     "/departments",
     checkPermission([
-        PERMISSIONS.REPORT.OVERVIEW
+        PERMISSIONS.REPORT.DEPARTMENTS
     ]),
     controller.getDepartments
 );
@@ -79,7 +79,7 @@ router.get(
 router.get(
     "/directorates",
     checkPermission([
-        PERMISSIONS.REPORT.OVERVIEW
+        PERMISSIONS.REPORT.DIRECTORATES
     ]),
     controller.getDirectorateReport
 );
@@ -87,9 +87,18 @@ router.get(
 router.get(
     "/financial",
     checkPermission([
-        PERMISSIONS.REPORT.OVERVIEW
+        PERMISSIONS.REPORT.FINANCIAL
     ]),
     controller.getFinancial
+);
+
+
+router.get(
+    "/researcher",
+    checkPermission([
+        PERMISSIONS.REPORT.RESEARCHER
+    ]),
+    controller.getResercherReport
 );
 
 export default router;
