@@ -109,8 +109,19 @@ const COLUMNS: ColumnProps[] = [
                 : 'Unknown Lead PI';
         },
     },
-    percentColumn('Female Proportion', 'femaleProportion'),
-    percentColumn('Verified Collaborators', 'verifiedCollaboratorsProportion'),
+    {
+        header: 'Stage',
+        field: 'stage.name',
+        sortable: true,
+        body: (row: Application) => {
+            const stageName = (row.stage as Stage).name ?? 'Unknown Stage';
+            return (
+                stageName
+            );
+        },
+    },
+    //percentColumn('Female Proportion', 'femaleProportion'),
+    //percentColumn('Verified Collaborators', 'verifiedCollaboratorsProportion'),
     docColumn('Orig Doc', 'origDoc', (a) => a.documentPath,
         'text-blue-600 hover:text-blue-800', 'text-red-500', 'No document'),
     docColumn('Anon Doc', 'anonDoc', (a) => a.anonymizedDocumentPath,
@@ -208,8 +219,9 @@ const COLUMNS: ColumnProps[] = [
 ];
 
 const DEFAULT_HIDDEN = [
-    'project.femaleProportion',
-    'project.verifiedCollaboratorsProportion',
+    //'project.femaleProportion',
+    //'project.verifiedCollaboratorsProportion',
+    'stage.name',
     'assigner',
     'origDoc',
     'anonDoc',
