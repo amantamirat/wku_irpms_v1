@@ -10,6 +10,7 @@
     "seed:demo": "ts-node src/scripts/seed.ts demo",
     "seed:user": "ts-node src/scripts/seed.ts user",
     "seed:org": "ts-node src/scripts/seed.ts org",
+    "seed:external": "ts-node src/scripts/seed.ts external",
     "seed:legacy": "ts-node src/scripts/seed.ts legacy",
     "setup:chrome": "puppeteer browsers install chrome",
     "build": "tsc",

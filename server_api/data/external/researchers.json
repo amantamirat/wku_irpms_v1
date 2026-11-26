@@ -1,0 +1,355 @@
+{
+  "total_records": 35,
+  "records": [
+    {
+      "serial_number": 1,
+      "name": "Dr. Aregu Asmare",
+      "email": "aregu.asmare@ju.edu.et",
+      "institution": "Jimma University",
+      "college": "BECO",
+      "research_titles": [
+        "Greeen Entreprenurship, Financial Litracy &Sustainable Business Performance of Micro,Small and Medium enterprise in Central Ethiopia"
+      ]
+    },
+    {
+      "serial_number": 2,
+      "name": "Dr. Amsalu Dachito",
+      "email": "amsalu.dachito@ju.edu.et",
+      "institution": "Jimma University",
+      "college": "BECO",
+      "research_titles": [
+        "Unlocking local economic value through Tourism based Entreprenurship: Business capablity, Financial Practice,market linkage &Community particpation in East gurage"
+      ]
+    },
+    {
+      "serial_number": 3,
+      "name": "Dr. Arega Syoum",
+      "email": "aregas10@gmail.com",
+      "institution": "Jimma University",
+      "college": "BECO",
+      "research_titles": [
+        "Educational Policy reform,Financial market development & Entreprenurship in ethiopia: On Human capital development finanacial inclusion & Sustaibable economic growth"
+      ]
+    },
+    {
+      "serial_number": 4,
+      "name": "Dr. Amare Abaw",
+      "email": "amare.abawa@aau.edu.et",
+      "institution": "Addis Ababa University",
+      "college": "BECO",
+      "research_titles": [
+        "Leadershi Behaviour and Organizational Performance: Do Work-life Balance &job Satisfaction matters in Ethiopia Higher Education Institiutions."
+      ]
+    },
+    {
+      "serial_number": 5,
+      "name": "Dr. Befikadu Zewdie",
+      "email": "zewdienati@gmail.com / befikadu.asu.edu.et",
+      "institution": "Assosa University",
+      "college": "CANR",
+      "research_titles": [
+        "Enhancing Milk Production through improved breed, feed and health management in Gurage zone, Central Ethiopia Region"
+      ]
+    },
+    {
+      "serial_number": 6,
+      "name": "Dr. Teakbe G",
+      "email": "Tekabegebre27@gmail.com",
+      "institution": "Bonga University",
+      "college": "CANR",
+      "research_titles": [
+        "Enhancing Milk Production through improved breed, feed and health management in Gurage zone, Central Ethiopia Region"
+      ]
+    },
+    {
+      "serial_number": 7,
+      "name": "Dr. Abera H.",
+      "email": "habteee@gmail.com",
+      "institution": "Wolita Sodo University",
+      "college": "CANR",
+      "research_titles": [
+        "A Climate-Resilient Farm Decision-Support System to Optimize Water and Crop Allocation for Smallholder Farmers in Gurage Zone, Ethiopia2. Assessment of Urban Agriculture and Design of Innovative Approaches for Sustainable Farming in Central Ethiopia"
+      ]
+    },
+    {
+      "serial_number": 8,
+      "name": "Mr. Daniel W.",
+      "email": "danmolla5@gmail.com",
+      "institution": "Ethiopian Wildlife Conservation Authority",
+      "college": "CANR",
+      "research_titles": [
+        "Harnessing Indigenous Knowledge For Sustainable Tourism Development In Central Ethiopia"
+      ]
+    },
+    {
+      "serial_number": 9,
+      "name": "Dr. Ginjo G.",
+      "email": "ginjo@bongau.edu.et",
+      "institution": "Bonga University",
+      "college": "CANR",
+      "research_titles": [
+        "Participatory Evaluation of Woody Species Suitability and Economic Efficiency of Agroforestry System in Gurage Zone, Enor woreda2. Integrated Wildlife Conservation, Human Wildlife Conflict Mitigation, and Community Based Biodiversity Conservation in the Gurage Zone, Ethiopia"
+      ]
+    },
+    {
+      "serial_number": 10,
+      "name": "Dr. Degife A.",
+      "email": "degife.asefa@amu.edu.et",
+      "institution": "Arbaminch University",
+      "college": "CANR",
+      "research_titles": [
+        "Adaptability and Yield Stability Analysis of Introduced Beetroot (Beta vulgaris L.) Varieties in Gurage Zone, Central Ethiopia"
+      ]
+    },
+    {
+      "serial_number": 11,
+      "name": "Dr. Firesenbet Z.",
+      "email": "frewza@gmail.com",
+      "institution": "Haramaya University",
+      "college": "CANR",
+      "research_titles": [
+        "Rural–Urban Migration and Agricultural Resilience in Gurage Zone, Ethiopia: Initiating Pathways to Rural Livelihood Improvement.2. Closing Smallholder Farm Profitability Gap : An Integrated Assessment of Production Efficiency, Market, and Agricultural Finance for Climate Resilient Livelihoods"
+      ]
+    },
+    {
+      "serial_number": 12,
+      "name": "Dr. Alemu N.",
+      "email": "alemunega531@gmail.com",
+      "institution": "Wolita Sodo University",
+      "college": "CANR",
+      "research_titles": [
+        "Distribution of Mango (Mangifera indica L.) Disease and Factors Affecting Epidemic Development in Major Mango Growing Areas of Central Ethiopia"
+      ]
+    },
+    {
+      "serial_number": 13,
+      "name": "Mr. Mohammed",
+      "email": "mohaff1438@gmail.com",
+      "institution": "Wolkite Agricultural Research Center",
+      "college": "CANR",
+      "research_titles": [
+        "Enhancing Food Security through Improved Production and productivity of Sweet Orange (Citrus sinensis L. Osbeck) in Gurage Zones, Central Ethiopia"
+      ]
+    },
+    {
+      "serial_number": 14,
+      "name": "Dr. Feta",
+      "email": "fettanegashi@ju.edu.et",
+      "institution": "Wolkite Agricultural Research Center",
+      "college": "CANR",
+      "research_titles": [
+        "Advancing Enset Based Agroforestry System for Climate Resilient Agriculture and Biodiversity Conservation in Gurage Zone, Central Ethiopia"
+      ]
+    },
+    {
+      "serial_number": 15,
+      "name": "Dr. Girma",
+      "email": "girma.alemu@ju.edu.et",
+      "institution": "Jimma University",
+      "college": "CANR",
+      "research_titles": [
+        "Factors Affecting Sustainability of Urban Greenery Development and Management in Wolkite Town, Central Ethiopia"
+      ]
+    },
+    {
+      "serial_number": 16,
+      "name": "Mr. Hundaol Bedadha",
+      "email": "N/A",
+      "institution": "Adama Science and Technology University (ASTU)",
+      "college": "CCI",
+      "research_titles": [
+        "Assistive Technology Access and Utilization among Persons with Visual Impairment: Assessing Institutional Readiness and Developing a Service Delivery Framework for Digital Inclusion in Central Ethiopia Regional State2. Artificial Intelligence Adoption and Its Effect on Socioeconomic and Workforce Outcomes among Employed Working-Age Population in Zonal Cities of Central Ethiopia Regional"
+      ]
+    },
+    {
+      "serial_number": 17,
+      "name": "Dr. Fekede Minuta",
+      "email": "N/A",
+      "institution": "Hawasa University",
+      "college": "CCI",
+      "research_titles": [
+        "Developing Open Speech and Language Resources and an AI-Powered Learning Platform for Guragigna Revitalization"
+      ]
+    },
+    {
+      "serial_number": 18,
+      "name": "Dr. Kidu G/Cherkos",
+      "email": "N/A",
+      "institution": "FDRE Technical & Vocational Training Institute",
+      "college": "CET",
+      "research_titles": [
+        "Technical and Social Barriers to Efficient Tillage Tool Use among Central Ethiopian Farmers for Sustainable Mechanization"
+      ]
+    },
+    {
+      "serial_number": 19,
+      "name": "Dr. Gemeda Gebino",
+      "email": "N/A",
+      "institution": "Bahir dar University Institute of Textile & Fashion Technology",
+      "college": "CET",
+      "research_titles": [
+        "Circular recycling of lignin waste from Industrial byproducts for Functional Textile biomaterials"
+      ]
+    },
+    {
+      "serial_number": 20,
+      "name": "Dr. Worku Firomsa",
+      "email": "N/A",
+      "institution": "Jimma University",
+      "college": "CET",
+      "research_titles": [
+        "Geo-hazard Susceptibility Mapping and Transport Infrastructure Risk Assessment in the Gurage Zone, Central Ethiopia"
+      ]
+    },
+    {
+      "serial_number": 21,
+      "name": "Dr. Deneke Wolde",
+      "email": "N/A",
+      "institution": "Wachemo University",
+      "college": "CHMS",
+      "research_titles": [
+        "Effect of Chronic Gasoline Exposure on Environmental Contamination and Lower Respiratory-Function Among Illicit Fuel Vending Workers in the Gurage Zone2. Eco-Epidemiology and One Health assessment of Anopheles stephensi in Gurage Zone, Integrating vector surveillance, Spatial Ecology, and Environmental management3. Burden, Multidrug-Resistance Patterns, and Determinants of Healthcare-Associated Infections in Surgical Wards and ICUs of Gurage Zone Hospitals: Infection-Prevention and Antimicrobial-Stewardship"
+      ]
+    },
+    {
+      "serial_number": 22,
+      "name": "Dr. Likawunt Samuel",
+      "email": "N/A",
+      "institution": "Hossana Health Science College",
+      "college": "CHMS",
+      "research_titles": [
+        "Assess breast cancer burden, determinants, diagnostic delays, and treatment outcomes in Ethiopians: a mixed-methods study2. Religious Leader-guided Community Intervention for Schizophrenia in Gurage zone, Ethiopia: A Cluster-Randomized Controlled Trial3. Development and Pilot Evaluation of Caregiver Psychoeducation Intervention to Improve Mental Health Literacy at Wolkite University Hospital: A Mixed-Methods Study4. Integrated evaluation of non-communicable disease burden, readiness of health facility, community knowledge and practice, Treatment adherence in central Ethiopia"
+      ]
+    },
+    {
+      "serial_number": 23,
+      "name": "Dr. Belayneh Hamdalla",
+      "email": "N/A",
+      "institution": "Wachemo University",
+      "college": "CHMS",
+      "research_titles": [
+        "Assessment of Palliative Care Needs, Quality of Life, Caregiver Burden, Service Readiness, Utilization, Integration, and Determinants in Central Ethiopia, 2026/20272. Exploring Barriers and Facilitators to CCS, Developing, implement and Evaluating Context-Based Intervention to Improve Screening Uptake Women and HCP competency3. Digital, Biomedical and Lifestyle Interventions for Metabolic Syndrome Management among Old Adult in Healthcare Facilities of Gurage zones, Ethiopia, 20264. Health, Economic, and Social Burden of common Communicable Diseases among, Under- Five Year children in Gurage Zone in 2026/2027.G.C"
+      ]
+    },
+    {
+      "serial_number": 24,
+      "name": "Hassen Mossa",
+      "email": "N/A",
+      "institution": "Worabe University",
+      "college": "CHMS",
+      "research_titles": [
+        "Water insecurity and its Health Impacts in Central Ethiopia2. Assessment of antenatal corticosteroid use, ultrasound capacity, and facility readiness for preterm newborn care in public hospitals of Gurage zone, central Ethiopia3. Duration of Stages of Labour, Infection Prevention Practices, and Perinatal Outcomes in Labour Wards of Public Hospitals in Gurage Zone4. Multidimensional Evaluation of Obstetric Emergencies: Facility Readiness, Provider Competency, Prevention, and Implementation Challenges in Gurage Zone, Ethiopia: Mixed-Methods Study"
+      ]
+    },
+    {
+      "serial_number": 25,
+      "name": "Dr. Mitsiwat Abebe",
+      "email": "N/A",
+      "institution": "Ambo University",
+      "college": "CHMS",
+      "research_titles": [
+        "Bridging Tradition and Fracture Healing among Orthopedic Patients in Ethiopia: A Prospective Cohort Study2. Exploring abortifacient effects of Enset and its implication for maternal nutrition among childbearing age women in Gurage zone3. Integrated Assessment of Agricultural Diversity, Food Security, Maternal Dietary Diversity, Child Nutritional Status, among Rural Households in Gurage Zone."
+      ]
+    },
+    {
+      "serial_number": 26,
+      "name": "Dr. Abinet W/senbet",
+      "email": "abnetyer2012@gmail.com",
+      "institution": "Hawassa University",
+      "college": "CNCS",
+      "research_titles": [
+        "Sustainable Fish and Poultry Feed Development Using Black Soldier Fly Larvae Bioconversion in the Gurage Zone, Ethiopia2. Genetic and Bean-Quality Based Characterization of Gurage Coffee: Paving the Way for Branding"
+      ]
+    },
+    {
+      "serial_number": 27,
+      "name": "Dr. Teklebirhan Abraha",
+      "email": "teklebirhanabraha@gmail.com",
+      "institution": "Aksum University",
+      "college": "CNCS",
+      "research_titles": [
+        "Development and Evaluation of a Precision Weed Management System Using Physics-Informed Machine Learning for Farmers in Gurage Zone, Ethiopia2. Mathematical Modeling and Development of an AI-Assisted Learning Support System for Secondary and Preparatory School Libraries in Gurage Zone, Ethiopia"
+      ]
+    },
+    {
+      "serial_number": 28,
+      "name": "Dr. Tariku Baiysa",
+      "email": "tarikubayisa12@gmail.com",
+      "institution": "Defence University",
+      "college": "CNCS",
+      "research_titles": [
+        "Eco-Taxonomic Assessment and Valorization of Invasive Plant Species in the Gurage Zone, Central Ethiopia, for Nanocellulose–Chitosan Wound Dressing Films"
+      ]
+    },
+    {
+      "serial_number": 29,
+      "name": "Biruwork Derbew",
+      "email": "bizusi@gmail.com",
+      "institution": "Mizan-Tepi University",
+      "college": "CNCS",
+      "research_titles": [
+        "Practice of Hybrid Learning and Student Experience in Ethiopian Public Universities2. Remittance, Early child education, Household food Insecurity, and wellbeing in Gurage zone3. Spatial Distribution, Environmental, Seasonal Patterns, Associated Factors, and Early Prediction of Birth Asphyxia Among Newborns in Central Ethiopia Region, Ethiopia"
+      ]
+    },
+    {
+      "serial_number": 30,
+      "name": "Dr. Haftu Birhanie",
+      "email": "haftuberhane@gmail.com",
+      "institution": "Haromia University",
+      "college": "CNCS",
+      "research_titles": [
+        "Integrated nanotechnology based detection and management of enset bacterial wilt using ZnO/Ag nanocomposites"
+      ]
+    },
+    {
+      "serial_number": 31,
+      "name": "Dr. Kasegn Birhanu",
+      "email": "kassegnberhanu@gmail.com",
+      "institution": "Debrebirhan University",
+      "college": "CSSH",
+      "research_titles": [
+        "Socio-ecology of Coffee Production, Cultural Services, and Tourism Opportunities in Gurage Zones, Ethiopia"
+      ]
+    },
+    {
+      "serial_number": 32,
+      "name": "Dr. Dereje Andarge",
+      "email": "derejefanaye@gmail.com",
+      "institution": "Debrebirhan University",
+      "college": "CSSH",
+      "research_titles": [
+        "Enhancing Educational Quality through Competency-Based Education (CBE): An Examination of Pedagogical Practices, Digital Competence, and Resource Availability in the Central Ethiopia Regional State"
+      ]
+    },
+    {
+      "serial_number": 33,
+      "name": "Dr. Philipos Labore",
+      "email": "philipos.lamore@gmail.com",
+      "institution": "Wachemo University",
+      "college": "CSSH",
+      "research_titles": [
+        "Digital Business Communication Transformation For Graduate Employability and Sustainable Organizational Competitiveness: Ethiopian Applied Science Universities in Focus"
+      ]
+    },
+    {
+      "serial_number": 34,
+      "name": "Dr. Daniel Handimo",
+      "email": "danielhandino822@gmail.com",
+      "institution": "Wachemo University",
+      "college": "CSSH",
+      "research_titles": [
+        "GOVERNANCE AND LIVELIHOOD IMPLICATIONS OF PERI-URBAN TRANSFORMATION IN SELECTED RAPIDLY GROWING TOWNS OF THE GURAGE ZONES, ETHIOPIA"
+      ]
+    },
+    {
+      "serial_number": 35,
+      "name": "Dr. Biruk Paulos",
+      "email": "brookcanada2017@gmail.com",
+      "institution": "Wachamo University",
+      "college": "SL",
+      "research_titles": [
+        "Maintenance of Minors in the Liquidation and Partition of Succession: A Multidisciplinary Study of the Law and Practice in Gurage Zone, Ethiopia"
+      ]
+    }
+  ]
+}

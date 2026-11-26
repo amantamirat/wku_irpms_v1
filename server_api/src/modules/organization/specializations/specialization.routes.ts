@@ -17,18 +17,20 @@ router.post(
 );
 
 router.get(
+  '/lookup',
+  verifyAuthToken,
+  checkPermission([PERMISSIONS.SPECIALIZATION.LOOKUP]),
+  controller.get
+);
+
+router.get(
   '/',
   verifyAuthToken,
   checkPermission([PERMISSIONS.SPECIALIZATION.READ]),
   controller.get
 );
 
-router.get(
-  '/lookup',
-  verifyAuthToken,
-  checkPermission([PERMISSIONS.SPECIALIZATION.LOOKUP]),
-  controller.get
-);
+
 
 router.put(
   '/:id',

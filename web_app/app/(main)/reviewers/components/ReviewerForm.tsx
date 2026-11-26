@@ -38,6 +38,22 @@ const getValidationError = (payload: Reviewer): string | null => {
     return null;
 };
 
+// Returns the workspace name when the workspace is a populated object.
+const getWorkspaceName = (user?: Partial<User> | null): string | undefined => {
+    const workspace = user?.workspace as any;
+    if (!workspace || typeof workspace !== 'object') return undefined;
+    return workspace.name;
+};
+
+// "Name (Workspace)" label, falling back to just the name.
+const getUserLabel = (user?: Partial<User> | null): string => {
+    if (!user) return '-';
+    const workspaceName = getWorkspaceName(user);
+    return workspaceName
+        ? `${user.name} (${workspaceName})`
+        : user.name ?? '-';
+};
+
 const ReviewerForm = ({
     item,
     saving,
@@ -107,7 +123,7 @@ const ReviewerForm = ({
 
     const getReviewerName = () => {
         if (typeof selectedReviewer === 'object' && selectedReviewer !== null) {
-            return (selectedReviewer as User).name || '-';
+            return getUserLabel(selectedReviewer as User);
         }
         return '-';
     };
@@ -187,7 +203,18 @@ const ReviewerForm = ({
                             dataKey="_id"
                             placeholder="Choose a user from the system..."
                             filter
+                            filterBy="name,workspace.name"
                             showClear
+                            itemTemplate={(user: User) => (
+                                <span>{getUserLabel(user)}</span>
+                            )}
+                            valueTemplate={(user: User | null, props) =>
+                                user && typeof user === 'object' ? (
+                                    <span>{getUserLabel(user)}</span>
+                                ) : (
+                                    <span>{props?.placeholder}</span>
+                                )
+                            }
                             onChange={(event) =>
                                 updateReviewer({
                                     reviewer: (event.value ??

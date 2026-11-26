@@ -1,7 +1,7 @@
 import { ApiClient } from "@/api/ApiClient";
 import { Specialization } from "../models/specialization.model";
 import { EntityApi } from "@/api/EntityApi";
-const end_point = '/specializations/';
+const end_point = '/specializations';
 
 export const SpecializationApi: EntityApi<Specialization> = {
 
@@ -10,13 +10,14 @@ export const SpecializationApi: EntityApi<Specialization> = {
         return createdData as Specialization;
     },
 
-    async getAll(): Promise<Specialization[]> {
+    async getAll(options): Promise<Specialization[]> {
         const data = await ApiClient.get(end_point);
         return data as Specialization[];
     },
 
-    async lookup(options) {
-        return ApiClient.get(`${end_point}/lookup`, options);
+    async lookup() {
+        const data = await ApiClient.get(`${end_point}/lookup`);
+        return data as Specialization[];
     },
 
     async update(specialization: Partial<Specialization>): Promise<Specialization> {

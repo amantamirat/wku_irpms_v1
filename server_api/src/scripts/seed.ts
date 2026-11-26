@@ -4,6 +4,7 @@ import { createDemoSeeder } from "../util/seeder/demo.seed";
 import { createOrganizationSeeder } from "../util/seeder/organization.seeder";
 import { createSystemSeeder } from "../util/seeder/system.seed";
 import { createUserSeeder } from "../util/seeder/user.seeder";
+import { createExternalUserSeeder } from "../util/seeder/extrnal/user.seeder";
 
 dotenv.config();
 
@@ -37,10 +38,14 @@ async function main() {
             await createUserSeeder().run();
             break;
 
-            /*
-        case "legacy":
-            await createLegacySeeder().run();
-            break;*/
+        case "external":
+            await createExternalUserSeeder().run();
+            break;
+
+        /*
+    case "legacy":
+        await createLegacySeeder().run();
+        break;*/
 
         case "legacy":
             //await createNewLegacySeeder().run();

@@ -154,13 +154,14 @@ export class UserService {
     ) {
 
         const users = await this.userRepo.find(
-            filter
+            filter, { populate: true }
         );
 
         return users.map(user => ({
             _id: user._id,
             name: user.name,
-            orcid: user.orcid
+            orcid: user.orcid,
+            workspace: user.workspace
         }));
     }
 
